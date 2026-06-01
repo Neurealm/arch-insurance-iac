@@ -1,0 +1,11 @@
+project_id = "rrceuqczvpfcmjrwewpw"
+
+[functions]
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.tenant-invite]
+    verify_jwt = false
+  [functions.tenant-signup]
+    verify_jwt = false

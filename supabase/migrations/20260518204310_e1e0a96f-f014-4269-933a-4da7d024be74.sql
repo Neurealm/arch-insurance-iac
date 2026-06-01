@@ -1,0 +1,1 @@
+ALTER TABLE public.org_practices DROP COLUMN IF EXISTS business_unit_id;

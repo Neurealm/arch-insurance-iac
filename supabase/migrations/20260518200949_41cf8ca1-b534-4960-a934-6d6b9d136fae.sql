@@ -1,0 +1,21 @@
+UPDATE public.org_business_units SET description = '' WHERE description IS NULL;
+UPDATE public.org_practices SET description = '' WHERE description IS NULL;
+UPDATE public.org_service_functions SET description = '' WHERE description IS NULL;
+UPDATE public.org_workflows SET description = '' WHERE description IS NULL;
+UPDATE public.org_activities SET description = '' WHERE description IS NULL;
+UPDATE public.org_tasks SET description = '' WHERE description IS NULL;
+UPDATE public.crm_departments SET description = '' WHERE description IS NULL;
+UPDATE public.crm_teams SET description = '' WHERE description IS NULL;
+UPDATE public.agents_catalog SET description = '' WHERE description IS NULL;
+UPDATE public.tools_catalog SET description = '' WHERE description IS NULL;
+
+ALTER TABLE public.org_business_units ALTER COLUMN description SET DEFAULT '', ALTER COLUMN description SET NOT NULL;
+ALTER TABLE public.org_practices ALTER COLUMN description SET DEFAULT '', ALTER COLUMN description SET NOT NULL;
+ALTER TABLE public.org_service_functions ALTER COLUMN description SET DEFAULT '', ALTER COLUMN description SET NOT NULL;
+ALTER TABLE public.org_workflows ALTER COLUMN description SET DEFAULT '', ALTER COLUMN description SET NOT NULL;
+ALTER TABLE public.org_activities ALTER COLUMN description SET DEFAULT '', ALTER COLUMN description SET NOT NULL;
+ALTER TABLE public.org_tasks ALTER COLUMN description SET DEFAULT '', ALTER COLUMN description SET NOT NULL;
+ALTER TABLE public.crm_departments ALTER COLUMN description SET DEFAULT '', ALTER COLUMN description SET NOT NULL;
+ALTER TABLE public.crm_teams ALTER COLUMN description SET DEFAULT '', ALTER COLUMN description SET NOT NULL;
+ALTER TABLE public.agents_catalog ALTER COLUMN description SET DEFAULT '', ALTER COLUMN description SET NOT NULL;
+ALTER TABLE public.tools_catalog ALTER COLUMN description SET DEFAULT '', ALTER COLUMN description SET NOT NULL;
