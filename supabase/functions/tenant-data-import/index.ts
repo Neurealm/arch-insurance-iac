@@ -10,36 +10,36 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// Treat empty / whitespace-only strings as "not provided" so defaults & optional() apply.
+const blankToUndef = (v: unknown) =>
+  typeof v === "string" && v.trim() === "" ? undefined : v;
+
+const optStr = (max = 200) =>
+  z.preprocess(blankToUndef, z.string().trim().max(max).optional().nullable());
+
+const safeIso = (v: unknown): string | null => {
+  if (v == null || v === "") return null;
+  const d = new Date(String(v));
+  if (isNaN(d.getTime())) throw new Error(`Invalid date: ${String(v)}`);
+  return d.toISOString();
+};
+
 const IncidentRow = z.object({
-  incident_number: z.string().trim().max(64).optional().nullable(),
-  title: z.string().trim().min(1).max(500),
-  severity: z
-    .string()
-    .trim()
-    .transform((v) => v.toLowerCase())
-    .pipe(z.enum(["critical", "high", "medium", "low"]))
-    .default("medium"),
-  status: z
-    .string()
-    .trim()
-    .transform((v) => v.toLowerCase())
-    .pipe(z.enum(["open", "in_progress", "on_hold", "pending", "resolved"]))
-    .default("open"),
-  service: z.string().trim().max(200).optional().nullable(),
-  owner: z.string().trim().max(200).optional().nullable(),
-  opened_at: z
-    .string()
-    .trim()
-    .optional()
-    .nullable()
-    .transform((v) => (v ? new Date(v).toISOString() : new Date().toISOString())),
-  resolved_at: z
-    .string()
-    .trim()
-    .optional()
-    .nullable()
-    .transform((v) => (v ? new Date(v).toISOString() : null)),
-  external_id: z.string().trim().max(200).optional().nullable(),
+  incident_number: optStr(64),
+  title: z.preprocess(blankToUndef, z.string().trim().min(1).max(500)),
+  severity: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() !== "" ? v.trim().toLowerCase() : "medium"),
+    z.enum(["critical", "high", "medium", "low"]),
+  ),
+  status: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() !== "" ? v.trim().toLowerCase() : "open"),
+    z.enum(["open", "in_progress", "on_hold", "pending", "resolved"]),
+  ),
+  service: optStr(200),
+  owner: optStr(200),
+  opened_at: z.preprocess(blankToUndef, z.any()).transform((v) => safeIso(v) ?? new Date().toISOString()),
+  resolved_at: z.preprocess(blankToUndef, z.any()).transform((v) => safeIso(v)),
+  external_id: optStr(200),
 });
 
 const Body = z.object({
