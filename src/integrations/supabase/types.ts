@@ -1416,6 +1416,66 @@ export type Database = {
           },
         ]
       }
+      tenant_incidents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          external_id: string | null
+          id: string
+          incident_number: string | null
+          mttr_minutes: number | null
+          opened_at: string
+          owner: string | null
+          raw: Json
+          resolved_at: string | null
+          service: string | null
+          severity: string
+          source: string
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          external_id?: string | null
+          id?: string
+          incident_number?: string | null
+          mttr_minutes?: number | null
+          opened_at?: string
+          owner?: string | null
+          raw?: Json
+          resolved_at?: string | null
+          service?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          tenant_id: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          external_id?: string | null
+          id?: string
+          incident_number?: string | null
+          mttr_minutes?: number | null
+          opened_at?: string
+          owner?: string | null
+          raw?: Json
+          resolved_at?: string | null
+          service?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tenant_integrations: {
         Row: {
           created_at: string
@@ -1526,6 +1586,8 @@ export type Database = {
       tenants: {
         Row: {
           created_at: string
+          data_mode: string
+          db_connection_id: string | null
           id: string
           logo_url: string | null
           name: string
@@ -1537,6 +1599,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          data_mode?: string
+          db_connection_id?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -1548,6 +1612,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          data_mode?: string
+          db_connection_id?: string | null
           id?: string
           logo_url?: string | null
           name?: string

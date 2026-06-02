@@ -15,8 +15,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import {
-  ArrowLeft, Bot, LayoutDashboard, Plug, Users2, Settings2, Search, Eye, UserPlus, Copy,
+  ArrowLeft, Bot, LayoutDashboard, Plug, Users2, Settings2, Search, Eye, UserPlus, Copy, Database,
 } from "lucide-react";
+import { TenantDataPanel } from "@/pages/crm/TenantDataPanel";
 import { useState } from "react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
@@ -196,6 +197,7 @@ export default function TenantSettingsPage() {
                 <TabsTrigger value="overview"><LayoutDashboard className="h-4 w-4 mr-1.5" />Overview</TabsTrigger>
                 <TabsTrigger value="agents"><Bot className="h-4 w-4 mr-1.5" />Agents</TabsTrigger>
                 <TabsTrigger value="tools"><LayoutDashboard className="h-4 w-4 mr-1.5" />Dashboards & KPIs</TabsTrigger>
+                <TabsTrigger value="data"><Database className="h-4 w-4 mr-1.5" />Data</TabsTrigger>
                 <TabsTrigger value="connectors"><Plug className="h-4 w-4 mr-1.5" />Connectors</TabsTrigger>
                 <TabsTrigger value="members"><Users2 className="h-4 w-4 mr-1.5" />Members</TabsTrigger>
               </TabsList>
@@ -208,6 +210,9 @@ export default function TenantSettingsPage() {
               </TabsContent>
               <TabsContent value="tools" className="mt-4">
                 <ToolsPanel tenantId={tenant.id} />
+              </TabsContent>
+              <TabsContent value="data" className="mt-4">
+                <TenantDataPanel tenantId={tenant.id} />
               </TabsContent>
               <TabsContent value="connectors" className="mt-4">
                 <ConnectorsPanel tenantId={tenant.id} />
