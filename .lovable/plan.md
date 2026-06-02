@@ -1,36 +1,38 @@
-The project just got switched to a fresh Supabase backend (`esfpbiishpkvhlejnxzq`). The new database is empty (no tables, functions, triggers, storage buckets, or secrets beyond defaults), but the app code expects the full existing schema (tenants, memberships, tool assignments, CRM, org hierarchy, profiles, user roles, email infra, etc.) that was built up across 26 migrations against the old backend.
+# Project Health Check — Neugain
 
-I'll rebuild that schema on the new backend so the app works again.
+I reviewed the Supabase backend, ran the security linter, checked storage, console logs, and the app code. The app is in a good state — no broken code paths, RLS is enabled everywhere, schema and edge functions are in place. Three things stand out as worth fixing.
 
-## What I'll do
+## Findings
 
-1. **Replay schema** — Apply the consolidated contents of all 26 files in `supabase/migrations/` as a single new migration against the new Supabase project. This recreates:
-  - Auth/role infra: `profiles`, `user_roles` + `app_role` enum, `has_role` / `is_platform_admin` / `is_tenant_member` / `has_tenant_role` security-definer functions
-  - Tenancy: `tenants`, `tenant_memberships`, `tenant_tool_assignments`
-  - Catalogs: `tools_catalog`, `agents_catalog`, `integrations_catalog`
-  - CRM: `crm_companies`, `crm_stakeholders`, `crm_departments`, `crm_teams`, `crm_activities`, `crm_notes`, `stakeholder_registers`
-  - Org hierarchy: `org_business_units`, `org_practices`, `org_capability_areas`, `org_service_functions`, `org_workflows`, `org_activities`, `org_tasks`
-  - Triggers (`update_updated_at_column`, tenant-id auto-fill, etc.)
-  - RLS policies + GRANTs for all of the above
-  - Email queue infra (pgmq queue, RPC wrappers, cron job) used by `auth-email-hook` and `process-email-queue`
-2. **Storage bucket** — Recreate the `avatars` bucket (public) with the per-tenant path policies the app expects.
-3. **Edge functions** — Redeploy the four existing functions (`auth-email-hook`, `process-email-queue`, `tenant-invite`, `tenant-signup`) against the new project. No code changes; just deployment.
-4. **Seed minimum admin** — After migrations land, I'll point out that you need to sign up once, then I (or you via SQL) will grant your user the `platform_admin` role so you can reach `/settings` and the NeuRealm workspace. No user data is migrated from the old backend.
-5. **Verify** — Run the Supabase linter and a quick read on `tenants` / `tools_catalog` to confirm the schema is reachable through PostgREST with proper GRANTs.
+### 1. Missing `avatars` storage bucket  (functional gap)
+Profile RLS policies expect a public `avatars` bucket but the bucket itself doesn't exist yet. Any avatar upload from `/profile` will fail until it's created.
+
+### 2. Supabase linter — 14 SECURITY DEFINER warnings  (low risk, noisy)
+All your helper functions (`has_role`, `is_platform_admin`, `is_tenant_member`, `has_tenant_role`, `is_user_approved`, `set_tenant_id_from_membership`, `handle_new_user`, `update_updated_at_column`) are flagged because `EXECUTE` is granted to `public` / `authenticated` by default. They're written safely (read-only, scoped `search_path`), but linter best practice is to revoke `EXECUTE FROM public` and grant only to `authenticated` (or nothing for trigger-only functions).
+
+### 3. Leaked password protection disabled  (auth hardening)
+Supabase Auth setting — enable "Leaked password protection" in the dashboard so signups/resets reject passwords found in HIBP breach lists. One toggle, no code change.
+
+### Not issues (verified clean)
+- RLS is enabled on every public table with sensible policies.
+- All public tables have proper GRANTs to `authenticated` / `service_role`.
+- `handle_new_user` correctly grants `platform_admin` to the 4 NeuRealm emails and blocks personal-email signups.
+- Edge functions (`auth-email-hook`, `process-email-queue`, `tenant-invite`, `tenant-signup`) deployed.
+- Frontend: no console errors on `/login`, tenant scope guard + protected routes wired correctly, types file in sync with schema.
+
+## Proposed fixes
+
+1. **Create the `avatars` storage bucket** (public, with the per-user-folder upload policies already implied by the app).
+2. **Tighten function EXECUTE grants** — one migration:
+   - `REVOKE EXECUTE ... FROM public, anon` on all 8 SECURITY DEFINER functions.
+   - `GRANT EXECUTE TO authenticated` only on the ones called from the client/RLS evaluation (`has_role`, `is_platform_admin`, `is_tenant_member`, `has_tenant_role`, `is_user_approved`). Trigger-only functions stay locked down.
+3. **Tell you to flip the "Leaked password protection" toggle** in Supabase Auth settings (I can't toggle it from here).
 
 ## What I will NOT do
+- Touch any frontend code — nothing is broken there.
+- Change RLS policies, schema, or seed data.
+- Modify edge functions.
 
-- No app/UI code changes — the frontend already targets the new backend via the auto-updated `.env`.
-- No data migration from the old Supabase project (you didn't ask, and credentials for the old DB aren't available here).
-- No changes to the plan in `.lovable/plan.md` (tenant-isolation refactor) — that's a separate effort.
+## Confirm before I run
 
-## Things to confirm before I start
-
-- **Catalog seed data** (tools_catalog, agents_catalog, integrations_catalog rows) — the old DB likely had seed rows for the sidebar/tool assignments to work. The migration files may or may not include them. If they don't, the sidebar will be empty for tenants until rows are inserted. Want me to also seed a baseline catalog (derived from the routes/keys referenced in the app) as part of this migration? yes
-- **Your admin account** — after the schema is up, do you want me to insert a `platform_admin` row for a specific email you'll sign up with, or will you handle that yourself in the SQL editor?   
-make below users as super admins  
-  
-[ryan.blackwell@neurealm.com](mailto:ryan.blackwell@neurealm.com)  
-[vidyarth.v@neurealm.com](mailto:vidyarth.v@neurealm.com)  
-[bala.janagaraja@neurealm.com](mailto:bala.janagaraja@neurealm.com)  
-[srikanth.burra@neurealm.com](mailto:srikanth.burra@neurealm.com)
+- Proceed with all three fixes above? Or skip any of them?
