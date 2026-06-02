@@ -1,124 +1,36 @@
-Make org-hierarchy data tenant-isolated. Tenants only see dashboards/tools NeuGain has assigned them (already enforced by `tenant_tool_assignments` + Sidebar + `TenantAccessGuard`). Leave CRM and Settings as NeuGain-only. Leave dashboard visuals (KPIs, charts) as static demo content.
+The project just got switched to a fresh Supabase backend (`esfpbiishpkvhlejnxzq`). The new database is empty (no tables, functions, triggers, storage buckets, or secrets beyond defaults), but the app code expects the full existing schema (tenants, memberships, tool assignments, CRM, org hierarchy, profiles, user roles, email infra, etc.) that was built up across 26 migrations against the old backend.
 
-## Scope
+I'll rebuild that schema on the new backend so the app works again.
 
-In scope (add tenant isolation):
-- Org hierarchy: `org_business_units`, `org_practices`, `org_capability_areas`, `org_service_functions`, `org_workflows`, `org_activities`, `org_tasks`
-- `avatars` storage bucket: per-tenant path prefix
+## What I'll do
 
-Stays NeuGain-only (platform admin):
-- All CRM tables (`crm_companies`, `crm_stakeholders`, `crm_departments`, `crm_teams`, `crm_activities`, `crm_notes`, `stakeholder_registers`)
-- Settings pages (`/settings/*`, user approvals, organization admin)
+1. **Replay schema** — Apply the consolidated contents of all 26 files in `supabase/migrations/` as a single new migration against the new Supabase project. This recreates:
+  - Auth/role infra: `profiles`, `user_roles` + `app_role` enum, `has_role` / `is_platform_admin` / `is_tenant_member` / `has_tenant_role` security-definer functions
+  - Tenancy: `tenants`, `tenant_memberships`, `tenant_tool_assignments`
+  - Catalogs: `tools_catalog`, `agents_catalog`, `integrations_catalog`
+  - CRM: `crm_companies`, `crm_stakeholders`, `crm_departments`, `crm_teams`, `crm_activities`, `crm_notes`, `stakeholder_registers`
+  - Org hierarchy: `org_business_units`, `org_practices`, `org_capability_areas`, `org_service_functions`, `org_workflows`, `org_activities`, `org_tasks`
+  - Triggers (`update_updated_at_column`, tenant-id auto-fill, etc.)
+  - RLS policies + GRANTs for all of the above
+  - Email queue infra (pgmq queue, RPC wrappers, cron job) used by `auth-email-hook` and `process-email-queue`
+2. **Storage bucket** — Recreate the `avatars` bucket (public) with the per-tenant path policies the app expects.
+3. **Edge functions** — Redeploy the four existing functions (`auth-email-hook`, `process-email-queue`, `tenant-invite`, `tenant-signup`) against the new project. No code changes; just deployment.
+4. **Seed minimum admin** — After migrations land, I'll point out that you need to sign up once, then I (or you via SQL) will grant your user the `platform_admin` role so you can reach `/settings` and the NeuRealm workspace. No user data is migrated from the old backend.
+5. **Verify** — Run the Supabase linter and a quick read on `tenants` / `tools_catalog` to confirm the schema is reachable through PostgREST with proper GRANTs.
 
-Left as-is:
-- Static dashboards (Practice Library, ITSM, Command Center, KPI strips, charts) — pure demo data
-- Sidebar, tenant login, route guard, `useTenantScope`
-- NeuGain approval flow: tenants only see the dashboards/tools enabled for them in `tenant_tool_assignments` (no change — already working)
-- Global catalogs (`tools_catalog`, `agents_catalog`, `integrations_catalog`)
+## What I will NOT do
 
-## Approval / visibility model (no change needed)
+- No app/UI code changes — the frontend already targets the new backend via the auto-updated `.env`.
+- No data migration from the old Supabase project (you didn't ask, and credentials for the old DB aren't available here).
+- No changes to the plan in `.lovable/plan.md` (tenant-isolation refactor) — that's a separate effort.
 
-A tenant user sees a dashboard only when **all three** are true — already enforced today:
-1. NeuGain assigned the tool to the tenant (`tenant_tool_assignments.enabled = true`)
-2. Sidebar filters nav by `useTenantScope().keys` / `routes`
-3. `TenantAccessGuard` blocks direct URL access to unassigned routes
+## Things to confirm before I start
 
-This plan does not alter that gating. It only ensures the *data* shown inside those dashboards is the tenant's own.
-
-## 1. Lock CRM + Settings to platform admins
-
-Replace current "approved user" RLS on CRM tables with platform-admin-only:
-
-```sql
--- Repeat for crm_companies, crm_stakeholders, crm_departments, crm_teams,
--- crm_activities, crm_notes, stakeholder_registers
-DROP POLICY "Approved read <table>"   ON public.<table>;
-DROP POLICY "Approved insert <table>" ON public.<table>;
-DROP POLICY "Approved update <table>" ON public.<table>;
-DROP POLICY "Approved delete <table>" ON public.<table>;
-
-CREATE POLICY "Platform admins manage <table>"
-  ON public.<table> FOR ALL TO authenticated
-  USING (is_platform_admin(auth.uid()))
-  WITH CHECK (is_platform_admin(auth.uid()));
-```
-
-## 2. Tenant-scope the org hierarchy
-
-Add `tenant_id uuid` to each org table:
-
-```text
-org_business_units      + tenant_id
-org_practices           + tenant_id
-org_capability_areas    + tenant_id
-org_service_functions   + tenant_id
-org_workflows           + tenant_id
-org_activities          + tenant_id
-org_tasks               + tenant_id
-```
-
-Backfill: assign existing rows to the first tenant in `tenants` (or leave null until a tenant exists, then add NOT NULL). Indexes on `tenant_id`.
-
-New RLS — read requires tenant membership AND (implicitly via UI) that NeuGain has assigned the relevant dashboard. RLS itself only needs membership; assignment is enforced at the route/sidebar layer.
-
-```sql
--- Repeat for each org_* table
-DROP POLICY "Approved read <table>"           ON public.<table>;
-DROP POLICY "Platform admins manage <table>"  ON public.<table>;
-
-CREATE POLICY "Tenant members read <table>"
-  ON public.<table> FOR SELECT TO authenticated
-  USING (is_platform_admin(auth.uid()) OR is_tenant_member(auth.uid(), tenant_id));
-
-CREATE POLICY "Tenant admins write <table>"
-  ON public.<table> FOR INSERT TO authenticated
-  WITH CHECK (
-    is_platform_admin(auth.uid())
-    OR has_tenant_role(auth.uid(), tenant_id, 'tenant_admin')
-  );
-
-CREATE POLICY "Tenant admins update <table>"
-  ON public.<table> FOR UPDATE TO authenticated
-  USING (is_platform_admin(auth.uid()) OR has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'))
-  WITH CHECK (is_platform_admin(auth.uid()) OR has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
-
-CREATE POLICY "Tenant admins delete <table>"
-  ON public.<table> FOR DELETE TO authenticated
-  USING (is_platform_admin(auth.uid()) OR has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
-```
-
-If you'd rather NeuGain be the only editor of org data, swap write policies for `is_platform_admin(auth.uid())` only. Default: tenant admins can edit their own org tree.
-
-## 3. Auto-fill tenant_id on insert
-
-DB trigger `set_tenant_id_from_membership()` on each org table:
-- If `NEW.tenant_id IS NULL` and user is a tenant member, set to their tenant.
-- If platform admin, require explicit `tenant_id`.
-
-Keeps existing client mutations working.
-
-## 4. Hook updates
-
-- `src/hooks/org/useOrgEntity.ts` — read `tenantId` from `useTenantScope()`; add `.eq("tenant_id", tenantId)` to list/read; include `tenantId` in `queryKey`.
-- CRM hooks — no change (platform-admin-only now).
-
-## 5. Storage (`avatars` bucket)
-
-- Path convention: `{tenant_id}/{user_id}/avatar.png` for tenant users; `platform/{user_id}/avatar.png` for platform admins.
-- Update avatar upload code to prepend the correct prefix.
-- New policies: tenant members read/write under their tenant prefix; platform admins read/write everything; public read stays.
-
-## 6. Edge function
-
-`supabase/functions/tenant-signup/index.ts` — if it seeds any org rows, set `tenant_id` to the new tenant.
-
-## Order of execution
-
-1. Migration: lock CRM/Settings RLS to platform admin
-2. Migration: add `tenant_id` to org tables + backfill + NOT NULL + indexes + new RLS + auto-fill trigger
-3. Update `useOrgEntity` to filter by tenant
-4. Update avatar upload path + storage policies
-5. Smoke test:
-   - Tenant A user: only sees dashboards NeuGain assigned, only A's org data inside them, no CRM/Settings
-   - Tenant B user: only sees their assigned dashboards with B's data
-   - Platform admin (NeuGain): sees everything across all tenants
+- **Catalog seed data** (tools_catalog, agents_catalog, integrations_catalog rows) — the old DB likely had seed rows for the sidebar/tool assignments to work. The migration files may or may not include them. If they don't, the sidebar will be empty for tenants until rows are inserted. Want me to also seed a baseline catalog (derived from the routes/keys referenced in the app) as part of this migration? yes
+- **Your admin account** — after the schema is up, do you want me to insert a `platform_admin` row for a specific email you'll sign up with, or will you handle that yourself in the SQL editor?   
+make below users as super admins  
+  
+[ryan.blackwell@neurealm.com](mailto:ryan.blackwell@neurealm.com)  
+[vidyarth.v@neurealm.com](mailto:vidyarth.v@neurealm.com)  
+[bala.janagaraja@neurealm.com](mailto:bala.janagaraja@neurealm.com)  
+[srikanth.burra@neurealm.com](mailto:srikanth.burra@neurealm.com)
