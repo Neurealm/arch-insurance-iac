@@ -10,7 +10,6 @@ const config: CoworkerConfig = {
   title: "AI Governance & Digital Coworker Oversight Coworker",
   mission: "Ensure AI-powered workflows and digital coworkers operate safely, ethically, and compliantly with transparency, accountability, and continuous oversight.",
   consoleClass: "bg-indigo-600 hover:bg-indigo-700",
-  consoleLabel: "Open Governance Console",
   kpis: [
     { icon: ShieldCheck, iconColor: "text-emerald-600", iconBg: "bg-emerald-50", label: "AI Governance Score (MTD)", value: "87 / 100", deltaText: "9 pts vs last month", deltaTone: "pos", deltaDir: "up" },
     { icon: Bot, iconColor: "text-indigo-600", iconBg: "bg-indigo-50", label: "AI Workflows Monitored", value: "156", deltaText: "23 vs last month", deltaTone: "pos", deltaDir: "up" },
