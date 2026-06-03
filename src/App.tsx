@@ -45,6 +45,7 @@ import PediatricChw from "./pages/coworkers/healthcare/PediatricChw.tsx";
 import ChronicDisease from "./pages/coworkers/healthcare/ChronicDisease.tsx";
 import ProviderExperience from "./pages/coworkers/healthcare/ProviderExperience.tsx";
 import RiskAdjustment from "./pages/coworkers/healthcare/RiskAdjustment.tsx";
+import AiModelGovernance from "./pages/coworkers/healthcare/AiModelGovernance.tsx";
 import ClaimsExceptionAppeals from "./pages/coworkers/healthcare/ClaimsExceptionAppeals.tsx";
 import HealthEquity from "./pages/coworkers/healthcare/HealthEquity.tsx";
 import FhirCmsApi from "./pages/coworkers/healthcare/FhirCmsApi.tsx";
@@ -234,6 +235,7 @@ const App = () => (
           <Route path="/coworkers/healthcare-payer/major-incident-business-impact" element={<MajorIncidentBusinessImpact />} />
           <Route path="/coworkers/healthcare-payer/vendor-saas-risk" element={<VendorSaasRisk />} />
           <Route path="/coworkers/healthcare-payer/identity-oauth-governance" element={<IdentityOauthGovernance />} />
+          <Route path="/coworkers/healthcare-payer/ai-model-governance" element={<AiModelGovernance />} />
           <Route path="/coworkers/it-carve-out-and-separation/escc/overview" element={<EsccOverview />} />
           <Route path="/coworkers/it-carve-out-and-separation/escc/solution-design" element={<EsccSolutionDesign />} />
           <Route path="/coworkers/it-carve-out-and-separation/escc/operational-dashboard" element={<EsccDashboard />} />
