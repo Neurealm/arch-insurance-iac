@@ -45,6 +45,7 @@ import PediatricChw from "./pages/coworkers/healthcare/PediatricChw.tsx";
 import ChronicDisease from "./pages/coworkers/healthcare/ChronicDisease.tsx";
 import ProviderExperience from "./pages/coworkers/healthcare/ProviderExperience.tsx";
 import RiskAdjustment from "./pages/coworkers/healthcare/RiskAdjustment.tsx";
+import AiModelGovernance from "./pages/coworkers/healthcare/AiModelGovernance.tsx";
 import ClaimsExceptionAppeals from "./pages/coworkers/healthcare/ClaimsExceptionAppeals.tsx";
 import HealthEquity from "./pages/coworkers/healthcare/HealthEquity.tsx";
 import FhirCmsApi from "./pages/coworkers/healthcare/FhirCmsApi.tsx";
