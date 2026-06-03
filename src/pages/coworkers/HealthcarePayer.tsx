@@ -63,7 +63,7 @@ const rightTop: Category[] = [
     icon: Lock, color: "text-orange-600", bar: "border-orange-500", badge: "bg-orange-600",
     items: [
       { n: 21, title: "Identity, OAuth & Access Governance Coworker", desc: "Manage access risk and OAuth sprawl", to: "/coworkers/healthcare-payer/identity-oauth-governance" },
-      { n: 22, title: "Cyber Resilience & Ransomware Readiness Coworker", desc: "Strengthen cybersecurity posture and recovery readiness" },
+      { n: 22, title: "Cyber Resilience & Ransomware Readiness Coworker", desc: "Strengthen cybersecurity posture and recovery readiness", to: "/practice-library/cyber-security/resilience-ir" },
     ],
   },
   {
