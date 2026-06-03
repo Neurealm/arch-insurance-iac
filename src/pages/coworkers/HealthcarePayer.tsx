@@ -71,7 +71,7 @@ const rightTop: Category[] = [
     icon: Database, color: "text-teal-600", bar: "border-teal-500", badge: "bg-teal-600",
     items: [
       { n: 23, title: "Enterprise Data & Analytics Insights Coworker", desc: "Deliver unified insights across operational and clinical data" },
-      { n: 24, title: "AI Model Governance & Monitoring Coworker", desc: "Ensure responsible AI with monitoring and governance" },
+      { n: 24, title: "AI Model Governance & Monitoring Coworker", desc: "Ensure responsible AI with monitoring and governance", to: "/coworkers/healthcare-payer/ai-model-governance" },
     ],
   },
   {
