@@ -235,6 +235,7 @@ const App = () => (
           <Route path="/coworkers/healthcare-payer/major-incident-business-impact" element={<MajorIncidentBusinessImpact />} />
           <Route path="/coworkers/healthcare-payer/vendor-saas-risk" element={<VendorSaasRisk />} />
           <Route path="/coworkers/healthcare-payer/identity-oauth-governance" element={<IdentityOauthGovernance />} />
+          <Route path="/coworkers/healthcare-payer/ai-model-governance" element={<AiModelGovernance />} />
           <Route path="/coworkers/it-carve-out-and-separation/escc/overview" element={<EsccOverview />} />
           <Route path="/coworkers/it-carve-out-and-separation/escc/solution-design" element={<EsccSolutionDesign />} />
           <Route path="/coworkers/it-carve-out-and-separation/escc/operational-dashboard" element={<EsccDashboard />} />
