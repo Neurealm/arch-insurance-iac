@@ -70,9 +70,22 @@ export function TenantDataPanel({ tenantId }: { tenantId: string }) {
       const { data, error } = await supabase.functions.invoke("tenant-data-import", {
         body: { tenantId, domain: "incidents", rows },
       });
-      if (error) throw error;
+      if (error) {
+        // Try to read the actual error body returned by the function.
+        let detail = error.message;
+        try {
+          const ctx = (error as unknown as { context?: Response }).context;
+          if (ctx && typeof ctx.text === "function") {
+            const body = await ctx.text();
+            if (body) detail = body;
+          }
+        } catch { /* ignore */ }
+        throw new Error(detail);
+      }
       if (data && (data as { error?: string }).error)
-        throw new Error(String((data as { error: string }).error));
+        throw new Error(typeof (data as { error: unknown }).error === "string"
+          ? String((data as { error: string }).error)
+          : JSON.stringify((data as { error: unknown }).error));
       return data as { processed: number; upserted: number; errors: { index: number; message: string }[] };
     },
     onSuccess: (data) => {
