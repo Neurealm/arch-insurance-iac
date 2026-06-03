@@ -1420,7 +1420,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          external_id: string | null
+          external_id: string
           id: string
           incident_number: string | null
           mttr_minutes: number | null
@@ -1439,7 +1439,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
-          external_id?: string | null
+          external_id: string
           id?: string
           incident_number?: string | null
           mttr_minutes?: number | null
@@ -1458,7 +1458,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
-          external_id?: string | null
+          external_id?: string
           id?: string
           incident_number?: string | null
           mttr_minutes?: number | null
