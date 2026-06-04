@@ -590,6 +590,7 @@ function QuestionnairesPanel({ tenantId, tenantName }: { tenantId: string; tenan
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [assignTarget, setAssignTarget] = useState<QRow | null>(null);
+  const [responsesTarget, setResponsesTarget] = useState<QRow | null>(null);
 
   const { data: templates = [], isLoading: tLoading } = useQuery({
     queryKey: ["q-templates"],
