@@ -876,6 +876,71 @@ export default function CustomerExperience() {
             </aside>
           </div>
         </div>
+
+        {/* Submit confirmation + required gate */}
+        <AlertDialog open={submitOpen} onOpenChange={setSubmitOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {missingRequired.length > 0 ? "Required questions are still unanswered" : "Submit questionnaire?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-2 text-sm">
+                  {missingRequired.length > 0 ? (
+                    <>
+                      <p>
+                        You have <span className="font-semibold text-rose-600">{missingRequired.length}</span> required {missingRequired.length === 1 ? "question" : "questions"} left to answer. Please complete them before submitting:
+                      </p>
+                      <ul className="max-h-40 overflow-auto rounded-md border border-rose-100 bg-rose-50/60 p-2 text-xs text-slate-700 space-y-1">
+                        {missingRequired.slice(0, 8).map((q) => (
+                          <li key={q.id} className="flex gap-2">
+                            <span className="font-mono text-rose-600 shrink-0">Q{qNumberById[q.id]}</span>
+                            <span className="truncate">{q.question_text}</span>
+                          </li>
+                        ))}
+                        {missingRequired.length > 8 && (
+                          <li className="text-muted-foreground">…and {missingRequired.length - 8} more</li>
+                        )}
+                      </ul>
+                    </>
+                  ) : (
+                    <>
+                      <p>
+                        Once submitted, your answers and evidence are locked for review by the NeuGAIN team. You won't be able to edit them without contacting your program lead.
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {counts.answered} of {counts.total} questions answered · {counts.percent}% complete
+                      </p>
+                    </>
+                  )}
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{missingRequired.length > 0 ? "Keep editing" : "Cancel"}</AlertDialogCancel>
+              {missingRequired.length > 0 ? (
+                <AlertDialogAction
+                  onClick={() => {
+                    setSubmitOpen(false);
+                    const first = missingRequired[0];
+                    setActiveSectionId(first.section_id);
+                    setActiveQuestionId(first.id);
+                  }}
+                >
+                  Jump to first
+                </AlertDialogAction>
+              ) : (
+                <AlertDialogAction
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600"
+                  onClick={() => { setSubmitOpen(false); submitQuestionnaire.mutate(); }}
+                  disabled={submitQuestionnaire.isPending}
+                >
+                  Yes, submit
+                </AlertDialogAction>
+              )}
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </TooltipProvider>
   );
