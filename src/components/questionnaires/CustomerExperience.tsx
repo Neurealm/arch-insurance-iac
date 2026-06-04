@@ -807,6 +807,7 @@ function QuestionPanel({
   question, answer, evidence, notes,
   saving, uploading,
   onSave, onStatusChange, onUpload, onRemoveEvidence, onPrev, onNext,
+  isLast, isSubmitted, submitting, onSubmit,
 }: {
   question: Question;
   answer: AnswerRow | null;
@@ -820,6 +821,10 @@ function QuestionPanel({
   onRemoveEvidence: (id: string, url: string) => void;
   onPrev: () => void;
   onNext: () => void;
+  isLast: boolean;
+  isSubmitted: boolean;
+  submitting: boolean;
+  onSubmit: () => void;
 }) {
   const [text, setText] = useState(answer?.answer_text ?? "");
   const [dragActive, setDragActive] = useState(false);
