@@ -278,6 +278,7 @@ export default function CustomerExperience() {
       };
       if (v.answer_text !== undefined) patch.answer_text = v.answer_text;
       if (v.status !== undefined) patch.status = v.status;
+      else if (v.answer_text !== undefined && v.answer_text.trim().length > 0) patch.status = "Answered";
       else if (!existing) patch.status = "In Progress";
 
       const { data, error } = await supabase
