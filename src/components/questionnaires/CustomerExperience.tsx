@@ -313,6 +313,17 @@ export default function CustomerExperience() {
     return { total, answered, needsEvidence, inProgress, remaining: total - answered, percent };
   }, [visibleQuestions, answerByQ]);
 
+  // Required questions still missing an answer — used by the submit gate.
+  const missingRequired = useMemo(() => {
+    return visibleQuestions.filter((q) => {
+      if (!q.required) return false;
+      const a = answerByQ[q.id];
+      const hasText = !!(a?.answer_text && a.answer_text.trim().length > 0);
+      const isAnswered = a?.status === "Answered" || a?.status === "Validated" || hasText;
+      return !isAnswered;
+    });
+  }, [visibleQuestions, answerByQ]);
+
   /* --------------- Mutations --------------- */
 
   const saveAnswer = useMutation({
