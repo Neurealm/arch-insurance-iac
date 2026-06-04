@@ -806,7 +806,12 @@ export default function CustomerExperience() {
                         Current question
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px] font-mono">{activeQuestion.question_id}</Badge>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge variant="outline" className="text-[10px]">Q{qNumberById[activeQuestion.id]}</Badge>
+                          </TooltipTrigger>
+                          <TooltipContent className="font-mono text-[10px]">{activeQuestion.question_id}</TooltipContent>
+                        </Tooltip>
                         <StatusPill status={(activeAnswer?.status ?? "Not Started") as AnswerStatus} />
                       </div>
                     </div>
