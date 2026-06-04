@@ -351,6 +351,22 @@ export default function CustomerExperience() {
     onError: (e: any) => toast.error(e.message ?? "Failed to remove"),
   });
 
+  const submitQuestionnaire = useMutation({
+    mutationFn: async () => {
+      if (!activeQId) throw new Error("No questionnaire selected");
+      const { error } = await supabase
+        .from("questionnaires")
+        .update({ status: "submitted" })
+        .eq("id", activeQId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Questionnaire submitted — thank you!");
+      qc.invalidateQueries({ queryKey: ["customer-questionnaires", tenantId] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Failed to submit"),
+  });
+
   /* --------------- Render guards --------------- */
   if (tenantLoading) {
     return (
