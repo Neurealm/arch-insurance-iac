@@ -48,13 +48,13 @@ export default function TenantPreviewPage() {
   const realTenantId = tenant?.id;
 
   const { data: enabled = [], isLoading } = useQuery({
-    queryKey: ["tenant-enabled-tools", tenantId],
-    enabled: !!tenantId,
+    queryKey: ["tenant-enabled-tools", realTenantId],
+    enabled: !!realTenantId,
     queryFn: async () => {
       const { data: assigns, error: e1 } = await supabase
         .from("tenant_tool_assignments")
         .select("tool_id,enabled")
-        .eq("tenant_id", tenantId!)
+        .eq("tenant_id", realTenantId!)
         .eq("enabled", true);
       if (e1) throw e1;
       const ids = (assigns ?? []).map((a) => a.tool_id);
@@ -73,6 +73,7 @@ export default function TenantPreviewPage() {
 
   if (roleLoading) return <AppShell><div className="p-8 text-muted-foreground">Loading…</div></AppShell>;
   if (!isAdmin) return <Navigate to="/crm/tenants" replace />;
+  if (isUuid && tenant?.slug) return <Navigate to={`/crm/tenants/${tenant.slug}/preview`} replace />;
 
   const enabledKpis = enabled.filter((t) => t.category === "KPI");
   const enabledDashboards = enabled.filter((t) => t.category !== "KPI");
