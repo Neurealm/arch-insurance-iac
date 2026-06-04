@@ -255,9 +255,10 @@ export default function CustomerExperience() {
     visibleQuestions.forEach((q) => {
       const a = answerByQ[q.id];
       if (!a) return;
-      if (a.status === "Answered" || a.status === "Validated") answered++;
-      if (a.status === "Needs Evidence") needsEvidence++;
-      if (a.status === "In Progress") inProgress++;
+      const hasText = !!(a.answer_text && a.answer_text.trim().length > 0);
+      if (a.status === "Answered" || a.status === "Validated" || (hasText && a.status === "In Progress")) answered++;
+      else if (a.status === "Needs Evidence") needsEvidence++;
+      else if (a.status === "In Progress") inProgress++;
     });
     const percent = total === 0 ? 0 : Math.round((answered / total) * 100);
     return { total, answered, needsEvidence, inProgress, remaining: total - answered, percent };
@@ -277,6 +278,7 @@ export default function CustomerExperience() {
       };
       if (v.answer_text !== undefined) patch.answer_text = v.answer_text;
       if (v.status !== undefined) patch.status = v.status;
+      else if (v.answer_text !== undefined && v.answer_text.trim().length > 0) patch.status = "Answered";
       else if (!existing) patch.status = "In Progress";
 
       const { data, error } = await supabase
@@ -350,6 +352,22 @@ export default function CustomerExperience() {
     onError: (e: any) => toast.error(e.message ?? "Failed to remove"),
   });
 
+  const submitQuestionnaire = useMutation({
+    mutationFn: async () => {
+      if (!activeQId) throw new Error("No questionnaire selected");
+      const { error } = await supabase
+        .from("questionnaires")
+        .update({ status: "submitted" })
+        .eq("id", activeQId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Questionnaire submitted — thank you!");
+      qc.invalidateQueries({ queryKey: ["customer-questionnaires", tenantId] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Failed to submit"),
+  });
+
   /* --------------- Render guards --------------- */
   if (tenantLoading) {
     return (
@@ -387,6 +405,19 @@ export default function CustomerExperience() {
   const activeAnswer = activeQuestion ? answerByQ[activeQuestion.id] : null;
   const activeEvidence = activeAnswer ? evidenceByAnswer[activeAnswer.id] ?? [] : [];
   const activeNotes = activeAnswer ? notesByAnswer[activeAnswer.id] ?? [] : [];
+
+  const flatQList = useMemo(() => {
+    const flat: { sectionId: string; questionId: string }[] = [];
+    sections.forEach((s) => {
+      (questionsBySection[s.id] ?? []).forEach((q) => {
+        flat.push({ sectionId: s.id, questionId: q.id });
+      });
+    });
+    return flat;
+  }, [sections, questionsBySection]);
+  const activeIdx = flatQList.findIndex((f) => f.questionId === activeQuestionId);
+  const isLastQ = activeIdx >= 0 && activeIdx === flatQList.length - 1;
+  const isSubmitted = activeQuestionnaire?.status === "submitted";
 
   const overall = OverallStatus(counts.percent);
 
@@ -616,6 +647,10 @@ export default function CustomerExperience() {
                       onRemoveEvidence={(id, url) => removeEvidence.mutate({ id, file_url: url })}
                       onPrev={() => navigateQuestion(-1)}
                       onNext={() => navigateQuestion(1)}
+                      isLast={isLastQ}
+                      isSubmitted={isSubmitted}
+                      submitting={submitQuestionnaire.isPending}
+                      onSubmit={() => submitQuestionnaire.mutate()}
                     />
                   )}
                 </div>
@@ -681,9 +716,22 @@ export default function CustomerExperience() {
                       <Button type="button" size="sm" variant="outline" className="bg-white/70" onClick={() => navigateQuestion(-1)}>
                         <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Prev
                       </Button>
-                      <Button type="button" size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95" onClick={() => navigateQuestion(1)}>
-                        Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                      </Button>
+                      {isLastQ ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95"
+                          onClick={() => submitQuestionnaire.mutate()}
+                          disabled={submitQuestionnaire.isPending || isSubmitted}
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                          {isSubmitted ? "Submitted" : "Submit"}
+                        </Button>
+                      ) : (
+                        <Button type="button" size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95" onClick={() => navigateQuestion(1)}>
+                          Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -759,6 +807,7 @@ function QuestionPanel({
   question, answer, evidence, notes,
   saving, uploading,
   onSave, onStatusChange, onUpload, onRemoveEvidence, onPrev, onNext,
+  isLast, isSubmitted, submitting, onSubmit,
 }: {
   question: Question;
   answer: AnswerRow | null;
@@ -772,6 +821,10 @@ function QuestionPanel({
   onRemoveEvidence: (id: string, url: string) => void;
   onPrev: () => void;
   onNext: () => void;
+  isLast: boolean;
+  isSubmitted: boolean;
+  submitting: boolean;
+  onSubmit: () => void;
 }) {
   const [text, setText] = useState(answer?.answer_text ?? "");
   const [dragActive, setDragActive] = useState(false);
@@ -991,14 +1044,27 @@ function QuestionPanel({
           >
             <Save className="h-3.5 w-3.5 mr-1" /> Save
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95"
-            onClick={onNext}
-          >
-            Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
-          </Button>
+          {isLast ? (
+            <Button
+              type="button"
+              size="sm"
+              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95"
+              onClick={() => { onSave(text); lastSavedRef.current = text; onSubmit(); }}
+              disabled={submitting || isSubmitted}
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+              {isSubmitted ? "Submitted" : "Submit questionnaire"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95"
+              onClick={onNext}
+            >
+              Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
+            </Button>
+          )}
         </div>
       </div>
     </Card>
