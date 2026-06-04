@@ -712,9 +712,22 @@ export default function CustomerExperience() {
                       <Button type="button" size="sm" variant="outline" className="bg-white/70" onClick={() => navigateQuestion(-1)}>
                         <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Prev
                       </Button>
-                      <Button type="button" size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95" onClick={() => navigateQuestion(1)}>
-                        Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                      </Button>
+                      {isLastQ ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95"
+                          onClick={() => submitQuestionnaire.mutate()}
+                          disabled={submitQuestionnaire.isPending || isSubmitted}
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                          {isSubmitted ? "Submitted" : "Submit"}
+                        </Button>
+                      ) : (
+                        <Button type="button" size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95" onClick={() => navigateQuestion(1)}>
+                          Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )}
