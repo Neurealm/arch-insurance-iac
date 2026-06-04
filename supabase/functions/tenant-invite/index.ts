@@ -72,17 +72,26 @@ Deno.serve(async (req) => {
     if (invited?.user?.id) {
       userId = invited.user.id;
     } else if (iErr && /already|registered|exists/i.test(iErr.message)) {
-      // Existing user — generate a recovery link so they can set a new password
+      // Existing user — locate them, then trigger a password-reset email via SMTP
       const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
       const match = list?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
       if (!match) return json({ error: "User exists but could not be located" }, 500);
       userId = match.id;
-      const { data: link } = await admin.auth.admin.generateLink({
-        type: "recovery",
-        email,
-        options: { redirectTo: finalRedirect },
+
+      // Send the recovery email through configured SMTP (Resend)
+      const { error: resetErr } = await userClient.auth.resetPasswordForEmail(email, {
+        redirectTo: finalRedirect,
       });
-      inviteLink = link?.properties?.action_link ?? null;
+      if (resetErr) {
+        console.error("resetPasswordForEmail error", resetErr);
+        // Fallback: still return a manual link so admin can share it
+        const { data: link } = await admin.auth.admin.generateLink({
+          type: "recovery",
+          email,
+          options: { redirectTo: finalRedirect },
+        });
+        inviteLink = link?.properties?.action_link ?? null;
+      }
     } else if (iErr) {
       console.error("inviteUserByEmail error", iErr);
       return json({ error: iErr.message || "Could not invite user" }, 400);
