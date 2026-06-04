@@ -16,6 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Bot, LayoutDashboard, Plug, Users2, Settings2, Search, Eye, UserPlus, Copy, Database,
+  ClipboardList, Trash2, ExternalLink,
 } from "lucide-react";
 import { TenantDataPanel } from "@/pages/crm/TenantDataPanel";
 import { useState } from "react";
