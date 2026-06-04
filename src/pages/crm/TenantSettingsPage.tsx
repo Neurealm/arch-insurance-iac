@@ -798,6 +798,9 @@ function QuestionnairesPanel({ tenantId, tenantName }: { tenantId: string; tenan
                       />
                     </TableCell>
                     <TableCell className="text-right">
+                      <Button type="button" size="sm" variant="ghost" onClick={() => setResponsesTarget(r)}>
+                        <Eye className="h-3.5 w-3.5 mr-1" /> Responses
+                      </Button>
                       <Button type="button" size="sm" variant="ghost" onClick={() => unassign.mutate(r.id)} disabled={unassign.isPending}>
                         <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
                       </Button>
