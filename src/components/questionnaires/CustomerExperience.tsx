@@ -265,6 +265,24 @@ export default function CustomerExperience() {
     return m;
   }, [visibleQuestions]);
 
+  // Apply the active filter chip to each section's question list.
+  const matchesFilter = (q: Question): boolean => {
+    if (filterMode === "all") return true;
+    const a = answerByQ[q.id];
+    const hasText = !!(a?.answer_text && a.answer_text.trim().length > 0);
+    const isAnswered = a?.status === "Answered" || a?.status === "Validated" || hasText;
+    if (filterMode === "unanswered") return !isAnswered;
+    if (filterMode === "needs_evidence") return a?.status === "Needs Evidence";
+    return true;
+  };
+  const filteredQuestionsBySection = useMemo(() => {
+    const m: Record<string, Question[]> = {};
+    Object.entries(questionsBySection).forEach(([sid, list]) => {
+      m[sid] = list.filter(matchesFilter);
+    });
+    return m;
+  }, [questionsBySection, filterMode, answerByQ]);
+
   // Auto-select first section / question
   useEffect(() => {
     if (sections.length > 0 && (!activeSectionId || !sections.find((s) => s.id === activeSectionId))) {
