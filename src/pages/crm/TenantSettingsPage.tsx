@@ -877,6 +877,12 @@ function QuestionnairesPanel({ tenantId, tenantName }: { tenantId: string; tenan
         submitting={assign.isPending}
         onSubmit={(dueDate) => assignTarget && assign.mutate({ template: assignTarget, dueDate })}
       />
+      <ResponsesSheet
+        questionnaire={responsesTarget}
+        tenantId={tenantId}
+        tenantName={tenantName}
+        onOpenChange={(v) => !v && setResponsesTarget(null)}
+      />
     </div>
   );
 }
