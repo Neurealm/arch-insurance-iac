@@ -647,6 +647,10 @@ export default function CustomerExperience() {
                       onRemoveEvidence={(id, url) => removeEvidence.mutate({ id, file_url: url })}
                       onPrev={() => navigateQuestion(-1)}
                       onNext={() => navigateQuestion(1)}
+                      isLast={isLastQ}
+                      isSubmitted={isSubmitted}
+                      submitting={submitQuestionnaire.isPending}
+                      onSubmit={() => submitQuestionnaire.mutate()}
                     />
                   )}
                 </div>
