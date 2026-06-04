@@ -406,6 +406,19 @@ export default function CustomerExperience() {
   const activeEvidence = activeAnswer ? evidenceByAnswer[activeAnswer.id] ?? [] : [];
   const activeNotes = activeAnswer ? notesByAnswer[activeAnswer.id] ?? [] : [];
 
+  const flatQList = useMemo(() => {
+    const flat: { sectionId: string; questionId: string }[] = [];
+    sections.forEach((s) => {
+      (questionsBySection[s.id] ?? []).forEach((q) => {
+        flat.push({ sectionId: s.id, questionId: q.id });
+      });
+    });
+    return flat;
+  }, [sections, questionsBySection]);
+  const activeIdx = flatQList.findIndex((f) => f.questionId === activeQuestionId);
+  const isLastQ = activeIdx >= 0 && activeIdx === flatQList.length - 1;
+  const isSubmitted = activeQuestionnaire?.status === "submitted";
+
   const overall = OverallStatus(counts.percent);
 
   return (
