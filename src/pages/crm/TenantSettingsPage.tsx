@@ -923,3 +923,317 @@ function AssignDialog({
     </Dialog>
   );
 }
+
+/* ========================= Responses Sheet ========================= */
+
+type ResponseQuestion = {
+  id: string; question_id: string; question_text: string; required: boolean;
+  customer_visible: boolean; section_id: string; display_order: number; priority: string | null;
+  evidence_requested: string | null;
+};
+type ResponseSection = { id: string; title: string; description: string | null; display_order: number };
+type ResponseAnswer = {
+  id: string; question_id: string; answer_text: string | null; status: string;
+  answered_at: string | null; updated_at: string;
+};
+type ResponseEvidence = { id: string; answer_id: string; file_name: string; file_url: string };
+type ResponseNote = {
+  id: string; answer_id: string; note_text: string; note_type: string; created_at: string;
+};
+
+function ResponsesSheet({
+  questionnaire, tenantId, tenantName, onOpenChange,
+}: {
+  questionnaire: QRow | null;
+  tenantId: string;
+  tenantName: string;
+  onOpenChange: (v: boolean) => void;
+}) {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const open = !!questionnaire;
+  const qId = questionnaire?.id ?? null;
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["tenant-responses", qId, tenantId],
+    enabled: !!qId,
+    queryFn: async () => {
+      const { data: sections, error: e1 } = await supabase
+        .from("questionnaire_sections")
+        .select("id,title,description,display_order")
+        .eq("questionnaire_id", qId!)
+        .order("display_order");
+      if (e1) throw e1;
+      const secIds = (sections ?? []).map((s) => s.id);
+
+      let questions: ResponseQuestion[] = [];
+      if (secIds.length) {
+        const { data: qs, error: e2 } = await supabase
+          .from("questions")
+          .select("id,question_id,question_text,required,customer_visible,section_id,display_order,priority,evidence_requested")
+          .in("section_id", secIds)
+          .order("display_order");
+        if (e2) throw e2;
+        questions = (qs as ResponseQuestion[]) ?? [];
+      }
+      const qIds = questions.map((q) => q.id);
+
+      let answers: ResponseAnswer[] = [];
+      if (qIds.length) {
+        const { data: a, error: e3 } = await supabase
+          .from("answers")
+          .select("id,question_id,answer_text,status,answered_at,updated_at")
+          .eq("tenant_id", tenantId)
+          .in("question_id", qIds);
+        if (e3) throw e3;
+        answers = (a as ResponseAnswer[]) ?? [];
+      }
+      const aIds = answers.map((a) => a.id);
+
+      let evidence: ResponseEvidence[] = [];
+      let notes: ResponseNote[] = [];
+      if (aIds.length) {
+        const [{ data: ev }, { data: ns }] = await Promise.all([
+          supabase.from("evidence_files").select("id,answer_id,file_name,file_url").in("answer_id", aIds),
+          supabase.from("answer_notes").select("id,answer_id,note_text,note_type,created_at").in("answer_id", aIds).order("created_at", { ascending: false }),
+        ]);
+        evidence = (ev as ResponseEvidence[]) ?? [];
+        notes = (ns as ResponseNote[]) ?? [];
+      }
+      return { sections: (sections as ResponseSection[]) ?? [], questions, answers, evidence, notes };
+    },
+  });
+
+  const addNote = useMutation({
+    mutationFn: async (v: { answerId: string; text: string; noteType: string }) => {
+      const { error } = await supabase.from("answer_notes").insert({
+        answer_id: v.answerId,
+        note_text: v.text,
+        note_type: v.noteType,
+        created_by: user?.id ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Note added" });
+      qc.invalidateQueries({ queryKey: ["tenant-responses", qId, tenantId] });
+    },
+    onError: (e: unknown) => toast({ title: e instanceof Error ? e.message : "Failed", variant: "destructive" }),
+  });
+
+  const answerByQ = new Map((data?.answers ?? []).map((a) => [a.question_id, a]));
+  const evidenceByA = new Map<string, ResponseEvidence[]>();
+  (data?.evidence ?? []).forEach((e) => {
+    const arr = evidenceByA.get(e.answer_id) ?? [];
+    arr.push(e); evidenceByA.set(e.answer_id, arr);
+  });
+  const notesByA = new Map<string, ResponseNote[]>();
+  (data?.notes ?? []).forEach((n) => {
+    const arr = notesByA.get(n.answer_id) ?? [];
+    arr.push(n); notesByA.set(n.answer_id, arr);
+  });
+
+  const totalQ = (data?.questions ?? []).filter((q) => q.customer_visible).length;
+  const answeredQ = (data?.questions ?? []).filter((q) => {
+    if (!q.customer_visible) return false;
+    const a = answerByQ.get(q.id);
+    return a?.status === "Answered" || a?.status === "Validated";
+  }).length;
+  const pct = totalQ === 0 ? 0 : Math.round((answeredQ / totalQ) * 100);
+  const needsEv = (data?.answers ?? []).filter((a) => a.status === "Needs Evidence").length;
+
+  const downloadFile = async (path: string, name: string) => {
+    const { data, error } = await supabase.storage.from("evidence").createSignedUrl(path, 60);
+    if (error || !data) { toast({ title: "Could not get file URL", variant: "destructive" }); return; }
+    window.open(data.signedUrl, "_blank");
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-indigo" /> {questionnaire?.title}
+          </SheetTitle>
+          <SheetDescription>
+            Responses from <span className="font-medium">{tenantName}</span> · {questionnaire?.program_name} / {questionnaire?.workstream_name}
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="mt-4 space-y-4">
+          {/* Summary */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-medium">Completion</div>
+                <div className="text-sm text-muted-foreground">{answeredQ} / {totalQ} answered</div>
+              </div>
+              <Progress value={pct} className="h-2" />
+              <div className="grid grid-cols-3 gap-2 mt-3">
+                <SummaryStat icon={<CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />} label="Answered" value={answeredQ} />
+                <SummaryStat icon={<AlertTriangle className="h-3.5 w-3.5 text-rose-600" />} label="Needs evidence" value={needsEv} />
+                <SummaryStat icon={<FileText className="h-3.5 w-3.5 text-indigo-600" />} label="Remaining" value={Math.max(0, totalQ - answeredQ)} />
+              </div>
+            </CardContent>
+          </Card>
+
+          {isLoading && <div className="text-center text-sm text-muted-foreground py-10">Loading responses…</div>}
+
+          {!isLoading && (data?.sections ?? []).length === 0 && (
+            <div className="text-center text-sm text-muted-foreground py-10">This questionnaire has no sections.</div>
+          )}
+
+          <Accordion type="multiple" className="space-y-2" defaultValue={(data?.sections ?? []).map((s) => s.id)}>
+            {(data?.sections ?? []).map((s) => {
+              const list = (data?.questions ?? []).filter((q) => q.section_id === s.id);
+              const ans = list.filter((q) => {
+                const a = answerByQ.get(q.id);
+                return a?.status === "Answered" || a?.status === "Validated";
+              }).length;
+              return (
+                <AccordionItem key={s.id} value={s.id} className="border rounded-lg px-3">
+                  <AccordionTrigger className="hover:no-underline py-3">
+                    <div className="flex items-center justify-between flex-1 gap-3">
+                      <div className="text-left">
+                        <div className="text-sm font-medium">{s.title}</div>
+                        {s.description && <div className="text-xs text-muted-foreground">{s.description}</div>}
+                      </div>
+                      <Badge variant="outline" className="text-[10px]">{ans}/{list.length}</Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3 pb-3">
+                    {list.map((q) => {
+                      const a = answerByQ.get(q.id);
+                      const ev = a ? evidenceByA.get(a.id) ?? [] : [];
+                      const ns = a ? notesByA.get(a.id) ?? [] : [];
+                      return (
+                        <div key={q.id} className="rounded-lg border bg-card p-3">
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <Badge variant="outline" className="font-mono text-[10px]">{q.question_id}</Badge>
+                              {q.required && <Badge className="text-[10px] bg-rose-100 text-rose-700 border border-rose-200 hover:bg-rose-100">Required</Badge>}
+                              {!q.customer_visible && <Badge variant="outline" className="text-[10px]">Internal</Badge>}
+                              <Badge variant="outline" className="text-[10px]">{a?.status ?? "Not Started"}</Badge>
+                            </div>
+                          </div>
+                          <p className="text-sm text-slate-800">{q.question_text}</p>
+
+                          <div className="mt-2 rounded-md bg-muted/50 p-2.5 text-sm whitespace-pre-wrap min-h-[40px]">
+                            {a?.answer_text ? a.answer_text : <span className="text-xs text-muted-foreground italic">No answer provided yet</span>}
+                          </div>
+
+                          {ev.length > 0 && (
+                            <div className="mt-2">
+                              <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1 flex items-center gap-1">
+                                <Paperclip className="h-3 w-3" /> Evidence
+                              </div>
+                              <div className="space-y-1">
+                                {ev.map((e) => (
+                                  <button
+                                    key={e.id}
+                                    type="button"
+                                    onClick={() => downloadFile(e.file_url, e.file_name)}
+                                    className="flex w-full items-center gap-2 text-xs text-indigo-700 hover:underline text-left"
+                                  >
+                                    <Paperclip className="h-3 w-3" /> {e.file_name}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {a && (
+                            <div className="mt-3">
+                              <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1 flex items-center gap-1">
+                                <MessageSquare className="h-3 w-3" /> Notes ({ns.length})
+                              </div>
+                              {ns.length > 0 && (
+                                <div className="space-y-1 mb-2">
+                                  {ns.map((n) => (
+                                    <div
+                                      key={n.id}
+                                      className={`text-xs p-2 rounded-md border ${
+                                        n.note_type === "customer_visible"
+                                          ? "bg-indigo-50/60 border-indigo-100 text-slate-700"
+                                          : "bg-amber-50/60 border-amber-100 text-slate-700"
+                                      }`}
+                                    >
+                                      <div className="flex items-center justify-between mb-0.5">
+                                        <Badge variant="outline" className="text-[9px]">
+                                          {n.note_type === "customer_visible" ? "Visible to tenant" : "Internal only"}
+                                        </Badge>
+                                      </div>
+                                      {n.note_text}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <NoteComposer
+                                onSubmit={(text, type) => addNote.mutate({ answerId: a.id, text, noteType: type })}
+                                pending={addNote.isPending}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {list.length === 0 && (
+                      <div className="text-xs text-muted-foreground text-center py-3">No questions in this section.</div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function SummaryStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <div className="rounded-md border bg-card p-2 flex items-center gap-2">
+      {icon}
+      <div>
+        <div className="text-sm font-semibold leading-none">{value}</div>
+        <div className="text-[10px] text-muted-foreground mt-0.5">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function NoteComposer({
+  onSubmit, pending,
+}: { onSubmit: (text: string, type: string) => void; pending: boolean }) {
+  const [text, setText] = useState("");
+  const [type, setType] = useState("customer_visible");
+  return (
+    <div className="flex gap-2 items-start">
+      <Textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Add a note for the tenant or your team…"
+        className="min-h-[60px] text-xs"
+      />
+      <div className="flex flex-col gap-1.5 shrink-0">
+        <Select value={type} onValueChange={setType}>
+          <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="customer_visible" className="text-xs">Visible to tenant</SelectItem>
+            <SelectItem value="internal" className="text-xs">Internal only</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          type="button"
+          size="sm"
+          className="h-8"
+          disabled={pending || !text.trim()}
+          onClick={() => { onSubmit(text.trim(), type); setText(""); }}
+        >
+          <Send className="h-3.5 w-3.5 mr-1" /> Add
+        </Button>
+      </div>
+    </div>
+  );
+}
