@@ -255,9 +255,10 @@ export default function CustomerExperience() {
     visibleQuestions.forEach((q) => {
       const a = answerByQ[q.id];
       if (!a) return;
-      if (a.status === "Answered" || a.status === "Validated") answered++;
-      if (a.status === "Needs Evidence") needsEvidence++;
-      if (a.status === "In Progress") inProgress++;
+      const hasText = !!(a.answer_text && a.answer_text.trim().length > 0);
+      if (a.status === "Answered" || a.status === "Validated" || (hasText && a.status === "In Progress")) answered++;
+      else if (a.status === "Needs Evidence") needsEvidence++;
+      else if (a.status === "In Progress") inProgress++;
     });
     const percent = total === 0 ? 0 : Math.round((answered / total) * 100);
     return { total, answered, needsEvidence, inProgress, remaining: total - answered, percent };
