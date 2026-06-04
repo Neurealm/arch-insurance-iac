@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
       const { data: link } = await admin.auth.admin.generateLink({
         type: "recovery",
         email,
-        options: { redirectTo: redirectTo || undefined },
+        options: { redirectTo: finalRedirect },
       });
       inviteLink = link?.properties?.action_link ?? null;
     } else if (iErr) {
