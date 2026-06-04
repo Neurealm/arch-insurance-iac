@@ -74,6 +74,7 @@ export default function Login() {
         }
       }
       sessionStorage.setItem("active_workspace", workspace);
+      window.dispatchEvent(new Event("workspace-change"));
       navigate(dest, { replace: true });
     } finally {
       setLoading(false);

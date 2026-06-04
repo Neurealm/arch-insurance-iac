@@ -14,22 +14,28 @@ export type TenantScope = {
 };
 
 export function useTenantScope(): TenantScope {
-  const { user, isAdmin, loading, roleLoading } = useAuth();
+  const { user, isAdmin, loading, roleLoading, activeWorkspace } = useAuth();
   const enabled = !!user?.id && !isAdmin && !roleLoading;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["tenant-scope", user?.id],
+    queryKey: ["tenant-scope", user?.id, activeWorkspace],
     enabled,
     staleTime: 60_000,
     queryFn: async () => {
-      const { data: m } = await supabase
+      // Fetch all memberships for this user, then pick the one matching the
+      // active workspace slug. This keeps tenants isolated even when the same
+      // identity belongs to multiple workspaces.
+      const { data: memberships } = await supabase
         .from("tenant_memberships")
         .select("tenant_id, tenants ( id, name, slug )")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      if (!m) return null;
-      const tenantId = (m as any).tenant_id as string;
-      const tenant = (m as any).tenants as { name: string; slug: string } | null;
+        .eq("user_id", user!.id);
+      if (!memberships || memberships.length === 0) return null;
+      const picked =
+        (activeWorkspace
+          ? memberships.find((m: any) => m.tenants?.slug === activeWorkspace)
+          : null) ?? memberships[0];
+      const tenantId = (picked as any).tenant_id as string;
+      const tenant = (picked as any).tenants as { name: string; slug: string } | null;
       const { data: assigns } = await supabase
         .from("tenant_tool_assignments")
         .select("tool_id, enabled, tools_catalog ( key, route )")
