@@ -858,7 +858,7 @@ export default function CustomerExperience() {
                           type="button"
                           size="sm"
                           className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95"
-                          onClick={() => submitQuestionnaire.mutate()}
+                          onClick={() => setSubmitOpen(true)}
                           disabled={submitQuestionnaire.isPending || isSubmitted}
                         >
                           <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
