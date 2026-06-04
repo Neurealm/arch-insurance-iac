@@ -33,16 +33,19 @@ export default function TenantPreviewPage() {
   const { tenantId } = useParams<{ tenantId: string }>();
   const { isAdmin, roleLoading } = useAuth();
 
+  const isUuid = !!tenantId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tenantId);
   const { data: tenant } = useQuery({
     queryKey: ["tenant", tenantId],
     enabled: !!tenantId,
     queryFn: async () => {
+      const col = isUuid ? "id" : "slug";
       const { data, error } = await supabase
-        .from("tenants").select("id,name,slug").eq("id", tenantId!).maybeSingle();
+        .from("tenants").select("id,name,slug").eq(col, tenantId!).maybeSingle();
       if (error) throw error;
       return data;
     },
   });
+  const realTenantId = tenant?.id;
 
   const { data: enabled = [], isLoading } = useQuery({
     queryKey: ["tenant-enabled-tools", tenantId],
