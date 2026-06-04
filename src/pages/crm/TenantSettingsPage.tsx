@@ -200,6 +200,7 @@ export default function TenantSettingsPage() {
                 <TabsTrigger value="tools"><LayoutDashboard className="h-4 w-4 mr-1.5" />Dashboards & KPIs</TabsTrigger>
                 <TabsTrigger value="data"><Database className="h-4 w-4 mr-1.5" />Data</TabsTrigger>
                 <TabsTrigger value="connectors"><Plug className="h-4 w-4 mr-1.5" />Connectors</TabsTrigger>
+                <TabsTrigger value="questionnaires"><ClipboardList className="h-4 w-4 mr-1.5" />Questionnaires</TabsTrigger>
                 <TabsTrigger value="members"><Users2 className="h-4 w-4 mr-1.5" />Members</TabsTrigger>
               </TabsList>
 
@@ -217,6 +218,9 @@ export default function TenantSettingsPage() {
               </TabsContent>
               <TabsContent value="connectors" className="mt-4">
                 <ConnectorsPanel tenantId={tenant.id} />
+              </TabsContent>
+              <TabsContent value="questionnaires" className="mt-4">
+                <QuestionnairesPanel tenantId={tenant.id} tenantName={tenant.name} />
               </TabsContent>
               <TabsContent value="members" className="mt-4">
                 <MembersPanel tenantId={tenant.id} tenantName={tenant.name} />
