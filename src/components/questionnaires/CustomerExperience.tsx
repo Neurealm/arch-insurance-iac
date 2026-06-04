@@ -1006,11 +1006,26 @@ function QuestionPanel({
 
   const status: AnswerStatus = (answer?.status ?? "Not Started") as AnswerStatus;
 
+  const reviewerLocked = REVIEWER_STATUSES.has(status);
+
   return (
     <Card className="rounded-2xl border-white/60 bg-white/65 backdrop-blur-xl shadow-[0_8px_30px_-12px_rgba(99,102,241,0.25)] p-5 transition-all">
+      {isSubmitted && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-xs text-emerald-800">
+          <Lock className="h-3.5 w-3.5" />
+          <span>
+            <span className="font-medium">Submitted.</span> Your answers are locked for review. Contact your NeuGAIN program lead if you need to make changes.
+          </span>
+        </div>
+      )}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant="outline" className="font-mono text-[10px] bg-white/80">{question.question_id}</Badge>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className="text-[10px] bg-white/80">Q{questionNumber}</Badge>
+            </TooltipTrigger>
+            <TooltipContent className="font-mono text-[10px]">{question.question_id}</TooltipContent>
+          </Tooltip>
           {question.required && (
             <Badge className="text-[10px] bg-rose-100 text-rose-700 border border-rose-200 hover:bg-rose-100">Required</Badge>
           )}
@@ -1021,16 +1036,31 @@ function QuestionPanel({
           )}
           <StatusPill status={status} />
         </div>
-        <Select value={status} onValueChange={(v) => onStatusChange(v as AnswerStatus)}>
-          <SelectTrigger className="h-8 w-[170px] text-xs bg-white/70">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {ANSWER_STATUSES.map((s) => (
-              <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {reviewerLocked ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className="h-8 px-3 text-[11px] gap-1.5 bg-white/70">
+                <Lock className="h-3 w-3" /> Set by reviewer
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>This status was set by your NeuGAIN reviewer and can't be changed here.</TooltipContent>
+          </Tooltip>
+        ) : (
+          <Select
+            value={status}
+            onValueChange={(v) => onStatusChange(v as AnswerStatus)}
+            disabled={isSubmitted}
+          >
+            <SelectTrigger className="h-8 w-[170px] text-xs bg-white/70">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TENANT_STATUSES.map((s) => (
+                <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <h2 className="text-base font-semibold text-slate-900 leading-relaxed">
