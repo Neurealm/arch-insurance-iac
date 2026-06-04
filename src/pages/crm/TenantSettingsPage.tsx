@@ -563,3 +563,346 @@ function MembersPanel({ tenantId, tenantName }: { tenantId: string; tenantName: 
     </div>
   );
 }
+
+/* ========================= Questionnaires Panel ========================= */
+
+type QRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  due_date: string | null;
+  workstream_id: string;
+  workstream_name?: string;
+  program_name?: string;
+  section_count?: number;
+  question_count?: number;
+};
+
+function QuestionnairesPanel({ tenantId, tenantName }: { tenantId: string; tenantName: string }) {
+  const qc = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [assignTarget, setAssignTarget] = useState<QRow | null>(null);
+
+  const { data: templates = [], isLoading: tLoading } = useQuery({
+    queryKey: ["q-templates"],
+    queryFn: async (): Promise<QRow[]> => {
+      const { data, error } = await supabase
+        .from("questionnaires")
+        .select("id,title,description,status,due_date,workstream_id, workstreams!inner(name, programs!inner(name))")
+        .is("assigned_to_tenant_id", null)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const rows = (data ?? []).map((r: any) => ({
+        id: r.id, title: r.title, description: r.description, status: r.status,
+        due_date: r.due_date, workstream_id: r.workstream_id,
+        workstream_name: r.workstreams?.name, program_name: r.workstreams?.programs?.name,
+      })) as QRow[];
+      const ids = rows.map((r) => r.id);
+      if (ids.length) {
+        const { data: secs } = await supabase
+          .from("questionnaire_sections").select("id,questionnaire_id").in("questionnaire_id", ids);
+        const secIds = (secs ?? []).map((s) => s.id);
+        let qCounts: Record<string, number> = {};
+        if (secIds.length) {
+          const { data: qs } = await supabase.from("questions").select("section_id").in("section_id", secIds);
+          (qs ?? []).forEach((q) => { qCounts[q.section_id] = (qCounts[q.section_id] ?? 0) + 1; });
+        }
+        const secByQ: Record<string, number> = {};
+        const qByQ: Record<string, number> = {};
+        (secs ?? []).forEach((s) => {
+          secByQ[s.questionnaire_id] = (secByQ[s.questionnaire_id] ?? 0) + 1;
+          qByQ[s.questionnaire_id] = (qByQ[s.questionnaire_id] ?? 0) + (qCounts[s.id] ?? 0);
+        });
+        rows.forEach((r) => { r.section_count = secByQ[r.id] ?? 0; r.question_count = qByQ[r.id] ?? 0; });
+      }
+      return rows;
+    },
+  });
+
+  const { data: assigned = [] } = useQuery({
+    queryKey: ["q-assigned", tenantId],
+    queryFn: async (): Promise<QRow[]> => {
+      const { data, error } = await supabase
+        .from("questionnaires")
+        .select("id,title,description,status,due_date,workstream_id, workstreams!inner(name, programs!inner(name))")
+        .eq("assigned_to_tenant_id", tenantId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map((r: any) => ({
+        id: r.id, title: r.title, description: r.description, status: r.status,
+        due_date: r.due_date, workstream_id: r.workstream_id,
+        workstream_name: r.workstreams?.name, program_name: r.workstreams?.programs?.name,
+      })) as QRow[];
+    },
+  });
+
+  const assign = useMutation({
+    mutationFn: async ({ template, dueDate }: { template: QRow; dueDate: string | null }) => {
+      // clone questionnaire
+      const { data: srcQ, error: e0 } = await supabase.from("questionnaires").select("*").eq("id", template.id).single();
+      if (e0) throw e0;
+      const { data: newQ, error: e1 } = await supabase.from("questionnaires").insert({
+        workstream_id: srcQ.workstream_id,
+        title: srcQ.title,
+        description: srcQ.description,
+        status: "assigned",
+        assigned_to_tenant_id: tenantId,
+        due_date: dueDate,
+      }).select().single();
+      if (e1) throw e1;
+
+      const { data: srcSections, error: e2 } = await supabase
+        .from("questionnaire_sections").select("*").eq("questionnaire_id", template.id).order("display_order");
+      if (e2) throw e2;
+
+      for (const s of srcSections ?? []) {
+        const { data: newS, error: e3 } = await supabase.from("questionnaire_sections").insert({
+          questionnaire_id: newQ.id,
+          title: s.title,
+          description: s.description,
+          display_order: s.display_order,
+        }).select().single();
+        if (e3) throw e3;
+
+        const { data: srcQs, error: e4 } = await supabase
+          .from("questions").select("*").eq("section_id", s.id).order("display_order");
+        if (e4) throw e4;
+        if ((srcQs ?? []).length) {
+          const payload = srcQs!.map((q: any) => ({
+            section_id: newS.id,
+            question_id: q.question_id,
+            question_text: q.question_text,
+            why_asking: q.why_asking,
+            follow_up_questions: q.follow_up_questions,
+            evidence_requested: q.evidence_requested,
+            question_type: q.question_type,
+            priority: q.priority,
+            display_order: q.display_order,
+            customer_visible: q.customer_visible,
+            required: q.required,
+          }));
+          const { error: e5 } = await supabase.from("questions").insert(payload);
+          if (e5) throw e5;
+        }
+      }
+    },
+    onSuccess: () => {
+      toast({ title: "Questionnaire assigned", description: `Sent to ${tenantName}` });
+      qc.invalidateQueries({ queryKey: ["q-assigned", tenantId] });
+      setAssignTarget(null);
+    },
+    onError: (e: unknown) => toast({ title: e instanceof Error ? e.message : "Assign failed", variant: "destructive" }),
+  });
+
+  const updateAssigned = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Partial<{ status: string; due_date: string | null }> }) => {
+      const { error } = await supabase.from("questionnaires").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["q-assigned", tenantId] }),
+    onError: (e: unknown) => toast({ title: e instanceof Error ? e.message : "Update failed", variant: "destructive" }),
+  });
+
+  const unassign = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("questionnaires").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Removed" });
+      qc.invalidateQueries({ queryKey: ["q-assigned", tenantId] });
+    },
+    onError: (e: unknown) => toast({ title: e instanceof Error ? e.message : "Failed", variant: "destructive" }),
+  });
+
+  const filteredTemplates = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return templates;
+    return templates.filter((r) => [r.title, r.description ?? "", r.workstream_name ?? "", r.program_name ?? ""].some((x) => x.toLowerCase().includes(q)));
+  }, [templates, search]);
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
+          <div>
+            <CardTitle className="text-base flex items-center gap-2">
+              <ClipboardList className="h-4 w-4 text-indigo" /> Assigned to {tenantName}
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              {assigned.length} questionnaire{assigned.length === 1 ? "" : "s"} sent to this tenant
+            </p>
+          </div>
+          <Link to="/questionnaires">
+            <Button variant="outline" size="sm">
+              <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open Studio
+            </Button>
+          </Link>
+        </CardHeader>
+        <CardContent className="p-0">
+          {assigned.length === 0 ? (
+            <div className="text-center text-sm text-muted-foreground py-10">
+              Nothing assigned yet. Pick a template below to send it to {tenantName}.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Questionnaire</TableHead>
+                  <TableHead>Program / Workstream</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Due date</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {assigned.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-medium">
+                      <div>{r.title}</div>
+                      {r.description && <div className="text-xs text-muted-foreground line-clamp-1">{r.description}</div>}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {r.program_name} / {r.workstream_name}
+                    </TableCell>
+                    <TableCell>
+                      <Select value={r.status} onValueChange={(v) => updateAssigned.mutate({ id: r.id, patch: { status: v } })}>
+                        <SelectTrigger className="h-8 w-[140px]"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="assigned">Assigned</SelectItem>
+                          <SelectItem value="in_progress">In progress</SelectItem>
+                          <SelectItem value="submitted">Submitted</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="date"
+                        className="h-8 w-[160px]"
+                        defaultValue={r.due_date ?? ""}
+                        onBlur={(e) => {
+                          const v = e.target.value || null;
+                          if (v !== r.due_date) updateAssigned.mutate({ id: r.id, patch: { due_date: v } });
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="ghost" onClick={() => unassign.mutate(r.id)} disabled={unassign.isPending}>
+                        <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Available templates</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Built in the Questionnaire Studio. Assigning sends a copy to {tenantName}.
+          </p>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="p-3 border-b">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input className="pl-9" placeholder="Search templates…" value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+          </div>
+          {tLoading ? (
+            <div className="text-center py-10 text-muted-foreground text-sm">Loading…</div>
+          ) : filteredTemplates.length === 0 ? (
+            <div className="text-center py-10 text-muted-foreground text-sm">
+              No templates yet. Build one in the <Link to="/questionnaires" className="text-indigo underline">Questionnaire Studio</Link>.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Template</TableHead>
+                  <TableHead>Program / Workstream</TableHead>
+                  <TableHead className="text-center">Sections</TableHead>
+                  <TableHead className="text-center">Questions</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredTemplates.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-medium">
+                      <div>{r.title}</div>
+                      {r.description && <div className="text-xs text-muted-foreground line-clamp-1">{r.description}</div>}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {r.program_name} / {r.workstream_name}
+                    </TableCell>
+                    <TableCell className="text-center text-sm">{r.section_count ?? 0}</TableCell>
+                    <TableCell className="text-center text-sm">{r.question_count ?? 0}</TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" onClick={() => setAssignTarget(r)}>
+                        <UserPlus className="h-3.5 w-3.5 mr-1" /> Assign
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <AssignDialog
+        open={!!assignTarget}
+        onOpenChange={(v) => !v && setAssignTarget(null)}
+        template={assignTarget}
+        tenantName={tenantName}
+        submitting={assign.isPending}
+        onSubmit={(dueDate) => assignTarget && assign.mutate({ template: assignTarget, dueDate })}
+      />
+    </div>
+  );
+}
+
+function AssignDialog({
+  open, onOpenChange, template, tenantName, submitting, onSubmit,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  template: QRow | null;
+  tenantName: string;
+  submitting: boolean;
+  onSubmit: (dueDate: string | null) => void;
+}) {
+  const [dueDate, setDueDate] = useState("");
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Assign questionnaire</DialogTitle>
+          <DialogDescription>
+            Send <span className="font-medium">{template?.title}</span> to {tenantName}. A copy is created so edits won't affect the template.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label>Due date (optional)</Label>
+            <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button disabled={submitting} onClick={() => onSubmit(dueDate || null)}>
+            {submitting ? "Assigning…" : "Assign to tenant"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
