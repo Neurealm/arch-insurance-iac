@@ -625,87 +625,141 @@ export default function CustomerExperience() {
                 <div className="space-y-4">
                   {/* Sections accordion */}
                   <Card className="rounded-2xl border-white/60 bg-white/60 backdrop-blur-xl shadow-md p-3">
-                    <Accordion
-                      type="single"
-                      collapsible
-                      value={activeSectionId ?? undefined}
-                      onValueChange={(v) => setActiveSectionId(v || null)}
-                      className="space-y-2"
-                    >
-                      {sections.map((s) => {
-                        const list = questionsBySection[s.id] ?? [];
-                        const sectionAnswered = list.filter((q) => {
-                          const a = answerByQ[q.id];
-                          return a?.status === "Answered" || a?.status === "Validated";
-                        }).length;
-                        const pct = list.length === 0 ? 0 : Math.round((sectionAnswered / list.length) * 100);
-                        return (
-                          <AccordionItem
-                            key={s.id}
-                            value={s.id}
-                            className="border border-white/70 rounded-xl bg-gradient-to-br from-white/80 to-white/40 px-3"
-                          >
-                            <AccordionTrigger className="hover:no-underline py-3">
-                              <div className="flex flex-1 items-center gap-3 text-left">
-                                <Layers className="h-4 w-4 text-indigo-500 shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium text-slate-800 truncate">{s.title}</div>
-                                  {s.description && (
-                                    <div className="text-[11px] text-muted-foreground truncate">{s.description}</div>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="text-[10px]">{sectionAnswered}/{list.length}</Badge>
-                                  <div className="w-16 h-1.5 rounded-full bg-indigo-100 overflow-hidden">
-                                    <div
-                                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all"
-                                      style={{ width: `${pct}%` }}
-                                    />
+                    {/* Filter pills */}
+                    <div className="flex items-center gap-2 px-1 pb-2 flex-wrap">
+                      <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                        <ListFilter className="h-3 w-3" /> Show
+                      </span>
+                      {([
+                        { key: "all", label: `All (${counts.total})` },
+                        { key: "unanswered", label: `Unanswered (${counts.remaining})` },
+                        { key: "needs_evidence", label: `Needs evidence (${counts.needsEvidence})` },
+                      ] as { key: FilterMode; label: string }[]).map((f) => (
+                        <button
+                          key={f.key}
+                          type="button"
+                          onClick={() => setFilterMode(f.key)}
+                          className={`px-2.5 py-1 rounded-full text-[11px] border transition-all ${
+                            filterMode === f.key
+                              ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                              : "bg-white/70 border-white/70 hover:border-indigo-300 text-slate-700"
+                          }`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {(loadingSections || loadingQuestions) ? (
+                      <div className="space-y-2 p-1">
+                        {[0, 1, 2].map((i) => (
+                          <div key={i} className="border border-white/70 rounded-xl bg-white/50 p-3">
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="h-4 w-4 rounded" />
+                              <Skeleton className="h-3 flex-1 max-w-[40%]" />
+                              <Skeleton className="h-3 w-16" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <Accordion
+                        type="single"
+                        collapsible
+                        value={activeSectionId ?? undefined}
+                        onValueChange={(v) => setActiveSectionId(v || null)}
+                        className="space-y-2"
+                      >
+                        {sections.map((s) => {
+                          const list = questionsBySection[s.id] ?? [];
+                          const filteredList = filteredQuestionsBySection[s.id] ?? [];
+                          const sectionAnswered = list.filter((q) => {
+                            const a = answerByQ[q.id];
+                            return a?.status === "Answered" || a?.status === "Validated";
+                          }).length;
+                          const pct = list.length === 0 ? 0 : Math.round((sectionAnswered / list.length) * 100);
+                          return (
+                            <AccordionItem
+                              key={s.id}
+                              value={s.id}
+                              className="border border-white/70 rounded-xl bg-gradient-to-br from-white/80 to-white/40 px-3"
+                            >
+                              <AccordionTrigger className="hover:no-underline py-3">
+                                <div className="flex flex-1 items-center gap-3 text-left">
+                                  <Layers className="h-4 w-4 text-indigo-500 shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium text-slate-800 truncate">{s.title}</div>
+                                    {s.description && (
+                                      <div className="text-[11px] text-muted-foreground truncate">{s.description}</div>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="text-[10px]">{sectionAnswered}/{list.length}</Badge>
+                                    <div className="w-16 h-1.5 rounded-full bg-indigo-100 overflow-hidden">
+                                      <div
+                                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all"
+                                        style={{ width: `${pct}%` }}
+                                      />
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pb-3">
-                              <div className="flex flex-wrap gap-1.5">
-                                {list.map((q) => {
-                                  const a = answerByQ[q.id];
-                                  const status = a?.status ?? "Not Started";
-                                  const isActive = q.id === activeQuestionId;
-                                  return (
-                                    <button
-                                      key={q.id}
-                                      onClick={() => setActiveQuestionId(q.id)}
-                                      className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] border transition-all ${
-                                        isActive
-                                          ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
-                                          : "bg-white/80 border-white/80 hover:border-indigo-300 hover:bg-indigo-50 text-slate-700"
-                                      }`}
-                                    >
-                                      {status === "Answered" || status === "Validated" ? (
-                                        <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                                      ) : status === "Needs Evidence" ? (
-                                        <AlertTriangle className="h-3 w-3 text-rose-500" />
-                                      ) : (
-                                        <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-                                      )}
-                                      {q.question_id}
-                                    </button>
-                                  );
-                                })}
-                                {list.length === 0 && (
-                                  <div className="text-xs text-muted-foreground py-1">No customer-visible questions in this section.</div>
-                                )}
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        );
-                      })}
-                      {sections.length === 0 && (
-                        <div className="text-xs text-muted-foreground py-4 text-center">
-                          This questionnaire has no sections yet.
-                        </div>
-                      )}
-                    </Accordion>
+                              </AccordionTrigger>
+                              <AccordionContent className="pb-3">
+                                <div className="flex flex-wrap gap-1.5">
+                                  {filteredList.map((q) => {
+                                    const a = answerByQ[q.id];
+                                    const status = a?.status ?? "Not Started";
+                                    const isActive = q.id === activeQuestionId;
+                                    const n = qNumberById[q.id];
+                                    const preview = (q.question_text ?? "").slice(0, 80);
+                                    return (
+                                      <Tooltip key={q.id}>
+                                        <TooltipTrigger asChild>
+                                          <button
+                                            onClick={() => setActiveQuestionId(q.id)}
+                                            className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] border transition-all ${
+                                              isActive
+                                                ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
+                                                : "bg-white/80 border-white/80 hover:border-indigo-300 hover:bg-indigo-50 text-slate-700"
+                                            }`}
+                                          >
+                                            {status === "Answered" || status === "Validated" ? (
+                                              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                                            ) : status === "Needs Evidence" ? (
+                                              <AlertTriangle className="h-3 w-3 text-rose-500" />
+                                            ) : (
+                                              <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
+                                            )}
+                                            {q.required && <span className="text-rose-500" aria-label="required">*</span>}
+                                            Q{n}
+                                          </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-xs">
+                                          <div className="text-[11px] font-medium">{preview}{(q.question_text?.length ?? 0) > 80 ? "…" : ""}</div>
+                                          <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">{q.question_id}</div>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    );
+                                  })}
+                                  {filteredList.length === 0 && (
+                                    <div className="text-xs text-muted-foreground py-1">
+                                      {list.length === 0
+                                        ? "No customer-visible questions in this section."
+                                        : "No questions match the current filter."}
+                                    </div>
+                                  )}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          );
+                        })}
+                        {sections.length === 0 && (
+                          <div className="text-xs text-muted-foreground py-4 text-center">
+                            This questionnaire has no sections yet.
+                          </div>
+                        )}
+                      </Accordion>
+                    )}
                   </Card>
 
                   {/* Active question editor */}
