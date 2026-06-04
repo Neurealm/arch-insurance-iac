@@ -39,6 +39,18 @@ const ANSWER_STATUSES = [
 ] as const;
 type AnswerStatus = typeof ANSWER_STATUSES[number];
 
+// Statuses a tenant user is allowed to set themselves.
+// Reviewer-only states ("Validated", "Needs Follow Up", "Needs Evidence", "Deferred")
+// stay visible as read-only badges when a reviewer has set them.
+const TENANT_STATUSES: AnswerStatus[] = [
+  "Not Started", "In Progress", "Answered", "Not Applicable",
+];
+const REVIEWER_STATUSES = new Set<AnswerStatus>([
+  "Validated", "Needs Follow Up", "Needs Evidence", "Deferred",
+]);
+
+type FilterMode = "all" | "unanswered" | "needs_evidence";
+
 type AssignedQuestionnaire = {
   id: string;
   title: string;
