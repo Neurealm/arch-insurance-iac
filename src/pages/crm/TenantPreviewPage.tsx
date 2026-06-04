@@ -33,25 +33,28 @@ export default function TenantPreviewPage() {
   const { tenantId } = useParams<{ tenantId: string }>();
   const { isAdmin, roleLoading } = useAuth();
 
+  const isUuid = !!tenantId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tenantId);
   const { data: tenant } = useQuery({
     queryKey: ["tenant", tenantId],
     enabled: !!tenantId,
     queryFn: async () => {
+      const col = isUuid ? "id" : "slug";
       const { data, error } = await supabase
-        .from("tenants").select("id,name,slug").eq("id", tenantId!).maybeSingle();
+        .from("tenants").select("id,name,slug").eq(col, tenantId!).maybeSingle();
       if (error) throw error;
       return data;
     },
   });
+  const realTenantId = tenant?.id;
 
   const { data: enabled = [], isLoading } = useQuery({
-    queryKey: ["tenant-enabled-tools", tenantId],
-    enabled: !!tenantId,
+    queryKey: ["tenant-enabled-tools", realTenantId],
+    enabled: !!realTenantId,
     queryFn: async () => {
       const { data: assigns, error: e1 } = await supabase
         .from("tenant_tool_assignments")
         .select("tool_id,enabled")
-        .eq("tenant_id", tenantId!)
+        .eq("tenant_id", realTenantId!)
         .eq("enabled", true);
       if (e1) throw e1;
       const ids = (assigns ?? []).map((a) => a.tool_id);
@@ -70,6 +73,7 @@ export default function TenantPreviewPage() {
 
   if (roleLoading) return <AppShell><div className="p-8 text-muted-foreground">Loading…</div></AppShell>;
   if (!isAdmin) return <Navigate to="/crm/tenants" replace />;
+  if (isUuid && tenant?.slug) return <Navigate to={`/crm/tenants/${tenant.slug}/preview`} replace />;
 
   const enabledKpis = enabled.filter((t) => t.category === "KPI");
   const enabledDashboards = enabled.filter((t) => t.category !== "KPI");
@@ -81,7 +85,7 @@ export default function TenantPreviewPage() {
     <AppShell>
       <div className="p-6 max-w-[1600px] mx-auto w-full">
         <Link
-          to={`/crm/tenants/${tenantId}/settings`}
+          to={`/crm/tenants/${tenant?.slug ?? tenantId}/settings`}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-3"
         >
           <ArrowLeft className="h-4 w-4" /> Back to tenant settings
@@ -105,7 +109,7 @@ export default function TenantPreviewPage() {
           <Card>
             <CardContent className="p-12 text-center text-muted-foreground">
               Nothing is enabled yet for this tenant. Go to{" "}
-              <Link className="text-indigo underline" to={`/crm/tenants/${tenantId}/settings`}>
+              <Link className="text-indigo underline" to={`/crm/tenants/${tenant?.slug ?? tenantId}/settings`}>
                 Dashboards &amp; KPIs
               </Link>{" "}
               and turn things on.

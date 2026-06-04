@@ -153,16 +153,23 @@ export default function TenantSettingsPage() {
   const { tenantId } = useParams<{ tenantId: string }>();
   const { isAdmin, roleLoading } = useAuth();
 
+  const isUuid = !!tenantId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tenantId);
   const { data: tenant, isLoading } = useQuery({
     queryKey: ["tenant", tenantId],
     queryFn: async () => {
+      const col = isUuid ? "id" : "slug";
       const { data, error } = await supabase
-        .from("tenants").select("*").eq("id", tenantId!).maybeSingle();
+        .from("tenants").select("*").eq(col, tenantId!).maybeSingle();
       if (error) throw error;
       return data as Tenant | null;
     },
     enabled: !!tenantId,
   });
+
+  // If accessed via UUID, redirect to slug URL for a cleaner address.
+  if (isUuid && tenant?.slug) {
+    return <Navigate to={`/crm/tenants/${tenant.slug}/settings`} replace />;
+  }
 
   if (roleLoading) return <AppShell><div className="p-8 text-muted-foreground">Loading…</div></AppShell>;
   if (!isAdmin) return <Navigate to="/crm/tenants" replace />;
