@@ -1044,14 +1044,27 @@ function QuestionPanel({
           >
             <Save className="h-3.5 w-3.5 mr-1" /> Save
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95"
-            onClick={onNext}
-          >
-            Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
-          </Button>
+          {isLast ? (
+            <Button
+              type="button"
+              size="sm"
+              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95"
+              onClick={() => { onSave(text); lastSavedRef.current = text; onSubmit(); }}
+              disabled={submitting || isSubmitted}
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+              {isSubmitted ? "Submitted" : "Submit questionnaire"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95"
+              onClick={onNext}
+            >
+              Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
+            </Button>
+          )}
         </div>
       </div>
     </Card>
