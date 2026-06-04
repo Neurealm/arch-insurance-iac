@@ -734,11 +734,11 @@ function QuestionnairesPanel({ tenantId, tenantName }: { tenantId: string; tenan
               {assigned.length} questionnaire{assigned.length === 1 ? "" : "s"} sent to this tenant
             </p>
           </div>
-          <Link to="/questionnaires">
-            <Button variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/questionnaires">
               <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open Studio
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </CardHeader>
         <CardContent className="p-0">
           {assigned.length === 0 ? (
@@ -790,7 +790,7 @@ function QuestionnairesPanel({ tenantId, tenantName }: { tenantId: string; tenan
                       />
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="ghost" onClick={() => unassign.mutate(r.id)} disabled={unassign.isPending}>
+                      <Button type="button" size="sm" variant="ghost" onClick={() => unassign.mutate(r.id)} disabled={unassign.isPending}>
                         <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
                       </Button>
                     </TableCell>
@@ -846,7 +846,7 @@ function QuestionnairesPanel({ tenantId, tenantName }: { tenantId: string; tenan
                     <TableCell className="text-center text-sm">{r.section_count ?? 0}</TableCell>
                     <TableCell className="text-center text-sm">{r.question_count ?? 0}</TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" onClick={() => setAssignTarget(r)}>
+                      <Button type="button" size="sm" onClick={() => setAssignTarget(r)} disabled={assign.isPending}>
                         <UserPlus className="h-3.5 w-3.5 mr-1" /> Assign
                       </Button>
                     </TableCell>
@@ -897,8 +897,8 @@ function AssignDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button disabled={submitting} onClick={() => onSubmit(dueDate || null)}>
+          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button type="button" disabled={submitting || !template} onClick={() => onSubmit(dueDate || null)}>
             {submitting ? "Assigning…" : "Assign to tenant"}
           </Button>
         </DialogFooter>
