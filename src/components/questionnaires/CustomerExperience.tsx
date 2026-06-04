@@ -941,12 +941,13 @@ function QuestionnaireCard({
 }
 
 function QuestionPanel({
-  question, answer, evidence, notes,
+  question, questionNumber, answer, evidence, notes,
   saving, uploading,
   onSave, onStatusChange, onUpload, onRemoveEvidence, onPrev, onNext,
   isLast, isSubmitted, submitting, onSubmit,
 }: {
   question: Question;
+  questionNumber: number;
   answer: AnswerRow | null;
   evidence: EvidenceRow[];
   notes: NoteRow[];
