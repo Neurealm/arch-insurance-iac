@@ -16,7 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Bot, LayoutDashboard, Plug, Users2, Settings2, Search, Eye, UserPlus, Copy, Database,
-  ClipboardList, Trash2, ExternalLink,
+  ClipboardList, Trash2, ExternalLink, FileText, Paperclip, MessageSquare, CheckCircle2, AlertTriangle, Send,
 } from "lucide-react";
 import { TenantDataPanel } from "@/pages/crm/TenantDataPanel";
 import { useState } from "react";
@@ -27,6 +27,13 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
+} from "@/components/ui/sheet";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 
 type Tenant = {
   id: string; name: string; slug: string; status: boolean;
