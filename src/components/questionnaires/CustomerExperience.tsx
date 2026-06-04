@@ -1131,8 +1131,9 @@ function QuestionPanel({
         <Textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type your answer here..."
-          className="min-h-[140px] bg-white/80 border-white/80 backdrop-blur-md focus-visible:ring-indigo-300"
+          placeholder={isSubmitted ? "Locked — questionnaire submitted." : "Type your answer here..."}
+          disabled={isSubmitted}
+          className="min-h-[140px] bg-white/80 border-white/80 backdrop-blur-md focus-visible:ring-indigo-300 disabled:opacity-70 disabled:cursor-not-allowed"
         />
       </div>
 
