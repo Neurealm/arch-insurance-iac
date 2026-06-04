@@ -515,10 +515,10 @@ export default function CustomerExperience() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
               <div>
                 <p className="text-xs font-medium tracking-wide text-indigo-600 uppercase">
-                  NeuGAIN Questionnaire Studio
+                  NeuGAIN Assessment
                 </p>
                 <h1 className="text-2xl lg:text-3xl font-semibold text-slate-900 mt-1">
-                  My Questionnaires
+                  {activeQuestionnaire ? activeQuestionnaire.title : "My Questionnaires"}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
                   {activeQuestionnaire
