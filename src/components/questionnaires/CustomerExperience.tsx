@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   ArrowLeft, Search, FileText, ShieldCheck, CheckCircle2, AlertTriangle,
   Upload, Paperclip, X, ChevronLeft, ChevronRight, Sparkles, Info,
-  Save, Clock, Layers, FolderKanban, Loader2, MessageCircle,
+  Save, Clock, Layers, FolderKanban, Loader2, MessageCircle, Lock, Mail, ListFilter,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,17 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +38,18 @@ const ANSWER_STATUSES = [
   "Needs Evidence", "Validated", "Deferred", "Not Applicable",
 ] as const;
 type AnswerStatus = typeof ANSWER_STATUSES[number];
+
+// Statuses a tenant user is allowed to set themselves.
+// Reviewer-only states ("Validated", "Needs Follow Up", "Needs Evidence", "Deferred")
+// stay visible as read-only badges when a reviewer has set them.
+const TENANT_STATUSES: AnswerStatus[] = [
+  "Not Started", "In Progress", "Answered", "Not Applicable",
+];
+const REVIEWER_STATUSES = new Set<AnswerStatus>([
+  "Validated", "Needs Follow Up", "Needs Evidence", "Deferred",
+]);
+
+type FilterMode = "all" | "unanswered" | "needs_evidence";
 
 type AssignedQuestionnaire = {
   id: string;
@@ -187,6 +204,8 @@ export default function CustomerExperience() {
   const [activeQId, setActiveQId] = useState<string | null>(null);
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
+  const [filterMode, setFilterMode] = useState<FilterMode>("all");
+  const [submitOpen, setSubmitOpen] = useState(false);
 
   const { data: assigned = [], isLoading: loadingAssigned } = useAssignedQuestionnaires(tenantId);
 
@@ -196,14 +215,26 @@ export default function CustomerExperience() {
 
   const activeQuestionnaire = assigned.find((q) => q.id === activeQId) ?? null;
 
-  const { data: sections = [] } = useSections(activeQId);
+  const { data: sections = [], isLoading: loadingSections } = useSections(activeQId);
   const sectionIds = useMemo(() => sections.map((s) => s.id), [sections]);
-  const { data: allQuestions = [] } = useQuestions(activeQId, sectionIds);
+  const { data: allQuestions = [], isLoading: loadingQuestions } = useQuestions(activeQId, sectionIds);
   const visibleQuestions = useMemo(
     () => allQuestions.filter((q) => q.customer_visible),
     [allQuestions]
   );
   const questionIds = useMemo(() => visibleQuestions.map((q) => q.id), [visibleQuestions]);
+
+  // Sequence number per question (Q1, Q2, …) using flat order across sections.
+  const qNumberById = useMemo(() => {
+    const m: Record<string, number> = {};
+    let i = 0;
+    sections.forEach((s) => {
+      visibleQuestions
+        .filter((q) => q.section_id === s.id)
+        .forEach((q) => { i += 1; m[q.id] = i; });
+    });
+    return m;
+  }, [sections, visibleQuestions]);
 
   const { data: answers = [] } = useAnswers(tenantId, questionIds);
   const answerByQ = useMemo(() => {
@@ -234,6 +265,24 @@ export default function CustomerExperience() {
     return m;
   }, [visibleQuestions]);
 
+  // Apply the active filter chip to each section's question list.
+  const matchesFilter = (q: Question): boolean => {
+    if (filterMode === "all") return true;
+    const a = answerByQ[q.id];
+    const hasText = !!(a?.answer_text && a.answer_text.trim().length > 0);
+    const isAnswered = a?.status === "Answered" || a?.status === "Validated" || hasText;
+    if (filterMode === "unanswered") return !isAnswered;
+    if (filterMode === "needs_evidence") return a?.status === "Needs Evidence";
+    return true;
+  };
+  const filteredQuestionsBySection = useMemo(() => {
+    const m: Record<string, Question[]> = {};
+    Object.entries(questionsBySection).forEach(([sid, list]) => {
+      m[sid] = list.filter(matchesFilter);
+    });
+    return m;
+  }, [questionsBySection, filterMode, answerByQ]);
+
   // Auto-select first section / question
   useEffect(() => {
     if (sections.length > 0 && (!activeSectionId || !sections.find((s) => s.id === activeSectionId))) {
@@ -262,6 +311,17 @@ export default function CustomerExperience() {
     });
     const percent = total === 0 ? 0 : Math.round((answered / total) * 100);
     return { total, answered, needsEvidence, inProgress, remaining: total - answered, percent };
+  }, [visibleQuestions, answerByQ]);
+
+  // Required questions still missing an answer — used by the submit gate.
+  const missingRequired = useMemo(() => {
+    return visibleQuestions.filter((q) => {
+      if (!q.required) return false;
+      const a = answerByQ[q.id];
+      const hasText = !!(a?.answer_text && a.answer_text.trim().length > 0);
+      const isAnswered = a?.status === "Answered" || a?.status === "Validated" || hasText;
+      return !isAnswered;
+    });
   }, [visibleQuestions, answerByQ]);
 
   /* --------------- Mutations --------------- */
@@ -455,10 +515,10 @@ export default function CustomerExperience() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
               <div>
                 <p className="text-xs font-medium tracking-wide text-indigo-600 uppercase">
-                  NeuGAIN Questionnaire Studio
+                  NeuGAIN Assessment
                 </p>
                 <h1 className="text-2xl lg:text-3xl font-semibold text-slate-900 mt-1">
-                  My Questionnaires
+                  {activeQuestionnaire ? activeQuestionnaire.title : "My Questionnaires"}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
                   {activeQuestionnaire
@@ -516,11 +576,28 @@ export default function CustomerExperience() {
                     </div>
                   )}
                   {!loadingAssigned && filteredAssigned.length === 0 && (
-                    <div className="text-center py-10 px-3">
+                    <div className="text-center py-8 px-3">
                       <ShieldCheck className="h-8 w-8 mx-auto text-indigo-300" />
-                      <p className="text-xs text-muted-foreground mt-2">
-                        No questionnaires have been assigned to your tenant yet.
+                      <p className="text-xs font-medium text-slate-700 mt-2">
+                        {search ? "No questionnaires match your search." : "Nothing assigned yet"}
                       </p>
+                      {!search && (
+                        <>
+                          <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                            Your NeuGAIN program lead will assign assessments to <span className="font-medium">{tenantName ?? "your workspace"}</span>. They'll appear here automatically.
+                          </p>
+                          <Button
+                            asChild
+                            size="sm"
+                            variant="outline"
+                            className="mt-3 bg-white/70 text-[11px]"
+                          >
+                            <a href={`mailto:hello@neugain.io?subject=Questionnaire assignment for ${encodeURIComponent(tenantName ?? "my tenant")}`}>
+                              <Mail className="h-3 w-3 mr-1.5" /> Contact program lead
+                            </a>
+                          </Button>
+                        </>
+                      )}
                     </div>
                   )}
                   {filteredAssigned.map((q) => (
@@ -548,87 +625,141 @@ export default function CustomerExperience() {
                 <div className="space-y-4">
                   {/* Sections accordion */}
                   <Card className="rounded-2xl border-white/60 bg-white/60 backdrop-blur-xl shadow-md p-3">
-                    <Accordion
-                      type="single"
-                      collapsible
-                      value={activeSectionId ?? undefined}
-                      onValueChange={(v) => setActiveSectionId(v || null)}
-                      className="space-y-2"
-                    >
-                      {sections.map((s) => {
-                        const list = questionsBySection[s.id] ?? [];
-                        const sectionAnswered = list.filter((q) => {
-                          const a = answerByQ[q.id];
-                          return a?.status === "Answered" || a?.status === "Validated";
-                        }).length;
-                        const pct = list.length === 0 ? 0 : Math.round((sectionAnswered / list.length) * 100);
-                        return (
-                          <AccordionItem
-                            key={s.id}
-                            value={s.id}
-                            className="border border-white/70 rounded-xl bg-gradient-to-br from-white/80 to-white/40 px-3"
-                          >
-                            <AccordionTrigger className="hover:no-underline py-3">
-                              <div className="flex flex-1 items-center gap-3 text-left">
-                                <Layers className="h-4 w-4 text-indigo-500 shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium text-slate-800 truncate">{s.title}</div>
-                                  {s.description && (
-                                    <div className="text-[11px] text-muted-foreground truncate">{s.description}</div>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="text-[10px]">{sectionAnswered}/{list.length}</Badge>
-                                  <div className="w-16 h-1.5 rounded-full bg-indigo-100 overflow-hidden">
-                                    <div
-                                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all"
-                                      style={{ width: `${pct}%` }}
-                                    />
+                    {/* Filter pills */}
+                    <div className="flex items-center gap-2 px-1 pb-2 flex-wrap">
+                      <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                        <ListFilter className="h-3 w-3" /> Show
+                      </span>
+                      {([
+                        { key: "all", label: `All (${counts.total})` },
+                        { key: "unanswered", label: `Unanswered (${counts.remaining})` },
+                        { key: "needs_evidence", label: `Needs evidence (${counts.needsEvidence})` },
+                      ] as { key: FilterMode; label: string }[]).map((f) => (
+                        <button
+                          key={f.key}
+                          type="button"
+                          onClick={() => setFilterMode(f.key)}
+                          className={`px-2.5 py-1 rounded-full text-[11px] border transition-all ${
+                            filterMode === f.key
+                              ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                              : "bg-white/70 border-white/70 hover:border-indigo-300 text-slate-700"
+                          }`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {(loadingSections || loadingQuestions) ? (
+                      <div className="space-y-2 p-1">
+                        {[0, 1, 2].map((i) => (
+                          <div key={i} className="border border-white/70 rounded-xl bg-white/50 p-3">
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="h-4 w-4 rounded" />
+                              <Skeleton className="h-3 flex-1 max-w-[40%]" />
+                              <Skeleton className="h-3 w-16" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <Accordion
+                        type="single"
+                        collapsible
+                        value={activeSectionId ?? undefined}
+                        onValueChange={(v) => setActiveSectionId(v || null)}
+                        className="space-y-2"
+                      >
+                        {sections.map((s) => {
+                          const list = questionsBySection[s.id] ?? [];
+                          const filteredList = filteredQuestionsBySection[s.id] ?? [];
+                          const sectionAnswered = list.filter((q) => {
+                            const a = answerByQ[q.id];
+                            return a?.status === "Answered" || a?.status === "Validated";
+                          }).length;
+                          const pct = list.length === 0 ? 0 : Math.round((sectionAnswered / list.length) * 100);
+                          return (
+                            <AccordionItem
+                              key={s.id}
+                              value={s.id}
+                              className="border border-white/70 rounded-xl bg-gradient-to-br from-white/80 to-white/40 px-3"
+                            >
+                              <AccordionTrigger className="hover:no-underline py-3">
+                                <div className="flex flex-1 items-center gap-3 text-left">
+                                  <Layers className="h-4 w-4 text-indigo-500 shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium text-slate-800 truncate">{s.title}</div>
+                                    {s.description && (
+                                      <div className="text-[11px] text-muted-foreground truncate">{s.description}</div>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="text-[10px]">{sectionAnswered}/{list.length}</Badge>
+                                    <div className="w-16 h-1.5 rounded-full bg-indigo-100 overflow-hidden">
+                                      <div
+                                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all"
+                                        style={{ width: `${pct}%` }}
+                                      />
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pb-3">
-                              <div className="flex flex-wrap gap-1.5">
-                                {list.map((q) => {
-                                  const a = answerByQ[q.id];
-                                  const status = a?.status ?? "Not Started";
-                                  const isActive = q.id === activeQuestionId;
-                                  return (
-                                    <button
-                                      key={q.id}
-                                      onClick={() => setActiveQuestionId(q.id)}
-                                      className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] border transition-all ${
-                                        isActive
-                                          ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
-                                          : "bg-white/80 border-white/80 hover:border-indigo-300 hover:bg-indigo-50 text-slate-700"
-                                      }`}
-                                    >
-                                      {status === "Answered" || status === "Validated" ? (
-                                        <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                                      ) : status === "Needs Evidence" ? (
-                                        <AlertTriangle className="h-3 w-3 text-rose-500" />
-                                      ) : (
-                                        <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-                                      )}
-                                      {q.question_id}
-                                    </button>
-                                  );
-                                })}
-                                {list.length === 0 && (
-                                  <div className="text-xs text-muted-foreground py-1">No customer-visible questions in this section.</div>
-                                )}
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        );
-                      })}
-                      {sections.length === 0 && (
-                        <div className="text-xs text-muted-foreground py-4 text-center">
-                          This questionnaire has no sections yet.
-                        </div>
-                      )}
-                    </Accordion>
+                              </AccordionTrigger>
+                              <AccordionContent className="pb-3">
+                                <div className="flex flex-wrap gap-1.5">
+                                  {filteredList.map((q) => {
+                                    const a = answerByQ[q.id];
+                                    const status = a?.status ?? "Not Started";
+                                    const isActive = q.id === activeQuestionId;
+                                    const n = qNumberById[q.id];
+                                    const preview = (q.question_text ?? "").slice(0, 80);
+                                    return (
+                                      <Tooltip key={q.id}>
+                                        <TooltipTrigger asChild>
+                                          <button
+                                            onClick={() => setActiveQuestionId(q.id)}
+                                            className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] border transition-all ${
+                                              isActive
+                                                ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
+                                                : "bg-white/80 border-white/80 hover:border-indigo-300 hover:bg-indigo-50 text-slate-700"
+                                            }`}
+                                          >
+                                            {status === "Answered" || status === "Validated" ? (
+                                              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                                            ) : status === "Needs Evidence" ? (
+                                              <AlertTriangle className="h-3 w-3 text-rose-500" />
+                                            ) : (
+                                              <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
+                                            )}
+                                            {q.required && <span className="text-rose-500" aria-label="required">*</span>}
+                                            Q{n}
+                                          </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-xs">
+                                          <div className="text-[11px] font-medium">{preview}{(q.question_text?.length ?? 0) > 80 ? "…" : ""}</div>
+                                          <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">{q.question_id}</div>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    );
+                                  })}
+                                  {filteredList.length === 0 && (
+                                    <div className="text-xs text-muted-foreground py-1">
+                                      {list.length === 0
+                                        ? "No customer-visible questions in this section."
+                                        : "No questions match the current filter."}
+                                    </div>
+                                  )}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          );
+                        })}
+                        {sections.length === 0 && (
+                          <div className="text-xs text-muted-foreground py-4 text-center">
+                            This questionnaire has no sections yet.
+                          </div>
+                        )}
+                      </Accordion>
+                    )}
                   </Card>
 
                   {/* Active question editor */}
@@ -636,6 +767,7 @@ export default function CustomerExperience() {
                     <QuestionPanel
                       key={activeQuestion.id}
                       question={activeQuestion}
+                      questionNumber={qNumberById[activeQuestion.id]}
                       answer={activeAnswer}
                       evidence={activeEvidence}
                       notes={activeNotes}
@@ -650,7 +782,7 @@ export default function CustomerExperience() {
                       isLast={isLastQ}
                       isSubmitted={isSubmitted}
                       submitting={submitQuestionnaire.isPending}
-                      onSubmit={() => submitQuestionnaire.mutate()}
+                      onSubmit={() => setSubmitOpen(true)}
                     />
                   )}
                 </div>
@@ -674,7 +806,12 @@ export default function CustomerExperience() {
                         Current question
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px] font-mono">{activeQuestion.question_id}</Badge>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge variant="outline" className="text-[10px]">Q{qNumberById[activeQuestion.id]}</Badge>
+                          </TooltipTrigger>
+                          <TooltipContent className="font-mono text-[10px]">{activeQuestion.question_id}</TooltipContent>
+                        </Tooltip>
                         <StatusPill status={(activeAnswer?.status ?? "Not Started") as AnswerStatus} />
                       </div>
                     </div>
@@ -721,7 +858,7 @@ export default function CustomerExperience() {
                           type="button"
                           size="sm"
                           className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95"
-                          onClick={() => submitQuestionnaire.mutate()}
+                          onClick={() => setSubmitOpen(true)}
                           disabled={submitQuestionnaire.isPending || isSubmitted}
                         >
                           <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
@@ -739,6 +876,71 @@ export default function CustomerExperience() {
             </aside>
           </div>
         </div>
+
+        {/* Submit confirmation + required gate */}
+        <AlertDialog open={submitOpen} onOpenChange={setSubmitOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {missingRequired.length > 0 ? "Required questions are still unanswered" : "Submit questionnaire?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-2 text-sm">
+                  {missingRequired.length > 0 ? (
+                    <>
+                      <p>
+                        You have <span className="font-semibold text-rose-600">{missingRequired.length}</span> required {missingRequired.length === 1 ? "question" : "questions"} left to answer. Please complete them before submitting:
+                      </p>
+                      <ul className="max-h-40 overflow-auto rounded-md border border-rose-100 bg-rose-50/60 p-2 text-xs text-slate-700 space-y-1">
+                        {missingRequired.slice(0, 8).map((q) => (
+                          <li key={q.id} className="flex gap-2">
+                            <span className="font-mono text-rose-600 shrink-0">Q{qNumberById[q.id]}</span>
+                            <span className="truncate">{q.question_text}</span>
+                          </li>
+                        ))}
+                        {missingRequired.length > 8 && (
+                          <li className="text-muted-foreground">…and {missingRequired.length - 8} more</li>
+                        )}
+                      </ul>
+                    </>
+                  ) : (
+                    <>
+                      <p>
+                        Once submitted, your answers and evidence are locked for review by the NeuGAIN team. You won't be able to edit them without contacting your program lead.
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {counts.answered} of {counts.total} questions answered · {counts.percent}% complete
+                      </p>
+                    </>
+                  )}
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{missingRequired.length > 0 ? "Keep editing" : "Cancel"}</AlertDialogCancel>
+              {missingRequired.length > 0 ? (
+                <AlertDialogAction
+                  onClick={() => {
+                    setSubmitOpen(false);
+                    const first = missingRequired[0];
+                    setActiveSectionId(first.section_id);
+                    setActiveQuestionId(first.id);
+                  }}
+                >
+                  Jump to first
+                </AlertDialogAction>
+              ) : (
+                <AlertDialogAction
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600"
+                  onClick={() => { setSubmitOpen(false); submitQuestionnaire.mutate(); }}
+                  disabled={submitQuestionnaire.isPending}
+                >
+                  Yes, submit
+                </AlertDialogAction>
+              )}
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </TooltipProvider>
   );
@@ -804,12 +1006,13 @@ function QuestionnaireCard({
 }
 
 function QuestionPanel({
-  question, answer, evidence, notes,
+  question, questionNumber, answer, evidence, notes,
   saving, uploading,
   onSave, onStatusChange, onUpload, onRemoveEvidence, onPrev, onNext,
   isLast, isSubmitted, submitting, onSubmit,
 }: {
   question: Question;
+  questionNumber: number;
   answer: AnswerRow | null;
   evidence: EvidenceRow[];
   notes: NoteRow[];
@@ -868,11 +1071,26 @@ function QuestionPanel({
 
   const status: AnswerStatus = (answer?.status ?? "Not Started") as AnswerStatus;
 
+  const reviewerLocked = REVIEWER_STATUSES.has(status);
+
   return (
     <Card className="rounded-2xl border-white/60 bg-white/65 backdrop-blur-xl shadow-[0_8px_30px_-12px_rgba(99,102,241,0.25)] p-5 transition-all">
+      {isSubmitted && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-xs text-emerald-800">
+          <Lock className="h-3.5 w-3.5" />
+          <span>
+            <span className="font-medium">Submitted.</span> Your answers are locked for review. Contact your NeuGAIN program lead if you need to make changes.
+          </span>
+        </div>
+      )}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant="outline" className="font-mono text-[10px] bg-white/80">{question.question_id}</Badge>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className="text-[10px] bg-white/80">Q{questionNumber}</Badge>
+            </TooltipTrigger>
+            <TooltipContent className="font-mono text-[10px]">{question.question_id}</TooltipContent>
+          </Tooltip>
           {question.required && (
             <Badge className="text-[10px] bg-rose-100 text-rose-700 border border-rose-200 hover:bg-rose-100">Required</Badge>
           )}
@@ -883,16 +1101,31 @@ function QuestionPanel({
           )}
           <StatusPill status={status} />
         </div>
-        <Select value={status} onValueChange={(v) => onStatusChange(v as AnswerStatus)}>
-          <SelectTrigger className="h-8 w-[170px] text-xs bg-white/70">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {ANSWER_STATUSES.map((s) => (
-              <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {reviewerLocked ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className="h-8 px-3 text-[11px] gap-1.5 bg-white/70">
+                <Lock className="h-3 w-3" /> Set by reviewer
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>This status was set by your NeuGAIN reviewer and can't be changed here.</TooltipContent>
+          </Tooltip>
+        ) : (
+          <Select
+            value={status}
+            onValueChange={(v) => onStatusChange(v as AnswerStatus)}
+            disabled={isSubmitted}
+          >
+            <SelectTrigger className="h-8 w-[170px] text-xs bg-white/70">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TENANT_STATUSES.map((s) => (
+                <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <h2 className="text-base font-semibold text-slate-900 leading-relaxed">
@@ -963,8 +1196,9 @@ function QuestionPanel({
         <Textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type your answer here..."
-          className="min-h-[140px] bg-white/80 border-white/80 backdrop-blur-md focus-visible:ring-indigo-300"
+          placeholder={isSubmitted ? "Locked — questionnaire submitted." : "Type your answer here..."}
+          disabled={isSubmitted}
+          className="min-h-[140px] bg-white/80 border-white/80 backdrop-blur-md focus-visible:ring-indigo-300 disabled:opacity-70 disabled:cursor-not-allowed"
         />
       </div>
 
@@ -981,14 +1215,17 @@ function QuestionPanel({
           )}
         </div>
         <div
-          onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+          onDragOver={(e) => { if (isSubmitted) return; e.preventDefault(); setDragActive(true); }}
           onDragLeave={() => setDragActive(false)}
-          onDrop={handleDrop}
-          onClick={() => fileRef.current?.click()}
-          className={`rounded-xl border-2 border-dashed p-5 text-center cursor-pointer transition-all ${
-            dragActive
-              ? "border-indigo-400 bg-indigo-50/60"
-              : "border-white/80 bg-white/40 hover:border-indigo-300 hover:bg-white/60"
+          onDrop={(e) => { if (isSubmitted) return; handleDrop(e); }}
+          onClick={() => { if (isSubmitted) return; fileRef.current?.click(); }}
+          aria-disabled={isSubmitted}
+          className={`rounded-xl border-2 border-dashed p-5 text-center transition-all ${
+            isSubmitted
+              ? "border-white/60 bg-white/30 opacity-60 cursor-not-allowed"
+              : dragActive
+                ? "border-indigo-400 bg-indigo-50/60 cursor-pointer"
+                : "border-white/80 bg-white/40 hover:border-indigo-300 hover:bg-white/60 cursor-pointer"
           }`}
         >
           <Upload className="h-5 w-5 mx-auto text-indigo-500" />
@@ -1053,7 +1290,7 @@ function QuestionPanel({
             variant="outline"
             className="bg-white/70"
             onClick={() => { onSave(text); lastSavedRef.current = text; }}
-            disabled={saving}
+            disabled={saving || isSubmitted}
           >
             <Save className="h-3.5 w-3.5 mr-1" /> Save
           </Button>
