@@ -836,6 +836,10 @@ function QuestionPanel({
     lastSavedRef.current = answer?.answer_text ?? "";
   }, [answer?.id]);
 
+  // Keep latest text in a ref so the unmount/question-switch flush sees it.
+  const textRef = useRef(text);
+  useEffect(() => { textRef.current = text; }, [text]);
+
   // Debounced autosave
   useEffect(() => {
     if (text === lastSavedRef.current) return;
@@ -845,6 +849,15 @@ function QuestionPanel({
     }, 1200);
     return () => clearTimeout(t);
   }, [text]); // eslint-disable-line
+
+  // Flush unsaved text when question changes or panel unmounts.
+  useEffect(() => {
+    return () => {
+      if (textRef.current !== lastSavedRef.current) {
+        onSave(textRef.current);
+      }
+    };
+  }, [answer?.id]); // eslint-disable-line
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
