@@ -1060,7 +1060,13 @@ function QuestionPanel({
               type="button"
               size="sm"
               className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95"
-              onClick={onNext}
+              onClick={() => {
+                if (text !== lastSavedRef.current) {
+                  onSave(text);
+                  lastSavedRef.current = text;
+                }
+                onNext();
+              }}
             >
               Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
             </Button>
