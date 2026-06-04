@@ -204,6 +204,8 @@ export default function CustomerExperience() {
   const [activeQId, setActiveQId] = useState<string | null>(null);
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
+  const [filterMode, setFilterMode] = useState<FilterMode>("all");
+  const [submitOpen, setSubmitOpen] = useState(false);
 
   const { data: assigned = [], isLoading: loadingAssigned } = useAssignedQuestionnaires(tenantId);
 
@@ -213,14 +215,26 @@ export default function CustomerExperience() {
 
   const activeQuestionnaire = assigned.find((q) => q.id === activeQId) ?? null;
 
-  const { data: sections = [] } = useSections(activeQId);
+  const { data: sections = [], isLoading: loadingSections } = useSections(activeQId);
   const sectionIds = useMemo(() => sections.map((s) => s.id), [sections]);
-  const { data: allQuestions = [] } = useQuestions(activeQId, sectionIds);
+  const { data: allQuestions = [], isLoading: loadingQuestions } = useQuestions(activeQId, sectionIds);
   const visibleQuestions = useMemo(
     () => allQuestions.filter((q) => q.customer_visible),
     [allQuestions]
   );
   const questionIds = useMemo(() => visibleQuestions.map((q) => q.id), [visibleQuestions]);
+
+  // Sequence number per question (Q1, Q2, …) using flat order across sections.
+  const qNumberById = useMemo(() => {
+    const m: Record<string, number> = {};
+    let i = 0;
+    sections.forEach((s) => {
+      visibleQuestions
+        .filter((q) => q.section_id === s.id)
+        .forEach((q) => { i += 1; m[q.id] = i; });
+    });
+    return m;
+  }, [sections, visibleQuestions]);
 
   const { data: answers = [] } = useAnswers(tenantId, questionIds);
   const answerByQ = useMemo(() => {
