@@ -169,13 +169,13 @@ export function TenantDataPanel({ tenantId }: { tenantId: string }) {
         </CardHeader>
         <CardContent className="flex items-center justify-between gap-6">
           <div className="text-sm">
-            <p>
+            <div>
               Currently showing{" "}
               <Badge variant={live ? "default" : "secondary"}>
                 {live ? "Live data" : "Demo data"}
               </Badge>{" "}
               to everyone in this tenant.
-            </p>
+            </div>
             <p className="text-muted-foreground text-xs mt-1">
               Demo mode shows seeded sample data. Live mode reads from this tenant's tables.
               Switch back to demo anytime.
