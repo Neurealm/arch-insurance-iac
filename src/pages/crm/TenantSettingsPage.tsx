@@ -57,6 +57,8 @@ function InviteUserDialog({
 
   const invite = useMutation({
     mutationFn: async () => {
+      // The edge function will override this with the production site URL
+      // unless it is already an allowed production host.
       const redirectTo = `${window.location.origin}/reset-password`;
       const { data, error } = await supabase.functions.invoke("tenant-invite", {
         body: { email, fullName, tenantId, role, redirectTo },

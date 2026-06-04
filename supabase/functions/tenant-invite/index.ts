@@ -52,12 +52,20 @@ Deno.serve(async (req) => {
       .eq("id", tenantId).maybeSingle();
     if (!tenant) return json({ error: "Tenant not found" }, 404);
 
+    // Always use the production app URL for invite links so emails never
+    // point at localhost / preview. Override via PUBLIC_SITE_URL secret.
+    const publicSite = (Deno.env.get("PUBLIC_SITE_URL") || "https://neugain.io").replace(/\/$/, "");
+    const isSafeRedirect =
+      typeof redirectTo === "string" &&
+      /^https:\/\/(neugain\.io|www\.neugain\.io|[^/]+\.lovable\.app)(\/|$)/i.test(redirectTo);
+    const finalRedirect = isSafeRedirect ? redirectTo : `${publicSite}/auth/${tenant.slug}`;
+
     // Invite or reuse existing user
     let userId: string | null = null;
     let inviteLink: string | null = null;
 
     const { data: invited, error: iErr } = await admin.auth.admin.inviteUserByEmail(email, {
-      redirectTo: redirectTo || undefined,
+      redirectTo: finalRedirect,
       data: { full_name: fullName ?? "", invited_to_tenant: tenant.slug },
     });
 
@@ -72,7 +80,7 @@ Deno.serve(async (req) => {
       const { data: link } = await admin.auth.admin.generateLink({
         type: "recovery",
         email,
-        options: { redirectTo: redirectTo || undefined },
+        options: { redirectTo: finalRedirect },
       });
       inviteLink = link?.properties?.action_link ?? null;
     } else if (iErr) {
