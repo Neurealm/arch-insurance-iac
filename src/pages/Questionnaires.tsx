@@ -73,6 +73,12 @@ function LeftNav({
 
   return (
     <aside className="w-72 shrink-0 h-[calc(100vh-1rem)] sticky top-2 rounded-2xl border border-white/60 bg-white/60 backdrop-blur-xl shadow-lg p-3 flex flex-col">
+      <Link
+        to="/app"
+        className="flex items-center gap-1.5 px-2 py-1 mb-1 text-[11px] text-muted-foreground hover:text-indigo-700 transition-colors"
+      >
+        <ArrowLeft className="h-3 w-3" /> Back to dashboard
+      </Link>
       <div className="flex items-center gap-2 px-2 py-2">
         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-md">
           <Sparkles className="h-4 w-4 text-white" />
