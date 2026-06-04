@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_items: {
+        Row: {
+          answer_id: string
+          assigned_to: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          answer_id: string
+          assigned_to?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          answer_id?: string
+          assigned_to?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_items_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agents_catalog: {
         Row: {
           capability: string | null
@@ -49,6 +90,92 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      answer_notes: {
+        Row: {
+          answer_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note_text: string
+          note_type: string
+        }
+        Insert: {
+          answer_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note_text: string
+          note_type?: string
+        }
+        Update: {
+          answer_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note_text?: string
+          note_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answer_notes_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      answers: {
+        Row: {
+          answer_text: string | null
+          answered_at: string | null
+          answered_by: string | null
+          created_at: string
+          id: string
+          question_id: string
+          status: Database["public"]["Enums"]["answer_status"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          answer_text?: string | null
+          answered_at?: string | null
+          answered_by?: string | null
+          created_at?: string
+          id?: string
+          question_id: string
+          status?: Database["public"]["Enums"]["answer_status"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          answer_text?: string | null
+          answered_at?: string | null
+          answered_by?: string | null
+          created_at?: string
+          id?: string
+          question_id?: string
+          status?: Database["public"]["Enums"]["answer_status"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crm_activities: {
         Row: {
@@ -704,6 +831,41 @@ export type Database = {
           },
         ]
       }
+      evidence_files: {
+        Row: {
+          answer_id: string
+          file_name: string
+          file_url: string
+          id: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          answer_id: string
+          file_name: string
+          file_url: string
+          id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          answer_id?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_files_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integrations_catalog: {
         Row: {
           auth_type: string
@@ -1323,6 +1485,181 @@ export type Database = {
         }
         Relationships: []
       }
+      programs: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      questionnaire_sections: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          questionnaire_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          questionnaire_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          questionnaire_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_sections_questionnaire_id_fkey"
+            columns: ["questionnaire_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questionnaires: {
+        Row: {
+          assigned_to_tenant_id: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          status: string
+          title: string
+          updated_at: string
+          workstream_id: string
+        }
+        Insert: {
+          assigned_to_tenant_id?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+          workstream_id: string
+        }
+        Update: {
+          assigned_to_tenant_id?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          workstream_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaires_assigned_to_tenant_id_fkey"
+            columns: ["assigned_to_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questionnaires_workstream_id_fkey"
+            columns: ["workstream_id"]
+            isOneToOne: false
+            referencedRelation: "workstreams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          created_at: string
+          customer_visible: boolean
+          display_order: number
+          evidence_requested: string | null
+          follow_up_questions: string | null
+          id: string
+          priority: string | null
+          question_id: string
+          question_text: string
+          question_type: string
+          required: boolean
+          section_id: string
+          updated_at: string
+          why_asking: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_visible?: boolean
+          display_order?: number
+          evidence_requested?: string | null
+          follow_up_questions?: string | null
+          id?: string
+          priority?: string | null
+          question_id: string
+          question_text: string
+          question_type?: string
+          required?: boolean
+          section_id: string
+          updated_at?: string
+          why_asking?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_visible?: boolean
+          display_order?: number
+          evidence_requested?: string | null
+          follow_up_questions?: string | null
+          id?: string
+          priority?: string | null
+          question_id?: string
+          question_text?: string
+          question_type?: string
+          required?: boolean
+          section_id?: string
+          updated_at?: string
+          why_asking?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stakeholder_registers: {
         Row: {
           company: string | null
@@ -1771,6 +2108,44 @@ export type Database = {
           },
         ]
       }
+      workstreams: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          name: string
+          program_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          name: string
+          program_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          name?: string
+          program_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workstreams_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1799,6 +2174,15 @@ export type Database = {
       is_user_approved: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
+      answer_status:
+        | "Not Started"
+        | "In Progress"
+        | "Answered"
+        | "Needs Follow Up"
+        | "Needs Evidence"
+        | "Validated"
+        | "Deferred"
+        | "Not Applicable"
       app_role: "platform_admin" | "platform_support"
       tenant_role: "tenant_admin" | "tenant_manager" | "tenant_member"
     }
@@ -1928,6 +2312,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      answer_status: [
+        "Not Started",
+        "In Progress",
+        "Answered",
+        "Needs Follow Up",
+        "Needs Evidence",
+        "Validated",
+        "Deferred",
+        "Not Applicable",
+      ],
       app_role: ["platform_admin", "platform_support"],
       tenant_role: ["tenant_admin", "tenant_manager", "tenant_member"],
     },
