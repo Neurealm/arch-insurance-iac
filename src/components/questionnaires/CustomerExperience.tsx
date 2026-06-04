@@ -1225,7 +1225,7 @@ function QuestionPanel({
             variant="outline"
             className="bg-white/70"
             onClick={() => { onSave(text); lastSavedRef.current = text; }}
-            disabled={saving}
+            disabled={saving || isSubmitted}
           >
             <Save className="h-3.5 w-3.5 mr-1" /> Save
           </Button>
