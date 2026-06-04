@@ -1150,14 +1150,17 @@ function QuestionPanel({
           )}
         </div>
         <div
-          onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+          onDragOver={(e) => { if (isSubmitted) return; e.preventDefault(); setDragActive(true); }}
           onDragLeave={() => setDragActive(false)}
-          onDrop={handleDrop}
-          onClick={() => fileRef.current?.click()}
-          className={`rounded-xl border-2 border-dashed p-5 text-center cursor-pointer transition-all ${
-            dragActive
-              ? "border-indigo-400 bg-indigo-50/60"
-              : "border-white/80 bg-white/40 hover:border-indigo-300 hover:bg-white/60"
+          onDrop={(e) => { if (isSubmitted) return; handleDrop(e); }}
+          onClick={() => { if (isSubmitted) return; fileRef.current?.click(); }}
+          aria-disabled={isSubmitted}
+          className={`rounded-xl border-2 border-dashed p-5 text-center transition-all ${
+            isSubmitted
+              ? "border-white/60 bg-white/30 opacity-60 cursor-not-allowed"
+              : dragActive
+                ? "border-indigo-400 bg-indigo-50/60 cursor-pointer"
+                : "border-white/80 bg-white/40 hover:border-indigo-300 hover:bg-white/60 cursor-pointer"
           }`}
         >
           <Upload className="h-5 w-5 mx-auto text-indigo-500" />
