@@ -576,11 +576,28 @@ export default function CustomerExperience() {
                     </div>
                   )}
                   {!loadingAssigned && filteredAssigned.length === 0 && (
-                    <div className="text-center py-10 px-3">
+                    <div className="text-center py-8 px-3">
                       <ShieldCheck className="h-8 w-8 mx-auto text-indigo-300" />
-                      <p className="text-xs text-muted-foreground mt-2">
-                        No questionnaires have been assigned to your tenant yet.
+                      <p className="text-xs font-medium text-slate-700 mt-2">
+                        {search ? "No questionnaires match your search." : "Nothing assigned yet"}
                       </p>
+                      {!search && (
+                        <>
+                          <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                            Your NeuGAIN program lead will assign assessments to <span className="font-medium">{tenantName ?? "your workspace"}</span>. They'll appear here automatically.
+                          </p>
+                          <Button
+                            asChild
+                            size="sm"
+                            variant="outline"
+                            className="mt-3 bg-white/70 text-[11px]"
+                          >
+                            <a href={`mailto:hello@neugain.io?subject=Questionnaire assignment for ${encodeURIComponent(tenantName ?? "my tenant")}`}>
+                              <Mail className="h-3 w-3 mr-1.5" /> Contact program lead
+                            </a>
+                          </Button>
+                        </>
+                      )}
                     </div>
                   )}
                   {filteredAssigned.map((q) => (
