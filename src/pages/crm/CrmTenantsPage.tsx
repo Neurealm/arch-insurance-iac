@@ -160,7 +160,7 @@ export default function CrmTenantsPage() {
                             size="icon"
                             className="h-7 w-7"
                             title="Tenant settings"
-                            onClick={() => navigate(`/crm/tenants/${t.id}/settings`)}
+                            onClick={() => navigate(`/crm/tenants/${t.slug}/settings`)}
                           >
                             <Settings2 className="h-3.5 w-3.5" />
                           </Button>
@@ -180,7 +180,7 @@ export default function CrmTenantsPage() {
                           size="icon"
                           className="h-8 w-8"
                           title="Configure"
-                          onClick={() => navigate(`/crm/tenants/${t.id}/settings`)}
+                          onClick={() => navigate(`/crm/tenants/${t.slug}/settings`)}
                         >
                           <Settings2 className="h-4 w-4" />
                         </Button>

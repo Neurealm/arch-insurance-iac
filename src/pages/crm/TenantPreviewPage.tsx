@@ -85,7 +85,7 @@ export default function TenantPreviewPage() {
     <AppShell>
       <div className="p-6 max-w-[1600px] mx-auto w-full">
         <Link
-          to={`/crm/tenants/${tenantId}/settings`}
+          to={`/crm/tenants/${tenant?.slug ?? tenantId}/settings`}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-3"
         >
           <ArrowLeft className="h-4 w-4" /> Back to tenant settings
@@ -109,7 +109,7 @@ export default function TenantPreviewPage() {
           <Card>
             <CardContent className="p-12 text-center text-muted-foreground">
               Nothing is enabled yet for this tenant. Go to{" "}
-              <Link className="text-indigo underline" to={`/crm/tenants/${tenantId}/settings`}>
+              <Link className="text-indigo underline" to={`/crm/tenants/${tenant?.slug ?? tenantId}/settings`}>
                 Dashboards &amp; KPIs
               </Link>{" "}
               and turn things on.
