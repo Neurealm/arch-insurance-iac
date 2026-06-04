@@ -767,6 +767,7 @@ export default function CustomerExperience() {
                     <QuestionPanel
                       key={activeQuestion.id}
                       question={activeQuestion}
+                      questionNumber={qNumberById[activeQuestion.id]}
                       answer={activeAnswer}
                       evidence={activeEvidence}
                       notes={activeNotes}
@@ -781,7 +782,7 @@ export default function CustomerExperience() {
                       isLast={isLastQ}
                       isSubmitted={isSubmitted}
                       submitting={submitQuestionnaire.isPending}
-                      onSubmit={() => submitQuestionnaire.mutate()}
+                      onSubmit={() => setSubmitOpen(true)}
                     />
                   )}
                 </div>
