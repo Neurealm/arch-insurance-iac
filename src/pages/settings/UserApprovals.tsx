@@ -35,11 +35,13 @@ type ProfileRow = {
 };
 
 export default function UserApprovals() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [rows, setRows] = useState<ProfileRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [selected, setSelected] = useState<ProfileRow | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+
 
   const load = async () => {
     setLoading(true);
