@@ -257,3 +257,87 @@ function ProfileDialog({ row, onClose }: { row: ProfileRow | null; onClose: () =
     </Dialog>
   );
 }
+
+function InviteUserDialog({ open, onClose, onInvited }: { open: boolean; onClose: () => void; onInvited: () => void }) {
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const reset = () => {
+    setEmail("");
+    setFullName("");
+    setSubmitting(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    setSubmitting(true);
+    const { data, error } = await supabase.functions.invoke("invite-user", {
+      body: { email: trimmed, full_name: fullName.trim() },
+    });
+    setSubmitting(false);
+    if (error || (data && (data as any).error)) {
+      toast.error(error?.message || (data as any)?.error || "Failed to send invitation");
+      return;
+    }
+    toast.success(`Invitation sent to ${trimmed}`);
+    reset();
+    onClose();
+    onInvited();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) { reset(); onClose(); } }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Invite user</DialogTitle>
+          <DialogDescription>
+            Send an email invitation. The user will be granted read-only platform access once they accept and set a password.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="invite-email">Work email</Label>
+            <Input
+              id="invite-email"
+              type="email"
+              autoFocus
+              required
+              placeholder="name@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={submitting}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="invite-name">Full name (optional)</Label>
+            <Input
+              id="invite-name"
+              placeholder="Jane Doe"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              disabled={submitting}
+            />
+          </div>
+          <div className="rounded-md bg-muted/50 border px-3 py-2 text-xs text-muted-foreground">
+            Access level: <span className="font-medium text-foreground">Read-only</span>. Invited users cannot create, edit, or delete data.
+          </div>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="ghost" onClick={() => { reset(); onClose(); }} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting} className="gap-2">
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+              Send invitation
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
