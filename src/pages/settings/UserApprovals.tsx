@@ -196,7 +196,9 @@ export default function UserApprovals() {
         </Card>
       </main>
       <ProfileDialog row={selected} onClose={() => setSelected(null)} />
+      <InviteUserDialog open={inviteOpen} onClose={() => setInviteOpen(false)} onInvited={load} />
     </AppShell>
+
   );
 }
 
