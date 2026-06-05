@@ -80,17 +80,25 @@ export default function UserApprovals() {
         <Link to="/settings" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-3">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to Settings
         </Link>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-xl bg-navy text-white grid place-items-center shadow-[var(--shadow-md)]">
-            <ShieldCheck className="h-5 w-5" />
+        <div className="flex items-start justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-navy text-white grid place-items-center shadow-[var(--shadow-md)]">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">User Approvals</h1>
+              <p className="text-sm text-muted-foreground">
+                Review and approve new account requests. Only approved users can access the platform.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">User Approvals</h1>
-            <p className="text-sm text-muted-foreground">
-              Review and approve new account requests. Only approved users can access the platform.
-            </p>
-          </div>
+          {isAdmin && (
+            <Button onClick={() => setInviteOpen(true)} className="gap-2 shrink-0">
+              <UserPlus className="h-4 w-4" /> Invite user
+            </Button>
+          )}
         </div>
+
 
         <Card>
           <CardHeader>
