@@ -3,14 +3,17 @@ import { AppShell } from "@/components/eoc/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ShieldCheck, ArrowLeft, Check, X, RotateCcw, Mail, Phone, Briefcase, Building2, MapPin, Clock, Languages, User as UserIcon } from "lucide-react";
+import { ShieldCheck, ArrowLeft, Check, X, RotateCcw, Mail, Phone, Briefcase, Building2, MapPin, Clock, Languages, User as UserIcon, UserPlus, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+
 
 type ProfileRow = {
   id: string;
