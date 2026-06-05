@@ -3,14 +3,17 @@ import { AppShell } from "@/components/eoc/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ShieldCheck, ArrowLeft, Check, X, RotateCcw, Mail, Phone, Briefcase, Building2, MapPin, Clock, Languages, User as UserIcon } from "lucide-react";
+import { ShieldCheck, ArrowLeft, Check, X, RotateCcw, Mail, Phone, Briefcase, Building2, MapPin, Clock, Languages, User as UserIcon, UserPlus, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+
 
 type ProfileRow = {
   id: string;
@@ -32,11 +35,13 @@ type ProfileRow = {
 };
 
 export default function UserApprovals() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [rows, setRows] = useState<ProfileRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [selected, setSelected] = useState<ProfileRow | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+
 
   const load = async () => {
     setLoading(true);
@@ -75,17 +80,25 @@ export default function UserApprovals() {
         <Link to="/settings" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-3">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to Settings
         </Link>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-xl bg-navy text-white grid place-items-center shadow-[var(--shadow-md)]">
-            <ShieldCheck className="h-5 w-5" />
+        <div className="flex items-start justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-navy text-white grid place-items-center shadow-[var(--shadow-md)]">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">User Approvals</h1>
+              <p className="text-sm text-muted-foreground">
+                Review and approve new account requests. Only approved users can access the platform.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">User Approvals</h1>
-            <p className="text-sm text-muted-foreground">
-              Review and approve new account requests. Only approved users can access the platform.
-            </p>
-          </div>
+          {isAdmin && (
+            <Button onClick={() => setInviteOpen(true)} className="gap-2 shrink-0">
+              <UserPlus className="h-4 w-4" /> Invite user
+            </Button>
+          )}
         </div>
+
 
         <Card>
           <CardHeader>
@@ -183,7 +196,9 @@ export default function UserApprovals() {
         </Card>
       </main>
       <ProfileDialog row={selected} onClose={() => setSelected(null)} />
+      <InviteUserDialog open={inviteOpen} onClose={() => setInviteOpen(false)} onInvited={load} />
     </AppShell>
+
   );
 }
 
@@ -238,6 +253,90 @@ function ProfileDialog({ row, onClose }: { row: ProfileRow | null; onClose: () =
             </div>
           </div>
         )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function InviteUserDialog({ open, onClose, onInvited }: { open: boolean; onClose: () => void; onInvited: () => void }) {
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const reset = () => {
+    setEmail("");
+    setFullName("");
+    setSubmitting(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    setSubmitting(true);
+    const { data, error } = await supabase.functions.invoke("invite-user", {
+      body: { email: trimmed, full_name: fullName.trim() },
+    });
+    setSubmitting(false);
+    if (error || (data && (data as any).error)) {
+      toast.error(error?.message || (data as any)?.error || "Failed to send invitation");
+      return;
+    }
+    toast.success(`Invitation sent to ${trimmed}`);
+    reset();
+    onClose();
+    onInvited();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) { reset(); onClose(); } }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Invite user</DialogTitle>
+          <DialogDescription>
+            Send an email invitation. The user will be granted read-only platform access once they accept and set a password.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="invite-email">Work email</Label>
+            <Input
+              id="invite-email"
+              type="email"
+              autoFocus
+              required
+              placeholder="name@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={submitting}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="invite-name">Full name (optional)</Label>
+            <Input
+              id="invite-name"
+              placeholder="Jane Doe"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              disabled={submitting}
+            />
+          </div>
+          <div className="rounded-md bg-muted/50 border px-3 py-2 text-xs text-muted-foreground">
+            Access level: <span className="font-medium text-foreground">Read-only</span>. Invited users cannot create, edit, or delete data.
+          </div>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="ghost" onClick={() => { reset(); onClose(); }} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting} className="gap-2">
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+              Send invitation
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
