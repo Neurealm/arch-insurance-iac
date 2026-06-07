@@ -183,6 +183,12 @@ import SreDashboard from "./pages/practice-library/dashboards/SreDashboard.tsx";
 import EhrDashboard from "./pages/practice-library/dashboards/EhrDashboard.tsx";
 import WorkforceDashboard from "./pages/practice-library/dashboards/WorkforceDashboard.tsx";
 import ApplicationProfile from "./pages/aocp/ApplicationProfile.tsx";
+import EnvironmentModel from "./pages/aocp/EnvironmentModel.tsx";
+import BusinessCriticality from "./pages/aocp/BusinessCriticality.tsx";
+import DesiredOutcomes from "./pages/aocp/DesiredOutcomes.tsx";
+import LifecycleTechDebt from "./pages/aocp/LifecycleTechDebt.tsx";
+import AdminModel from "./pages/aocp/AdminModel.tsx";
+import AocpPlaceholder from "./pages/aocp/AocpPlaceholder.tsx";
 
 const queryClient = new QueryClient();
 
@@ -369,7 +375,38 @@ const App = () => (
             <Route path=":levelSlug" element={<EntityListPage />} />
             <Route path=":levelSlug/:id" element={<EntityDetailPage />} />
           </Route>
+          {/* AOCP — Application Intelligence */}
           <Route path="/aocp/:appId" element={<ApplicationProfile />} />
+          <Route path="/aocp/:appId/environments" element={<EnvironmentModel />} />
+          <Route path="/aocp/:appId/criticality" element={<BusinessCriticality />} />
+          <Route path="/aocp/:appId/outcomes" element={<DesiredOutcomes />} />
+          <Route path="/aocp/:appId/lifecycle" element={<LifecycleTechDebt />} />
+          <Route path="/aocp/:appId/admin" element={<AdminModel />} />
+          {/* AOCP — Placeholders (coming soon) */}
+          <Route path="/aocp/:appId/hosting" element={<AocpPlaceholder title="Hosting Platform" />} />
+          <Route path="/aocp/:appId/compute" element={<AocpPlaceholder title="Compute Services" />} />
+          <Route path="/aocp/:appId/storage" element={<AocpPlaceholder title="Storage & Data Services" />} />
+          <Route path="/aocp/:appId/databases" element={<AocpPlaceholder title="Database Services" />} />
+          <Route path="/aocp/:appId/network" element={<AocpPlaceholder title="Network & Edge Services" />} />
+          <Route path="/aocp/:appId/config-drift" element={<AocpPlaceholder title="Configuration & Drift Management" />} />
+          <Route path="/aocp/:appId/tasks" element={<AocpPlaceholder title="Operational Task Inventory" />} />
+          <Route path="/aocp/:appId/support-scope" element={<AocpPlaceholder title="Support Scope L1–L4" />} />
+          <Route path="/aocp/:appId/workload" element={<AocpPlaceholder title="Workload Profile" />} />
+          <Route path="/aocp/:appId/service-catalog" element={<AocpPlaceholder title="Service Catalog & Request Model" />} />
+          <Route path="/aocp/:appId/escalation" element={<AocpPlaceholder title="Escalation & On-Call" />} />
+          <Route path="/aocp/:appId/automation-catalog" element={<AocpPlaceholder title="Automation Catalog" />} />
+          <Route path="/aocp/:appId/automation-heatmap" element={<AocpPlaceholder title="Automation Opportunity Heatmap" />} />
+          <Route path="/aocp/:appId/auto-remediation" element={<AocpPlaceholder title="Auto Remediation Center" />} />
+          <Route path="/aocp/:appId/coworker-catalog" element={<AocpPlaceholder title="Digital Coworker Catalog" />} />
+          <Route path="/aocp/:appId/agentic-workflows" element={<AocpPlaceholder title="Agentic Workflow Library" />} />
+          <Route path="/aocp/:appId/raci" element={<AocpPlaceholder title="Human, Automation & Digital Coworker RACI" />} />
+          <Route path="/aocp/:appId/agentic-governance" element={<AocpPlaceholder title="Agentic Governance, Guardrails & Audit" />} />
+          <Route path="/aocp/:appId/automation-roi" element={<AocpPlaceholder title="Automation Value & ROI" />} />
+          <Route path="/aocp/:appId/maturity" element={<AocpPlaceholder title="AOCP Maturity Model" />} />
+          <Route path="/aocp/:appId/cost-model" element={<AocpPlaceholder title="Internal Cost Model" />} />
+          <Route path="/aocp/:appId/pricing" element={<AocpPlaceholder title="Customer Pricing" />} />
+          <Route path="/aocp/:appId/scenarios" element={<AocpPlaceholder title="Scenario Modeling" />} />
+          <Route path="/aocp/:appId/runops-model" element={<AocpPlaceholder title="Final RunOps Support Model" />} />
           <Route path="/settings/stakeholder-register" element={<Navigate to="/crm" replace />} />
           <Route path="/settings/stakeholder-register-legacy" element={<ProtectedRoute><StakeholderRegister /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
