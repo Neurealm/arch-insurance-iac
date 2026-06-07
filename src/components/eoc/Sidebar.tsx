@@ -6,7 +6,7 @@ import {
   ChevronsLeft, ChevronsRight, Plus, Zap, FileBarChart2, AlertOctagon, ShieldAlert,
   Scissors, ChevronRight, ChevronDown, Pin, Activity, Network as NetIcon, Server, Workflow,
   Briefcase, Smile, Target, ShieldX, Headphones, Users,
-  Library,
+  Library, Package, Layers,
   ShieldHalf,
   ClipboardList,
   type LucideIcon,
@@ -75,6 +75,21 @@ const itsmChildren: Node[] = [
 
 const tree: Node[] = [
   { key: "home",       label: "Command Center",      icon: Home,          to: "/app" },
+  {
+    key: "aocp",
+    label: "AOCP",
+    icon: Package,
+    to: "/aocp/claims-processing",
+    navOnClick: true,
+    children: [
+      { key: "aocp-profile",  label: "Application Profile",       icon: Package,    to: "/aocp/claims-processing" },
+      { key: "aocp-env",      label: "Environment Model",         icon: Layers,     to: "/aocp/claims-processing/environments" },
+      { key: "aocp-crit",     label: "Business Criticality",      icon: ShieldAlert, to: "/aocp/claims-processing/criticality" },
+      { key: "aocp-outcomes", label: "Desired Outcomes",          icon: Target,     to: "/aocp/claims-processing/outcomes" },
+      { key: "aocp-arch",     label: "Architecture Canvas",       icon: Workflow,   to: "/aocp/claims-processing/architecture" },
+      { key: "aocp-lifecycle",label: "Lifecycle & Tech Debt",     icon: GitBranch,  to: "/aocp/claims-processing/lifecycle" },
+    ],
+  },
   { key: "ops",        label: "Operations Overview", icon: LayoutGrid,    to: "/operations" },
   {
     key: "runops",

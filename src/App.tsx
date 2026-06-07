@@ -182,6 +182,7 @@ import DataDashboard from "./pages/practice-library/dashboards/DataDashboard.tsx
 import SreDashboard from "./pages/practice-library/dashboards/SreDashboard.tsx";
 import EhrDashboard from "./pages/practice-library/dashboards/EhrDashboard.tsx";
 import WorkforceDashboard from "./pages/practice-library/dashboards/WorkforceDashboard.tsx";
+import ApplicationProfile from "./pages/aocp/ApplicationProfile.tsx";
 
 const queryClient = new QueryClient();
 
@@ -368,6 +369,7 @@ const App = () => (
             <Route path=":levelSlug" element={<EntityListPage />} />
             <Route path=":levelSlug/:id" element={<EntityDetailPage />} />
           </Route>
+          <Route path="/aocp/:appId" element={<ApplicationProfile />} />
           <Route path="/settings/stakeholder-register" element={<Navigate to="/crm" replace />} />
           <Route path="/settings/stakeholder-register-legacy" element={<ProtectedRoute><StakeholderRegister /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
