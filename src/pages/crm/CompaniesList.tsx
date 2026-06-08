@@ -15,7 +15,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Building2, Plus, Search, Filter, Download, Pencil, Trash2, MoreVertical, Globe, Mail } from "lucide-react";
+import { Building2, Plus, Search, Filter, Download, Pencil, Trash2, MoreVertical, Globe, Mail, ArrowRight } from "lucide-react";
 import { useCompanies, useDeleteCompany } from "@/hooks/crm/useCompanies";
 import { CompanySheet } from "@/components/crm/CompanySheet";
 import { toast } from "@/hooks/use-toast";
@@ -96,7 +96,17 @@ export default function CompaniesList() {
               Manage companies, stakeholders, departments, and engagement.
             </p>
           </div>
-          <Button onClick={openAdd} className="gap-2"><Plus className="h-4 w-4" /> Add Company</Button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate("/crm-demo")}
+              title="Preview AOCP Customer & Engagement Flow"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-violet-300 bg-violet-50 text-violet-700 text-xs font-semibold hover:bg-violet-100 hover:border-violet-400 transition-colors"
+            >
+              <span className="hidden sm:inline">AOCP Flow Preview</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <Button onClick={openAdd} className="gap-2"><Plus className="h-4 w-4" /> Add Company</Button>
+          </div>
         </header>
 
         <CrmTabs />

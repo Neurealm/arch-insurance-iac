@@ -13,6 +13,9 @@ import { DepartmentsTab } from "./tabs/DepartmentsTab";
 import { TeamsTab } from "./tabs/TeamsTab";
 import { ActivitiesTab } from "./tabs/ActivitiesTab";
 import { NotesTab } from "./tabs/NotesTab";
+import { EngagementTab } from "./tabs/EngagementTab";
+import { StakeholderMapTab } from "./tabs/StakeholderMapTab";
+import { DiscoveryTab } from "./tabs/DiscoveryTab";
 
 export default function CompanyWorkspace() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -83,6 +86,9 @@ export default function CompanyWorkspace() {
             <TabsTrigger value="teams">Teams</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="notes">Notes</TabsTrigger>
+            <TabsTrigger value="engagement">Engagement</TabsTrigger>
+            <TabsTrigger value="stakeholder-map">Stakeholder Map</TabsTrigger>
+            <TabsTrigger value="discovery">Discovery</TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="mt-5"><OverviewTab company={company} /></TabsContent>
           <TabsContent value="stakeholders" className="mt-5"><StakeholdersTab companyId={company.id} /></TabsContent>
@@ -90,6 +96,9 @@ export default function CompanyWorkspace() {
           <TabsContent value="teams" className="mt-5"><TeamsTab companyId={company.id} company={company} /></TabsContent>
           <TabsContent value="activities" className="mt-5"><ActivitiesTab companyId={company.id} /></TabsContent>
           <TabsContent value="notes" className="mt-5"><NotesTab companyId={company.id} /></TabsContent>
+          <TabsContent value="engagement" className="mt-5"><EngagementTab companyId={company.id} company={company} /></TabsContent>
+          <TabsContent value="stakeholder-map" className="mt-5"><StakeholderMapTab companyId={company.id} /></TabsContent>
+          <TabsContent value="discovery" className="mt-5"><DiscoveryTab companyId={company.id} /></TabsContent>
         </Tabs>
       </div>
 

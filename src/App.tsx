@@ -189,6 +189,11 @@ import DesiredOutcomes from "./pages/aocp/DesiredOutcomes.tsx";
 import LifecycleTechDebt from "./pages/aocp/LifecycleTechDebt.tsx";
 import AdminModel from "./pages/aocp/AdminModel.tsx";
 import AocpPlaceholder from "./pages/aocp/AocpPlaceholder.tsx";
+import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
+import EngagementProfileDemo from "./pages/crm-demo/EngagementProfileDemo.tsx";
+import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
+import DiscoveryLibraryDemo from "./pages/crm-demo/DiscoveryLibraryDemo.tsx";
+import DiscoveryConfidenceDemo from "./pages/crm-demo/DiscoveryConfidenceDemo.tsx";
 
 const queryClient = new QueryClient();
 
@@ -407,6 +412,11 @@ const App = () => (
           <Route path="/aocp/:appId/pricing" element={<AocpPlaceholder title="Customer Pricing" />} />
           <Route path="/aocp/:appId/scenarios" element={<AocpPlaceholder title="Scenario Modeling" />} />
           <Route path="/aocp/:appId/runops-model" element={<AocpPlaceholder title="Final RunOps Support Model" />} />
+          <Route path="/crm-demo" element={<CustomerSelectionDemo />} />
+          <Route path="/crm-demo/engagement" element={<EngagementProfileDemo />} />
+          <Route path="/crm-demo/stakeholders" element={<StakeholderMapDemo />} />
+          <Route path="/crm-demo/discovery" element={<DiscoveryLibraryDemo />} />
+          <Route path="/crm-demo/confidence" element={<DiscoveryConfidenceDemo />} />
           <Route path="/settings/stakeholder-register" element={<Navigate to="/crm" replace />} />
           <Route path="/settings/stakeholder-register-legacy" element={<ProtectedRoute><StakeholderRegister /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
