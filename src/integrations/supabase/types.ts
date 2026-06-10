@@ -2151,6 +2151,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_user_login_history: {
+        Args: { _email?: string; _limit?: number; _user_id: string }
+        Returns: {
+          action: string
+          actor_email: string
+          created_at: string
+          id: string
+          ip_address: string
+          traits: Json
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
