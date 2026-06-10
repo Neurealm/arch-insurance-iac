@@ -174,9 +174,9 @@ export default function StakeholderMapDemo() {
                   <div className="flex items-start gap-6 w-full justify-center relative">
                     <div className="absolute top-0 h-px bg-slate-300" style={{ left: "20%", right: "20%" }} />
                     {[
-                      { name: "Mark Davis", title: "Director, Operations", badge: "Business Authority", color: "#059669", borderColor: "#bbf7d0" },
-                      { name: "Lisa Chen", title: "Manager, Claims Platform", badge: "Accountable", color: "#7c3aed", borderColor: "#ddd6fe" },
-                      { name: "David Patel", title: "Engineering Manager", badge: "Technical Authority", color: "#0e7490", borderColor: "#a5f3fc" },
+                      { name: "Mark Davis", title: "Director, Operations", role: "exec", badge: "Business Authority", badgeColor: "#059669", borderColor: "#bbf7d0" },
+                      { name: "Lisa Chen", title: "Manager, Claims Platform", role: "exec", badge: "Accountable", badgeColor: "#7c3aed", borderColor: "#ddd6fe" },
+                      { name: "David Patel", title: "Engineering Manager", role: "exec", badge: "Technical Authority", badgeColor: "#0e7490", borderColor: "#a5f3fc" },
                     ].map((n) => (
                       <div key={n.name} className="flex flex-col items-center gap-0">
                         <VLine height={16} />
@@ -190,11 +190,11 @@ export default function StakeholderMapDemo() {
                   <div className="flex items-start gap-3 w-full justify-center relative">
                     <div className="absolute top-0 h-px bg-slate-300" style={{ left: "8%", right: "8%" }} />
                     {[
-                      { name: "Alex Morgan", title: "Security Manager", badge: "Security Authority", color: "#b45309", borderColor: "#fde68a" },
-                      { name: "Priya Nair", title: "Solutions Architect", badge: "Architecture Authority", color: "#92400e", borderColor: "#fed7aa" },
-                      { name: "James Walker", title: "Procurement Manager", badge: "Procurement Authority", color: "#1d4ed8", borderColor: "#bfdbfe" },
-                      { name: "Rachel Smith", title: "Finance Manager", badge: "Financial Authority", color: "#be185d", borderColor: "#fbcfe8" },
-                      { name: "Tom Reynolds", title: "Vendor Manager", badge: "Vendor Authority", color: "#4d7c0f", borderColor: "#d9f99d" },
+                      { name: "Alex Morgan", title: "Security Manager", role: "exec", badge: "Security Authority", badgeColor: "#b45309", borderColor: "#fde68a" },
+                      { name: "Priya Nair", title: "Solutions Architect", role: "exec", badge: "Architecture Authority", badgeColor: "#92400e", borderColor: "#fed7aa" },
+                      { name: "James Walker", title: "Procurement Manager", role: "exec", badge: "Procurement Authority", badgeColor: "#1d4ed8", borderColor: "#bfdbfe" },
+                      { name: "Rachel Smith", title: "Finance Manager", role: "exec", badge: "Financial Authority", badgeColor: "#be185d", borderColor: "#fbcfe8" },
+                      { name: "Tom Reynolds", title: "Vendor Manager", role: "exec", badge: "Vendor Authority", badgeColor: "#4d7c0f", borderColor: "#d9f99d" },
                     ].map((n) => (
                       <div key={n.name} className="flex flex-col items-center gap-0">
                         <VLine height={16} />
