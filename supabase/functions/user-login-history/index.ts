@@ -35,61 +35,22 @@ Deno.serve(async (req) => {
     const email = String(body.email ?? "").trim().toLowerCase();
     if (!userId && !email) return json({ error: "userId or email required" }, 400);
 
-    // Query auth.audit_log_entries directly via PostgREST. The auth schema isn't
-    // exposed by default, so we use a small SQL via rpc-less approach: a SECURITY
-    // DEFINER view would be ideal, but we can hit it through PostgREST by enabling
-    // the `auth` schema. As a portable fallback, we query via the REST raw endpoint.
-    // Simpler: use a service-role SQL through pg_meta is not available; instead we
-    // expose results by querying a SECURITY DEFINER function. To avoid a migration
-    // here, we use the postgres connection through PostgREST `/rest/v1/rpc/...` if
-    // present, otherwise we return an explanatory empty result.
-    //
-    // Implementation: use the supabase-js admin client and a raw fetch to the
-    // Postgres REST endpoint for the `auth` schema.
-    const restRes = await fetch(
-      `${url}/rest/v1/audit_log_entries?select=id,created_at,ip_address,payload&order=created_at.desc&limit=50`,
-      {
-        headers: {
-          apikey: service,
-          Authorization: `Bearer ${service}`,
-          "Accept-Profile": "auth",
-        },
-      },
-    );
+    const { data, error } = await admin.rpc("admin_get_user_login_history", {
+      _user_id: userId || "00000000-0000-0000-0000-000000000000",
+      _email: email || null,
+      _limit: 20,
+    });
 
-    if (!restRes.ok) {
-      const txt = await restRes.text();
-      return json({ events: [], note: "auth audit log not exposed", error: txt }, 200);
-    }
-    const rows: Array<{
-      id: string;
-      created_at: string;
-      ip_address: string | null;
-      payload: Record<string, unknown> | null;
-    }> = await restRes.json();
+    if (error) return json({ events: [], error: error.message }, 200);
 
-    const events = rows
-      .filter((r) => {
-        const p = r.payload ?? {};
-        const actorId = (p as any).actor_id as string | undefined;
-        const actorEmail = ((p as any).actor_username as string | undefined)?.toLowerCase();
-        const traitsEmail = ((p as any).traits?.user_email as string | undefined)?.toLowerCase();
-        if (userId && actorId === userId) return true;
-        if (email && (actorEmail === email || traitsEmail === email)) return true;
-        return false;
-      })
-      .slice(0, 20)
-      .map((r) => {
-        const p = (r.payload ?? {}) as any;
-        return {
-          id: r.id,
-          timestamp: r.created_at,
-          ip: r.ip_address,
-          action: p.action ?? "unknown",
-          actor_email: p.actor_username ?? null,
-          traits: p.traits ?? null,
-        };
-      });
+    const events = (data ?? []).map((r: any) => ({
+      id: r.id,
+      timestamp: r.created_at,
+      ip: r.ip_address,
+      action: r.action ?? "unknown",
+      actor_email: r.actor_email ?? null,
+      traits: r.traits ?? null,
+    }));
 
     return json({ events });
   } catch (e) {
