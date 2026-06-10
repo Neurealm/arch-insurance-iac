@@ -74,7 +74,10 @@ export default function UserApprovals() {
         approved_by: status === "approved" ? user?.id ?? null : null,
       })
       .eq("id", row.id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success(`User ${status}`);
     await load();
     setSelected((s) => (s && s.id === row.id ? { ...s, approval_status: status } : s));
