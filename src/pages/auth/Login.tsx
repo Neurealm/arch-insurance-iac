@@ -43,15 +43,16 @@ export default function Login() {
     const uid = signInData.user?.id;
     try {
       if (workspace === "neurealm") {
+        // Any platform role (admin OR read-only support) can enter NeuRealm.
         const { data: roles } = await supabase
           .from("user_roles")
           .select("role")
-          .eq("user_id", uid!)
-          .eq("role", "platform_admin")
-          .maybeSingle();
-        if (!roles) {
-          await supabase.auth.signOut();
-          toast.error("You do not have access to the NeuRealm workspace.");
+          .eq("user_id", uid!);
+        if (!roles || roles.length === 0) {
+          // Keep the session alive and route to a clear explanation page
+          // instead of signing them out — signing out makes users think
+          // their password is wrong and triggers a reset loop.
+          navigate("/no-access", { replace: true, state: { workspace: "NeuRealm" } });
           return;
         }
       } else {
@@ -68,8 +69,7 @@ export default function Login() {
           .eq("tenant_id", tenant.id)
           .maybeSingle();
         if (!m) {
-          await supabase.auth.signOut();
-          toast.error(`You are not a member of ${tenant.name}.`);
+          navigate("/no-access", { replace: true, state: { workspace: tenant.name } });
           return;
         }
       }
