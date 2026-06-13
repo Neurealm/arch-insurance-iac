@@ -2048,6 +2048,45 @@ export type Database = {
           },
         ]
       }
+      user_login_events: {
+        Row: {
+          action: string
+          created_at: string
+          email: string | null
+          id: string
+          ip_address: string | null
+          login_method: string | null
+          source: string
+          traits: Json
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: string | null
+          login_method?: string | null
+          source?: string
+          traits?: Json
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: string | null
+          login_method?: string | null
+          source?: string
+          traits?: Json
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2183,6 +2222,19 @@ export type Database = {
         Returns: boolean
       }
       is_user_approved: { Args: { _user_id: string }; Returns: boolean }
+      record_user_login_event: {
+        Args: {
+          _action?: string
+          _email?: string
+          _ip_address?: string
+          _login_method?: string
+          _source?: string
+          _traits?: Json
+          _user_agent?: string
+          _user_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       answer_status:
