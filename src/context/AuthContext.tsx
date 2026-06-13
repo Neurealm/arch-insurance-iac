@@ -78,10 +78,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setLoading(false);
       setTimeout(() => loadRole(s?.user?.id), 0);
+      if (event === "SIGNED_IN" && s?.user) {
+        const action =
+          (s.user.app_metadata as any)?.provider === "email" ? "login" : "login";
+        setTimeout(() => {
+          supabase
+            .rpc("record_user_login_event", {
+              _user_id: s.user.id,
+              _email: s.user.email ?? null,
+              _action: action,
+              _login_method:
+                ((s.user.app_metadata as any)?.provider as string) ?? null,
+              _ip_address: null,
+              _user_agent:
+                typeof navigator !== "undefined" ? navigator.userAgent : null,
+              _source: "portal",
+              _traits: {},
+            })
+            .then(({ error }) => {
+              if (error) console.warn("login event not recorded", error.message);
+            });
+        }, 0);
+      }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -90,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+
 
   // Platform-admin privileges only apply when the user is acting in the
   // NeuRealm workspace. The same identity used inside a tenant workspace is
