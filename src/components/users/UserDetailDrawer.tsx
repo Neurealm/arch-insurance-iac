@@ -1,10 +1,25 @@
+import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AccessEditor } from "./AccessEditor";
 import { LoginHistoryList } from "./LoginHistoryList";
-import { Check, X, RotateCcw, User as UserIcon, Mail, Calendar } from "lucide-react";
+import { Check, X, RotateCcw, User as UserIcon, Mail, Calendar, Trash2, Loader2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+
 
 export type UserRow = {
   id: string;
@@ -29,6 +44,29 @@ export function UserDetailDrawer({
   onStatus: (row: UserRow, status: "approved" | "rejected" | "pending") => Promise<void> | void;
   onChanged?: () => void;
 }) {
+  const { isAdmin, user: currentUser } = useAuth();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!row) return;
+    setDeleting(true);
+    const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+      body: { userId: row.user_id },
+    });
+    setDeleting(false);
+    if (error || (data as any)?.error) {
+      toast.error(error?.message || (data as any)?.error || "Failed to delete user");
+      return;
+    }
+    toast.success(`Deleted ${row.email ?? "user"}`);
+    setConfirmOpen(false);
+    onChanged?.();
+    onClose();
+  };
+
+  const canDelete = isAdmin && row && currentUser?.id !== row.user_id;
+
   return (
     <Sheet open={!!row} onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
@@ -100,9 +138,55 @@ export function UserDetailDrawer({
               <h3 className="text-sm font-semibold">Recent sign-in activity</h3>
               <LoginHistoryList userId={row.user_id} email={row.email} />
             </section>
+
+            {canDelete && (
+              <>
+                <Separator className="my-5" />
+                <section className="space-y-2">
+                  <h3 className="text-sm font-semibold text-destructive">Danger zone</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Permanently deletes the auth account, profile, roles, workspace memberships,
+                    tool/agent assignments, and sign-in history. This cannot be undone.
+                  </p>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="gap-1"
+                    onClick={() => setConfirmOpen(true)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete user
+                  </Button>
+                </section>
+              </>
+            )}
           </>
         )}
       </SheetContent>
+      <AlertDialog open={confirmOpen} onOpenChange={(o) => !deleting && setConfirmOpen(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this user?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove <span className="font-medium">{row?.email ?? "the account"}</span>{" "}
+              and all of their roles, workspace memberships, and assignments. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+              Delete user
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   );
 }
