@@ -156,6 +156,7 @@ const tree: Node[] = [
       { key: "sre-hcw", label: "Hybrid Cloud, Data & Modernization Workbench", icon: Cloud, to: "/hybrid-cloud-workbench" },
       { key: "sre-cyber", label: "Cyber Resilience Overlay", icon: ShieldCheck, to: "/cyber-resilience-overlay" },
       { key: "sre-aicr", label: "Automation & AI Digital Coworker Control Room", icon: Bot, to: "/ai-coworker-control-room" },
+      { key: "sre-tdr", label: "Transition & Dual-Run Command Center", icon: ArrowRightLeft, to: "/transition-dual-run" },
     ],
   },
   {
