@@ -202,6 +202,7 @@ import CyberResilienceOverlay from "./pages/prod-twin/CyberResilienceOverlay.tsx
 import AiCoworkerControlRoom from "./pages/prod-twin/AiCoworkerControlRoom.tsx";
 import TransitionDualRun from "./pages/prod-twin/TransitionDualRun.tsx";
 import AcquisitionOnboardingFactory from "./pages/prod-twin/AcquisitionOnboardingFactory.tsx";
+import ValueCreationBoard from "./pages/prod-twin/ValueCreationBoard.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
 import EngagementProfileDemo from "./pages/crm-demo/EngagementProfileDemo.tsx";
 import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
@@ -303,6 +304,7 @@ const App = () => (
           <Route path="/ai-coworker-control-room" element={<AiCoworkerControlRoom />} />
           <Route path="/transition-dual-run" element={<TransitionDualRun />} />
           <Route path="/acquisition-onboarding-factory" element={<AcquisitionOnboardingFactory />} />
+          <Route path="/value-creation-board" element={<ValueCreationBoard />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />
