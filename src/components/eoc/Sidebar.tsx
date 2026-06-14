@@ -153,6 +153,7 @@ const tree: Node[] = [
       { key: "sre-opmodel", label: "HHAX SRE Operating Model Cockpit", icon: Activity, to: "/sre-operating-model" },
       { key: "sre-signal", label: "Signal Intelligence", icon: Activity, to: "/signal-intelligence" },
       { key: "sre-pef", label: "Platform Engineering & Golden Environment Factory", icon: Package, to: "/platform-engineering-factory" },
+      { key: "sre-hcw", label: "Hybrid Cloud, Data & Modernization Workbench", icon: Cloud, to: "/hybrid-cloud-workbench" },
     ],
   },
   {
