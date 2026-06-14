@@ -195,6 +195,7 @@ import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
 import GoldenWorkflowMap from "./pages/prod-twin/GoldenWorkflowMap.tsx";
 import ProductionTopology from "./pages/prod-twin/ProductionTopology.tsx";
 import SreOperatingModel from "./pages/prod-twin/SreOperatingModel.tsx";
+import SignalIntelligence from "./pages/prod-twin/SignalIntelligence.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
 import EngagementProfileDemo from "./pages/crm-demo/EngagementProfileDemo.tsx";
 import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
