@@ -259,7 +259,7 @@ export default function ProdResilienceTwin() {
               {engagementTeam.map((m) => (
                 <button
                   key={m.name}
-                  onClick={() => openDrawer(m.name, m.role)}
+                  onClick={() => m.name === "Sarah Mitchell" ? navigate("/executive-service-owner-twin") : openDrawer(m.name, m.role)}
                   className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition shrink-0"
                 >
                   <div className="relative">
