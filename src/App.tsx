@@ -204,6 +204,7 @@ import TransitionDualRun from "./pages/prod-twin/TransitionDualRun.tsx";
 import AcquisitionOnboardingFactory from "./pages/prod-twin/AcquisitionOnboardingFactory.tsx";
 import ValueCreationBoard from "./pages/prod-twin/ValueCreationBoard.tsx";
 import ModernizationRoadmap from "./pages/prod-twin/ModernizationRoadmap.tsx";
+import InteractiveDemoCenter from "./pages/prod-twin/InteractiveDemoCenter.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
 import EngagementProfileDemo from "./pages/crm-demo/EngagementProfileDemo.tsx";
 import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
@@ -307,6 +308,7 @@ const App = () => (
           <Route path="/acquisition-onboarding-factory" element={<AcquisitionOnboardingFactory />} />
           <Route path="/value-creation-board" element={<ValueCreationBoard />} />
           <Route path="/modernization-roadmap" element={<ModernizationRoadmap />} />
+          <Route path="/interactive-demo-center" element={<InteractiveDemoCenter />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />
