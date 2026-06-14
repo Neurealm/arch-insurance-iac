@@ -388,14 +388,7 @@ export default function AcquisitionOnboardingFactory() {
                     <div />
                     {HEATMAP_COLS.map(c => <div key={c} className="text-[10px] text-slate-500 px-1 pb-1 text-center font-semibold leading-tight">{c}</div>)}
                     {HEATMAP_ROWS.map((row, ri) => (
-                      <>
-                        <div key={row} className="text-[11px] text-slate-700 pr-2 py-0.5 truncate">{row}</div>
-                        {HEATMAP[ri].map((cell, ci) => (
-                          <button key={`${ri}-${ci}`}
-                            onClick={() => open("cell", `${row} · ${HEATMAP_COLS[ci]}`, cell === "g" ? "Ready" : cell === "a" ? "Partial" : "Gap")}
-                            className={cn("m-0.5 h-6 rounded-sm transition-colors", cellStyle[cell])} />
-                        ))}
-                      </>
+                      <FragmentRow key={row} row={row} cells={HEATMAP[ri]} onCell={(ci, cell) => open("cell", `${row} · ${HEATMAP_COLS[ci]}`, cell === "g" ? "Ready" : cell === "a" ? "Partial" : "Gap")} />
                     ))}
                   </div>
                   <div className="mt-3 flex items-center gap-3 text-[10.5px] text-slate-600">
