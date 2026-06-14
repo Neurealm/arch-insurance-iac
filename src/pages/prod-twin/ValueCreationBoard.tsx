@@ -270,10 +270,10 @@ export default function ValueCreationBoard() {
               <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div className="px-4 pt-3 pb-2 font-semibold text-slate-900">Enterprise Value Creation Engine</div>
                 <div className="p-4 grid grid-cols-3 gap-3 items-stretch relative">
-                  {NODES.map((n, i) => {
+                  {Array.from({ length: 9 }).map((_, i) => {
                     if (i === 4) {
                       return (
-                        <div key="center" className="col-span-1 row-span-1 grid place-items-center">
+                        <div key="center" className="grid place-items-center">
                           <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-blue-500 to-amber-500 p-[3px]">
                             <div className="h-full w-full rounded-full bg-white grid place-items-center text-center px-2">
                               <div>
@@ -285,7 +285,7 @@ export default function ValueCreationBoard() {
                         </div>
                       );
                     }
-                    const node = i < 4 ? NODES[i] : NODES[i - 1];
+                    const node = NODES[i < 4 ? i : i - 1];
                     return (
                       <button key={node.id} onClick={() => open("node", node.label, "Value engine driver", node)}
                         className="text-left rounded-lg border border-slate-200 bg-white p-3 hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300 transition-all">
