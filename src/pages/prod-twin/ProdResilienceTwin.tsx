@@ -256,6 +256,19 @@ export default function ProdResilienceTwin() {
           <div className="flex items-center gap-4">
             <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide shrink-0">Engagement Team</div>
             <div className="flex items-center gap-3 overflow-x-auto">
+              <button
+                onClick={() => navigate("/delivery-org-twin")}
+                title="Open full delivery organization"
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-blue-200 bg-blue-50/60 hover:bg-blue-100 hover:border-blue-400 transition shrink-0"
+              >
+                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white grid place-items-center ring-2 ring-white shadow-sm">
+                  <Users className="h-4 w-4" />
+                </div>
+                <div className="text-left">
+                  <div className="text-[12px] font-semibold text-blue-900 leading-tight">Full Team View</div>
+                  <div className="text-[10px] text-blue-700 leading-tight">22-person operating model</div>
+                </div>
+              </button>
               {engagementTeam.map((m) => (
                 <button
                   key={m.name}
