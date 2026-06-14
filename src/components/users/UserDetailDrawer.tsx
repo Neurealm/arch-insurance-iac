@@ -187,6 +187,43 @@ export function UserDetailDrawer({
               <LoginHistoryList userId={row.user_id} email={row.email} />
             </section>
 
+            {canManage && (
+              <>
+                <Separator className="my-5" />
+                <section className="space-y-2">
+                  <h3 className="text-sm font-semibold">Password</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Send a reset email or set a new password directly for this user.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      onClick={sendResetEmail}
+                      disabled={pwBusy !== null || !row.email}
+                    >
+                      {pwBusy === "email" ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Send className="h-3.5 w-3.5" />
+                      )}
+                      Send reset email
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      onClick={() => setPwOpen(true)}
+                      disabled={pwBusy !== null}
+                    >
+                      <KeyRound className="h-3.5 w-3.5" /> Set new password
+                    </Button>
+                  </div>
+                </section>
+              </>
+            )}
+
             {canDelete && (
               <>
                 <Separator className="my-5" />
@@ -210,6 +247,41 @@ export function UserDetailDrawer({
           </>
         )}
       </SheetContent>
+
+      <Dialog open={pwOpen} onOpenChange={(o) => !pwBusy && setPwOpen(o)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set new password</DialogTitle>
+            <DialogDescription>
+              Directly set a new password for{" "}
+              <span className="font-medium">{row?.email ?? "this user"}</span>. They will need
+              to use this password on their next sign-in.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="new-pw">New password</Label>
+            <Input
+              id="new-pw"
+              type="text"
+              autoComplete="new-password"
+              value={pwValue}
+              onChange={(e) => setPwValue(e.target.value)}
+              placeholder="At least 8 characters"
+              disabled={pwBusy !== null}
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => { setPwValue(""); setPwOpen(false); }} disabled={pwBusy !== null}>
+              Cancel
+            </Button>
+            <Button onClick={setPasswordDirect} disabled={pwBusy !== null} className="gap-2">
+              {pwBusy === "set" ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+              Update password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={confirmOpen} onOpenChange={(o) => !deleting && setConfirmOpen(o)}>
         <AlertDialogContent>
           <AlertDialogHeader>
