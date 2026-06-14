@@ -148,6 +148,7 @@ const tree: Node[] = [
     children: [
       { key: "sre-cmd", label: "PROD Resilience Command Center", icon: Activity, to: "/prod-resilience-twin" },
       { key: "sre-plm", label: "HHAX Product Line Map", icon: Package, to: "/product-line-map" },
+      { key: "sre-gwm", label: "HHAX Golden Workflow Map", icon: Workflow, to: "/golden-workflow-map" },
     ],
   },
   {
