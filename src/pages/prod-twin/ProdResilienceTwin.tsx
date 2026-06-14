@@ -139,6 +139,7 @@ function CardShell({ title, action, children, className = "", onClick }: any) {
 
 /* ---------- Page ---------- */
 export default function ProdResilienceTwin() {
+  const navigate = useNavigate();
   const [drawer, setDrawer] = useState<{ title: string; subtitle?: string; body?: any } | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>({
     env: "Production", product: "All", hosting: "All", workflow: "All", risk: "All", time: "30 days", owner: "All",
