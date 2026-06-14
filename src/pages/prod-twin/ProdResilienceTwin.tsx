@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/eoc/AppShell";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -138,6 +139,7 @@ function CardShell({ title, action, children, className = "", onClick }: any) {
 
 /* ---------- Page ---------- */
 export default function ProdResilienceTwin() {
+  const navigate = useNavigate();
   const [drawer, setDrawer] = useState<{ title: string; subtitle?: string; body?: any } | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>({
     env: "Production", product: "All", hosting: "All", workflow: "All", risk: "All", time: "30 days", owner: "All",
@@ -257,7 +259,7 @@ export default function ProdResilienceTwin() {
               {engagementTeam.map((m) => (
                 <button
                   key={m.name}
-                  onClick={() => openDrawer(m.name, m.role)}
+                  onClick={() => m.name === "Sarah Mitchell" ? navigate("/executive-service-owner-twin") : openDrawer(m.name, m.role)}
                   className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition shrink-0"
                 >
                   <div className="relative">
