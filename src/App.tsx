@@ -294,6 +294,7 @@ const App = () => (
           <Route path="/sre-operating-model" element={<SreOperatingModel />} />
           <Route path="/signal-intelligence" element={<SignalIntelligence />} />
           <Route path="/platform-engineering-factory" element={<PlatformEngineeringFactory />} />
+          <Route path="/hybrid-cloud-workbench" element={<HybridCloudWorkbench />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />
