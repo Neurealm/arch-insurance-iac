@@ -206,6 +206,7 @@ import ValueCreationBoard from "./pages/prod-twin/ValueCreationBoard.tsx";
 import ModernizationRoadmap from "./pages/prod-twin/ModernizationRoadmap.tsx";
 import InteractiveDemoCenter from "./pages/prod-twin/InteractiveDemoCenter.tsx";
 import ModernizationRoadmapV2 from "./pages/prod-twin/ModernizationRoadmapV2.tsx";
+import ExecutiveServiceOwnerTwin from "./pages/prod-twin/ExecutiveServiceOwnerTwin.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
 import EngagementProfileDemo from "./pages/crm-demo/EngagementProfileDemo.tsx";
 import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
