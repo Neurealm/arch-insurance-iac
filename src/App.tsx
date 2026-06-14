@@ -207,6 +207,7 @@ import ModernizationRoadmap from "./pages/prod-twin/ModernizationRoadmap.tsx";
 import InteractiveDemoCenter from "./pages/prod-twin/InteractiveDemoCenter.tsx";
 import ModernizationRoadmapV2 from "./pages/prod-twin/ModernizationRoadmapV2.tsx";
 import ExecutiveServiceOwnerTwin from "./pages/prod-twin/ExecutiveServiceOwnerTwin.tsx";
+import DeliveryOrgTwin from "./pages/prod-twin/DeliveryOrgTwin.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
 import EngagementProfileDemo from "./pages/crm-demo/EngagementProfileDemo.tsx";
 import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
@@ -313,6 +314,7 @@ const App = () => (
           <Route path="/interactive-demo-center" element={<InteractiveDemoCenter />} />
           <Route path="/modernization-roadmap-v2" element={<ModernizationRoadmapV2 />} />
           <Route path="/executive-service-owner-twin" element={<ExecutiveServiceOwnerTwin />} />
+          <Route path="/delivery-org-twin" element={<DeliveryOrgTwin />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />
