@@ -286,6 +286,7 @@ const App = () => (
           <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
           <Route path="/product-line-map" element={<ProductLineMap />} />
           <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
+          <Route path="/production-topology" element={<ProductionTopology />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />
