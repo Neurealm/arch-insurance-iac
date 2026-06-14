@@ -141,6 +141,7 @@ const tree: Node[] = [
     ],
   },
   { key: "ops",        label: "Operations Overview", icon: LayoutGrid,    to: "/operations" },
+  { key: "prod-twin",  label: "PROD Resilience Digital Twin", icon: ShieldCheck, to: "/prod-resilience-twin" },
   {
     key: "runops",
     label: "RunOps Practice",
