@@ -199,6 +199,7 @@ import SignalIntelligence from "./pages/prod-twin/SignalIntelligence.tsx";
 import PlatformEngineeringFactory from "./pages/prod-twin/PlatformEngineeringFactory.tsx";
 import HybridCloudWorkbench from "./pages/prod-twin/HybridCloudWorkbench.tsx";
 import CyberResilienceOverlay from "./pages/prod-twin/CyberResilienceOverlay.tsx";
+import AiCoworkerControlRoom from "./pages/prod-twin/AiCoworkerControlRoom.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
 import EngagementProfileDemo from "./pages/crm-demo/EngagementProfileDemo.tsx";
 import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
@@ -297,6 +298,7 @@ const App = () => (
           <Route path="/platform-engineering-factory" element={<PlatformEngineeringFactory />} />
           <Route path="/hybrid-cloud-workbench" element={<HybridCloudWorkbench />} />
           <Route path="/cyber-resilience-overlay" element={<CyberResilienceOverlay />} />
+          <Route path="/ai-coworker-control-room" element={<AiCoworkerControlRoom />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />
