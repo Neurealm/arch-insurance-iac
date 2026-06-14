@@ -57,6 +57,9 @@ export function UserDetailDrawer({
   const { isAdmin, user: currentUser } = useAuth();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pwValue, setPwValue] = useState("");
+  const [pwBusy, setPwBusy] = useState<"email" | "set" | null>(null);
 
   const handleDelete = async () => {
     if (!row) return;
@@ -75,6 +78,41 @@ export function UserDetailDrawer({
     onClose();
   };
 
+  const sendResetEmail = async () => {
+    if (!row) return;
+    setPwBusy("email");
+    const { data, error } = await supabase.functions.invoke("admin-reset-password", {
+      body: { userId: row.user_id, mode: "email" },
+    });
+    setPwBusy(null);
+    if (error || (data as any)?.error) {
+      toast.error(error?.message || (data as any)?.error || "Failed to send reset email");
+      return;
+    }
+    toast.success(`Password reset email sent to ${row.email}`);
+  };
+
+  const setPasswordDirect = async () => {
+    if (!row) return;
+    if (pwValue.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    setPwBusy("set");
+    const { data, error } = await supabase.functions.invoke("admin-reset-password", {
+      body: { userId: row.user_id, mode: "set", password: pwValue },
+    });
+    setPwBusy(null);
+    if (error || (data as any)?.error) {
+      toast.error(error?.message || (data as any)?.error || "Failed to set password");
+      return;
+    }
+    toast.success(`Password updated for ${row.email}`);
+    setPwValue("");
+    setPwOpen(false);
+  };
+
+  const canManage = isAdmin && !!row;
   const canDelete = isAdmin && row && currentUser?.id !== row.user_id;
 
   return (
