@@ -19,6 +19,18 @@ import {
   ResponsiveContainer, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, CartesianGrid,
 } from "recharts";
+import sarahMitchellAsset from "@/assets/sarah-mitchell.png.asset.json";
+
+/* ---------- Engagement Team ---------- */
+const engagementTeam: { name: string; role: string; avatar?: string; initials: string }[] = [
+  { name: "Sarah Mitchell", role: "Service Delivery Director", avatar: sarahMitchellAsset.url, initials: "SM" },
+  { name: "Marcus Chen",    role: "SRE Lead",                  initials: "MC" },
+  { name: "Priya Raman",    role: "Cyber Resilience Lead",     initials: "PR" },
+  { name: "David Okafor",   role: "Platform Engineering Lead", initials: "DO" },
+  { name: "Elena Rossi",    role: "Modernization Architect",   initials: "ER" },
+  { name: "James Carter",   role: "Transition Program Lead",   initials: "JC" },
+  { name: "Aisha Patel",    role: "Value Realization Lead",    initials: "AP" },
+];
 
 /* ---------- Mock data ---------- */
 const reliabilitySpark = Array.from({ length: 30 }, (_, i) => ({ x: i, y: 86 + Math.sin(i / 3) * 3 + i * 0.25 }));
