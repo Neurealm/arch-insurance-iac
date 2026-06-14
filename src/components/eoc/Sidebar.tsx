@@ -141,7 +141,14 @@ const tree: Node[] = [
     ],
   },
   { key: "ops",        label: "Operations Overview", icon: LayoutGrid,    to: "/operations" },
-  { key: "prod-twin",  label: "PROD Resilience Digital Twin", icon: ShieldCheck, to: "/prod-resilience-twin" },
+  {
+    key: "sre-practice",
+    label: "Site Resilience Engineering",
+    icon: ShieldCheck,
+    children: [
+      { key: "sre-cmd", label: "PROD Resilience Command Center", icon: Activity, to: "/prod-resilience-twin" },
+    ],
+  },
   {
     key: "runops",
     label: "RunOps Practice",
