@@ -237,8 +237,40 @@ export default function ProdResilienceTwin() {
           </div>
         </div>
 
+        {/* Engagement Team */}
+        <div className="bg-white border-b border-slate-200/80 px-6 py-3">
+          <div className="flex items-center gap-4">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide shrink-0">Engagement Team</div>
+            <div className="flex items-center gap-3 overflow-x-auto">
+              {engagementTeam.map((m) => (
+                <button
+                  key={m.name}
+                  onClick={() => openDrawer(m.name, m.role)}
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition shrink-0"
+                >
+                  <div className="relative">
+                    {m.avatar ? (
+                      <img src={m.avatar} alt={m.name} className="h-9 w-9 rounded-full object-cover ring-2 ring-white shadow-sm" />
+                    ) : (
+                      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 text-white text-[11px] font-bold grid place-items-center ring-2 ring-white shadow-sm">
+                        {m.initials}
+                      </div>
+                    )}
+                    <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-[12px] font-semibold text-slate-900 leading-tight">{m.name}</div>
+                    <div className="text-[10px] text-slate-500 leading-tight">{m.role}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Content */}
         <div className="px-6 py-4 space-y-4">
+
           {/* KPI Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
             {/* Reliability */}
