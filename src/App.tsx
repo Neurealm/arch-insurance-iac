@@ -202,6 +202,7 @@ import CyberResilienceOverlay from "./pages/prod-twin/CyberResilienceOverlay.tsx
 import AiCoworkerControlRoom from "./pages/prod-twin/AiCoworkerControlRoom.tsx";
 import TransitionDualRun from "./pages/prod-twin/TransitionDualRun.tsx";
 import AcquisitionOnboardingFactory from "./pages/prod-twin/AcquisitionOnboardingFactory.tsx";
+import ValueCreationBoard from "./pages/prod-twin/ValueCreationBoard.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
 import EngagementProfileDemo from "./pages/crm-demo/EngagementProfileDemo.tsx";
 import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
