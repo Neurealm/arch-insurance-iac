@@ -78,8 +78,6 @@ const NODES: { id: string; label: string; icon: any; tone: string; rows: { k: st
     rows: [{ k: "Investment", v: "$2.2M" }, { k: "Progress", v: "84%" }, { k: "Value Realized", v: "$3.4M" }, { k: "Target", v: "90% ↗" }] },
   { id: "own", label: "Service Ownership", icon: Cog, tone: "text-slate-700",
     rows: [{ k: "Investment", v: "$1.6M" }, { k: "Progress", v: "75%" }, { k: "Value Realized", v: "$0.9M" }, { k: "Target", v: "85% ↗" }] },
-  { id: "sca", label: "Scalability", icon: TrendingUp, tone: "text-teal-600",
-    rows: [{ k: "Investment", v: "$2.1M" }, { k: "Progress", v: "71%" }, { k: "Value Realized", v: "$1.0M" }, { k: "Target", v: "85% ↗" }] },
 ];
 
 /* ------- Waterfall ------- */
