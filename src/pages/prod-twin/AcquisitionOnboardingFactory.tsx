@@ -620,10 +620,3 @@ function FragmentRow({ row, cells, onCell }: { row: string; cells: ("g"|"a"|"r")
     </>
   );
 }
-  return (
-    <div className="rounded-md border border-slate-200 p-2.5">
-      <div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="text-sm font-semibold text-slate-900 mt-0.5">{value}</div>
-    </div>
-  );
-}
