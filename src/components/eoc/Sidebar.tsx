@@ -150,6 +150,7 @@ const tree: Node[] = [
       { key: "sre-plm", label: "HHAX Product Line Map", icon: Package, to: "/product-line-map" },
       { key: "sre-gwm", label: "HHAX Golden Workflow Map", icon: Workflow, to: "/golden-workflow-map" },
       { key: "sre-topo", label: "HHAX Production Topology Digital Twin", icon: NetIcon, to: "/production-topology" },
+      { key: "sre-opmodel", label: "HHAX SRE Operating Model Cockpit", icon: Activity, to: "/sre-operating-model" },
     ],
   },
   {
