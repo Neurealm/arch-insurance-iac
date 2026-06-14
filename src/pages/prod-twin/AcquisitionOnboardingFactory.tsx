@@ -609,3 +609,21 @@ function Field({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function FragmentRow({ row, cells, onCell }: { row: string; cells: ("g"|"a"|"r")[]; onCell: (ci: number, cell: "g"|"a"|"r") => void }) {
+  return (
+    <>
+      <div className="text-[11px] text-slate-700 pr-2 py-0.5 truncate">{row}</div>
+      {cells.map((cell, ci) => (
+        <button key={ci} onClick={() => onCell(ci, cell)} className={cn("m-0.5 h-6 rounded-sm transition-colors", cellStyle[cell])} />
+      ))}
+    </>
+  );
+}
+  return (
+    <div className="rounded-md border border-slate-200 p-2.5">
+      <div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="text-sm font-semibold text-slate-900 mt-0.5">{value}</div>
+    </div>
+  );
+}
