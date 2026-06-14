@@ -10,7 +10,7 @@ import {
   Sparkles as Sparkles2, CheckCircle2 as CheckCircle2b,
   ShieldHalf,
   ClipboardList,
-  ArrowRightLeft,
+  ArrowRightLeft, Rocket,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -158,6 +158,7 @@ const tree: Node[] = [
       { key: "sre-cyber", label: "Cyber Resilience Overlay", icon: ShieldCheck, to: "/cyber-resilience-overlay" },
       { key: "sre-aicr", label: "Automation & AI Digital Coworker Control Room", icon: Bot, to: "/ai-coworker-control-room" },
       { key: "sre-tdr", label: "Transition & Dual-Run Command Center", icon: ArrowRightLeft, to: "/transition-dual-run" },
+      { key: "sre-aof", label: "Acquisition-to-SRE Onboarding Factory", icon: Rocket, to: "/acquisition-onboarding-factory" },
     ],
   },
   {
