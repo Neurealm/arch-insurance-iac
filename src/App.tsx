@@ -304,6 +304,7 @@ const App = () => (
           <Route path="/ai-coworker-control-room" element={<AiCoworkerControlRoom />} />
           <Route path="/transition-dual-run" element={<TransitionDualRun />} />
           <Route path="/acquisition-onboarding-factory" element={<AcquisitionOnboardingFactory />} />
+          <Route path="/value-creation-board" element={<ValueCreationBoard />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />

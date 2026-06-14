@@ -159,6 +159,7 @@ const tree: Node[] = [
       { key: "sre-aicr", label: "Automation & AI Digital Coworker Control Room", icon: Bot, to: "/ai-coworker-control-room" },
       { key: "sre-tdr", label: "Transition & Dual-Run Command Center", icon: ArrowRightLeft, to: "/transition-dual-run" },
       { key: "sre-aof", label: "Acquisition-to-SRE Onboarding Factory", icon: Rocket, to: "/acquisition-onboarding-factory" },
+      { key: "sre-vcb", label: "Value Creation & PE / Board Dashboard", icon: TrendingUp2, to: "/value-creation-board" },
     ],
   },
   {
