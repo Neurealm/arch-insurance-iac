@@ -3,9 +3,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { AccessEditor } from "./AccessEditor";
 import { LoginHistoryList } from "./LoginHistoryList";
-import { Check, X, RotateCcw, User as UserIcon, Mail, Calendar, Trash2, Loader2 } from "lucide-react";
+import { Check, X, RotateCcw, User as UserIcon, Mail, Calendar, Trash2, Loader2, KeyRound, Send } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +18,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
