@@ -160,6 +160,7 @@ const tree: Node[] = [
       { key: "sre-tdr", label: "Transition & Dual-Run Command Center", icon: ArrowRightLeft, to: "/transition-dual-run" },
       { key: "sre-aof", label: "Acquisition-to-SRE Onboarding Factory", icon: Rocket, to: "/acquisition-onboarding-factory" },
       { key: "sre-vcb", label: "Value Creation & PE / Board Dashboard", icon: TrendingUp2, to: "/value-creation-board" },
+      { key: "sre-mrm", label: "Modernization Roadmap", icon: FileBarChart2, to: "/modernization-roadmap" },
     ],
   },
   {
