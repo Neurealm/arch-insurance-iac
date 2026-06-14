@@ -162,6 +162,7 @@ const tree: Node[] = [
       { key: "sre-vcb", label: "Value Creation & PE / Board Dashboard", icon: TrendingUp2, to: "/value-creation-board" },
       { key: "sre-mrm", label: "Modernization Roadmap", icon: FileBarChart2, to: "/modernization-roadmap" },
       { key: "sre-idc", label: "Interactive Demo Experience Center", icon: Sparkles2, to: "/interactive-demo-center" },
+      { key: "sre-mrm2", label: "Modernization Roadmap", icon: FileBarChart2, to: "/modernization-roadmap-v2" },
     ],
   },
   {
