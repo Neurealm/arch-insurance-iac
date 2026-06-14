@@ -312,6 +312,7 @@ const App = () => (
           <Route path="/modernization-roadmap" element={<ModernizationRoadmap />} />
           <Route path="/interactive-demo-center" element={<InteractiveDemoCenter />} />
           <Route path="/modernization-roadmap-v2" element={<ModernizationRoadmapV2 />} />
+          <Route path="/executive-service-owner-twin" element={<ExecutiveServiceOwnerTwin />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />
