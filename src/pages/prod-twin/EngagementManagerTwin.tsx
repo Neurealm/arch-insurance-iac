@@ -370,6 +370,7 @@ const customerMetrics = [
 
 /* ---------------- Page ---------------- */
 export default function EngagementManagerTwin() {
+  const navigate = useNavigate();
   const [panel, setPanel] = useState<null | { title: string; subtitle?: string; kpi?: KPI; service?: Service; workstream?: any; initiative?: Initiative; generic?: { name: string; baseline: string; target: string; actual: string; forecast: string; status: RAG; note?: string } }>(null);
   const close = () => setPanel(null);
 
