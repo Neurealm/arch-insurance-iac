@@ -561,7 +561,7 @@ export default function DeliveryOrgTwin() {
                 </div>
                 <div className="bg-white border border-t-0 border-slate-200 rounded-b-lg p-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                   {list.map((p) => (
-                    <button key={p.id} onClick={() => p.id === "sarah" ? navigate("/executive-service-owner-twin") : openPerson(p)}
+                    <button key={p.id} onClick={() => p.id === "sarah" ? navigate("/executive-service-owner-twin") : p.id === "amit" ? navigate("/engagement-manager-twin") : openPerson(p)}
                       className="text-left p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-md transition">
                       <div className="flex items-start gap-3">
                         <div className="relative shrink-0">
