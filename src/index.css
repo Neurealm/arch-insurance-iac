@@ -151,3 +151,23 @@ All colors MUST be HSL.
     @apply transition-all duration-200 hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5;
   }
 }
+
+/* Slim sidebar scrollbar */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--sidebar-foreground) / 0.18) transparent;
+}
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--sidebar-foreground) / 0.15);
+  border-radius: 9999px;
+}
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--sidebar-foreground) / 0.3);
+}

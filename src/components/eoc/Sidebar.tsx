@@ -241,45 +241,53 @@ function pathMatches(pathname: string, to?: string, exact?: boolean) {
 }
 
 function UserPill({ collapsed }: { collapsed: boolean }) {
-  const { displayName, initials, role, email, signOut } = useUserProfile();
+  const { displayName, initials, email, signOut } = useUserProfile();
   const navigate = useNavigate();
   const handleSignOut = async () => { await signOut(); navigate("/"); };
 
   if (collapsed) {
     return (
-      <div className="px-2 pb-2 shrink-0 flex flex-col items-center gap-1.5">
-        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-xs font-bold shadow-[var(--shadow-md)]" title={displayName}>
+      <div className="px-2 py-2 shrink-0 flex flex-col items-center gap-1.5 border-t border-sidebar-border">
+        <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold" title={displayName}>
           {initials}
         </div>
         <button
           onClick={handleSignOut}
           title="Sign out"
-          className="h-8 w-8 rounded-lg border border-sidebar-border grid place-items-center text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+          className="h-6 w-6 rounded grid place-items-center text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
         >
-          <LogOut className="h-3.5 w-3.5" />
+          <LogOut className="h-3 w-3" />
         </button>
       </div>
     );
   }
 
   return (
-    <div className="mx-3 mb-2 rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-2 flex items-center gap-2.5 shrink-0">
-      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-xs font-bold shadow-[var(--shadow-md)] shrink-0">
+    <div className="px-3 h-10 flex items-center gap-2 shrink-0 border-t border-sidebar-border">
+      <div className="h-6 w-6 rounded-full bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold shrink-0">
         {initials}
       </div>
-      <div className="min-w-0 flex-1 leading-tight">
-        <div className="text-[12px] font-semibold text-sidebar-foreground truncate" title={email || displayName}>{displayName}</div>
+      <div className="min-w-0 flex-1 text-[12px] font-medium text-sidebar-foreground truncate" title={email || displayName}>
+        {displayName}
       </div>
       <button
         onClick={handleSignOut}
         title="Sign out"
-        className="h-7 w-7 rounded-md grid place-items-center text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors shrink-0"
+        aria-label="Sign out"
+        className="h-6 w-6 rounded grid place-items-center text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors shrink-0"
       >
         <LogOut className="h-3.5 w-3.5" />
       </button>
     </div>
   );
 }
+
+const SECTION_LABELS: Record<string, string> = {
+  home: "PLATFORM",
+  "sre-practice": "PRACTICES",
+  "carve-op": "OPERATIONS",
+  vendors: "WORKSPACE",
+};
 
 function findActiveTrail(nodes: Node[], pathname: string, trail: string[] = []): string[] | null {
   for (const n of nodes) {
@@ -486,7 +494,7 @@ export function EocSidebar() {
     setOpenByParent(keep);
   };
 
-  const w = collapsed ? "w-[72px]" : "w-[268px]";
+  const w = collapsed ? "w-[72px]" : "w-[284px]";
 
   return (
     <aside
@@ -498,52 +506,68 @@ export function EocSidebar() {
       )}
     >
       {/* Brand */}
-      <div className="flex items-center gap-3 px-4 h-[68px] border-b border-sidebar-border shrink-0">
+      <div className="flex items-center gap-3 px-3 h-[68px] border-b border-sidebar-border shrink-0">
         <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo to-ai grid place-items-center shadow-[var(--shadow-md)] shrink-0">
           <ShieldAlert className="h-5 w-5 text-white" />
         </div>
         {!collapsed && (
-          <div className="leading-tight">
+          <div className="leading-tight flex-1 min-w-0">
             <div className="tracking-[0.18em] text-sidebar-foreground font-bold text-lg font-sans">neuGAIN</div>
             <div className="text-[11px] font-medium tracking-wide text-sidebar-foreground/60 uppercase">AI Platform</div>
           </div>
         )}
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="h-7 w-7 rounded-md grid place-items-center text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors shrink-0"
+        >
+          {collapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
+        </button>
       </div>
 
       {/* Nav (independent scroll) */}
       <nav
         ref={navRef}
         aria-label="Sections"
-        className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-0.5"
-        style={{ scrollbarGutter: "stable" }}
+        className="sidebar-scroll flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-0.5"
       >
-        {visibleTree.map((node) => (
-          <SidebarNode
-            key={node.key}
-            node={node}
-            depth={0}
-            parentKey="root"
-            collapsed={collapsed}
-            pathname={pathname}
-            isOpen={isOpen}
-            toggleOpen={toggleOpen}
-            togglePin={togglePin}
-            pinned={pinned}
-            persistScroll={persistNavScroll}
-          />
-        ))}
+        {visibleTree.map((node) => {
+          const label = !collapsed ? SECTION_LABELS[node.key] : undefined;
+          return (
+            <div key={node.key}>
+              {label && (
+                <div className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-[0.14em] text-sidebar-foreground/50">
+                  {label}
+                </div>
+              )}
+              <SidebarNode
+                node={node}
+                depth={0}
+                parentKey="root"
+                collapsed={collapsed}
+                pathname={pathname}
+                isOpen={isOpen}
+                toggleOpen={toggleOpen}
+                togglePin={togglePin}
+                pinned={pinned}
+                persistScroll={persistNavScroll}
+              />
+            </div>
+          );
+        })}
       </nav>
 
       {/* Quick Actions */}
-      <div className="mx-3 mt-2 rounded-xl bg-sidebar-accent/50 border border-sidebar-border p-2 shrink-0">
+      <div className="px-3 pt-2 shrink-0">
         {!collapsed && (
           <button
             onClick={() => setQuickOpen((v) => !v)}
-            className="w-full flex items-center justify-between rounded-md px-1.5 py-1 text-[11px] font-semibold tracking-[0.14em] text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors"
+            className="w-full flex items-center justify-between px-0 py-1 text-[10px] font-semibold tracking-[0.14em] text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
             aria-expanded={quickOpen}
           >
             <span>QUICK ACTIONS</span>
-            {quickOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            {quickOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           </button>
         )}
         {(collapsed || quickOpen) && (
@@ -556,7 +580,7 @@ export function EocSidebar() {
                   type="button"
                   title={collapsed ? q.label : undefined}
                   aria-label={q.label}
-                  className="w-full flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+                  className="w-full flex items-center gap-2.5 rounded-lg px-1 py-1.5 text-xs font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
                 >
                   <span className={cn("h-7 w-7 rounded-md grid place-items-center shrink-0", toneClass[q.tone])}>
                     <Icon className="h-3.5 w-3.5" />
@@ -571,24 +595,6 @@ export function EocSidebar() {
 
       {/* User profile */}
       <UserPill collapsed={collapsed} />
-
-      {/* Bottom controls */}
-      <div className="px-3 pb-3 space-y-2 shrink-0">
-        {!collapsed && (
-          <button
-            onClick={collapseAll}
-            className="w-full flex items-center justify-center gap-2 rounded-lg border border-sidebar-border py-2 text-[11px] font-medium text-sidebar-foreground/80 hover:bg-sidebar-accent transition-colors"
-          >
-            <Workflow className="h-3.5 w-3.5" /> Collapse all sections
-          </button>
-        )}
-        <button
-          onClick={() => setCollapsed((c) => !c)}
-          className="w-full flex items-center justify-center gap-2 rounded-lg border border-sidebar-border py-2 text-xs text-sidebar-foreground/80 hover:bg-sidebar-accent transition-colors"
-        >
-          {collapsed ? <ChevronsRight className="h-4 w-4" /> : <><ChevronsLeft className="h-4 w-4" /> Compact mode</>}
-        </button>
-      </div>
     </aside>
   );
 }
@@ -650,7 +656,7 @@ function SidebarNode(props: NodeProps) {
         className={cn(
           "relative w-12 h-10 mx-auto flex items-center justify-center rounded-lg transition-colors",
           (active || trailActive)
-            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-[var(--shadow-md)]"
+            ? "bg-primary/10 text-primary"
             : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         )}
       >
@@ -683,7 +689,7 @@ function SidebarNode(props: NodeProps) {
   }
 
   // Expanded mode rendering
-  const indent = depth === 0 ? "px-3" : depth === 1 ? "pl-6 pr-2" : "pl-9 pr-2";
+  const indent = depth === 0 ? "px-2.5" : depth === 1 ? "pl-6 pr-2" : "pl-9 pr-2";
   const sizeText = depth === 0 ? "text-sm" : depth === 1 ? "text-[12px]" : "text-[11px]";
   const py = depth === 0 ? "py-2.5" : "py-1.5";
 
@@ -701,11 +707,11 @@ function SidebarNode(props: NodeProps) {
           }
         }}
         className={cn(
-          "group relative w-full flex items-center gap-2 rounded-lg transition-colors cursor-pointer",
+          "group relative w-full flex items-center gap-1.5 rounded-lg transition-colors cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
           indent, py, sizeText,
           active
-            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-[var(--shadow-md)] font-medium"
+            ? "bg-primary/10 text-primary font-medium"
             : trailActive
               ? "bg-sidebar-accent/60 text-sidebar-accent-foreground font-medium"
               : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -713,7 +719,7 @@ function SidebarNode(props: NodeProps) {
         onClick={handleRowClick}
       >
         {active && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-white/90" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-primary" />
         )}
         {Icon && <Icon className={cn(depth === 0 ? "h-[18px] w-[18px]" : "h-3.5 w-3.5", "shrink-0")} />}
         <span className={cn("flex-1 text-left truncate", depth === 0 ? "font-medium" : "")}>{node.label}</span>

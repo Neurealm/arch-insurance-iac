@@ -1,70 +1,47 @@
-# User Management
+## Sidebar cleanup plan
 
-Replace `/settings/approvals` with a richer User Management page that lets platform admins see, in one place, who has access to the platform, what roles & workspaces they hold, their recent sign-in activity, and edit access inline.
+Scope: `src/components/eoc/Sidebar.tsx` + a small CSS addition in `src/index.css` for the custom scrollbar. No nav structure changes, no route changes.
 
-## Page layout
+### 1. Fix label truncation
+- Widen expanded sidebar from `w-[268px]` → `w-[284px]` so depth-0 labels like "App Ops Control Plane" and "Site Resilience Engineering" fit alongside chevron + pin.
+- Reduce depth-0 horizontal padding from `px-3` → `px-2.5` and shrink the gap before chevron buttons (pin button stays hover-only so it doesn't steal space).
 
-`/settings/approvals` (kept as the route to avoid breaking links; nav label changes to "User Management"):
+### 2. Quieter active state
+- Replace the loud `bg-sidebar-primary` solid fill on the active row with:
+  - `bg-primary/10 text-primary font-medium`
+  - keep the existing 3px left accent bar, recolored to `bg-primary`
+  - active icon inherits `text-primary`
+- `trailActive` stays as the subtle `bg-sidebar-accent/60`.
+- Collapsed-mode icon button gets the same treatment (left bar + tint instead of solid pill).
 
-```text
-+------------------------------------------------------------+
-| User Management                          [Invite user]     |
-| Tabs: All  |  Pending  |  Approved  |  Rejected            |
-| Search: [______________]                                   |
-+------------------------------------------------------------+
-| Name / Email | Status | Platform role | Workspaces | Last  |
-|              |        |               |            | sign- |
-|              |        |               |            | in    |
-|--------------+--------+---------------+------------+-------|
-| > Ashish N.  | appr.  | support       | NeuRealm   | 2m ago|
-|   ashish@... |        |               | +2 tenants |       |
-+------------------------------------------------------------+
-```
+### 3. Thin custom scrollbar
+- Add a `.sidebar-scroll` utility in `src/index.css` styling `::-webkit-scrollbar` to 6px wide, transparent track, `hsl(var(--sidebar-foreground) / 0.15)` thumb, hover → 0.3, plus `scrollbar-width: thin` for Firefox.
+- Apply it to the `<nav>` element and drop `scrollbarGutter: stable` (no longer needed with the slim scrollbar).
 
-Clicking a row opens a **detail drawer** with three sections:
+### 4. Merge the two bottom toggles into one header control
+- Remove the bottom "Collapse all sections" + "Compact mode" buttons entirely.
+- Move a single collapse/expand icon button into the brand header (right side, next to "neuGAIN" lockup). Uses `ChevronsLeft` / `ChevronsRight`.
+- "Collapse all sections" behavior is dropped — it's redundant with per-section chevrons and pinning.
 
-1. **Profile & status** — email, display name, approval status, created/approved timestamps, approve/reject buttons.
-2. **Roles & workspace access** — current platform role (none / `platform_support` / `platform_admin`) with a dropdown to change it; list of tenant memberships with role per tenant and a remove (X) button; "Add to workspace" picker (tenant + role) to grant new access.
-3. **Login history** (last 20 attempts) — timestamp, outcome (success / invalid_credentials / refresh_failed / logout), IP, user agent. Live-pulled from Supabase auth logs each time the drawer opens.
+### 5. Compact user footer
+- Replace the boxed `UserPill` card with a single 40px-tall row: 24px avatar, name (truncated), small logout icon button on the right.
+- Remove the border + rounded background; just a top border above the row.
+- Collapsed variant: 28px avatar + logout icon stacked, no card chrome.
 
-## Login history source
+### 6. Section group labels
+- Insert three muted uppercase labels (`text-[10px] tracking-[0.14em] text-sidebar-foreground/50 px-3 pt-3 pb-1`) at fixed positions in `visibleTree` rendering:
+  - "PLATFORM" before `home`
+  - "PRACTICES" before `sre-practice`
+  - "OPERATIONS" before `carve-op`
+  - "WORKSPACE" before `vendors`
+- Implemented as a small render helper that emits a label `<div>` when the current node key matches one of the boundary keys, then renders the node.
 
-Live read from Supabase auth analytics via a new edge function `user-login-history`:
-- Verifies caller is `platform_admin` via `user_roles`.
-- Accepts `{ userId, email }` and runs an analytics query against `auth_logs` filtered by `actor_id` or `actor_username`, ordered desc, limit 20.
-- Returns a normalised list (timestamp, action, status, ip, user_agent).
-- No new tables, no auth hooks. Retention follows Supabase defaults (~7 days), which is called out in the UI as "Recent sign-in activity".
+### 7. Quick Actions polish
+- Keep the collapsible group but restyle the header button: remove the surrounding card (`mx-3 rounded-xl bg-sidebar-accent/50 border`), keep just the uppercase label row matching the new section labels for visual consistency. The action buttons render below it without a card.
 
-## Inline edits
+### Files changed
+- `src/components/eoc/Sidebar.tsx` — all of the above
+- `src/index.css` — `.sidebar-scroll` utility (≈10 lines)
 
-Two new edge functions (admin-gated, service-role) so the UI can mutate roles without loosening RLS on `user_roles` / `tenant_memberships`:
-
-- `admin-set-platform-role` — `{ userId, role: 'platform_admin' | 'platform_support' | null }`. Upserts or deletes the row in `user_roles`. Refuses to remove the last `platform_admin`.
-- `admin-set-tenant-membership` — `{ userId, tenantId, role: 'admin' | 'member' | null }`. Upserts or deletes in `tenant_memberships`.
-
-Both verify caller is `platform_admin`, validate input, and return the updated state.
-
-Approve / reject already exists and stays.
-
-## Frontend changes
-
-- `src/pages/settings/UserApprovals.tsx` — rewrite into the table + tabs + search shell, opens a `UserDetailDrawer` on row click.
-- New `src/components/users/UserDetailDrawer.tsx` — three stacked sections (Profile, Access, Login history) using existing shadcn `Sheet`, `Select`, `Badge`, `Table`.
-- New `src/components/users/AccessEditor.tsx` — platform role dropdown + tenant grant/remove UI; calls the two new edge functions and invalidates the parent query on success.
-- New `src/components/users/LoginHistoryList.tsx` — invokes `user-login-history` with React Query, shows skeleton, badges per outcome, relative timestamps.
-- Existing `InviteUserDialog` keeps working unchanged.
-
-## Backend changes
-
-New edge functions only — no DB schema changes:
-- `supabase/functions/user-login-history/index.ts`
-- `supabase/functions/admin-set-platform-role/index.ts`
-- `supabase/functions/admin-set-tenant-membership/index.ts`
-
-All three: CORS, admin gate, Zod input validation, service-role client for writes.
-
-## Out of scope (for this iteration)
-
-- Persisting login events to our own table (user picked "Live from Supabase auth logs").
-- Per-feature permissions (only platform role + tenant role).
-- Audit log of who changed whose role (can be added later if needed).
+### Out of scope
+- Nav tree contents, routing, pin/scroll-restore logic, hover-card flyouts in collapsed mode (kept as-is).
