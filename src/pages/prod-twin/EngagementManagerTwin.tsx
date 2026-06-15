@@ -379,7 +379,7 @@ export default function EngagementManagerTwin() {
   const openGeneric = (g: any) => setPanel({ title: g.name, subtitle: "Customer engagement metric", generic: g });
 
   return (
-    <AppShell title="Engagement Manager Digital Twin" subtitle="Service Delivery • Program Execution • Customer Success">
+    <AppShell>
       <div className="bg-slate-50/50 min-h-screen">
         <div className="px-6 py-5 max-w-[1800px] mx-auto space-y-5">
 
