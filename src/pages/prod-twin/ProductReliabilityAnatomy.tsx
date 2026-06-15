@@ -10,8 +10,8 @@ import {
   Rocket, DollarSign, UserCircle2, Landmark, Star, CheckCircle2, LineChart as LineIcon, Heart, Compass,
 } from "lucide-react";
 import {
-  ResponsiveContainer, LineChart, Line, AreaChart, Area, BarChart, Bar,
-  XAxis, YAxis, Tooltip, CartesianGrid, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  ResponsiveContainer, AreaChart, Area,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   PieChart, Pie, Cell,
 } from "recharts";
 
