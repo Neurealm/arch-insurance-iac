@@ -383,7 +383,7 @@ export default function EngagementManagerTwin() {
   return (
     <AppShell>
       <div className="bg-slate-50/50 min-h-screen">
-        <div className="px-6 py-5 max-w-[1800px] mx-auto space-y-5">
+        <div className="px-6 py-5 w-full space-y-5">
 
           {/* Header */}
           <div className="flex items-start justify-between gap-4">
