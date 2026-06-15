@@ -641,7 +641,7 @@ export default function HowReliabilityOperates() {
                         >
                           <div className="flex items-center gap-2.5">
                             <div className={`h-9 w-9 rounded-full grid place-items-center bg-muted ${d.accent}`}>
-                              <Icon className="h-4.5 w-4.5" />
+                              <Icon className="h-4 w-4" />
                             </div>
                             <div>
                               <div className="text-[12px] font-semibold uppercase tracking-wider text-foreground">{label || d.title}</div>
@@ -692,7 +692,7 @@ export default function HowReliabilityOperates() {
                             className={`w-full text-left ${headerAccent(wf.id)} text-white p-3.5 hover:brightness-110 transition`}
                           >
                             <div className="flex items-center gap-2">
-                              <Icon className="h-4.5 w-4.5" />
+                              <Icon className="h-4 w-4" />
                               <div className="text-[12px] font-semibold uppercase tracking-wider">{wf.title}</div>
                             </div>
                             <p className="mt-1 text-[12px] text-white/85">{
