@@ -10,7 +10,7 @@ import {
   Sparkles as Sparkles2, CheckCircle2 as CheckCircle2b,
   ShieldHalf,
   ClipboardList,
-  ArrowRightLeft, Rocket,
+  ArrowRightLeft, Rocket, Compass,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -148,6 +148,7 @@ const tree: Node[] = [
     icon: ShieldCheck,
     children: [
       { key: "sre-ofi", label: "Operational Friction Index", icon: TrendingUp2, to: "/operational-friction-index" },
+      { key: "sre-fnd", label: "Foundations of Production Reliability Operating Model", icon: Compass, to: "/reliability-foundations" },
       { key: "sre-cmd", label: "PROD Resilience Command Center", icon: Activity, to: "/prod-resilience-twin" },
       { key: "sre-plm", label: "HHAX Product Line Map", icon: Package, to: "/product-line-map" },
       { key: "sre-gwm", label: "HHAX Golden Workflow Map", icon: Workflow, to: "/golden-workflow-map" },
