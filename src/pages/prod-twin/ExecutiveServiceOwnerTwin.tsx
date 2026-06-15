@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { toast } from "sonner";
 import sarahAsset from "@/assets/sarah-mitchell.png.asset.json";
+import { useNavigate } from "react-router-dom";
 import {
   Calendar, Download, MoreVertical, GitCompare, MapPin, Award, Users, Activity, TrendingUp,
-  TrendingDown, ArrowRight, ShieldCheck, ShieldAlert, Cloud, Server, Database, Sparkles,
+  TrendingDown, ArrowRight, ArrowLeft, ShieldCheck, ShieldAlert, Cloud, Server, Database, Sparkles,
   CheckCircle2, AlertTriangle, Brain, FileBarChart2, Briefcase, Target, Wrench, Zap,
   DollarSign, LineChart as LineIcon, ClipboardCheck, Crown, Building2,
 } from "lucide-react";
@@ -416,6 +417,7 @@ function Clickable({
 
 /* ====================================================================== */
 export default function ExecutiveServiceOwnerTwin() {
+  const navigate = useNavigate();
   const [ctx, setCtx] = useState<PanelCtx | null>(null);
   const open = (c: PanelCtx) => setCtx(c);
 
@@ -424,10 +426,15 @@ export default function ExecutiveServiceOwnerTwin() {
       <main className="flex-1 bg-slate-50/60 min-h-screen">
         {/* Top Header */}
         <div className="bg-white border-b border-slate-200/80 px-6 py-4 flex items-start justify-between gap-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Executive Service Owner Digital Twin</h1>
-            <div className="text-sm text-slate-500 mt-1">
-              Service Delivery Director <span className="mx-2 text-slate-300">•</span> Production Reliability &amp; Modernization Leader
+          <div className="flex items-start gap-3">
+            <Button variant="outline" size="sm" className="h-9 text-xs mt-1" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />Back
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900">Executive Service Owner Digital Twin</h1>
+              <div className="text-sm text-slate-500 mt-1">
+                Service Delivery Director <span className="mx-2 text-slate-300">•</span> Production Reliability &amp; Modernization Leader
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
