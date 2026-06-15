@@ -711,7 +711,7 @@ function SidebarNode(props: NodeProps) {
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
           indent, py, sizeText,
           active
-            ? "bg-primary/10 text-primary font-medium"
+            ? "bg-status-critical/15 text-status-critical font-medium"
             : trailActive
               ? "bg-sidebar-accent/60 text-sidebar-accent-foreground font-medium"
               : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
