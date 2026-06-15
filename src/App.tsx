@@ -200,6 +200,7 @@ import SreOperatingModel from "./pages/prod-twin/SreOperatingModel.tsx";
 import SignalIntelligence from "./pages/prod-twin/SignalIntelligence.tsx";
 import PlatformEngineeringFactory from "./pages/prod-twin/PlatformEngineeringFactory.tsx";
 import HybridCloudWorkbench from "./pages/prod-twin/HybridCloudWorkbench.tsx";
+import AutomationMarketplace from "./pages/prod-twin/AutomationMarketplace.tsx";
 import CyberResilienceOverlay from "./pages/prod-twin/CyberResilienceOverlay.tsx";
 import AiCoworkerControlRoom from "./pages/prod-twin/AiCoworkerControlRoom.tsx";
 import TransitionDualRun from "./pages/prod-twin/TransitionDualRun.tsx";

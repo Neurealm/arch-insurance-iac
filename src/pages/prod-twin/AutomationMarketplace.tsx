@@ -1610,7 +1610,7 @@ function CategorySection({
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Icon className={`h-4.5 w-4.5 ${meta.color}`} />
+          <Icon className={`h-4 w-4 ${meta.color}`} />
           <h2 className="text-[14px] font-semibold text-foreground">{category} Services</h2>
         </div>
         <button className="text-[12px] text-primary hover:underline inline-flex items-center gap-1">
