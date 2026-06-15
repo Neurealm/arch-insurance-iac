@@ -147,7 +147,7 @@ const tree: Node[] = [
     label: "Site Resilience Engineering",
     icon: ShieldCheck,
     children: [
-      { key: "sre-prti", label: "Product Reliability Transformation Index", icon: TrendingUp2, to: "/product-reliability-transformation-index" },
+      { key: "sre-ofi", label: "Operational Friction Index", icon: TrendingUp2, to: "/operational-friction-index" },
       { key: "sre-cmd", label: "PROD Resilience Command Center", icon: Activity, to: "/prod-resilience-twin" },
       { key: "sre-plm", label: "HHAX Product Line Map", icon: Package, to: "/product-line-map" },
       { key: "sre-gwm", label: "HHAX Golden Workflow Map", icon: Workflow, to: "/golden-workflow-map" },

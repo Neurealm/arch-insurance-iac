@@ -209,7 +209,7 @@ import ModernizationRoadmapV2 from "./pages/prod-twin/ModernizationRoadmapV2.tsx
 import ExecutiveServiceOwnerTwin from "./pages/prod-twin/ExecutiveServiceOwnerTwin.tsx";
 import DeliveryOrgTwin from "./pages/prod-twin/DeliveryOrgTwin.tsx";
 import EngagementManagerTwin from "./pages/prod-twin/EngagementManagerTwin.tsx";
-import ProductReliabilityTransformationIndex from "./pages/prod-twin/ProductReliabilityTransformationIndex.tsx";
+import OperationalFrictionIndex from "./pages/prod-twin/OperationalFrictionIndex.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
 import EngagementProfileDemo from "./pages/crm-demo/EngagementProfileDemo.tsx";
 import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
@@ -299,7 +299,8 @@ const App = () => (
           <Route path="/coworkers/it-carve-out-and-separation/cmm/operational-dashboard" element={<CmmDashboard />} />
           <Route path="/coworkers/deploy" element={<DeployCoworker />} />
           <Route path="/operations" element={<Operations />} />
-          <Route path="/product-reliability-transformation-index" element={<ProductReliabilityTransformationIndex />} />
+          <Route path="/operational-friction-index" element={<OperationalFrictionIndex />} />
+          <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
           <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
           <Route path="/product-line-map" element={<ProductLineMap />} />
           <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
