@@ -656,7 +656,7 @@ function SidebarNode(props: NodeProps) {
         className={cn(
           "relative w-12 h-10 mx-auto flex items-center justify-center rounded-lg transition-colors",
           (active || trailActive)
-            ? "bg-primary/10 text-primary"
+            ? "bg-status-critical/15 text-status-critical"
             : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         )}
       >
@@ -711,7 +711,7 @@ function SidebarNode(props: NodeProps) {
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
           indent, py, sizeText,
           active
-            ? "bg-primary/10 text-primary font-medium"
+            ? "bg-status-critical/15 text-status-critical font-medium"
             : trailActive
               ? "bg-sidebar-accent/60 text-sidebar-accent-foreground font-medium"
               : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -719,7 +719,7 @@ function SidebarNode(props: NodeProps) {
         onClick={handleRowClick}
       >
         {active && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-primary" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-status-critical" />
         )}
         {Icon && <Icon className={cn(depth === 0 ? "h-[18px] w-[18px]" : "h-3.5 w-3.5", "shrink-0")} />}
         <span className={cn("flex-1 text-left truncate", depth === 0 ? "font-medium" : "")}>{node.label}</span>
