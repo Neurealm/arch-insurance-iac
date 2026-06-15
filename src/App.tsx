@@ -191,6 +191,7 @@ import LifecycleTechDebt from "./pages/aocp/LifecycleTechDebt.tsx";
 import AdminModel from "./pages/aocp/AdminModel.tsx";
 import AocpPlaceholder from "./pages/aocp/AocpPlaceholder.tsx";
 import ProdResilienceTwin from "./pages/prod-twin/ProdResilienceTwin.tsx";
+import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
 import GoldenWorkflowMap from "./pages/prod-twin/GoldenWorkflowMap.tsx";
 import ProductionTopology from "./pages/prod-twin/ProductionTopology.tsx";
@@ -308,6 +309,7 @@ const App = () => (
           <Route path="/transformation-journey" element={<TransformationJourney />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
           <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
+          <Route path="/measuring-success" element={<MeasuringSuccess />} />
           <Route path="/product-line-map" element={<ProductLineMap />} />
           <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
           <Route path="/production-topology" element={<ProductionTopology />} />
