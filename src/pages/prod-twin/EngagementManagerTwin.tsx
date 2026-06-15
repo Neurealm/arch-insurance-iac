@@ -7,10 +7,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import michaelImg from "@/assets/team/michael-brown.jpg";
+import { useNavigate } from "react-router-dom";
 import {
   Calendar, Download, Filter, Activity, Star, DollarSign, AlertTriangle, Users, Rocket, Bell,
   ChevronRight, TrendingUp, TrendingDown, ShieldCheck, Sparkles, CheckCircle2, Brain,
-  Building2, Layers, Cloud, Database, Server, FileBarChart2, Briefcase, Target, Award, X,
+  Building2, Layers, Cloud, Database, Server, FileBarChart2, Briefcase, Target, Award, X, ArrowLeft,
 } from "lucide-react";
 import {
   ResponsiveContainer, LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis,
@@ -369,6 +370,7 @@ const customerMetrics = [
 
 /* ---------------- Page ---------------- */
 export default function EngagementManagerTwin() {
+  const navigate = useNavigate();
   const [panel, setPanel] = useState<null | { title: string; subtitle?: string; kpi?: KPI; service?: Service; workstream?: any; initiative?: Initiative; generic?: { name: string; baseline: string; target: string; actual: string; forecast: string; status: RAG; note?: string } }>(null);
   const close = () => setPanel(null);
 
@@ -385,9 +387,14 @@ export default function EngagementManagerTwin() {
 
           {/* Header */}
           <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Engagement Manager Digital Twin</h1>
-              <p className="text-sm text-slate-500 mt-1">Service Delivery • Program Execution • Customer Success</p>
+            <div className="flex items-start gap-3">
+              <Button variant="outline" size="sm" className="bg-white mt-1" onClick={() => navigate(-1)}>
+                <ArrowLeft className="h-4 w-4 mr-1.5" />Back
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Engagement Manager Digital Twin</h1>
+                <p className="text-sm text-slate-500 mt-1">Service Delivery • Program Execution • Customer Success</p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="bg-white"><Calendar className="h-4 w-4 mr-1.5" />Last 30 Days</Button>
