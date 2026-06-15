@@ -303,6 +303,7 @@ const App = () => (
           <Route path="/operations" element={<Operations />} />
           <Route path="/operational-friction-index" element={<OperationalFrictionIndex />} />
           <Route path="/reliability-foundations" element={<ReliabilityFoundations />} />
+          <Route path="/product-reliability-anatomy" element={<ProductReliabilityAnatomy />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
           <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
           <Route path="/product-line-map" element={<ProductLineMap />} />
