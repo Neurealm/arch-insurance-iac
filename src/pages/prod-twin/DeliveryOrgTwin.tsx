@@ -17,6 +17,27 @@ import {
   ResponsiveContainer, LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
 } from "recharts";
 import sarahMitchellAsset from "@/assets/sarah-mitchell.png.asset.json";
+import amitImg from "@/assets/team/amit.jpg";
+import brianImg from "@/assets/team/brian.jpg";
+import oliviaImg from "@/assets/team/olivia.jpg";
+import priyaNImg from "@/assets/team/priya-n.jpg";
+import vikramImg from "@/assets/team/vikram.jpg";
+import jchenImg from "@/assets/team/jchen.jpg";
+import lauraImg from "@/assets/team/laura.jpg";
+import danielImg from "@/assets/team/daniel.jpg";
+import rahulImg from "@/assets/team/rahul.jpg";
+import arunImg from "@/assets/team/arun.jpg";
+import kevinImg from "@/assets/team/kevin.jpg";
+import nehaImg from "@/assets/team/neha.jpg";
+import williamImg from "@/assets/team/william.jpg";
+import nicholasImg from "@/assets/team/nicholas.jpg";
+import fatimaImg from "@/assets/team/fatima.jpg";
+import meeraImg from "@/assets/team/meera.jpg";
+import jasonImg from "@/assets/team/jason.jpg";
+import amandaImg from "@/assets/team/amanda.jpg";
+import michaelImg from "@/assets/team/michael.jpg";
+import jenniferImg from "@/assets/team/jennifer.jpg";
+import anitaImg from "@/assets/team/anita.jpg";
 
 /* ---------- Types ---------- */
 type Status = "On Track" | "At Risk" | "Escalated";
@@ -87,7 +108,7 @@ const PEOPLE: Person[] = [
   // SERVICE MANAGEMENT (3)
   {
     id: "amit", name: "Amit Verma", title: "Engagement Manager", manager: "Sarah Mitchell",
-    layer: "svc", workstream: "Service Delivery", team: 0, years: 12, status: "On Track", criticality: "High", initials: "AV",
+    layer: "svc", workstream: "Service Delivery", team: 0, years: 12, status: "On Track", criticality: "High", avatar: amitImg, initials: "AV",
     responsibilities: ["Engagement leadership", "Stakeholder management", "Delivery governance"],
     servicesOwned: ["Executive Engagement", "QBR Operations", "Stakeholder Register"],
     outcomes: ["Stakeholder Satisfaction", "Governance Cadence"],
@@ -101,7 +122,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "brian", name: "Brian Thompson", title: "ITSM Lead", manager: "Michael Brown",
-    layer: "svc", workstream: "Service Management", team: 1, years: 10, status: "On Track", criticality: "High", initials: "BT",
+    layer: "svc", workstream: "Service Management", team: 1, years: 10, status: "On Track", criticality: "High", avatar: brianImg, initials: "BT",
     responsibilities: ["Service management", "Process governance", "Change & Release ownership"],
     servicesOwned: ["ITSM Platform", "Change Calendar", "Service Catalog"],
     outcomes: ["Process Efficiency", "Change Success"],
@@ -117,7 +138,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "olivia", name: "Olivia Martin", title: "Service Desk Analyst", manager: "Brian Thompson",
-    layer: "svc", workstream: "Service Management", team: 0, years: 4, status: "On Track", criticality: "Medium", initials: "OM",
+    layer: "svc", workstream: "Service Management", team: 0, years: 4, status: "On Track", criticality: "Medium", avatar: oliviaImg, initials: "OM",
     responsibilities: ["Request fulfillment", "End-user support", "Knowledge curation"],
     servicesOwned: ["Service Desk", "Self-Service Portal"],
     outcomes: ["End-User Satisfaction"],
@@ -131,7 +152,7 @@ const PEOPLE: Person[] = [
   // SRE (4)
   {
     id: "priya-n", name: "Priya Nair", title: "SRE Program Manager", manager: "Sarah Mitchell",
-    layer: "sre", workstream: "SRE Program", team: 4, years: 11, status: "On Track", criticality: "Critical", initials: "PN",
+    layer: "sre", workstream: "SRE Program", team: 4, years: 11, status: "On Track", criticality: "Critical", avatar: priyaNImg, initials: "PN",
     responsibilities: ["SRE strategy & roadmap", "Reliability governance", "SLO/SLI & error budgets"],
     servicesOwned: ["SRE Operating Model", "Error Budget Policy", "Reliability Council"],
     outcomes: ["Availability", "Reliability", "Service Health"],
@@ -146,7 +167,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "vikram", name: "Vikram Reddy", title: "SRE Lead", manager: "Priya Nair",
-    layer: "sre", workstream: "Site Reliability Engineering", team: 3, years: 9, status: "On Track", criticality: "Critical", initials: "VR",
+    layer: "sre", workstream: "Site Reliability Engineering", team: 3, years: 9, status: "On Track", criticality: "Critical", avatar: vikramImg, initials: "VR",
     responsibilities: ["Reliability strategy", "SLO/SLI & error budgets", "Major incident command"],
     servicesOwned: ["Production Reliability", "Major Incident Process", "Observability Standards"],
     outcomes: ["Availability", "Incident Prevention", "Service Health"],
@@ -167,7 +188,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "jchen", name: "James Chen", title: "Reliability Engineer", manager: "Vikram Reddy",
-    layer: "sre", workstream: "Site Reliability Engineering", team: 0, years: 6, status: "On Track", criticality: "High", initials: "JC",
+    layer: "sre", workstream: "Site Reliability Engineering", team: 0, years: 6, status: "On Track", criticality: "High", avatar: jchenImg, initials: "JC",
     responsibilities: ["SRE best practices", "Automation & tooling", "Incident prevention"],
     servicesOwned: ["Caregiver Onboarding", "Visit Verification"],
     outcomes: ["Incident Prevention", "SLO Compliance"],
@@ -184,7 +205,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "laura", name: "Laura Green", title: "Reliability Engineer", manager: "Vikram Reddy",
-    layer: "sre", workstream: "Site Reliability Engineering", team: 0, years: 5, status: "At Risk", criticality: "High", initials: "LG",
+    layer: "sre", workstream: "Site Reliability Engineering", team: 0, years: 5, status: "At Risk", criticality: "High", avatar: lauraImg, initials: "LG",
     responsibilities: ["Dependency mapping", "Service ownership enablement", "SLI instrumentation"],
     servicesOwned: ["Claims Adjudication", "Payroll Engine"],
     outcomes: ["Service Availability", "Dependency Mapping"],
@@ -198,7 +219,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "daniel", name: "Daniel Martinez", title: "Observability Engineer", manager: "Vikram Reddy",
-    layer: "sre", workstream: "Site Reliability Engineering", team: 0, years: 7, status: "On Track", criticality: "High", initials: "DM",
+    layer: "sre", workstream: "Site Reliability Engineering", team: 0, years: 7, status: "On Track", criticality: "High", avatar: danielImg, initials: "DM",
     responsibilities: ["Monitoring & alerting", "Metrics & dashboards", "Telemetry pipeline"],
     servicesOwned: ["Observability Platform", "SLO Dashboards"],
     outcomes: ["Signal Quality", "Detection Time"],
@@ -213,7 +234,7 @@ const PEOPLE: Person[] = [
   // CLOUD / INFRA (4)
   {
     id: "rahul", name: "Rahul Sharma", title: "Head of Engineering", manager: "Sarah Mitchell",
-    layer: "cloud", workstream: "Engineering", team: 4, years: 16, status: "On Track", criticality: "Critical", initials: "RS",
+    layer: "cloud", workstream: "Engineering", team: 4, years: 16, status: "On Track", criticality: "Critical", avatar: rahulImg, initials: "RS",
     responsibilities: ["Technical leadership", "Architecture oversight", "Engineering standards"],
     servicesOwned: ["Cloud Platform", "Engineering Standards", "Architecture Review Board"],
     outcomes: ["Engineering Throughput", "Architecture Quality"],
@@ -227,7 +248,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "arun", name: "Arun Kumar", title: "Platform Engineering Lead", manager: "Rahul Sharma",
-    layer: "plat", workstream: "Platform & Infrastructure", team: 3, years: 12, status: "On Track", criticality: "Critical", initials: "AK",
+    layer: "plat", workstream: "Platform & Infrastructure", team: 3, years: 12, status: "On Track", criticality: "Critical", avatar: arunImg, initials: "AK",
     responsibilities: ["Platform strategy", "Infrastructure standards", "Golden image governance"],
     servicesOwned: ["Internal Developer Platform", "Golden Images", "GitOps Pipelines"],
     outcomes: ["Developer Experience", "Platform Adoption"],
@@ -245,7 +266,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "kevin", name: "Kevin Thomas", title: "Cloud Engineer", manager: "Arun Kumar",
-    layer: "cloud", workstream: "Cloud Operations", team: 0, years: 8, status: "On Track", criticality: "High", initials: "KT",
+    layer: "cloud", workstream: "Cloud Operations", team: 0, years: 8, status: "On Track", criticality: "High", avatar: kevinImg, initials: "KT",
     responsibilities: ["Cloud operations", "Automation (IaC)", "FinOps execution"],
     servicesOwned: ["AWS Landing Zone", "Cost & Tagging Governance"],
     outcomes: ["Cost Optimization", "Cloud Resilience"],
@@ -264,7 +285,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "neha", name: "Neha Gupta", title: "Cloud Engineer", manager: "Arun Kumar",
-    layer: "cloud", workstream: "Cloud Operations", team: 0, years: 6, status: "On Track", criticality: "High", initials: "NG",
+    layer: "cloud", workstream: "Cloud Operations", team: 0, years: 6, status: "On Track", criticality: "High", avatar: nehaImg, initials: "NG",
     responsibilities: ["Cloud automation", "Disaster recovery", "Multi-region resilience"],
     servicesOwned: ["DR Runbooks", "Cross-Region Replication"],
     outcomes: ["Cloud Resilience", "Recovery Posture"],
@@ -277,7 +298,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "william", name: "William Clark", title: "Systems Engineer", manager: "Arun Kumar",
-    layer: "cloud", workstream: "Platform & Infrastructure", team: 0, years: 14, status: "On Track", criticality: "Medium", initials: "WC",
+    layer: "cloud", workstream: "Platform & Infrastructure", team: 0, years: 14, status: "On Track", criticality: "Medium", avatar: williamImg, initials: "WC",
     responsibilities: ["Systems administration", "Capacity & performance"],
     servicesOwned: ["Linux Estate", "Windows Estate", "Capacity Plan"],
     outcomes: ["Capacity Planning", "Performance"],
@@ -291,7 +312,7 @@ const PEOPLE: Person[] = [
   // SECURITY (2)
   {
     id: "nicholas", name: "Nicholas James", title: "Security Lead", manager: "Sarah Mitchell",
-    layer: "sec", workstream: "Security & Compliance", team: 1, years: 13, status: "On Track", criticality: "Critical", initials: "NJ",
+    layer: "sec", workstream: "Security & Compliance", team: 1, years: 13, status: "On Track", criticality: "Critical", avatar: nicholasImg, initials: "NJ",
     responsibilities: ["Security governance", "Risk & compliance", "Threat detection ownership"],
     servicesOwned: ["SOC", "Compliance Program", "Vulnerability Management"],
     outcomes: ["Risk Reduction", "Compliance", "Threat Detection"],
@@ -310,7 +331,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "fatima", name: "Fatima Ali", title: "Security Engineer", manager: "Nicholas James",
-    layer: "sec", workstream: "Security & Compliance", team: 0, years: 5, status: "On Track", criticality: "High", initials: "FA",
+    layer: "sec", workstream: "Security & Compliance", team: 0, years: 5, status: "On Track", criticality: "High", avatar: fatimaImg, initials: "FA",
     responsibilities: ["Security monitoring", "Vulnerability mgmt"],
     servicesOwned: ["Vulnerability Scanner", "EDR Console"],
     outcomes: ["Threat Detection", "Vulnerability Closure"],
@@ -324,7 +345,7 @@ const PEOPLE: Person[] = [
   // APPLICATION OPS (3)
   {
     id: "meera", name: "Meera Iyer", title: "Application Support Lead", manager: "Rahul Sharma",
-    layer: "app", workstream: "Application Management", team: 2, years: 11, status: "On Track", criticality: "High", initials: "MI",
+    layer: "app", workstream: "Application Management", team: 2, years: 11, status: "On Track", criticality: "High", avatar: meeraImg, initials: "MI",
     responsibilities: ["Application support mgmt", "Release coordination"],
     servicesOwned: ["Caregiver App", "Provider Portal", "Claims UI"],
     outcomes: ["Application Availability", "Release Stability"],
@@ -340,7 +361,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "jason", name: "Jason Lee", title: "Application Support Engineer", manager: "Meera Iyer",
-    layer: "app", workstream: "Application Management", team: 0, years: 4, status: "On Track", criticality: "Medium", initials: "JL",
+    layer: "app", workstream: "Application Management", team: 0, years: 4, status: "On Track", criticality: "Medium", avatar: jasonImg, initials: "JL",
     responsibilities: ["L2/L3 application support", "Issue resolution"],
     servicesOwned: ["Visit Verification", "Payroll UI"],
     outcomes: ["Ticket Aging", "Escalation Rate"],
@@ -353,7 +374,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "amanda", name: "Amanda White", title: "Application Support Engineer", manager: "Meera Iyer",
-    layer: "app", workstream: "Application Management", team: 0, years: 3, status: "On Track", criticality: "Medium", initials: "AW",
+    layer: "app", workstream: "Application Management", team: 0, years: 3, status: "On Track", criticality: "Medium", avatar: amandaImg, initials: "AW",
     responsibilities: ["L2/L3 application support", "Issue resolution"],
     servicesOwned: ["Claims UI", "Provider Portal"],
     outcomes: ["Customer Impact", "Application Availability"],
@@ -366,7 +387,7 @@ const PEOPLE: Person[] = [
   // OPERATIONS (Service Delivery Manager + ops staff)
   {
     id: "michael", name: "Michael Brown", title: "Service Delivery Manager", manager: "Sarah Mitchell",
-    layer: "svc", workstream: "Service Delivery", team: 1, years: 14, status: "On Track", criticality: "High", initials: "MB",
+    layer: "svc", workstream: "Service Delivery", team: 1, years: 14, status: "On Track", criticality: "High", avatar: michaelImg, initials: "MB",
     responsibilities: ["Service performance", "SLA management", "Continuous improvement"],
     servicesOwned: ["SLA Portfolio", "Continuous Improvement Backlog"],
     outcomes: ["SLA Performance", "Continuous Improvement"],
@@ -379,7 +400,7 @@ const PEOPLE: Person[] = [
   },
   {
     id: "jennifer", name: "Jennifer Lee", title: "Head of Operations", manager: "Sarah Mitchell",
-    layer: "svc", workstream: "Operations", team: 6, years: 17, status: "On Track", criticality: "Critical", initials: "JLe",
+    layer: "svc", workstream: "Operations", team: 6, years: 17, status: "On Track", criticality: "Critical", avatar: jenniferImg, initials: "JLe",
     responsibilities: ["Operational leadership", "Service delivery oversight", "Shift & team management"],
     servicesOwned: ["24x7 Ops", "NOC", "L1/L2 Support"],
     outcomes: ["Operational Stability", "Coverage"],
@@ -393,7 +414,7 @@ const PEOPLE: Person[] = [
   // MODERNIZATION (1)
   {
     id: "anita", name: "Anita Desai", title: "Transformation Manager", manager: "Sarah Mitchell",
-    layer: "mod", workstream: "Modernization", team: 0, years: 13, status: "At Risk", criticality: "Critical", initials: "AD",
+    layer: "mod", workstream: "Modernization", team: 0, years: 13, status: "At Risk", criticality: "Critical", avatar: anitaImg, initials: "AD",
     responsibilities: ["Modernization execution", "Program coordination", "Change management"],
     servicesOwned: ["Modernization Roadmap", "Acquisition Onboarding Factory"],
     outcomes: ["Modernization Success", "Acquisition Readiness"],
