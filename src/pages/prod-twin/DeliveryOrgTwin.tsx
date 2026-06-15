@@ -17,6 +17,27 @@ import {
   ResponsiveContainer, LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
 } from "recharts";
 import sarahMitchellAsset from "@/assets/sarah-mitchell.png.asset.json";
+import amitImg from "@/assets/team/amit.jpg";
+import brianImg from "@/assets/team/brian.jpg";
+import oliviaImg from "@/assets/team/olivia.jpg";
+import priyaNImg from "@/assets/team/priya-n.jpg";
+import vikramImg from "@/assets/team/vikram.jpg";
+import jchenImg from "@/assets/team/jchen.jpg";
+import lauraImg from "@/assets/team/laura.jpg";
+import danielImg from "@/assets/team/daniel.jpg";
+import rahulImg from "@/assets/team/rahul.jpg";
+import arunImg from "@/assets/team/arun.jpg";
+import kevinImg from "@/assets/team/kevin.jpg";
+import nehaImg from "@/assets/team/neha.jpg";
+import williamImg from "@/assets/team/william.jpg";
+import nicholasImg from "@/assets/team/nicholas.jpg";
+import fatimaImg from "@/assets/team/fatima.jpg";
+import meeraImg from "@/assets/team/meera.jpg";
+import jasonImg from "@/assets/team/jason.jpg";
+import amandaImg from "@/assets/team/amanda.jpg";
+import michaelImg from "@/assets/team/michael.jpg";
+import jenniferImg from "@/assets/team/jennifer.jpg";
+import anitaImg from "@/assets/team/anita.jpg";
 
 /* ---------- Types ---------- */
 type Status = "On Track" | "At Risk" | "Escalated";
