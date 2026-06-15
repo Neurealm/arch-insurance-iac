@@ -10,7 +10,7 @@ import {
   Sparkles as Sparkles2, CheckCircle2 as CheckCircle2b,
   ShieldHalf,
   ClipboardList,
-  ArrowRightLeft, Rocket, Compass,
+  ArrowRightLeft, Rocket, Compass, Gauge,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
