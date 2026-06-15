@@ -723,7 +723,7 @@ export default function OperationalFrictionIndex() {
     setOpen(c);
   };
 
-  return (
+    <AppShell>
     <div className="min-h-full bg-white text-slate-900">
       {/* Header */}
       <div className="border-b border-slate-200 bg-white">
