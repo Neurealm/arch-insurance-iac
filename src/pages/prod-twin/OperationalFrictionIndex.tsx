@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { AppShell } from "@/components/eoc/AppShell";
 import {
   Users, Workflow, Ticket, HelpCircle, Boxes,
   Wrench, BellRing, GitBranch, Layers, Building2,
