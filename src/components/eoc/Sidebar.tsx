@@ -719,7 +719,7 @@ function SidebarNode(props: NodeProps) {
         onClick={handleRowClick}
       >
         {active && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-primary" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-status-critical" />
         )}
         {Icon && <Icon className={cn(depth === 0 ? "h-[18px] w-[18px]" : "h-3.5 w-3.5", "shrink-0")} />}
         <span className={cn("flex-1 text-left truncate", depth === 0 ? "font-medium" : "")}>{node.label}</span>
