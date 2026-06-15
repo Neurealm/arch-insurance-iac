@@ -299,7 +299,8 @@ const App = () => (
           <Route path="/coworkers/it-carve-out-and-separation/cmm/operational-dashboard" element={<CmmDashboard />} />
           <Route path="/coworkers/deploy" element={<DeployCoworker />} />
           <Route path="/operations" element={<Operations />} />
-          <Route path="/product-reliability-transformation-index" element={<ProductReliabilityTransformationIndex />} />
+          <Route path="/operational-friction-index" element={<OperationalFrictionIndex />} />
+          <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
           <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
           <Route path="/product-line-map" element={<ProductLineMap />} />
           <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
