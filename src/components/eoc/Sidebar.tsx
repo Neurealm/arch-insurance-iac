@@ -689,7 +689,7 @@ function SidebarNode(props: NodeProps) {
   }
 
   // Expanded mode rendering
-  const indent = depth === 0 ? "px-3" : depth === 1 ? "pl-6 pr-2" : "pl-9 pr-2";
+  const indent = depth === 0 ? "px-2.5" : depth === 1 ? "pl-6 pr-2" : "pl-9 pr-2";
   const sizeText = depth === 0 ? "text-sm" : depth === 1 ? "text-[12px]" : "text-[11px]";
   const py = depth === 0 ? "py-2.5" : "py-1.5";
 
@@ -707,11 +707,11 @@ function SidebarNode(props: NodeProps) {
           }
         }}
         className={cn(
-          "group relative w-full flex items-center gap-2 rounded-lg transition-colors cursor-pointer",
+          "group relative w-full flex items-center gap-1.5 rounded-lg transition-colors cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
           indent, py, sizeText,
           active
-            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-[var(--shadow-md)] font-medium"
+            ? "bg-primary/10 text-primary font-medium"
             : trailActive
               ? "bg-sidebar-accent/60 text-sidebar-accent-foreground font-medium"
               : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -719,7 +719,7 @@ function SidebarNode(props: NodeProps) {
         onClick={handleRowClick}
       >
         {active && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-white/90" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-primary" />
         )}
         {Icon && <Icon className={cn(depth === 0 ? "h-[18px] w-[18px]" : "h-3.5 w-3.5", "shrink-0")} />}
         <span className={cn("flex-1 text-left truncate", depth === 0 ? "font-medium" : "")}>{node.label}</span>
