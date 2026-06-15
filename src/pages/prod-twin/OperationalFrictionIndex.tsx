@@ -992,6 +992,7 @@ export default function OperationalFrictionIndex() {
         </SheetContent>
       </Sheet>
     </div>
+    </AppShell>
   );
 }
 
