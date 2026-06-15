@@ -309,6 +309,7 @@ const App = () => (
           <Route path="/transformation-journey" element={<TransformationJourney />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
           <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
+          <Route path="/measuring-success" element={<MeasuringSuccess />} />
           <Route path="/product-line-map" element={<ProductLineMap />} />
           <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
           <Route path="/production-topology" element={<ProductionTopology />} />
