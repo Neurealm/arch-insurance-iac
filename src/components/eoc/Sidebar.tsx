@@ -494,7 +494,7 @@ export function EocSidebar() {
     setOpenByParent(keep);
   };
 
-  const w = collapsed ? "w-[72px]" : "w-[268px]";
+  const w = collapsed ? "w-[72px]" : "w-[284px]";
 
   return (
     <aside
@@ -506,52 +506,68 @@ export function EocSidebar() {
       )}
     >
       {/* Brand */}
-      <div className="flex items-center gap-3 px-4 h-[68px] border-b border-sidebar-border shrink-0">
+      <div className="flex items-center gap-3 px-3 h-[68px] border-b border-sidebar-border shrink-0">
         <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo to-ai grid place-items-center shadow-[var(--shadow-md)] shrink-0">
           <ShieldAlert className="h-5 w-5 text-white" />
         </div>
         {!collapsed && (
-          <div className="leading-tight">
+          <div className="leading-tight flex-1 min-w-0">
             <div className="tracking-[0.18em] text-sidebar-foreground font-bold text-lg font-sans">neuGAIN</div>
             <div className="text-[11px] font-medium tracking-wide text-sidebar-foreground/60 uppercase">AI Platform</div>
           </div>
         )}
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="h-7 w-7 rounded-md grid place-items-center text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors shrink-0"
+        >
+          {collapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
+        </button>
       </div>
 
       {/* Nav (independent scroll) */}
       <nav
         ref={navRef}
         aria-label="Sections"
-        className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-0.5"
-        style={{ scrollbarGutter: "stable" }}
+        className="sidebar-scroll flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-0.5"
       >
-        {visibleTree.map((node) => (
-          <SidebarNode
-            key={node.key}
-            node={node}
-            depth={0}
-            parentKey="root"
-            collapsed={collapsed}
-            pathname={pathname}
-            isOpen={isOpen}
-            toggleOpen={toggleOpen}
-            togglePin={togglePin}
-            pinned={pinned}
-            persistScroll={persistNavScroll}
-          />
-        ))}
+        {visibleTree.map((node) => {
+          const label = !collapsed ? SECTION_LABELS[node.key] : undefined;
+          return (
+            <div key={node.key}>
+              {label && (
+                <div className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-[0.14em] text-sidebar-foreground/50">
+                  {label}
+                </div>
+              )}
+              <SidebarNode
+                node={node}
+                depth={0}
+                parentKey="root"
+                collapsed={collapsed}
+                pathname={pathname}
+                isOpen={isOpen}
+                toggleOpen={toggleOpen}
+                togglePin={togglePin}
+                pinned={pinned}
+                persistScroll={persistNavScroll}
+              />
+            </div>
+          );
+        })}
       </nav>
 
       {/* Quick Actions */}
-      <div className="mx-3 mt-2 rounded-xl bg-sidebar-accent/50 border border-sidebar-border p-2 shrink-0">
+      <div className="px-3 pt-2 shrink-0">
         {!collapsed && (
           <button
             onClick={() => setQuickOpen((v) => !v)}
-            className="w-full flex items-center justify-between rounded-md px-1.5 py-1 text-[11px] font-semibold tracking-[0.14em] text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors"
+            className="w-full flex items-center justify-between px-0 py-1 text-[10px] font-semibold tracking-[0.14em] text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
             aria-expanded={quickOpen}
           >
             <span>QUICK ACTIONS</span>
-            {quickOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            {quickOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           </button>
         )}
         {(collapsed || quickOpen) && (
@@ -564,7 +580,7 @@ export function EocSidebar() {
                   type="button"
                   title={collapsed ? q.label : undefined}
                   aria-label={q.label}
-                  className="w-full flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+                  className="w-full flex items-center gap-2.5 rounded-lg px-1 py-1.5 text-xs font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
                 >
                   <span className={cn("h-7 w-7 rounded-md grid place-items-center shrink-0", toneClass[q.tone])}>
                     <Icon className="h-3.5 w-3.5" />
@@ -579,24 +595,6 @@ export function EocSidebar() {
 
       {/* User profile */}
       <UserPill collapsed={collapsed} />
-
-      {/* Bottom controls */}
-      <div className="px-3 pb-3 space-y-2 shrink-0">
-        {!collapsed && (
-          <button
-            onClick={collapseAll}
-            className="w-full flex items-center justify-center gap-2 rounded-lg border border-sidebar-border py-2 text-[11px] font-medium text-sidebar-foreground/80 hover:bg-sidebar-accent transition-colors"
-          >
-            <Workflow className="h-3.5 w-3.5" /> Collapse all sections
-          </button>
-        )}
-        <button
-          onClick={() => setCollapsed((c) => !c)}
-          className="w-full flex items-center justify-center gap-2 rounded-lg border border-sidebar-border py-2 text-xs text-sidebar-foreground/80 hover:bg-sidebar-accent transition-colors"
-        >
-          {collapsed ? <ChevronsRight className="h-4 w-4" /> : <><ChevronsLeft className="h-4 w-4" /> Compact mode</>}
-        </button>
-      </div>
     </aside>
   );
 }
