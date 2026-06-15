@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { AppShell } from "@/components/eoc/AppShell";
 import {
   Users, Workflow, Ticket, HelpCircle, Boxes,
   Wrench, BellRing, GitBranch, Layers, Building2,
@@ -723,6 +724,7 @@ export default function OperationalFrictionIndex() {
   };
 
   return (
+    <AppShell>
     <div className="min-h-full bg-white text-slate-900">
       {/* Header */}
       <div className="border-b border-slate-200 bg-white">
@@ -990,6 +992,7 @@ export default function OperationalFrictionIndex() {
         </SheetContent>
       </Sheet>
     </div>
+    </AppShell>
   );
 }
 
