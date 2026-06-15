@@ -320,6 +320,7 @@ const App = () => (
           <Route path="/signal-intelligence" element={<SignalIntelligence />} />
           <Route path="/platform-engineering-factory" element={<PlatformEngineeringFactory />} />
           <Route path="/hybrid-cloud-workbench" element={<HybridCloudWorkbench />} />
+          <Route path="/automation-marketplace" element={<AutomationMarketplace />} />
           <Route path="/cyber-resilience-overlay" element={<CyberResilienceOverlay />} />
           <Route path="/ai-coworker-control-room" element={<AiCoworkerControlRoom />} />
           <Route path="/transition-dual-run" element={<TransitionDualRun />} />
