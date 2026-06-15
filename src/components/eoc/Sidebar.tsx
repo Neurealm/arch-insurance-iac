@@ -656,7 +656,7 @@ function SidebarNode(props: NodeProps) {
         className={cn(
           "relative w-12 h-10 mx-auto flex items-center justify-center rounded-lg transition-colors",
           (active || trailActive)
-            ? "bg-primary/10 text-primary"
+            ? "bg-status-critical/15 text-status-critical"
             : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         )}
       >
