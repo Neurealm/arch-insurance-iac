@@ -894,50 +894,355 @@ export default function ReliabilityFoundations() {
 
 function FoundationCard({ f, onOpen }: { f: Foundation; onOpen: (f: Foundation) => void }) {
   const Icon = f.icon;
+  const topKpi = f.kpis[0];
+
   return (
-    <div className={`rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all group`}>
-      <button onClick={() => onOpen(f)} className="w-full text-left p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold text-slate-400">{String(f.number).padStart(2, "0")}</span>
-            <div className={`h-9 w-9 rounded-full grid place-items-center ring-2 ${f.ringClass}`}
-                 style={{ backgroundColor: `${f.accent}10`, color: f.accent }}>
-              <Icon className="h-4 w-4" />
+    <div
+      className="group relative rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-lg hover:-translate-y-0.5 hover:border-slate-300 transition-all duration-200 flex flex-col"
+      style={{
+        // subtle top accent strip
+        boxShadow: "0 1px 0 rgba(15,23,42,0.02)",
+      }}
+    >
+      {/* Accent rail */}
+      <div className="h-1 w-full" style={{ backgroundColor: f.accent }} />
+
+      {/* HEADER — signature graphic + identity */}
+      <button onClick={() => onOpen(f)} className="text-left w-full">
+        <div
+          className="relative px-4 pt-4 pb-3 overflow-hidden"
+          style={{
+            background: `linear-gradient(135deg, ${f.accent}0D 0%, ${f.accent}03 60%, #ffffff 100%)`,
+          }}
+        >
+          {/* Signature foundation glyph in the background */}
+          <FoundationGlyph id={f.id} accent={f.accent} />
+
+          <div className="relative flex items-start justify-between">
+            <div className="flex items-center gap-2.5">
+              <span
+                className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded"
+                style={{ color: f.accent, backgroundColor: `${f.accent}14` }}
+              >
+                {String(f.number).padStart(2, "0")}
+              </span>
+              <div
+                className={`h-10 w-10 rounded-full grid place-items-center ring-4 ${f.ringClass} shadow-sm`}
+                style={{ backgroundColor: "#fff", color: f.accent }}
+              >
+                <Icon className="h-5 w-5" />
+              </div>
             </div>
+            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-700 transition-colors" />
           </div>
-          <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-700" />
+
+          <h3
+            className="relative mt-3 text-[13px] font-bold tracking-tight uppercase leading-tight"
+            style={{ color: f.accent }}
+          >
+            {f.title}
+          </h3>
+          <p className="relative text-xs text-slate-600 mt-1 leading-snug min-h-[2.5rem]">
+            {f.tagline}
+          </p>
+
+          {/* Hero metric strip */}
+          <div className="relative mt-3 flex items-end justify-between gap-3 pt-2 border-t border-dashed border-slate-200/80">
+            <div>
+              <div className="text-[9px] uppercase tracking-wider text-slate-500 font-semibold">{topKpi.label}</div>
+              <div className="text-base font-bold text-slate-900 leading-none mt-1">{topKpi.value}</div>
+            </div>
+            <Sparkline data={f.trend.map((t) => t.value)} color={f.accent} />
+          </div>
         </div>
-        <h3 className="mt-3 text-sm font-semibold tracking-tight uppercase" style={{ color: f.accent }}>
-          {f.title}
-        </h3>
-        <p className="text-xs text-slate-600 mt-1 leading-snug">{f.tagline}</p>
       </button>
 
-      <div className="border-t border-slate-100 px-4 py-3 space-y-2">
-        <SubList label="Key Practices" items={f.practices} color="text-slate-700" onPick={() => onOpen(f)} />
-        <SubList label="KPIs to Watch" items={f.kpis.slice(0, 4).map((k) => k.label)} color="text-slate-700" onPick={() => onOpen(f)} />
-        <SubList label="Anti-Patterns" items={f.antiPatterns} color="text-rose-700" onPick={() => onOpen(f)} />
+      {/* BODY — three visually distinct sections */}
+      <div className="flex-1 flex flex-col">
+        {/* Key Practices — accent-tinted */}
+        <FoundationSection
+          icon={CheckCircle2}
+          label="Key Practices"
+          accent={f.accent}
+          variant="accent"
+          items={f.practices}
+          onPick={() => onOpen(f)}
+        />
+
+        {/* KPIs — neutral with chip styling */}
+        <FoundationSection
+          icon={Activity}
+          label="KPIs to Watch"
+          accent={f.accent}
+          variant="neutral"
+          items={f.kpis.slice(0, 4).map((k) => k.label)}
+          onPick={() => onOpen(f)}
+          chip
+        />
+
+        {/* Anti-Patterns — warning-tinted */}
+        <FoundationSection
+          icon={AlertTriangle}
+          label="Anti-Patterns to Avoid"
+          accent="#b91c1c"
+          variant="warning"
+          items={f.antiPatterns}
+          onPick={() => onOpen(f)}
+        />
+      </div>
+
+      {/* Footer ribbon */}
+      <button
+        onClick={() => onOpen(f)}
+        className="border-t border-slate-100 px-4 py-2 flex items-center justify-between bg-slate-50/60 hover:bg-slate-50 transition"
+      >
+        <span className="text-[10px] uppercase tracking-wider text-slate-500">
+          Industry · <span className="text-slate-700 font-medium">{f.industryTranslation}</span>
+        </span>
+        <span className="text-[10px] font-medium text-slate-600 group-hover:text-slate-900 flex items-center gap-0.5">
+          Open <ChevronRight className="h-3 w-3" />
+        </span>
+      </button>
+    </div>
+  );
+}
+
+function FoundationSection({
+  icon: Icon,
+  label,
+  items,
+  accent,
+  variant,
+  onPick,
+  chip,
+}: {
+  icon: LucideIcon;
+  label: string;
+  items: string[];
+  accent: string;
+  variant: "accent" | "neutral" | "warning";
+  onPick: () => void;
+  chip?: boolean;
+}) {
+  const styles = {
+    accent: {
+      bg: `${accent}08`,
+      bar: accent,
+      labelColor: accent,
+    },
+    neutral: {
+      bg: "#fff",
+      bar: "#cbd5e1",
+      labelColor: "#475569",
+    },
+    warning: {
+      bg: "#fef2f2",
+      bar: "#b91c1c",
+      labelColor: "#b91c1c",
+    },
+  }[variant];
+
+  return (
+    <div className="relative border-t border-slate-100" style={{ backgroundColor: styles.bg }}>
+      {/* Vertical accent bar */}
+      <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r" style={{ backgroundColor: styles.bar }} />
+      <div className="pl-4 pr-3 py-2.5">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <Icon className="h-3 w-3" style={{ color: styles.labelColor }} />
+          <span
+            className="text-[9px] uppercase tracking-wider font-bold"
+            style={{ color: styles.labelColor }}
+          >
+            {label}
+          </span>
+        </div>
+        {chip ? (
+          <div className="flex flex-wrap gap-1">
+            {items.map((it) => (
+              <button
+                key={it}
+                onClick={onPick}
+                className="text-[10px] px-1.5 py-0.5 rounded border border-slate-200 bg-white text-slate-700 hover:border-slate-900 hover:text-slate-900 transition"
+              >
+                {it}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <ul className="space-y-0.5">
+            {items.map((it) => (
+              <li key={it}>
+                <button
+                  onClick={onPick}
+                  className="text-[11px] text-slate-700 hover:text-slate-900 hover:underline underline-offset-2 text-left leading-tight"
+                >
+                  {it}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
 }
 
-function SubList({ label, items, color, onPick }: { label: string; items: string[]; color: string; onPick: () => void }) {
+/* Tiny inline sparkline */
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  if (!data.length) return null;
+  const w = 80, h = 26, pad = 2;
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 1;
+  const step = (w - pad * 2) / (data.length - 1);
+  const pts = data.map((v, i) => {
+    const x = pad + i * step;
+    const y = h - pad - ((v - min) / range) * (h - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const path = `M ${pts.join(" L ")}`;
+  const areaPath = `${path} L ${(pad + (data.length - 1) * step).toFixed(1)},${h - pad} L ${pad},${h - pad} Z`;
+  const gid = `spk-${color.replace("#", "")}`;
   return (
-    <div>
-      <div className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">{label}</div>
-      <ul className="mt-1 space-y-0.5">
-        {items.map((it) => (
-          <li key={it}>
-            <button onClick={onPick} className={`text-[11px] ${color} hover:text-slate-900 hover:underline underline-offset-2 text-left`}>
-              • {it}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <svg width={w} height={h} className="overflow-visible">
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill={`url(#${gid})`} />
+      <path d={path} stroke={color} strokeWidth={1.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <circle
+        cx={pad + (data.length - 1) * step}
+        cy={h - pad - ((data[data.length - 1] - min) / range) * (h - pad * 2)}
+        r={2}
+        fill={color}
+      />
+    </svg>
   );
 }
+
+/* Per-foundation signature SVG glyph rendered behind the header */
+function FoundationGlyph({ id, accent }: { id: string; accent: string }) {
+  const common = "absolute right-2 top-2 opacity-[0.18] pointer-events-none";
+  switch (id) {
+    case "prevention":
+      return (
+        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
+          {[44, 32, 20].map((r, i) => (
+            <circle key={i} cx="55" cy="55" r={r} stroke={accent} strokeWidth="1" fill="none" strokeDasharray={i === 1 ? "3 3" : ""} />
+          ))}
+          <path d="M55 30 L72 40 V60 C72 72 55 80 55 80 C55 80 38 72 38 60 V40 Z" stroke={accent} strokeWidth="1.5" fill="none" />
+        </svg>
+      );
+    case "ownership":
+      return (
+        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
+          <circle cx="55" cy="35" r="6" fill={accent} />
+          {[{ x: 25, y: 75 }, { x: 55, y: 75 }, { x: 85, y: 75 }].map((p, i) => (
+            <g key={i}>
+              <line x1="55" y1="35" x2={p.x} y2={p.y} stroke={accent} strokeWidth="1" />
+              <circle cx={p.x} cy={p.y} r="5" stroke={accent} strokeWidth="1.5" fill="none" />
+            </g>
+          ))}
+        </svg>
+      );
+    case "collaboration":
+      return (
+        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <path
+              key={i}
+              d={`M10 ${20 + i * 12} Q55 ${10 + i * 12} 100 ${20 + i * 12}`}
+              stroke={accent}
+              strokeWidth="1"
+              fill="none"
+            />
+          ))}
+        </svg>
+      );
+    case "platform":
+      return (
+        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
+          {[0, 1, 2].map((row) =>
+            [0, 1, 2].map((col) => (
+              <rect
+                key={`${row}-${col}`}
+                x={20 + col * 22}
+                y={20 + row * 22}
+                width="18"
+                height="18"
+                stroke={accent}
+                strokeWidth="1"
+                fill={row === 1 && col === 1 ? `${accent}33` : "none"}
+              />
+            ))
+          )}
+        </svg>
+      );
+    case "automation":
+      return (
+        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
+          <circle cx="55" cy="55" r="20" stroke={accent} strokeWidth="1.5" fill="none" />
+          {Array.from({ length: 8 }).map((_, i) => {
+            const a = (i * Math.PI) / 4;
+            const x1 = 55 + Math.cos(a) * 22;
+            const y1 = 55 + Math.sin(a) * 22;
+            const x2 = 55 + Math.cos(a) * 32;
+            const y2 = 55 + Math.sin(a) * 32;
+            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={accent} strokeWidth="2" strokeLinecap="round" />;
+          })}
+          <circle cx="55" cy="55" r="6" fill={accent} />
+        </svg>
+      );
+    case "modernization":
+      return (
+        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
+          <path
+            d="M55 22 A33 33 0 1 1 22 55"
+            stroke={accent}
+            strokeWidth="1.5"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <path d="M55 22 L48 16 M55 22 L48 28" stroke={accent} strokeWidth="1.5" strokeLinecap="round" />
+          <path
+            d="M55 88 A33 33 0 1 1 88 55"
+            stroke={accent}
+            strokeWidth="1.5"
+            fill="none"
+            strokeLinecap="round"
+            opacity="0.5"
+          />
+        </svg>
+      );
+    case "acquisition":
+      return (
+        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
+          <path d="M20 80 L55 30 L90 80 Z" stroke={accent} strokeWidth="1" fill="none" />
+          {[30, 45, 60, 75].map((x, i) => (
+            <line key={i} x1={x} y1="80" x2={x} y2={50 + i * 4} stroke={accent} strokeWidth="1" />
+          ))}
+          <line x1="20" y1="85" x2="90" y2="85" stroke={accent} strokeWidth="1.5" />
+        </svg>
+      );
+    case "security":
+      return (
+        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
+          <rect x="35" y="48" width="40" height="32" rx="3" stroke={accent} strokeWidth="1.5" fill="none" />
+          <path d="M43 48 V38 A12 12 0 0 1 67 38 V48" stroke={accent} strokeWidth="1.5" fill="none" />
+          {Array.from({ length: 4 }).map((_, i) =>
+            Array.from({ length: 5 }).map((_, j) => (
+              <circle key={`${i}-${j}`} cx={20 + j * 18} cy={20 + i * 18} r="1" fill={accent} opacity="0.6" />
+            ))
+          )}
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
 
 function FoundationDetail({ f, onClose, onJump }: { f: Foundation; onClose: () => void; onJump: (id: string) => void }) {
   const Icon = f.icon;
