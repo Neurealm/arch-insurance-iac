@@ -150,6 +150,7 @@ const tree: Node[] = [
       { key: "sre-ofi", label: "Operational Friction Index", icon: TrendingUp2, to: "/operational-friction-index" },
       { key: "sre-fnd", label: "Foundations of Production Reliability Operating Model", icon: Compass, to: "/reliability-foundations" },
       { key: "sre-anat", label: "Anatomy of a Modern Product Reliability Organization", icon: Compass, to: "/product-reliability-anatomy" },
+      { key: "sre-tj", label: "Production Reliability Transformation Journey", icon: TrendingUp2, to: "/transformation-journey" },
       { key: "sre-cmd", label: "PROD Resilience Command Center", icon: Activity, to: "/prod-resilience-twin" },
       { key: "sre-plm", label: "HHAX Product Line Map", icon: Package, to: "/product-line-map" },
       { key: "sre-gwm", label: "HHAX Golden Workflow Map", icon: Workflow, to: "/golden-workflow-map" },
