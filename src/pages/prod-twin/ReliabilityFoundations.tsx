@@ -888,13 +888,13 @@ function DisciplineCard({
   const Icon = d.icon;
   const dim = hoveredId && hoveredId !== d.id;
   const navigate = useNavigate();
+  const isSre = d.id === "sre";
   return (
     <div
       onMouseEnter={() => onHover(d.id)}
       onMouseLeave={() => onHover(null)}
-      onClick={() => { if (d.id === "sre") navigate("/reliability-foundations/google-sre"); }}
       className={[
-        "group relative rounded-2xl border bg-white p-4 transition-all cursor-pointer",
+        "group relative rounded-2xl border bg-white p-4 transition-all",
         "border-slate-200 hover:border-slate-300 hover:shadow-md",
         active ? `ring-2 ${d.ring}` : "",
         dim ? "opacity-50" : "",
@@ -905,6 +905,24 @@ function DisciplineCard({
       </div>
       <div className="text-sm font-semibold text-slate-900">{d.name}</div>
       <div className="mt-1 text-xs text-slate-600 leading-relaxed">{d.description}</div>
+      {isSre && (
+        <div className="mt-3 flex flex-col gap-1.5">
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate("/reliability-foundations/google-sre"); }}
+            className="text-left text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 inline-flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-50 px-2 py-1.5 transition-colors"
+          >
+            <span>Reliability Engineering Discipline</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate("/reliability-foundations/google-sre/how-to-achieve"); }}
+            className="text-left text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 inline-flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-50 px-2 py-1.5 transition-colors"
+          >
+            <span>How Organizations Achieve It</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
