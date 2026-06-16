@@ -215,24 +215,92 @@ const Metric = ({ label, value, sub, tone = "info" as Health }: { label: string;
 /* ------------------------------------------------------------------ */
 /* DIGITAL TWIN CANVAS (SVG + glass nodes)                             */
 /* ------------------------------------------------------------------ */
+// dependency edges between layers (source id → target id)
+const EDGES_BS_TX: [string, string][] = [
+  ["bs-cx","tx-login"], ["bs-cx","tx-search"], ["bs-cx","tx-cart"],
+  ["bs-id","tx-login"],
+  ["bs-om","tx-cart"], ["bs-om","tx-order"],
+  ["bs-pay","tx-pay"], ["bs-pay","tx-order"],
+  ["bs-noti","tx-noti"],
+  ["bs-ana","tx-report"],
+];
+const EDGES_TX_SVC: [string, string][] = [
+  ["tx-login","svc-auth"], ["tx-login","svc-web"],
+  ["tx-search","svc-search"], ["tx-search","svc-cat"],
+  ["tx-cart","svc-cat"], ["tx-cart","svc-inv"],
+  ["tx-order","svc-order"], ["tx-order","svc-pay"], ["tx-order","svc-inv"],
+  ["tx-pay","svc-pay"],
+  ["tx-noti","svc-noti"],
+  ["tx-report","svc-rep"], ["tx-report","svc-rec"],
+];
+const EDGES_SVC_AWS: [string, string][] = [
+  ["svc-web","g-edge"], ["svc-web","g-compute"],
+  ["svc-mob","g-api"], ["svc-mob","g-compute"],
+  ["svc-search","g-compute"], ["svc-search","g-data"],
+  ["svc-cat","g-compute"], ["svc-cat","g-data"],
+  ["svc-order","g-compute"], ["svc-order","g-data"], ["svc-order","g-event"],
+  ["svc-pay","g-compute"], ["svc-pay","g-data"], ["svc-pay","g-event"],
+  ["svc-noti","g-compute"], ["svc-noti","g-event"],
+  ["svc-rep","g-compute"], ["svc-rep","g-data"],
+  ["svc-auth","g-compute"], ["svc-auth","g-sec"],
+  ["svc-inv","g-compute"], ["svc-inv","g-data"],
+  ["svc-rec","g-compute"], ["svc-rec","g-data"],
+];
+
+// Highlight set for the active Payment Services incident path
+const HIGHLIGHT_PATH = new Set([
+  "bs-pay","tx-pay","svc-pay","g-data","g-event","svc-noti","bs-noti","svc-order","bs-om",
+]);
+const CRIT_EDGES = new Set([
+  "bs-pay|tx-pay","tx-pay|svc-pay","svc-pay|g-data","svc-pay|g-event",
+  "g-event|svc-noti","svc-noti|bs-noti",
+]);
+
 function DigitalTwinCanvas({
   selectedId, onSelect, hoveredId, setHoveredId,
 }: { selectedId: string | null; onSelect: (id: string) => void; hoveredId: string | null; setHoveredId: (id: string | null) => void }) {
-  // Layer positions (percent based for responsiveness)
   const bizCols = BUSINESS_SERVICES.length;
   const txCols  = TRANSACTIONS.length;
   const svcCols = APP_SERVICES.length;
   const awsCols = AWS_GROUPS.length;
 
-  // Highlight set for the active Payment Services incident path
-  const HIGHLIGHT_PATH = new Set(["bs-pay", "tx-pay", "svc-pay", "g-data", "g-event", "svc-noti", "bs-noti", "svc-order", "bs-om"]);
   const isHighlighted = (id: string) => HIGHLIGHT_PATH.has(id);
   const focusId = selectedId || hoveredId;
-
   const dim = (id: string) => focusId && id !== focusId && !isHighlighted(id) && !isHighlighted(focusId);
 
+  // Compute viewBox column-center X for each layer (viewBox 1000 x 1000)
+  const colX = (i: number, n: number) => ((i + 0.5) / n) * 1000;
+  const bizIdx = (id: string) => BUSINESS_SERVICES.findIndex(b => b.id === id);
+  const txIdx  = (id: string) => TRANSACTIONS.findIndex(t => t.id === id);
+  const svcIdx = (id: string) => APP_SERVICES.findIndex(s => s.id === id);
+  const awsIdx = (id: string) => AWS_GROUPS.findIndex(g => g.id === id);
+
+  // Layer Y centers (top/bottom anchor for the curves)
+  const Y_BIZ_BOT = 165;
+  const Y_TX_TOP  = 305;
+  const Y_TX_BOT  = 420;
+  const Y_SVC_TOP = 555;
+  const Y_SVC_BOT = 660;
+  const Y_AWS_TOP = 795;
+
+  const curve = (x1: number, y1: number, x2: number, y2: number) => {
+    const dy = (y2 - y1) * 0.55;
+    return `M ${x1} ${y1} C ${x1} ${y1 + dy}, ${x2} ${y2 - dy}, ${x2} ${y2}`;
+  };
+
+  const edgeKey = (a: string, b: string) => `${a}|${b}`;
+  const isEdgeCrit = (a: string, b: string) => CRIT_EDGES.has(edgeKey(a, b));
+  const edgeActive = (a: string, b: string) =>
+    !focusId || focusId === a || focusId === b || (isHighlighted(a) && isHighlighted(b));
+
+  const allEdges = [
+    ...EDGES_BS_TX.map(([a,b]) => ({ a, b, d: curve(colX(bizIdx(a), bizCols), Y_BIZ_BOT, colX(txIdx(b), txCols), Y_TX_TOP) })),
+    ...EDGES_TX_SVC.map(([a,b]) => ({ a, b, d: curve(colX(txIdx(a), txCols), Y_TX_BOT, colX(svcIdx(b), svcCols), Y_SVC_TOP) })),
+    ...EDGES_SVC_AWS.map(([a,b]) => ({ a, b, d: curve(colX(svcIdx(a), svcCols), Y_SVC_BOT, colX(awsIdx(b), awsCols), Y_AWS_TOP) })),
+  ];
+
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl border border-slate-200/70 bg-gradient-to-br from-[#F6F8FB] via-white to-[#EEF4FF]">
+    <div className="relative flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-gradient-to-br from-[#F6F8FB] via-white to-[#EEF4FF]">
       {/* atmospheric gradients */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute -top-32 -left-24 h-96 w-96 rounded-full bg-sky-200/30 blur-3xl" />
@@ -240,37 +308,74 @@ function DigitalTwinCanvas({
         <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-emerald-200/20 blur-3xl" />
       </div>
 
-      {/* SVG dependency layer (curved animated paths for the active incident) */}
-      <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 1000 700" preserveAspectRatio="none">
+      {/* faint topology grid */}
+      <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.35]" preserveAspectRatio="none" viewBox="0 0 1000 1000">
         <defs>
-          <linearGradient id="critGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stopColor="#fb7185" stopOpacity="0.0" />
-            <stop offset="50%"  stopColor="#fb7185" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#fb7185" stopOpacity="0.0" />
-          </linearGradient>
-          <linearGradient id="warnGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stopColor="#fbbf24" stopOpacity="0.0" />
-            <stop offset="50%"  stopColor="#fbbf24" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#fbbf24" stopOpacity="0.0" />
-          </linearGradient>
+          <pattern id="twin-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#cbd5e1" strokeWidth="0.4" />
+          </pattern>
         </defs>
-        {/* Payment Services → Process Payment → Payment Service → Aurora (data group) → SQS (event) → Notification */}
-        <path d="M 520 100 C 520 180, 480 200, 480 280" fill="none" stroke="#f43f5e" strokeWidth="2" strokeDasharray="4 4" opacity="0.55">
-          <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.2s" repeatCount="indefinite" />
-        </path>
-        <path d="M 480 290 C 480 360, 520 390, 540 460" fill="none" stroke="#f43f5e" strokeWidth="2" strokeDasharray="4 4" opacity="0.55">
-          <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.2s" repeatCount="indefinite" />
-        </path>
-        <path d="M 540 470 C 600 540, 720 540, 760 580" fill="none" stroke="#fbbf24" strokeWidth="2" strokeDasharray="4 4" opacity="0.55">
-          <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.4s" repeatCount="indefinite" />
-        </path>
-        <path d="M 760 590 C 700 620, 600 600, 580 480" fill="none" stroke="#fbbf24" strokeWidth="2" strokeDasharray="4 4" opacity="0.55">
-          <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.6s" repeatCount="indefinite" />
-        </path>
+        <rect width="1000" height="1000" fill="url(#twin-grid)" />
+      </svg>
+
+      {/* SVG dependency mesh (stretches to fill canvas) */}
+      <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+        <defs>
+          <radialGradient id="nodePulse" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor="#fb7185" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#fb7185" stopOpacity="0" />
+          </radialGradient>
+          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
+
+        {/* base edges */}
+        {allEdges.map(({ a, b, d }, i) => {
+          const crit = isEdgeCrit(a, b);
+          const active = edgeActive(a, b);
+          return (
+            <path
+              key={`edge-${i}`}
+              d={d}
+              fill="none"
+              stroke={crit ? "#f43f5e" : "#94a3b8"}
+              strokeWidth={crit ? 1.6 : 0.9}
+              opacity={active ? (crit ? 0.85 : 0.35) : 0.08}
+              strokeLinecap="round"
+            />
+          );
+        })}
+
+        {/* animated flow particles on critical edges */}
+        {allEdges.filter(({ a, b }) => isEdgeCrit(a, b)).map(({ d }, i) => (
+          <path
+            key={`flow-${i}`}
+            d={d}
+            fill="none"
+            stroke="#fb7185"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeDasharray="6 22"
+            opacity="0.9"
+            filter="url(#softGlow)"
+          >
+            <animate attributeName="stroke-dashoffset" from="0" to="-56" dur={`${1.6 + i * 0.15}s`} repeatCount="indefinite" />
+          </path>
+        ))}
+
+        {/* pulse halo on critical node anchor points */}
+        <circle cx={colX(svcIdx("svc-pay"), svcCols)} cy={Y_SVC_TOP - 8} r="10" fill="url(#nodePulse)">
+          <animate attributeName="r" values="8;18;8" dur="2.4s" repeatCount="indefinite" />
+        </circle>
+        <circle cx={colX(awsIdx("g-data"), awsCols)} cy={Y_AWS_TOP + 4} r="10" fill="url(#nodePulse)">
+          <animate attributeName="r" values="8;18;8" dur="2.6s" repeatCount="indefinite" />
+        </circle>
       </svg>
 
       {/* LAYER 1 — Business Services */}
-      <div className="absolute inset-x-3 top-3">
+      <div className="relative z-10 px-3 pt-3">
         <Label>Business Services</Label>
         <div className="mt-1.5 grid gap-2" style={{ gridTemplateColumns: `repeat(${bizCols}, minmax(0, 1fr))` }}>
           {BUSINESS_SERVICES.map((b) => {
@@ -282,7 +387,6 @@ function DigitalTwinCanvas({
                 className={cn(
                   "group relative text-left rounded-xl border bg-white/85 backdrop-blur p-2.5 transition-all duration-300",
                   "hover:-translate-y-0.5 hover:shadow-lg",
-                  HEALTH[b.health].chip.replace("text-", "border-").split(" ")[0],
                   "border-slate-200/70",
                   isFocus && "ring-2 " + HEALTH[b.health].ring,
                   b.health === "critical" && "animate-[pulse_2.6s_ease-in-out_infinite]",
@@ -304,8 +408,11 @@ function DigitalTwinCanvas({
         </div>
       </div>
 
+      {/* connector spacer */}
+      <div className="h-9" />
+
       {/* LAYER 2 — Transaction lanes */}
-      <div className="absolute inset-x-3 top-[28%]">
+      <div className="relative z-10 px-3">
         <Label>User Transactions</Label>
         <div className="mt-1.5 grid gap-2" style={{ gridTemplateColumns: `repeat(${txCols}, minmax(0, 1fr))` }}>
           {TRANSACTIONS.map((t) => {
@@ -327,7 +434,6 @@ function DigitalTwinCanvas({
                 <div className="mt-0.5 flex items-center justify-between text-[10px] text-slate-500 tabular-nums">
                   <span>p95 {t.p95}</span><span>{t.err}</span>
                 </div>
-                {/* organic flow indicator */}
                 <div className="mt-1 h-0.5 w-full overflow-hidden rounded bg-slate-100">
                   <div className={cn("h-full w-1/3 animate-[flow_2.4s_linear_infinite] rounded",
                     t.health === "critical" ? "bg-rose-400" : t.health === "warning" ? "bg-amber-400" : "bg-emerald-400")} />
@@ -338,8 +444,10 @@ function DigitalTwinCanvas({
         </div>
       </div>
 
+      <div className="h-9" />
+
       {/* LAYER 3 — Application Services */}
-      <div className="absolute inset-x-3 top-[48%]">
+      <div className="relative z-10 px-3">
         <Label>Application Services</Label>
         <div className="mt-1.5 grid gap-2" style={{ gridTemplateColumns: `repeat(${svcCols}, minmax(0, 1fr))` }}>
           {APP_SERVICES.map((s) => {
@@ -349,7 +457,7 @@ function DigitalTwinCanvas({
                 onMouseEnter={() => setHoveredId(s.id)} onMouseLeave={() => setHoveredId(null)}
                 onClick={() => onSelect(s.id)}
                 className={cn(
-                  "relative text-left rounded-lg border border-slate-200/70 bg-white/80 p-1.5 transition-all duration-300",
+                  "relative text-left rounded-lg border border-slate-200/70 bg-white/85 p-1.5 transition-all duration-300",
                   "hover:-translate-y-0.5 hover:shadow",
                   isFocus && "ring-2 " + HEALTH[s.health].ring,
                   s.health === "critical" && "shadow-[0_0_0_4px_rgba(244,63,94,0.10)]",
@@ -366,10 +474,12 @@ function DigitalTwinCanvas({
         </div>
       </div>
 
+      <div className="h-9" />
+
       {/* LAYER 4 — AWS Resource clusters */}
-      <div className="absolute inset-x-3 bottom-3 top-[68%] overflow-hidden">
+      <div className="relative z-10 px-3 pb-3">
         <Label>AWS Cloud Native Resources</Label>
-        <div className="mt-1.5 grid h-[calc(100%-22px)] gap-2" style={{ gridTemplateColumns: `repeat(${awsCols}, minmax(0, 1fr))` }}>
+        <div className="mt-1.5 grid gap-2" style={{ gridTemplateColumns: `repeat(${awsCols}, minmax(0, 1fr))` }}>
           {AWS_GROUPS.map((g) => {
             const isFocus = focusId === g.id;
             const worst: Health = g.resources.some(r => r.status === "critical") ? "critical"
@@ -389,13 +499,13 @@ function DigitalTwinCanvas({
                   <StatusDot s={worst} pulse />
                 </div>
                 <div className="mt-1 space-y-0.5">
-                  {g.resources.slice(0, 4).map((r) => (
+                  {g.resources.slice(0, 3).map((r) => (
                     <div key={r.name} className="flex items-center justify-between gap-1 text-[9.5px] text-slate-600">
                       <span className="truncate">{r.name}</span>
                       <StatusDot s={r.status} />
                     </div>
                   ))}
-                  {g.resources.length > 4 && <div className="text-[9px] text-slate-400">+{g.resources.length - 4} more</div>}
+                  {g.resources.length > 3 && <div className="text-[9px] text-slate-400">+{g.resources.length - 3} more</div>}
                 </div>
               </button>
             );
@@ -405,7 +515,7 @@ function DigitalTwinCanvas({
 
       {/* Investigation breadcrumb */}
       {selectedId === "svc-pay" && (
-        <div className="pointer-events-none absolute left-1/2 top-2 -translate-x-1/2 rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-[10.5px] text-slate-600 shadow-sm backdrop-blur">
+        <div className="pointer-events-none absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-[10.5px] text-slate-600 shadow-sm backdrop-blur">
           Payment Services <ChevronRight className="inline h-3 w-3 mx-0.5 text-slate-400" /> Process Payment
           <ChevronRight className="inline h-3 w-3 mx-0.5 text-slate-400" /> Payment Service
           <ChevronRight className="inline h-3 w-3 mx-0.5 text-slate-400" /> Aurora PostgreSQL
@@ -413,6 +523,13 @@ function DigitalTwinCanvas({
           <ChevronRight className="inline h-3 w-3 mx-0.5 text-slate-400" /> Notification Service
         </div>
       )}
+
+      {/* Canvas legend */}
+      <div className="pointer-events-none absolute bottom-2 right-3 z-20 flex items-center gap-3 rounded-full border border-slate-200 bg-white/85 px-3 py-1 text-[10px] text-slate-600 shadow-sm backdrop-blur">
+        <span className="flex items-center gap-1"><span className="inline-block h-1.5 w-3 rounded-full bg-rose-500" /> Critical path</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-1.5 w-3 rounded-full bg-slate-400/70" /> Dependency</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-rose-500 animate-pulse" /> Live</span>
+      </div>
 
       <style>{`
         @keyframes flow { 0% { transform: translateX(-100%);} 100% { transform: translateX(400%);} }
@@ -1252,7 +1369,7 @@ export default function EnterpriseCloudTwin() {
           </Glass>
 
           {/* MAIN GRID */}
-          <div className="mt-3 grid grid-cols-12 gap-3" style={{ minHeight: "calc(100vh - 260px)" }}>
+          <div className="mt-3 grid grid-cols-12 gap-3" style={{ minHeight: "560px" }}>
             {/* LEFT SUB-NAV */}
             <Glass className="col-span-2 p-2">
               <div className="px-2 pt-1 pb-2"><Label>Navigation</Label></div>
@@ -1289,11 +1406,11 @@ export default function EnterpriseCloudTwin() {
 
             {/* CANVAS / VIEW */}
             <div className="col-span-7 h-full">
-              <div className="h-full min-h-[560px]">{renderCanvasArea()}</div>
+              <div className="min-h-[620px]">{renderCanvasArea()}</div>
             </div>
 
             {/* RIGHT PANEL */}
-            <div className="col-span-3 h-full min-h-[560px]">
+            <div className="col-span-3 min-h-[620px]">
               <RightPanel selectedId={selectedId} onClear={() => setSelectedId(null)} onGenerateRCA={() => setRcaOpen(true)} />
             </div>
           </div>
