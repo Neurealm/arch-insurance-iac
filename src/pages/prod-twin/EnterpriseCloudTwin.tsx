@@ -1458,6 +1458,7 @@ function EnterpriseCloudTwinInner() {
         <RCAPreview open={rcaOpen} onOpenChange={setRcaOpen} />
         <ScenarioDrawer />
         <GuidedInvestigationMode />
+        <EvidenceGraphEngine />
       </div>
     </AppShell>
   );
