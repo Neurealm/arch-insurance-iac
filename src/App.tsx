@@ -215,6 +215,7 @@ import DeliveryOrgTwin from "./pages/prod-twin/DeliveryOrgTwin.tsx";
 import EngagementManagerTwin from "./pages/prod-twin/EngagementManagerTwin.tsx";
 import OperationalFrictionIndex from "./pages/prod-twin/OperationalFrictionIndex.tsx";
 import ReliabilityFoundations from "./pages/prod-twin/ReliabilityFoundations.tsx";
+import GoogleSre from "./pages/prod-twin/GoogleSre.tsx";
 import ProductReliabilityAnatomy from "./pages/prod-twin/ProductReliabilityAnatomy.tsx";
 import TransformationJourney from "./pages/prod-twin/TransformationJourney.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
