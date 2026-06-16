@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/eoc/AppShell";
 import {
   Activity, Users, Boxes, TrendingUp, ShieldCheck, DollarSign,
