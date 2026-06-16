@@ -5,7 +5,7 @@ import {
   Bell, Ticket, MonitorCheck, Clock, ClipboardList,
   Code2, Rocket, RefreshCw, Building2, Wrench,
   AlertTriangle, FileCheck, Shield, Network, Eye,
-  Layers, Cpu, Maximize2, GitBranch, Boxes as BoxesIcon,
+  Cpu, Maximize2, GitBranch, Boxes as BoxesIcon,
   Banknote, FileBarChart, Target, Trash2, BarChart3,
   ArrowRight, X, Sparkles, CheckCircle2, Gauge,
   type LucideIcon,
