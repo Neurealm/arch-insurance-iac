@@ -409,7 +409,7 @@ function DigitalTwinCanvas({
       </div>
 
       {/* connector spacer */}
-      <div className="flex-1 min-h-[28px]" />
+      <div className="h-9" />
 
       {/* LAYER 2 — Transaction lanes */}
       <div className="relative z-10 px-3">
@@ -444,7 +444,7 @@ function DigitalTwinCanvas({
         </div>
       </div>
 
-      <div className="flex-1 min-h-[28px]" />
+      <div className="h-9" />
 
       {/* LAYER 3 — Application Services */}
       <div className="relative z-10 px-3">
@@ -474,7 +474,7 @@ function DigitalTwinCanvas({
         </div>
       </div>
 
-      <div className="flex-1 min-h-[28px]" />
+      <div className="h-9" />
 
       {/* LAYER 4 — AWS Resource clusters */}
       <div className="relative z-10 px-3 pb-3">
@@ -1369,7 +1369,7 @@ export default function EnterpriseCloudTwin() {
           </Glass>
 
           {/* MAIN GRID */}
-          <div className="mt-3 grid grid-cols-12 gap-3" style={{ minHeight: "calc(100vh - 260px)" }}>
+          <div className="mt-3 grid grid-cols-12 gap-3" style={{ minHeight: "560px" }}>
             {/* LEFT SUB-NAV */}
             <Glass className="col-span-2 p-2">
               <div className="px-2 pt-1 pb-2"><Label>Navigation</Label></div>
@@ -1406,11 +1406,11 @@ export default function EnterpriseCloudTwin() {
 
             {/* CANVAS / VIEW */}
             <div className="col-span-7 h-full">
-              <div className="h-full min-h-[560px]">{renderCanvasArea()}</div>
+              <div className="min-h-[620px]">{renderCanvasArea()}</div>
             </div>
 
             {/* RIGHT PANEL */}
-            <div className="col-span-3 h-full min-h-[560px]">
+            <div className="col-span-3 min-h-[620px]">
               <RightPanel selectedId={selectedId} onClear={() => setSelectedId(null)} onGenerateRCA={() => setRcaOpen(true)} />
             </div>
           </div>
