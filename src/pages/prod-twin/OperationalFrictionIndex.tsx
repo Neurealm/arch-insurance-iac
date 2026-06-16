@@ -1436,7 +1436,7 @@ export default function OperationalFrictionIndex() {
         </div>
       </div>
 
-      <ChallengePanel c={selected} onClose={() => setSelected(null)} onOpen={openById} />
+      <ExecutiveIntelligencePanel c={selected} onClose={() => setSelected(null)} onOpen={openById} />
       <StagePanel stage={!selected ? activeStage : null} onClose={() => setActiveStage(null)} />
     </AppShell>
   );
