@@ -219,6 +219,7 @@ import GoogleSre from "./pages/prod-twin/GoogleSre.tsx";
 import HowToAchieveGoogleSre from "./pages/prod-twin/HowToAchieveGoogleSre.tsx";
 import TeamTopologies from "./pages/prod-twin/TeamTopologies.tsx";
 import FutureStateReliabilityOrg from "./pages/prod-twin/FutureStateReliabilityOrg.tsx";
+import FunctionalOrgChart from "./pages/prod-twin/FunctionalOrgChart.tsx";
 import ProductReliabilityAnatomy from "./pages/prod-twin/ProductReliabilityAnatomy.tsx";
 import TransformationJourney from "./pages/prod-twin/TransformationJourney.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
@@ -315,7 +316,8 @@ const App = () => (
           <Route path="/reliability-foundations/google-sre" element={<GoogleSre />} />
          <Route path="/reliability-foundations/google-sre/how-to-achieve" element={<HowToAchieveGoogleSre />} />
          <Route path="/reliability-foundations/team-topologies" element={<TeamTopologies />} />
-         <Route path="/reliability-foundations/team-topologies/future-state-org" element={<FutureStateReliabilityOrg />} />
+        <Route path="/reliability-foundations/team-topologies/future-state-org" element={<FutureStateReliabilityOrg />} />
+        <Route path="/reliability-foundations/team-topologies/functional-org-chart" element={<FunctionalOrgChart />} />
           <Route path="/product-reliability-anatomy" element={<ProductReliabilityAnatomy />} />
           <Route path="/transformation-journey" element={<TransformationJourney />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
