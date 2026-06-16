@@ -510,7 +510,7 @@ export function EocSidebar() {
       data-collapsed={collapsed ? "true" : "false"}
       className={cn(
         "flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
-        "fixed left-0 top-0 h-dvh z-50 will-change-[width]",
+        "fixed left-0 top-0 h-dvh z-40 will-change-[width]",
         "transition-[width,box-shadow] duration-300 ease-out",
         collapsed
           ? "shadow-none"
