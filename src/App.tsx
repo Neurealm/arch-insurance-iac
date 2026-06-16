@@ -192,7 +192,7 @@ import AdminModel from "./pages/aocp/AdminModel.tsx";
 import AocpPlaceholder from "./pages/aocp/AocpPlaceholder.tsx";
 import ProdResilienceTwin from "./pages/prod-twin/ProdResilienceTwin.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
-import HowReliabilityOperates from "./pages/prod-twin/HowReliabilityOperates.tsx";
+
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
 import GoldenWorkflowMap from "./pages/prod-twin/GoldenWorkflowMap.tsx";
 import ProductionTopology from "./pages/prod-twin/ProductionTopology.tsx";
@@ -331,7 +331,7 @@ const App = () => (
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
           <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
-          <Route path="/how-reliability-operates" element={<HowReliabilityOperates />} />
+          
           <Route path="/product-line-map" element={<ProductLineMap />} />
           <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
           <Route path="/production-topology" element={<ProductionTopology />} />
