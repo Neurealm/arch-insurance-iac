@@ -221,6 +221,7 @@ import TeamTopologies from "./pages/prod-twin/TeamTopologies.tsx";
 import FutureStateReliabilityOrg from "./pages/prod-twin/FutureStateReliabilityOrg.tsx";
 import FunctionalOrgChart from "./pages/prod-twin/FunctionalOrgChart.tsx";
 import PlatformEngineeringDesignPrinciples from "./pages/prod-twin/PlatformEngineeringDesignPrinciples.tsx";
+import HowToBuildPlatformEngineering from "./pages/prod-twin/HowToBuildPlatformEngineering.tsx";
 import ProductReliabilityAnatomy from "./pages/prod-twin/ProductReliabilityAnatomy.tsx";
 import TransformationJourney from "./pages/prod-twin/TransformationJourney.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
