@@ -198,6 +198,7 @@ import GoldenWorkflowMap from "./pages/prod-twin/GoldenWorkflowMap.tsx";
 import ProductionTopology from "./pages/prod-twin/ProductionTopology.tsx";
 import SreOperatingModel from "./pages/prod-twin/SreOperatingModel.tsx";
 import SignalIntelligence from "./pages/prod-twin/SignalIntelligence.tsx";
+import EnterpriseCloudTwin from "./pages/prod-twin/EnterpriseCloudTwin.tsx";
 import PlatformEngineeringFactory from "./pages/prod-twin/PlatformEngineeringFactory.tsx";
 import HybridCloudWorkbench from "./pages/prod-twin/HybridCloudWorkbench.tsx";
 import AutomationMarketplace from "./pages/prod-twin/AutomationMarketplace.tsx";
@@ -337,6 +338,7 @@ const App = () => (
           <Route path="/production-topology" element={<ProductionTopology />} />
           <Route path="/sre-operating-model" element={<SreOperatingModel />} />
           <Route path="/signal-intelligence" element={<SignalIntelligence />} />
+          <Route path="/enterprise-cloud-twin" element={<EnterpriseCloudTwin />} />
           <Route path="/platform-engineering-factory" element={<PlatformEngineeringFactory />} />
           <Route path="/hybrid-cloud-workbench" element={<HybridCloudWorkbench />} />
           <Route path="/automation-marketplace" element={<AutomationMarketplace />} />
