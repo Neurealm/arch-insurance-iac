@@ -1368,9 +1368,12 @@ export default function EnterpriseCloudTwin() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="ml-auto relative">
-                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
-                <Input placeholder="Search services, transactions, traces, resources, incidents, changes, owners, tags, runbooks" className="h-8 w-[420px] pl-8 text-[11.5px]" />
+              <div className="ml-auto flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                  <Input placeholder="Search services, transactions, traces, resources, incidents, changes, owners, tags, runbooks" className="h-8 w-[360px] pl-8 text-[11.5px]" />
+                </div>
+                <DemoScenarioController />
               </div>
             </div>
             {/* Global KPI strip */}
@@ -1446,6 +1449,7 @@ export default function EnterpriseCloudTwin() {
 
         <NovaCopilot open={novaOpen} onOpenChange={setNovaOpen} />
         <RCAPreview open={rcaOpen} onOpenChange={setRcaOpen} />
+        <ScenarioDrawer />
       </div>
     </AppShell>
   );
