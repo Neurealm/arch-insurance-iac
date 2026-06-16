@@ -300,7 +300,7 @@ function DigitalTwinCanvas({
   ];
 
   return (
-    <div className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-gradient-to-br from-[#F6F8FB] via-white to-[#EEF4FF]">
+    <div className="relative flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-gradient-to-br from-[#F6F8FB] via-white to-[#EEF4FF]">
       {/* atmospheric gradients */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute -top-32 -left-24 h-96 w-96 rounded-full bg-sky-200/30 blur-3xl" />
