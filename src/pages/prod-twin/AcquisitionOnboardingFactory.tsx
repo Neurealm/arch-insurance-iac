@@ -54,7 +54,7 @@ const STAGES: { id: string; n: number; tone: StageTone; window: string; title: s
     metric: { v: "124", k: "Assets Standardized" },
     activities: ["Golden Images","Agent Deployment","Logging Standards","Tagging","Patch Baselines","SLO Registration","CMDB Registration","Service Ownership Mapping"],
     outputs: ["Readiness Certification","Standardization Score"] },
-  { id: "s4", n: 4, tone: "violet",  window: "Day 60–90", title: "HHAX Integration",    icon: Workflow,
+  { id: "s4", n: 4, tone: "violet",  window: "Day 60–90", title: "Client Integration",    icon: Workflow,
     metric: { v: "68", k: "Services Integrated" },
     activities: ["Service Catalog Registration","Incident Model Integration","SRE Reviews","FinOps Governance","Security Governance","Change Governance","Executive Reporting"],
     outputs: ["Governance Alignment","Operational Acceptance"] },
@@ -107,7 +107,7 @@ const TOWERS = [
   { tower: "Platform Engineering",current: "Baseline",    future: "Platform Aligned", progress: 45, gate: "Pass",        owner: "Neurealm", gateTone: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   { tower: "Security Operations", current: "Baseline",    future: "Standardized",     progress: 30, gate: "Pass",        owner: "Neurealm", gateTone: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   { tower: "Database Operations", current: "Baseline",    future: "Standardized",     progress: 40, gate: "Pass",        owner: "Neurealm", gateTone: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  { tower: "Network Operations",  current: "Baseline",    future: "Standardized",     progress: 25, gate: "In Progress", owner: "HHAX",     gateTone: "bg-amber-50 text-amber-800 border-amber-200" },
+  { tower: "Network Operations",  current: "Baseline",    future: "Standardized",     progress: 25, gate: "In Progress", owner: "Client",     gateTone: "bg-amber-50 text-amber-800 border-amber-200" },
   { tower: "SRE",                 current: "Integration", future: "Platform Aligned", progress: 35, gate: "Pass",        owner: "Neurealm", gateTone: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   { tower: "DevOps",              current: "Baseline",    future: "Platform Aligned", progress: 50, gate: "Pass",        owner: "Neurealm", gateTone: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   { tower: "Observability",       current: "Integration", future: "Standardized",     progress: 55, gate: "Pass",        owner: "Neurealm", gateTone: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -174,7 +174,7 @@ export default function AcquisitionOnboardingFactory() {
         <div className="bg-white border-b border-slate-200">
           <div className="px-6 py-4 flex items-start gap-6">
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">HHAX Production Resilience Operating System</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Client Production Resilience Operating System</div>
               <h1 className="text-[22px] font-bold text-slate-900 leading-tight mt-0.5">Acquisition-to-SRE Onboarding Factory</h1>
               <p className="text-sm text-slate-600 mt-0.5">Transform acquired environments into secure, observable, reliable, governable production services.</p>
             </div>
@@ -565,7 +565,7 @@ export default function AcquisitionOnboardingFactory() {
               <TabsContent value="arch" className="mt-3 text-sm text-slate-700">Hosting: {drawer?.data?.hosting}. Identity federated via Okta. Multi-cloud DB on Oracle + RDS Postgres. Networking via TGW.</TabsContent>
               <TabsContent value="deps" className="mt-3 text-sm text-slate-700">142 services, 612 integrations, 38 data flows mapped by Dependency Mapper.</TabsContent>
               <TabsContent value="sec" className="mt-3 text-sm text-slate-700">EDR 88% · Identity 62% · Backup validated · 14 critical CVEs open · Recovery tested 2025-05.</TabsContent>
-              <TabsContent value="ops" className="mt-3 text-sm text-slate-700">SLO registered for top 8 workflows. On-call integrated with HHAX PagerDuty. Runbooks 71% complete.</TabsContent>
+              <TabsContent value="ops" className="mt-3 text-sm text-slate-700">SLO registered for top 8 workflows. On-call integrated with Client PagerDuty. Runbooks 71% complete.</TabsContent>
               <TabsContent value="mod" className="mt-3 text-sm text-slate-700">12 modernization tracks. 4 candidates for containerization. 2 sunset candidates.</TabsContent>
               <TabsContent value="actions" className="mt-3 space-y-2">
                 {["30 Day Plan","60 Day Plan","90 Day Plan","12 Month Plan"].map(p => (

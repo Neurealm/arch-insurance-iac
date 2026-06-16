@@ -79,7 +79,7 @@ const PHASES: { id: string; n: number; title: string; status: PhaseStatus; metri
   { id: "p0", n: 0, title: "Confidential Discovery", status: "complete", metrics: [{k:"Artifacts",v:"124"},{k:"Stakeholders",v:"28"},{k:"Open Data Gaps",v:"14"}], contents: ["Stakeholder Map","Scope Towers","Decision Calendar","Data Requests","Governance Structure"] },
   { id: "p1", n: 1, title: "Knowledge Capture", status: "complete", metrics: [{k:"Runbooks",v:"286"},{k:"Diagrams",v:"142"},{k:"Alerts",v:"328"}], contents: ["Product Inventory","Service Inventory","Runbooks","Access Models","Architecture","Alert Catalog","Ticket History"] },
   { id: "p2", n: 2, title: "Reverse Shadow", status: "active",   metrics: [{k:"Observed Workflows",v:"68"},{k:"Incidents Observed",v:"24"},{k:"Runbooks Reviewed",v:"102"}], contents: ["Observe Operations","Validate Procedures","Identify Gaps","Document Dependencies"] },
-  { id: "p3", n: 3, title: "Shadow Support", status: "planned",  metrics: [{k:"Actions Proposed",v:"0"},{k:"Recommendations",v:"0"},{k:"Runbooks Drafted",v:"0"}], contents: ["Neurealm Recommends","HHAX Executes","Validation Captured"] },
+  { id: "p3", n: 3, title: "Shadow Support", status: "planned",  metrics: [{k:"Actions Proposed",v:"0"},{k:"Recommendations",v:"0"},{k:"Runbooks Drafted",v:"0"}], contents: ["Neurealm Recommends","Client Executes","Validation Captured"] },
   { id: "p4", n: 4, title: "Co-Run", status: "planned",          metrics: [{k:"Shared Services",v:"0"},{k:"Quality Gates",v:"0"},{k:"Reviews Scheduled",v:"0"}], contents: ["Shared Execution","Quality Gates","Joint Governance","Operational Reviews"] },
   { id: "p5", n: 5, title: "Takeover", status: "planned",        metrics: [{k:"Towers Transitioned",v:"0"},{k:"Ownership Defined",v:"0"},{k:"Acceptance Tests",v:"0"}], contents: ["Defined Ownership","Acceptance Validation","Tower Transition","Service Ownership"] },
   { id: "p6", n: 6, title: "Stabilize", status: "planned",       metrics: [{k:"Stability Index",v:"0"},{k:"SLO Compliance",v:"0%"},{k:"Runbook Complete",v:"0%"}], contents: ["SLO Governance","Patch Hygiene","Incident Hygiene","Runbook Completeness","Observability"] },
@@ -87,11 +87,11 @@ const PHASES: { id: string; n: number; title: string; status: PhaseStatus; metri
 ];
 
 const DUAL_RUN = [
-  { id: "cgm", service: "Caregiver Mobile",   sub: "Member app, auth, APIs", cur: "Incumbent", fut: "Neurealm + HHAX", phase: "Phase 2 Reverse Shadow", phaseTone: "blue",    status: "On Track", risk: "low" as Risk,    slo: "low" as Risk,    next: "Shadow Support", date: "Jul 15, 2025" },
-  { id: "clm", service: "Claims Processing", sub: "Claims intake, adjudication", cur: "Incumbent", fut: "Neurealm + HHAX", phase: "Phase 1 Knowledge Capture", phaseTone: "violet", status: "On Track", risk: "medium" as Risk, slo: "high" as Risk,   next: "Reverse Shadow", date: "Jul 31, 2025" },
-  { id: "pay", service: "Payroll",            sub: "Provider payroll, payments", cur: "Incumbent", fut: "Neurealm + HHAX", phase: "Phase 2 Reverse Shadow", phaseTone: "blue",    status: "On Track", risk: "low" as Risk,    slo: "medium" as Risk, next: "Shadow Support", date: "Jul 15, 2025" },
-  { id: "pp",  service: "Provider Portal",    sub: "Provider web portal",     cur: "Incumbent", fut: "Neurealm + HHAX", phase: "Phase 1 Knowledge Capture", phaseTone: "violet", status: "On Track", risk: "medium" as Risk, slo: "medium" as Risk, next: "Reverse Shadow", date: "Jul 31, 2025" },
-  { id: "idd", service: "IDD / Citrix",       sub: "Thick client environment", cur: "Incumbent", fut: "Neurealm + HHAX", phase: "Phase 0 Discovery Complete", phaseTone: "emerald", status: "Complete", risk: "low" as Risk, slo: "low" as Risk,   next: "Knowledge Capture", date: "Complete" },
+  { id: "cgm", service: "Caregiver Mobile",   sub: "Member app, auth, APIs", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 2 Reverse Shadow", phaseTone: "blue",    status: "On Track", risk: "low" as Risk,    slo: "low" as Risk,    next: "Shadow Support", date: "Jul 15, 2025" },
+  { id: "clm", service: "Claims Processing", sub: "Claims intake, adjudication", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 1 Knowledge Capture", phaseTone: "violet", status: "On Track", risk: "medium" as Risk, slo: "high" as Risk,   next: "Reverse Shadow", date: "Jul 31, 2025" },
+  { id: "pay", service: "Payroll",            sub: "Provider payroll, payments", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 2 Reverse Shadow", phaseTone: "blue",    status: "On Track", risk: "low" as Risk,    slo: "medium" as Risk, next: "Shadow Support", date: "Jul 15, 2025" },
+  { id: "pp",  service: "Provider Portal",    sub: "Provider web portal",     cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 1 Knowledge Capture", phaseTone: "violet", status: "On Track", risk: "medium" as Risk, slo: "medium" as Risk, next: "Reverse Shadow", date: "Jul 31, 2025" },
+  { id: "idd", service: "IDD / Citrix",       sub: "Thick client environment", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 0 Discovery Complete", phaseTone: "emerald", status: "Complete", risk: "low" as Risk, slo: "low" as Risk,   next: "Knowledge Capture", date: "Complete" },
 ];
 
 const RISKS = [
@@ -193,7 +193,7 @@ export default function TransitionDualRun() {
         <div className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-20">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div className="text-[11px] uppercase tracking-wide text-slate-500 font-medium">HHAX Production Resilience Operating System</div>
+              <div className="text-[11px] uppercase tracking-wide text-slate-500 font-medium">Client Production Resilience Operating System</div>
               <h1 className="text-xl font-semibold text-slate-900 mt-0.5">Transition & Dual-Run Command Center</h1>
               <p className="text-xs text-slate-500 mt-1 max-w-3xl">Govern knowledge transfer, continuity, dual-run execution, service ownership adoption, and modernization without customer disruption.</p>
             </div>
@@ -526,15 +526,15 @@ export default function TransitionDualRun() {
               <p className="text-[11px] text-slate-500 mb-3">Service tower progress, ownership, and quality gates.</p>
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
                 {[
-                  { name: "Cloud Operations",    cur: "Incumbent",     fut: "Neurealm + HHAX", prog: 62, qg: "Pass", risk: "low" as Risk, icon: Cloud },
+                  { name: "Cloud Operations",    cur: "Incumbent",     fut: "Neurealm + Client", prog: 62, qg: "Pass", risk: "low" as Risk, icon: Cloud },
                   { name: "Platform Engineering",cur: "Incumbent",     fut: "Neurealm",        prog: 48, qg: "Pass", risk: "medium" as Risk, icon: Layers },
-                  { name: "Security Operations", cur: "Incumbent",     fut: "Neurealm + HHAX", prog: 54, qg: "Pass", risk: "high" as Risk, icon: ShieldCheck },
+                  { name: "Security Operations", cur: "Incumbent",     fut: "Neurealm + Client", prog: 54, qg: "Pass", risk: "high" as Risk, icon: ShieldCheck },
                   { name: "Database Operations", cur: "Incumbent",     fut: "Neurealm",        prog: 71, qg: "Pass", risk: "medium" as Risk, icon: Database },
-                  { name: "Network Operations",  cur: "Incumbent",     fut: "Neurealm + HHAX", prog: 58, qg: "Watch", risk: "medium" as Risk, icon: GitBranch },
+                  { name: "Network Operations",  cur: "Incumbent",     fut: "Neurealm + Client", prog: 58, qg: "Watch", risk: "medium" as Risk, icon: GitBranch },
                   { name: "SRE",                 cur: "Incumbent",     fut: "Neurealm",        prog: 42, qg: "Pass", risk: "low" as Risk, icon: Activity },
                   { name: "DevOps",              cur: "Incumbent",     fut: "Neurealm",        prog: 65, qg: "Pass", risk: "low" as Risk, icon: Workflow },
                   { name: "Observability",       cur: "Incumbent",     fut: "Neurealm",        prog: 38, qg: "Watch", risk: "medium" as Risk, icon: Eye },
-                  { name: "FinOps",              cur: "HHAX",          fut: "HHAX + Neurealm", prog: 30, qg: "Planned", risk: "low" as Risk, icon: BarChart3 },
+                  { name: "FinOps",              cur: "Client",          fut: "Client + Neurealm", prog: 30, qg: "Planned", risk: "low" as Risk, icon: BarChart3 },
                 ].map((t) => (
                   <button key={t.name} onClick={() => open({ kind: "tower", title: t.name, data: t })} className="text-left rounded-lg border border-slate-200 bg-white p-3 hover:shadow-md hover:border-blue-200 transition-all">
                     <div className="flex items-center gap-2 mb-1.5">
@@ -633,7 +633,7 @@ export default function TransitionDualRun() {
               <TabsTrigger value="audit"    className="text-[11px]">Audit</TabsTrigger>
             </TabsList>
             <TabsContent value="overview" className="text-xs text-slate-600 space-y-3 mt-3">
-              <div>This item is governed by the HHAX transition program and tracked under the Production Resilience Operating System.</div>
+              <div>This item is governed by the Client transition program and tracked under the Production Resilience Operating System.</div>
               {drawer?.data?.contents && (
                 <ul className="list-disc pl-4 space-y-1">
                   {drawer.data.contents.map((c: string) => <li key={c}>{c}</li>)}

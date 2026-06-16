@@ -191,7 +191,7 @@ export default function ModernizationRoadmapV2() {
           <div className="px-6 py-4 flex items-start gap-6">
             <div className="flex-1 min-w-0">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                HHAX Production Resilience Operating System
+                Client Production Resilience Operating System
               </div>
               <h1 className="text-[24px] font-bold tracking-tight text-slate-900 leading-tight mt-0.5">
                 Modernization Roadmap

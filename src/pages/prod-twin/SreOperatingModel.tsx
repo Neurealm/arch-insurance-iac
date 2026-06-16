@@ -161,7 +161,7 @@ export default function SreOperatingModel() {
         {/* Top bar */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
           <div>
-            <div className="text-[11px] uppercase tracking-wider text-slate-500">HHAX Production Resilience Operating System</div>
+            <div className="text-[11px] uppercase tracking-wider text-slate-500">Client Production Resilience Operating System</div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold tracking-tight">SRE Operating Model Cockpit</h1>
               <Info className="h-4 w-4 text-slate-400" />
@@ -630,7 +630,7 @@ export default function SreOperatingModel() {
         </div>
 
         <div className="border-t border-slate-200 bg-white px-6 py-2 text-[11px] text-slate-500">
-          Last updated: May 16, 2025 9:30 AM ET · Source: HHAX Digital Twin
+          Last updated: May 16, 2025 9:30 AM ET · Source: Client Digital Twin
         </div>
       </div>
 
@@ -655,7 +655,7 @@ export default function SreOperatingModel() {
                 <Row label="Product Line" value="HHA Enterprise" />
                 <Row label="Environment" value="Production" />
                 <div className="rounded-md border border-slate-200 bg-slate-50 p-2 text-[12px] text-slate-600">
-                  This entity is governed under the HHAX SRE Operating Model. Reliability decisions are made through SLOs and error budgets, not ticket queues.
+                  This entity is governed under the Client SRE Operating Model. Reliability decisions are made through SLOs and error budgets, not ticket queues.
                 </div>
               </TabsContent>
               <TabsContent value="metrics" className="mt-3 space-y-2 text-sm">

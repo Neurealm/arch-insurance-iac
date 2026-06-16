@@ -94,7 +94,7 @@ const INPUTS: Input[] = [
     symptoms: ["Integration timelines highly variable", "Reliability posture differs by acquisition", "Engineering ramp slow"],
     impact: "Slows portfolio modernization; creates parallel operating models.",
     metrics: ["Integration cycle time", "Time to first standard adoption", "Cross-acquisition incident rate"],
-    hhax: "HHAX growth strategy includes multiple acquisitions with heterogeneous engineering histories." },
+    hhax: "Client growth strategy includes multiple acquisitions with heterogeneous engineering histories." },
   { id: "silos", title: "Siloed Teams", icon: Users,
     definition: "Engineering, operations, infra, security, and product teams operate with limited shared visibility.",
     symptoms: ["Handoffs dominate delivery", "Each team has its own backlog and metrics", "Cross-team work stalls"],
@@ -167,7 +167,7 @@ const STAGES: Stage[] = [
       { label: "MTTR (Tier-1)", baseline: "65 min", target: "< 45 min", forecast: "42 min" },
     ],
     ai: ["Asset Discovery Agent", "Alert Triage Copilot", "Runbook Indexer"],
-    hhax: "HHAX enters this stage with multiple acquired estates and partial visibility. Stabilize creates the operating baseline that all subsequent investment depends on.",
+    hhax: "Client enters this stage with multiple acquired estates and partial visibility. Stabilize creates the operating baseline that all subsequent investment depends on.",
     why: "You cannot improve what you cannot see. Stabilization establishes the truth of the current state.",
     cannotSkip: "Without stabilization, later stages optimize the wrong things. Standardization without visibility creates standards no one trusts.",
     decisionGate: { id: "DG1", name: "Baseline Established", metric: "Monitoring Coverage > 70%" },
@@ -195,7 +195,7 @@ const STAGES: Stage[] = [
       { label: "Tagging Compliance", baseline: "55%", target: "> 90%", forecast: "92%" },
     ],
     ai: ["IaC Authoring Copilot", "Policy Drift Detector", "Compliance Evidence Agent"],
-    hhax: "Standardization is the lever that lets HHAX absorb future acquisitions without bespoke integration. Golden images, GitHub standards, and cloud guardrails are explicit HHAX initiatives.",
+    hhax: "Standardization is the lever that lets Client absorb future acquisitions without bespoke integration. Golden images, GitHub standards, and cloud guardrails are explicit Client initiatives.",
     why: "Standards reduce cognitive load, accelerate onboarding, and create the substrate for automation.",
     cannotSkip: "Service ownership without standards burdens every team with the same decisions in isolation.",
     decisionGate: { id: "DG2", name: "Standards Adopted", metric: "Image Standardization > 70%" },
@@ -205,7 +205,7 @@ const STAGES: Stage[] = [
     inputs: ["ownership-gaps", "silos", "ticket-culture"],
     activities: [
       { title: "Service catalog", detail: "Single source of truth: owner, tier, dependencies, runbooks, on-call, SLOs." },
-      { title: "Ownership matrix", detail: "Named owning team for every Tier-1 service across HHAX and acquisitions." },
+      { title: "Ownership matrix", detail: "Named owning team for every Tier-1 service across Client and acquisitions." },
       { title: "Escalation models", detail: "Defined paging, escalation, and customer-comms paths per Sev." },
       { title: "Service tiering", detail: "Tier-1/2/3 model with criticality, RTO/RPO, and SLO commitments." },
       { title: "KPI framework", detail: "Per-service health: reliability, cost, performance, customer impact." },
@@ -251,7 +251,7 @@ const STAGES: Stage[] = [
       { label: "Time-to-First-Service", baseline: "12 wk", target: "< 2 wk", forecast: "1.5 wk" },
     ],
     ai: ["Developer Onboarding Copilot", "Golden Path Recommender", "Catalog Quality Agent"],
-    hhax: "Directly addresses HHAX discussions around standardization, golden images, GitHub standards, shared services, and reusable platforms across acquired teams.",
+    hhax: "Directly addresses Client discussions around standardization, golden images, GitHub standards, shared services, and reusable platforms across acquired teams.",
     why: "Platforms compound. Each capability you build reduces operational tax for every team that consumes it.",
     cannotSkip: "Automation without a platform creates point automations. Reliability engineering without a platform cannot scale across the portfolio.",
     decisionGate: { id: "DG4", name: "Platform Adoption", metric: "Platform Adoption > 60%" },
@@ -817,7 +817,7 @@ function StagePanel({ open, onClose, stage }: { open: boolean; onClose: () => vo
             <TabsTrigger value="roles"     className="text-[11px] px-2 py-1">People & Roles</TabsTrigger>
             <TabsTrigger value="kpis"      className="text-[11px] px-2 py-1">KPIs</TabsTrigger>
             <TabsTrigger value="ai"        className="text-[11px] px-2 py-1">AI Enablement</TabsTrigger>
-            <TabsTrigger value="hhax"      className="text-[11px] px-2 py-1">HHAX</TabsTrigger>
+            <TabsTrigger value="hhax"      className="text-[11px] px-2 py-1">Client</TabsTrigger>
           </TabsList>
 
           <div className="overflow-y-auto px-6 py-4 flex-1 space-y-4">
@@ -963,7 +963,7 @@ function InputPanel({ open, onClose, input }: { open: boolean; onClose: () => vo
             </div>
           </div>
           <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
-            <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">HHAX Manifestation</div>
+            <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">Client Manifestation</div>
             <div className="text-xs text-emerald-900 mt-1 leading-relaxed">{input.hhax}</div>
           </div>
         </div>

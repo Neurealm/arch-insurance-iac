@@ -142,7 +142,7 @@ export default function GoldenWorkflowMap() {
       <div className="flex-1 flex flex-col bg-slate-50/60 min-h-screen">
         {/* Top utility bar */}
         <div className="h-14 border-b bg-white px-6 flex items-center gap-4 sticky top-0 z-20">
-          <div className="font-semibold text-slate-800">HHAX Production Resilience Operating System</div>
+          <div className="font-semibold text-slate-800">Client Production Resilience Operating System</div>
           <div className="flex-1 max-w-2xl mx-auto relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input placeholder="Search for workflows, services, apps, owners…" className="pl-9 h-9 bg-slate-50 border-slate-200" />
@@ -165,7 +165,7 @@ export default function GoldenWorkflowMap() {
                 <Info className="h-4 w-4 text-slate-400" />
               </div>
               <p className="text-sm text-slate-600 mt-1">
-                Customer journeys that matter most to HHAX. Real-time health across experience, applications, data, platform, and security.
+                Customer journeys that matter most to Client. Real-time health across experience, applications, data, platform, and security.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -417,7 +417,7 @@ export default function GoldenWorkflowMap() {
 
           <div className="mt-4 text-[11px] text-slate-500 flex items-center justify-between">
             <span>Last updated: Jun 14, 2026 8:30 AM ET <RefreshCw className="h-3 w-3 inline ml-1 text-slate-400" /></span>
-            <span className="flex items-center gap-1">Source: HHAX Digital Twin <Info className="h-3 w-3" /></span>
+            <span className="flex items-center gap-1">Source: Client Digital Twin <Info className="h-3 w-3" /></span>
           </div>
         </main>
 
