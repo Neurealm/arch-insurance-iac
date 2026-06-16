@@ -580,6 +580,29 @@ function detailFor(id: string | null) {
   return null;
 }
 
+function PaymentEvidenceSummary() {
+  const { graph, openGraph } = useEvidenceGraph();
+  if (!graph) return null;
+  return (
+    <section>
+      <Label>Evidence</Label>
+      <div className="mt-2"><RootCauseSummaryCard graph={graph} onOpen={() => openGraph()} /></div>
+      <div className="mt-2 grid grid-cols-4 gap-1.5 text-[10.5px]">
+        <div className="rounded-md border border-slate-200 bg-white p-1.5"><div className="text-slate-500">Related</div><div className="font-semibold text-slate-800">7 items</div></div>
+        <div className="rounded-md border border-slate-200 bg-white p-1.5"><div className="text-slate-500">Strength</div><div className="font-semibold text-emerald-700">Strong</div></div>
+        <div className="rounded-md border border-slate-200 bg-white p-1.5"><div className="text-slate-500">Hypothesis</div><div className="font-semibold text-violet-700">Deploy</div></div>
+        <div className="rounded-md border border-slate-200 bg-white p-1.5"><div className="text-slate-500">Top signal</div><div className="font-semibold text-slate-800">v2.14.7</div></div>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <EvidenceGraphLauncher variant="compact" label="Open Evidence Graph" />
+        <EvidenceGraphLauncher variant="pill" label="Causal Chain" mode="causal" />
+        <EvidenceGraphLauncher variant="pill" label="Hypotheses" mode="hypotheses" />
+        <EvidenceGraphLauncher variant="pill" label="Recommendation" mode="recommendation" />
+      </div>
+    </section>
+  );
+}
+
 function RightPanel({
   selectedId, onClear, onGenerateRCA,
 }: { selectedId: string | null; onClear: () => void; onGenerateRCA: () => void }) {
