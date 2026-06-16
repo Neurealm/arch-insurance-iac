@@ -966,6 +966,13 @@ function DisciplineCard({
             <span>How Organizations Achieve It</span>
             <ArrowRight className="w-3 h-3" />
           </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate("/reliability-foundations/platform-engineering/capability-model"); }}
+            className="text-left text-[11px] font-semibold text-violet-700 hover:text-violet-800 inline-flex items-center justify-between rounded-md border border-violet-200 bg-violet-50/60 hover:bg-violet-50 px-2 py-1.5 transition-colors"
+          >
+            <span>Capability Model</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
         </div>
       )}
 

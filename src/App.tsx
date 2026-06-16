@@ -222,6 +222,7 @@ import FutureStateReliabilityOrg from "./pages/prod-twin/FutureStateReliabilityO
 import FunctionalOrgChart from "./pages/prod-twin/FunctionalOrgChart.tsx";
 import PlatformEngineeringDesignPrinciples from "./pages/prod-twin/PlatformEngineeringDesignPrinciples.tsx";
 import HowToBuildPlatformEngineering from "./pages/prod-twin/HowToBuildPlatformEngineering.tsx";
+import PlatformAsAProduct from "./pages/prod-twin/PlatformAsAProduct.tsx";
 import ProductReliabilityAnatomy from "./pages/prod-twin/ProductReliabilityAnatomy.tsx";
 import TransformationJourney from "./pages/prod-twin/TransformationJourney.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
@@ -322,6 +323,7 @@ const App = () => (
         <Route path="/reliability-foundations/team-topologies/functional-org-chart" element={<FunctionalOrgChart />} />
         <Route path="/reliability-foundations/platform-engineering/design-principles" element={<PlatformEngineeringDesignPrinciples />} />
         <Route path="/reliability-foundations/platform-engineering/how-to-build" element={<HowToBuildPlatformEngineering />} />
+        <Route path="/reliability-foundations/platform-engineering/capability-model" element={<PlatformAsAProduct />} />
           <Route path="/product-reliability-anatomy" element={<ProductReliabilityAnatomy />} />
           <Route path="/transformation-journey" element={<TransformationJourney />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
