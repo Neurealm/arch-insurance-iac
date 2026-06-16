@@ -778,6 +778,7 @@ function Timeline() {
               <div className="mt-1 rounded-md border border-slate-200/70 bg-white/80 p-1.5 text-[10.5px]">
                 <div className="text-[9.5px] uppercase tracking-wide text-slate-400">{e.type}</div>
                 <div className="text-slate-800 leading-tight">{e.label}</div>
+                <div className="mt-1"><EvidenceGraphLauncher variant="inline" label="View correlation evidence" mode="timeline" /></div>
               </div>
             </div>
           ))}
