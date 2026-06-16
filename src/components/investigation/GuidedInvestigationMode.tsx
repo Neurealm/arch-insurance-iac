@@ -12,6 +12,8 @@ import { TIMELINE_EVENTS } from "@/data/guidedInvestigations";
 import type {
   DecisionOption, EvidenceItem, InvestigationStep, MetricSnapshot, RunbookStep,
 } from "@/data/guidedInvestigations";
+import { EvidenceGraphLauncher, EvidenceGraphAvailableIndicator } from "@/components/evidence/EvidenceGraphEngine";
+import type { EvidenceGraphMode } from "@/data/evidenceGraphData";
 
 /* ------------------------------ utilities ------------------------------- */
 
