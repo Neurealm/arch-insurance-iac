@@ -889,6 +889,7 @@ function DisciplineCard({
   const dim = hoveredId && hoveredId !== d.id;
   const navigate = useNavigate();
   const isSre = d.id === "sre";
+  const isTopo = d.id === "topo";
   return (
     <div
       onMouseEnter={() => onHover(d.id)}
@@ -923,9 +924,21 @@ function DisciplineCard({
           </button>
         </div>
       )}
+      {isTopo && (
+        <div className="mt-3 flex flex-col gap-1.5">
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate("/reliability-foundations/team-topologies"); }}
+            className="text-left text-[11px] font-semibold text-sky-700 hover:text-sky-800 inline-flex items-center justify-between rounded-md border border-sky-200 bg-sky-50/60 hover:bg-sky-50 px-2 py-1.5 transition-colors"
+          >
+            <span>Design Principles</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
+
 
 function ShiftCard({
   shift, hoveredDiscipline, onOpen, dim,
