@@ -152,7 +152,7 @@ const tree: Node[] = [
       { key: "sre-anat", label: "Anatomy of a Modern Product Reliability Organization", icon: Compass, to: "/product-reliability-anatomy" },
       { key: "sre-tj", label: "Production Reliability Transformation Journey", icon: TrendingUp2, to: "/transformation-journey" },
       { key: "sre-ms", label: "Measuring Success", icon: Gauge, to: "/measuring-success" },
-      { key: "sre-hro", label: "How a Modern Product Reliability Organization Operates", icon: Workflow, to: "/how-reliability-operates" },
+      
       { key: "sre-cmd", label: "PROD Resilience Command Center", icon: Activity, to: "/prod-resilience-twin" },
       { key: "sre-plm", label: "HHAX Product Line Map", icon: Package, to: "/product-line-map" },
       { key: "sre-gwm", label: "HHAX Golden Workflow Map", icon: Workflow, to: "/golden-workflow-map" },
