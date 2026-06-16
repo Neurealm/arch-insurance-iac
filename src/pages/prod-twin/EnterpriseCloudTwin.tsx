@@ -809,8 +809,20 @@ function NovaCopilot({ open, onOpenChange }: { open: boolean; onOpenChange: (b: 
 
             <Glass className="p-3">
               <Label>Probable Root Cause</Label>
-              <p className="mt-1 text-[12px] text-slate-700">Connection pool saturation after deployment v2.14.7.</p>
-              <Label><span className="mt-2 inline-block">Blast Radius</span></Label>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <p className="text-[12px] text-slate-700">Deployment Regression · v2.14.7 → connection pool saturation on Aurora.</p>
+                <span className="rounded-full bg-violet-100 text-violet-700 px-2 py-0.5 text-[10.5px] font-semibold">87%</span>
+              </div>
+              <div className="mt-1.5 text-[11px] text-slate-600">
+                9 supporting signals · 3 excluded · 4 alternatives evaluated
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <EvidenceGraphLauncher variant="compact" label="View Evidence Graph" />
+                <EvidenceGraphLauncher variant="compact" label="Compare Hypotheses" mode="hypotheses" />
+                <EvidenceGraphLauncher variant="compact" label="Explain Confidence" mode="hypotheses" />
+                <EvidenceGraphLauncher variant="compact" label="Show Why Not" mode="hypotheses" />
+              </div>
+              <Label><span className="mt-3 inline-block">Blast Radius</span></Label>
               <div className="mt-1 flex flex-wrap gap-1">
                 {["Payment Service","Order Service","Notification Service","Submit Order","Process Payment"].map(x =>
                   <Badge key={x} variant="outline" className="text-[10px]">{x}</Badge>)}
