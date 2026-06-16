@@ -193,7 +193,7 @@ export default function ValueCreationBoard() {
         <div className="bg-white border-b border-slate-200">
           <div className="px-6 py-4 flex items-start gap-6">
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">HHAX Production Resilience Operating System</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Client Production Resilience Operating System</div>
               <h1 className="text-[22px] font-bold text-slate-900 leading-tight mt-0.5">Value Creation &amp; PE / Board Dashboard</h1>
               <p className="text-sm text-slate-600 mt-0.5">Demonstrate measurable business value through reliability, modernization, automation, cyber resilience, and scalable growth.</p>
             </div>

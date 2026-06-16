@@ -168,7 +168,7 @@ export default function ProdResilienceTwin() {
         <div className="bg-white border-b border-slate-200/80 px-6 pt-5 pb-4">
           <div className="flex items-start justify-between gap-6">
             <div>
-              <div className="text-[12px] font-semibold text-slate-600">HHAX Production Resilience Operating System</div>
+              <div className="text-[12px] font-semibold text-slate-600">Client Production Resilience Operating System</div>
               <h1 className="text-3xl font-bold tracking-tight text-slate-900 mt-0.5">PROD Resilience Command Center</h1>
               <p className="text-sm text-slate-500 mt-1.5 max-w-3xl">
                 Protect caregiver, claims, payroll, state compliance, customer commitments, and revenue workflows while modernizing the operating model.
@@ -722,7 +722,7 @@ export default function ProdResilienceTwin() {
                   </div>
                 ) : (
                   <>
-                    <div><div className="text-[10px] font-bold text-slate-500 uppercase">Business Impact</div><p className="mt-1">Mission-critical workflow supporting HHAX caregivers, claims and customers across all product lines.</p></div>
+                    <div><div className="text-[10px] font-bold text-slate-500 uppercase">Business Impact</div><p className="mt-1">Mission-critical workflow supporting Client caregivers, claims and customers across all product lines.</p></div>
                     <div><div className="text-[10px] font-bold text-slate-500 uppercase">Current Health Score</div><div className="text-2xl font-bold text-emerald-600">94</div></div>
                     <div><div className="text-[10px] font-bold text-slate-500 uppercase">Recent Incidents</div><p className="mt-1">2 Sev2 incidents in the last 30 days, both resolved within SLA.</p></div>
                     <div><div className="text-[10px] font-bold text-slate-500 uppercase">Automation Coverage</div><Progress value={64} className="h-2 mt-1" /><div className="text-[10px] mt-1">64% of operational tasks automated</div></div>

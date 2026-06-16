@@ -189,7 +189,7 @@ export default function CyberResilienceOverlay() {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
           <div>
-            <div className="text-[11px] uppercase tracking-wider text-slate-500">HHAX Production Resilience Operating System</div>
+            <div className="text-[11px] uppercase tracking-wider text-slate-500">Client Production Resilience Operating System</div>
             <h1 className="text-xl font-semibold tracking-tight">Cyber Resilience Overlay</h1>
             <div className="mt-0.5 text-xs text-slate-500">Protect production workflows through identity, patching, cyber controls, recovery readiness, and security engineering.</div>
           </div>
@@ -591,7 +591,7 @@ export default function CyberResilienceOverlay() {
               ))}
             </TabsList>
             <TabsContent value="overview" className="mt-3 space-y-2 text-xs text-slate-700">
-              <div>{drawer?.kind === "kpi" ? `${drawer.title} reflects production cyber posture across HHAX assets. Trend monitoring is active.` :
+              <div>{drawer?.kind === "kpi" ? `${drawer.title} reflects production cyber posture across Client assets. Trend monitoring is active.` :
                 drawer?.kind === "layer" ? `The ${drawer.title} layer maps directly to production workflows. Risk: ${drawer.data?.risk}.` :
                 drawer?.kind === "ai-review" ? `AI-assisted recommendation requires human approval before any privileged runtime change.` :
                 "Detail context for selected cyber resilience entity."}</div>

@@ -100,7 +100,7 @@ const EXECS: Entity[] = [
   {
     id: "vp-data", kind: "exec", name: "VP Data & Analytics", tone: "violet", icon: Database,
     tagline: "Enterprise data",
-    summary: { mission: "Make data a product across HHAX and acquired platforms.", why: "Acquired platforms produce siloed data; the business needs unified insight.", value: "Faster decisions, trustworthy data, AI/ML readiness." },
+    summary: { mission: "Make data a product across Client and acquired platforms.", why: "Acquired platforms produce siloed data; the business needs unified insight.", value: "Faster decisions, trustworthy data, AI/ML readiness." },
     owns: ["Data platform team", "Analytics & insights stream", "Data governance"],
     related: ["data-plat","analytics"],
     hhax: ["Unify Sandata + Pavilio data", "Operational + financial data products", "AI/ML enablement"],
@@ -114,7 +114,7 @@ const STREAMS: Entity[] = [
     tagline: "Mobile, scheduling, visit verification",
     summary: {
       mission: "Deliver a seamless mobile experience that empowers caregivers to complete visits, deliver care, and get paid accurately and on time.",
-      why: "The caregiver is HHAX's frontline user. Mobile experience drives retention, EVV compliance, and payroll accuracy.",
+      why: "The caregiver is Client's frontline user. Mobile experience drives retention, EVV compliance, and payroll accuracy.",
       value: "Higher visit completion, fewer support tickets, better caregiver retention.",
     },
     owns: ["Caregiver Mobile App", "Visit Verification (EVV)", "Scheduling", "Caregiver Notifications", "Offline Experience"],
@@ -173,7 +173,7 @@ const STREAMS: Entity[] = [
   {
     id: "claims", kind: "stream", name: "Claims & Payments Team", tone: "amber", icon: CreditCard,
     tagline: "Claims processing, billing, payroll, reconciliation",
-    summary: { mission: "Process claims accurately and pay providers and caregivers on time.", why: "Claims & payroll are HHAX's revenue engine and the most regulated workflow.", value: "Faster cash cycle, fewer rejections, accurate payroll." },
+    summary: { mission: "Process claims accurately and pay providers and caregivers on time.", why: "Claims & payroll are Client's revenue engine and the most regulated workflow.", value: "Faster cash cycle, fewer rejections, accurate payroll." },
     owns: ["Claims Processing", "Billing", "Payments", "Payroll", "Reconciliation"],
     doesNotOwn: ["Policy engine (Subsystem)", "Clearinghouse integration (Integration Services)"],
     applications: ["Claims Engine", "Billing Service", "Payroll Service", "Reconciliation Service"],
@@ -410,7 +410,7 @@ const SUBSYSTEMS: Entity[] = [
   },
   { id: "identity-fed", kind: "subsystem", name: "Identity & Access Platform Team", tone: "rose", icon: ShieldCheck,
     tagline: "Identity federation across acquisitions",
-    summary: { mission: "Federate identity across HHAX + acquired tenants.", why: "Each tenant brought its own IdP; users and providers need one identity.", value: "Single sign-on, simpler audits, faster onboarding." },
+    summary: { mission: "Federate identity across Client + acquired tenants.", why: "Each tenant brought its own IdP; users and providers need one identity.", value: "Single sign-on, simpler audits, faster onboarding." },
     owns: ["Identity federation", "SSO platform", "Directory sync"], roles: [{ role: "IAM Engineers", count: 4 }], size: "4 people",
     kpis: [{ name: "Federated Apps", current: "12", target: "> 60", forecast: "5×" }],
     hhax: ["Federate Sandata, Pavilio, HHA"], related: ["sec-plat","provider","member"],
@@ -590,7 +590,7 @@ function EntityDrawer({ id, onClose, onOpen }: { id: string | null; onClose: () 
               {[
                 ["summary","Summary"], ["resp","Responsibilities"], ["apps","Applications"],
                 ["team","Composition"], ["kpis","KPIs"], ["deps","Dependencies"],
-                ["hhax","HHAX"], ["flow","Workflows"], ["artifacts","Artifacts"], ["journey","Journey"],
+                ["hhax","Client"], ["flow","Workflows"], ["artifacts","Artifacts"], ["journey","Journey"],
               ].map(([v,l]) => (
                 <TabsTrigger key={v} value={v} className="text-[11px] data-[state=active]:bg-slate-100">{l}</TabsTrigger>
               ))}
@@ -975,14 +975,14 @@ export default function FutureStateReliabilityOrg() {
             </div>
           </section>
 
-          {/* HHAX THEMES */}
+          {/* Client THEMES */}
           <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-sky-50/40 to-white p-6">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 inline-flex items-center justify-center"><Building2 className="w-5 h-5" /></div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-900">How This Operating Model Addresses HHAX Realities</h3>
+                <h3 className="text-lg font-semibold text-slate-900">How This Operating Model Addresses Client Realities</h3>
                 <p className="text-sm text-slate-700 mt-1 max-w-4xl">
-                  The structure above is shaped by HHAX's specific situation: multiple acquired platforms, AWS and GCP cloud estates,
+                  The structure above is shaped by Client's specific situation: multiple acquired platforms, AWS and GCP cloud estates,
                   a Virginia data center transition, Sandata integration, the Pavilio growth platform, and the self-direction platform —
                   all needing standardization, service ownership, and reliability engineering.
                 </p>

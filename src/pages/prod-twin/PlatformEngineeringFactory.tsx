@@ -282,7 +282,7 @@ export default function PlatformEngineeringFactory() {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
           <div>
-            <div className="text-[11px] uppercase tracking-wider text-slate-500">HHAX Production Resilience Operating System</div>
+            <div className="text-[11px] uppercase tracking-wider text-slate-500">Client Production Resilience Operating System</div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold tracking-tight">Platform Engineering & Golden Environment Factory</h1>
               <Info className="h-4 w-4 text-slate-400" />
@@ -546,7 +546,7 @@ export default function PlatformEngineeringFactory() {
         </div>
 
         <div className="border-t border-slate-200 bg-white px-6 py-2 text-[11px] text-slate-500">
-          Last updated: May 22, 2025 · Source: HHAX Platform Engineering Factory
+          Last updated: May 22, 2025 · Source: Client Platform Engineering Factory
         </div>
       </div>
 

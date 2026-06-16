@@ -98,7 +98,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Ownership exists on a wiki but not in tooling", consequence: "Alerts route to the wrong team. Incidents go orphan. MTTR climbs." },
     ],
     hhax: {
-      headline: "At HHAX, service ownership directly addresses the operational interruption and tribal-knowledge concerns surfaced in discovery.",
+      headline: "At Client, service ownership directly addresses the operational interruption and tribal-knowledge concerns surfaced in discovery.",
       bullets: [
         { area: "Caregiver Mobile App", detail: "A named team owns mobile reliability — clock-in/clock-out, EVV, offline sync — with SLOs visible to product leadership." },
         { area: "Claims Processing", detail: "Claims engine has a single owning team accountable for throughput, error rate, and payer SLAs." },
@@ -152,11 +152,11 @@ const D: Record<string, DrawerContent> = {
       { anti: "SLOs exist but no error budget policy", consequence: "Reliability data ignored. Release decisions still made on gut feel." },
     ],
     hhax: {
-      headline: "SLOs give HHAX a shared language for reliability across home care, claims, payroll, and mobile platforms.",
+      headline: "SLOs give Client a shared language for reliability across home care, claims, payroll, and mobile platforms.",
       bullets: [
         { area: "Caregiver Clock-In", detail: "A 99.95% availability SLO on clock-in (mobile + EVV) directly protects payroll accuracy and compliance." },
         { area: "Claims Submission", detail: "Latency SLO on claims submission ensures payer windows are never missed due to platform slowness." },
-        { area: "Acquisition Integration", detail: "SLOs published during integration set expectations between HHAX teams and acquired engineering groups." },
+        { area: "Acquisition Integration", detail: "SLOs published during integration set expectations between Client teams and acquired engineering groups." },
       ],
     },
   }),
@@ -194,7 +194,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Threshold alerts on every metric", consequence: "Alert fatigue. Real signals lost in noise." },
     ],
     hhax: {
-      headline: "Telemetry at the user journey level shows HHAX where caregivers, branches, and payers actually experience friction.",
+      headline: "Telemetry at the user journey level shows Client where caregivers, branches, and payers actually experience friction.",
       bullets: [
         { area: "Mobile App", detail: "Real-user monitoring on caregiver app shows latency by region, device, and network — exposing the real causes of clock-in failures." },
         { area: "Branch Workflows", detail: "Journey-level traces on scheduling and authorization workflows reveal where branch staff lose time." },
@@ -234,7 +234,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Automation owned by one person", consequence: "Bus factor of one. Automation rots when they leave." },
     ],
     hhax: {
-      headline: "Automation directly attacks the 'ticket factory' pattern observed across HHAX operations.",
+      headline: "Automation directly attacks the 'ticket factory' pattern observed across Client operations.",
       bullets: [
         { area: "Access Requests", detail: "Self-service access workflows replace ticket queues for caregiver and branch onboarding." },
         { area: "Remediation", detail: "Common incident patterns (failed sync, retry storms) self-heal without paging on-call." },
@@ -275,7 +275,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Blame-driven postmortems", consequence: "Engineers hide information. Real root causes never surface." },
     ],
     hhax: {
-      headline: "Structured incident response replaces the firefighting-and-tribal-knowledge pattern observed across HHAX teams.",
+      headline: "Structured incident response replaces the firefighting-and-tribal-knowledge pattern observed across Client teams.",
       bullets: [
         { area: "Payroll Week", detail: "Defined incident command during weekly payroll runs eliminates ad-hoc war rooms and CEO calls." },
         { area: "Mobile Outages", detail: "Customer comms scripted; status page automated; field operations notified within SLAs." },
@@ -315,7 +315,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Action items without owners", consequence: "Nothing happens. Postmortems become theater." },
     ],
     hhax: {
-      headline: "Continuous reliability investment is how HHAX moves from reactive to proactive — the central theme of the transformation journey.",
+      headline: "Continuous reliability investment is how Client moves from reactive to proactive — the central theme of the transformation journey.",
       bullets: [
         { area: "Reliability Backlog", detail: "Each owning team holds a reliability backlog visible to engineering leadership and prioritized alongside features." },
         { area: "Quarterly Reviews", detail: "Tier-1 services reviewed quarterly — error budget burn, toil %, incident trends — driving next-quarter investment." },
@@ -365,7 +365,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Threshold alerts instead of burn-rate alerts", consequence: "Pager noise. Real SLO violations buried." },
     ],
     hhax: {
-      headline: "SLOs are the foundation HHAX needs to make reliability negotiable, measurable, and visible across all platforms.",
+      headline: "SLOs are the foundation Client needs to make reliability negotiable, measurable, and visible across all platforms.",
       bullets: [
         { area: "Caregiver Workflows", detail: "Per-journey SLOs (visit start, EVV capture, visit close) replace generic uptime targets." },
         { area: "Claims & Payroll", detail: "Process-level SLOs (claims acknowledged within X, payroll completed by Y) align with business calendars." },
@@ -415,7 +415,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Hoarding the budget", consequence: "Over-investment in reliability. Slow delivery. Wrong tradeoff." },
     ],
     hhax: {
-      headline: "Error budgets give HHAX a principled way to balance modernization velocity with reliability commitments.",
+      headline: "Error budgets give Client a principled way to balance modernization velocity with reliability commitments.",
       bullets: [
         { area: "Modernization Trains", detail: "When error budget is healthy, modernization work proceeds aggressively; when burning, focus shifts to stabilization." },
         { area: "Acquisition Integration", detail: "Acquired platforms enter a 'stabilization window' with explicit budget targets before being released for change." },
@@ -463,7 +463,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Automating individual tasks without addressing categories", consequence: "Toil whack-a-mole. Same patterns reappear elsewhere." },
     ],
     hhax: {
-      headline: "Toil reduction is the lever HHAX uses to reclaim engineering capacity currently lost to operational interruptions.",
+      headline: "Toil reduction is the lever Client uses to reclaim engineering capacity currently lost to operational interruptions.",
       bullets: [
         { area: "Access & Provisioning", detail: "Self-service replaces ticket queues, reclaiming branch IT capacity." },
         { area: "Repeat Incidents", detail: "Categorized incidents auto-remediated, freeing on-call for novel work." },
@@ -502,7 +502,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Action items never tracked", consequence: "Same incidents repeat. Postmortems become theater." },
     ],
     hhax: {
-      headline: "A blameless culture is a precondition for HHAX moving from reactive operations to learning-driven reliability.",
+      headline: "A blameless culture is a precondition for Client moving from reactive operations to learning-driven reliability.",
       bullets: [
         { area: "Cross-Platform Incidents", detail: "Postmortems shared across acquired platforms surface systemic patterns no single team can see." },
         { area: "Leadership Visibility", detail: "Quarterly incident trends reviewed by engineering leadership inform platform investment." },
@@ -541,7 +541,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Metrics without traces", consequence: "Distributed-system failures impossible to root-cause." },
     ],
     hhax: {
-      headline: "Observability investments make HHAX's distributed platforms diagnosable — across acquisitions, modern services, and legacy systems alike.",
+      headline: "Observability investments make Client's distributed platforms diagnosable — across acquisitions, modern services, and legacy systems alike.",
       bullets: [
         { area: "Cross-Platform Tracing", detail: "End-to-end traces across home care, claims, payroll surface where workflows fail across system boundaries." },
         { area: "User-Journey Telemetry", detail: "Caregiver and branch journeys instrumented at the user boundary, not infrastructure." },
@@ -580,7 +580,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Capacity planning detached from product roadmap", consequence: "Launches over- or under-provisioned; customer experience and cost both suffer." },
     ],
     hhax: {
-      headline: "Capacity planning gives HHAX predictable cost and predictable reliability — particularly as acquisitions add load.",
+      headline: "Capacity planning gives Client predictable cost and predictable reliability — particularly as acquisitions add load.",
       bullets: [
         { area: "Payroll Week Surge", detail: "Capacity model accounts for weekly payroll peaks rather than treating them as incidents." },
         { area: "Acquisition Onboarding", detail: "Capacity reviewed and forecast each time an acquired platform onboards." },
@@ -618,9 +618,9 @@ const D: Record<string, DrawerContent> = {
       { anti: "Service exists only in someone's head", consequence: "Onboarding takes weeks; incident response inefficient." },
     ],
     hhax: {
-      headline: "Service definition is the precondition for service ownership across HHAX's portfolio.",
+      headline: "Service definition is the precondition for service ownership across Client's portfolio.",
       bullets: [
-        { area: "Catalog", detail: "Every Tier-1 service across HHAX and acquired platforms catalogued with owner and on-call." },
+        { area: "Catalog", detail: "Every Tier-1 service across Client and acquired platforms catalogued with owner and on-call." },
       ],
     },
   }),
@@ -651,7 +651,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "SLOs copied from infra dashboards", consequence: "Disconnected from user experience." },
     ],
     hhax: {
-      headline: "HHAX SLOs map to caregiver, branch, payer, and claims journeys.",
+      headline: "Client SLOs map to caregiver, branch, payer, and claims journeys.",
       bullets: [
         { area: "Journey-Level", detail: "Per-journey SLOs replace generic uptime metrics." },
       ],
@@ -680,7 +680,7 @@ const D: Record<string, DrawerContent> = {
     },
     mistakes: [{ anti: "Logs without metrics", consequence: "Trend analysis impossible." }],
     hhax: {
-      headline: "HHAX telemetry instruments user journeys end-to-end.",
+      headline: "Client telemetry instruments user journeys end-to-end.",
       bullets: [{ area: "End-to-End", detail: "Traces across home care, claims, payroll." }],
     },
   }),
@@ -707,7 +707,7 @@ const D: Record<string, DrawerContent> = {
     },
     mistakes: [{ anti: "Budget tracked, never enforced", consequence: "Feature pressure wins; SLOs become decoration." }],
     hhax: {
-      headline: "Budget policy lets HHAX balance modernization velocity with reliability commitments.",
+      headline: "Budget policy lets Client balance modernization velocity with reliability commitments.",
       bullets: [{ area: "Modernization", detail: "Modernization proceeds aggressively when budget healthy; stabilization when burning." }],
     },
   }),
@@ -788,7 +788,7 @@ const D: Record<string, DrawerContent> = {
     },
     mistakes: [{ anti: "Improvement backlog grows, nothing ships", consequence: "Reliability decays." }],
     hhax: {
-      headline: "Continuous investment is the central transformation theme for HHAX.",
+      headline: "Continuous investment is the central transformation theme for Client.",
       bullets: [{ area: "Reliability Backlog", detail: "Visible to leadership, prioritized alongside features." }],
     },
   }),
@@ -806,7 +806,7 @@ const D: Record<string, DrawerContent> = {
     ] },
     patterns: { good: "Measured per service.", better: "Per user journey.", best: "Drives error budget policy." },
     mistakes: [{ anti: "Measured from infra checks", consequence: "Disconnected from user experience." }],
-    hhax: { headline: "Availability of caregiver, branch, and payer journeys drives HHAX's primary reliability commitments.", bullets: [{ area: "Caregiver App", detail: "Per-journey availability tracked separately from infrastructure uptime." }] },
+    hhax: { headline: "Availability of caregiver, branch, and payer journeys drives Client's primary reliability commitments.", bullets: [{ area: "Caregiver App", detail: "Per-journey availability tracked separately from infrastructure uptime." }] },
   }),
   mLatency: makeDrawer({
     id: "mLatency", title: "Latency", kicker: "Reliability Metric",
@@ -867,7 +867,7 @@ const D: Record<string, DrawerContent> = {
     metrics: { definition: "Hours spent on toil ÷ total hours.", measured: "Self-report or sampled audit.", targets: [{ label: "SRE cap", value: "≤ 50%", status: "good" }, { label: "Product team healthy", value: "< 25%", status: "good" }, { label: "At risk", value: "> 60%", status: "risk" }] },
     patterns: { good: "Top items identified.", better: "Measured continuously.", best: "Cap enforced." },
     mistakes: [{ anti: "Normalizing toil as 'the job'", consequence: "Capacity erodes." }],
-    hhax: { headline: "Reducing toil reclaims HHAX engineering capacity for modernization.", bullets: [{ area: "Self-Service", detail: "Replaces ticket queues, freeing capacity." }] },
+    hhax: { headline: "Reducing toil reclaims Client engineering capacity for modernization.", bullets: [{ area: "Self-Service", detail: "Replaces ticket queues, freeing capacity." }] },
   }),
   mBurn: makeDrawer({
     id: "mBurn", title: "Error Budget Burn", kicker: "Reliability Metric",
@@ -877,7 +877,7 @@ const D: Record<string, DrawerContent> = {
     metrics: { definition: "Budget consumed ÷ time elapsed over a window.", formula: "burn = (1 − good/valid) ÷ (1 − SLO)", measured: "Computed continuously by SLO platform.", targets: [{ label: "Healthy", value: "< 1×", status: "good" }, { label: "Warning", value: "2×", status: "warn" }, { label: "Critical", value: "10× short-window", status: "risk" }] },
     patterns: { good: "Burn rate visible.", better: "Multi-window alerts.", best: "Burn rate drives release decisions." },
     mistakes: [{ anti: "Single-window burn alerts", consequence: "Pager noise or missed incidents." }],
-    hhax: { headline: "Burn-rate alerts give HHAX on-call signal without noise.", bullets: [{ area: "Per-Service", detail: "Replaces threshold alerts across acquired platforms." }] },
+    hhax: { headline: "Burn-rate alerts give Client on-call signal without noise.", bullets: [{ area: "Per-Service", detail: "Replaces threshold alerts across acquired platforms." }] },
   }),
   mSloComp: makeDrawer({
     id: "mSloComp", title: "SLO Compliance", kicker: "Reliability Metric",
@@ -887,7 +887,7 @@ const D: Record<string, DrawerContent> = {
     metrics: { definition: "Percentage of services meeting SLO over the window.", measured: "From SLO platform aggregate.", targets: [{ label: "Healthy portfolio", value: "> 85%", status: "good" }, { label: "Attention", value: "70–85%", status: "warn" }, { label: "Critical", value: "< 70%", status: "risk" }] },
     patterns: { good: "Compliance reported.", better: "Reviewed quarterly with action.", best: "Drives investment shifts." },
     mistakes: [{ anti: "Compliance hidden in dashboards", consequence: "No leadership signal; no investment changes." }],
-    hhax: { headline: "Portfolio SLO compliance gives HHAX leadership a single reliability-posture signal across platforms.", bullets: [{ area: "Quarterly", detail: "Reported with platform-level drilldowns." }] },
+    hhax: { headline: "Portfolio SLO compliance gives Client leadership a single reliability-posture signal across platforms.", bullets: [{ area: "Quarterly", detail: "Reported with platform-level drilldowns." }] },
   }),
 
   /* --- Section 6 anti-patterns --- */
@@ -900,7 +900,7 @@ const D: Record<string, DrawerContent> = {
       { anti: "Reliance on a few key people", consequence: "Burnout, attrition, knowledge loss." },
       { anti: "Rewarding heroism", consequence: "Reinforces the pattern; discourages systemic fixes." },
     ],
-    hhax: { headline: "HHAX's tribal-knowledge concerns map directly to hero culture — service ownership is the structural fix.", bullets: [{ area: "On-Call Spread", detail: "Cross-team on-call rotation breaks hero dependency." }] },
+    hhax: { headline: "Client's tribal-knowledge concerns map directly to hero culture — service ownership is the structural fix.", bullets: [{ area: "On-Call Spread", detail: "Cross-team on-call rotation breaks hero dependency." }] },
   }),
   apTickets: makeDrawer({
     id: "apTickets", title: "Ticket Factories", kicker: "Anti-Pattern", icon: AlertTriangle, tone: "rose",
@@ -908,7 +908,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Symptom: ticket volume up, reliability flat.", examples: [{ org: "Industry", story: "Self-service replaces tickets where possible; tickets become exception cases." }] },
     patterns: { good: "Identify high-volume ticket types.", better: "Self-service replaces tickets.", best: "Service ownership eliminates ticket categories entirely." },
     mistakes: [{ anti: "Optimizing ticket SLAs without reducing tickets", consequence: "Cost grows, reliability stagnates." }],
-    hhax: { headline: "HHAX's ticket-driven operations pattern is exactly what SRE addresses through self-service and automation.", bullets: [{ area: "Self-Service", detail: "Branch and caregiver requests served by platforms, not queues." }] },
+    hhax: { headline: "Client's ticket-driven operations pattern is exactly what SRE addresses through self-service and automation.", bullets: [{ area: "Self-Service", detail: "Branch and caregiver requests served by platforms, not queues." }] },
   }),
   apMonNoOwn: makeDrawer({
     id: "apMonNoOwn", title: "Monitoring Without Ownership", kicker: "Anti-Pattern", icon: AlertTriangle, tone: "rose",
@@ -916,7 +916,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Alert hygiene audits expose orphan alerts.", examples: [{ org: "Industry", story: "Service catalog enforces owner-on-alert mapping." }] },
     patterns: { good: "Every alert routes to a team.", better: "Every alert has runbook and SLI link.", best: "Alerts auto-disable if owner unknown." },
     mistakes: [{ anti: "Send to ops@", consequence: "Alerts ignored; incidents missed." }],
-    hhax: { headline: "Service ownership defines who carries the pager for each HHAX platform.", bullets: [{ area: "Catalog", detail: "Routes alerts from a single source of truth." }] },
+    hhax: { headline: "Service ownership defines who carries the pager for each Client platform.", bullets: [{ area: "Catalog", detail: "Routes alerts from a single source of truth." }] },
   }),
   apTribal: makeDrawer({
     id: "apTribal", title: "Tribal Knowledge", kicker: "Anti-Pattern", icon: AlertTriangle, tone: "rose",
@@ -924,7 +924,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Knowledge gaps surface in incident-response timelines.", examples: [{ org: "Industry", story: "Runbook + game-day cadence keeps knowledge current." }] },
     patterns: { good: "Runbooks per service.", better: "Game days exercise runbooks.", best: "Service catalog is the source of truth." },
     mistakes: [{ anti: "Stale runbooks", consequence: "False confidence; worse than no runbook." }],
-    hhax: { headline: "Externalizing knowledge is essential as HHAX integrates acquired platforms with disparate engineering histories.", bullets: [{ area: "Catalog", detail: "Standardized runbooks across platforms." }] },
+    hhax: { headline: "Externalizing knowledge is essential as Client integrates acquired platforms with disparate engineering histories.", bullets: [{ area: "Catalog", detail: "Standardized runbooks across platforms." }] },
   }),
   apToil: makeDrawer({
     id: "apToil", title: "Excessive Toil", kicker: "Anti-Pattern", icon: AlertTriangle, tone: "rose",
@@ -932,7 +932,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Quarterly toil audits drive prioritization.", examples: [{ org: "Google", story: "Reallocations triggered when caps breach." }] },
     patterns: { good: "Identify top items.", better: "Measure continuously.", best: "Cap and enforce." },
     mistakes: [{ anti: "Normalize toil", consequence: "Engineering capacity erodes." }],
-    hhax: { headline: "Reclaiming toil capacity is how HHAX funds modernization without growing headcount.", bullets: [{ area: "Automation Backlog", detail: "Toil categories prioritized alongside features." }] },
+    hhax: { headline: "Reclaiming toil capacity is how Client funds modernization without growing headcount.", bullets: [{ area: "Automation Backlog", detail: "Toil categories prioritized alongside features." }] },
   }),
   apOvertime: makeDrawer({
     id: "apOvertime", title: "Reliability Through Overtime", kicker: "Anti-Pattern", icon: AlertTriangle, tone: "rose",
@@ -940,7 +940,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Hours tracked alongside incident metrics.", examples: [{ org: "Industry", story: "On-call hours per engineer per month reviewed by leadership." }] },
     patterns: { good: "Track on-call hours.", better: "Cap consecutive on-call weeks.", best: "Engineering investment removes the need." },
     mistakes: [{ anti: "Reward overtime", consequence: "Reinforces the anti-pattern; drives attrition." }],
-    hhax: { headline: "Replacing heroics with engineering protects HHAX from the attrition risk seen in similar transformations.", bullets: [{ area: "On-Call Health", detail: "Hours and pages tracked; investment when limits breach." }] },
+    hhax: { headline: "Replacing heroics with engineering protects Client from the attrition risk seen in similar transformations.", bullets: [{ area: "On-Call Health", detail: "Hours and pages tracked; investment when limits breach." }] },
   }),
   apNoBudget: makeDrawer({
     id: "apNoBudget", title: "No Error Budgets", kicker: "Anti-Pattern", icon: AlertTriangle, tone: "rose",
@@ -948,7 +948,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Budget policy enforced in pipelines and reliability councils.", examples: [{ org: "LinkedIn", story: "Pipelines block deploys when budget at risk." }] },
     patterns: { good: "Budget visible.", better: "Reviewed weekly.", best: "Enforced in pipelines." },
     mistakes: [{ anti: "Budget tracked, not enforced", consequence: "Velocity always wins." }],
-    hhax: { headline: "Budget policy is the mechanism that lets HHAX modernize without sacrificing reliability.", bullets: [{ area: "Modernization Trains", detail: "Stabilize when burning, accelerate when healthy." }] },
+    hhax: { headline: "Budget policy is the mechanism that lets Client modernize without sacrificing reliability.", bullets: [{ area: "Modernization Trains", detail: "Stabilize when burning, accelerate when healthy." }] },
   }),
   apMonNoAction: makeDrawer({
     id: "apMonNoAction", title: "Monitoring Without Action", kicker: "Anti-Pattern", icon: AlertTriangle, tone: "rose",
@@ -956,7 +956,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Telemetry tied to SLOs and runbooks; cost of observability reviewed.", examples: [{ org: "Industry", story: "Observability cost benchmarked vs. business value." }] },
     patterns: { good: "Telemetry tied to a runbook.", better: "Telemetry drives SLO burn.", best: "Cost of observability budgeted and reviewed." },
     mistakes: [{ anti: "Buy more monitoring", consequence: "Cost climbs; outcomes don't improve." }],
-    hhax: { headline: "Disciplined telemetry strategy ensures HHAX observability spend returns reliability value.", bullets: [{ area: "Per-Workflow", detail: "Telemetry tied to user journeys, not infrastructure." }] },
+    hhax: { headline: "Disciplined telemetry strategy ensures Client observability spend returns reliability value.", bullets: [{ area: "Per-Workflow", detail: "Telemetry tied to user journeys, not infrastructure." }] },
   }),
 
   /* --- Section 2 comparison rows --- */
@@ -966,7 +966,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Traditional: ticket queues, Ops responds. SRE: services owned by teams that write the code.", examples: [{ org: "Industry", story: "'You build it, you run it' is the common phrasing." }] },
     patterns: { good: "Defined ownership.", better: "Pager held by service team.", best: "SRE engages services that meet maturity bar." },
     mistakes: [{ anti: "Rebrand Ops as SRE without changing operating model", consequence: "Same handoffs, new badges." }],
-    hhax: { headline: "HHAX's discovery showed exactly the handoff and ownership gaps SRE addresses.", bullets: [{ area: "Per-Service", detail: "Code-owning teams hold the pager." }] },
+    hhax: { headline: "Client's discovery showed exactly the handoff and ownership gaps SRE addresses.", bullets: [{ area: "Per-Service", detail: "Code-owning teams hold the pager." }] },
   }),
   cmpOwn: makeDrawer({
     id: "cmpOwn", title: "Ownership", kicker: "Traditional vs SRE", icon: Users, tone: "emerald",
@@ -974,7 +974,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Catalog enforces named ownership.", examples: [{ org: "Netflix", story: "'You build it, you run it.'" }] },
     patterns: { good: "Named team.", better: "Team owns SLOs, cost, security.", best: "Ownership measured in team scorecards." },
     mistakes: [{ anti: "Wiki ownership only", consequence: "Alerts misroute; incidents orphan." }],
-    hhax: { headline: "Named ownership ends 'no one owns it' for acquired and legacy HHAX platforms.", bullets: [{ area: "Catalog", detail: "Source of truth for ownership across all platforms." }] },
+    hhax: { headline: "Named ownership ends 'no one owns it' for acquired and legacy Client platforms.", bullets: [{ area: "Catalog", detail: "Source of truth for ownership across all platforms." }] },
   }),
   cmpIncident: makeDrawer({
     id: "cmpIncident", title: "Incident Management", kicker: "Traditional vs SRE", icon: AlertTriangle, tone: "rose",
@@ -982,7 +982,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Incident Commander coordinates; postmortems peer-reviewed.", examples: [{ org: "PagerDuty / Atlassian", story: "IC/Comms/Scribe activated within minutes." }] },
     patterns: { good: "Defined Sevs.", better: "Practiced roles.", best: "Action items tracked and trended." },
     mistakes: [{ anti: "Ad-hoc each time", consequence: "Unpredictable MTTR." }],
-    hhax: { headline: "Structured incident response replaces HHAX firefighting and CEO calls.", bullets: [{ area: "Payroll Week", detail: "IC role activates instead of ad-hoc bridge." }] },
+    hhax: { headline: "Structured incident response replaces Client firefighting and CEO calls.", bullets: [{ area: "Payroll Week", detail: "IC role activates instead of ad-hoc bridge." }] },
   }),
   cmpChange: makeDrawer({
     id: "cmpChange", title: "Change Management", kicker: "Traditional vs SRE", icon: RefreshCw, tone: "teal",
@@ -990,7 +990,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Pipelines check budget; reliability council reviews exceptions.", examples: [{ org: "LinkedIn", story: "Pipelines auto-block on budget at risk." }] },
     patterns: { good: "Defined release process.", better: "Automated checks.", best: "Budget-driven release decisions." },
     mistakes: [{ anti: "CAB-only model", consequence: "Slow delivery without reliability gains." }],
-    hhax: { headline: "Budget-governed release replaces freeze theater for HHAX modernization trains.", bullets: [{ area: "Pipelines", detail: "Automated checks ensure reliability stays in budget." }] },
+    hhax: { headline: "Budget-governed release replaces freeze theater for Client modernization trains.", bullets: [{ area: "Pipelines", detail: "Automated checks ensure reliability stays in budget." }] },
   }),
   cmpAuto: makeDrawer({
     id: "cmpAuto", title: "Automation", kicker: "Traditional vs SRE", icon: Cpu, tone: "amber",
@@ -998,7 +998,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Automation backlog runs alongside product backlog.", examples: [{ org: "Netflix", story: "Spinnaker invested as a product." }] },
     patterns: { good: "Top toil items automated.", better: "Automation backlog measured.", best: "Self-healing dominates response." },
     mistakes: [{ anti: "Scripts in home directories", consequence: "Bus factor of one." }],
-    hhax: { headline: "Automation investment is the lever that breaks HHAX's ticket-factory pattern.", bullets: [{ area: "Self-Service", detail: "Replaces ticket queues for access and provisioning." }] },
+    hhax: { headline: "Automation investment is the lever that breaks Client's ticket-factory pattern.", bullets: [{ area: "Self-Service", detail: "Replaces ticket queues for access and provisioning." }] },
   }),
   cmpMon: makeDrawer({
     id: "cmpMon", title: "Monitoring", kicker: "Traditional vs SRE", icon: Eye, tone: "teal",
@@ -1006,7 +1006,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Telemetry tied to user journeys; alerts derived from burn.", examples: [{ org: "Google", story: "Burn alerts page only when budget is at risk." }] },
     patterns: { good: "Golden signals per service.", better: "Journey-level telemetry.", best: "Burn-rate alerts replace thresholds." },
     mistakes: [{ anti: "Threshold alerts on every metric", consequence: "Alert fatigue; real signals lost." }],
-    hhax: { headline: "User-journey telemetry exposes the real causes of HHAX caregiver and branch issues.", bullets: [{ area: "Journeys", detail: "Per-journey burn replaces noisy thresholds." }] },
+    hhax: { headline: "User-journey telemetry exposes the real causes of Client caregiver and branch issues.", bullets: [{ area: "Journeys", detail: "Per-journey burn replaces noisy thresholds." }] },
   }),
   cmpCap: makeDrawer({
     id: "cmpCap", title: "Capacity Planning", kicker: "Traditional vs SRE", icon: TrendingUp, tone: "emerald",
@@ -1014,7 +1014,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Forecasts reviewed quarterly; reservations aligned with growth.", examples: [{ org: "AWS customers", story: "Headroom defined per service tier." }] },
     patterns: { good: "Auto-scaling configured.", better: "Headroom targets.", best: "Integrated with FinOps." },
     mistakes: [{ anti: "Provision by last-incident + 20%", consequence: "Cost up; saturation still surprises." }],
-    hhax: { headline: "Predictable HHAX capacity ends payroll-week surprises.", bullets: [{ area: "Payroll Week", detail: "Surge modeled, not reacted to." }] },
+    hhax: { headline: "Predictable Client capacity ends payroll-week surprises.", bullets: [{ area: "Payroll Week", detail: "Surge modeled, not reacted to." }] },
   }),
   cmpCust: makeDrawer({
     id: "cmpCust", title: "Customer Focus", kicker: "Traditional vs SRE", icon: Heart, tone: "rose",
@@ -1022,7 +1022,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "SLOs per user journey, per persona.", examples: [{ org: "Healthcare SaaS", story: "Patient and provider journeys carry distinct SLOs." }] },
     patterns: { good: "Service-level SLOs.", better: "Journey-level SLOs.", best: "Persona-level SLOs with VoC tie-in." },
     mistakes: [{ anti: "Optimize SLA, ignore experience", consequence: "Customers churn while dashboards green." }],
-    hhax: { headline: "Caregiver, branch, and payer experience become measurable HHAX commitments.", bullets: [{ area: "Personas", detail: "Distinct SLOs per persona and platform." }] },
+    hhax: { headline: "Caregiver, branch, and payer experience become measurable Client commitments.", bullets: [{ area: "Personas", detail: "Distinct SLOs per persona and platform." }] },
   }),
   cmpEng: makeDrawer({
     id: "cmpEng", title: "Engineering Involvement", kicker: "Traditional vs SRE", icon: Code2, tone: "violet",
@@ -1030,7 +1030,7 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Engineering owns production by default; SRE engages services that earn it.", examples: [{ org: "Google", story: "Maturity bar gates SRE engagement." }] },
     patterns: { good: "Engineers on call.", better: "Engineers own SLOs.", best: "Reliability bar earns SRE partnership." },
     mistakes: [{ anti: "Throw it over the wall", consequence: "Bad design choices for operability." }],
-    hhax: { headline: "Engineering ownership closes HHAX's design-to-operations feedback loop.", bullets: [{ area: "Per-Service", detail: "Engineers own production reliability for code they ship." }] },
+    hhax: { headline: "Engineering ownership closes Client's design-to-operations feedback loop.", bullets: [{ area: "Per-Service", detail: "Engineers own production reliability for code they ship." }] },
   }),
   cmpRel: makeDrawer({
     id: "cmpRel", title: "Reliability Strategy", kicker: "Traditional vs SRE", icon: ShieldCheck, tone: "emerald",
@@ -1038,85 +1038,85 @@ const D: Record<string, DrawerContent> = {
     operational: { intro: "Targets reviewed quarterly with product and business.", examples: [{ org: "Industry", story: "Targets adjusted as user expectations evolve." }] },
     patterns: { good: "Defined per service.", better: "Reviewed quarterly.", best: "Aligned with business value and budget policy." },
     mistakes: [{ anti: "Aspirational targets no one believes", consequence: "Policy ignored; SLOs irrelevant." }],
-    hhax: { headline: "Reliability becomes a strategic conversation across HHAX leadership.", bullets: [{ area: "Tiers", detail: "Targets reflect business criticality, not aspiration." }] },
+    hhax: { headline: "Reliability becomes a strategic conversation across Client leadership.", bullets: [{ area: "Tiers", detail: "Targets reflect business criticality, not aspiration." }] },
   }),
 
-  /* --- Section 7 HHAX --- */
+  /* --- Section 7 Client --- */
   hhCurrentReactive: makeDrawer({
-    id: "hhCurrentReactive", title: "Reactive Operations", kicker: "HHAX Current State", icon: Bell, tone: "rose",
+    id: "hhCurrentReactive", title: "Reactive Operations", kicker: "Client Current State", icon: Bell, tone: "rose",
     meaning: { plain: "Most operational work is responding to issues as they surface, rather than engineering them out.", whyExists: "Years of growth and acquisitions outpaced engineering investment in reliability.", whyGoogle: "SRE is the engineering response to reactive operating models.", misconceptions: [] },
-    operational: { intro: "Pattern observed across HHAX engineering interviews.", examples: [{ org: "HHAX", story: "Recurring incident categories absorb on-call capacity weekly." }] },
+    operational: { intro: "Pattern observed across Client engineering interviews.", examples: [{ org: "Client", story: "Recurring incident categories absorb on-call capacity weekly." }] },
     patterns: { good: "Categorize recurring incidents.", better: "Backlog for repeat causes.", best: "Engineering invests until categories disappear." },
     mistakes: [{ anti: "Hire to keep up", consequence: "Cost grows; reliability doesn't." }],
     hhax: { headline: "Moving from reactive to proactive is the central transformation goal.", bullets: [{ area: "Recurring Categories", detail: "Top categories targeted in reliability roadmap." }] },
   }),
   hhCurrentTickets: makeDrawer({
-    id: "hhCurrentTickets", title: "Ticket-Driven Work", kicker: "HHAX Current State", icon: ClipboardList, tone: "rose",
+    id: "hhCurrentTickets", title: "Ticket-Driven Work", kicker: "Client Current State", icon: ClipboardList, tone: "rose",
     meaning: { plain: "Engineering capacity consumed by access, provisioning, and operational requests routed via tickets.", whyExists: "Tickets fill the gap left by missing self-service.", whyGoogle: "Platform engineering eliminates ticket categories.", misconceptions: [] },
-    operational: { intro: "Observed across branch and caregiver workflows.", examples: [{ org: "HHAX", story: "High-volume ticket types catalogued during discovery." }] },
+    operational: { intro: "Observed across branch and caregiver workflows.", examples: [{ org: "Client", story: "High-volume ticket types catalogued during discovery." }] },
     patterns: { good: "Top types identified.", better: "Self-service replaces them.", best: "Service ownership eliminates entire categories." },
     mistakes: [{ anti: "SLA harder", consequence: "Cost up; reliability flat." }],
     hhax: { headline: "Self-service platforms reclaim engineering capacity.", bullets: [{ area: "Branch Ops", detail: "Access and provisioning self-serve." }] },
   }),
   hhCurrentInterrupt: makeDrawer({
-    id: "hhCurrentInterrupt", title: "Heavy Interruptions", kicker: "HHAX Current State", icon: AlertTriangle, tone: "rose",
+    id: "hhCurrentInterrupt", title: "Heavy Interruptions", kicker: "Client Current State", icon: AlertTriangle, tone: "rose",
     meaning: { plain: "Engineering interrupted constantly by operational events, eroding flow and project delivery.", whyExists: "Lack of toil reduction and clear ownership.", whyGoogle: "Toil cap and ownership protect engineering time.", misconceptions: [] },
-    operational: { intro: "Observed across product and platform teams.", examples: [{ org: "HHAX", story: "Engineers report majority of week consumed by ops interruptions." }] },
+    operational: { intro: "Observed across product and platform teams.", examples: [{ org: "Client", story: "Engineers report majority of week consumed by ops interruptions." }] },
     patterns: { good: "Measure interruptions.", better: "Categorize and automate.", best: "Cap toil; protect engineering time." },
     mistakes: [{ anti: "Add 'just one more' on-call channel", consequence: "Capacity erodes further." }],
     hhax: { headline: "Reducing interruptions unlocks modernization capacity.", bullets: [{ area: "Flow Time", detail: "Engineering time protected for roadmap." }] },
   }),
   hhCurrentOwnership: makeDrawer({
-    id: "hhCurrentOwnership", title: "Limited Service Ownership", kicker: "HHAX Current State", icon: Users, tone: "rose",
+    id: "hhCurrentOwnership", title: "Limited Service Ownership", kicker: "Client Current State", icon: Users, tone: "rose",
     meaning: { plain: "Services exist without consistently named owners; alerts route to shared inboxes.", whyExists: "Acquisitions and reorgs left gaps unfilled.", whyGoogle: "Service catalog and named ownership are foundational.", misconceptions: [] },
-    operational: { intro: "Surfaced during discovery interviews.", examples: [{ org: "HHAX", story: "Several Tier-1 services lacked clear owner during walkthrough." }] },
+    operational: { intro: "Surfaced during discovery interviews.", examples: [{ org: "Client", story: "Several Tier-1 services lacked clear owner during walkthrough." }] },
     patterns: { good: "Name owner per service.", better: "Owner accountable for SLOs and cost.", best: "Ownership in scorecards." },
     mistakes: [{ anti: "Wiki ownership", consequence: "Alerts orphan; MTTR climbs." }],
     hhax: { headline: "Ownership is the single highest-leverage change.", bullets: [{ area: "Catalog", detail: "Source of truth for ownership." }] },
   }),
   hhCurrentDebt: makeDrawer({
-    id: "hhCurrentDebt", title: "High Technical Debt", kicker: "HHAX Current State", icon: AlertTriangle, tone: "rose",
+    id: "hhCurrentDebt", title: "High Technical Debt", kicker: "Client Current State", icon: AlertTriangle, tone: "rose",
     meaning: { plain: "Accumulated design and infrastructure debt across legacy and acquired platforms.", whyExists: "Years of velocity-first decisions without debt repayment.", whyGoogle: "Modernization roadmap repays debt deliberately.", misconceptions: [] },
-    operational: { intro: "Observed across platform assessments.", examples: [{ org: "HHAX", story: "Debt categories surfaced during modernization workshops." }] },
+    operational: { intro: "Observed across platform assessments.", examples: [{ org: "Client", story: "Debt categories surfaced during modernization workshops." }] },
     patterns: { good: "Inventory debt.", better: "Prioritized backlog.", best: "Budgeted repayment per quarter." },
     mistakes: [{ anti: "Defer indefinitely", consequence: "Velocity collapses." }],
     hhax: { headline: "Repaying debt enables platform and reliability investment.", bullets: [{ area: "Modernization", detail: "Repayment tied to roadmap." }] },
   }),
   hhCurrentFragmented: makeDrawer({
-    id: "hhCurrentFragmented", title: "Fragmented Platforms", kicker: "HHAX Current State", icon: Layers, tone: "rose",
+    id: "hhCurrentFragmented", title: "Fragmented Platforms", kicker: "Client Current State", icon: Layers, tone: "rose",
     meaning: { plain: "Multiple platforms from acquisitions operate with different tools, processes, and standards.", whyExists: "Each acquisition brought its own stack.", whyGoogle: "Platform engineering converges over time on golden paths.", misconceptions: [] },
-    operational: { intro: "Observed across portfolio reviews.", examples: [{ org: "HHAX", story: "Disparate CI/CD, observability, and IAM stacks." }] },
+    operational: { intro: "Observed across portfolio reviews.", examples: [{ org: "Client", story: "Disparate CI/CD, observability, and IAM stacks." }] },
     patterns: { good: "Inventory.", better: "Converge on golden paths.", best: "Platform team enables migration." },
     mistakes: [{ anti: "Rip-and-replace all at once", consequence: "Business disruption." }],
     hhax: { headline: "Convergence on golden paths reduces operational tax across the portfolio.", bullets: [{ area: "Golden Paths", detail: "Common CI/CD, observability, IAM." }] },
   }),
   hhCurrentManual: makeDrawer({
-    id: "hhCurrentManual", title: "Manual Operations", kicker: "HHAX Current State", icon: Wrench, tone: "rose",
+    id: "hhCurrentManual", title: "Manual Operations", kicker: "Client Current State", icon: Wrench, tone: "rose",
     meaning: { plain: "Significant operations performed manually — runbooks executed by humans, provisioning by ticket.", whyExists: "Automation investment trailed business growth.", whyGoogle: "Automation as product addresses this.", misconceptions: [] },
-    operational: { intro: "Observed across ops walkthroughs.", examples: [{ org: "HHAX", story: "Common runbooks still hand-executed." }] },
+    operational: { intro: "Observed across ops walkthroughs.", examples: [{ org: "Client", story: "Common runbooks still hand-executed." }] },
     patterns: { good: "Identify top runbooks.", better: "Automate them.", best: "Self-healing on common patterns." },
     mistakes: [{ anti: "Add headcount", consequence: "Cost up; reliability flat." }],
     hhax: { headline: "Automation reclaims capacity and improves reliability simultaneously.", bullets: [{ area: "Runbooks", detail: "Top patterns automated first." }] },
   }),
   hhCurrentAcq: makeDrawer({
-    id: "hhCurrentAcq", title: "Acquisition Complexity", kicker: "HHAX Current State", icon: Building2, tone: "rose",
+    id: "hhCurrentAcq", title: "Acquisition Complexity", kicker: "Client Current State", icon: Building2, tone: "rose",
     meaning: { plain: "Each acquisition adds platforms, teams, processes, and reliability postures that take time to integrate.", whyExists: "Without a repeatable integration model, each acquisition starts from scratch.", whyGoogle: "Standardized golden paths reduce integration time.", misconceptions: [] },
-    operational: { intro: "Pattern observed across multiple acquisitions.", examples: [{ org: "HHAX", story: "Variable integration timelines and reliability outcomes per acquisition." }] },
+    operational: { intro: "Pattern observed across multiple acquisitions.", examples: [{ org: "Client", story: "Variable integration timelines and reliability outcomes per acquisition." }] },
     patterns: { good: "Document integration steps.", better: "Templated onboarding.", best: "Standardized acquisition factory." },
     mistakes: [{ anti: "Treat each acquisition as unique", consequence: "Slow integration; reliability variance." }],
     hhax: { headline: "An acquisition factory turns integration into a repeatable, fast process.", bullets: [{ area: "Factory", detail: "Standard templates and golden paths." }] },
   }),
 
   hhFutureOwnership: makeDrawer({
-    id: "hhFutureOwnership", title: "Service Ownership", kicker: "HHAX Future State", icon: Users, tone: "emerald",
+    id: "hhFutureOwnership", title: "Service Ownership", kicker: "Client Future State", icon: Users, tone: "emerald",
     meaning: { plain: "Every Tier-1 service has a named owning team, with SLOs, on-call, and a reliability roadmap.", whyExists: "Ownership closes feedback loops and ends 'no one owns it.'", whyGoogle: "Foundational SRE practice.", misconceptions: [] },
     operational: { intro: "Catalog as source of truth.", examples: [{ org: "Netflix", story: "'You build it, you run it.'" }] },
     patterns: { good: "Named team.", better: "Scope expanded to cost & security.", best: "Measured in scorecards." },
     mistakes: [{ anti: "Wiki ownership", consequence: "Alerts misroute." }],
-    hhax: { headline: "Ownership is the single highest-leverage shift.", bullets: [{ area: "All Platforms", detail: "Consistent ownership across HHAX and acquisitions." }] },
+    hhax: { headline: "Ownership is the single highest-leverage shift.", bullets: [{ area: "All Platforms", detail: "Consistent ownership across Client and acquisitions." }] },
   }),
   hhFutureReliable: makeDrawer({
-    id: "hhFutureReliable", title: "Reliable Platforms", kicker: "HHAX Future State", icon: ShieldCheck, tone: "emerald",
+    id: "hhFutureReliable", title: "Reliable Platforms", kicker: "Client Future State", icon: ShieldCheck, tone: "emerald",
     meaning: { plain: "Platforms operate within explicit SLOs and budgets, with measurable improvement quarter over quarter.", whyExists: "Predictability for customers and the business.", whyGoogle: "SLO/budget framework formalizes this.", misconceptions: [] },
     operational: { intro: "Reliability council reviews each quarter.", examples: [{ org: "Google", story: "Quarterly reliability reviews drive investment." }] },
     patterns: { good: "SLOs defined.", better: "Budgets enforced.", best: "Investment shifts based on data." },
@@ -1124,7 +1124,7 @@ const D: Record<string, DrawerContent> = {
     hhax: { headline: "Reliability becomes a measurable commitment to caregivers, branches, and payers.", bullets: [{ area: "Per-Platform", detail: "Quarterly reviews per platform." }] },
   }),
   hhFutureAuto: makeDrawer({
-    id: "hhFutureAuto", title: "Automation", kicker: "HHAX Future State", icon: Cpu, tone: "emerald",
+    id: "hhFutureAuto", title: "Automation", kicker: "Client Future State", icon: Cpu, tone: "emerald",
     meaning: { plain: "Operational work eliminated by self-healing platforms and self-service workflows.", whyExists: "Reclaim capacity; improve reliability.", whyGoogle: "Toil cap drives this.", misconceptions: [] },
     operational: { intro: "Automation backlog prioritized alongside features.", examples: [{ org: "Netflix", story: "Paved roads eliminate categories of toil." }] },
     patterns: { good: "Top items automated.", better: "Toil measured.", best: "Self-healing dominates response." },
@@ -1132,7 +1132,7 @@ const D: Record<string, DrawerContent> = {
     hhax: { headline: "Automation reclaims engineering capacity for modernization.", bullets: [{ area: "Self-Service", detail: "Replaces ticket queues." }] },
   }),
   hhFuturePlatform: makeDrawer({
-    id: "hhFuturePlatform", title: "Platform Engineering", kicker: "HHAX Future State", icon: Boxes, tone: "emerald",
+    id: "hhFuturePlatform", title: "Platform Engineering", kicker: "Client Future State", icon: Boxes, tone: "emerald",
     meaning: { plain: "A dedicated platform team builds golden paths that reduce the operational tax for every product team.", whyExists: "Platforms scale; one-off enablement does not.", whyGoogle: "Platform engineering is the modern successor to internal tooling.", misconceptions: [] },
     operational: { intro: "Platform as product, with users, SLAs, and a roadmap.", examples: [{ org: "Spotify Backstage / Cortex / Port", story: "Catalog + golden paths." }] },
     patterns: { good: "Identify golden paths.", better: "Platform team owns them.", best: "Adoption measured." },
@@ -1140,7 +1140,7 @@ const D: Record<string, DrawerContent> = {
     hhax: { headline: "Platform engineering converges acquired platforms over time.", bullets: [{ area: "Golden Paths", detail: "Common CI/CD, observability, IAM." }] },
   }),
   hhFutureModern: makeDrawer({
-    id: "hhFutureModern", title: "Modern Architecture", kicker: "HHAX Future State", icon: Code2, tone: "emerald",
+    id: "hhFutureModern", title: "Modern Architecture", kicker: "Client Future State", icon: Code2, tone: "emerald",
     meaning: { plain: "Architecture aligned with current business and technology realities — cloud-native where it matters, with clear modernization priorities.", whyExists: "Legacy architecture caps reliability, velocity, and cost outcomes.", whyGoogle: "Modernization is a continuous discipline, not a project.", misconceptions: [] },
     operational: { intro: "Modernization roadmap aligned with reliability and platform investment.", examples: [{ org: "AWS / GCP customers", story: "Modernization tied to business outcomes." }] },
     patterns: { good: "Roadmap exists.", better: "Tied to debt repayment.", best: "Continuous modernization cadence." },
@@ -1148,7 +1148,7 @@ const D: Record<string, DrawerContent> = {
     hhax: { headline: "Modernization unlocks reliability, velocity, and cost wins simultaneously.", bullets: [{ area: "Roadmap", detail: "Aligned with reliability priorities." }] },
   }),
   hhFutureInt: makeDrawer({
-    id: "hhFutureInt", title: "Integrated Acquisitions", kicker: "HHAX Future State", icon: Building2, tone: "emerald",
+    id: "hhFutureInt", title: "Integrated Acquisitions", kicker: "Client Future State", icon: Building2, tone: "emerald",
     meaning: { plain: "A repeatable acquisition factory integrates platforms, teams, and reliability standards predictably.", whyExists: "Each new acquisition adds operational tax without repeatability.", whyGoogle: "Standardized templates reduce integration cost.", misconceptions: [] },
     operational: { intro: "Templates and golden paths reduce ramp time.", examples: [{ org: "Industry", story: "Acquisition playbooks shared across portfolios." }] },
     patterns: { good: "Templates exist.", better: "Integration measured.", best: "Acquisition factory." },
@@ -1156,7 +1156,7 @@ const D: Record<string, DrawerContent> = {
     hhax: { headline: "An acquisition factory turns integration into a competitive advantage.", bullets: [{ area: "Factory", detail: "Standard templates per platform type." }] },
   }),
   hhFutureReduced: makeDrawer({
-    id: "hhFutureReduced", title: "Reduced Interruptions", kicker: "HHAX Future State", icon: CheckCircle2, tone: "emerald",
+    id: "hhFutureReduced", title: "Reduced Interruptions", kicker: "Client Future State", icon: CheckCircle2, tone: "emerald",
     meaning: { plain: "Engineering time protected from operational interruptions through automation, ownership, and platforms.", whyExists: "Flow time is the leading indicator of delivery and reliability.", whyGoogle: "Toil cap exists for exactly this.", misconceptions: [] },
     operational: { intro: "Interruptions measured per team.", examples: [{ org: "Google", story: "Toil reports drive reallocation." }] },
     patterns: { good: "Measure.", better: "Reduce categories.", best: "Cap and enforce." },
@@ -1164,7 +1164,7 @@ const D: Record<string, DrawerContent> = {
     hhax: { headline: "Protected flow time unlocks roadmap delivery.", bullets: [{ area: "Per-Team", detail: "Interruption budget tracked." }] },
   }),
   hhFuturePredict: makeDrawer({
-    id: "hhFuturePredict", title: "Predictable Operations", kicker: "HHAX Future State", icon: Activity, tone: "emerald",
+    id: "hhFuturePredict", title: "Predictable Operations", kicker: "Client Future State", icon: Activity, tone: "emerald",
     meaning: { plain: "Operations follow data-driven cadences with explicit targets, budgets, and reviews.", whyExists: "Predictability for customers, the business, and engineering teams.", whyGoogle: "SLO/budget framework drives predictability.", misconceptions: [] },
     operational: { intro: "Quarterly reliability reviews; weekly burn review.", examples: [{ org: "Google", story: "Cadence is the source of compounding improvement." }] },
     patterns: { good: "Cadence established.", better: "Cadence enforced.", best: "Cadence drives investment shifts." },
@@ -1203,7 +1203,7 @@ function ContextDrawer({
             {content.metrics && <TabsTrigger value="metrics" className="text-[11px] px-2 py-1">Metrics</TabsTrigger>}
             <TabsTrigger value="patterns" className="text-[11px] px-2 py-1">Patterns</TabsTrigger>
             <TabsTrigger value="mistakes" className="text-[11px] px-2 py-1">Mistakes</TabsTrigger>
-            <TabsTrigger value="hhax" className="text-[11px] px-2 py-1">HHAX Relevance</TabsTrigger>
+            <TabsTrigger value="hhax" className="text-[11px] px-2 py-1">Client Relevance</TabsTrigger>
           </TabsList>
 
           <div className="overflow-y-auto px-6 py-4 flex-1">
@@ -1400,7 +1400,7 @@ const ANTI_PATTERNS = [
   { id: "apMonNoAction", title: "Monitoring Without Action" },
 ];
 
-const HHAX_CURRENT = [
+const Client_CURRENT = [
   { id: "hhCurrentReactive",   title: "Reactive Operations" },
   { id: "hhCurrentTickets",    title: "Ticket-Driven Work" },
   { id: "hhCurrentInterrupt",  title: "Heavy Interruptions" },
@@ -1411,7 +1411,7 @@ const HHAX_CURRENT = [
   { id: "hhCurrentAcq",        title: "Acquisition Complexity" },
 ];
 
-const HHAX_FUTURE = [
+const Client_FUTURE = [
   { id: "hhFutureOwnership", title: "Service Ownership" },
   { id: "hhFutureReliable",  title: "Reliable Platforms" },
   { id: "hhFutureAuto",      title: "Automation" },
@@ -1609,8 +1609,8 @@ export default function GoogleSre() {
             ))}
           </div>
 
-          {/* SECTION 7 - Why this matters to HHAX */}
-          <SectionHeader number="07" title="Why This Matters To HHAX" subtitle="From current state to desired future state. Click any item for the contextual HHAX explanation." />
+          {/* SECTION 7 - Why this matters to Client */}
+          <SectionHeader number="07" title="Why This Matters To Client" subtitle="From current state to desired future state. Click any item for the contextual Client explanation." />
           <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
@@ -1619,7 +1619,7 @@ export default function GoogleSre() {
                   <div className="text-xs font-semibold uppercase tracking-wider text-rose-700">Current State</div>
                 </div>
                 <div className="space-y-2">
-                  {HHAX_CURRENT.map((h) => (
+                  {Client_CURRENT.map((h) => (
                     <button
                       key={h.id}
                       onClick={() => open(h.id)}
@@ -1637,7 +1637,7 @@ export default function GoogleSre() {
                   <div className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Desired Future State</div>
                 </div>
                 <div className="space-y-2">
-                  {HHAX_FUTURE.map((h) => (
+                  {Client_FUTURE.map((h) => (
                     <button
                       key={h.id}
                       onClick={() => open(h.id)}
@@ -1655,7 +1655,7 @@ export default function GoogleSre() {
               <div className="flex items-start gap-3">
                 <Lightbulb className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
                 <div className="text-xs text-slate-700 leading-relaxed">
-                  SRE is the engineering discipline that connects HHAX's modernization, platform engineering, automation,
+                  SRE is the engineering discipline that connects Client's modernization, platform engineering, automation,
                   acquisition integration, and reliability goals into a single operating model. It is the bridge from
                   reactive, ticket-driven operations to proactive, engineering-owned reliability — the foundation the
                   rest of the transformation depends on.

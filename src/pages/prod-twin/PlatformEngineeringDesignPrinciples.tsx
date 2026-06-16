@@ -659,7 +659,7 @@ function EntryPane({ entry, onPrev, onNext, indexInfo, onClose }: { entry: Entry
       <Tabs defaultValue="overview" className="flex-1 flex flex-col">
         <TabsList className="px-6 mt-3 flex flex-wrap justify-start h-auto bg-transparent gap-1">
           {["overview","responsibilities","components","competencies","interactions","metrics","hhax","implementation","artifacts"].map(t => (
-            <TabsTrigger key={t} value={t} className="text-[11px] capitalize data-[state=active]:bg-slate-900 data-[state=active]:text-white">{t === "hhax" ? "HHAX Relevance" : t}</TabsTrigger>
+            <TabsTrigger key={t} value={t} className="text-[11px] capitalize data-[state=active]:bg-slate-900 data-[state=active]:text-white">{t === "hhax" ? "Client Relevance" : t}</TabsTrigger>
           ))}
         </TabsList>
 
@@ -743,7 +743,7 @@ function EntryPane({ entry, onPrev, onNext, indexInfo, onClose }: { entry: Entry
           <TabsContent value="hhax" className="space-y-4 mt-4">
             {entry.hhax ? entry.hhax.map((h, i) => <p key={i} className="text-sm text-slate-700 leading-relaxed">{h}</p>) : (
               <div className="text-sm text-slate-700 leading-relaxed">
-                Platform engineering directly supports HHAX modernization: standardizing acquired platforms onto common cloud foundations,
+                Platform engineering directly supports Client modernization: standardizing acquired platforms onto common cloud foundations,
                 anchoring GitHub-based delivery, embedding Datadog observability, and replacing ticket-driven operations with self-service
                 workflows that scale across product teams.
               </div>

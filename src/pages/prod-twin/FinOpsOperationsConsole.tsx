@@ -727,7 +727,7 @@ export default function FinOpsOperationsConsole() {
           <footer className="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 flex items-start gap-2.5">
             <Sparkles className="w-4 h-4 text-slate-400 mt-0.5" />
             <p className="text-[12px] text-slate-600 leading-relaxed">
-              Illustrative HHAX-aligned FinOps view. Built for hybrid AWS / GCP / Virginia data center operations,
+              Illustrative Client-aligned FinOps view. Built for hybrid AWS / GCP / Virginia data center operations,
               SQL Server cost takeout, reliability tooling control, and clearer ownership across cloud, infrastructure,
               database, SRE, security, and product teams. All numbers are illustrative placeholders unless connected
               to live billing data.

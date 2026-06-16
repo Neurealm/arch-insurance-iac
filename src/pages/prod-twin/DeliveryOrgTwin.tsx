@@ -85,11 +85,11 @@ const spark = (vals: number[]) => vals.map((y, i) => ({ x: i, y }));
 const PEOPLE: Person[] = [
   // EXEC (1)
   {
-    id: "sarah", name: "Sarah Mitchell", title: "Service Delivery Director", manager: "HHAX CIO",
+    id: "sarah", name: "Sarah Mitchell", title: "Service Delivery Director", manager: "Client CIO",
     layer: "exec", workstream: "Executive Service Ownership", team: 22, years: 18,
     status: "On Track", criticality: "Critical", avatar: sarahMitchellAsset.url, initials: "SM",
     responsibilities: ["SLA Accountability & Service Governance", "Executive Reporting & QBR Leadership", "Roadmap Execution & Value Realization", "Risk Management & Compliance Oversight", "Vendor & Financial Management"],
-    servicesOwned: ["HHAX Production Platform", "All Critical Workflows", "Modernization Program"],
+    servicesOwned: ["Client Production Platform", "All Critical Workflows", "Modernization Program"],
     outcomes: ["Customer Satisfaction", "SLA Performance", "Executive Governance", "Modernization Success"],
     kpis: [
       { name: "Availability", target: "99.95%", baseline: "99.82%", current: "99.95%", trend: "up", risk: "low" },
@@ -101,7 +101,7 @@ const PEOPLE: Person[] = [
       { name: "Executive Escalations", target: "<5", baseline: "11", current: "3", trend: "down", risk: "low" },
       { name: "QBR Completion", target: "100%", baseline: "75%", current: "100%", trend: "up", risk: "low" },
     ],
-    peers: ["HHAX CIO", "HHAX CFO"], reports: ["Amit Verma", "Jennifer Lee", "Rahul Sharma", "Priya Nair", "Michael Brown", "Anita Desai"],
+    peers: ["Client CIO", "Client CFO"], reports: ["Amit Verma", "Jennifer Lee", "Rahul Sharma", "Priya Nair", "Michael Brown", "Anita Desai"],
     budget: "$18.7M", forecast: "$18.2M", savings: "$2.6M",
     aiSummary: "Executive ownership posture is strong. SLA attainment improved 2.3 pts QoQ. Modernization progress requires acceleration in containerization workstream to hit 80% horizon target by Q4. Recommend reallocating $420K from L2 contractor spend into platform engineering uplift.",
   },
@@ -479,7 +479,7 @@ export default function DeliveryOrgTwin() {
             </Button>
             <div className="flex-1">
               <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium uppercase tracking-wide">
-                <span>HHAX Production Resilience OS</span><ChevronRight className="h-3 w-3" /><span>Delivery Organization</span>
+                <span>Client Production Resilience OS</span><ChevronRight className="h-3 w-3" /><span>Delivery Organization</span>
               </div>
               <h1 className="text-2xl font-bold text-slate-900 leading-tight">Delivery Organization Digital Twin</h1>
               <p className="text-sm text-slate-600">22-person SRE, RunOps, Platform, Security, Cloud, Service Management & Modernization operating model — every person is a business function.</p>

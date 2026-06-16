@@ -151,7 +151,7 @@ const D: Record<string, DrawerContent> = {
       dysfunction: ["Constantly blocked by other teams", "Tickets thrown over the wall", "Reliability is someone else's job"],
     },
     hhax: {
-      headline: "Stream-aligned teams map directly to HHAX's customer value streams.",
+      headline: "Stream-aligned teams map directly to Client's customer value streams.",
       bullets: [
         { area: "Caregiver Mobile Experience", detail: "One team owns mobile end-to-end: app, APIs, EVV reliability." },
         { area: "Claims & Payments", detail: "Long-lived team owns claim intake through payment, including SLOs." },
@@ -233,7 +233,7 @@ const D: Record<string, DrawerContent> = {
       dysfunction: ["Long-running engagements", "Owns production work", "Becomes a help desk"],
     },
     hhax: {
-      headline: "Enabling teams accelerate HHAX's shift from ticket-driven ops to engineering practices.",
+      headline: "Enabling teams accelerate Client's shift from ticket-driven ops to engineering practices.",
       bullets: [
         { area: "SRE Enablement", detail: "Coach acquired teams on SLOs, error budgets, blameless postmortems." },
         { area: "Cloud Enablement", detail: "Help workloads adopt AWS/GCP landing zones and reference patterns." },
@@ -303,7 +303,7 @@ const D: Record<string, DrawerContent> = {
       dysfunction: ["Every change requires ticket", "Heroics keep it running", "Bus factor of 1"],
     },
     hhax: {
-      headline: "Isolate HHAX's specialized systems so stream teams stay focused on customer value.",
+      headline: "Isolate Client's specialized systems so stream teams stay focused on customer value.",
       bullets: [
         { area: "Policy Engine", detail: "Specialist team owns complex business-rule engine consumed by Claims, Eligibility." },
         { area: "Legacy Database Modernization", detail: "Deep DBAs evolve schemas without burdening every stream team." },
@@ -384,7 +384,7 @@ const D: Record<string, DrawerContent> = {
       dysfunction: ["Tickets pile up", "Stream teams build their own pipelines", "DX NPS declining"],
     },
     hhax: {
-      headline: "Platforms are the leverage point for HHAX to standardize across acquired estates.",
+      headline: "Platforms are the leverage point for Client to standardize across acquired estates.",
       bullets: [
         { area: "Cloud Platform", detail: "Landing zones for AWS + GCP with embedded guardrails for acquired workloads." },
         { area: "Observability Platform", detail: "Unified logs, traces, metrics across acquired tenants." },
@@ -606,7 +606,7 @@ function TeamDrawer({ id, onClose }: { id: TeamId | null; onClose: () => void })
             <TabsList className="w-full justify-start rounded-none border-b bg-white px-4 h-auto py-0 overflow-x-auto">
               {["overview","responsibilities","collaboration","skills","kpis","hhax","artifacts","anti","implementation"].map((t) => (
                 <TabsTrigger key={t} value={t} className="text-[11px] capitalize data-[state=active]:bg-slate-100">
-                  {t === "anti" ? "Anti-patterns" : t === "hhax" ? "HHAX" : t === "kpis" ? "KPIs" : t}
+                  {t === "anti" ? "Anti-patterns" : t === "hhax" ? "Client" : t === "kpis" ? "KPIs" : t}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -797,7 +797,7 @@ function GenericSideDrawer({ d, onClose }: { d: GenericDrawer | null; onClose: (
               <Section title="Maturity signals">
                 Practiced daily, documented, taught by an enabling team, encoded in the platform, and measured.
               </Section>
-              <Section title="HHAX relevance">
+              <Section title="Client relevance">
                 Required across acquired estates to standardize practice and reduce duplicated effort.
               </Section>
             </div>
@@ -842,8 +842,8 @@ function GenericSideDrawer({ d, onClose }: { d: GenericDrawer | null; onClose: (
             </SheetHeader>
             <div className="p-6 space-y-4 overflow-y-auto">
               <Section title="What this team does">{d.node.detail}</Section>
-              <Section title="HHAX relevance">
-                Maps to current HHAX needs across acquired platforms, cloud operations, and modernization.
+              <Section title="Client relevance">
+                Maps to current Client needs across acquired platforms, cloud operations, and modernization.
               </Section>
             </div>
           </>
@@ -1089,14 +1089,14 @@ export default function TeamTopologies() {
             </div>
           </section>
 
-          {/* HHAX RELEVANCE FOOTER */}
+          {/* Client RELEVANCE FOOTER */}
           <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-sky-50/50 to-white p-6">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 inline-flex items-center justify-center"><Building2 className="w-5 h-5" /></div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-900">Why Team Topologies Matters for HHAX</h3>
+                <h3 className="text-lg font-semibold text-slate-900">Why Team Topologies Matters for Client</h3>
                 <p className="text-sm text-slate-700 mt-1 max-w-4xl">
-                  HHAX is moving from ITIL-oriented operations toward SRE and platform engineering. Multiple acquired platforms,
+                  Client is moving from ITIL-oriented operations toward SRE and platform engineering. Multiple acquired platforms,
                   AWS and GCP cloud estates, a Virginia data center, Sandata integration, the Pavilio growth platform, and the
                   self-direction platform transition all demand clear ownership, reduced cognitive load, and reusable platforms.
                   Team Topologies provides the operating shape that makes that transition concrete and measurable.

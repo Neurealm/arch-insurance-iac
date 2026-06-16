@@ -1128,7 +1128,7 @@ function PaneBody({ pane, tab }: { pane: Pane; tab: string }) {
       <>
         <Section title="Definition"><p>{c.definition}</p></Section>
         <Section title="Why it matters"><p>Directly improves developer productivity, reliability, security, or cost — and removes friction created by ticket-driven operations.</p></Section>
-        <Section title="HHAX relevance"><p>Supports standardizing across acquired product lines, the AWS/GCP footprint, Virginia data center transition, GitHub standardization, Datadog observability, and the move from ITIL-style operations toward SRE-aligned, self-service platform engineering — while protecting caregiver visits, claims, payroll, and PHI.</p></Section>
+        <Section title="Client relevance"><p>Supports standardizing across acquired product lines, the AWS/GCP footprint, Virginia data center transition, GitHub standardization, Datadog observability, and the move from ITIL-style operations toward SRE-aligned, self-service platform engineering — while protecting caregiver visits, claims, payroll, and PHI.</p></Section>
       </>
     );
     if (tab === "How It Works") return (

@@ -208,7 +208,7 @@ export default function ModernizationRoadmap() {
         <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-6 sticky top-0 z-30">
           <div className="flex-1 min-w-0">
             <h1 className="text-[22px] font-semibold text-slate-900 leading-tight">Modernization Roadmap</h1>
-            <p className="text-[13px] text-slate-500 mt-0.5">Execute a phased roadmap to modernize, automate, secure, and scale the HHAX production platform.</p>
+            <p className="text-[13px] text-slate-500 mt-0.5">Execute a phased roadmap to modernize, automate, secure, and scale the Client production platform.</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex flex-col">
@@ -496,7 +496,7 @@ export default function ModernizationRoadmap() {
           </div>
         </section>
 
-        <footer className="px-6 py-3 border-t border-slate-200 text-[11px] text-slate-400 bg-white">© 2025 HHAX. All rights reserved.</footer>
+        <footer className="px-6 py-3 border-t border-slate-200 text-[11px] text-slate-400 bg-white">© 2025 Client. All rights reserved.</footer>
       </div>
 
       {/* Drawer */}

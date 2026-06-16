@@ -619,7 +619,7 @@ function EntryPane({ entry, onPrev, onNext, indexInfo, onClose }: { entry: Entry
         <TabsList className="px-6 mt-3 flex flex-wrap justify-start h-auto bg-transparent gap-1">
           {["overview", "implementation", "raci", "competencies", "artifacts", "kpis", "hhax", "roadmap"].map(t => (
             <TabsTrigger key={t} value={t} className="text-[11px] capitalize data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-              {t === "hhax" ? "HHAX Relevance" : t === "raci" ? "Roles & RACI" : t === "kpis" ? "KPIs" : t}
+              {t === "hhax" ? "Client Relevance" : t === "raci" ? "Roles & RACI" : t === "kpis" ? "KPIs" : t}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -699,7 +699,7 @@ function EntryPane({ entry, onPrev, onNext, indexInfo, onClose }: { entry: Entry
           <TabsContent value="hhax" className="space-y-4 mt-4">
             {entry.hhax ? entry.hhax.map((h, i) => <p key={i} className="text-sm text-slate-700 leading-relaxed">{h}</p>) : (
               <div className="text-sm text-slate-700 leading-relaxed space-y-3">
-                <p>For HHAX, building platform engineering directly answers the themes raised across the workshops:</p>
+                <p>For Client, building platform engineering directly answers the themes raised across the workshops:</p>
                 <ul className="space-y-1 text-sm text-slate-700">
                   {["Need for standardization across acquired BUs", "Golden image strategy", "GitHub standardization",
                     "Cloud modernization and AWS landing zones", "Datadog observability as a shared service",

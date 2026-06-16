@@ -269,7 +269,7 @@ export default function AiCoworkerControlRoom() {
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <div className="text-sm font-semibold text-slate-900">Digital Coworkers</div>
-                  <div className="text-[11px] text-slate-500">AI teammates assisting HHAX operations</div>
+                  <div className="text-[11px] text-slate-500">AI teammates assisting Client operations</div>
                 </div>
                 <button className="text-[11px] text-blue-600 inline-flex items-center gap-1 hover:underline">
                   View All Coworkers <ChevronRight className="h-3 w-3" />

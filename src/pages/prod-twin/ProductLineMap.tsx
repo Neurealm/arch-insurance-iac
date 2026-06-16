@@ -60,11 +60,11 @@ type Product = {
 const PRODUCTS: Product[] = [
   {
     id: "hha", name: "HHA Enterprise", lifecycle: "Invest / Modernize",
-    description: "Core go-forward platform for HHAX. Primary system for caregiver, claims, payroll and state operations.",
+    description: "Core go-forward platform for Client. Primary system for caregiver, claims, payroll and state operations.",
     hosting: [{ label: "AWS (Ashburn)", icon: "aws" }],
     tech: [{ label: "SQL Server", icon: "db" }, { label: "12 Shards", icon: "shards" }],
     criticality: "High", sloMaturity: "Measured", health: 86,
-    owner: "Platform Engineering", support: "HHAX-Owned",
+    owner: "Platform Engineering", support: "Client-Owned",
     cyber: { label: "Good", tone: "good" },
     patch: 92, edr: true, identity: "Okta SSO", fwSg: "Restricted",
     backup: "Daily", dr: "Cross-region (Warm)", vuln: "Medium",
@@ -84,7 +84,7 @@ const PRODUCTS: Product[] = [
     hosting: [{ label: "AWS", icon: "aws" }],
     tech: [{ label: "Oracle Database", icon: "oracle" }],
     criticality: "High", sloMaturity: "Measured", health: 80,
-    owner: "Product Engineering", support: "HHAX-Owned",
+    owner: "Product Engineering", support: "Client-Owned",
     cyber: { label: "Good", tone: "good" },
     patch: 88, edr: true, identity: "Okta SSO", fwSg: "Restricted",
     backup: "Daily", dr: "Pilot Light", vuln: "Low",
@@ -124,7 +124,7 @@ const PRODUCTS: Product[] = [
     hosting: [{ label: "Citrix", icon: "citrix" }],
     tech: [{ label: "SQL Server", icon: "db" }],
     criticality: "High", sloMaturity: "Draft", health: 68,
-    owner: "Product Engineering", support: "HHAX-Owned",
+    owner: "Product Engineering", support: "Client-Owned",
     cyber: { label: "Warn", tone: "warn" },
     patch: 79, edr: true, identity: "AD + Okta", fwSg: "Citrix gateway",
     backup: "Daily", dr: "Warm", vuln: "Medium",
@@ -164,7 +164,7 @@ const PRODUCTS: Product[] = [
     hosting: [{ label: "AWS", icon: "aws" }],
     tech: [{ label: "PostgreSQL", icon: "pg" }],
     criticality: "High", sloMaturity: "Draft", health: 78,
-    owner: "Platform Engineering", support: "HHAX-Owned",
+    owner: "Platform Engineering", support: "Client-Owned",
     cyber: { label: "Good", tone: "good" },
     patch: 95, edr: true, identity: "Okta SSO + MFA", fwSg: "Zero Trust",
     backup: "Continuous", dr: "Multi-region active", vuln: "Low",
@@ -269,7 +269,7 @@ export default function ProductLineMap() {
       <div className="flex-1 flex flex-col bg-slate-50/60 min-h-screen">
         {/* Top utility bar */}
         <div className="h-14 border-b bg-white px-6 flex items-center gap-4 sticky top-0 z-20">
-          <div className="font-semibold text-slate-800">HHAX Production Resilience Operating System</div>
+          <div className="font-semibold text-slate-800">Client Production Resilience Operating System</div>
           <div className="flex-1 max-w-2xl mx-auto relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input value={search} onChange={e => setSearch(e.target.value)}
@@ -294,13 +294,13 @@ export default function ProductLineMap() {
                 Digital Twin <ChevronRight className="h-3 w-3" /> Site Resilience Engineering
               </div>
               <div className="flex items-center gap-2 mt-1">
-                <h1 className="text-2xl font-semibold text-slate-900">HHAX Product Line Map</h1>
+                <h1 className="text-2xl font-semibold text-slate-900">Client Product Line Map</h1>
                 <TooltipProvider><Tooltip>
                   <TooltipTrigger><Info className="h-4 w-4 text-slate-400" /></TooltipTrigger>
-                  <TooltipContent>Authoritative operating model for HHAX product portfolio governance</TooltipContent>
+                  <TooltipContent>Authoritative operating model for Client product portfolio governance</TooltipContent>
                 </Tooltip></TooltipProvider>
               </div>
-              <p className="text-sm text-slate-600 mt-1">Digital twin view of HHAX product families, hosting footprint, and operating posture.</p>
+              <p className="text-sm text-slate-600 mt-1">Digital twin view of Client product families, hosting footprint, and operating posture.</p>
             </div>
 
             {/* KPI Row */}
@@ -398,7 +398,7 @@ export default function ProductLineMap() {
 
             <div className="mt-4 text-[11px] text-slate-500 flex items-center justify-between">
               <span>Last updated: Jun 14, 2026 8:30 AM ET</span>
-              <span className="flex items-center gap-1">Source: HHAX Digital Twin <Info className="h-3 w-3" /></span>
+              <span className="flex items-center gap-1">Source: Client Digital Twin <Info className="h-3 w-3" /></span>
             </div>
           </main>
 

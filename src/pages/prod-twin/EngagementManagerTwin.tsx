@@ -417,7 +417,7 @@ export default function EngagementManagerTwin() {
                   <div className="text-sm text-indigo-600 font-medium">Engagement Manager</div>
                   <div className="text-xs text-slate-500 mt-0.5">Service Delivery</div>
                   <div className="text-xs text-slate-500">SRE & Modernization Services</div>
-                  <div className="text-xs text-slate-500 mt-1">Customer: <span className="font-semibold text-slate-700">HHAX</span></div>
+                  <div className="text-xs text-slate-500 mt-1">Customer: <span className="font-semibold text-slate-700">Client</span></div>
                   <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-1 gap-1.5 text-[12px]">
                     {[
                       { i: Users, l: "Team Size", v: "22" },
@@ -939,7 +939,7 @@ function ServiceDrill({ service }: { service: Service }) {
           { l: "Cloud Services", v: "AWS / EKS / RDS" },
           { l: "Teams", v: "SRE • Platform • Ops" },
           { l: "Vendors", v: "Datadog, PagerDuty" },
-          { l: "Customers", v: "HHAX • Affiliated" },
+          { l: "Customers", v: "Client • Affiliated" },
         ].map(d => (
           <div key={d.l} className="border border-slate-200 rounded-lg p-2.5">
             <div className="text-[9px] uppercase font-bold text-slate-500">{d.l}</div>
