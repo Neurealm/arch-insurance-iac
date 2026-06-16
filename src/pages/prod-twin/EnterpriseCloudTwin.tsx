@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { useScenarioState } from "@/context/ScenarioStateContext";
 import { DemoScenarioController, ScenarioDrawer } from "@/components/scenario/DemoScenarioController";
+import { GuidedInvestigationProvider, useGuidedInvestigation } from "@/context/GuidedInvestigationContext";
+import { GuidedInvestigationMode, InvestigationLauncher, InvestigationEmptyHint } from "@/components/investigation/GuidedInvestigationMode";
 
 const KPI_ICONS: Record<string, any> = {
   health: Activity, inc: AlertOctagon, slo: ShieldCheck, budget: Gauge,
@@ -1291,7 +1293,7 @@ function RCAPreview({ open, onOpenChange }: { open: boolean; onOpenChange: (b: b
 /* ------------------------------------------------------------------ */
 /* PAGE                                                                */
 /* ------------------------------------------------------------------ */
-export default function EnterpriseCloudTwin() {
+function EnterpriseCloudTwinInner() {
   const scenarioCtx = useScenarioState();
   const { derived, view: ctxView, setView: ctxSetView, selectedId: ctxSelected, setSelectedId: ctxSetSelected, activeScenario, stepIndex } = scenarioCtx;
 
@@ -1373,6 +1375,7 @@ export default function EnterpriseCloudTwin() {
                   <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
                   <Input placeholder="Search services, transactions, traces, resources, incidents, changes, owners, tags, runbooks" className="h-8 w-[360px] pl-8 text-[11.5px]" />
                 </div>
+                <InvestigationLauncher />
                 <DemoScenarioController />
               </div>
             </div>
@@ -1415,6 +1418,7 @@ export default function EnterpriseCloudTwin() {
               </div>
               <div className="mt-3 px-2"><Label>Quick Actions</Label></div>
               <div className="mt-1 space-y-1 px-1">
+                <StartInvestigationQuickAction />
                 {[
                   { i: AlertOctagon, t: "Create Incident" },
                   { i: GitBranch,    t: "Create Change" },
@@ -1427,6 +1431,7 @@ export default function EnterpriseCloudTwin() {
                     <I className="h-3 w-3 text-slate-500" />{t}
                   </button>
                 ))}
+                <div className="pt-1"><InvestigationEmptyHint /></div>
               </div>
             </Glass>
 
@@ -1450,7 +1455,53 @@ export default function EnterpriseCloudTwin() {
         <NovaCopilot open={novaOpen} onOpenChange={setNovaOpen} />
         <RCAPreview open={rcaOpen} onOpenChange={setRcaOpen} />
         <ScenarioDrawer />
+        <GuidedInvestigationMode />
       </div>
     </AppShell>
+  );
+}
+
+function StartInvestigationQuickAction() {
+  const { activeScenario } = useScenarioState();
+  const { status, canStart, start, exit } = useGuidedInvestigation();
+  const active = status === "active" || status === "paused";
+  if (active) {
+    return (
+      <button onClick={exit}
+        className="flex w-full items-center gap-2 rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] text-sky-700 hover:bg-sky-100">
+        <X className="h-3 w-3" /> Exit Investigation
+      </button>
+    );
+  }
+  return (
+    <button
+      onClick={() => canStart && start(activeScenario.id)}
+      disabled={!canStart}
+      className={cn(
+        "flex w-full items-center gap-2 rounded-md border px-2 py-1 text-[11px] transition",
+        canStart
+          ? "border-sky-200 bg-gradient-to-r from-sky-50 to-indigo-50 text-sky-700 hover:from-sky-100 hover:to-indigo-100"
+          : "border-slate-200 bg-white text-slate-400 cursor-not-allowed",
+      )}
+    >
+      <Search className="h-3 w-3" /> Start Guided Investigation
+    </button>
+  );
+}
+
+export default function EnterpriseCloudTwin() {
+  return (
+    <GuidedInvestigationBridge>
+      <EnterpriseCloudTwinInner />
+    </GuidedInvestigationBridge>
+  );
+}
+
+function GuidedInvestigationBridge({ children }: { children: React.ReactNode }) {
+  const { activeScenario } = useScenarioState();
+  return (
+    <GuidedInvestigationProvider scenarioId={activeScenario.id}>
+      {children}
+    </GuidedInvestigationProvider>
   );
 }
