@@ -1085,7 +1085,7 @@ function BusinessServicesView({ onSelect }: { onSelect: (id: string) => void }) 
   return (
     <div className="grid h-full grid-cols-3 gap-3 overflow-auto">
       {BUSINESS_SERVICES.map(b => (
-        <Glass key={b.id} className="p-4 cursor-pointer hover:-translate-y-0.5 transition" onClick={() => onSelect(b.id)}>
+        <div key={b.id} onClick={() => onSelect(b.id)} className="cursor-pointer"><Glass className="p-4 hover:-translate-y-0.5 transition">
           <div className="flex items-center justify-between"><div className="font-semibold">{b.name}</div><Chip s={b.health}>{HEALTH[b.health].label}</Chip></div>
           <div className="mt-1 text-[11px] text-slate-500">{b.owner}</div>
           <div className="mt-3 grid grid-cols-3 gap-2">
