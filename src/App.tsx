@@ -218,6 +218,7 @@ import ReliabilityFoundations from "./pages/prod-twin/ReliabilityFoundations.tsx
 import GoogleSre from "./pages/prod-twin/GoogleSre.tsx";
 import HowToAchieveGoogleSre from "./pages/prod-twin/HowToAchieveGoogleSre.tsx";
 import TeamTopologies from "./pages/prod-twin/TeamTopologies.tsx";
+import FutureStateReliabilityOrg from "./pages/prod-twin/FutureStateReliabilityOrg.tsx";
 import ProductReliabilityAnatomy from "./pages/prod-twin/ProductReliabilityAnatomy.tsx";
 import TransformationJourney from "./pages/prod-twin/TransformationJourney.tsx";
 import CustomerSelectionDemo from "./pages/crm-demo/CustomerSelectionDemo.tsx";
