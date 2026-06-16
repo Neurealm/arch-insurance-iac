@@ -1378,6 +1378,7 @@ function EnterpriseCloudTwinInner() {
                   <Input placeholder="Search services, transactions, traces, resources, incidents, changes, owners, tags, runbooks" className="h-8 w-[360px] pl-8 text-[11.5px]" />
                 </div>
                 <InvestigationLauncher />
+                <EvidenceGraphAvailableIndicator />
                 <DemoScenarioController />
               </div>
             </div>
