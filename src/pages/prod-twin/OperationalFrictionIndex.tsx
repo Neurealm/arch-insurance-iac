@@ -1249,8 +1249,7 @@ function ExecutiveIntelligencePanel({
     </>
   );
 }
-  );
-}
+
 
 function StagePanel({ stage, onClose }: { stage: Stage | null; onClose: () => void }) {
   if (!stage) return null;
