@@ -1502,8 +1502,10 @@ export default function EnterpriseCloudTwin() {
 function GuidedInvestigationBridge({ children }: { children: React.ReactNode }) {
   const { activeScenario } = useScenarioState();
   return (
-    <GuidedInvestigationProvider scenarioId={activeScenario.id}>
-      {children}
-    </GuidedInvestigationProvider>
+    <EvidenceGraphProvider scenarioId={activeScenario.id}>
+      <GuidedInvestigationProvider scenarioId={activeScenario.id}>
+        {children}
+      </GuidedInvestigationProvider>
+    </EvidenceGraphProvider>
   );
 }
