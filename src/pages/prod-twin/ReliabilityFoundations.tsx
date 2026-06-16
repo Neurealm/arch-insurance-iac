@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/eoc/AppShell";
 import {
   Activity, Users, Boxes, TrendingUp, ShieldCheck, DollarSign,
@@ -886,10 +887,12 @@ function DisciplineCard({
 }) {
   const Icon = d.icon;
   const dim = hoveredId && hoveredId !== d.id;
+  const navigate = useNavigate();
   return (
     <div
       onMouseEnter={() => onHover(d.id)}
       onMouseLeave={() => onHover(null)}
+      onClick={() => { if (d.id === "sre") navigate("/reliability-foundations/google-sre"); }}
       className={[
         "group relative rounded-2xl border bg-white p-4 transition-all cursor-pointer",
         "border-slate-200 hover:border-slate-300 hover:shadow-md",
