@@ -1435,6 +1435,7 @@ function EnterpriseCloudTwinInner() {
                   </button>
                 ))}
                 <div className="pt-1"><InvestigationEmptyHint /></div>
+                <div className="pt-1"><EvidenceGraphLauncher variant="compact" label="Open Evidence Graph" className="w-full justify-center" /></div>
               </div>
             </Glass>
 
