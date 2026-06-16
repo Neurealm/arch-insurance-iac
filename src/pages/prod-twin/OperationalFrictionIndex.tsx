@@ -1358,8 +1358,7 @@ export default function OperationalFrictionIndex() {
               </div>
               <h1 className="text-[28px] font-semibold text-slate-900 mt-1 leading-tight">Enterprise Friction Index</h1>
               <p className="text-[13px] text-slate-600 mt-1 max-w-3xl">
-                Executive transformation assessment of operational, organizational, technology, and business friction
-                limiting performance and growth. Each challenge maps to a transformation stage, maturity gap, and quantified value opportunity.
+                These are the forces preventing the enterprise from achieving its desired state.
               </p>
             </div>
             <div className="flex items-center gap-2">
