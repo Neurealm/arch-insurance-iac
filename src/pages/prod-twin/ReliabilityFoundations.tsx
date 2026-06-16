@@ -950,6 +950,17 @@ function DisciplineCard({
           </button>
         </div>
       )}
+      {isPlatform && (
+        <div className="mt-3 flex flex-col gap-1.5">
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate("/reliability-foundations/platform-engineering/design-principles"); }}
+            className="text-left text-[11px] font-semibold text-indigo-700 hover:text-indigo-800 inline-flex items-center justify-between rounded-md border border-indigo-200 bg-indigo-50/60 hover:bg-indigo-50 px-2 py-1.5 transition-colors"
+          >
+            <span>Design Principles</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+      )}
 
     </div>
   );
