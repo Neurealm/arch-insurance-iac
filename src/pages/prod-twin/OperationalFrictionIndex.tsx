@@ -10,10 +10,52 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { FRICTION_BY_SLUG } from "./frictionPanelData";
 import {
   ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip as RTooltip, LineChart, Line, CartesianGrid,
 } from "recharts";
+
+/* Map CHALLENGE.id → friction spec slug (frictionPanelData) */
+const PANEL_SLUG: Record<string, string> = {
+  fsd: "lack-of-future-state-definition",
+  twg: "transformation-without-governance",
+  lev: "limited-executive-visibility",
+  sim: "strategy-and-initiative-misalignment",
+  itil: "itil-to-sre-transition-resistance",
+  rff: "reactive-firefighting-culture",
+  sog: "service-ownership-gaps",
+  ehd: "excessive-human-dependency",
+  afn: "alert-fatigue-and-operational-noise",
+  crr: "change-and-release-risk",
+  aic: "acquisition-integration-complexity",
+  ute: "unknown-technology-estate",
+  cms: "cloud-migration-stagnation",
+  laa: "legacy-application-architecture",
+  pei: "platform-engineering-immaturity",
+  idf: "identity-fragmentation",
+  mom: "multiple-operating-models",
+  tda: "technical-debt-accumulation",
+  tsf: "tool-sprawl-and-fragmentation",
+  dic: "data-and-integration-complexity",
+  env: "environment-sprawl",
+  sag: "security-automation-gaps",
+  obs: "poor-observability",
+  vdr: "vendor-dependency",
+  svr: "slow-vulnerability-remediation",
+  scd: "security-configuration-drift",
+  iac: "identity-and-access-challenges",
+  sca: "security-automation-gaps",
+  sce: "compliance-exposure",
+  stf: "security-tool-fragmentation",
+  cei: "customer-experience-instability",
+  cwd: "caregiver-workflow-disruption",
+  hoc: "high-operational-cost",
+  ttm: "slow-time-to-market",
+  rce: "compliance-exposure",
+  lsa: "lack-of-scalability-and-agility",
+};
 
 /* ============================================================
    TYPES
@@ -871,145 +913,343 @@ function CostKpi({ icon: Icon, value, label, tint, suffix }: { icon: any; value:
 }
 
 /* ============================================================
-   DETAIL PANELS
+   EXECUTIVE INTELLIGENCE PANEL — persistent right drawer
 ============================================================ */
-function ChallengePanel({ c, onClose, onOpen }: { c: Challenge | null; onClose: () => void; onOpen: (id: string) => void }) {
-  if (!c) return null;
-  const cat = CATEGORIES.find((x) => x.id === c.category)!;
-  const Icon = c.icon;
-  const sev = SEVERITY_STYLE[c.severity];
-  const trend = Array.from({ length: 12 }).map((_, i) => ({
+const LEVEL_TINT: Record<string, string> = {
+  Critical: "#dc2626", High: "#ea580c", Medium: "#f59e0b", Moderate: "#f59e0b", Emerging: "#10b981", Low: "#10b981",
+};
+const PRIORITY_TINT: Record<string, string> = { High: "#dc2626", Medium: "#f59e0b", Low: "#10b981" };
+
+function SectionLabel({ n, title, size = "md" }: { n: number; title: string; size?: "sm" | "md" }) {
+  return (
+    <div className="flex items-center gap-2 mb-2">
+      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-100 rounded px-1.5 py-0.5">{String(n).padStart(2,"0")}</span>
+      <h3 className={`font-semibold text-slate-900 ${size === "sm" ? "text-[12px]" : "text-[13px]"}`}>{title}</h3>
+    </div>
+  );
+}
+
+function MetricTip({ label, definition, why }: { label: string; definition?: string; why?: string }) {
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="underline decoration-dotted decoration-slate-300 cursor-help">{label}</span>
+        </TooltipTrigger>
+        <TooltipContent side="left" className="max-w-[280px] text-[11px] leading-snug">
+          {definition && <div><b>Definition.</b> {definition}</div>}
+          {why && <div className="mt-1"><b>Why it matters.</b> {why}</div>}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+function ExecutiveIntelligencePanel({
+  c, onClose, onOpen,
+}: { c: Challenge | null; onClose: () => void; onOpen: (id: string) => void }) {
+  const cat = c ? CATEGORIES.find((x) => x.id === c.category)! : null;
+  const slug = c ? PANEL_SLUG[c.id] : undefined;
+  const data = slug ? FRICTION_BY_SLUG[slug] : undefined;
+  const Icon = c?.icon;
+  const sev = c ? SEVERITY_STYLE[c.severity] : null;
+
+  // Forecast trajectory (illustrative)
+  const trend = useMemo(() => Array.from({ length: 12 }).map((_, i) => ({
     m: `M${i + 1}`,
     current: 50 - i * 1.8 + (i % 3) * 1.2,
     target: 90 - Math.max(0, 11 - i) * 4,
-  }));
+  })), [c?.id]);
+
+  const open = !!c;
+
   return (
-    <Sheet open={!!c} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <SheetContent side="right" className="w-[560px] sm:max-w-[560px] p-0 overflow-y-auto bg-white">
-        <div className="p-6 border-b border-slate-100" style={{ background: cat.bg }}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="h-11 w-11 rounded-xl grid place-items-center text-white" style={{ background: cat.tint }}>
-                <Icon className="h-5 w-5" />
+    <>
+      {/* Persistent (non-modal) right drawer */}
+      <aside
+        aria-hidden={!open}
+        className={`fixed top-0 right-0 h-screen z-40 bg-white border-l border-slate-200 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.18)] transition-transform duration-300 ease-out overflow-hidden ${open ? "translate-x-0" : "translate-x-full"}`}
+        style={{ width: "min(640px, 35vw)" }}
+      >
+        {c && cat && Icon && sev && (
+          <div key={c.id} className="h-full flex flex-col animate-fade-in">
+            {/* HEADER */}
+            <div className="shrink-0 px-5 pt-5 pb-4 border-b border-slate-100" style={{ background: cat.bg }}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="h-10 w-10 rounded-xl grid place-items-center text-white shrink-0" style={{ background: cat.tint }}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-semibold tracking-[0.16em] uppercase truncate" style={{ color: cat.tint }}>Executive Intelligence Panel</div>
+                    <h2 className="text-[17px] font-semibold text-slate-900 leading-tight mt-0.5 truncate">{c.title}</h2>
+                    <div className="text-[11.5px] text-slate-600 mt-0.5 line-clamp-2">{data?.summary ? data.summary.slice(0, 140) + "…" : c.description}</div>
+                  </div>
+                </div>
+                <button onClick={onClose} aria-label="Close panel"
+                  className="shrink-0 h-7 w-7 grid place-items-center rounded-md text-slate-500 hover:bg-white/70 hover:text-slate-900 transition">
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <div>
-                <div className="text-[10.5px] font-semibold tracking-[0.16em] uppercase" style={{ color: cat.tint }}>{cat.title}</div>
-                <SheetTitle className="text-[18px] font-semibold text-slate-900 mt-1">{c.title}</SheetTitle>
-                <SheetDescription className="text-[12px] text-slate-600 mt-1">{c.description}</SheetDescription>
+              {/* Chip strip */}
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700"><b className="text-slate-500 font-medium">Category</b> · {cat.title}</span>
+                {data?.owner && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700"><b className="text-slate-500 font-medium">Owner</b> · {data.owner}</span>}
+                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${sev.chip}`}>Severity · {c.severity}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700"><b className="text-slate-500 font-medium">Stage</b> · {data?.stage || c.stage}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800"><b>Confidence</b> · Discovery-Based</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 text-white">Illustrative Example</span>
               </div>
             </div>
-            <span className={`text-[10px] px-2 py-1 rounded-full border font-medium ${sev.chip}`}>{c.severity}</span>
-          </div>
-        </div>
 
-        <div className="p-6 space-y-5">
-          <div className="grid grid-cols-4 gap-2.5">
-            {[
-              { l: "Impact Score", v: `${c.impactScore}` },
-              { l: "Current Maturity", v: `${c.currentMaturity}/5` },
-              { l: "Target Maturity", v: `${c.targetMaturity}/5` },
-              { l: "Value Unlocked", v: c.valueUnlocked },
-            ].map((s) => (
-              <div key={s.l} className="rounded-lg border border-slate-200 bg-white p-2.5">
-                <div className="text-[9.5px] tracking-wider text-slate-400 font-semibold uppercase">{s.l}</div>
-                <div className="text-[15px] font-semibold text-slate-900 mt-0.5">{s.v}</div>
-              </div>
-            ))}
-          </div>
+            {/* BODY — scrollable */}
+            <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
+              {/* 1. Executive Summary */}
+              <section>
+                <SectionLabel n={1} title="Executive Summary" size="sm" />
+                <p className="text-[12.5px] text-slate-700 leading-relaxed">{data?.summary || c.description}</p>
+              </section>
 
-          <div>
-            <div className="text-[11px] font-semibold tracking-[0.14em] text-slate-500 mb-2">FORECAST TRAJECTORY</div>
-            <div className="h-[140px] rounded-lg border border-slate-200 bg-white p-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trend}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="m" tick={{ fontSize: 10, fill: "#64748b" }} />
-                  <YAxis tick={{ fontSize: 10, fill: "#64748b" }} />
-                  <RTooltip />
-                  <Area type="monotone" dataKey="target" stroke="#10b981" fill="#10b981" fillOpacity={0.1} />
-                  <Area type="monotone" dataKey="current" stroke="#2563eb" fill="#2563eb" fillOpacity={0.2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div>
-            <div className="text-[11px] font-semibold tracking-[0.14em] text-slate-500 mb-2">CONTRIBUTING KPIs / SLAs</div>
-            <div className="rounded-lg border border-slate-200 overflow-hidden">
-              <table className="w-full text-[12px]">
-                <thead className="bg-slate-50 text-slate-500">
-                  <tr>
-                    <th className="text-left px-3 py-2 font-medium">KPI</th>
-                    <th className="text-right px-3 py-2 font-medium">Baseline</th>
-                    <th className="text-right px-3 py-2 font-medium">Current</th>
-                    <th className="text-right px-3 py-2 font-medium">Target</th>
-                    <th className="text-right px-3 py-2 font-medium">Forecast</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {c.kpis.map((k) => (
-                    <tr key={k.label} className="border-t border-slate-100">
-                      <td className="px-3 py-2 text-slate-800">{k.label}</td>
-                      <td className="px-3 py-2 text-right text-slate-500">{k.baseline}</td>
-                      <td className="px-3 py-2 text-right text-slate-700">{k.current}</td>
-                      <td className="px-3 py-2 text-right font-semibold text-emerald-700">{k.target}</td>
-                      <td className="px-3 py-2 text-right text-blue-700">{k.forecast}</td>
-                    </tr>
+              {/* 2. Impact Scorecards */}
+              <section>
+                <SectionLabel n={2} title="Impact Scorecards" size="sm" />
+                <div className="grid grid-cols-2 gap-2">
+                  {(data?.scorecards?.length ? data.scorecards : [
+                    { label: "Business Impact", level: c.severity, why: "Derived from category severity." },
+                  ]).map((s) => (
+                    <div key={s.label} className="rounded-lg border border-slate-200 p-2.5 bg-white">
+                      <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">{s.label}</div>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="h-2 w-2 rounded-full" style={{ background: LEVEL_TINT[s.level] || "#64748b" }} />
+                        <span className="text-[13px] font-semibold text-slate-900">{s.level}</span>
+                      </div>
+                      {s.why && <div className="text-[10.5px] text-slate-500 mt-1 leading-snug">{s.why}</div>}
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </section>
+
+              {/* 3. KPI Tree */}
+              <section>
+                <SectionLabel n={3} title="KPI Tree" />
+                <div className="rounded-lg border border-slate-200 bg-gradient-to-b from-blue-50/40 to-white p-3">
+                  <div className="text-[10px] tracking-wider text-blue-700 font-semibold uppercase">Executive KPI</div>
+                  <div className="text-[13px] font-semibold text-slate-900 mt-0.5">{data?.execKpi || c.metric.label}</div>
+                </div>
+                {data?.supportingKpis && data.supportingKpis.length > 0 && (
+                  <div className="mt-2 rounded-lg border border-slate-200 overflow-hidden">
+                    <table className="w-full text-[11.5px]">
+                      <thead className="bg-slate-50 text-slate-500">
+                        <tr>
+                          <th className="text-left px-3 py-2 font-medium">Supporting KPI</th>
+                          <th className="text-right px-3 py-2 font-medium">Baseline</th>
+                          <th className="text-right px-3 py-2 font-medium">Current</th>
+                          <th className="text-right px-3 py-2 font-medium">Target</th>
+                          <th className="text-right px-3 py-2 font-medium">Forecast</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.supportingKpis.map((k, i) => {
+                          // illustrative values
+                          const base = 25 + (i * 7) % 30, cur = base + 10, tgt = 85 + (i % 3), fc = cur + 18;
+                          return (
+                            <tr key={k.name} className="border-t border-slate-100 align-top">
+                              <td className="px-3 py-2 text-slate-800">
+                                <MetricTip label={k.name} definition={k.definition} why={k.why} />
+                              </td>
+                              <td className="px-3 py-2 text-right text-slate-500">{base}%</td>
+                              <td className="px-3 py-2 text-right text-slate-700">{cur}%</td>
+                              <td className="px-3 py-2 text-right font-semibold text-emerald-700">{tgt}%</td>
+                              <td className="px-3 py-2 text-right text-blue-700">{fc}%</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    <div className="px-3 py-1.5 text-[10px] text-slate-500 bg-slate-50 border-t border-slate-100">Illustrative Example · figures shown until customer data is calibrated.</div>
+                  </div>
+                )}
+                <div className="mt-3 h-[120px] rounded-lg border border-slate-200 bg-white p-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={trend} margin={{ top: 6, right: 8, bottom: 0, left: -10 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                      <XAxis dataKey="m" tick={{ fontSize: 9, fill: "#94a3b8" }} />
+                      <YAxis tick={{ fontSize: 9, fill: "#94a3b8" }} />
+                      <RTooltip contentStyle={{ fontSize: 11 }} />
+                      <Area type="monotone" dataKey="target" stroke="#10b981" fill="#10b981" fillOpacity={0.1} />
+                      <Area type="monotone" dataKey="current" stroke="#2563eb" fill="#2563eb" fillOpacity={0.2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </section>
+
+              {/* 4. Workflow Impact Map */}
+              <section>
+                <SectionLabel n={4} title="Workflow Impact Map" />
+                {data?.workflowFlow && (
+                  <div className="rounded-lg border border-slate-200 bg-white p-3 text-[12px] text-slate-700 leading-relaxed">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {data.workflowFlow.replace(/\.$/,"").split(/\s+flows to\s+/i).map((step, i, arr) => (
+                        <span key={i} className="flex items-center gap-1.5">
+                          <span className="px-2 py-1 rounded-md bg-blue-50 border border-blue-100 text-blue-800 text-[11px] font-medium">{step.trim()}</span>
+                          {i < arr.length - 1 && <ArrowRight className="h-3 w-3 text-slate-400" />}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {data?.affectedWorkflows && data.affectedWorkflows.length > 0 && (
+                  <div className="mt-2">
+                    <div className="text-[10px] tracking-wider font-semibold text-slate-500 uppercase mb-1">Affected workflows</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {data.affectedWorkflows.map((w) => (
+                        <span key={w} className="text-[11px] px-2 py-0.5 rounded-md border border-slate-200 bg-slate-50 text-slate-700">{w}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </section>
+
+              {/* 5. Root Cause Analysis */}
+              <section>
+                <SectionLabel n={5} title="Root Cause Analysis" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="rounded-lg border border-rose-100 bg-rose-50/40 p-3">
+                    <div className="text-[10px] tracking-wider font-semibold text-rose-700 uppercase mb-1">Primary Drivers</div>
+                    <ul className="space-y-1">
+                      {(data?.rootPrimary || []).map((r) => (
+                        <li key={r} className="text-[11.5px] text-slate-700 flex items-start gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0" />{r}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded-lg border border-amber-100 bg-amber-50/40 p-3">
+                    <div className="text-[10px] tracking-wider font-semibold text-amber-700 uppercase mb-1">Secondary Drivers</div>
+                    <ul className="space-y-1">
+                      {(data?.rootSecondary || []).map((r) => (
+                        <li key={r} className="text-[11.5px] text-slate-700 flex items-start gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />{r}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              {/* 6. Dependency Graph */}
+              <section>
+                <SectionLabel n={6} title="Dependency Graph" />
+                <div className="rounded-lg border border-slate-200 bg-white p-3">
+                  <div className="text-[11px] text-slate-500 mb-2">This friction point connects to other systemic challenges:</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(data?.related || []).map((relTitle) => {
+                      // try to find local challenge
+                      const slugged = relTitle.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/-(and|to)-/g,"-");
+                      const localId = Object.entries(PANEL_SLUG).find(([,v]) => v.replace(/-(and|to)-/g,"-") === slugged)?.[0];
+                      const clickable = !!localId;
+                      return (
+                        <button key={relTitle} disabled={!clickable} onClick={() => clickable && onOpen(localId!)}
+                          className={`text-[11px] px-2 py-1 rounded-md border transition ${clickable ? "border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300 text-slate-800 cursor-pointer" : "border-slate-100 bg-slate-50 text-slate-500 cursor-default"}`}>
+                          {relTitle}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+
+              {/* 7. Recommended Initiatives */}
+              <section>
+                <SectionLabel n={7} title="Recommended Initiatives" />
+                <div className="space-y-2">
+                  {(data?.initiatives || []).map((i) => (
+                    <div key={i.name} className="rounded-lg border border-slate-200 bg-white p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="text-[12.5px] font-semibold text-slate-900">{i.name}</div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {i.priority && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ color: PRIORITY_TINT[i.priority] || "#64748b", background: (PRIORITY_TINT[i.priority] || "#64748b") + "14" }}>{i.priority} priority</span>}
+                          {i.effort && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700">{i.effort} effort</span>}
+                        </div>
+                      </div>
+                      {i.outcome && <div className="text-[11.5px] text-slate-600 mt-1 leading-snug">Outcome · {i.outcome}</div>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* 8. AI Opportunities */}
+              <section>
+                <SectionLabel n={8} title="AI Opportunities" size="sm" />
+                <div className="rounded-lg border border-violet-100 bg-violet-50/40 p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5 text-[11px] text-violet-800 font-semibold"><Sparkles className="h-3.5 w-3.5" /> Agentic leverage</div>
+                    {data?.aiAutomationPotential && (
+                      <div className="text-[10.5px] text-violet-800"><b>Automation potential</b> · {data.aiAutomationPotential}</div>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    {(data?.aiAgents || []).map((a) => (
+                      <div key={a.name} className="rounded-md border border-violet-100 bg-white p-2">
+                        <div className="text-[11.5px] font-semibold text-slate-900">{a.name}</div>
+                        {a.desc && <div className="text-[10.5px] text-slate-600 mt-0.5 leading-snug">{a.desc}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* 9. Value Creation Model */}
+              <section>
+                <SectionLabel n={9} title="Value Creation Model" />
+                <div className="rounded-lg border border-emerald-100 bg-emerald-50/30 p-3 space-y-2">
+                  {(data?.valueItems || []).map((v) => (
+                    <div key={v.name} className="flex items-start gap-2">
+                      <div className="h-5 w-5 rounded-md grid place-items-center bg-emerald-100 text-emerald-700 shrink-0"><TrendingUp className="h-3 w-3" /></div>
+                      <div>
+                        <div className="text-[12px] font-semibold text-slate-900">{v.name}</div>
+                        {v.desc && <div className="text-[11px] text-slate-600 leading-snug">{v.desc}</div>}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-emerald-100">
+                    {[
+                      { l: "Low", v: c.valueUnlocked.replace("$","").replace("M","") + "M", color: "#94a3b8" },
+                      { l: "Medium", v: c.valueUnlocked, color: "#0891b2" },
+                      { l: "High", v: "$" + (parseFloat(c.valueUnlocked.replace(/[^\d.]/g,"")) * 1.8).toFixed(1) + "M", color: "#059669" },
+                    ].map((b) => (
+                      <div key={b.l} className="text-center rounded-md bg-white border border-emerald-100 p-1.5">
+                        <div className="text-[9.5px] tracking-wider text-slate-400 font-semibold uppercase">{b.l} Estimate</div>
+                        <div className="text-[13px] font-semibold mt-0.5" style={{ color: b.color }}>{b.v}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-[10px] text-slate-500 pt-1">Illustrative Example · values require validation against customer data.</div>
+                </div>
+              </section>
+
+              {/* 10. Transformation Roadmap */}
+              <section>
+                <SectionLabel n={10} title="Transformation Roadmap" size="sm" />
+                <ol className="relative border-l border-slate-200 ml-2 space-y-2.5">
+                  {(data?.roadmap || []).map((r, i) => (
+                    <li key={r.stage + i} className="ml-4">
+                      <span className="absolute -left-[5px] h-2.5 w-2.5 rounded-full bg-blue-500 border-2 border-white" style={{ marginTop: 4 }} />
+                      <div className="text-[11.5px] font-semibold text-slate-900">{r.stage}</div>
+                      {r.note && <div className="text-[11px] text-slate-600">{r.note}</div>}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+
+              {/* Footer disclaimer */}
+              <div className="pt-3 border-t border-slate-100 text-[10.5px] text-slate-500 leading-snug">
+                All figures are <b>Illustrative Examples</b> shown to demonstrate panel structure. Every metric carries a definition and a "why it matters" note so executives can connect the friction point to business outcomes once real data is calibrated.
+              </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg border border-slate-200 p-3">
-              <div className="text-[11px] font-semibold tracking-[0.14em] text-slate-500 mb-1.5">RECOMMENDED INITIATIVES</div>
-              <ul className="space-y-1">
-                {c.initiatives.map((i) => (
-                  <li key={i} className="text-[12px] text-slate-700 flex items-start gap-1.5">
-                    <ArrowRight className="h-3 w-3 mt-1 text-blue-500 shrink-0" /> {i}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-lg border border-slate-200 p-3 space-y-2.5">
-              <div>
-                <div className="text-[10px] tracking-wider text-slate-400 font-semibold uppercase">Timeline</div>
-                <div className="text-[13px] font-semibold text-slate-900">{c.timeline}</div>
-              </div>
-              <div>
-                <div className="text-[10px] tracking-wider text-slate-400 font-semibold uppercase">Investment</div>
-                <div className="text-[13px] font-semibold text-slate-900">{c.investment}</div>
-              </div>
-              <div>
-                <div className="text-[10px] tracking-wider text-slate-400 font-semibold uppercase">Expected Annual Value</div>
-                <div className="text-[13px] font-semibold text-emerald-700">{c.valueUnlocked}</div>
-              </div>
-            </div>
-          </div>
-
-          {c.related.length > 0 && (
-            <div>
-              <div className="text-[11px] font-semibold tracking-[0.14em] text-slate-500 mb-2">RELATED CHALLENGES</div>
-              <div className="flex flex-wrap gap-1.5">
-                {c.related.map((rid) => {
-                  const r = CHALLENGES.find((x) => x.id === rid);
-                  if (!r) return null;
-                  return (
-                    <button key={rid} onClick={() => onOpen(rid)}
-                      className="text-[11px] px-2 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-300 text-slate-700 transition">
-                      {r.title}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </SheetContent>
-    </Sheet>
+        )}
+      </aside>
+    </>
   );
 }
+
 
 function StagePanel({ stage, onClose }: { stage: Stage | null; onClose: () => void }) {
   if (!stage) return null;
@@ -1196,7 +1436,7 @@ export default function OperationalFrictionIndex() {
         </div>
       </div>
 
-      <ChallengePanel c={selected} onClose={() => setSelected(null)} onOpen={openById} />
+      <ExecutiveIntelligencePanel c={selected} onClose={() => setSelected(null)} onOpen={openById} />
       <StagePanel stage={!selected ? activeStage : null} onClose={() => setActiveStage(null)} />
     </AppShell>
   );
