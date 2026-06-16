@@ -959,6 +959,13 @@ function DisciplineCard({
             <span>Design Principles</span>
             <ArrowRight className="w-3 h-3" />
           </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate("/reliability-foundations/platform-engineering/how-to-build"); }}
+            className="text-left text-[11px] font-semibold text-sky-700 hover:text-sky-800 inline-flex items-center justify-between rounded-md border border-sky-200 bg-sky-50/60 hover:bg-sky-50 px-2 py-1.5 transition-colors"
+          >
+            <span>How Organizations Achieve It</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
         </div>
       )}
 
