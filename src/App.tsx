@@ -312,7 +312,8 @@ const App = () => (
           <Route path="/operational-friction-index" element={<OperationalFrictionIndex />} />
           <Route path="/reliability-foundations" element={<ReliabilityFoundations />} />
           <Route path="/reliability-foundations/google-sre" element={<GoogleSre />} />
-          <Route path="/reliability-foundations/google-sre/how-to-achieve" element={<HowToAchieveGoogleSre />} />
+         <Route path="/reliability-foundations/google-sre/how-to-achieve" element={<HowToAchieveGoogleSre />} />
+         <Route path="/reliability-foundations/team-topologies" element={<TeamTopologies />} />
           <Route path="/product-reliability-anatomy" element={<ProductReliabilityAnatomy />} />
           <Route path="/transformation-journey" element={<TransformationJourney />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
