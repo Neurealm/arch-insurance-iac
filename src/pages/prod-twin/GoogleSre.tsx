@@ -9,7 +9,7 @@ import {
   Gauge, Users, Activity, Wrench, AlertTriangle, RefreshCw, Target, Eye,
   Cpu, ClipboardList, BarChart3, ChevronRight, ArrowRight, ShieldCheck,
   Sparkles, Clock, TrendingUp, Building2, BookOpen, CheckCircle2, XCircle,
-  Lightbulb, Code2, Heart, Workflow, Layers, ArrowLeft,
+  Lightbulb, Code2, Heart, Workflow, Layers, ArrowLeft, Bell, Boxes,
   type LucideIcon,
 } from "lucide-react";
 
