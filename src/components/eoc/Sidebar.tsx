@@ -148,7 +148,7 @@ const tree: Node[] = [
     icon: ShieldCheck,
     children: [
       { key: "sre-ofi", label: "Enterprise Friction Index", icon: TrendingUp2, to: "/operational-friction-index" },
-      { key: "sre-fnd", label: "Foundations of Production Reliability Operating Model", icon: Compass, to: "/reliability-foundations" },
+      { key: "sre-fnd", label: "Enterprise Operating Shifts", icon: Compass, to: "/reliability-foundations" },
       { key: "sre-anat", label: "Anatomy of a Modern Product Reliability Organization", icon: Compass, to: "/product-reliability-anatomy" },
       { key: "sre-tj", label: "Production Reliability Transformation Journey", icon: TrendingUp2, to: "/transformation-journey" },
       { key: "sre-ms", label: "Measuring Success", icon: Gauge, to: "/measuring-success" },
