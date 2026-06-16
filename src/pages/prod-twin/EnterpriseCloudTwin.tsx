@@ -1096,7 +1096,8 @@ function BusinessServicesView({ onSelect }: { onSelect: (id: string) => void }) 
             <Metric label="Traffic" value={b.tx} />
             <Metric label="Risk" value={String(b.risk)} sub={b.impact} />
           </div>
-        </Glass>
+        </Glass></div>
+
       ))}
     </div>
   );
