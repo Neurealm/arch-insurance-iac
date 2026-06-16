@@ -1292,8 +1292,23 @@ function RCAPreview({ open, onOpenChange }: { open: boolean; onOpenChange: (b: b
 /* PAGE                                                                */
 /* ------------------------------------------------------------------ */
 export default function EnterpriseCloudTwin() {
-  const [view, setView] = useState<ViewId | "biz" | "tx">("twin");
-  const [selectedId, setSelectedId] = useState<string | null>("svc-pay");
+  const scenarioCtx = useScenarioState();
+  const { derived, view: ctxView, setView: ctxSetView, selectedId: ctxSelected, setSelectedId: ctxSetSelected, activeScenario, stepIndex } = scenarioCtx;
+
+  // Sync module-level data from the scenario derive (single source of truth for the page)
+  BUSINESS_SERVICES = derived.businessServices as any;
+  TRANSACTIONS = derived.transactions as any;
+  APP_SERVICES = derived.appServices as any;
+  AWS_GROUPS = derived.awsGroups as any;
+  TIMELINE_EVENTS = derived.timelineEvents as any;
+  GLOBAL_KPIS = derived.globalKpis.map(k => ({ ...k, icon: KPI_ICONS[k.id] ?? Activity }));
+  HIGHLIGHT_PATH = derived.highlightedNodes;
+  CRIT_EDGES = derived.criticalEdges;
+
+  const view = ctxView;
+  const setView = ctxSetView;
+  const selectedId = ctxSelected;
+  const setSelectedId = ctxSetSelected;
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [novaOpen, setNovaOpen] = useState(false);
   const [rcaOpen, setRcaOpen] = useState(false);
