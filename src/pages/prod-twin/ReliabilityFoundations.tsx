@@ -890,6 +890,7 @@ function DisciplineCard({
   const navigate = useNavigate();
   const isSre = d.id === "sre";
   const isTopo = d.id === "topo";
+  const isPlatform = d.id === "platform";
   return (
     <div
       onMouseEnter={() => onHover(d.id)}
