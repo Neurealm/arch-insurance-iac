@@ -12,6 +12,8 @@ import { TIMELINE_EVENTS } from "@/data/guidedInvestigations";
 import type {
   DecisionOption, EvidenceItem, InvestigationStep, MetricSnapshot, RunbookStep,
 } from "@/data/guidedInvestigations";
+import { EvidenceGraphLauncher, EvidenceGraphAvailableIndicator } from "@/components/evidence/EvidenceGraphEngine";
+import type { EvidenceGraphMode } from "@/data/evidenceGraphData";
 
 /* ------------------------------ utilities ------------------------------- */
 
@@ -433,8 +435,38 @@ function InvestigationStepPanel() {
             <div className="mt-0.5 text-[11.5px] text-slate-700">{currentStep.expectedInsight}</div>
             <div className="mt-1 text-[10.5px] text-slate-500">
               <span className="font-semibold text-slate-700">Next:</span> {currentStep.suggestedAction}
-            </div>
           </div>
+
+          {[5,6,7,8].includes(currentStep.stepNumber) && (
+            <div className="rounded-lg border border-violet-200 bg-gradient-to-br from-violet-50/70 to-white px-2.5 py-2">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[9.5px] uppercase tracking-wider text-violet-700">Evidence Graph available</div>
+                  <div className="text-[11.5px] text-slate-700">Confidence 87% · 9 evidence items · 4 alternatives</div>
+                </div>
+                <EvidenceGraphAvailableIndicator />
+              </div>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                <EvidenceGraphLauncher
+                  variant="compact"
+                  label={
+                    currentStep.stepNumber === 5 ? "Open Timeline Correlation" :
+                    currentStep.stepNumber === 6 ? "Open Causal Chain" :
+                    currentStep.stepNumber === 7 ? "Open Blast Radius" :
+                                                   "Open Recommendation Evidence"
+                  }
+                  mode={
+                    (currentStep.stepNumber === 5 ? "timeline" :
+                     currentStep.stepNumber === 6 ? "causal"  :
+                     currentStep.stepNumber === 7 ? "blast"   :
+                                                    "recommendation") as EvidenceGraphMode
+                  }
+                />
+                <EvidenceGraphLauncher variant="pill" label="Compare Hypotheses" mode="hypotheses" />
+              </div>
+            </div>
+          )}
+        </div>
         </div>
 
         {/* footer actions */}

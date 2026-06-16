@@ -19,6 +19,8 @@ import { useScenarioState } from "@/context/ScenarioStateContext";
 import { DemoScenarioController, ScenarioDrawer } from "@/components/scenario/DemoScenarioController";
 import { GuidedInvestigationProvider, useGuidedInvestigation } from "@/context/GuidedInvestigationContext";
 import { GuidedInvestigationMode, InvestigationLauncher, InvestigationEmptyHint } from "@/components/investigation/GuidedInvestigationMode";
+import { EvidenceGraphProvider, useEvidenceGraph } from "@/context/EvidenceGraphContext";
+import { EvidenceGraphEngine, EvidenceGraphLauncher, EvidenceGraphAvailableIndicator, RootCauseSummaryCard } from "@/components/evidence/EvidenceGraphEngine";
 
 const KPI_ICONS: Record<string, any> = {
   health: Activity, inc: AlertOctagon, slo: ShieldCheck, budget: Gauge,
@@ -578,6 +580,29 @@ function detailFor(id: string | null) {
   return null;
 }
 
+function PaymentEvidenceSummary() {
+  const { graph, openGraph } = useEvidenceGraph();
+  if (!graph) return null;
+  return (
+    <section>
+      <Label>Evidence</Label>
+      <div className="mt-2"><RootCauseSummaryCard graph={graph} onOpen={() => openGraph()} /></div>
+      <div className="mt-2 grid grid-cols-4 gap-1.5 text-[10.5px]">
+        <div className="rounded-md border border-slate-200 bg-white p-1.5"><div className="text-slate-500">Related</div><div className="font-semibold text-slate-800">7 items</div></div>
+        <div className="rounded-md border border-slate-200 bg-white p-1.5"><div className="text-slate-500">Strength</div><div className="font-semibold text-emerald-700">Strong</div></div>
+        <div className="rounded-md border border-slate-200 bg-white p-1.5"><div className="text-slate-500">Hypothesis</div><div className="font-semibold text-violet-700">Deploy</div></div>
+        <div className="rounded-md border border-slate-200 bg-white p-1.5"><div className="text-slate-500">Top signal</div><div className="font-semibold text-slate-800">v2.14.7</div></div>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <EvidenceGraphLauncher variant="compact" label="Open Evidence Graph" />
+        <EvidenceGraphLauncher variant="pill" label="Causal Chain" mode="causal" />
+        <EvidenceGraphLauncher variant="pill" label="Hypotheses" mode="hypotheses" />
+        <EvidenceGraphLauncher variant="pill" label="Recommendation" mode="recommendation" />
+      </div>
+    </section>
+  );
+}
+
 function RightPanel({
   selectedId, onClear, onGenerateRCA,
 }: { selectedId: string | null; onClear: () => void; onGenerateRCA: () => void }) {
@@ -600,6 +625,7 @@ function RightPanel({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {isPay && <PaymentEvidenceSummary />}
         {/* Golden signals */}
         {isPay && (
           <section>
@@ -752,6 +778,7 @@ function Timeline() {
               <div className="mt-1 rounded-md border border-slate-200/70 bg-white/80 p-1.5 text-[10.5px]">
                 <div className="text-[9.5px] uppercase tracking-wide text-slate-400">{e.type}</div>
                 <div className="text-slate-800 leading-tight">{e.label}</div>
+                <div className="mt-1"><EvidenceGraphLauncher variant="inline" label="View correlation evidence" mode="timeline" /></div>
               </div>
             </div>
           ))}
@@ -807,8 +834,20 @@ function NovaCopilot({ open, onOpenChange }: { open: boolean; onOpenChange: (b: 
 
             <Glass className="p-3">
               <Label>Probable Root Cause</Label>
-              <p className="mt-1 text-[12px] text-slate-700">Connection pool saturation after deployment v2.14.7.</p>
-              <Label><span className="mt-2 inline-block">Blast Radius</span></Label>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <p className="text-[12px] text-slate-700">Deployment Regression · v2.14.7 → connection pool saturation on Aurora.</p>
+                <span className="rounded-full bg-violet-100 text-violet-700 px-2 py-0.5 text-[10.5px] font-semibold">87%</span>
+              </div>
+              <div className="mt-1.5 text-[11px] text-slate-600">
+                9 supporting signals · 3 excluded · 4 alternatives evaluated
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <EvidenceGraphLauncher variant="compact" label="View Evidence Graph" />
+                <EvidenceGraphLauncher variant="compact" label="Compare Hypotheses" mode="hypotheses" />
+                <EvidenceGraphLauncher variant="compact" label="Explain Confidence" mode="hypotheses" />
+                <EvidenceGraphLauncher variant="compact" label="Show Why Not" mode="hypotheses" />
+              </div>
+              <Label><span className="mt-3 inline-block">Blast Radius</span></Label>
               <div className="mt-1 flex flex-wrap gap-1">
                 {["Payment Service","Order Service","Notification Service","Submit Order","Process Payment"].map(x =>
                   <Badge key={x} variant="outline" className="text-[10px]">{x}</Badge>)}
@@ -1376,6 +1415,7 @@ function EnterpriseCloudTwinInner() {
                   <Input placeholder="Search services, transactions, traces, resources, incidents, changes, owners, tags, runbooks" className="h-8 w-[360px] pl-8 text-[11.5px]" />
                 </div>
                 <InvestigationLauncher />
+                <EvidenceGraphAvailableIndicator />
                 <DemoScenarioController />
               </div>
             </div>
@@ -1432,6 +1472,7 @@ function EnterpriseCloudTwinInner() {
                   </button>
                 ))}
                 <div className="pt-1"><InvestigationEmptyHint /></div>
+                <div className="pt-1"><EvidenceGraphLauncher variant="compact" label="Open Evidence Graph" className="w-full justify-center" /></div>
               </div>
             </Glass>
 
@@ -1456,6 +1497,7 @@ function EnterpriseCloudTwinInner() {
         <RCAPreview open={rcaOpen} onOpenChange={setRcaOpen} />
         <ScenarioDrawer />
         <GuidedInvestigationMode />
+        <EvidenceGraphEngine />
       </div>
     </AppShell>
   );
@@ -1500,8 +1542,10 @@ export default function EnterpriseCloudTwin() {
 function GuidedInvestigationBridge({ children }: { children: React.ReactNode }) {
   const { activeScenario } = useScenarioState();
   return (
-    <GuidedInvestigationProvider scenarioId={activeScenario.id}>
-      {children}
-    </GuidedInvestigationProvider>
+    <EvidenceGraphProvider scenarioId={activeScenario.id}>
+      <GuidedInvestigationProvider scenarioId={activeScenario.id}>
+        {children}
+      </GuidedInvestigationProvider>
+    </EvidenceGraphProvider>
   );
 }
