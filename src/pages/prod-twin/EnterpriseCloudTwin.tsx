@@ -19,6 +19,8 @@ import { useScenarioState } from "@/context/ScenarioStateContext";
 import { DemoScenarioController, ScenarioDrawer } from "@/components/scenario/DemoScenarioController";
 import { GuidedInvestigationProvider, useGuidedInvestigation } from "@/context/GuidedInvestigationContext";
 import { GuidedInvestigationMode, InvestigationLauncher, InvestigationEmptyHint } from "@/components/investigation/GuidedInvestigationMode";
+import { EvidenceGraphProvider, useEvidenceGraph } from "@/context/EvidenceGraphContext";
+import { EvidenceGraphEngine, EvidenceGraphLauncher, EvidenceGraphAvailableIndicator, RootCauseSummaryCard } from "@/components/evidence/EvidenceGraphEngine";
 
 const KPI_ICONS: Record<string, any> = {
   health: Activity, inc: AlertOctagon, slo: ShieldCheck, budget: Gauge,
