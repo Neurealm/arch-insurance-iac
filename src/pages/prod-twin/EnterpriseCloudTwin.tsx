@@ -15,6 +15,14 @@ import {
   Sparkles, TrendingDown, TrendingUp, Users, Workflow, Zap, ZapOff,
   Eye, BarChart3, MapPin, Clock, ChevronDown, X, CheckCircle2, AlertOctagon,
 } from "lucide-react";
+import { useScenarioState } from "@/context/ScenarioStateContext";
+import { DemoScenarioController, ScenarioDrawer } from "@/components/scenario/DemoScenarioController";
+
+const KPI_ICONS: Record<string, any> = {
+  health: Activity, inc: AlertOctagon, slo: ShieldCheck, budget: Gauge,
+  p95: Clock, err: AlertTriangle, spend: DollarSign, fcst: TrendingUp,
+  sec: Shield, auto: Sparkles,
+};
 
 /* ------------------------------------------------------------------ */
 /* TYPES + COLOR LANGUAGE                                              */
@@ -30,7 +38,7 @@ const HEALTH: Record<Health, { dot: string; chip: string; ring: string; stroke: 
 /* ------------------------------------------------------------------ */
 /* MOCK DATA                                                           */
 /* ------------------------------------------------------------------ */
-const BUSINESS_SERVICES = [
+let BUSINESS_SERVICES = [
   { id: "bs-cx",   name: "Customer Experience",   health: "healthy"  as Health, avail: "99.98%", sloTarget: "99.95%", sloActual: "99.98%", p95: "182 ms", err: "0.08%", tx: "1.8M/hr",  incidents: 0, risk: 21, impact: "Medium",   owner: "Experience SRE Squad" },
   { id: "bs-om",   name: "Order Management",      health: "warning"  as Health, avail: "99.88%", sloTarget: "99.95%", sloActual: "99.88%", p95: "421 ms", err: "0.62%", tx: "612K/hr",  incidents: 1, risk: 64, impact: "High",     owner: "Orders SRE Squad" },
   { id: "bs-id",   name: "Identity Services",     health: "healthy"  as Health, avail: "99.99%", sloTarget: "99.99%", sloActual: "99.99%", p95: "146 ms", err: "0.03%", tx: "920K/hr",  incidents: 0, risk: 18, impact: "Critical", owner: "Identity Platform Team" },
@@ -39,7 +47,7 @@ const BUSINESS_SERVICES = [
   { id: "bs-ana",  name: "Analytics Platform",    health: "healthy"  as Health, avail: "99.96%", sloTarget: "99.90%", sloActual: "99.96%", p95: "220 ms", err: "0.11%", tx: "4.8K jobs/hr", incidents: 0, risk: 27, impact: "Medium", owner: "Data Platform Team" },
 ];
 
-const TRANSACTIONS = [
+let TRANSACTIONS = [
   { id: "tx-login",   name: "User Login",        health: "healthy"  as Health, p50: "88 ms",  p95: "146 ms", p99: "290 ms",  err: "0.03%", tput: "8,100 rpm", sloT: "99.99%", sloA: "99.99%", owner: "Identity Platform Team", lastDeploy: "2 days ago",  changes: 0, topDep: "Authentication Service", costPerK: "$0.22" },
   { id: "tx-search",  name: "Product Search",    health: "healthy"  as Health, p50: "112 ms", p95: "240 ms", p99: "410 ms",  err: "0.09%", tput: "6,400 rpm", sloT: "99.95%", sloA: "99.96%", owner: "Search Platform Team",   lastDeploy: "6 hours ago", changes: 1, topDep: "Catalog Service",         costPerK: "$0.18" },
   { id: "tx-cart",    name: "Add to Cart",       health: "healthy"  as Health, p50: "94 ms",  p95: "188 ms", p99: "320 ms",  err: "0.11%", tput: "5,800 rpm", sloT: "99.95%", sloA: "99.97%", owner: "Commerce SRE Squad",     lastDeploy: "1 day ago",   changes: 0, topDep: "Catalog Service",         costPerK: "$0.16" },
@@ -49,7 +57,7 @@ const TRANSACTIONS = [
   { id: "tx-report",  name: "Generate Report",   health: "healthy"  as Health, p50: "240 ms", p95: "520 ms", p99: "980 ms",  err: "0.14%", tput: "320 rpm",   sloT: "99.90%", sloA: "99.94%", owner: "Data Platform Team",     lastDeploy: "4 days ago",  changes: 0, topDep: "Analytics Platform",      costPerK: "$0.34" },
 ];
 
-const APP_SERVICES = [
+let APP_SERVICES = [
   { id: "svc-web",   name: "Web Front End",         runtime: "ECS Fargate", version: "v8.4.0",  health: "healthy"  as Health, p95: "210 ms", err: "0.12%", sat: "48%", tput: "9,200 rpm",  tasks: 24, deploy: "1 day ago",   owner: "Experience SRE Squad",   cost: "$11,400/mo", sec: "Clean",       changes: 0 },
   { id: "svc-mob",   name: "Mobile API",            runtime: "ECS Fargate", version: "v4.2.1",  health: "healthy"  as Health, p95: "240 ms", err: "0.18%", sat: "52%", tput: "5,400 rpm",  tasks: 18, deploy: "2 days ago",  owner: "Experience SRE Squad",   cost: "$9,800/mo",  sec: "1 low",        changes: 0 },
   { id: "svc-search",name: "Search Service",        runtime: "ECS Fargate", version: "v3.1.4",  health: "healthy"  as Health, p95: "180 ms", err: "0.09%", sat: "44%", tput: "6,400 rpm",  tasks: 16, deploy: "6 hours ago", owner: "Search Platform Team",   cost: "$7,200/mo",  sec: "Clean",        changes: 1 },
@@ -63,7 +71,7 @@ const APP_SERVICES = [
   { id: "svc-rec",   name: "Recommendation Service",runtime: "Lambda",      version: "v1.9.2",  health: "healthy"  as Health, p95: "260 ms", err: "0.18%", sat: "50%", tput: "2,800 rpm",  tasks: 0,  deploy: "2 days ago",  owner: "Data Platform Team",     cost: "$5,100/mo",  sec: "Clean",        changes: 0 },
 ];
 
-const AWS_GROUPS: { id: string; name: string; tone: string; resources: { name: string; status: Health; util?: string; cost?: string }[] }[] = [
+let AWS_GROUPS: { id: string; name: string; tone: string; resources: { name: string; status: Health; util?: string; cost?: string }[] }[] = [
   { id: "g-edge", name: "Edge & Access", tone: "from-sky-50 to-white", resources: [
     { name: "Route53",    status: "healthy", util: "—",   cost: "$120/mo" },
     { name: "CloudFront", status: "healthy", util: "62%", cost: "$3,400/mo" },
@@ -120,7 +128,7 @@ const AWS_GROUPS: { id: string; name: string; tone: string; resources: { name: s
   ]},
 ];
 
-const TIMELINE_EVENTS = [
+let TIMELINE_EVENTS: { t: string; type: string; label: string; tone: Health }[] = [
   { t: "-12h",  type: "Change",     label: "Aurora parameter group update",        tone: "info" as Health },
   { t: "-8h",   type: "Deployment", label: "Notification Service v4.0.6 released", tone: "info" as Health },
   { t: "-6h",   type: "Security",   label: "GuardDuty medium finding opened",      tone: "warning" as Health },
@@ -149,7 +157,7 @@ const VIEWS = [
 ] as const;
 type ViewId = typeof VIEWS[number]["id"];
 
-const GLOBAL_KPIS = [
+let GLOBAL_KPIS: { id: string; label: string; value: string; tone: Health; icon: any }[] = [
   { id: "health",  label: "Overall Health",        value: "Warning",   tone: "warning"  as Health, icon: Activity },
   { id: "inc",     label: "Active Incidents",      value: "2",         tone: "critical" as Health, icon: AlertOctagon },
   { id: "slo",     label: "SLO Compliance",        value: "99.91%",    tone: "healthy"  as Health, icon: ShieldCheck },
@@ -248,10 +256,10 @@ const EDGES_SVC_AWS: [string, string][] = [
 ];
 
 // Highlight set for the active Payment Services incident path
-const HIGHLIGHT_PATH = new Set([
+let HIGHLIGHT_PATH: Set<string> = new Set([
   "bs-pay","tx-pay","svc-pay","g-data","g-event","svc-noti","bs-noti","svc-order","bs-om",
 ]);
-const CRIT_EDGES = new Set([
+let CRIT_EDGES: Set<string> = new Set([
   "bs-pay|tx-pay","tx-pay|svc-pay","svc-pay|g-data","svc-pay|g-event",
   "g-event|svc-noti","svc-noti|bs-noti",
 ]);
@@ -1284,8 +1292,23 @@ function RCAPreview({ open, onOpenChange }: { open: boolean; onOpenChange: (b: b
 /* PAGE                                                                */
 /* ------------------------------------------------------------------ */
 export default function EnterpriseCloudTwin() {
-  const [view, setView] = useState<ViewId | "biz" | "tx">("twin");
-  const [selectedId, setSelectedId] = useState<string | null>("svc-pay");
+  const scenarioCtx = useScenarioState();
+  const { derived, view: ctxView, setView: ctxSetView, selectedId: ctxSelected, setSelectedId: ctxSetSelected, activeScenario, stepIndex } = scenarioCtx;
+
+  // Sync module-level data from the scenario derive (single source of truth for the page)
+  BUSINESS_SERVICES = derived.businessServices as any;
+  TRANSACTIONS = derived.transactions as any;
+  APP_SERVICES = derived.appServices as any;
+  AWS_GROUPS = derived.awsGroups as any;
+  TIMELINE_EVENTS = derived.timelineEvents as any;
+  GLOBAL_KPIS = derived.globalKpis.map(k => ({ ...k, icon: KPI_ICONS[k.id] ?? Activity }));
+  HIGHLIGHT_PATH = derived.highlightedNodes;
+  CRIT_EDGES = derived.criticalEdges;
+
+  const view = ctxView;
+  const setView = ctxSetView;
+  const selectedId = ctxSelected;
+  const setSelectedId = ctxSetSelected;
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [novaOpen, setNovaOpen] = useState(false);
   const [rcaOpen, setRcaOpen] = useState(false);
@@ -1345,9 +1368,12 @@ export default function EnterpriseCloudTwin() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="ml-auto relative">
-                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
-                <Input placeholder="Search services, transactions, traces, resources, incidents, changes, owners, tags, runbooks" className="h-8 w-[420px] pl-8 text-[11.5px]" />
+              <div className="ml-auto flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                  <Input placeholder="Search services, transactions, traces, resources, incidents, changes, owners, tags, runbooks" className="h-8 w-[360px] pl-8 text-[11.5px]" />
+                </div>
+                <DemoScenarioController />
               </div>
             </div>
             {/* Global KPI strip */}
@@ -1423,6 +1449,7 @@ export default function EnterpriseCloudTwin() {
 
         <NovaCopilot open={novaOpen} onOpenChange={setNovaOpen} />
         <RCAPreview open={rcaOpen} onOpenChange={setRcaOpen} />
+        <ScenarioDrawer />
       </div>
     </AppShell>
   );
