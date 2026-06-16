@@ -507,9 +507,14 @@ export function EocSidebar() {
   return (
     <aside
       aria-label="Primary navigation"
+      data-collapsed={collapsed ? "true" : "false"}
       className={cn(
-        "flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0 h-dvh sticky top-0",
-        "transition-[width] duration-300 ease-out",
+        "flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
+        "fixed left-0 top-0 h-dvh z-50 will-change-[width]",
+        "transition-[width,box-shadow] duration-300 ease-out",
+        collapsed
+          ? "shadow-none"
+          : "shadow-[0_10px_40px_-10px_rgba(0,0,0,0.35),0_4px_16px_-4px_rgba(0,0,0,0.25)] backdrop-blur-sm",
         w,
       )}
     >
