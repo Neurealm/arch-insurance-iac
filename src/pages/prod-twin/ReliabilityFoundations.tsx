@@ -1,1530 +1,1384 @@
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/eoc/AppShell";
 import {
-  ShieldCheck, UserCheck, Users, Boxes, Cog, RefreshCw, Building2, Lock,
-  Target, Rocket, TrendingUp, Smile, Zap, Layers, DollarSign, Code2,
-  ChevronRight, X, Activity, BarChart3, CheckCircle2, AlertTriangle,
-  ArrowRight, Compass, type LucideIcon,
+  Activity, Users, Boxes, TrendingUp, ShieldCheck, DollarSign,
+  Bell, Ticket, MonitorCheck, Clock, ClipboardList,
+  Code2, Rocket, RefreshCw, Building2, Wrench,
+  AlertTriangle, FileCheck, Shield, Network, Eye,
+  Layers, Cpu, Maximize2, GitBranch, Boxes as BoxesIcon,
+  Banknote, FileBarChart, Target, Trash2, BarChart3,
+  ArrowRight, X, Sparkles, CheckCircle2, Gauge,
+  type LucideIcon,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
-  BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  LineChart, Line, Legend,
 } from "recharts";
 
 /* ---------------- Types ---------------- */
 
-type KPI = { label: string; value: string; trend?: string };
-type Foundation = {
-  id: string;
-  number: number;
-  title: string;
-  tagline: string;
+type DisciplineId =
+  | "sre" | "topo" | "platform" | "tech" | "devsecops" | "finops";
+
+type Discipline = {
+  id: DisciplineId;
+  name: string;
+  short: string;
+  description: string;
   icon: LucideIcon;
-  accent: string;       // hex
-  ringClass: string;    // tailwind ring color
-  industryTranslation: string;
-  executiveDefinition: string;
-  whyExists: string;
-  looksLike: string[];
-  withoutIt: string[];
-  practices: string[];
-  antiPatterns: string[];
-  kpis: KPI[];
-  slas: string[];
-  visuals: string[];
-  realWorld: string[];
-  reporting: string[];
-  talkingPoints: string[];
-  coworkerOpportunities: string[];
-  modernizationInitiatives: string[];
-  serviceCatalog: string[];
-  teamStructure: string[];
-  related: string[];
-  radar: { axis: string; current: number; target: number }[];
-  trend: { m: string; value: number }[];
+  color: string; // tailwind text color
+  ring: string;  // tailwind ring color
+  bg: string;    // tailwind bg tint
 };
 
-type Outcome = {
+type Shift = {
   id: string;
-  title: string;
-  metric: string;
-  caption: string;
+  current: string;
+  future: string;
   icon: LucideIcon;
-  accent: string;
-  panels: { title: string; items: string[] }[];
-  trend: { m: string; value: number }[];
+  frictions: number;        // count for badge
+  frictionPoints: string[]; // names linked back to friction index
+  disciplines: DisciplineId[];
+  value: string;            // estimated value contribution
+  narrative: string;
+  operationalChanges: string[];
+  capability: { processes: string[]; technology: string[]; automation: string[]; governance: string[] };
+  kpi: { label: string; current: string; target: string; forecast: string }[];
+  outcomes: { risk: string; cost: string; customer: string; growth: string };
+  aiCoworkers: string[];
+  dependencies: string[];
+  maturity: { stage: string; status: "done" | "active" | "pending" }[];
 };
 
-type Framework = {
+type Category = {
   id: string;
   name: string;
-  caption: string;
-  icon: LucideIcon;
-  accent: string;
-  what: string;
-  why: string;
-  influence: string[];
-  pitfalls: string[];
-  useCases: string[];
-  relatedFoundations: string[];
+  accent: string;     // hex
+  tint: string;       // bg tint class
+  textAccent: string; // tailwind text class
+  shifts: Shift[];
 };
 
-/* ---------------- Data ---------------- */
+/* ---------------- Disciplines ---------------- */
 
-const FOUNDATIONS: Foundation[] = [
+const DISCIPLINES: Discipline[] = [
+  { id: "sre", name: "Google SRE", short: "SRE",
+    description: "Reliability engineering discipline focused on prevention, service ownership, error budgets, and resilient systems.",
+    icon: Gauge, color: "text-emerald-600", ring: "ring-emerald-300", bg: "bg-emerald-50" },
+  { id: "topo", name: "Team Topologies", short: "Topologies",
+    description: "Organizing teams around flow, value delivery, collaboration, and platform enablement.",
+    icon: Users, color: "text-violet-600", ring: "ring-violet-300", bg: "bg-violet-50" },
+  { id: "platform", name: "Platform Engineering", short: "Platform",
+    description: "Reusable capabilities, golden paths, self-service platforms, and developer productivity.",
+    icon: Boxes, color: "text-sky-600", ring: "ring-sky-300", bg: "bg-sky-50" },
+  { id: "tech", name: "Technology Investment Strategy", short: "Tech Strategy",
+    description: "Evolve, modernize, retire, consolidate, and reinvest technology intentionally.",
+    icon: TrendingUp, color: "text-amber-600", ring: "ring-amber-300", bg: "bg-amber-50" },
+  { id: "devsecops", name: "DevSecOps", short: "DevSecOps",
+    description: "Security embedded into engineering workflows, automation, and software delivery.",
+    icon: ShieldCheck, color: "text-teal-600", ring: "ring-teal-300", bg: "bg-teal-50" },
+  { id: "finops", name: "FinOps", short: "FinOps",
+    description: "Financial accountability, cost transparency, service ownership, and value realization.",
+    icon: DollarSign, color: "text-rose-600", ring: "ring-rose-300", bg: "bg-rose-50" },
+];
+
+/* ---------------- Shifts ---------------- */
+
+const mkShift = (s: Shift): Shift => s;
+
+const CATEGORIES: Category[] = [
   {
-    id: "prevention",
-    number: 1,
-    title: "Prevention Over Reaction",
-    tagline: "Reliability is engineered before incidents occur.",
-    icon: ShieldCheck,
-    accent: "#6D28D9",
-    ringClass: "ring-violet-200",
-    industryTranslation: "Google SRE",
-    executiveDefinition: "Reliability is engineered before incidents occur.",
-    whyExists: "Production reliability is a property of design, not heroics. Investing in prevention compounds — every failure mode eliminated is a future incident that does not happen.",
-    looksLike: ["Proactive reliability reviews", "Error budget management", "Capacity forecasting", "Chaos testing", "Resilience engineering"],
-    withoutIt: ["Firefighting culture", "Escalation fatigue", "Constant interruptions", "High incident volume"],
-    practices: ["SLOs & Error Budgets", "Proactive Operations", "Resilience Testing", "Chaos & GameDays"],
-    antiPatterns: ["Heroics over process", "Firefighting as the norm", "No error budgets"],
-    kpis: [
-      { label: "MTTD", value: "6 min", trend: "-42%" },
-      { label: "MTTR", value: "28 min", trend: "-38%" },
-      { label: "Sev1 / month", value: "0.8", trend: "-71%" },
-      { label: "Error Budget Burn", value: "62%", trend: "-12%" },
-    ],
-    slas: ["99.95% service availability", "Sev1 recovery < 60 min", "Quarterly chaos drill completion 100%"],
-    visuals: ["Reliability Trend", "Incident Reduction", "Error Budget Gauge", "Prevention vs Response Ratio"],
-    realWorld: [
-      "Pre-release reliability reviews block deploys when SLO burn risk is elevated",
-      "GameDays run quarterly across top 10 services",
-      "Capacity headroom enforced via automated forecasting",
-    ],
-    reporting: ["Reliability Trend Graph", "Incident Reduction Trend", "Error Budget Gauge", "Prevention vs Response Ratio"],
-    talkingPoints: [
-      "The best incident is the one that never occurs.",
-      "Prevention investment compounds; reaction cost is linear.",
-    ],
-    coworkerOpportunities: [
-      "SLO Sentinel — automated burn-rate detection and rollback",
-      "Chaos Conductor — scheduled fault injection",
-      "Capacity Forecaster — predictive scaling and headroom alerts",
-    ],
-    modernizationInitiatives: [
-      "Stand up error budget policy across tier-1 services",
-      "Adopt progressive delivery with automated SLO gates",
-    ],
-    serviceCatalog: ["SLO Service", "Chaos Engineering Service", "Reliability Review"],
-    teamStructure: ["SRE Embedded Pods", "Platform Reliability Guild"],
-    related: ["ownership", "automation", "platform"],
-    radar: [
-      { axis: "Prevention", current: 4, target: 5 },
-      { axis: "Detection", current: 3, target: 5 },
-      { axis: "Recovery", current: 3, target: 5 },
-      { axis: "Learning", current: 2, target: 5 },
-      { axis: "Resilience", current: 3, target: 5 },
-    ],
-    trend: [
-      { m: "Q1", value: 12 }, { m: "Q2", value: 9 }, { m: "Q3", value: 6 },
-      { m: "Q4", value: 4 }, { m: "Q5", value: 3 }, { m: "Q6", value: 2 },
+    id: "ro", name: "Reliability & Operations",
+    accent: "#10b981", tint: "bg-emerald-50/60", textAccent: "text-emerald-700",
+    shifts: [
+      mkShift({
+        id: "ro-1", current: "Reactive Operations", future: "Proactive Reliability", icon: Bell,
+        frictions: 7,
+        frictionPoints: ["Reactive Firefighting", "Alert Fatigue", "Repeat Incidents", "Unclear Ownership", "Toil-Heavy Days", "MTTR Volatility", "Customer-Impacting Drift"],
+        disciplines: ["sre", "platform"],
+        value: "$14.2M / 3yr",
+        narrative: "Shift the operating posture from responding to outages to engineering them out. Reliability becomes a measurable property of services, not the result of heroics.",
+        operationalChanges: [
+          "Replace ticket-driven response with service-owner-led reliability work",
+          "Adopt error budgets that govern release pace and reliability investment",
+          "Move toil work into engineering backlogs with explicit reduction targets",
+          "Stand up reliability reviews for every Tier-1 service each sprint",
+        ],
+        capability: {
+          processes: ["Error budget policy", "Service reliability review cadence", "Blameless postmortems"],
+          technology: ["SLO platform", "Synthetic monitoring", "Chaos & resilience tooling"],
+          automation: ["Auto-remediation runbooks", "Self-healing workflows", "Toil-burn dashboards"],
+          governance: ["Reliability council", "Service tiering policy", "Error budget enforcement"],
+        },
+        kpi: [
+          { label: "MTTR (Tier 1)", current: "48 min", target: "12 min", forecast: "14 min" },
+          { label: "Repeat Incidents", current: "31%", target: "<10%", forecast: "11%" },
+          { label: "Toil %", current: "55%", target: "<25%", forecast: "27%" },
+        ],
+        outcomes: {
+          risk: "55% lower outage probability on Tier-1 services",
+          cost: "$3.1M annual reduction in unplanned operations spend",
+          customer: "Fewer member-impacting incidents and faster recovery",
+          growth: "Capacity to absorb 2× release volume without instability",
+        },
+        aiCoworkers: ["Reliability Sentinel", "Incident Commander Copilot", "Toil Analyst"],
+        dependencies: ["Service catalog", "Defined ownership", "Telemetry foundation"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "ro-2", current: "Ticket Escalation", future: "Service Ownership", icon: Ticket,
+        frictions: 6,
+        frictionPoints: ["Unclear Ownership", "Cross-Team Handoffs", "Escalation Loops", "Knowledge Silos", "Slow Triage", "Accountability Gaps"],
+        disciplines: ["sre", "topo"],
+        value: "$9.6M / 3yr",
+        narrative: "Replace ticket hand-offs with named service owners accountable for reliability, performance, and customer experience end-to-end.",
+        operationalChanges: [
+          "Every Tier-1/2 service gets a named owning team and on-call rotation",
+          "Eliminate L1→L2→L3 escalation chains in favor of stream-aligned ownership",
+          "Service scorecards published and reviewed monthly",
+        ],
+        capability: {
+          processes: ["Ownership charter", "On-call standard", "Service scorecards"],
+          technology: ["Service catalog", "Ownership graph", "Paging platform"],
+          automation: ["Auto-routing by service ownership", "Ownership drift detection"],
+          governance: ["Ownership policy", "Stream-aligned team model"],
+        },
+        kpi: [
+          { label: "Services with named owner", current: "62%", target: "100%", forecast: "98%" },
+          { label: "Escalation hops / incident", current: "3.4", target: "<1.5", forecast: "1.6" },
+          { label: "Mean Time to Engage", current: "22 min", target: "5 min", forecast: "6 min" },
+        ],
+        outcomes: {
+          risk: "Clear accountability eliminates dropped-ball outages",
+          cost: "Removes duplicated triage effort across L1/L2/L3",
+          customer: "Single owner for member-impacting issues",
+          growth: "Faster onboarding of new services and acquisitions",
+        },
+        aiCoworkers: ["Ownership Mapper", "On-Call Copilot"],
+        dependencies: ["Service catalog", "Team topology mapping"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "ro-3", current: "Alert Monitoring", future: "Service Health Management", icon: MonitorCheck,
+        frictions: 6,
+        frictionPoints: ["Alert Fatigue", "Tool Sprawl", "Limited Observability", "Symptom-only Signals", "False Positives", "Customer-Impact Blindness"],
+        disciplines: ["sre", "platform"],
+        value: "$8.4M / 3yr",
+        narrative: "Move from raw alert streams to a managed model of service health where SLOs, journeys, and business impact drive what humans see.",
+        operationalChanges: [
+          "Define SLO/SLI for every Tier-1 service and golden journey",
+          "Replace symptom alerts with SLO-burn and journey-impact alerts",
+          "Stand up a unified observability plane across infra, app, and customer experience",
+        ],
+        capability: {
+          processes: ["SLO definition workflow", "Alert quality review"],
+          technology: ["Unified observability", "Journey monitoring", "Trace + log correlation"],
+          automation: ["Auto-suppression", "Correlation engine", "Noise reduction"],
+          governance: ["Alert quality SLA", "Observability standards"],
+        },
+        kpi: [
+          { label: "Alert-to-Signal Ratio", current: "1:18", target: "1:3", forecast: "1:4" },
+          { label: "SLO Coverage", current: "31%", target: "95%", forecast: "92%" },
+          { label: "Customer-Impact Detection", current: "44%", target: ">90%", forecast: "88%" },
+        ],
+        outcomes: {
+          risk: "Earlier detection of member-impacting drift",
+          cost: "Lower on-call burden and reduced tooling sprawl",
+          customer: "Issues caught before they reach the member",
+          growth: "Confidence to ship faster with observable services",
+        },
+        aiCoworkers: ["Signal Curator", "SLO Architect"],
+        dependencies: ["Telemetry foundation", "Service catalog"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "ro-4", current: "Manual Incident Response", future: "Intelligent Incident Management", icon: Clock,
+        frictions: 7,
+        frictionPoints: ["High MTTR", "Manual Triage", "War-Room Overhead", "Comms Gaps", "Postmortem Backlog", "Repeat Incidents", "Toil"],
+        disciplines: ["sre", "platform", "devsecops"],
+        value: "$11.8M / 3yr",
+        narrative: "Make incident response a high-leverage, AI-assisted workflow with automated triage, runbook execution, and structured learning.",
+        operationalChanges: [
+          "AI-assisted triage and root-cause hypothesis on incident open",
+          "Runbook automation for the top 50 incident types",
+          "Structured postmortems with action tracking and recurrence prevention",
+        ],
+        capability: {
+          processes: ["Severity matrix", "Postmortem standard", "Comms playbook"],
+          technology: ["Incident platform", "Runbook automation", "AI triage assistant"],
+          automation: ["Auto-bridge spin-up", "Auto-remediation for known patterns"],
+          governance: ["Incident review board", "Recurrence SLAs"],
+        },
+        kpi: [
+          { label: "MTTR", current: "72 min", target: "15 min", forecast: "18 min" },
+          { label: "Auto-Remediated %", current: "6%", target: ">40%", forecast: "38%" },
+          { label: "Postmortems on time", current: "55%", target: "100%", forecast: "97%" },
+        ],
+        outcomes: {
+          risk: "Faster containment of revenue- and member-impacting events",
+          cost: "Lower on-call burnout and overtime",
+          customer: "Shorter, less visible disruptions",
+          growth: "Scales without proportional response staffing",
+        },
+        aiCoworkers: ["Incident Commander Copilot", "Postmortem Synthesizer"],
+        dependencies: ["Service health management", "Service ownership"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "ro-5", current: "ITIL-Centric Processes", future: "SRE Practices & Culture", icon: ClipboardList,
+        frictions: 4,
+        frictionPoints: ["Process Drag", "CAB Bottlenecks", "Change Failure Rate", "Slow Lead Time"],
+        disciplines: ["sre", "topo"],
+        value: "$6.2M / 3yr",
+        narrative: "Retain ITIL governance value but replace gatekeeping rituals with engineering-led, evidence-based reliability practices.",
+        operationalChanges: [
+          "Replace CAB review for low-risk changes with automated policy and pre-approved changes",
+          "Adopt error budgets to govern release velocity vs. reliability",
+          "Move from ticket-driven to engineering-driven operations",
+        ],
+        capability: {
+          processes: ["Change policy", "Error budget policy", "Reliability reviews"],
+          technology: ["Policy-as-code", "Release platform"],
+          automation: ["Pre-approved change automation", "Risk scoring"],
+          governance: ["Reliability council replaces CAB for routine changes"],
+        },
+        kpi: [
+          { label: "Change Lead Time", current: "9 days", target: "<1 day", forecast: "1.2 days" },
+          { label: "Change Failure Rate", current: "14%", target: "<5%", forecast: "6%" },
+          { label: "CAB Reviews / week", current: "120", target: "<20", forecast: "24" },
+        ],
+        outcomes: {
+          risk: "Lower change-induced incidents through automated guardrails",
+          cost: "Removes governance overhead from routine work",
+          customer: "Faster delivery of fixes and features",
+          growth: "Supports modern engineering velocity",
+        },
+        aiCoworkers: ["Change Risk Scorer", "Policy-as-Code Author"],
+        dependencies: ["Service ownership", "Automated delivery"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
     ],
   },
   {
-    id: "ownership",
-    number: 2,
-    title: "Service Ownership",
-    tagline: "Every service has a clearly accountable owner end to end.",
-    icon: UserCheck,
-    accent: "#0F766E",
-    ringClass: "ring-teal-200",
-    industryTranslation: "Product Ownership",
-    executiveDefinition: "Every service has a clearly accountable owner.",
-    whyExists: "Without unambiguous ownership, decisions stall and accountability dilutes. Ownership is the operating contract that makes reliability and improvement possible.",
-    looksLike: ["Clear ownership boundaries", "Defined escalation paths", "End-to-end accountability"],
-    withoutIt: ["Ownership confusion", "Multiple escalation layers", "Slow recovery", "Accountability gaps"],
-    practices: ["End-to-End Accountability", "Product Ownership", "Clear Boundaries", "Escalation Ownership"],
-    antiPatterns: ["Shared responsibility", "Ticket ping-pong", "Blame & handoffs"],
-    kpis: [
-      { label: "Ownership Coverage", value: "96%", trend: "+18%" },
-      { label: "Escalation Count", value: "1.4", trend: "-46%" },
-      { label: "MTTR", value: "31 min", trend: "-35%" },
-      { label: "Service Health Score", value: "92", trend: "+9" },
-    ],
-    slas: ["100% of tier-1 services have a named on-call owner", "Escalation resolved within 2 hops"],
-    visuals: ["Ownership Heat Map", "Ownership Matrix", "Responsibility Radar"],
-    realWorld: [
-      "Each service registered in Compass-style catalog with primary, secondary, exec sponsor",
-      "On-call rotation tied to service ownership, not function",
-    ],
-    reporting: ["Ownership Heat Map", "Service Ownership Matrix", "Responsibility Coverage Radar"],
-    talkingPoints: ["Ownership should never be ambiguous.", "If two teams own it, no one does."],
-    coworkerOpportunities: [
-      "Owner Resolver — auto-routes alerts to the correct on-call",
-      "Coverage Auditor — surfaces services without a defined owner",
-    ],
-    modernizationInitiatives: ["Adopt service registry with required ownership fields", "Tie funding model to service ownership"],
-    serviceCatalog: ["Service Registry", "On-Call Management", "Ownership Audit"],
-    teamStructure: ["Stream-aligned teams", "Service Owner role per product"],
-    related: ["prevention", "collaboration", "platform"],
-    radar: [
-      { axis: "Coverage", current: 4, target: 5 },
-      { axis: "Clarity", current: 4, target: 5 },
-      { axis: "Escalation", current: 3, target: 5 },
-      { axis: "Funding", current: 3, target: 5 },
-      { axis: "Lifecycle", current: 3, target: 5 },
-    ],
-    trend: [
-      { m: "Q1", value: 60 }, { m: "Q2", value: 71 }, { m: "Q3", value: 82 },
-      { m: "Q4", value: 88 }, { m: "Q5", value: 93 }, { m: "Q6", value: 96 },
-    ],
-  },
-  {
-    id: "collaboration",
-    number: 3,
-    title: "Collaborative Engineering",
-    tagline: "We solve problems together, not by throwing tickets over the fence.",
-    icon: Users,
-    accent: "#1D4ED8",
-    ringClass: "ring-blue-200",
-    industryTranslation: "Flow-Based Organizations",
-    executiveDefinition: "Teams solve problems together instead of routing tickets between silos.",
-    whyExists: "Customer outcomes flow horizontally; functional silos optimize locally and degrade globally. Collaboration replaces queuing.",
-    looksLike: ["Shared accountability", "Embedded engineering", "Cross-functional collaboration"],
-    withoutIt: ["Ticket routing", "Delays", "Escalation chains", "Friction"],
-    practices: ["Cross-Functional Teams", "Clear Communication", "Shared Context", "Collective Problem Solving"],
-    antiPatterns: ["Siloed mindsets", "\"That's not my job\"", "Us vs. Them culture"],
-    kpis: [
-      { label: "Handoffs / Incident", value: "1.8", trend: "-66%" },
-      { label: "Collaboration Score", value: "84", trend: "+22" },
-      { label: "Reopened Incidents %", value: "3.1%", trend: "-58%" },
-      { label: "CSAT / NPS", value: "62", trend: "+18" },
-    ],
-    slas: ["Cross-team incidents resolved within shared SLO", "Joint post-incident review within 5 days"],
-    visuals: ["Workflow Map", "Cross-Team Collaboration Radar"],
-    realWorld: [
-      "Engineering, SRE and security co-own production health dashboards",
-      "Major incidents triaged in shared rooms, not via tickets",
-    ],
-    reporting: ["Current State Workflow", "Future State Workflow", "Cross-Team Collaboration Radar"],
-    talkingPoints: ["Collaboration should replace ticket routing.", "Tickets are evidence of broken flow."],
-    coworkerOpportunities: [
-      "Incident Companion — assembles context and stakeholders into one room",
-      "Handoff Detector — flags chains exceeding threshold",
-    ],
-    modernizationInitiatives: ["Adopt shared SLOs across delivery, SRE, security", "Replace approval boards with policy-as-code"],
-    serviceCatalog: ["Incident Collaboration Workspace", "Shared Observability"],
-    teamStructure: ["Enabling teams", "Complicated-subsystem teams", "Stream-aligned squads"],
-    related: ["ownership", "platform", "automation"],
-    radar: [
-      { axis: "Flow", current: 4, target: 5 },
-      { axis: "Shared Context", current: 4, target: 5 },
-      { axis: "Joint Tools", current: 3, target: 5 },
-      { axis: "Trust", current: 3, target: 5 },
-      { axis: "Rituals", current: 4, target: 5 },
-    ],
-    trend: [
-      { m: "Q1", value: 5.2 }, { m: "Q2", value: 4.1 }, { m: "Q3", value: 3.2 },
-      { m: "Q4", value: 2.4 }, { m: "Q5", value: 2.0 }, { m: "Q6", value: 1.8 },
-    ],
-  },
-  {
-    id: "platform",
-    number: 4,
-    title: "Shared Platform Services",
-    tagline: "Common capabilities are built once, secured, and consumed everywhere.",
-    icon: Boxes,
-    accent: "#0F766E",
-    ringClass: "ring-emerald-200",
-    industryTranslation: "Platform Engineering",
-    executiveDefinition: "Common capabilities are delivered once and consumed everywhere.",
-    whyExists: "Reinventing core capabilities per team multiplies cost, risk and tech debt. Platforms convert reliability and security into reusable services.",
-    looksLike: ["Cloud Platform", "Identity Platform", "Observability Platform", "CI/CD Platform", "Data Platform"],
-    withoutIt: ["Reinventing solutions", "Snowflake environments", "Ad-hoc tooling sprawl"],
-    practices: ["Platform Engineering", "Self-Service Portal", "Reusable Services", "Golden Paths & Guardrails"],
-    antiPatterns: ["Reinventing solutions", "Snowflake environments", "Ad-hoc tooling sprawl"],
-    kpis: [
-      { label: "Shared Service Adoption", value: "78%", trend: "+24%" },
-      { label: "Self-Service Utilization", value: "71%", trend: "+31%" },
-      { label: "Platform Consistency", value: "88%", trend: "+12%" },
-      { label: "Time to Provision", value: "9 min", trend: "-83%" },
-    ],
-    slas: ["Platform availability 99.95%", "Golden path provisioning < 15 min"],
-    visuals: ["Service Catalog", "Adoption Heat Map"],
-    realWorld: [
-      "Internal developer portal exposes paved-path templates",
-      "Identity, observability, CI/CD consumed as platform products",
-    ],
-    reporting: ["Platform Service Catalog", "Consumer Adoption Heat Map"],
-    talkingPoints: ["Build once. Consume many.", "Platforms turn reliability into a product."],
-    coworkerOpportunities: [
-      "Paved-Path Advisor — recommends golden templates",
-      "Drift Watcher — detects deviation from platform standards",
-    ],
-    modernizationInitiatives: ["Establish internal developer platform", "Define golden paths for top 5 workloads"],
-    serviceCatalog: ["Compute", "Identity", "Observability", "CI/CD", "Data"],
-    teamStructure: ["Platform engineering team(s)", "Product manager per platform"],
-    related: ["automation", "ownership", "modernization"],
-    radar: [
-      { axis: "Adoption", current: 4, target: 5 },
-      { axis: "Self-Service", current: 4, target: 5 },
-      { axis: "Coverage", current: 3, target: 5 },
-      { axis: "Reliability", current: 4, target: 5 },
-      { axis: "DX", current: 3, target: 5 },
-    ],
-    trend: [
-      { m: "Q1", value: 32 }, { m: "Q2", value: 44 }, { m: "Q3", value: 58 },
-      { m: "Q4", value: 66 }, { m: "Q5", value: 73 }, { m: "Q6", value: 78 },
+    id: "ed", name: "Engineering & Delivery",
+    accent: "#8b5cf6", tint: "bg-violet-50/60", textAccent: "text-violet-700",
+    shifts: [
+      mkShift({
+        id: "ed-1", current: "Custom Engineering", future: "Shared Platforms", icon: Code2,
+        frictions: 5, frictionPoints: ["Reinvented Wheels", "Duplicate Tooling", "Inconsistent Patterns", "High Cognitive Load", "Slow Onboarding"],
+        disciplines: ["platform", "topo"], value: "$12.4M / 3yr",
+        narrative: "Replace one-off engineering with reusable platform capabilities and golden paths that accelerate every team.",
+        operationalChanges: [
+          "Establish platform team with internal-product mindset",
+          "Publish golden paths for service creation, deploy, observability",
+          "Deprecate redundant in-house tools in favor of shared capabilities",
+        ],
+        capability: {
+          processes: ["Platform product management", "Golden path standards"],
+          technology: ["Internal developer portal", "Service templates", "Paved-road infra"],
+          automation: ["Service scaffolding", "Self-service environments"],
+          governance: ["Platform investment board", "Capability roadmap"],
+        },
+        kpi: [
+          { label: "Time to first deploy", current: "3 wks", target: "<2 days", forecast: "3 days" },
+          { label: "Golden-path adoption", current: "18%", target: ">80%", forecast: "76%" },
+          { label: "Duplicate tools retired", current: "0", target: "30+", forecast: "27" },
+        ],
+        outcomes: { risk: "Fewer unsupported bespoke systems", cost: "Major engineering leverage from reuse",
+          customer: "Faster delivery of value", growth: "Scales engineering without scaling headcount" },
+        aiCoworkers: ["Golden-Path Copilot", "Service Scaffolder"],
+        dependencies: ["Platform team funded", "Service catalog"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "ed-2", current: "Manual Deployments", future: "Automated Delivery", icon: Rocket,
+        frictions: 5, frictionPoints: ["Deploy Risk", "Off-Hours Releases", "Manual Steps", "Rollback Pain", "Inconsistent Pipelines"],
+        disciplines: ["platform", "devsecops"], value: "$9.1M / 3yr",
+        narrative: "Move from manual release events to continuous, policy-governed, automated delivery on every service.",
+        operationalChanges: ["Standardize CI/CD per language/runtime", "Adopt progressive delivery (canary, blue/green)", "Automate rollback on SLO breach"],
+        capability: {
+          processes: ["Release policy", "Progressive delivery standard"],
+          technology: ["CI/CD platform", "Feature flag platform", "Release orchestrator"],
+          automation: ["Pipeline-as-code", "Auto-rollback", "Policy gates"],
+          governance: ["Pre-approved change framework"],
+        },
+        kpi: [
+          { label: "Deployment Frequency", current: "Weekly", target: "On-demand", forecast: "Daily+" },
+          { label: "Lead Time for Change", current: "9 days", target: "<1 day", forecast: "1.4 days" },
+          { label: "Change Failure Rate", current: "14%", target: "<5%", forecast: "6%" },
+        ],
+        outcomes: { risk: "Lower deploy-induced incidents", cost: "Less weekend / overtime release effort",
+          customer: "Faster fixes and features", growth: "Sustains modern delivery cadence" },
+        aiCoworkers: ["Release Copilot", "Pipeline Author"],
+        dependencies: ["Shared platforms", "Service ownership"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "ed-3", current: "Project Modernization", future: "Continuous Modernization", icon: RefreshCw,
+        frictions: 5, frictionPoints: ["Tech Debt Drift", "End-of-Life Risk", "Aging Stacks", "Migration Fatigue", "Stalled Roadmaps"],
+        disciplines: ["tech", "platform"], value: "$10.7M / 3yr",
+        narrative: "Stop treating modernization as episodic projects. Make modernization a continuous engineering discipline tied to outcomes.",
+        operationalChanges: ["Tech-debt budget allocated each sprint", "Lifecycle policy per technology", "Modernization tied to product roadmaps"],
+        capability: {
+          processes: ["Technology lifecycle policy", "Modernization intake"],
+          technology: ["Architecture decision records", "Dependency telemetry"],
+          automation: ["Auto-upgrade workflows", "EOL detection"],
+          governance: ["Tech-debt portfolio review"],
+        },
+        kpi: [
+          { label: "EOL components", current: "187", target: "<20", forecast: "26" },
+          { label: "Tech-debt burn / sprint", current: "5%", target: "20%", forecast: "18%" },
+          { label: "Modern stack %", current: "41%", target: "85%", forecast: "82%" },
+        ],
+        outcomes: { risk: "Less hidden risk from unsupported stacks", cost: "Avoided emergency migrations",
+          customer: "Stable, modern experience", growth: "Faster delivery on modern foundations" },
+        aiCoworkers: ["Modernization Strategist", "EOL Sentinel"],
+        dependencies: ["Application portfolio assessment"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "ed-4", current: "Siloed Engineering", future: "Cross-Functional Teams", icon: Building2,
+        frictions: 4, frictionPoints: ["Hand-offs", "Slow Decisions", "Conway-style Bottlenecks", "Misaligned Roadmaps"],
+        disciplines: ["topo"], value: "$5.4M / 3yr",
+        narrative: "Reorganize from functional silos to stream-aligned teams with the skills to deliver, run, and improve their services.",
+        operationalChanges: ["Stream-aligned teams own services end-to-end", "Enabling teams accelerate capability adoption", "Reduce dependencies via platform model"],
+        capability: {
+          processes: ["Team topology charter", "Dependency mapping"],
+          technology: ["Dependency dashboard"],
+          automation: ["Cross-team workflow automation"],
+          governance: ["Topology review board"],
+        },
+        kpi: [
+          { label: "Cross-team dependencies", current: "high", target: "low", forecast: "med-low" },
+          { label: "Lead-time variability", current: "high", target: "low", forecast: "low" },
+          { label: "Stream-aligned %", current: "35%", target: "85%", forecast: "80%" },
+        ],
+        outcomes: { risk: "Fewer dropped balls between teams", cost: "Lower coordination overhead",
+          customer: "Faster decisions on member-impacting work", growth: "Scales with new lines of business" },
+        aiCoworkers: ["Topology Mapper"],
+        dependencies: ["Service ownership"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "ed-5", current: "Manual Operations", future: "Automation First", icon: Wrench,
+        frictions: 6, frictionPoints: ["Toil", "Manual Runbooks", "Inconsistent Execution", "Human Error", "Slow Recovery", "Hidden Work"],
+        disciplines: ["sre", "platform"], value: "$8.9M / 3yr",
+        narrative: "Adopt an automation-first stance: every recurring operational task is a candidate for codification.",
+        operationalChanges: ["Toil inventory & burn-down per team", "Runbook-as-code standard", "Automation reviews each sprint"],
+        capability: {
+          processes: ["Toil tracking", "Automation backlog"],
+          technology: ["Workflow engine", "Runbook platform"],
+          automation: ["Runbook-as-code", "Event-driven actions"],
+          governance: ["Automation review board"],
+        },
+        kpi: [
+          { label: "Toil %", current: "55%", target: "<25%", forecast: "27%" },
+          { label: "Automated runbooks", current: "22", target: "200+", forecast: "190" },
+          { label: "Auto-remediation %", current: "6%", target: ">40%", forecast: "38%" },
+        ],
+        outcomes: { risk: "Consistent, predictable execution", cost: "Reduces ops headcount pressure",
+          customer: "Faster recovery", growth: "Scales without scaling ops headcount" },
+        aiCoworkers: ["Toil Analyst", "Runbook Author"],
+        dependencies: ["Telemetry", "Service catalog"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
     ],
   },
   {
-    id: "automation",
-    number: 5,
-    title: "Automation First",
-    tagline: "Humans focus on decisions. Automation handles repetition.",
-    icon: Cog,
-    accent: "#C2410C",
-    ringClass: "ring-orange-200",
-    industryTranslation: "Agentic Operations",
-    executiveDefinition: "Humans focus on decisions. Automation handles repetition.",
-    whyExists: "Toil is a tax on engineering capacity. Automation converts repeatable work into reliable, observable systems and frees humans for judgement.",
-    looksLike: ["Automated remediation", "Automated validation", "Automated patching", "Automated scaling"],
-    withoutIt: ["Manual, repetitive work", "Tribal knowledge runbooks", "Low automation maturity"],
-    practices: ["Runbook Automation", "Self-Healing", "Policy as Code", "AI / Agentic Operations"],
-    antiPatterns: ["Manual repetitive work", "Tribal knowledge runbooks", "Low automation maturity"],
-    kpis: [
-      { label: "Automation Coverage", value: "76%", trend: "+22%" },
-      { label: "Toil Reduction", value: "63%", trend: "+18%" },
-      { label: "Automated Recovery", value: "58%", trend: "+27%" },
-      { label: "Manual Interventions", value: "22%", trend: "-44%" },
-    ],
-    slas: ["Auto-remediation for top 20 alert classes", "Patch automation cycle ≤ 7 days"],
-    visuals: ["Automation Coverage Gauge", "Manual vs Automated Activity Trend"],
-    realWorld: [
-      "Self-healing runbooks resolve common alerts without paging",
-      "Policy-as-code blocks non-compliant change at PR time",
-    ],
-    reporting: ["Automation Coverage Gauge", "Manual vs Automated Activity Trend"],
-    talkingPoints: ["Human judgment should be reserved for high-value decisions.", "If we did it twice, we should automate it."],
-    coworkerOpportunities: [
-      "Runbook Operator — executes parameterized runbooks safely",
-      "Patch Pilot — automates risk-scored patch waves",
-    ],
-    modernizationInitiatives: ["Build automation catalog", "Adopt policy-as-code across CI/CD"],
-    serviceCatalog: ["Runbook Service", "Policy Service", "Agent Catalog"],
-    teamStructure: ["Automation guild", "Agent operations team"],
-    related: ["platform", "prevention", "modernization"],
-    radar: [
-      { axis: "Coverage", current: 4, target: 5 },
-      { axis: "Safety", current: 4, target: 5 },
-      { axis: "Reuse", current: 3, target: 5 },
-      { axis: "Telemetry", current: 4, target: 5 },
-      { axis: "Adoption", current: 3, target: 5 },
-    ],
-    trend: [
-      { m: "Q1", value: 28 }, { m: "Q2", value: 41 }, { m: "Q3", value: 55 },
-      { m: "Q4", value: 64 }, { m: "Q5", value: 71 }, { m: "Q6", value: 76 },
-    ],
-  },
-  {
-    id: "modernization",
-    number: 6,
-    title: "Continuous Modernization",
-    tagline: "Technology continuously evolves. Technical debt continuously declines.",
-    icon: RefreshCw,
-    accent: "#1D4ED8",
-    ringClass: "ring-blue-200",
-    industryTranslation: "Technology Investment Strategy",
-    executiveDefinition: "Technology continuously evolves.",
-    whyExists: "Software ages. Without a continuous modernization loop, debt compounds and optionality narrows.",
-    looksLike: ["Modern Architectures", "Containerization", "Refactoring", "Retire What We Don't Need"],
-    withoutIt: ["Preserve for forever", "Big bang rewrites", "Ignoring technical debt"],
-    practices: ["Modern Architectures", "Containerization", "Refactoring", "Retire What We Don't Need"],
-    antiPatterns: ["Preserve for forever", "Big bang rewrites", "Ignoring technical debt"],
-    kpis: [
-      { label: "Technical Debt Index", value: "31", trend: "-19" },
-      { label: "Container Adoption", value: "72%", trend: "+24%" },
-      { label: "Legacy Asset Reduction", value: "28%", trend: "+11%" },
-      { label: "Deployment Frequency", value: "8.4 / day", trend: "+3.1x" },
-    ],
-    slas: ["Modernization milestones reported quarterly", "Legacy retirement ≥ 10% per year"],
-    visuals: ["Modernization Roadmap", "Technical Debt Trend", "Application Modernization Heat Map"],
-    realWorld: [
-      "Quarterly architecture review board sets retirement and refactor targets",
-      "Application portfolio scored against modernization criteria",
-    ],
-    reporting: ["Modernization Roadmap", "Technical Debt Trend", "Application Modernization Heat Map"],
-    talkingPoints: ["Technical debt compounds when ignored.", "Modernization is a rhythm, not a project."],
-    coworkerOpportunities: [
-      "Debt Analyst — quantifies and trends technical debt",
-      "Retirement Scout — identifies sunset candidates",
-    ],
-    modernizationInitiatives: ["Containerize tier-1 legacy workloads", "Establish portfolio modernization scorecard"],
-    serviceCatalog: ["Refactor Service", "Containerization Factory", "Sunset Service"],
-    teamStructure: ["Modernization tiger teams", "Architecture review board"],
-    related: ["platform", "automation", "acquisition"],
-    radar: [
-      { axis: "Visibility", current: 4, target: 5 },
-      { axis: "Velocity", current: 3, target: 5 },
-      { axis: "Retirement", current: 3, target: 5 },
-      { axis: "Standards", current: 4, target: 5 },
-      { axis: "Funding", current: 3, target: 5 },
-    ],
-    trend: [
-      { m: "Q1", value: 52 }, { m: "Q2", value: 47 }, { m: "Q3", value: 41 },
-      { m: "Q4", value: 38 }, { m: "Q5", value: 34 }, { m: "Q6", value: 31 },
-    ],
-  },
-  {
-    id: "acquisition",
-    number: 7,
-    title: "Acquisition Readiness",
-    tagline: "We can integrate, secure, and operate acquisitions within 60 days.",
-    icon: Building2,
-    accent: "#7C2D12",
-    ringClass: "ring-amber-200",
-    industryTranslation: "Acquisition Integration Factory",
-    executiveDefinition: "Organizations can absorb acquisitions without creating operational chaos.",
-    whyExists: "Inorganic growth fails operationally when each acquisition is bespoke. A factory model converts integrations into a repeatable, predictable motion.",
-    looksLike: ["Standard onboarding", "Standard tooling", "Standard observability", "Standard identity"],
-    withoutIt: ["One-off integrations", "Long stabilization cycles", "Inconsistent patterns"],
-    practices: ["Standardized Landing Zone", "Rapid Onboarding", "Identity & Access", "Operating Model Playbooks"],
-    antiPatterns: ["One-off integrations", "Long stabilization cycles", "Inconsistent patterns"],
-    kpis: [
-      { label: "Time to Stand Up", value: "42 days", trend: "-58%" },
-      { label: "Integration Cycle", value: "63 days", trend: "-49%" },
-      { label: "Security Compliance Time", value: "21 days", trend: "-44%" },
-      { label: "Acquisition Success Score", value: "87", trend: "+19" },
-    ],
-    slas: ["Operational readiness within 60 days", "Identity unification within 30 days"],
-    visuals: ["Acquisition Factory Workflow", "Integration Readiness Radar"],
-    realWorld: [
-      "Acquire → Assess → Standardize → Integrate → Operate factory",
-      "Pre-built landing zone provisioned within 5 business days",
-    ],
-    reporting: ["Acquisition Factory Workflow", "Integration Readiness Radar"],
-    talkingPoints: ["Every acquisition should become easier than the last.", "Integration speed is an enterprise capability."],
-    coworkerOpportunities: [
-      "Onboarding Orchestrator — provisions landing zone & identity",
-      "Compliance Mapper — accelerates control inheritance",
-    ],
-    modernizationInitiatives: ["Stand up acquisition factory playbook", "Pre-build standard landing zones"],
-    serviceCatalog: ["Landing Zone", "Identity Unification", "Tooling Standard Pack"],
-    teamStructure: ["Acquisition integration office", "Integration SRE pod"],
-    related: ["platform", "ownership", "security"],
-    radar: [
-      { axis: "Playbook", current: 4, target: 5 },
-      { axis: "Landing Zone", current: 4, target: 5 },
-      { axis: "Identity", current: 3, target: 5 },
-      { axis: "Observability", current: 3, target: 5 },
-      { axis: "Governance", current: 4, target: 5 },
-    ],
-    trend: [
-      { m: "M1", value: 120 }, { m: "M2", value: 96 }, { m: "M3", value: 78 },
-      { m: "M4", value: 64 }, { m: "M5", value: 52 }, { m: "M6", value: 42 },
+    id: "sr", name: "Security & Risk",
+    accent: "#0ea5e9", tint: "bg-sky-50/60", textAccent: "text-sky-700",
+    shifts: [
+      mkShift({
+        id: "sr-1", current: "Periodic Security", future: "Embedded Security", icon: ShieldCheck,
+        frictions: 5, frictionPoints: ["Late-Stage Findings", "Annual Audits", "Reactive Posture", "Blocked Releases", "Drift"],
+        disciplines: ["devsecops", "platform"], value: "$7.6M / 3yr",
+        narrative: "Move from periodic security reviews to security capabilities embedded in pipelines, services, and platforms.",
+        operationalChanges: ["Shift-left security in CI/CD", "Service-level risk scoring", "Security guardrails as code"],
+        capability: {
+          processes: ["Security-as-code policy", "Service risk reviews"],
+          technology: ["SCA/SAST/DAST", "Runtime protection"],
+          automation: ["Policy gates", "Auto-remediation of common findings"],
+          governance: ["Security risk board"],
+        },
+        kpi: [
+          { label: "Time-to-fix critical", current: "31 days", target: "<5 days", forecast: "6 days" },
+          { label: "Coverage in CI", current: "40%", target: ">95%", forecast: "92%" },
+          { label: "Security debt", current: "high", target: "low", forecast: "low" },
+        ],
+        outcomes: { risk: "Lower exploitable risk", cost: "Fewer last-minute release blocks",
+          customer: "Stronger trust posture", growth: "Audit-ready by default" },
+        aiCoworkers: ["AppSec Copilot"],
+        dependencies: ["Shared platforms", "Automated delivery"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "sr-2", current: "Manual Compliance", future: "Continuous Compliance", icon: FileCheck,
+        frictions: 4, frictionPoints: ["Audit Sprints", "Evidence Sprawl", "Manual Attestation", "Control Drift"],
+        disciplines: ["devsecops", "platform"], value: "$5.1M / 3yr",
+        narrative: "Replace audit-driven compliance with continuous control monitoring and evidence automation.",
+        operationalChanges: ["Controls codified once, evaluated continuously", "Automated evidence capture", "Real-time compliance posture"],
+        capability: {
+          processes: ["Control catalog", "Continuous attestation"],
+          technology: ["GRC platform", "Compliance-as-code"],
+          automation: ["Evidence harvest", "Drift alerts"],
+          governance: ["Compliance council"],
+        },
+        kpi: [
+          { label: "Audit prep effort", current: "12 wks", target: "<2 wks", forecast: "2 wks" },
+          { label: "Control coverage", current: "61%", target: "100%", forecast: "98%" },
+          { label: "Drift incidents", current: "high", target: "low", forecast: "low" },
+        ],
+        outcomes: { risk: "Continuous assurance instead of point-in-time", cost: "Major audit overhead reduction",
+          customer: "Trusted operations", growth: "Faster expansion into regulated markets" },
+        aiCoworkers: ["Compliance Evidence Bot"],
+        dependencies: ["Service catalog", "Embedded security"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "sr-3", current: "Reactive Patching", future: "Risk-Based Remediation", icon: AlertTriangle,
+        frictions: 4, frictionPoints: ["Patch Backlog", "Unprioritized Vulns", "Manual Triage", "SLA Misses"],
+        disciplines: ["devsecops"], value: "$4.7M / 3yr",
+        narrative: "Prioritize remediation by real-world exploitability and business impact instead of CVSS alone.",
+        operationalChanges: ["Risk-based SLAs by service tier", "Exposure-weighted prioritization", "Automated patch pipelines"],
+        capability: {
+          processes: ["Vuln triage SLA", "Exception management"],
+          technology: ["Risk-based vuln platform", "Asset/exposure correlation"],
+          automation: ["Auto-patching for low-risk classes"],
+          governance: ["Remediation council"],
+        },
+        kpi: [
+          { label: "Critical patch SLA", current: "55%", target: ">95%", forecast: "93%" },
+          { label: "Exploitable backlog", current: "high", target: "low", forecast: "low" },
+          { label: "Auto-patched %", current: "12%", target: ">60%", forecast: "57%" },
+        ],
+        outcomes: { risk: "Sharp drop in exploitable exposure", cost: "Right-sized remediation effort",
+          customer: "Trust through hardened services", growth: "Scales with growing asset estate" },
+        aiCoworkers: ["Vuln Prioritizer"],
+        dependencies: ["Service ownership", "Asset inventory"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "sr-4", current: "Siloed Security", future: "Integrated Security", icon: Shield,
+        frictions: 5, frictionPoints: ["Tool Silos", "Slow Detection", "Disconnected Identity", "Cross-Team Friction", "Acquired-Entity Gaps"],
+        disciplines: ["devsecops", "topo"], value: "$6.3M / 3yr",
+        narrative: "Integrate security into the engineering and operations operating model rather than treating it as a parallel function.",
+        operationalChanges: ["Security embedded into stream-aligned teams", "Unified identity & access plane", "Shared detection & response across business units"],
+        capability: {
+          processes: ["Security partnership model"],
+          technology: ["Unified IAM", "SIEM/SOAR consolidation"],
+          automation: ["Cross-domain detection automation"],
+          governance: ["Joint security & engineering council"],
+        },
+        kpi: [
+          { label: "Detection MTTR", current: "hours", target: "minutes", forecast: "minutes" },
+          { label: "Identity sprawl", current: "high", target: "low", forecast: "low" },
+          { label: "Acquired-entity integration", current: "manual", target: "templated", forecast: "templated" },
+        ],
+        outcomes: { risk: "Unified posture across business units", cost: "Tool consolidation savings",
+          customer: "Consistent protection", growth: "Acquisitions integrate faster" },
+        aiCoworkers: ["Detection Engineer Copilot"],
+        dependencies: ["Identity foundation", "Service catalog"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "sr-5", current: "Limited Visibility", future: "End-to-End Observability", icon: Eye,
+        frictions: 6, frictionPoints: ["Tool Sprawl", "Blind Spots", "Slow RCA", "Customer-Impact Blindness", "Cost Surprises", "Compliance Gaps"],
+        disciplines: ["sre", "platform", "devsecops"], value: "$7.9M / 3yr",
+        narrative: "Build a unified observability plane spanning infrastructure, application, security, customer journey, and cost.",
+        operationalChanges: ["Single observability backbone", "Standard instrumentation libraries", "Cost & journey signals on the same pane"],
+        capability: {
+          processes: ["Instrumentation standards"],
+          technology: ["OpenTelemetry stack", "Unified data lake"],
+          automation: ["Auto-instrumentation", "Correlation engine"],
+          governance: ["Observability standards board"],
+        },
+        kpi: [
+          { label: "Trace coverage", current: "28%", target: ">90%", forecast: "85%" },
+          { label: "MTTD", current: "18 min", target: "<3 min", forecast: "4 min" },
+          { label: "Tools consolidated", current: "0", target: "12+", forecast: "10" },
+        ],
+        outcomes: { risk: "Far fewer blind spots", cost: "Major tool consolidation savings",
+          customer: "Member-impact visible end-to-end", growth: "Foundation for AI ops" },
+        aiCoworkers: ["Observability Architect"],
+        dependencies: ["Service catalog"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
     ],
   },
   {
-    id: "security",
-    number: 8,
-    title: "Security By Design",
-    tagline: "Security is embedded into engineering workflows.",
-    icon: Lock,
-    accent: "#0F766E",
-    ringClass: "ring-emerald-200",
-    industryTranslation: "DevSecOps",
-    executiveDefinition: "Security is embedded in engineering workflows.",
-    whyExists: "Security bolted on at the end produces friction, delay, and gaps. Embedding it in the engineering lifecycle yields both speed and assurance.",
-    looksLike: ["DevSecOps", "Zero Trust", "Identity Security", "Compliance Automation"],
-    withoutIt: ["Security as a gate", "Manual compliance", "Shared privileged access"],
-    practices: ["DevSecOps", "Shift Left Security", "Zero Trust", "Compliance Automation"],
-    antiPatterns: ["Security as a gate", "Manual compliance", "Shared privileged access"],
-    kpis: [
-      { label: "Patch Compliance", value: "94%", trend: "+11%" },
-      { label: "Vulnerability Exposure", value: "Low", trend: "-37%" },
-      { label: "Identity Coverage", value: "98%", trend: "+6%" },
-      { label: "Security Lead Time", value: "2.1 days", trend: "-61%" },
+    id: "sg", name: "Scale & Growth",
+    accent: "#f59e0b", tint: "bg-amber-50/60", textAccent: "text-amber-700",
+    shifts: [
+      mkShift({
+        id: "sg-1", current: "Acquired Silos", future: "Integrated Platforms", icon: Network,
+        frictions: 6, frictionPoints: ["Duplicate Stacks", "Identity Fragmentation", "Data Silos", "Process Forks", "Cost Duplication", "Integration Backlog"],
+        disciplines: ["platform", "tech"], value: "$13.5M / 3yr",
+        narrative: "Replace acquisition-by-acquisition integration with a templated platform-based onboarding model.",
+        operationalChanges: ["Acquisition onboarding factory", "Reference target architecture", "Decommission duplicate platforms on a schedule"],
+        capability: {
+          processes: ["M&A onboarding playbook"],
+          technology: ["Shared identity, network, observability"],
+          automation: ["Templated environment build-out"],
+          governance: ["M&A integration board"],
+        },
+        kpi: [
+          { label: "Onboarding time", current: "9 mo", target: "<3 mo", forecast: "3.5 mo" },
+          { label: "Duplicate stacks", current: "many", target: "few", forecast: "few" },
+          { label: "Integration value capture", current: "low", target: "high", forecast: "high" },
+        ],
+        outcomes: { risk: "Lower integration-related outages", cost: "Major duplicate-cost recovery",
+          customer: "Consistent experience across brands", growth: "Acquisition becomes a strength" },
+        aiCoworkers: ["M&A Integration Planner"],
+        dependencies: ["Shared platforms", "Identity foundation"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "sg-2", current: "Human-Centric Operations", future: "AI-Augmented Operations", icon: Cpu,
+        frictions: 5, frictionPoints: ["Repetitive Work", "Slow Triage", "Knowledge Silos", "Inconsistent Decisions", "Burnout"],
+        disciplines: ["sre", "platform"], value: "$11.2M / 3yr",
+        narrative: "Inject digital coworkers into operations to absorb toil and accelerate human decision-making.",
+        operationalChanges: ["Digital coworkers for triage, RCA, change risk, compliance", "Human-in-the-loop review patterns", "AI guardrails and audit trail"],
+        capability: {
+          processes: ["AI coworker lifecycle"],
+          technology: ["AI control plane", "Knowledge graph"],
+          automation: ["AI-assisted runbooks", "AI-generated postmortems"],
+          governance: ["AI governance board"],
+        },
+        kpi: [
+          { label: "Operations work AI-assisted", current: "5%", target: ">50%", forecast: "47%" },
+          { label: "Time saved / engineer / week", current: "0 hrs", target: "8+ hrs", forecast: "7 hrs" },
+          { label: "Knowledge reuse", current: "low", target: "high", forecast: "high" },
+        ],
+        outcomes: { risk: "More consistent decisions", cost: "Major leverage on existing staff",
+          customer: "Faster response", growth: "Operating leverage on growth" },
+        aiCoworkers: ["All Reliability Coworkers"],
+        dependencies: ["Observability foundation", "Knowledge captured"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "sg-3", current: "Manual Scaling", future: "Elastic & Automated Scale", icon: Maximize2,
+        frictions: 4, frictionPoints: ["Capacity Surprises", "Overprovisioning", "Slow Scale Events", "Cost Spikes"],
+        disciplines: ["platform", "finops"], value: "$6.8M / 3yr",
+        narrative: "Replace human-driven capacity decisions with policy-driven elastic scaling and continuous capacity intelligence.",
+        operationalChanges: ["Capacity-as-code", "Autoscaling defaults per service tier", "Capacity reviews on cadence"],
+        capability: {
+          processes: ["Capacity policy"],
+          technology: ["Autoscaling platform", "Capacity intelligence"],
+          automation: ["Predictive scaling"],
+          governance: ["Capacity council"],
+        },
+        kpi: [
+          { label: "Autoscaling coverage", current: "37%", target: ">90%", forecast: "85%" },
+          { label: "Overprovisioning %", current: "42%", target: "<15%", forecast: "18%" },
+          { label: "Scale events failed", current: "high", target: "rare", forecast: "rare" },
+        ],
+        outcomes: { risk: "Headroom without surprises", cost: "Lower steady-state spend",
+          customer: "Stable performance under load", growth: "Confident peak handling" },
+        aiCoworkers: ["Capacity Forecaster"],
+        dependencies: ["Observability", "FinOps tagging"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "sg-4", current: "Fragmented Processes", future: "Standardized Workflows", icon: GitBranch,
+        frictions: 5, frictionPoints: ["Process Variance", "Onboarding Cost", "Audit Pain", "Reinvented Workflows", "Slow Decisions"],
+        disciplines: ["topo", "platform"], value: "$4.9M / 3yr",
+        narrative: "Standardize key operational workflows across the enterprise to enable measurement, automation, and improvement.",
+        operationalChanges: ["Workflow catalog", "Reference processes per domain", "Continuous improvement loop"],
+        capability: {
+          processes: ["Process standard library"],
+          technology: ["Workflow platform"],
+          automation: ["Process automation"],
+          governance: ["Process owners by domain"],
+        },
+        kpi: [
+          { label: "Standard workflow adoption", current: "32%", target: ">85%", forecast: "82%" },
+          { label: "Onboarding time", current: "weeks", target: "days", forecast: "days" },
+          { label: "Process variance", current: "high", target: "low", forecast: "low" },
+        ],
+        outcomes: { risk: "Predictable execution", cost: "Lower coordination overhead",
+          customer: "Consistent experience", growth: "Scales without re-invention" },
+        aiCoworkers: ["Process Cartographer"],
+        dependencies: ["Topology mapping"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "sg-5", current: "Tool Sprawl", future: "Unified Toolchain", icon: BoxesIcon,
+        frictions: 6, frictionPoints: ["Duplicate Tools", "Integration Tax", "Vendor Cost", "Skills Fragmentation", "Data Silos", "Slow Onboarding"],
+        disciplines: ["platform", "finops", "tech"], value: "$7.4M / 3yr",
+        narrative: "Consolidate to a curated, integrated toolchain aligned to platform capabilities and golden paths.",
+        operationalChanges: ["Tool inventory & rationalization", "Reference toolchain per capability", "Decommission schedule"],
+        capability: {
+          processes: ["Tool intake & exit"],
+          technology: ["Reference toolchain"],
+          automation: ["Usage telemetry"],
+          governance: ["Tool council"],
+        },
+        kpi: [
+          { label: "Tools retired", current: "0", target: "30+", forecast: "27" },
+          { label: "License savings", current: "$0", target: "$2.5M", forecast: "$2.2M" },
+          { label: "Onboarding time", current: "weeks", target: "days", forecast: "days" },
+        ],
+        outcomes: { risk: "Fewer unsupported tools", cost: "License + integration savings",
+          customer: "Faster delivery", growth: "Simpler, more leverageable estate" },
+        aiCoworkers: ["Toolchain Optimizer"],
+        dependencies: ["Platform capabilities defined"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
     ],
-    slas: ["Critical CVE remediation < 7 days", "MFA coverage 100%"],
-    visuals: ["Security Posture Dashboard", "Risk Reduction Trend"],
-    realWorld: [
-      "Security scanners enforce policy in CI/CD",
-      "Just-in-time privileged access replaces standing admin",
-    ],
-    reporting: ["Security Posture Dashboard", "Risk Reduction Trend"],
-    talkingPoints: ["Security should be embedded, not bolted on.", "Speed and security are not a trade-off."],
-    coworkerOpportunities: [
-      "CVE Triager — risk-scores and routes vulnerabilities",
-      "Access Reviewer — automates least-privilege reviews",
-    ],
-    modernizationInitiatives: ["Embed scanners in every pipeline", "Adopt zero-trust identity baseline"],
-    serviceCatalog: ["Scanner Service", "Identity Platform", "Compliance Automation"],
-    teamStructure: ["Security guild", "Embedded security engineers"],
-    related: ["platform", "automation", "acquisition"],
-    radar: [
-      { axis: "Shift-Left", current: 4, target: 5 },
-      { axis: "Zero Trust", current: 4, target: 5 },
-      { axis: "Compliance", current: 4, target: 5 },
-      { axis: "Identity", current: 5, target: 5 },
-      { axis: "Response", current: 3, target: 5 },
-    ],
-    trend: [
-      { m: "Q1", value: 71 }, { m: "Q2", value: 78 }, { m: "Q3", value: 84 },
-      { m: "Q4", value: 88 }, { m: "Q5", value: 91 }, { m: "Q6", value: 94 },
+  },
+  {
+    id: "fv", name: "Financial & Value",
+    accent: "#f43f5e", tint: "bg-rose-50/60", textAccent: "text-rose-700",
+    shifts: [
+      mkShift({
+        id: "fv-1", current: "Technology Cost Centers", future: "Business Value Platforms", icon: Banknote,
+        frictions: 5, frictionPoints: ["Cost-Center Mindset", "Value Disconnect", "Underinvestment", "Hidden Wins", "Misaligned Funding"],
+        disciplines: ["finops", "topo"], value: "$8.6M / 3yr",
+        narrative: "Reframe technology as a portfolio of business value platforms with explicit outcomes, owners, and ROI.",
+        operationalChanges: ["Platform-as-product funding", "Outcome-based scorecards", "Investment review tied to value"],
+        capability: {
+          processes: ["Value-stream accounting"],
+          technology: ["Cost + value telemetry"],
+          automation: ["Outcome dashboards"],
+          governance: ["Investment council"],
+        },
+        kpi: [
+          { label: "Platforms with value scorecard", current: "18%", target: "100%", forecast: "95%" },
+          { label: "Outcome reporting cadence", current: "annual", target: "quarterly", forecast: "monthly" },
+          { label: "ROI visibility", current: "low", target: "high", forecast: "high" },
+        ],
+        outcomes: { risk: "Investment aligned to value", cost: "Sharper allocation",
+          customer: "Investment follows member impact", growth: "Funds the right bets" },
+        aiCoworkers: ["Value Analyst"],
+        dependencies: ["FinOps transparency"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "fv-2", current: "Opaque Spending", future: "FinOps Transparency", icon: FileBarChart,
+        frictions: 4, frictionPoints: ["Untagged Spend", "Surprise Bills", "Cost Drift", "No Service Cost"],
+        disciplines: ["finops", "platform"], value: "$5.7M / 3yr",
+        narrative: "Bring cost visibility to every service, team, and capability with FinOps practices and tooling.",
+        operationalChanges: ["Tagging standard + enforcement", "Service cost reporting", "Anomaly alerting"],
+        capability: {
+          processes: ["FinOps council", "Tagging policy"],
+          technology: ["FinOps platform"],
+          automation: ["Cost anomaly detection"],
+          governance: ["FinOps council"],
+        },
+        kpi: [
+          { label: "Tagging coverage", current: "47%", target: ">95%", forecast: "92%" },
+          { label: "Cost per service", current: "unknown", target: "published", forecast: "published" },
+          { label: "Anomalies caught", current: "0", target: "all", forecast: "98%" },
+        ],
+        outcomes: { risk: "Cost surprises eliminated", cost: "Direct savings from visibility",
+          customer: "Investment goes where it matters", growth: "Confidence to invest in growth" },
+        aiCoworkers: ["FinOps Analyst"],
+        dependencies: ["Service catalog"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "fv-3", current: "Budget Focus", future: "Outcome & Value Focus", icon: Target,
+        frictions: 4, frictionPoints: ["Budget Theater", "Activity-Based Measurement", "Misaligned KPIs", "Slow Reprioritization"],
+        disciplines: ["finops", "topo"], value: "$4.3M / 3yr",
+        narrative: "Shift governance and reporting from budget consumption to outcomes delivered and value realized.",
+        operationalChanges: ["Outcome OKRs per platform", "Funding tied to outcome milestones", "Quarterly value review"],
+        capability: {
+          processes: ["Outcome planning"],
+          technology: ["OKR + value telemetry"],
+          automation: ["Outcome dashboards"],
+          governance: ["Outcome review board"],
+        },
+        kpi: [
+          { label: "Outcome-funded %", current: "22%", target: ">80%", forecast: "75%" },
+          { label: "Value realization", current: "ad hoc", target: "tracked", forecast: "tracked" },
+          { label: "Reprioritization speed", current: "slow", target: "fast", forecast: "fast" },
+        ],
+        outcomes: { risk: "Investment follows results", cost: "Stops funding low-value work",
+          customer: "Investment aligned to member outcomes", growth: "Maximizes growth investment" },
+        aiCoworkers: ["Outcome Tracker"],
+        dependencies: ["FinOps transparency"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "fv-4", current: "Resource Waste", future: "Efficient Resource Utilization", icon: Trash2,
+        frictions: 4, frictionPoints: ["Idle Resources", "Overprovisioned Stacks", "Zombie Workloads", "Unrightsized Services"],
+        disciplines: ["finops", "platform"], value: "$5.9M / 3yr",
+        narrative: "Continuously right-size, retire, and reclaim resources across the estate as a normal engineering practice.",
+        operationalChanges: ["Idle/zombie scanning", "Rightsizing reviews per quarter", "Auto-shutdown of non-prod"],
+        capability: {
+          processes: ["Rightsizing cadence"],
+          technology: ["Utilization telemetry"],
+          automation: ["Auto-shutdown, auto-rightsize"],
+          governance: ["FinOps council"],
+        },
+        kpi: [
+          { label: "Idle resources", current: "high", target: "low", forecast: "low" },
+          { label: "Rightsized services", current: "21%", target: ">85%", forecast: "82%" },
+          { label: "Non-prod off-hours savings", current: "$0", target: "$1.5M", forecast: "$1.3M" },
+        ],
+        outcomes: { risk: "Smaller attack surface", cost: "Direct utilization savings",
+          customer: "Investment redirected to value", growth: "Funds new initiatives" },
+        aiCoworkers: ["Rightsizing Bot"],
+        dependencies: ["Tagging", "Observability"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
+      mkShift({
+        id: "fv-5", current: "Disconnected Metrics", future: "Unified Value Metrics", icon: BarChart3,
+        frictions: 4, frictionPoints: ["Metric Sprawl", "Conflicting KPIs", "No Single Source", "Hard to Roll Up"],
+        disciplines: ["finops", "platform", "sre"], value: "$4.1M / 3yr",
+        narrative: "Establish a unified metric model that connects reliability, delivery, security, cost, and customer outcomes.",
+        operationalChanges: ["Value metric catalog", "Single source of truth dashboards", "Roll-up to executive scorecard"],
+        capability: {
+          processes: ["Metric governance"],
+          technology: ["Unified metrics layer"],
+          automation: ["Metric pipelines"],
+          governance: ["Metric council"],
+        },
+        kpi: [
+          { label: "Executive scorecard coverage", current: "partial", target: "full", forecast: "full" },
+          { label: "Conflicting metrics resolved", current: "few", target: "all", forecast: "most" },
+          { label: "Decision time", current: "slow", target: "fast", forecast: "fast" },
+        ],
+        outcomes: { risk: "Clear, shared truth", cost: "Stops duplicate reporting effort",
+          customer: "Decisions made on member outcomes", growth: "Aligned execution" },
+        aiCoworkers: ["Metric Steward"],
+        dependencies: ["Observability", "FinOps"],
+        maturity: [
+          { stage: "Current", status: "done" }, { stage: "Stabilize", status: "active" },
+          { stage: "Standardize", status: "pending" }, { stage: "Modernize", status: "pending" },
+          { stage: "Automate", status: "pending" }, { stage: "Optimize", status: "pending" }, { stage: "Scale", status: "pending" },
+        ],
+      }),
     ],
   },
 ];
 
-const OUTCOMES: Outcome[] = [
-  {
-    id: "reliability", title: "Reliability", metric: "99.95%+", caption: "Service Availability (Target)",
-    icon: ShieldCheck, accent: "#6D28D9",
-    panels: [
-      { title: "Availability Trends", items: ["Tier-1 availability 99.962% trailing 90d", "No tier-1 SLO miss last 2 quarters"] },
-      { title: "SLO Performance", items: ["92% of services meeting SLO", "Top 3 SLO burners under remediation"] },
-      { title: "Error Budget Performance", items: ["Burn rate 62% of quarterly budget", "Auto-freeze on >2x burn"] },
-    ],
-    trend: [{ m: "Q1", value: 99.82 }, { m: "Q2", value: 99.89 }, { m: "Q3", value: 99.93 }, { m: "Q4", value: 99.95 }, { m: "Q5", value: 99.96 }, { m: "Q6", value: 99.96 }],
-  },
-  {
-    id: "velocity", title: "Delivery Velocity", metric: "5x", caption: "Faster Change Throughput",
-    icon: Rocket, accent: "#C2410C",
-    panels: [
-      { title: "Lead Time For Change", items: ["Median 1.4 days", "P90 3.1 days"] },
-      { title: "Deployment Frequency", items: ["8.4 deploys / day", "On-demand for 78% of services"] },
-      { title: "Release Success", items: ["Change failure rate 4.2%", "Auto-rollback on SLO burn"] },
-    ],
-    trend: [{ m: "Q1", value: 1 }, { m: "Q2", value: 1.6 }, { m: "Q3", value: 2.4 }, { m: "Q4", value: 3.2 }, { m: "Q5", value: 4.1 }, { m: "Q6", value: 5 }],
-  },
-  {
-    id: "automation", title: "Automation Coverage", metric: "75%+", caption: "Of Operational Tasks Automated",
-    icon: Cog, accent: "#C2410C",
-    panels: [
-      { title: "Automation Inventory", items: ["312 automations in catalog", "184 self-service consumable"] },
-      { title: "Agent Catalog", items: ["27 production agents", "9 in safety review"] },
-      { title: "Toil Reduction", items: ["63% toil reduction trailing 12 months", "Top 10 toil sources tracked"] },
-    ],
-    trend: [{ m: "Q1", value: 28 }, { m: "Q2", value: 41 }, { m: "Q3", value: 55 }, { m: "Q4", value: 64 }, { m: "Q5", value: 71 }, { m: "Q6", value: 76 }],
-  },
-  {
-    id: "standardization", title: "Standardization", metric: "90%+", caption: "Workloads on Standard Platforms",
-    icon: Boxes, accent: "#0F766E",
-    panels: [
-      { title: "Platform Standardization", items: ["88% workloads on golden paths", "12% in remediation backlog"] },
-      { title: "Pipeline Standardization", items: ["Single CI/CD platform across 94% of services"] },
-      { title: "Service Standardization", items: ["Catalog coverage 96%", "Drift alerts active"] },
-    ],
-    trend: [{ m: "Q1", value: 52 }, { m: "Q2", value: 64 }, { m: "Q3", value: 73 }, { m: "Q4", value: 81 }, { m: "Q5", value: 87 }, { m: "Q6", value: 90 }],
-  },
-  {
-    id: "modernization", title: "Modernization Progress", metric: "Quarterly", caption: "Clear Visibility into Tech Evolution",
-    icon: RefreshCw, accent: "#1D4ED8",
-    panels: [
-      { title: "Roadmap", items: ["8 modernization waves in flight", "Quarterly board review"] },
-      { title: "Completed Initiatives", items: ["27 retirements YTD", "14 refactors closed"] },
-      { title: "Remaining Debt", items: ["Debt index reduced from 52 → 31", "Top 5 debt clusters quantified"] },
-    ],
-    trend: [{ m: "Q1", value: 52 }, { m: "Q2", value: 47 }, { m: "Q3", value: 41 }, { m: "Q4", value: 38 }, { m: "Q5", value: 34 }, { m: "Q6", value: 31 }],
-  },
-  {
-    id: "acquisition", title: "Acquisition Readiness", metric: "<90 Days", caption: "Systems Reprovisioned Post-Acquisition",
-    icon: Building2, accent: "#7C2D12",
-    panels: [
-      { title: "Integration Score", items: ["Last 3 acquisitions: 87 / 84 / 91", "Trending upward"] },
-      { title: "Operational Readiness", items: ["Identity unified in 21 days median", "Observability in 18 days median"] },
-      { title: "Standardization Coverage", items: ["94% of acquired workloads on standard tooling within 90 days"] },
-    ],
-    trend: [{ m: "M1", value: 120 }, { m: "M2", value: 96 }, { m: "M3", value: 78 }, { m: "M4", value: 64 }, { m: "M5", value: 52 }, { m: "M6", value: 42 }],
-  },
+/* ---------------- Friction → Shifts mapping ---------------- */
+
+const FRICTION_MAP: { friction: string; shiftIds: string[] }[] = [
+  { friction: "Reactive Firefighting", shiftIds: ["ro-1", "ro-4"] },
+  { friction: "Technical Debt", shiftIds: ["ed-3", "ed-1"] },
+  { friction: "Identity Fragmentation", shiftIds: ["sg-1", "sr-4"] },
+  { friction: "Operational Inefficiency", shiftIds: ["ed-5", "ro-5"] },
+  { friction: "Customer Experience Instability", shiftIds: ["ro-3", "sr-5"] },
+  { friction: "Cost Opacity", shiftIds: ["fv-2", "fv-4"] },
+  { friction: "Acquisition Integration Drag", shiftIds: ["sg-1", "ed-4"] },
+  { friction: "Security Drift", shiftIds: ["sr-1", "sr-3"] },
 ];
 
-const FRAMEWORKS: Framework[] = [
-  {
-    id: "sre", name: "Google SRE", caption: "Reliability engineering discipline", icon: ShieldCheck, accent: "#6D28D9",
-    what: "An engineering discipline that treats operations as a software problem with SLOs, error budgets and toil reduction.",
-    why: "Provides quantitative reliability targets the business can reason about, and a budget for change velocity.",
-    influence: ["Defines SLOs and error budgets", "Frames toil as work to be eliminated", "Embeds reliability into engineering practice"],
-    pitfalls: ["Treating SRE as a renamed ops team", "Setting SLOs without business input", "No enforcement of error budget policy"],
-    useCases: ["Set per-service SLOs", "Auto-freeze releases on burn", "Quarterly reliability reviews"],
-    relatedFoundations: ["prevention", "ownership", "automation"],
-  },
-  {
-    id: "topologies", name: "Team Topologies", caption: "Organizing around flow and value", icon: Users, accent: "#1D4ED8",
-    what: "An organizational design model with four team types and three interaction modes optimized for flow.",
-    why: "Removes coordination cost by aligning team structure to value streams.",
-    influence: ["Defines stream-aligned, enabling, complicated-subsystem and platform teams", "Constrains cognitive load"],
-    pitfalls: ["Renaming teams without changing interactions", "Platform team without product mindset"],
-    useCases: ["Realign squads to product domains", "Stand up enabling teams for new capabilities"],
-    relatedFoundations: ["ownership", "collaboration", "platform"],
-  },
-  {
-    id: "platformeng", name: "Platform Engineering", caption: "Reusable capabilities and self-service", icon: Boxes, accent: "#0F766E",
-    what: "Practice of building internal platforms as products, with golden paths and developer self-service.",
-    why: "Compounds engineering productivity and standardizes reliability and security.",
-    influence: ["Internal developer portal", "Golden path templates", "Paved roads vs guardrails"],
-    pitfalls: ["Building a tool, not a product", "No platform PM or roadmap", "Mandates without incentives"],
-    useCases: ["Provision environments in minutes", "Centralize identity and observability"],
-    relatedFoundations: ["platform", "automation", "modernization"],
-  },
-  {
-    id: "techinvest", name: "Technology Investment Strategy", caption: "Evolve, retire, and reinvest", icon: TrendingUp, accent: "#1D4ED8",
-    what: "A continuous portfolio management discipline that evolves, retires and reinvests across the technology estate.",
-    why: "Prevents technical debt accumulation and protects optionality.",
-    influence: ["Portfolio scoring", "Retirement targets", "Funding model tied to outcomes"],
-    pitfalls: ["Modernization treated as one-time program", "No retirement targets"],
-    useCases: ["Quarterly portfolio review", "Sunset legacy systems on schedule"],
-    relatedFoundations: ["modernization", "platform", "acquisition"],
-  },
-  {
-    id: "devsecops", name: "DevSecOps", caption: "Security embedded in the lifecycle", icon: Code2, accent: "#0F766E",
-    what: "Embeds security activities and controls into the engineering lifecycle through automation.",
-    why: "Yields both speed and assurance; reduces last-mile security cost.",
-    influence: ["Scanners in CI/CD", "Policy as code", "Shift-left security"],
-    pitfalls: ["Security as gate, not partner", "Tool sprawl without policy", "No measurable lead time"],
-    useCases: ["Block deploys on critical CVEs", "Automate compliance evidence"],
-    relatedFoundations: ["security", "automation", "platform"],
-  },
-  {
-    id: "finops", name: "FinOps", caption: "Financial accountability and transparency", icon: DollarSign, accent: "#0F766E",
-    what: "An operating model that brings financial accountability to cloud and platform spend.",
-    why: "Aligns engineering decisions to unit economics and business outcomes.",
-    influence: ["Showback and chargeback", "Unit economics", "Forecast and budget discipline"],
-    pitfalls: ["Cost cutting without engineering partnership", "No unit metric"],
-    useCases: ["Per-service cost dashboards", "Right-sizing automation"],
-    relatedFoundations: ["platform", "modernization", "automation"],
-  },
-];
+/* ---------------- UI ---------------- */
 
-const ENABLERS = [
-  { label: "Better Experiences", icon: Smile },
-  { label: "Greater Resilience", icon: ShieldCheck },
-  { label: "Faster Delivery", icon: Rocket },
-  { label: "Higher Business Value", icon: TrendingUp },
-];
+function HeaderIndicator({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="px-4 py-2 rounded-xl bg-white/70 border border-slate-200 shadow-sm">
+      <div className="text-[10px] uppercase tracking-wider text-slate-500">{label}</div>
+      <div className="text-sm font-semibold text-slate-900">{value}</div>
+    </div>
+  );
+}
+
+function DisciplineCard({
+  d, active, hoveredId, onHover,
+}: {
+  d: Discipline;
+  active: boolean;
+  hoveredId: DisciplineId | null;
+  onHover: (id: DisciplineId | null) => void;
+}) {
+  const Icon = d.icon;
+  const dim = hoveredId && hoveredId !== d.id;
+  return (
+    <div
+      onMouseEnter={() => onHover(d.id)}
+      onMouseLeave={() => onHover(null)}
+      className={[
+        "group relative rounded-2xl border bg-white p-4 transition-all cursor-pointer",
+        "border-slate-200 hover:border-slate-300 hover:shadow-md",
+        active ? `ring-2 ${d.ring}` : "",
+        dim ? "opacity-50" : "",
+      ].join(" ")}
+    >
+      <div className={`inline-flex items-center justify-center w-9 h-9 rounded-lg ${d.bg} ${d.color} mb-3`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div className="text-sm font-semibold text-slate-900">{d.name}</div>
+      <div className="mt-1 text-xs text-slate-600 leading-relaxed">{d.description}</div>
+    </div>
+  );
+}
+
+function ShiftCard({
+  shift, hoveredDiscipline, onOpen, dim,
+}: {
+  shift: Shift;
+  hoveredDiscipline: DisciplineId | null;
+  onOpen: () => void;
+  dim: boolean;
+}) {
+  const Icon = shift.icon;
+  const highlight = hoveredDiscipline && shift.disciplines.includes(hoveredDiscipline);
+  return (
+    <button
+      onClick={onOpen}
+      className={[
+        "group w-full text-left rounded-xl border bg-white p-3 transition-all",
+        "border-slate-200 hover:border-slate-300 hover:shadow-md",
+        highlight ? "ring-2 ring-amber-300 border-amber-300 shadow-md" : "",
+        dim ? "opacity-40" : "",
+      ].join(" ")}
+    >
+      <div className="flex items-start gap-3">
+        <div className="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-600 border border-slate-200">
+          <Icon className="w-4 h-4" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium text-slate-800 truncate">{shift.current}</div>
+          <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+            <ArrowRight className="w-3 h-3 text-slate-400" />
+            <span className="font-semibold text-slate-900 truncate">{shift.future}</span>
+          </div>
+        </div>
+        <div className="shrink-0 flex flex-col items-end gap-1">
+          <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-slate-900 text-white text-[10px] font-semibold">
+            {shift.frictions}
+          </span>
+          <BarChart3 className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600" />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function OutcomeCard({
+  icon: Icon, title, points, accent,
+}: { icon: LucideIcon; title: string; points: string[]; accent: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg" style={{ background: `${accent}14`, color: accent }}>
+          <Icon className="w-5 h-5" />
+        </div>
+        <div className="text-sm font-semibold text-slate-900">{title}</div>
+      </div>
+      <ul className="space-y-1.5">
+        {points.map((p) => (
+          <li key={p} className="text-xs text-slate-600 flex gap-2">
+            <CheckCircle2 className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+            <span>{p}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function MaturityRail({ items }: { items: Shift["maturity"] }) {
+  return (
+    <div className="flex items-center gap-1">
+      {items.map((m, i) => (
+        <div key={m.stage} className="flex-1 flex items-center gap-1">
+          <div
+            className={[
+              "flex-1 h-1.5 rounded-full",
+              m.status === "done" ? "bg-emerald-500" :
+              m.status === "active" ? "bg-amber-400" : "bg-slate-200",
+            ].join(" ")}
+          />
+          {i < items.length - 1 && <div className="w-1" />}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /* ---------------- Page ---------------- */
 
 export default function ReliabilityFoundations() {
-  const [openFoundation, setOpenFoundation] = useState<Foundation | null>(null);
-  const [openOutcome, setOpenOutcome] = useState<Outcome | null>(null);
-  const [openFramework, setOpenFramework] = useState<Framework | null>(null);
-  const [openPurpose, setOpenPurpose] = useState(false);
-  const [openEnabler, setOpenEnabler] = useState<string | null>(null);
+  const [hoveredDiscipline, setHoveredDiscipline] = useState<DisciplineId | null>(null);
+  const [openShift, setOpenShift] = useState<Shift | null>(null);
 
-  const headerKpis = useMemo(
-    () => [
-      { label: "Availability", value: "99.95%+" },
-      { label: "Automation", value: "76%" },
-      { label: "Standardization", value: "90%" },
-      { label: "Acquisition", value: "<90d" },
-    ],
+  const totalShifts = CATEGORIES.reduce((acc, c) => acc + c.shifts.length, 0);
+  const totalFriction = CATEGORIES.reduce((acc, c) => acc + c.shifts.reduce((a, s) => a + s.frictions, 0), 0);
+
+  const trendData = useMemo(
+    () => Array.from({ length: 12 }, (_, i) => ({
+      m: `M${i + 1}`,
+      friction: Math.round(100 - i * 6 + Math.sin(i) * 4),
+      capability: Math.round(20 + i * 6 + Math.cos(i) * 3),
+    })),
     []
   );
 
   return (
     <AppShell>
-      <div className="min-h-full bg-white text-slate-900">
-        {/* Header */}
-        <div className="border-b border-slate-200 bg-white">
-          <div className="px-8 py-6">
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-2 text-xs text-slate-500 uppercase tracking-wider mb-2">
-                  <span>Site Resilience Engineering</span>
-                  <ChevronRight className="h-3 w-3" />
-                  <span className="text-slate-700">Foundations</span>
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+        <div className="max-w-[1600px] mx-auto px-6 py-6 space-y-6">
+
+          {/* Header */}
+          <header className="rounded-3xl border border-slate-200 bg-white shadow-sm p-6">
+            <div className="flex items-start justify-between gap-6 flex-wrap">
+              <div className="max-w-3xl">
+                <div className="inline-flex items-center gap-2 text-[11px] font-medium text-slate-500 mb-2">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  From Enterprise Friction to Future-State Operations
                 </div>
-                <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
-                  Foundations of the Production Reliability Operating Model
+                <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-slate-900">
+                  Enterprise Operating Shifts
                 </h1>
-                <p className="mt-2 text-slate-600 max-w-3xl">
-                  The core beliefs and design principles that guide how high-performing organizations build, run, and evolve reliable products at scale.
+                <p className="mt-3 text-slate-600 leading-relaxed">
+                  The organizational, engineering, and operational changes required to eliminate enterprise friction
+                  and create a modern, resilient, scalable operating model.
                 </p>
               </div>
-              <div className="hidden lg:flex gap-2 text-xs">
-                {headerKpis.map((k) => (
-                  <Badge key={k.label} variant="outline" className="border-slate-300 text-slate-600 font-normal">
-                    {k.label}: <span className="ml-1 font-semibold text-slate-800">{k.value}</span>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-12 gap-6 px-8 py-6">
-          {/* Main column */}
-          <div className="col-span-12 xl:col-span-9 space-y-6">
-            {/* Purpose + Enable ribbon */}
-            <Card className="border-slate-200 p-5 bg-gradient-to-br from-white to-slate-50/50">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                <button
-                  onClick={() => setOpenPurpose(true)}
-                  className="lg:col-span-7 text-left group"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center ring-1 ring-emerald-100">
-                      <Target className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <div className="text-[11px] uppercase tracking-wider text-emerald-700 font-semibold">Our Purpose</div>
-                      <p className="text-sm text-slate-800 mt-1 leading-relaxed group-hover:text-slate-900">
-                        Deliver reliable, secure, and cost-effective services that create exceptional experiences for our users
-                        and measurable value for the business.
-                      </p>
-                    </div>
-                  </div>
-                </button>
-
-                <div className="lg:col-span-5">
-                  <div className="text-[11px] uppercase tracking-wider text-emerald-700 font-semibold text-center mb-2">We Enable</div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {ENABLERS.map((e) => {
-                      const Icon = e.icon;
-                      return (
-                        <button
-                          key={e.label}
-                          onClick={() => setOpenEnabler(e.label)}
-                          className="rounded-md border border-slate-200 hover:border-slate-400 hover:bg-white px-2 py-3 text-center transition"
-                        >
-                          <Icon className="h-5 w-5 mx-auto text-slate-700" />
-                          <div className="text-[10px] font-medium text-slate-700 mt-1 leading-tight">{e.label}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Foundations grid */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-slate-900" />
-                  <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-700">Eight Foundations</h2>
-                  <span className="text-xs text-slate-400">(click any element to drill in)</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-                {FOUNDATIONS.map((f) => (
-                  <FoundationCard key={f.id} f={f} onOpen={setOpenFoundation} />
-                ))}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <HeaderIndicator label="Current State" value="Legacy Operations" />
+                <HeaderIndicator label="Target State" value="Production Reliability OM" />
+                <HeaderIndicator label="Operating Maturity" value="Transitional" />
+                <HeaderIndicator label="Transformation Horizon" value="24–36 Months" />
               </div>
             </div>
 
-            {/* Outcomes */}
-            <section>
-              <div className="flex items-center gap-2 mb-3">
-                <BarChart3 className="h-4 w-4 text-slate-500" />
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-700">Outcomes We Deliver</h2>
+            <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="rounded-xl border border-slate-200 p-3">
+                <div className="text-[10px] uppercase tracking-wide text-slate-500">Operating Shifts</div>
+                <div className="text-2xl font-semibold text-slate-900">{totalShifts}</div>
+                <div className="text-xs text-slate-500">across 5 domains</div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                {OUTCOMES.map((o) => {
-                  const Icon = o.icon;
-                  return (
-                    <button
-                      key={o.id}
-                      onClick={() => setOpenOutcome(o)}
-                      className="text-left rounded-lg border border-slate-200 bg-white p-4 hover:border-slate-400 hover:shadow-sm transition group"
-                    >
-                      <div className="h-8 w-8 rounded-md flex items-center justify-center mb-3"
-                           style={{ backgroundColor: `${o.accent}14`, color: o.accent }}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div className="text-[10px] uppercase tracking-wider text-slate-500">{o.title}</div>
-                      <div className="text-xl font-semibold text-slate-900 mt-0.5 leading-tight">{o.metric}</div>
-                      <div className="text-[11px] text-slate-500 mt-1 leading-tight line-clamp-2">{o.caption}</div>
-                    </button>
-                  );
-                })}
+              <div className="rounded-xl border border-slate-200 p-3">
+                <div className="text-[10px] uppercase tracking-wide text-slate-500">Friction Points Addressed</div>
+                <div className="text-2xl font-semibold text-slate-900">{totalFriction}</div>
+                <div className="text-xs text-emerald-600">100% coverage</div>
               </div>
-            </section>
+              <div className="rounded-xl border border-slate-200 p-3">
+                <div className="text-[10px] uppercase tracking-wide text-slate-500">3-Year Value</div>
+                <div className="text-2xl font-semibold text-slate-900">$210M+</div>
+                <div className="text-xs text-slate-500">total unlocked</div>
+              </div>
+              <div className="rounded-xl border border-slate-200 p-3">
+                <div className="text-[10px] uppercase tracking-wide text-slate-500">Risk Reduction</div>
+                <div className="text-2xl font-semibold text-slate-900">55%</div>
+                <div className="text-xs text-slate-500">lower operational risk</div>
+              </div>
+            </div>
+          </header>
 
-            {/* Bottom band */}
-            <Card className="border-slate-900 bg-slate-900 text-white p-5">
-              <div className="flex items-start gap-3">
-                <Compass className="h-5 w-5 text-emerald-300 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm leading-relaxed">
-                    These foundations guide every decision, every investment, and every interaction across the production reliability operating model.
-                  </p>
-                  <p className="text-sm text-emerald-300 mt-1">
-                    They ensure consistent outcomes today while building the optionality required for tomorrow.
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Side rail: industry practices */}
-          <aside className="col-span-12 xl:col-span-3 space-y-4">
-            <Card className="border-slate-200 p-4 sticky top-4">
-              <div className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold mb-3">
-                Inspired by Leading Industry Practices
-              </div>
-              <div className="space-y-2">
-                {FRAMEWORKS.map((fr) => {
-                  const Icon = fr.icon;
-                  return (
-                    <button
-                      key={fr.id}
-                      onClick={() => setOpenFramework(fr)}
-                      className="w-full text-left flex items-start gap-3 rounded-md border border-slate-200 px-3 py-2.5 hover:border-slate-400 hover:bg-slate-50 transition"
-                    >
-                      <div className="h-8 w-8 rounded-md flex items-center justify-center shrink-0"
-                           style={{ backgroundColor: `${fr.accent}14`, color: fr.accent }}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-xs font-semibold text-slate-900">{fr.name}</div>
-                        <div className="text-[11px] text-slate-500 leading-tight mt-0.5">{fr.caption}</div>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-slate-300 ml-auto shrink-0 mt-1" />
-                    </button>
-                  );
-                })}
-              </div>
-              <Separator className="my-4" />
+          {/* SECTION 1 - Foundational Disciplines */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex items-end justify-between mb-4">
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold mb-2">Operating Health</div>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-[11px] text-slate-600 mb-1">
-                      <span>SLO Compliance</span><span className="font-semibold text-slate-900">92%</span>
-                    </div>
-                    <Progress value={92} className="h-1.5" />
+                <div className="text-[11px] uppercase tracking-wider text-slate-500">Section 01</div>
+                <h2 className="text-lg font-semibold text-slate-900">Foundational Disciplines</h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Industry disciplines informing the operating shifts. Hover any discipline to highlight the shifts it informs.
+                </p>
+              </div>
+              <Badge variant="secondary" className="bg-slate-100 text-slate-700 border border-slate-200">
+                {hoveredDiscipline ? `Highlighting ${DISCIPLINES.find(d => d.id === hoveredDiscipline)?.short}` : "6 disciplines"}
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {DISCIPLINES.map((d) => (
+                <DisciplineCard
+                  key={d.id} d={d}
+                  active={hoveredDiscipline === d.id}
+                  hoveredId={hoveredDiscipline}
+                  onHover={setHoveredDiscipline}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* SECTION 2 - Operating Shifts */}
+          <section className="space-y-4">
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-500">Section 02</div>
+                <h2 className="text-lg font-semibold text-slate-900">Enterprise Operating Shifts</h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Current state → Future state. Click any shift to open the Operating Shift Intelligence Panel.
+                </p>
+              </div>
+              <div className="text-xs text-slate-500">
+                {hoveredDiscipline ? (
+                  <span>Filtering by <span className="font-semibold text-slate-700">{DISCIPLINES.find(d => d.id === hoveredDiscipline)?.name}</span></span>
+                ) : "Hover a discipline above to filter"}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+              {CATEGORIES.map((c) => (
+                <div key={c.id} className={`rounded-2xl border border-slate-200 ${c.tint} p-3`}>
+                  <div className="flex items-center justify-between mb-2 px-1">
+                    <div className={`text-[11px] uppercase tracking-wider font-semibold ${c.textAccent}`}>{c.name}</div>
+                    <span className="text-[10px] text-slate-500">{c.shifts.length} shifts</span>
                   </div>
-                  <div>
-                    <div className="flex justify-between text-[11px] text-slate-600 mb-1">
-                      <span>Automation Coverage</span><span className="font-semibold text-slate-900">76%</span>
-                    </div>
-                    <Progress value={76} className="h-1.5" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-[11px] text-slate-600 mb-1">
-                      <span>Standardization</span><span className="font-semibold text-slate-900">90%</span>
-                    </div>
-                    <Progress value={90} className="h-1.5" />
+                  <div className="space-y-2">
+                    {c.shifts.map((s) => (
+                      <ShiftCard
+                        key={s.id} shift={s}
+                        hoveredDiscipline={hoveredDiscipline}
+                        dim={Boolean(hoveredDiscipline && !s.disciplines.includes(hoveredDiscipline))}
+                        onOpen={() => setOpenShift(s)}
+                      />
+                    ))}
                   </div>
                 </div>
+              ))}
+            </div>
+          </section>
+
+          {/* SECTION 3 - Outcomes */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-4">
+              <div className="text-[11px] uppercase tracking-wider text-slate-500">Section 03</div>
+              <h2 className="text-lg font-semibold text-slate-900">Operating Shift Impact Summary</h2>
+              <p className="text-xs text-slate-500 mt-1">What the enterprise gains when these shifts are achieved.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              <OutcomeCard icon={Gauge} title="More Reliable" accent="#10b981"
+                points={["Reduced incidents", "Higher service availability", "Improved customer experience"]} />
+              <OutcomeCard icon={Rocket} title="Faster Delivery" accent="#8b5cf6"
+                points={["Reduced lead times", "Higher deployment velocity", "Faster modernization"]} />
+              <OutcomeCard icon={ShieldCheck} title="More Secure" accent="#0ea5e9"
+                points={["Reduced risk exposure", "Improved compliance posture", "Embedded security"]} />
+              <OutcomeCard icon={Maximize2} title="Built To Scale" accent="#f59e0b"
+                points={["Supports acquisitions", "Supports growth", "Supports new products"]} />
+              <OutcomeCard icon={TrendingUp} title="Greater Value" accent="#f43f5e"
+                points={["Improved operating leverage", "Lower operational cost", "Higher enterprise value"]} />
+            </div>
+          </section>
+
+          {/* SECTION 4 - Friction Reduction Coverage */}
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-end justify-between">
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-500">Section 04</div>
+                <h2 className="text-lg font-semibold text-slate-900">Friction Reduction Coverage</h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  How operating shifts directly address the friction identified on the Enterprise Friction Index.
+                </p>
               </div>
-            </Card>
-          </aside>
+              <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200">
+                40 / 40 friction points covered
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+              <div className="lg:col-span-3 space-y-2">
+                {FRICTION_MAP.map((row) => (
+                  <div key={row.friction} className="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-semibold text-slate-900 px-2 py-1 rounded-md bg-white border border-slate-200">
+                        {row.friction}
+                      </span>
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                      <div className="flex flex-wrap gap-1.5">
+                        {row.shiftIds.map((sid) => {
+                          const sh = CATEGORIES.flatMap(c => c.shifts).find(x => x.id === sid)!;
+                          return (
+                            <button
+                              key={sid}
+                              onClick={() => setOpenShift(sh)}
+                              className="text-[11px] px-2 py-1 rounded-md bg-white border border-slate-200 hover:border-slate-400 hover:shadow-sm transition text-slate-700"
+                            >
+                              {sh.current} <span className="text-slate-400">→</span> <span className="font-semibold text-slate-900">{sh.future}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="lg:col-span-2 rounded-2xl border border-slate-200 p-4 bg-slate-50/50">
+                <div className="text-xs font-semibold text-slate-700 mb-2">Friction ↓ vs. Capability ↑ (illustrative, 12 months)</div>
+                <div className="h-56">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={trendData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="m" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                      <YAxis tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                      <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+                      <Area type="monotone" dataKey="friction" stroke="#f43f5e" fill="#fecdd3" />
+                      <Area type="monotone" dataKey="capability" stroke="#10b981" fill="#a7f3d0" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="text-[11px] text-slate-400 text-center pb-6">
+            Enterprise Friction Index identified what is broken. Enterprise Operating Shifts identifies what must change.
+            The Future-State Operating Model defines how people, process, technology, and AI are organized once these shifts are achieved.
+          </div>
         </div>
 
-        {/* Foundation Sheet */}
-        <Sheet open={!!openFoundation} onOpenChange={(o) => !o && setOpenFoundation(null)}>
-          <SheetContent side="right" className="w-full sm:max-w-none sm:w-[35vw] overflow-y-auto bg-white">
-            {openFoundation && <FoundationDetail f={openFoundation} onJump={(id) => {
-              const next = FOUNDATIONS.find((x) => x.id === id);
-              if (next) setOpenFoundation(next);
-            }} onClose={() => setOpenFoundation(null)} />}
-          </SheetContent>
-        </Sheet>
+        {/* ---- Operating Shift Intelligence Panel ---- */}
+        <Sheet open={!!openShift} onOpenChange={(o) => !o && setOpenShift(null)}>
+          <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto bg-white">
+            {openShift && (
+              <>
+                <SheetHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 text-slate-700">
+                      <openShift.icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] uppercase tracking-wider text-slate-500">Operating Shift Intelligence Panel</div>
+                      <SheetTitle className="text-base">
+                        <span className="text-slate-500 font-normal">{openShift.current}</span>
+                        <span className="text-slate-400 mx-2">→</span>
+                        <span className="text-slate-900">{openShift.future}</span>
+                      </SheetTitle>
+                    </div>
+                    <button onClick={() => setOpenShift(null)} className="text-slate-400 hover:text-slate-700">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </SheetHeader>
 
-        {/* Outcome Sheet */}
-        <Sheet open={!!openOutcome} onOpenChange={(o) => !o && setOpenOutcome(null)}>
-          <SheetContent side="right" className="w-full sm:max-w-none sm:w-[35vw] overflow-y-auto bg-white">
-            {openOutcome && <OutcomeDetail o={openOutcome} onClose={() => setOpenOutcome(null)} />}
-          </SheetContent>
-        </Sheet>
+                <div className="mt-5 space-y-5">
+                  {/* Executive Narrative */}
+                  <section>
+                    <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-1">Executive Narrative</div>
+                    <p className="text-sm text-slate-700 leading-relaxed">{openShift.narrative}</p>
+                  </section>
 
-        {/* Framework Sheet */}
-        <Sheet open={!!openFramework} onOpenChange={(o) => !o && setOpenFramework(null)}>
-          <SheetContent side="right" className="w-full sm:max-w-none sm:w-[35vw] overflow-y-auto bg-white">
-            {openFramework && <FrameworkDetail fr={openFramework} onClose={() => setOpenFramework(null)} onJump={(id) => {
-              const next = FOUNDATIONS.find((x) => x.id === id);
-              if (next) { setOpenFramework(null); setOpenFoundation(next); }
-            }} />}
-          </SheetContent>
-        </Sheet>
+                  <Separator />
 
-        {/* Purpose Sheet */}
-        <Sheet open={openPurpose} onOpenChange={setOpenPurpose}>
-          <SheetContent side="right" className="w-full sm:max-w-none sm:w-[35vw] overflow-y-auto bg-white">
-            <SheetHeader className="text-left">
-              <SheetTitle className="text-xl">Our Purpose</SheetTitle>
-              <SheetDescription>
-                Deliver reliable, secure, and cost-effective services that create exceptional experiences for our users and measurable value for the business.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="mt-6 space-y-5">
-              <Section title="Why It Exists">
-                <p className="text-sm text-slate-700 leading-relaxed">
-                  Purpose anchors trade-offs. Every reliability, security, cost and velocity decision is evaluated against this statement,
-                  so engineering choices remain aligned with customer outcomes and enterprise value.
-                </p>
-              </Section>
-              <Section title="How It Shows Up">
-                <Bullets items={[
-                  "Investment cases reference purpose explicitly",
-                  "SLOs derived from customer-impacting journeys",
-                  "Engineering OKRs map to purpose pillars",
-                ]} />
-              </Section>
-              <Section title="What Happens Without It">
-                <Bullets items={[
-                  "Conflicting priorities between teams",
-                  "Reliability investments deprioritized",
-                  "Local optimization erodes customer trust",
-                ]} />
-              </Section>
-            </div>
-          </SheetContent>
-        </Sheet>
+                  {/* Frictions Reduced */}
+                  <section>
+                    <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-2">Frictions Reduced ({openShift.frictionPoints.length})</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {openShift.frictionPoints.map((f) => (
+                        <span key={f} className="text-[11px] px-2 py-1 rounded-md bg-rose-50 text-rose-700 border border-rose-200">{f}</span>
+                      ))}
+                    </div>
+                  </section>
 
-        {/* Enabler Sheet */}
-        <Sheet open={!!openEnabler} onOpenChange={(o) => !o && setOpenEnabler(null)}>
-          <SheetContent side="right" className="w-full sm:max-w-none sm:w-[35vw] overflow-y-auto bg-white">
-            {openEnabler && <EnablerDetail label={openEnabler} onClose={() => setOpenEnabler(null)} />}
+                  {/* Supporting Disciplines */}
+                  <section>
+                    <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-2">Supporting Disciplines</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {openShift.disciplines.map((id) => {
+                        const d = DISCIPLINES.find((x) => x.id === id)!;
+                        const Icon = d.icon;
+                        return (
+                          <div key={id} className={`flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 ${d.bg}`}>
+                            <Icon className={`w-4 h-4 ${d.color}`} />
+                            <span className="text-xs font-semibold text-slate-800">{d.name}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  {/* Operational Changes */}
+                  <section>
+                    <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-2">Operational Changes Required</div>
+                    <ul className="space-y-1.5">
+                      {openShift.operationalChanges.map((c) => (
+                        <li key={c} className="text-sm text-slate-700 flex gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /><span>{c}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+
+                  {/* Capability Requirements */}
+                  <section>
+                    <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-2">Capability Requirements</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(["processes", "technology", "automation", "governance"] as const).map((k) => (
+                        <Card key={k} className="p-3 border-slate-200">
+                          <div className="text-[10px] uppercase text-slate-500 mb-1">{k}</div>
+                          <ul className="space-y-1">
+                            {openShift.capability[k].map((v) => (
+                              <li key={v} className="text-xs text-slate-700">• {v}</li>
+                            ))}
+                          </ul>
+                        </Card>
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* KPI Framework */}
+                  <section>
+                    <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-2">KPI Framework</div>
+                    <div className="overflow-hidden rounded-lg border border-slate-200">
+                      <table className="w-full text-xs">
+                        <thead className="bg-slate-50 text-slate-600">
+                          <tr>
+                            <th className="text-left p-2 font-medium">KPI</th>
+                            <th className="text-left p-2 font-medium">Current</th>
+                            <th className="text-left p-2 font-medium">Target</th>
+                            <th className="text-left p-2 font-medium">Forecast</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {openShift.kpi.map((k) => (
+                            <tr key={k.label} className="border-t border-slate-200">
+                              <td className="p-2 text-slate-800 font-medium">{k.label}</td>
+                              <td className="p-2 text-slate-600">{k.current}</td>
+                              <td className="p-2 text-slate-900 font-semibold">{k.target}</td>
+                              <td className="p-2 text-emerald-700">{k.forecast}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+
+                  {/* Business Outcomes */}
+                  <section>
+                    <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-2">Business Outcomes</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(["risk", "cost", "customer", "growth"] as const).map((k) => (
+                        <div key={k} className="rounded-lg border border-slate-200 p-3">
+                          <div className="text-[10px] uppercase text-slate-500">{k}</div>
+                          <div className="text-xs text-slate-700 mt-1">{openShift.outcomes[k]}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2 text-[11px] text-slate-500">Estimated value contribution: <span className="font-semibold text-slate-900">{openShift.value}</span></div>
+                  </section>
+
+                  {/* AI Enablement */}
+                  <section>
+                    <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-2">AI Enablement — Digital Coworkers</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {openShift.aiCoworkers.map((c) => (
+                        <span key={c} className="text-[11px] px-2 py-1 rounded-md bg-violet-50 text-violet-700 border border-violet-200">{c}</span>
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* Dependencies */}
+                  <section>
+                    <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-2">Transformation Dependencies</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {openShift.dependencies.map((d) => (
+                        <span key={d} className="text-[11px] px-2 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">{d}</span>
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* Maturity Journey */}
+                  <section>
+                    <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-2">Maturity Journey</div>
+                    <MaturityRail items={openShift.maturity} />
+                    <div className="mt-2 flex justify-between text-[10px] text-slate-500">
+                      {openShift.maturity.map((m) => (<span key={m.stage}>{m.stage}</span>))}
+                    </div>
+                  </section>
+                </div>
+              </>
+            )}
           </SheetContent>
         </Sheet>
       </div>
     </AppShell>
-  );
-}
-
-/* ---------------- Cards & Details ---------------- */
-
-function FoundationCard({ f, onOpen }: { f: Foundation; onOpen: (f: Foundation) => void }) {
-  const Icon = f.icon;
-  const topKpi = f.kpis[0];
-
-  return (
-    <div
-      className="group relative rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-lg hover:-translate-y-0.5 hover:border-slate-300 transition-all duration-200 flex flex-col"
-      style={{
-        // subtle top accent strip
-        boxShadow: "0 1px 0 rgba(15,23,42,0.02)",
-      }}
-    >
-      {/* Accent rail */}
-      <div className="h-1 w-full" style={{ backgroundColor: f.accent }} />
-
-      {/* HEADER — signature graphic + identity */}
-      <button onClick={() => onOpen(f)} className="text-left w-full">
-        <div
-          className="relative px-4 pt-4 pb-3 overflow-hidden"
-          style={{
-            background: `linear-gradient(135deg, ${f.accent}0D 0%, ${f.accent}03 60%, #ffffff 100%)`,
-          }}
-        >
-          {/* Signature foundation glyph in the background */}
-          <FoundationGlyph id={f.id} accent={f.accent} />
-
-          <div className="relative flex items-start justify-between">
-            <div className="flex items-center gap-2.5">
-              <span
-                className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded"
-                style={{ color: f.accent, backgroundColor: `${f.accent}14` }}
-              >
-                {String(f.number).padStart(2, "0")}
-              </span>
-              <div
-                className={`h-10 w-10 rounded-full grid place-items-center ring-4 ${f.ringClass} shadow-sm`}
-                style={{ backgroundColor: "#fff", color: f.accent }}
-              >
-                <Icon className="h-5 w-5" />
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-700 transition-colors" />
-          </div>
-
-          <h3
-            className="relative mt-3 text-[13px] font-bold tracking-tight uppercase leading-tight"
-            style={{ color: f.accent }}
-          >
-            {f.title}
-          </h3>
-          <p className="relative text-xs text-slate-600 mt-1 leading-snug min-h-[2.5rem]">
-            {f.tagline}
-          </p>
-
-          {/* Hero metric strip */}
-          <div className="relative mt-3 flex items-end justify-between gap-3 pt-2 border-t border-dashed border-slate-200/80">
-            <div>
-              <div className="text-[9px] uppercase tracking-wider text-slate-500 font-semibold">{topKpi.label}</div>
-              <div className="text-base font-bold text-slate-900 leading-none mt-1">{topKpi.value}</div>
-            </div>
-            <Sparkline data={f.trend.map((t) => t.value)} color={f.accent} />
-          </div>
-        </div>
-      </button>
-
-      {/* BODY — three visually distinct sections */}
-      <div className="flex-1 flex flex-col">
-        {/* Key Practices — accent-tinted */}
-        <FoundationSection
-          icon={CheckCircle2}
-          label="Key Practices"
-          accent={f.accent}
-          variant="accent"
-          items={f.practices}
-          onPick={() => onOpen(f)}
-        />
-
-        {/* KPIs — neutral with chip styling */}
-        <FoundationSection
-          icon={Activity}
-          label="KPIs to Watch"
-          accent={f.accent}
-          variant="neutral"
-          items={f.kpis.slice(0, 4).map((k) => k.label)}
-          onPick={() => onOpen(f)}
-          chip
-        />
-
-        {/* Anti-Patterns — warning-tinted */}
-        <FoundationSection
-          icon={AlertTriangle}
-          label="Anti-Patterns to Avoid"
-          accent="#b91c1c"
-          variant="warning"
-          items={f.antiPatterns}
-          onPick={() => onOpen(f)}
-        />
-      </div>
-
-      {/* Footer ribbon */}
-      <button
-        onClick={() => onOpen(f)}
-        className="border-t border-slate-100 px-4 py-2 flex items-center justify-between bg-slate-50/60 hover:bg-slate-50 transition"
-      >
-        <span className="text-[10px] uppercase tracking-wider text-slate-500">
-          Industry · <span className="text-slate-700 font-medium">{f.industryTranslation}</span>
-        </span>
-        <span className="text-[10px] font-medium text-slate-600 group-hover:text-slate-900 flex items-center gap-0.5">
-          Open <ChevronRight className="h-3 w-3" />
-        </span>
-      </button>
-    </div>
-  );
-}
-
-function FoundationSection({
-  icon: Icon,
-  label,
-  items,
-  accent,
-  variant,
-  onPick,
-  chip,
-}: {
-  icon: LucideIcon;
-  label: string;
-  items: string[];
-  accent: string;
-  variant: "accent" | "neutral" | "warning";
-  onPick: () => void;
-  chip?: boolean;
-}) {
-  const styles = {
-    accent: {
-      bg: `${accent}08`,
-      bar: accent,
-      labelColor: accent,
-    },
-    neutral: {
-      bg: "#fff",
-      bar: "#cbd5e1",
-      labelColor: "#475569",
-    },
-    warning: {
-      bg: "#fef2f2",
-      bar: "#b91c1c",
-      labelColor: "#b91c1c",
-    },
-  }[variant];
-
-  return (
-    <div className="relative border-t border-slate-100" style={{ backgroundColor: styles.bg }}>
-      {/* Vertical accent bar */}
-      <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r" style={{ backgroundColor: styles.bar }} />
-      <div className="pl-4 pr-3 py-2.5">
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <Icon className="h-3 w-3" style={{ color: styles.labelColor }} />
-          <span
-            className="text-[9px] uppercase tracking-wider font-bold"
-            style={{ color: styles.labelColor }}
-          >
-            {label}
-          </span>
-        </div>
-        {chip ? (
-          <div className="flex flex-wrap gap-1">
-            {items.map((it) => (
-              <button
-                key={it}
-                onClick={onPick}
-                className="text-[10px] px-1.5 py-0.5 rounded border border-slate-200 bg-white text-slate-700 hover:border-slate-900 hover:text-slate-900 transition"
-              >
-                {it}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <ul className="space-y-0.5">
-            {items.map((it) => (
-              <li key={it}>
-                <button
-                  onClick={onPick}
-                  className="text-[11px] text-slate-700 hover:text-slate-900 hover:underline underline-offset-2 text-left leading-tight"
-                >
-                  {it}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* Tiny inline sparkline */
-function Sparkline({ data, color }: { data: number[]; color: string }) {
-  if (!data.length) return null;
-  const w = 80, h = 26, pad = 2;
-  const min = Math.min(...data), max = Math.max(...data);
-  const range = max - min || 1;
-  const step = (w - pad * 2) / (data.length - 1);
-  const pts = data.map((v, i) => {
-    const x = pad + i * step;
-    const y = h - pad - ((v - min) / range) * (h - pad * 2);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  });
-  const path = `M ${pts.join(" L ")}`;
-  const areaPath = `${path} L ${(pad + (data.length - 1) * step).toFixed(1)},${h - pad} L ${pad},${h - pad} Z`;
-  const gid = `spk-${color.replace("#", "")}`;
-  return (
-    <svg width={w} height={h} className="overflow-visible">
-      <defs>
-        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity={0.35} />
-          <stop offset="100%" stopColor={color} stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <path d={areaPath} fill={`url(#${gid})`} />
-      <path d={path} stroke={color} strokeWidth={1.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <circle
-        cx={pad + (data.length - 1) * step}
-        cy={h - pad - ((data[data.length - 1] - min) / range) * (h - pad * 2)}
-        r={2}
-        fill={color}
-      />
-    </svg>
-  );
-}
-
-/* Per-foundation signature SVG glyph rendered behind the header */
-function FoundationGlyph({ id, accent }: { id: string; accent: string }) {
-  const common = "absolute right-2 top-2 opacity-[0.18] pointer-events-none";
-  switch (id) {
-    case "prevention":
-      return (
-        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
-          {[44, 32, 20].map((r, i) => (
-            <circle key={i} cx="55" cy="55" r={r} stroke={accent} strokeWidth="1" fill="none" strokeDasharray={i === 1 ? "3 3" : ""} />
-          ))}
-          <path d="M55 30 L72 40 V60 C72 72 55 80 55 80 C55 80 38 72 38 60 V40 Z" stroke={accent} strokeWidth="1.5" fill="none" />
-        </svg>
-      );
-    case "ownership":
-      return (
-        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
-          <circle cx="55" cy="35" r="6" fill={accent} />
-          {[{ x: 25, y: 75 }, { x: 55, y: 75 }, { x: 85, y: 75 }].map((p, i) => (
-            <g key={i}>
-              <line x1="55" y1="35" x2={p.x} y2={p.y} stroke={accent} strokeWidth="1" />
-              <circle cx={p.x} cy={p.y} r="5" stroke={accent} strokeWidth="1.5" fill="none" />
-            </g>
-          ))}
-        </svg>
-      );
-    case "collaboration":
-      return (
-        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <path
-              key={i}
-              d={`M10 ${20 + i * 12} Q55 ${10 + i * 12} 100 ${20 + i * 12}`}
-              stroke={accent}
-              strokeWidth="1"
-              fill="none"
-            />
-          ))}
-        </svg>
-      );
-    case "platform":
-      return (
-        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
-          {[0, 1, 2].map((row) =>
-            [0, 1, 2].map((col) => (
-              <rect
-                key={`${row}-${col}`}
-                x={20 + col * 22}
-                y={20 + row * 22}
-                width="18"
-                height="18"
-                stroke={accent}
-                strokeWidth="1"
-                fill={row === 1 && col === 1 ? `${accent}33` : "none"}
-              />
-            ))
-          )}
-        </svg>
-      );
-    case "automation":
-      return (
-        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
-          <circle cx="55" cy="55" r="20" stroke={accent} strokeWidth="1.5" fill="none" />
-          {Array.from({ length: 8 }).map((_, i) => {
-            const a = (i * Math.PI) / 4;
-            const x1 = 55 + Math.cos(a) * 22;
-            const y1 = 55 + Math.sin(a) * 22;
-            const x2 = 55 + Math.cos(a) * 32;
-            const y2 = 55 + Math.sin(a) * 32;
-            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={accent} strokeWidth="2" strokeLinecap="round" />;
-          })}
-          <circle cx="55" cy="55" r="6" fill={accent} />
-        </svg>
-      );
-    case "modernization":
-      return (
-        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
-          <path
-            d="M55 22 A33 33 0 1 1 22 55"
-            stroke={accent}
-            strokeWidth="1.5"
-            fill="none"
-            strokeLinecap="round"
-          />
-          <path d="M55 22 L48 16 M55 22 L48 28" stroke={accent} strokeWidth="1.5" strokeLinecap="round" />
-          <path
-            d="M55 88 A33 33 0 1 1 88 55"
-            stroke={accent}
-            strokeWidth="1.5"
-            fill="none"
-            strokeLinecap="round"
-            opacity="0.5"
-          />
-        </svg>
-      );
-    case "acquisition":
-      return (
-        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
-          <path d="M20 80 L55 30 L90 80 Z" stroke={accent} strokeWidth="1" fill="none" />
-          {[30, 45, 60, 75].map((x, i) => (
-            <line key={i} x1={x} y1="80" x2={x} y2={50 + i * 4} stroke={accent} strokeWidth="1" />
-          ))}
-          <line x1="20" y1="85" x2="90" y2="85" stroke={accent} strokeWidth="1.5" />
-        </svg>
-      );
-    case "security":
-      return (
-        <svg className={common} width="110" height="110" viewBox="0 0 110 110" fill="none">
-          <rect x="35" y="48" width="40" height="32" rx="3" stroke={accent} strokeWidth="1.5" fill="none" />
-          <path d="M43 48 V38 A12 12 0 0 1 67 38 V48" stroke={accent} strokeWidth="1.5" fill="none" />
-          {Array.from({ length: 4 }).map((_, i) =>
-            Array.from({ length: 5 }).map((_, j) => (
-              <circle key={`${i}-${j}`} cx={20 + j * 18} cy={20 + i * 18} r="1" fill={accent} opacity="0.6" />
-            ))
-          )}
-        </svg>
-      );
-    default:
-      return null;
-  }
-}
-
-
-function FoundationDetail({ f, onClose, onJump }: { f: Foundation; onClose: () => void; onJump: (id: string) => void }) {
-  const Icon = f.icon;
-  return (
-    <>
-      <SheetHeader className="text-left">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="h-11 w-11 rounded-md grid place-items-center"
-                 style={{ backgroundColor: `${f.accent}14`, color: f.accent }}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <div>
-              <Badge variant="outline" className="border-slate-300 text-slate-600 text-[10px] mb-1">
-                Foundation {String(f.number).padStart(2, "0")} · {f.industryTranslation}
-              </Badge>
-              <SheetTitle className="text-xl text-slate-900">{f.title}</SheetTitle>
-              <SheetDescription className="text-slate-600">{f.executiveDefinition}</SheetDescription>
-            </div>
-          </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      </SheetHeader>
-
-      <div className="mt-6 space-y-6">
-        <div className="grid grid-cols-2 gap-2">
-          {f.kpis.map((k) => (
-            <div key={k.label} className="rounded-md border border-slate-200 p-3">
-              <div className="text-[10px] uppercase tracking-wider text-slate-500">{k.label}</div>
-              <div className="text-lg font-semibold text-slate-900 mt-0.5">{k.value}</div>
-              {k.trend && (
-                <div className={`text-[10px] mt-0.5 ${k.trend.startsWith("-") ? "text-emerald-600" : "text-emerald-600"}`}>
-                  {k.trend}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <Section title="Trend">
-          <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={f.trend}>
-                <defs>
-                  <linearGradient id={`g-${f.id}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={f.accent} stopOpacity={0.35} />
-                    <stop offset="100%" stopColor={f.accent} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" />
-                <XAxis dataKey="m" tick={{ fontSize: 10, fill: "#64748b" }} />
-                <YAxis tick={{ fontSize: 10, fill: "#64748b" }} />
-                <Tooltip contentStyle={{ background: "white", border: "1px solid #e2e8f0", fontSize: 11 }} />
-                <Area type="monotone" dataKey="value" stroke={f.accent} fill={`url(#g-${f.id})`} strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Section>
-
-        <Section title="Maturity Radar">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={f.radar}>
-                <PolarGrid stroke="#e2e8f0" />
-                <PolarAngleAxis dataKey="axis" tick={{ fontSize: 10, fill: "#475569" }} />
-                <PolarRadiusAxis tick={{ fontSize: 9 }} angle={30} domain={[0, 5]} />
-                <Radar name="Current" dataKey="current" stroke={f.accent} fill={f.accent} fillOpacity={0.35} />
-                <Radar name="Target" dataKey="target" stroke="#64748b" fill="#64748b" fillOpacity={0.08} />
-                <Legend wrapperStyle={{ fontSize: 10 }} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </Section>
-
-        <Section title="Why This Foundation Exists">
-          <p className="text-sm text-slate-700 leading-relaxed">{f.whyExists}</p>
-        </Section>
-
-        <div className="grid grid-cols-1 gap-4">
-          <Section title="What It Looks Like in Real Organizations"><Bullets items={f.looksLike} /></Section>
-          <Section title="What Happens Without It"><Bullets items={f.withoutIt} /></Section>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4">
-          <Section title="Operational Characteristics"><Bullets items={f.realWorld} /></Section>
-          <Section title="Common Anti-Patterns"><Bullets items={f.antiPatterns} /></Section>
-        </div>
-
-        <Section title="Typical SLAs"><Bullets items={f.slas} /></Section>
-        <Section title="Suggested Reporting Widgets"><Bullets items={f.reporting} /></Section>
-
-        <Section title="Executive Talking Points">
-          <div className="space-y-2">
-            {f.talkingPoints.map((t, i) => (
-              <div key={i} className="rounded-md bg-slate-50 border-l-2 border-slate-300 px-3 py-2 text-sm text-slate-700 italic">
-                {t}
-              </div>
-            ))}
-          </div>
-        </Section>
-
-        <Section title="Example Service Catalog"><Bullets items={f.serviceCatalog} /></Section>
-        <Section title="Example Team Structure"><Bullets items={f.teamStructure} /></Section>
-        <Section title="Example Modernization Initiatives"><Bullets items={f.modernizationInitiatives} /></Section>
-        <Section title="Digital Coworker Opportunities"><Bullets items={f.coworkerOpportunities} /></Section>
-
-        <Section title="Related Foundations">
-          <div className="flex flex-wrap gap-1.5">
-            {f.related.map((rid) => {
-              const r = FOUNDATIONS.find((x) => x.id === rid);
-              if (!r) return null;
-              return (
-                <button
-                  key={rid}
-                  onClick={() => onJump(rid)}
-                  className="text-xs px-2.5 py-1 rounded-full border border-slate-200 hover:border-slate-900 hover:bg-slate-50 text-slate-700"
-                >
-                  {r.title}
-                </button>
-              );
-            })}
-          </div>
-        </Section>
-      </div>
-    </>
-  );
-}
-
-function OutcomeDetail({ o, onClose }: { o: Outcome; onClose: () => void }) {
-  const Icon = o.icon;
-  return (
-    <>
-      <SheetHeader className="text-left">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="h-11 w-11 rounded-md grid place-items-center"
-                 style={{ backgroundColor: `${o.accent}14`, color: o.accent }}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <div>
-              <Badge variant="outline" className="border-slate-300 text-slate-600 text-[10px] mb-1">Outcome</Badge>
-              <SheetTitle className="text-xl text-slate-900">{o.title}</SheetTitle>
-              <SheetDescription className="text-slate-600">{o.caption} · <span className="font-semibold text-slate-900">{o.metric}</span></SheetDescription>
-            </div>
-          </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700"><X className="h-4 w-4" /></button>
-        </div>
-      </SheetHeader>
-
-      <div className="mt-6 space-y-6">
-        <Section title="Trend">
-          <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={o.trend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" />
-                <XAxis dataKey="m" tick={{ fontSize: 10, fill: "#64748b" }} />
-                <YAxis tick={{ fontSize: 10, fill: "#64748b" }} />
-                <Tooltip contentStyle={{ background: "white", border: "1px solid #e2e8f0", fontSize: 11 }} />
-                <Line type="monotone" dataKey="value" stroke={o.accent} strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </Section>
-
-        {o.panels.map((p) => (
-          <Section key={p.title} title={p.title}>
-            <Bullets items={p.items} />
-          </Section>
-        ))}
-      </div>
-    </>
-  );
-}
-
-function FrameworkDetail({ fr, onClose, onJump }: { fr: Framework; onClose: () => void; onJump: (id: string) => void }) {
-  const Icon = fr.icon;
-  return (
-    <>
-      <SheetHeader className="text-left">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="h-11 w-11 rounded-md grid place-items-center"
-                 style={{ backgroundColor: `${fr.accent}14`, color: fr.accent }}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <div>
-              <Badge variant="outline" className="border-slate-300 text-slate-600 text-[10px] mb-1">Industry Practice</Badge>
-              <SheetTitle className="text-xl text-slate-900">{fr.name}</SheetTitle>
-              <SheetDescription className="text-slate-600">{fr.caption}</SheetDescription>
-            </div>
-          </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700"><X className="h-4 w-4" /></button>
-        </div>
-      </SheetHeader>
-
-      <div className="mt-6 space-y-5">
-        <Section title="What It Is"><p className="text-sm text-slate-700 leading-relaxed">{fr.what}</p></Section>
-        <Section title="Why It Matters"><p className="text-sm text-slate-700 leading-relaxed">{fr.why}</p></Section>
-        <Section title="How It Influences Product Reliability"><Bullets items={fr.influence} /></Section>
-        <Section title="What Organizations Usually Get Wrong"><Bullets items={fr.pitfalls} /></Section>
-        <Section title="Example Use Cases"><Bullets items={fr.useCases} /></Section>
-        <Section title="Related Foundations">
-          <div className="flex flex-wrap gap-1.5">
-            {fr.relatedFoundations.map((rid) => {
-              const r = FOUNDATIONS.find((x) => x.id === rid);
-              if (!r) return null;
-              return (
-                <button key={rid} onClick={() => onJump(rid)} className="text-xs px-2.5 py-1 rounded-full border border-slate-200 hover:border-slate-900 hover:bg-slate-50 text-slate-700">
-                  {r.title}
-                </button>
-              );
-            })}
-          </div>
-        </Section>
-      </div>
-    </>
-  );
-}
-
-function EnablerDetail({ label, onClose }: { label: string; onClose: () => void }) {
-  const map: Record<string, { why: string; how: string[]; metrics: string[] }> = {
-    "Better Experiences": {
-      why: "Reliability and performance shape user trust and adoption.",
-      how: ["Customer-journey-aligned SLOs", "Experience telemetry tied to journeys", "Post-incident customer comms"],
-      metrics: ["Journey availability", "P90 latency", "Customer-reported incident count"],
-    },
-    "Greater Resilience": {
-      why: "Resilience is the ability to absorb failure without customer harm.",
-      how: ["Chaos and GameDay programs", "Multi-region and DR posture", "Graceful degradation"],
-      metrics: ["MTTR", "RTO / RPO", "Failover rehearsal success"],
-    },
-    "Faster Delivery": {
-      why: "Speed and stability are correlated when reliability is engineered in.",
-      how: ["Progressive delivery", "Trunk-based development", "Automated quality gates"],
-      metrics: ["Lead time for change", "Deployment frequency", "Change failure rate"],
-    },
-    "Higher Business Value": {
-      why: "Reliable platforms convert engineering investment into compounding business outcomes.",
-      how: ["Unit economics per service", "Outcome-based funding", "Platform adoption tracking"],
-      metrics: ["Cost per transaction", "Revenue per platform user", "Run / grow ratio"],
-    },
-  };
-  const m = map[label];
-  return (
-    <>
-      <SheetHeader className="text-left">
-        <div className="flex items-start justify-between gap-3">
-          <SheetTitle className="text-xl">{label}</SheetTitle>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700"><X className="h-4 w-4" /></button>
-        </div>
-        <SheetDescription>{m.why}</SheetDescription>
-      </SheetHeader>
-      <div className="mt-6 space-y-5">
-        <Section title="How We Deliver It"><Bullets items={m.how} /></Section>
-        <Section title="Metrics That Tell The Story"><Bullets items={m.metrics} /></Section>
-      </div>
-    </>
-  );
-}
-
-/* ---------------- Primitives ---------------- */
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <h4 className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">{title}</h4>
-      {children}
-    </div>
-  );
-}
-
-function Bullets({ items }: { items: string[] }) {
-  return (
-    <ul className="space-y-1.5">
-      {items.map((it, i) => (
-        <li key={i} className="text-sm text-slate-700 flex gap-2">
-          <span className="mt-2 h-1 w-1 rounded-full bg-slate-400 shrink-0" />
-          <span>{it}</span>
-        </li>
-      ))}
-    </ul>
   );
 }
