@@ -159,6 +159,7 @@ const tree: Node[] = [
       { key: "sre-topo", label: "Client Production Topology Digital Twin", icon: NetIcon, to: "/production-topology" },
       { key: "sre-opmodel", label: "Client SRE Operating Model Cockpit", icon: Activity, to: "/sre-operating-model" },
       { key: "sre-signal", label: "Signal Intelligence", icon: Activity, to: "/signal-intelligence" },
+      { key: "sre-ecdt", label: "Enterprise Cloud Application Digital Twin", icon: Cloud, to: "/enterprise-cloud-twin" },
       { key: "sre-pef", label: "Platform Engineering & Golden Environment Factory", icon: Package, to: "/platform-engineering-factory" },
       { key: "sre-hcw", label: "Hybrid Cloud, Data & Modernization Workbench", icon: Cloud, to: "/hybrid-cloud-workbench" },
       { key: "sre-amp", label: "Product Reliability Automation Marketplace", icon: Boxes, to: "/automation-marketplace" },
