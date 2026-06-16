@@ -10,10 +10,52 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { FRICTION_BY_SLUG } from "./frictionPanelData";
 import {
   ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip as RTooltip, LineChart, Line, CartesianGrid,
 } from "recharts";
+
+/* Map CHALLENGE.id → friction spec slug (frictionPanelData) */
+const PANEL_SLUG: Record<string, string> = {
+  fsd: "lack-of-future-state-definition",
+  twg: "transformation-without-governance",
+  lev: "limited-executive-visibility",
+  sim: "strategy-and-initiative-misalignment",
+  itil: "itil-to-sre-transition-resistance",
+  rff: "reactive-firefighting-culture",
+  sog: "service-ownership-gaps",
+  ehd: "excessive-human-dependency",
+  afn: "alert-fatigue-and-operational-noise",
+  crr: "change-and-release-risk",
+  aic: "acquisition-integration-complexity",
+  ute: "unknown-technology-estate",
+  cms: "cloud-migration-stagnation",
+  laa: "legacy-application-architecture",
+  pei: "platform-engineering-immaturity",
+  idf: "identity-fragmentation",
+  mom: "multiple-operating-models",
+  tda: "technical-debt-accumulation",
+  tsf: "tool-sprawl-and-fragmentation",
+  dic: "data-and-integration-complexity",
+  env: "environment-sprawl",
+  sag: "security-automation-gaps",
+  obs: "poor-observability",
+  vdr: "vendor-dependency",
+  svr: "slow-vulnerability-remediation",
+  scd: "security-configuration-drift",
+  iac: "identity-and-access-challenges",
+  sca: "security-automation-gaps",
+  sce: "compliance-exposure",
+  stf: "security-tool-fragmentation",
+  cei: "customer-experience-instability",
+  cwd: "caregiver-workflow-disruption",
+  hoc: "high-operational-cost",
+  ttm: "slow-time-to-market",
+  rce: "compliance-exposure",
+  lsa: "lack-of-scalability-and-agility",
+};
 
 /* ============================================================
    TYPES
