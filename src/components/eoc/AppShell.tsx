@@ -5,9 +5,10 @@ import { PersonaProvider } from "@/context/PersonaContext";
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <PersonaProvider>
-      <div className="flex min-h-screen w-full bg-background text-foreground">
+      <div className="min-h-screen w-full bg-background text-foreground">
         <EocSidebar />
-        <div className="flex-1 flex flex-col min-w-0">{children}</div>
+        {/* Spacer matches the collapsed sidebar width so content never reflows when the sidebar expands. */}
+        <div className="flex flex-col min-w-0 min-h-screen pl-[72px]">{children}</div>
       </div>
     </PersonaProvider>
   );
