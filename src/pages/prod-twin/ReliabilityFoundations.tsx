@@ -891,6 +891,7 @@ function DisciplineCard({
   const isSre = d.id === "sre";
   const isTopo = d.id === "topo";
   const isPlatform = d.id === "platform";
+  const isFinops = d.id === "finops";
   return (
     <div
       onMouseEnter={() => onHover(d.id)}
@@ -971,6 +972,17 @@ function DisciplineCard({
             className="text-left text-[11px] font-semibold text-violet-700 hover:text-violet-800 inline-flex items-center justify-between rounded-md border border-violet-200 bg-violet-50/60 hover:bg-violet-50 px-2 py-1.5 transition-colors"
           >
             <span>Capability Model</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+      )}
+      {isFinops && (
+        <div className="mt-3 flex flex-col gap-1.5">
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate("/reliability-foundations/finops/operations-console"); }}
+            className="text-left text-[11px] font-semibold text-rose-700 hover:text-rose-800 inline-flex items-center justify-between rounded-md border border-rose-200 bg-rose-50/60 hover:bg-rose-50 px-2 py-1.5 transition-colors"
+          >
+            <span>FinOps Dashboard</span>
             <ArrowRight className="w-3 h-3" />
           </button>
         </div>
