@@ -554,8 +554,8 @@ export default function AWSResilienceArchitectureTwin() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50/40 text-slate-900">
       {/* HEADER */}
       <header className="border-b border-slate-200/80 bg-white/70 backdrop-blur-md sticky top-0 z-30">
-        <div className="px-6 py-4 flex items-start justify-between gap-6">
-          <div>
+        <div className="px-6 py-4 flex items-start justify-between gap-6 flex-wrap">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-slate-500 font-medium">
               <Cloud className="w-3.5 h-3.5" /> AWS · Production · us-east-1
             </div>
@@ -564,9 +564,9 @@ export default function AWSResilienceArchitectureTwin() {
               Interactive resilience, dependency, digital workforce, transformation, and value realization model for a production AWS service.
             </p>
           </div>
-          <div className="grid grid-cols-4 gap-2 min-w-[640px]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full lg:w-auto">
             {headerMetricList.map((m) => (
-              <div key={m.label} className="px-3 py-2 rounded-lg bg-white border border-slate-200">
+              <div key={m.label} className="px-3 py-2 rounded-lg bg-white border border-slate-200 min-w-[140px]">
                 <div className="text-[10px] uppercase tracking-wider text-slate-500 font-medium">{m.label}</div>
                 <div className="text-sm font-semibold text-slate-900 mt-0.5">{m.value}</div>
               </div>
@@ -575,7 +575,7 @@ export default function AWSResilienceArchitectureTwin() {
         </div>
       </header>
 
-      <div className="px-6 py-5 grid grid-cols-[200px_1fr] gap-5">
+      <div className="px-6 py-5 grid grid-cols-1 lg:grid-cols-[200px_minmax(0,1fr)] gap-5">
         {/* LEFT RAIL */}
         <aside className="space-y-4">
           <GlassCard className="p-3">
