@@ -92,7 +92,7 @@ function InvestigationRibbon() {
   const totalSteps = investigation.steps.length;
 
   return (
-    <div className="fixed left-1/2 top-16 z-40 -translate-x-1/2">
+    <div className="fixed left-1/2 top-4 z-40 -translate-x-1/2">
       <div className="flex items-center gap-3 rounded-2xl border border-sky-200/80 bg-white/95 px-3 py-2 shadow-[0_8px_30px_-12px_rgba(56,189,248,0.35)] backdrop-blur">
         <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 px-2.5 py-1 text-white">
           <Compass className="h-3.5 w-3.5" />
