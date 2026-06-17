@@ -21,7 +21,8 @@ import type { Simulation, Coworker } from "@/data/sreTwinData";
 type Status = "healthy" | "warning" | "degraded" | "critical" | "remediating";
 type ViewMode =
   | "architecture" | "reliability" | "performance"
-  | "security" | "cost" | "incident" | "remediation";
+  | "security" | "cost" | "incident" | "remediation"
+  | "lab" | "dependency" | "workforce" | "transformation" | "executive";
 type ScenarioId =
   | "normal" | "ec2_02_degraded" | "alb_5xx" | "az_a_impair"
   | "patch_risk" | "cost_opt" | "security_exposure";
