@@ -72,11 +72,12 @@ export function InvestigationLauncher({ compact = false }: { compact?: boolean }
 /* --------------------------- focus overlay ------------------------------- */
 
 function InvestigationFocusOverlay() {
-  // soft tint behind the workspace; non-blocking
+  // Full-frame readable surface: opaque enough to make the investigation
+  // panels comfortably readable, while keeping a hint of the twin underneath.
   return (
     <div className="pointer-events-none fixed inset-0 z-30">
-      <div className="absolute inset-0 bg-gradient-to-b from-sky-50/40 via-white/0 to-indigo-50/30" />
-      <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-sky-400 via-indigo-400 to-violet-400 opacity-80" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/75 to-sky-50/85 backdrop-blur-[2px]" />
+      <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-sky-400 via-indigo-400 to-violet-400" />
     </div>
   );
 }
@@ -90,7 +91,7 @@ function InvestigationRibbon() {
   const totalSteps = investigation.steps.length;
 
   return (
-    <div className="fixed left-1/2 top-16 z-40 -translate-x-1/2">
+    <div className="fixed left-1/2 top-4 z-40 -translate-x-1/2">
       <div className="flex items-center gap-3 rounded-2xl border border-sky-200/80 bg-white/95 px-3 py-2 shadow-[0_8px_30px_-12px_rgba(56,189,248,0.35)] backdrop-blur">
         <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 px-2.5 py-1 text-white">
           <Compass className="h-3.5 w-3.5" />
@@ -139,7 +140,7 @@ function InvestigationProgressRail() {
   if (!investigation) return null;
 
   return (
-    <div className="fixed left-4 top-32 z-40 hidden xl:block w-[238px]">
+    <div className="fixed left-4 top-24 z-40 w-[260px] max-h-[calc(100vh-160px)] overflow-y-auto">
       <div className="rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur">
         <div className="flex items-center gap-2 px-1 pb-2">
           <Layers className="h-3.5 w-3.5 text-sky-600" />
@@ -342,8 +343,8 @@ function InvestigationStepPanel() {
   const primaryAction = () => (isLast ? complete() : next());
 
   return (
-    <div className="fixed right-4 top-32 z-40 w-[380px] max-h-[calc(100vh-160px)]">
-      <div className="flex flex-col rounded-2xl border border-slate-200 bg-white/97 shadow-2xl backdrop-blur overflow-hidden">
+    <div className="fixed right-4 top-24 bottom-24 z-40 w-[480px] max-w-[calc(100vw-310px)]">
+      <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white/97 shadow-2xl backdrop-blur overflow-hidden">
         {/* header */}
         <div className="border-b border-slate-100 bg-gradient-to-br from-sky-50/80 to-white px-4 py-3">
           <div className="flex items-center gap-2">
@@ -362,7 +363,7 @@ function InvestigationStepPanel() {
         </div>
 
         {/* body (scrollable) */}
-        <div className="overflow-y-auto px-4 py-3 space-y-3" style={{ maxHeight: "calc(100vh - 320px)" }}>
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
           <div className="text-[11.5px] leading-relaxed text-slate-700">{currentStep.narrative}</div>
 
           {/* NOVA */}
@@ -513,7 +514,7 @@ function InvestigationTimelineStrip() {
   if (!investigation || !currentStep) return null;
 
   return (
-    <div className="fixed inset-x-4 bottom-4 z-40 xl:left-[260px] xl:right-[400px]">
+    <div className="fixed bottom-4 left-[284px] right-[504px] z-40">
       <div className="rounded-2xl border border-slate-200 bg-white/95 px-3 py-2 shadow-xl backdrop-blur">
         <div className="flex items-center gap-2 pb-1">
           <CircleDot className="h-3 w-3 text-sky-600" />
