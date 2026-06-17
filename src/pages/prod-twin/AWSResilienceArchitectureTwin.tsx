@@ -7,7 +7,14 @@ import {
   Activity, Shield, DollarSign, AlertTriangle, Wrench, Layers, Zap,
   RotateCcw, ChevronRight, Cloud, X, Clock,
   CheckCircle2, AlertCircle, TrendingUp, TrendingDown, Minus,
+  Beaker, Workflow, Users, Sliders, Award,
 } from "lucide-react";
+import {
+  ResilienceLabController, DigitalWorkforcePanel, DependencyMapPanel,
+  TransformationSlider, ExecutiveValueRealization, OperatingTimeline,
+  WorkshopOutputPanel,
+} from "@/components/sre-twin/SRETwinSections";
+import type { Simulation, Coworker } from "@/data/sreTwinData";
 
 /* ---------------- TYPES & DATA ---------------- */
 
