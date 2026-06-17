@@ -344,8 +344,8 @@ function InvestigationStepPanel() {
   const primaryAction = () => (isLast ? complete() : next());
 
   return (
-    <div className="fixed right-4 top-32 z-40 w-[380px] max-h-[calc(100vh-160px)]">
-      <div className="flex flex-col rounded-2xl border border-slate-200 bg-white/97 shadow-2xl backdrop-blur overflow-hidden">
+    <div className="fixed right-4 top-24 bottom-24 z-40 w-[480px] max-w-[calc(100vw-310px)]">
+      <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white/97 shadow-2xl backdrop-blur overflow-hidden">
         {/* header */}
         <div className="border-b border-slate-100 bg-gradient-to-br from-sky-50/80 to-white px-4 py-3">
           <div className="flex items-center gap-2">
