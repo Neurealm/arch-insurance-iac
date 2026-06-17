@@ -661,36 +661,78 @@ export default function AWSResilienceArchitectureTwin() {
             </div>
           </GlassCard>
 
-          {/* Timeline */}
+          {/* New operating-mode sections */}
+          {(viewMode === "lab" || viewMode === "architecture" || viewMode === "incident" || viewMode === "remediation") && (
+            <ResilienceLabController active={activeSim} onInject={injectSimulation} onRecover={recover} onReset={resetEnv} />
+          )}
+          {(viewMode === "dependency" || viewMode === "architecture") && (
+            <DependencyMapPanel selectedComponent={selected} onSelectComponent={setSelected} />
+          )}
+          {(viewMode === "workforce" || viewMode === "incident" || viewMode === "lab") && (
+            <DigitalWorkforcePanel activeId={activeCoworker?.id ?? null} onSelect={setActiveCoworker} />
+          )}
+          {(viewMode === "transformation" || viewMode === "executive") && (
+            <TransformationSlider value={transformVal} onChange={setTransformVal} />
+          )}
+          {(viewMode === "executive" || viewMode === "architecture") && (
+            <ExecutiveValueRealization />
+          )}
+
+          {/* Timeline with mode tabs */}
           <GlassCard className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold flex items-center gap-2">
-                <Clock className="w-3 h-3" /> Operational Timeline
+                <Clock className="w-3 h-3" /> Operating Timeline
               </div>
-              <span className="text-[10px] text-slate-500">Today · UTC</span>
-            </div>
-            <div className="relative">
-              <div className="absolute left-0 right-0 top-3 h-px bg-slate-200" />
-              <div className="grid grid-cols-6 gap-2">
-                {timelineEvents.map((e, i) => (
-                  <button key={i} onClick={() => setSelected(e.target)}
-                    className="text-left group">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-sky-500 ring-4 ring-white" />
-                      <span className="text-[11px] text-slate-500">{e.t}</span>
-                    </div>
-                    <div className="mt-2 text-[12px] font-medium text-slate-800 group-hover:text-sky-700 leading-tight">{e.title}</div>
-                    <div className="text-[11px] text-slate-500 mt-1 leading-snug">{e.detail}</div>
-                  </button>
+              <div className="flex gap-1">
+                {(["incident", "remediation", "transformation", "value"] as const).map((m) => (
+                  <button key={m} onClick={() => setTimelineMode(m)}
+                    className={`text-[10px] px-2 py-0.5 rounded-full border capitalize ${
+                      timelineMode === m ? "bg-sky-600 text-white border-sky-600" : "bg-white text-slate-600 border-slate-200"
+                    }`}>{m}</button>
                 ))}
               </div>
             </div>
+            <OperatingTimeline mode={timelineMode} onSelect={(t) => setSelected(t)} />
           </GlassCard>
 
-          {/* Engagement Readout */}
+          {/* Workshop output + Engagement Readout */}
+          <WorkshopOutputPanel />
           <EngagementReadout />
         </main>
       </div>
+
+      {/* Active coworker detail */}
+      <AnimatePresence>
+        {activeCoworker && (
+          <motion.div
+            initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[640px] max-w-[92vw] bg-white border border-slate-200 rounded-xl shadow-xl p-4"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-slate-500">{activeCoworker.role}</div>
+                <div className="text-sm font-semibold text-slate-900">{activeCoworker.name}</div>
+              </div>
+              <button onClick={() => setActiveCoworker(null)} className="p-1 rounded hover:bg-slate-100"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 mt-2 text-[11px]">
+              {[
+                ["Status", activeCoworker.status], ["Confidence", `${activeCoworker.confidence}%`],
+                ["Current activity", activeCoworker.activity], ["Last action", activeCoworker.lastAction],
+                ["Next action", activeCoworker.nextAction], ["Human owner", activeCoworker.owner],
+                ["Approval", activeCoworker.approval], ["Related runbook", activeCoworker.runbook],
+                ["Evidence", activeCoworker.evidence],
+              ].map(([k, v]) => (
+                <div key={k} className="px-2 py-1.5 rounded bg-slate-50 border border-slate-100">
+                  <div className="text-[10px] text-slate-500">{k}</div>
+                  <div className="text-[11px] text-slate-800">{v}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* DRAWER */}
       <AnimatePresence>
