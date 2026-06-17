@@ -72,12 +72,11 @@ export function InvestigationLauncher({ compact = false }: { compact?: boolean }
 /* --------------------------- focus overlay ------------------------------- */
 
 function InvestigationFocusOverlay() {
-  // Full-frame opaque backdrop so the investigation workspace is the only
-  // thing visible and readable while active.
+  // Full-frame readable surface: opaque enough to make the investigation
+  // panels comfortably readable, while keeping a hint of the twin underneath.
   return (
-    <div className="fixed inset-0 z-30">
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-sky-50/60" />
-      <div className="absolute inset-0 [background-image:radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.06)_1px,transparent_0)] [background-size:22px_22px] opacity-60" />
+    <div className="pointer-events-none fixed inset-0 z-30">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/75 to-sky-50/85 backdrop-blur-[2px]" />
       <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-sky-400 via-indigo-400 to-violet-400" />
     </div>
   );
