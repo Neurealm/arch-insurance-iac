@@ -548,9 +548,9 @@ export default function AWSResilienceArchitectureTwin() {
             <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-slate-500 font-medium">
               <Cloud className="w-3.5 h-3.5" /> AWS · Production · us-east-1
             </div>
-            <h1 className="text-xl font-semibold text-slate-900 mt-1">AWS Resilience Architecture Twin</h1>
+            <h1 className="text-xl font-semibold text-slate-900 mt-1">SRE Digital Twin Operating System</h1>
             <p className="text-sm text-slate-600 mt-0.5 max-w-3xl">
-              Interactive SRE view of traffic flow, service health, risk, cost, and remediation across a three node EC2 application tier.
+              Interactive resilience, dependency, digital workforce, transformation, and value realization model for a production AWS service.
             </p>
           </div>
           <div className="grid grid-cols-4 gap-2 min-w-[640px]">
