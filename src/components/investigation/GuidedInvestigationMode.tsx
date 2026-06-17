@@ -141,7 +141,7 @@ function InvestigationProgressRail() {
   if (!investigation) return null;
 
   return (
-    <div className="fixed left-4 top-32 z-40 hidden xl:block w-[238px]">
+    <div className="fixed left-4 top-24 z-40 w-[260px] max-h-[calc(100vh-160px)] overflow-y-auto">
       <div className="rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur">
         <div className="flex items-center gap-2 px-1 pb-2">
           <Layers className="h-3.5 w-3.5 text-sky-600" />
