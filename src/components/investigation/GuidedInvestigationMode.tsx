@@ -515,7 +515,7 @@ function InvestigationTimelineStrip() {
   if (!investigation || !currentStep) return null;
 
   return (
-    <div className="fixed inset-x-4 bottom-4 z-40 xl:left-[260px] xl:right-[400px]">
+    <div className="fixed bottom-4 left-[284px] right-[504px] z-40">
       <div className="rounded-2xl border border-slate-200 bg-white/95 px-3 py-2 shadow-xl backdrop-blur">
         <div className="flex items-center gap-2 pb-1">
           <CircleDot className="h-3 w-3 text-sky-600" />
