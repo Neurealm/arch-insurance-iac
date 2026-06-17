@@ -575,7 +575,7 @@ export default function AWSResilienceArchitectureTwin() {
         </div>
       </header>
 
-      <div className="px-6 py-5 grid grid-cols-[200px_1fr] gap-5">
+      <div className="px-6 py-5 grid grid-cols-1 lg:grid-cols-[200px_minmax(0,1fr)] gap-5">
         {/* LEFT RAIL */}
         <aside className="space-y-4">
           <GlassCard className="p-3">
