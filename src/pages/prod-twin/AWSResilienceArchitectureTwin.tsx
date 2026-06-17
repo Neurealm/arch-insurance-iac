@@ -154,7 +154,11 @@ const viewModes: { id: ViewMode; label: string; icon: any }[] = [
   { id: "security", label: "Security", icon: Shield },
   { id: "cost", label: "Cost", icon: DollarSign },
   { id: "incident", label: "Incident", icon: AlertTriangle },
-  { id: "remediation", label: "Remediation", icon: Wrench },
+  { id: "lab", label: "Resilience Lab", icon: Beaker },
+  { id: "dependency", label: "Dependency Map", icon: Workflow },
+  { id: "workforce", label: "Digital Workforce", icon: Users },
+  { id: "transformation", label: "Transformation", icon: Sliders },
+  { id: "executive", label: "Executive Value", icon: Award },
 ];
 
 const timelineEvents = [
