@@ -522,6 +522,17 @@ export default function AWSResilienceArchitectureTwin() {
   const [viewMode, setViewMode] = useState<ViewMode>("architecture");
   const [selected, setSelected] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
+  const [activeSim, setActiveSim] = useState<string | null>(null);
+  const [activeCoworker, setActiveCoworker] = useState<Coworker | null>(null);
+  const [transformVal, setTransformVal] = useState(50);
+  const [timelineMode, setTimelineMode] = useState<"incident" | "remediation" | "transformation" | "value">("incident");
+
+  const injectSimulation = (s: Simulation) => {
+    setActiveSim(s.id);
+    setScenario(s.scenarioMap as ScenarioId);
+  };
+  const recover = () => { setScenario("normal"); };
+  const resetEnv = () => { setActiveSim(null); setScenario("normal"); setSelected(null); setResetKey(k => k + 1); };
 
   const { state, headerOverrides } = scenarioStates[scenario];
   const header = { ...baseHeader, ...(headerOverrides ?? {}) };
