@@ -786,7 +786,7 @@ export function EvidenceGraphEngine() {
 
   return (
     <Sheet open={open} onOpenChange={(o) => { if (!o) closeGraph(); }}>
-      <SheetContent side="right" className="w-[min(1180px,100vw)] max-w-none p-0 bg-gradient-to-br from-[#F7F9FC] via-white to-[#F2F4FB] overflow-hidden">
+      <SheetContent side="right" className="w-screen max-w-none sm:max-w-none p-0 bg-gradient-to-br from-[#F7F9FC] via-white to-[#F2F4FB] overflow-hidden">
         <div className="flex h-full flex-col">
           <EvidenceRibbon graph={graph} onClose={closeGraph} />
 
