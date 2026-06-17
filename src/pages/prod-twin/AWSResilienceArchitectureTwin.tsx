@@ -1,11 +1,11 @@
-import { Suspense, useMemo, useRef, useState, useEffect } from "react";
+import { Suspense, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Html, Line, RoundedBox, Text } from "@react-three/drei";
+import { OrbitControls, Html, Line, RoundedBox } from "@react-three/drei";
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
 import {
   Activity, Shield, DollarSign, AlertTriangle, Wrench, Layers, Zap,
-  RotateCcw, ChevronRight, Server, Cloud, Network, Eye, X, Clock,
+  RotateCcw, ChevronRight, Cloud, X, Clock,
   CheckCircle2, AlertCircle, TrendingUp, TrendingDown, Minus,
 } from "lucide-react";
 
