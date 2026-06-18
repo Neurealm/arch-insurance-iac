@@ -848,6 +848,7 @@ export default function AWSResilienceArchitectureTwin() {
         )}
       </AnimatePresence>
     </div>
+    </AppShell>
   );
 }
 
