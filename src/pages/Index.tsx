@@ -1,5 +1,4 @@
-import { EocSidebar } from "@/components/eoc/Sidebar";
-import { PersonaProvider } from "@/context/PersonaContext";
+import { AppShell } from "@/components/eoc/AppShell";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
@@ -14,10 +13,8 @@ import {
 
 const Index = () => {
   return (
-    <PersonaProvider>
-      <div className="flex min-h-screen w-full bg-background text-foreground">
-        <EocSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
+    <AppShell>
+      <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
           <CommandTopBar />
           <main className="flex-1 px-6 lg:px-8 py-6 space-y-5 animate-fade-in">
             <PageHeader />
@@ -26,9 +23,8 @@ const Index = () => {
             <BottomGrid />
           </main>
           <CommandFooter />
-        </div>
       </div>
-    </PersonaProvider>
+    </AppShell>
   );
 };
 
