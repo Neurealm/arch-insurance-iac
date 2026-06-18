@@ -14,6 +14,7 @@ import {
   TransformationSlider, ExecutiveValueRealization, OperatingTimeline,
   WorkshopOutputPanel,
 } from "@/components/sre-twin/SRETwinSections";
+import { AppShell } from "@/components/eoc/AppShell";
 import type { Simulation, Coworker } from "@/data/sreTwinData";
 
 /* ---------------- TYPES & DATA ---------------- */
