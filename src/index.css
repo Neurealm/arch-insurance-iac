@@ -71,12 +71,13 @@ All colors MUST be HSL.
     /* Sidebar - Neurealm navy */
     --sidebar-background: 232 85% 14%;
     --sidebar-foreground: 220 25% 90%;
-    --sidebar-primary: 352 86% 52%;
+    /* Active nav state — light red */
+    --sidebar-primary: 352 90% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 232 60% 22%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 232 50% 24%;
-    --sidebar-ring: 352 86% 52%;
+    --sidebar-ring: 352 90% 66%;
   }
 
   .dark {

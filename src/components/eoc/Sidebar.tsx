@@ -3,14 +3,14 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, LayoutGrid, AlertTriangle, Bell, GitBranch, Boxes, Bot,
   Building2, BarChart3, ShieldCheck, BookOpen, ScrollText, Settings,
-  ChevronsLeft, ChevronsRight, Plus, Zap, FileBarChart2, AlertOctagon, ShieldAlert,
+  ChevronsLeft, Plus, Zap, FileBarChart2, AlertOctagon, ShieldAlert,
   Scissors, ChevronRight, ChevronDown, Pin, Activity, Network as NetIcon, Server, Workflow,
   Briefcase, Smile, Target, ShieldX, Headphones, Users,
   Library, Package, Layers, Cloud, TrendingUp as TrendingUp2, DollarSign as DollarSign2,
   Sparkles as Sparkles2, CheckCircle2 as CheckCircle2b,
   ShieldHalf,
   ClipboardList,
-  ArrowRightLeft, Rocket, Compass, Gauge,
+  ArrowRightLeft, Rocket, Compass, Gauge, X,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -87,7 +87,7 @@ const tree: Node[] = [
       {
         key: "aocp-intel", label: "Application Intelligence", icon: Layers,
         children: [
-          { key: "aocp-profile",   label: "Application Profile",       icon: Package,     to: "/aocp/claims-processing" },
+          { key: "aocp-profile",   label: "Application Profile",       icon: Package,     to: "/aocp/claims-processing", exact: true },
           { key: "aocp-env",       label: "Environment Model",         icon: Server,      to: "/aocp/claims-processing/environments" },
           { key: "aocp-crit",      label: "Business Criticality",      icon: ShieldAlert, to: "/aocp/claims-processing/criticality" },
           { key: "aocp-outcomes",  label: "Desired Outcomes",          icon: Target,      to: "/aocp/claims-processing/outcomes" },
@@ -250,6 +250,22 @@ function pathMatches(pathname: string, to?: string, exact?: boolean) {
   return pathname === to || pathname.startsWith(to + "/");
 }
 
+/** True at the `md` breakpoint and up. Used to gate the desktop-only collapse. */
+function useIsDesktop() {
+  const query = "(min-width: 768px)";
+  const [isDesktop, setIsDesktop] = useState<boolean>(() =>
+    typeof window === "undefined" ? true : window.matchMedia(query).matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    setIsDesktop(mq.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isDesktop;
+}
+
 function UserPill({ collapsed }: { collapsed: boolean }) {
   const { displayName, initials, email, signOut } = useUserProfile();
   const navigate = useNavigate();
@@ -331,7 +347,13 @@ function openStateFromTrail(activeTrail: string[]): Record<string, Set<string>> 
 
 /* ---------- Component ---------- */
 
-export function EocSidebar() {
+export function EocSidebar({
+  mobileOpen = false,
+  onMobileClose,
+}: {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+} = {}) {
   const { pathname } = useLocation();
   const { isAdmin } = useAuth();
   const { scoped, routes } = useTenantScope();
@@ -357,13 +379,16 @@ export function EocSidebar() {
   }, [isAdmin, scoped, routes]);
   const activeTrail = useMemo(() => findActiveTrail(visibleTree, pathname) ?? [], [pathname, visibleTree]);
 
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
+  const isDesktop = useIsDesktop();
+  const [collapsedPref, setCollapsedPref] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("eoc.collapsed") === "1";
   });
   useEffect(() => {
-    window.localStorage.setItem("eoc.collapsed", collapsed ? "1" : "0");
-  }, [collapsed]);
+    window.localStorage.setItem("eoc.collapsed", collapsedPref ? "1" : "0");
+  }, [collapsedPref]);
+  // Collapse only applies on desktop — the mobile drawer is always full-width.
+  const collapsed = isDesktop ? collapsedPref : false;
   const [quickOpen, setQuickOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("eoc.quickOpen") === "1";
@@ -420,21 +445,28 @@ export function EocSidebar() {
   const [openByParent, setOpenByParent] = useState<Record<string, Set<string>>>(() => openStateFromTrail(activeTrail));
   const [pinned, setPinned] = useState<Set<string>>(new Set());
 
-  // Auto-open the active trail
+  // Auto-open the active trail. Replace (not merge) so navigating to a new
+  // section closes the previously-open one — only the current route's parents
+  // stay open. Pinned sections are always preserved.
   useLayoutEffect(() => {
     if (activeTrail.length < 1) return;
     restoreScrollPendingRef.current = true;
-    setOpenByParent((prev) => {
-      const next = { ...prev };
+    setOpenByParent(() => {
+      const next: Record<string, Set<string>> = {};
       const activeOpenState = openStateFromTrail(activeTrail);
       for (const [parent, children] of Object.entries(activeOpenState)) {
-        const set = new Set(next[parent] ?? []);
-        children.forEach((child) => set.add(child));
-        next[parent] = set;
+        next[parent] = new Set(children);
+      }
+      for (const id of pinned) {
+        const [p, c] = id.split("/");
+        next[p] = next[p] ?? new Set();
+        next[p].add(c);
       }
       return next;
     });
-
+    // `pinned` intentionally excluded from deps: re-running on pin toggle would
+    // collapse manually-opened siblings.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTrail]);
 
   useLayoutEffect(() => {
@@ -469,9 +501,19 @@ export function EocSidebar() {
   const toggleOpen = (parentKey: string, childKey: string) => {
     setOpenByParent((prev) => {
       const cur = new Set(prev[parentKey] ?? []);
-      if (cur.has(childKey)) cur.delete(childKey);
-      else cur.add(childKey);
-      return { ...prev, [parentKey]: cur };
+      if (cur.has(childKey)) {
+        // Closing the open section.
+        cur.delete(childKey);
+        return { ...prev, [parentKey]: cur };
+      }
+      // Accordion: opening a section closes its siblings, but pinned siblings stay open.
+      const next = new Set<string>();
+      for (const id of pinned) {
+        const [p, c] = id.split("/");
+        if (p === parentKey) next.add(c);
+      }
+      next.add(childKey);
+      return { ...prev, [parentKey]: next };
     });
   };
 
@@ -504,41 +546,74 @@ export function EocSidebar() {
     setOpenByParent(keep);
   };
 
-  const w = collapsed ? "w-[72px]" : "w-[284px]";
-
   return (
     <aside
       aria-label="Primary navigation"
       data-collapsed={collapsed ? "true" : "false"}
       className={cn(
         "flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
-        "fixed left-0 top-0 h-dvh z-40 will-change-[width]",
-        "transition-[width,box-shadow] duration-300 ease-out",
-        collapsed
-          ? "shadow-none"
-          : "shadow-[0_10px_40px_-10px_rgba(0,0,0,0.35),0_4px_16px_-4px_rgba(0,0,0,0.25)] backdrop-blur-sm",
-        w,
+        "will-change-[width,transform]",
+        // Mobile: fixed overlay drawer — reserves no layout space.
+        "fixed inset-y-0 left-0 z-50 h-dvh",
+        // Desktop: in-flow sticky column that reserves exactly its own width,
+        // so collapsing it lets `main` reclaim the space with no margin hacks.
+        "md:sticky md:top-0 md:z-30 md:h-screen md:self-start",
+        // Width: 280 expanded, 72 collapsed (collapse is desktop-only).
+        "w-[280px]",
+        collapsed && "md:w-[72px]",
+        // Slide the drawer in/out on mobile; always visible from md up.
+        mobileOpen ? "translate-x-0" : "-translate-x-full",
+        "md:translate-x-0",
+        // Snappy width + slide transitions.
+        "transition-[width,transform] duration-200 ease-out",
+        // Floating depth on the mobile drawer; flat column on desktop.
+        "shadow-2xl md:shadow-none",
       )}
     >
-      {/* Brand */}
-      <div className="flex items-center gap-3 px-3 h-[68px] border-b border-sidebar-border shrink-0">
-        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo to-ai grid place-items-center shadow-[var(--shadow-md)] shrink-0">
-          <ShieldAlert className="h-5 w-5 text-white" />
-        </div>
-        {!collapsed && (
-          <div className="leading-tight flex-1 min-w-0">
-            <div className="tracking-[0.18em] text-sidebar-foreground font-bold text-lg font-sans">neuGAIN</div>
-            <div className="text-[11px] font-medium tracking-wide text-sidebar-foreground/60 uppercase">AI Platform</div>
-          </div>
+      {/* Brand — fixed header (does not scroll) */}
+      <div className={cn(
+        "flex items-center h-[68px] border-b border-sidebar-border shrink-0",
+        collapsed ? "px-2 justify-center" : "px-3 gap-3",
+      )}>
+        {collapsed ? (
+          // Collapsed: centered logo doubles as the expand button.
+          <button
+            onClick={() => setCollapsedPref(false)}
+            aria-label="Expand sidebar"
+            title="Expand sidebar"
+            className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo to-ai grid place-items-center shadow-[var(--shadow-md)] hover:opacity-90 transition-opacity"
+          >
+            <ShieldAlert className="h-5 w-5 text-white" />
+          </button>
+        ) : (
+          <>
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo to-ai grid place-items-center shadow-[var(--shadow-md)] shrink-0">
+              <ShieldAlert className="h-5 w-5 text-white" />
+            </div>
+            <div className="leading-tight flex-1 min-w-0">
+              <div className="tracking-[0.18em] text-sidebar-foreground font-bold text-lg font-sans">neuGAIN</div>
+              <div className="text-[11px] font-medium tracking-wide text-sidebar-foreground/60 uppercase">AI Platform</div>
+            </div>
+            {/* Desktop collapse toggle */}
+            <button
+              onClick={() => setCollapsedPref(true)}
+              aria-label="Collapse sidebar"
+              title="Collapse sidebar"
+              className="hidden md:grid h-7 w-7 rounded-md place-items-center text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors shrink-0"
+            >
+              <ChevronsLeft className="h-4 w-4" />
+            </button>
+            {/* Mobile close (drawer) */}
+            <button
+              onClick={onMobileClose}
+              aria-label="Close menu"
+              title="Close menu"
+              className="md:hidden grid h-7 w-7 rounded-md place-items-center text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </>
         )}
-        <button
-          onClick={() => setCollapsed((c) => !c)}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="h-7 w-7 rounded-md grid place-items-center text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors shrink-0"
-        >
-          {collapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
-        </button>
       </div>
 
       {/* Nav (independent scroll) */}
@@ -671,7 +746,7 @@ function SidebarNode(props: NodeProps) {
         className={cn(
           "relative w-12 h-10 mx-auto flex items-center justify-center rounded-lg transition-colors",
           (active || trailActive)
-            ? "bg-status-critical/15 text-status-critical"
+            ? "bg-sidebar-primary/20 text-sidebar-primary"
             : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         )}
       >
@@ -726,7 +801,7 @@ function SidebarNode(props: NodeProps) {
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
           indent, py, sizeText,
           active
-            ? "bg-status-critical/15 text-status-critical font-medium"
+            ? "bg-sidebar-primary/15 text-sidebar-primary font-medium"
             : trailActive
               ? "bg-sidebar-accent/60 text-sidebar-accent-foreground font-medium"
               : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -734,7 +809,7 @@ function SidebarNode(props: NodeProps) {
         onClick={handleRowClick}
       >
         {active && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-status-critical" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-sidebar-primary" />
         )}
         {Icon && <Icon className={cn(depth === 0 ? "h-[18px] w-[18px]" : "h-3.5 w-3.5", "shrink-0")} />}
         <span className={cn("flex-1 text-left truncate", depth === 0 ? "font-medium" : "")}>{node.label}</span>
