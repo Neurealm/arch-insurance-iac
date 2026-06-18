@@ -552,6 +552,7 @@ export default function AWSResilienceArchitectureTwin() {
   const detail = selected ? detailFor(selected, state) : null;
 
   return (
+    <AppShell>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50/40 text-slate-900">
       {/* HEADER */}
       <header className="border-b border-slate-200/80 bg-white/70 backdrop-blur-md sticky top-0 z-30">
