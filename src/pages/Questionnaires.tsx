@@ -474,8 +474,6 @@ function QuestionnaireStudio() {
 
             <div className="flex-1" />
 
-            {questionnaire && <StatusBadge status={questionnaire.status} />}
-
             <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-white/80 px-3 py-1.5">
               <Eye className="h-3.5 w-3.5 text-indigo-600" />
               <span className="text-xs">Preview</span>
@@ -483,29 +481,15 @@ function QuestionnaireStudio() {
             </div>
 
             {questionnaire && !preview && (
-              <>
-                <ShareDialog
-                  questionnaireId={questionnaire.id}
-                  questionnaireTitle={questionnaire.title}
-                  trigger={
-                    <Button size="sm" variant="outline" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
-                      <Share2 className="h-3.5 w-3.5 mr-1.5" /> Share
-                    </Button>
-                  }
-                />
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    m.updateQuestionnaire.mutate({
-                      id: questionnaire.id,
-                      patch: { status: questionnaire.status === "published" ? "draft" : "published" },
-                    })
-                  }
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md"
-                >
-                  <Save className="h-3.5 w-3.5 mr-1.5" /> {questionnaire.status === "published" ? "Unpublish" : "Publish"}
-                </Button>
-              </>
+              <ShareDialog
+                questionnaireId={questionnaire.id}
+                questionnaireTitle={questionnaire.title}
+                trigger={
+                  <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
+                    <Share2 className="h-3.5 w-3.5 mr-1.5" /> Share
+                  </Button>
+                }
+              />
             )}
           </Card>
 
