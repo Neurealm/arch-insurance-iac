@@ -69,6 +69,7 @@ export function ResponseDetailDialog({ responseId, questionnaireId, onClose }: P
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [files, setFiles] = useState<Record<string, FileRow[]>>({});
+  const [generalFiles, setGeneralFiles] = useState<FileRow[]>([]);
 
   useEffect(() => {
     if (!responseId) return;
