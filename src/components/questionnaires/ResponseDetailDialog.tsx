@@ -92,8 +92,13 @@ export function ResponseDetailDialog({ responseId, questionnaireId, onClose }: P
         (ans ?? []).forEach((a: any) => { aMap[a.question_id] = a; });
         setAnswers(aMap);
         const fMap: Record<string, FileRow[]> = {};
-        (fs ?? []).forEach((f: any) => { (fMap[f.question_id] ||= []).push(f); });
+        const general: FileRow[] = [];
+        (fs ?? []).forEach((f: any) => {
+          if (f.question_id) (fMap[f.question_id] ||= []).push(f);
+          else general.push(f);
+        });
         setFiles(fMap);
+        setGeneralFiles(general);
       } finally {
         if (!cancelled) setLoading(false);
       }
