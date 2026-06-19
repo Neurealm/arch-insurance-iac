@@ -31,7 +31,8 @@ import { QuestionCard } from "@/components/questionnaires/QuestionCard";
 import { QuestionEditor, QuestionDraft } from "@/components/questionnaires/QuestionEditor";
 import { PreviewMode } from "@/components/questionnaires/PreviewMode";
 import { ShareDialog } from "@/components/questionnaires/ShareDialog";
-import { Share2 } from "lucide-react";
+import { ImportDialog } from "@/components/questionnaires/ImportDialog";
+import { Share2, Upload } from "lucide-react";
 import type { Question } from "@/hooks/questionnaires/useQuestionnaireData";
 
 /* ---------- helpers ---------- */
