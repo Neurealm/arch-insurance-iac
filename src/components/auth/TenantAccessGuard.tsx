@@ -15,7 +15,7 @@ const ALWAYS_ALLOWED_EXACT = new Set<string>([
   "/app",
 ]);
 
-const ALWAYS_ALLOWED_PREFIXES = ["/t/"];
+const ALWAYS_ALLOWED_PREFIXES = ["/t/", "/q/"];
 
 function isAlwaysAllowed(pathname: string) {
   if (ALWAYS_ALLOWED_EXACT.has(pathname)) return true;
