@@ -248,10 +248,12 @@ function AddInline({ placeholder, label, icon, onAdd }: { placeholder: string; l
 
 /* ---------- section card with sortable questions ---------- */
 function SortableSection({
-  section, questions, onUpdate, onDelete, onAddQuestion, onEditQuestion,
+  section, questionnaireId, questionnaireTitle, questions, onUpdate, onDelete, onAddQuestion, onEditQuestion,
   onDuplicateQuestion, onDeleteQuestion, onReorderQuestions, onSelectQuestion, selectedQuestionId,
 }: {
   section: Section;
+  questionnaireId: string;
+  questionnaireTitle: string;
   questions: Question[];
   onUpdate: (patch: Partial<Section>) => void;
   onDelete: () => void;
@@ -309,6 +311,17 @@ function SortableSection({
               </Button>
             ) : (
               <>
+                <ShareDialog
+                  questionnaireId={questionnaireId}
+                  questionnaireTitle={questionnaireTitle}
+                  sectionId={section.id}
+                  sectionTitle={section.title}
+                  trigger={
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-indigo-600" title="Share section">
+                      <Share2 className="h-3.5 w-3.5" />
+                    </Button>
+                  }
+                />
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditing(true)}>
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
@@ -529,6 +542,8 @@ function QuestionnaireStudio() {
                         <SortableSection
                           key={s.id}
                           section={s}
+                          questionnaireId={questionnaire.id}
+                          questionnaireTitle={questionnaire.title}
                           questions={questionsBySection[s.id] ?? []}
                           onUpdate={(patch) => m.updateSection.mutate({ id: s.id, patch, questionnaire_id: questionnaire.id })}
                           onDelete={() => m.deleteSection.mutate({ id: s.id, questionnaire_id: questionnaire.id })}
