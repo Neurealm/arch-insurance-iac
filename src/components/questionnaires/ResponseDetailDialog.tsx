@@ -293,6 +293,23 @@ export function ResponseDetailDialog({ responseId, questionnaireId, onClose }: P
                 </div>
               );
             })}
+
+            {generalFiles.length > 0 && (
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-700 mb-2">General attachments</h4>
+                <Card className="p-3 space-y-1">
+                  {generalFiles.map((f) => (
+                    <button key={f.id} onClick={() => downloadFile(f)}
+                      className="flex items-center gap-2 text-xs text-indigo-600 hover:text-indigo-800 hover:underline">
+                      <FileText className="h-3.5 w-3.5" />
+                      <span>{f.file_name}</span>
+                      {f.size_bytes ? <span className="text-muted-foreground">({Math.round(f.size_bytes / 1024)} KB)</span> : null}
+                      <Download className="h-3 w-3" />
+                    </button>
+                  ))}
+                </Card>
+              </div>
+            )}
           </div>
         )}
 
