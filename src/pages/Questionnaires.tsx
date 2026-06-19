@@ -35,18 +35,6 @@ import { Share2 } from "lucide-react";
 import type { Question } from "@/hooks/questionnaires/useQuestionnaireData";
 
 /* ---------- helpers ---------- */
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    draft: "bg-amber-100 text-amber-700 border-amber-200",
-    ready: "bg-sky-100 text-sky-700 border-sky-200",
-    published: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  };
-  return (
-    <Badge variant="outline" className={`text-[10px] capitalize ${map[status] ?? "bg-slate-100 text-slate-700"}`}>
-      {status}
-    </Badge>
-  );
-}
 
 /* ---------- left sidebar ---------- */
 function LeftNav({
@@ -212,7 +200,7 @@ function WorkstreamRow({ ws, isOpen, active, questionnaireId, onToggle, onSelect
             >
               <FileText className="h-3 w-3 shrink-0" />
               <span className="text-[11px] flex-1 truncate">{q.title}</span>
-              <StatusBadge status={q.status} />
+              
             </button>
           ))}
           <AddInline placeholder="Questionnaire title" icon={<FileText className="h-3 w-3" />} label="Add questionnaire" onAdd={onAddQuestionnaire} />
