@@ -470,15 +470,25 @@ function QuestionnaireStudio() {
             </div>
 
             {questionnaire && !preview && (
-              <ShareDialog
-                questionnaireId={questionnaire.id}
-                questionnaireTitle={questionnaire.title}
-                trigger={
-                  <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
-                    <Share2 className="h-3.5 w-3.5 mr-1.5" /> Share
-                  </Button>
-                }
-              />
+              <>
+                <ImportDialog
+                  questionnaireId={questionnaire.id}
+                  trigger={
+                    <Button size="sm" variant="outline" className="bg-white/80">
+                      <Upload className="h-3.5 w-3.5 mr-1.5" /> Import
+                    </Button>
+                  }
+                />
+                <ShareDialog
+                  questionnaireId={questionnaire.id}
+                  questionnaireTitle={questionnaire.title}
+                  trigger={
+                    <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
+                      <Share2 className="h-3.5 w-3.5 mr-1.5" /> Share
+                    </Button>
+                  }
+                />
+              </>
             )}
           </Card>
 
