@@ -234,6 +234,7 @@ import EngagementProfileDemo from "./pages/crm-demo/EngagementProfileDemo.tsx";
 import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
 import DiscoveryLibraryDemo from "./pages/crm-demo/DiscoveryLibraryDemo.tsx";
 import DiscoveryConfidenceDemo from "./pages/crm-demo/DiscoveryConfidenceDemo.tsx";
+import PublicQuestionnaire from "./pages/PublicQuestionnaire.tsx";
 
 const queryClient = new QueryClient();
 
@@ -247,6 +248,7 @@ const App = () => (
         <TenantAccessGuard>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/q/:token" element={<PublicQuestionnaire />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -30,6 +30,8 @@ import {
 import { QuestionCard } from "@/components/questionnaires/QuestionCard";
 import { QuestionEditor, QuestionDraft } from "@/components/questionnaires/QuestionEditor";
 import { PreviewMode } from "@/components/questionnaires/PreviewMode";
+import { ShareDialog } from "@/components/questionnaires/ShareDialog";
+import { Share2 } from "lucide-react";
 import type { Question } from "@/hooks/questionnaires/useQuestionnaireData";
 
 /* ---------- helpers ---------- */
@@ -246,10 +248,12 @@ function AddInline({ placeholder, label, icon, onAdd }: { placeholder: string; l
 
 /* ---------- section card with sortable questions ---------- */
 function SortableSection({
-  section, questions, onUpdate, onDelete, onAddQuestion, onEditQuestion,
+  section, questionnaireId, questionnaireTitle, questions, onUpdate, onDelete, onAddQuestion, onEditQuestion,
   onDuplicateQuestion, onDeleteQuestion, onReorderQuestions, onSelectQuestion, selectedQuestionId,
 }: {
   section: Section;
+  questionnaireId: string;
+  questionnaireTitle: string;
   questions: Question[];
   onUpdate: (patch: Partial<Section>) => void;
   onDelete: () => void;
@@ -307,6 +311,17 @@ function SortableSection({
               </Button>
             ) : (
               <>
+                <ShareDialog
+                  questionnaireId={questionnaireId}
+                  questionnaireTitle={questionnaireTitle}
+                  sectionId={section.id}
+                  sectionTitle={section.title}
+                  trigger={
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-indigo-600" title="Share section">
+                      <Share2 className="h-3.5 w-3.5" />
+                    </Button>
+                  }
+                />
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditing(true)}>
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
@@ -468,18 +483,29 @@ function QuestionnaireStudio() {
             </div>
 
             {questionnaire && !preview && (
-              <Button
-                size="sm"
-                onClick={() =>
-                  m.updateQuestionnaire.mutate({
-                    id: questionnaire.id,
-                    patch: { status: questionnaire.status === "published" ? "draft" : "published" },
-                  })
-                }
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md"
-              >
-                <Save className="h-3.5 w-3.5 mr-1.5" /> {questionnaire.status === "published" ? "Unpublish" : "Publish"}
-              </Button>
+              <>
+                <ShareDialog
+                  questionnaireId={questionnaire.id}
+                  questionnaireTitle={questionnaire.title}
+                  trigger={
+                    <Button size="sm" variant="outline" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                      <Share2 className="h-3.5 w-3.5 mr-1.5" /> Share
+                    </Button>
+                  }
+                />
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    m.updateQuestionnaire.mutate({
+                      id: questionnaire.id,
+                      patch: { status: questionnaire.status === "published" ? "draft" : "published" },
+                    })
+                  }
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md"
+                >
+                  <Save className="h-3.5 w-3.5 mr-1.5" /> {questionnaire.status === "published" ? "Unpublish" : "Publish"}
+                </Button>
+              </>
             )}
           </Card>
 
@@ -516,6 +542,8 @@ function QuestionnaireStudio() {
                         <SortableSection
                           key={s.id}
                           section={s}
+                          questionnaireId={questionnaire.id}
+                          questionnaireTitle={questionnaire.title}
                           questions={questionsBySection[s.id] ?? []}
                           onUpdate={(patch) => m.updateSection.mutate({ id: s.id, patch, questionnaire_id: questionnaire.id })}
                           onDelete={() => m.deleteSection.mutate({ id: s.id, questionnaire_id: questionnaire.id })}
