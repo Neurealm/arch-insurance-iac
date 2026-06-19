@@ -110,6 +110,111 @@ export function ResponseDetailDialog({ responseId, questionnaireId, onClose }: P
   const answered = Object.keys(answers).length;
   const totalQs = questions.length;
 
+  function buildRows() {
+    const rows: Array<{ section: string; qid: string; question: string; answer: string; files: string }> = [];
+    sections.forEach((sec) => {
+      questions.filter((q) => q.section_id === sec.id).forEach((q) => {
+        const a = answers[q.id];
+        const qfiles = files[q.id] ?? [];
+        rows.push({
+          section: sec.title,
+          qid: q.question_id,
+          question: q.question_text,
+          answer: a ? formatAnswer(a.answer) : "",
+          files: qfiles.map((f) => f.file_name).join("; "),
+        });
+      });
+    });
+    return rows;
+  }
+
+  function baseFileName() {
+    if (!resp) return "response";
+    const safe = (s: string) => s.replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "");
+    return `${safe(resp.org_name)}_${safe(resp.respondent_name)}_${format(new Date(resp.submitted_at || resp.updated_at), "yyyyMMdd")}`;
+  }
+
+  function exportXlsx() {
+    if (!resp) return;
+    const wb = XLSX.utils.book_new();
+    const meta = [
+      ["Organization", resp.org_name],
+      ["Respondent", resp.respondent_name],
+      ["Email", resp.respondent_email],
+      ["Role", resp.respondent_role],
+      ["Status", resp.status],
+      ["Started", format(new Date(resp.created_at), "PP p")],
+      [resp.status === "submitted" ? "Submitted" : "Last updated",
+       format(new Date(resp.submitted_at || resp.updated_at), "PP p")],
+      ["Answered", `${answered} / ${totalQs}`],
+    ];
+    const metaWs = XLSX.utils.aoa_to_sheet(meta);
+    metaWs["!cols"] = [{ wch: 20 }, { wch: 60 }];
+    XLSX.utils.book_append_sheet(wb, metaWs, "Summary");
+
+    const rows = buildRows();
+    const ansWs = XLSX.utils.json_to_sheet(rows, {
+      header: ["section", "qid", "question", "answer", "files"],
+    });
+    XLSX.utils.sheet_add_aoa(ansWs, [["Section", "Question ID", "Question", "Answer", "Files"]], { origin: "A1" });
+    ansWs["!cols"] = [{ wch: 24 }, { wch: 14 }, { wch: 60 }, { wch: 60 }, { wch: 40 }];
+    XLSX.utils.book_append_sheet(wb, ansWs, "Answers");
+
+    XLSX.writeFile(wb, `${baseFileName()}.xlsx`);
+    toast.success("Spreadsheet downloaded");
+  }
+
+  function exportPdf() {
+    if (!resp) return;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const margin = 40;
+    let y = margin;
+
+    doc.setFontSize(16);
+    doc.text("Questionnaire Response", margin, y);
+    y += 22;
+    doc.setFontSize(10);
+    doc.setTextColor(90);
+
+    const metaLines = [
+      `Organization: ${resp.org_name}`,
+      `Respondent: ${resp.respondent_name}  (${resp.respondent_role})`,
+      `Email: ${resp.respondent_email}`,
+      `Status: ${resp.status === "submitted" ? "Submitted" : "Draft"}  ·  ${answered} / ${totalQs} answered`,
+      `${resp.status === "submitted" ? "Submitted" : "Last updated"}: ${format(new Date(resp.submitted_at || resp.updated_at), "PP p")}`,
+    ];
+    metaLines.forEach((line) => { doc.text(line, margin, y); y += 14; });
+    doc.setTextColor(0);
+
+    const body: any[] = [];
+    sections.forEach((sec) => {
+      const sqs = questions.filter((q) => q.section_id === sec.id);
+      if (!sqs.length) return;
+      body.push([{ content: sec.title, colSpan: 3, styles: { fillColor: [241, 245, 249], fontStyle: "bold", textColor: 30 } }]);
+      sqs.forEach((q) => {
+        const a = answers[q.id];
+        const qfiles = files[q.id] ?? [];
+        const answerText = a ? formatAnswer(a.answer) : "—";
+        const filesText = qfiles.length ? `\nFiles: ${qfiles.map((f) => f.file_name).join(", ")}` : "";
+        body.push([q.question_id, q.question_text, answerText + filesText]);
+      });
+    });
+
+    autoTable(doc, {
+      startY: y + 6,
+      head: [["ID", "Question", "Answer"]],
+      body,
+      styles: { fontSize: 9, cellPadding: 5, valign: "top", overflow: "linebreak" },
+      headStyles: { fillColor: [79, 70, 229], textColor: 255 },
+      columnStyles: { 0: { cellWidth: 60 }, 1: { cellWidth: 220 }, 2: { cellWidth: "auto" } },
+      margin: { left: margin, right: margin },
+    });
+
+    doc.save(`${baseFileName()}.pdf`);
+    toast.success("PDF downloaded");
+  }
+
+
   return (
     <Dialog open={!!responseId} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl">
@@ -185,8 +290,14 @@ export function ResponseDetailDialog({ responseId, questionnaireId, onClose }: P
           </div>
         )}
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button variant="outline" size="sm" onClick={exportXlsx} disabled={!resp || loading}>
+            <FileSpreadsheet className="h-4 w-4 mr-1.5" /> Export XLSX
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportPdf} disabled={!resp || loading}>
+            <FileDown className="h-4 w-4 mr-1.5" /> Export PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
