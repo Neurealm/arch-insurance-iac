@@ -8,6 +8,7 @@ import { Copy, Link2, Trash2, Loader2, CheckCircle2, Clock } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { ResponseDetailDialog } from "./ResponseDetailDialog";
 
 type Props = {
   questionnaireId: string;
@@ -51,6 +52,7 @@ export function ShareDialog({ questionnaireId, questionnaireTitle, sectionId, se
   const [label, setLabel] = useState("");
   const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [activeResponseId, setActiveResponseId] = useState<string | null>(null);
   const scope: "full" | "section" = sectionId ? "section" : "full";
 
   async function load() {
@@ -149,18 +151,22 @@ export function ShareDialog({ questionnaireId, questionnaireTitle, sectionId, se
                   <div className="mt-3 border-t pt-2 space-y-1">
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Responses ({rs.length})</p>
                     {rs.map((r) => (
-                      <div key={r.id} className="flex items-center gap-2 text-xs">
+                      <button
+                        key={r.id}
+                        onClick={() => setActiveResponseId(r.id)}
+                        className="w-full flex items-center gap-2 text-xs text-left rounded px-1.5 py-1 hover:bg-slate-50 transition"
+                      >
                         {r.status === "submitted"
-                          ? <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                          : <Clock className="h-3 w-3 text-amber-600" />}
+                          ? <CheckCircle2 className="h-3 w-3 text-emerald-600 shrink-0" />
+                          : <Clock className="h-3 w-3 text-amber-600 shrink-0" />}
                         <span className="font-medium">{r.org_name}</span>
-                        <span className="text-muted-foreground">· {r.respondent_name} ({r.respondent_role}) · {r.respondent_email}</span>
-                        <span className="ml-auto text-[10px] text-muted-foreground">
+                        <span className="text-muted-foreground truncate">· {r.respondent_name} ({r.respondent_role}) · {r.respondent_email}</span>
+                        <span className="ml-auto text-[10px] text-muted-foreground shrink-0">
                           {r.status === "submitted" && r.submitted_at
                             ? `Submitted ${formatDistanceToNow(new Date(r.submitted_at), { addSuffix: true })}`
                             : `Draft · updated ${formatDistanceToNow(new Date(r.updated_at), { addSuffix: true })}`}
                         </span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -173,6 +179,11 @@ export function ShareDialog({ questionnaireId, questionnaireTitle, sectionId, se
           <Button variant="outline" onClick={() => setOpen(false)}>Close</Button>
         </DialogFooter>
       </DialogContent>
+      <ResponseDetailDialog
+        responseId={activeResponseId}
+        questionnaireId={questionnaireId}
+        onClose={() => setActiveResponseId(null)}
+      />
     </Dialog>
   );
 }
