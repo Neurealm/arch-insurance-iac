@@ -1512,6 +1512,152 @@ export type Database = {
         }
         Relationships: []
       }
+      questionnaire_response_answers: {
+        Row: {
+          answer: Json | null
+          created_at: string
+          id: string
+          question_id: string
+          response_id: string
+          updated_at: string
+        }
+        Insert: {
+          answer?: Json | null
+          created_at?: string
+          id?: string
+          question_id: string
+          response_id: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: Json | null
+          created_at?: string
+          id?: string
+          question_id?: string
+          response_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_response_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questionnaire_response_answers_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questionnaire_response_files: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          file_name: string
+          id: string
+          question_id: string | null
+          response_id: string
+          size_bytes: number | null
+          storage_bucket: string
+          storage_path: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          file_name: string
+          id?: string
+          question_id?: string | null
+          response_id: string
+          size_bytes?: number | null
+          storage_bucket?: string
+          storage_path: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          file_name?: string
+          id?: string
+          question_id?: string | null
+          response_id?: string
+          size_bytes?: number | null
+          storage_bucket?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_response_files_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questionnaire_response_files_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questionnaire_responses: {
+        Row: {
+          created_at: string
+          id: string
+          org_name: string
+          respondent_email: string
+          respondent_name: string
+          respondent_role: string
+          respondent_token: string
+          share_link_id: string
+          started_at: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_name: string
+          respondent_email: string
+          respondent_name: string
+          respondent_role: string
+          respondent_token: string
+          share_link_id: string
+          started_at?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_name?: string
+          respondent_email?: string
+          respondent_name?: string
+          respondent_role?: string
+          respondent_token?: string
+          share_link_id?: string
+          started_at?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_responses_share_link_id_fkey"
+            columns: ["share_link_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire_share_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questionnaire_sections: {
         Row: {
           created_at: string
@@ -1546,6 +1692,60 @@ export type Database = {
             columns: ["questionnaire_id"]
             isOneToOne: false
             referencedRelation: "questionnaires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questionnaire_share_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string | null
+          questionnaire_id: string
+          revoked_at: string | null
+          scope: string
+          section_id: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          questionnaire_id: string
+          revoked_at?: string | null
+          scope: string
+          section_id?: string | null
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          questionnaire_id?: string
+          revoked_at?: string | null
+          scope?: string
+          section_id?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_share_links_questionnaire_id_fkey"
+            columns: ["questionnaire_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questionnaire_share_links_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire_sections"
             referencedColumns: ["id"]
           },
         ]
