@@ -727,7 +727,7 @@ function KpiRibbon() {
 
 function ProductBacklogPanel({ epics, onOpen }: { epics: Epic[]; onOpen: (e: Epic) => void }) {
   return (
-    <Card title="Product Backlog" subtitle={`642 Story Points · 58 Epics`} className="col-span-12 xl:col-span-5">
+    <Card title="Product Backlog" subtitle={`642 Story Points · 58 Epics`} className="col-span-12">
       <div className="grid grid-cols-[24px_1fr_70px_60px_60px_120px] gap-2 px-2 pb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border">
         <span>#</span>
         <span>Epic / Capability</span>
@@ -775,7 +775,7 @@ function SprintBacklogPanel({ epics, onOpenStory }: { epics: Epic[]; onOpenStory
     <Card
       title="Sprint Backlog"
       subtitle={`Sprint 18 · May 20 – Jun 2 · ${sprintStories.reduce((a, s) => a + s.points, 0)} SP · ${sprintStories.length} stories`}
-      className="col-span-12 xl:col-span-7"
+      className="col-span-12"
     >
       <ul className="divide-y divide-border">
         {sprintStories.map((s) => (
