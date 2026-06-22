@@ -257,6 +257,8 @@ const App = () => (
           <Route path="/no-access" element={<NoAccess />} />
           <Route path="/profile" element={<UpdateProfile />} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/ai-engineering/backlog" element={<ProtectedRoute><AiEngineeringBacklog /></ProtectedRoute>} />
+
           <Route path="/coworkers" element={<Coworkers />} />
           <Route path="/coworkers/network-connectivity-engineering" element={<CoworkersNetwork />} />
           <Route path="/coworkers/site-reliability-engineering" element={<CoworkersSRE />} />
