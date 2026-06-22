@@ -311,7 +311,7 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
 
 const SECTION_LABELS: Record<string, string> = {
   home: "PLATFORM",
-  "sre-practice": "PRACTICES",
+  "ai-engineering": "PRACTICES",
   "carve-op": "OPERATIONS",
   vendors: "WORKSPACE",
 };
