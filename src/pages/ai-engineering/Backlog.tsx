@@ -620,7 +620,6 @@ export default function AiEngineeringBacklog() {
                 <div className="grid grid-cols-12 gap-5">
                   <ProductBacklogPanel epics={EPICS} onOpen={setOpenEpic} />
                   <SprintBacklogPanel epics={EPICS} onOpenStory={setOpenStory} />
-                  <IntelligencePanel />
                 </div>
                 <BottomOpsMetrics />
               </>
@@ -776,7 +775,7 @@ function SprintBacklogPanel({ epics, onOpenStory }: { epics: Epic[]; onOpenStory
     <Card
       title="Sprint Backlog"
       subtitle={`Sprint 18 · May 20 – Jun 2 · ${sprintStories.reduce((a, s) => a + s.points, 0)} SP · ${sprintStories.length} stories`}
-      className="col-span-12 xl:col-span-4"
+      className="col-span-12 xl:col-span-7"
     >
       <ul className="divide-y divide-border">
         {sprintStories.map((s) => (
