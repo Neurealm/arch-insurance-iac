@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import AiEngineeringBacklog from "./pages/ai-engineering/Backlog.tsx";
+import AnswersActions from "./pages/ai-engineering/AnswersActions.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
@@ -260,6 +261,7 @@ const App = () => (
           <Route path="/profile" element={<UpdateProfile />} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/ai-engineering/backlog" element={<ProtectedRoute><AiEngineeringBacklog /></ProtectedRoute>} />
+          <Route path="/ai-engineering/answers-actions" element={<ProtectedRoute><AnswersActions /></ProtectedRoute>} />
 
           <Route path="/coworkers" element={<Coworkers />} />
           <Route path="/coworkers/network-connectivity-engineering" element={<CoworkersNetwork />} />
