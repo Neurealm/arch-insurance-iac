@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { AppShell } from "@/components/eoc/AppShell";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +12,7 @@ import {
   Activity, Map, Users, Settings as Cog, ChevronRight, Sparkles,
   Search, RefreshCcw, Brain, ShieldCheck, Workflow, Database, Layers,
   Target, Network, CheckCircle2, XCircle, Clock, TrendingUp, Bot, Zap,
-  CircleDot, AlertCircle, FileText, Boxes, ArrowRight,
+  CircleDot, AlertCircle, FileText, Boxes, ArrowRight, ExternalLink,
 } from "lucide-react";
 
 /* ============================================================
@@ -738,7 +739,7 @@ function ProductBacklogPanel({ epics, onOpen }: { epics: Epic[]; onOpen: (e: Epi
       </div>
       <ul className="divide-y divide-border">
         {epics.map((e) => (
-          <li key={e.id}>
+          <li key={e.id} className="relative">
             <button
               onClick={() => onOpen(e)}
               className="w-full grid grid-cols-[24px_1fr_70px_60px_60px_120px] gap-2 items-center px-2 py-2.5 text-left hover:bg-accent/40 rounded-md transition-colors"
@@ -758,6 +759,16 @@ function ProductBacklogPanel({ epics, onOpen }: { epics: Epic[]; onOpen: (e: Epi
                 <HealthChip h={e.health} compact />
               </div>
             </button>
+            {e.num === 1 && (
+              <Link
+                to="/ai-engineering/answers-actions"
+                onClick={(ev) => ev.stopPropagation()}
+                className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 rounded-md border border-ai/30 bg-white px-2 py-1 text-[10px] font-semibold text-ai shadow-sm hover:bg-ai/10 transition-colors"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Open Backlog Item
+              </Link>
+            )}
           </li>
         ))}
       </ul>
