@@ -142,7 +142,14 @@ const tree: Node[] = [
     ],
   },
   { key: "ops",        label: "Operations Overview", icon: LayoutGrid,    to: "/operations" },
-  { key: "ai-engineering", label: "AI Engineering", icon: Bot, to: "/ai-engineering" },
+  {
+    key: "ai-engineering",
+    label: "AI Engineering",
+    icon: Bot,
+    children: [
+      { key: "ai-eng-backlog", label: "AI Engineering Backlog", icon: LayoutGrid, to: "/ai-engineering/backlog" },
+    ],
+  },
   {
     key: "sre-practice",
     label: "Site Resilience Engineering",
