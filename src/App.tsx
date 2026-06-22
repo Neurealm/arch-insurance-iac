@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
+import AiEngineeringBacklog from "./pages/ai-engineering/Backlog.tsx";
+
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
@@ -257,6 +259,8 @@ const App = () => (
           <Route path="/no-access" element={<NoAccess />} />
           <Route path="/profile" element={<UpdateProfile />} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/ai-engineering/backlog" element={<ProtectedRoute><AiEngineeringBacklog /></ProtectedRoute>} />
+
           <Route path="/coworkers" element={<Coworkers />} />
           <Route path="/coworkers/network-connectivity-engineering" element={<CoworkersNetwork />} />
           <Route path="/coworkers/site-reliability-engineering" element={<CoworkersSRE />} />
