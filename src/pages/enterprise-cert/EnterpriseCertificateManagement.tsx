@@ -309,27 +309,55 @@ export default function EnterpriseCertificateManagement() {
                   <span className="text-[10px] text-slate-600 font-medium">Live telemetry</span>
                 </div>
               </div>
-              <div className="relative w-full aspect-[2/1] rounded-xl bg-gradient-to-br from-blue-50/50 to-indigo-50/30 border border-slate-200/50 overflow-hidden">
-                <WorldMapSVG />
-                {REGIONS.map((r) => (
-                  <motion.button
-                    key={r.id}
-                    initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.1 + Math.random() * 0.3 }}
-                    onClick={() => openPanel({ kind: "region", ...r })}
-                    style={{ left: `${(r.x / 960) * 100}%`, top: `${(r.y / 500) * 100}%` }}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 group"
-                  >
-                    <div className="relative">
-                      <div className="absolute inset-0 rounded-full bg-blue-400 animate-ping opacity-30" />
-                      <div className="relative h-12 w-12 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 grid place-items-center shadow-lg shadow-blue-500/30 border-2 border-white text-white text-[10px] font-bold group-hover:scale-110 transition-transform">
-                        {r.id.toUpperCase()}
-                      </div>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 whitespace-nowrap bg-white shadow-md rounded px-1.5 py-0.5 text-[9px] font-semibold text-slate-700 border border-slate-200">
-                        {(r.certs / 1000).toFixed(1)}k
-                      </div>
-                    </div>
-                  </motion.button>
-                ))}
+              <div className="relative w-full aspect-[2/1] rounded-xl bg-gradient-to-br from-blue-50/40 via-white to-indigo-50/30 border border-slate-200/50 overflow-hidden">
+                <ComposableMap
+                  projection="geoEqualEarth"
+                  projectionConfig={{ scale: 165 }}
+                  width={900}
+                  height={450}
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  <Geographies geography={GEO_URL}>
+                    {({ geographies }) =>
+                      geographies.map((geo) => (
+                        <Geography
+                          key={geo.rsmKey}
+                          geography={geo}
+                          fill="#e2e8f0"
+                          stroke="#ffffff"
+                          strokeWidth={0.5}
+                          style={{
+                            default: { outline: "none" },
+                            hover: { outline: "none", fill: "#cbd5e1" },
+                            pressed: { outline: "none" },
+                          }}
+                        />
+                      ))
+                    }
+                  </Geographies>
+                  {REGIONS.map((r) => (
+                    <Marker key={r.id} coordinates={r.coords} onClick={() => openPanel({ kind: "region", ...r })} style={{ default: { cursor: "pointer" }, hover: { cursor: "pointer" }, pressed: { cursor: "pointer" } }}>
+                      <g>
+                        <circle r={18} fill="#3b82f6" opacity={0.18}>
+                          <animate attributeName="r" values="18;28;18" dur="2.4s" repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.25;0;0.25" dur="2.4s" repeatCount="indefinite" />
+                        </circle>
+                        <circle r={16} fill="url(#regionGrad)" stroke="#ffffff" strokeWidth={2} style={{ filter: "drop-shadow(0 4px 8px rgba(59,130,246,0.35))" }} />
+                        <text textAnchor="middle" y={4} fill="#ffffff" fontSize={9} fontWeight={700}>{r.id.toUpperCase()}</text>
+                        <g transform="translate(0, 28)">
+                          <rect x={-18} y={-7} width={36} height={14} rx={3} fill="#ffffff" stroke="#e2e8f0" strokeWidth={0.5} />
+                          <text textAnchor="middle" y={3} fill="#334155" fontSize={8} fontWeight={700}>{(r.certs / 1000).toFixed(1)}k</text>
+                        </g>
+                      </g>
+                    </Marker>
+                  ))}
+                  <defs>
+                    <radialGradient id="regionGrad">
+                      <stop offset="0%" stopColor="#60a5fa" />
+                      <stop offset="100%" stopColor="#2563eb" />
+                    </radialGradient>
+                  </defs>
+                </ComposableMap>
               </div>
             </div>
           </div>
