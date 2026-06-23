@@ -598,6 +598,26 @@ function Plan() {
     ["W4", "Relationship Model"], ["W5", "Semantic Contracts"], ["W6", "Reference Architecture"],
   ];
 
+  const FragmentRow = ({ r }: { r: typeof rows[number] }) => (
+    <>
+      <div className="py-3 px-2 text-[13.5px] font-semibold" style={{ color: C.text }}>{r.name}</div>
+      {[1, 2, 3, 4, 5, 6].map((w) => {
+        const inRange = r.weeks.includes(w);
+        return (
+          <div key={w} className="py-3 px-1">
+            {inRange && (
+              <div className="h-7 rounded-md flex items-center justify-center text-[11px] font-semibold text-white transition-transform hover:scale-105"
+                style={{ background: r.color }}>
+                {r.name.split(" ")[0]}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </>
+  );
+
+
   return (
     <section>
       <SectionHeader
