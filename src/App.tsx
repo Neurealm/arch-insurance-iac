@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import AiEngineeringBacklog from "./pages/ai-engineering/Backlog.tsx";
 import AnswersActions from "./pages/ai-engineering/AnswersActions.tsx";
+import EnterpriseCertificateManagement from "./pages/enterprise-cert/EnterpriseCertificateManagement.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
