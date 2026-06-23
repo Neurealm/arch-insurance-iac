@@ -264,6 +264,7 @@ const App = () => (
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/ai-engineering/backlog" element={<ProtectedRoute><AiEngineeringBacklog /></ProtectedRoute>} />
           <Route path="/ai-engineering/answers-actions" element={<ProtectedRoute><AnswersActions /></ProtectedRoute>} />
+          <Route path="/ai-engineering/agentic-data-foundation" element={<ProtectedRoute><AgenticDataFoundation /></ProtectedRoute>} />
 
           <Route path="/coworkers" element={<Coworkers />} />
           <Route path="/coworkers/network-connectivity-engineering" element={<CoworkersNetwork />} />
