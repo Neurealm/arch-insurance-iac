@@ -23,7 +23,7 @@ const navTabs = [
   { label: "Environments", to: "#", active: true },
   { label: "Criticality", to: "/aocp/claims-processing/criticality" },
   { label: "Outcomes", to: "/aocp/claims-processing/outcomes" },
-  { label: "Architecture", to: "/aocp/claims-processing/architecture" },
+  { label: "Architecture", to: "/enterprise-cloud-twin" },
   { label: "Lifecycle", to: "/aocp/claims-processing/lifecycle" },
   { label: "Admin Model", to: "/aocp/claims-processing/admin" },
 ];
