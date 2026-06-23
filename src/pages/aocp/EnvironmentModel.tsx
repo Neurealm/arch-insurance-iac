@@ -168,13 +168,29 @@ export default function EnvironmentModel() {
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
             {/* Topology */}
             <Card className="xl:col-span-4 overflow-hidden">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <SectionTitle>Environment Topology Map</SectionTitle>
                 <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> AWS</span>
                   <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> On-Prem</span>
                 </div>
               </div>
+              <button
+                onClick={() => navigate("/aws-resilience-architecture-twin")}
+                className="mb-3 w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-violet-200 bg-gradient-to-r from-violet-50 to-blue-50 hover:from-violet-100 hover:to-blue-100 transition group"
+              >
+                <span className="flex items-center gap-2">
+                  <span className="h-6 w-6 rounded-md bg-violet-600 text-white grid place-items-center">
+                    <Sparkles className="h-3 w-3" />
+                  </span>
+                  <span className="text-left">
+                    <span className="block text-[11px] font-bold text-violet-900">Open in SRE Digital Twin Operating System</span>
+                    <span className="block text-[9px] text-violet-700/80">Live simulation, blast-radius, and reliability controls for this topology</span>
+                  </span>
+                </span>
+                <ExternalLink className="h-3.5 w-3.5 text-violet-600 group-hover:translate-x-0.5 transition" />
+              </button>
+
 
               {/* Architectural diagram (Cloudcraft / Lucid-style) */}
               <div className="relative rounded-lg border border-border bg-[linear-gradient(hsl(var(--muted))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--muted))_1px,transparent_1px)] bg-[size:18px_18px] p-3">
