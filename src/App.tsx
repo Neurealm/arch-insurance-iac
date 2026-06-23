@@ -443,6 +443,7 @@ const App = () => (
           <Route path="/practice-library/it-service-desk-itsm" element={<ItsmDashboard />} />
           <Route path="/practice-library/digital-workplace-euc" element={<EucPracticeDashboard />} />
           <Route path="/practice-library/infrastructure-hybrid-platform" element={<InfraDashboard />} />
+          <Route path="/enterprise-certificate-management" element={<EnterpriseCertificateManagement />} />
           <Route path="/practice-library/network-connectivity" element={<NetworkDashboard />} />
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />
