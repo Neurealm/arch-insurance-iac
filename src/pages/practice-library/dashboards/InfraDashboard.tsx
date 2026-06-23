@@ -19,7 +19,24 @@ export default function InfraDashboard() {
         <ExecKpiCard Icon={Target} iconBg="bg-violet-50" iconColor="text-violet-600" label="SLO Achievement" value="96.4%" delta="2.7 pp" deltaDir="up" visual={<Progress value={96} color="hsl(258 89% 66%)" />} target="SLO Target: ≥ 95%" />
         <ExecKpiCard Icon={Clock} iconBg="bg-blue-50" iconColor="text-blue-600" label="Mean Time to" sublabel="Restore (MTTR)" value="31m" delta="28%" deltaDir="down" deltaTone="positive" visual={<Sparkline data={trendDown} color="hsl(217 91% 60%)" />} target="Target: ≤ 45m" />
         <ExecKpiCard Icon={AlertTriangle} iconBg="bg-rose-50" iconColor="text-rose-600" label="Critical Incidents" sublabel="(30D)" value="7" delta="36%" deltaDir="down" deltaTone="positive" visual={<MiniBars data={bars} color="hsl(0 84% 60%)" />} target="Target: < 10" />
-        <ExecKpiCard Icon={Gauge} iconBg="bg-amber-50" iconColor="text-amber-600" label="Capacity Risk" value="Low" visual={<Progress value={32} color="hsl(142 71% 45%)" />} target="vs Last Month: Low" />
+        <Link to="/enterprise-certificate-management" className="rounded-2xl bg-white border border-blue-200 p-3 shadow-sm hover:shadow-md hover:border-blue-400 transition-all group relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-br from-blue-50 to-transparent rounded-bl-full" />
+          <div className="flex items-center justify-between mb-1.5 relative">
+            <div className="flex items-center gap-1.5">
+              <div className="h-7 w-7 rounded-lg bg-blue-50 grid place-items-center"><KeyRound className="h-3.5 w-3.5 text-blue-600" /></div>
+              <span className="text-[11px] font-semibold text-slate-700">Certificates</span>
+            </div>
+            <ExternalLink className="h-3 w-3 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <div className="text-[10px] text-muted-foreground">Managed Coverage</div>
+          <div className="text-xl font-bold text-slate-900 mt-0.5">91.5%</div>
+          <Progress value={91.5} color="hsl(217 91% 60%)" />
+          <div className="flex items-center justify-between mt-1.5 text-[9px]">
+            <span className="text-muted-foreground">250,847 total</span>
+            <span className="text-amber-600 font-semibold">1,487 exp 7d</span>
+          </div>
+          <div className="text-[10px] text-blue-600 font-semibold mt-1 group-hover:underline">Open Admin Console →</div>
+        </Link>
         <ExecKpiCard Icon={DollarSign} iconBg="bg-emerald-50" iconColor="text-emerald-600" label="Infrastructure Cost" sublabel="Efficiency" value="+18.6%" delta="4.2 pp" deltaDir="up" visual={<Sparkline data={trendUp} color="hsl(142 71% 45%)" />} target="vs Last Month" />
         <ExecKpiCard Icon={Database} iconBg="bg-violet-50" iconColor="text-violet-600" label="Backup Success Rate" value="97.3%" delta="1.6 pp" deltaDir="up" visual={<Progress value={97} color="hsl(258 89% 66%)" />} target="Target: ≥ 95%" />
       </div>
