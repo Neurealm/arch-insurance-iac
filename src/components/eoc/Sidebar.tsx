@@ -315,8 +315,11 @@ const SECTION_LABELS: Record<string, string> = {
   home: "PLATFORM",
   "ai-engineering": "PRACTICES",
   "carve-op": "OPERATIONS",
-  vendors: "WORKSPACE",
+  questionnaires: "ADMIN WORKSPACE",
 };
+
+const ADMIN_ONLY_KEYS = new Set(["questionnaires", "settings", "crm"]);
+
 
 function findActiveTrail(nodes: Node[], pathname: string, trail: string[] = []): string[] | null {
   for (const n of nodes) {
