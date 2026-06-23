@@ -148,6 +148,7 @@ const tree: Node[] = [
     icon: Bot,
     children: [
       { key: "ai-eng-backlog", label: "AI Engineering Backlog", icon: LayoutGrid, to: "/ai-engineering/backlog" },
+      { key: "ai-eng-adf", label: "Agentic Data Foundation", icon: Database, to: "/ai-engineering/agentic-data-foundation" },
     ],
   },
   {
