@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import AiEngineeringBacklog from "./pages/ai-engineering/Backlog.tsx";
 import AnswersActions from "./pages/ai-engineering/AnswersActions.tsx";
+import AgenticDataFoundation from "./pages/ai-engineering/AgenticDataFoundation.tsx";
 import EnterpriseCertificateManagement from "./pages/enterprise-cert/EnterpriseCertificateManagement.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
@@ -263,6 +264,7 @@ const App = () => (
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/ai-engineering/backlog" element={<ProtectedRoute><AiEngineeringBacklog /></ProtectedRoute>} />
           <Route path="/ai-engineering/answers-actions" element={<ProtectedRoute><AnswersActions /></ProtectedRoute>} />
+          <Route path="/ai-engineering/agentic-data-foundation" element={<ProtectedRoute><AgenticDataFoundation /></ProtectedRoute>} />
 
           <Route path="/coworkers" element={<Coworkers />} />
           <Route path="/coworkers/network-connectivity-engineering" element={<CoworkersNetwork />} />

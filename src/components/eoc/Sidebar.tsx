@@ -10,7 +10,7 @@ import {
   Sparkles as Sparkles2, CheckCircle2 as CheckCircle2b,
   ShieldHalf,
   ClipboardList,
-  ArrowRightLeft, Rocket, Compass, Gauge, X,
+  ArrowRightLeft, Rocket, Compass, Gauge, X, Database,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -148,6 +148,7 @@ const tree: Node[] = [
     icon: Bot,
     children: [
       { key: "ai-eng-backlog", label: "AI Engineering Backlog", icon: LayoutGrid, to: "/ai-engineering/backlog" },
+      { key: "ai-eng-adf", label: "Agentic Data Foundation", icon: Database, to: "/ai-engineering/agentic-data-foundation" },
     ],
   },
   {
