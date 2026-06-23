@@ -39,7 +39,48 @@ const envKpis = [
   { label: "Environment Drift", value: "2", color: "#f59e0b", icon: AlertTriangle },
 ];
 
-function Layers2(p: any) { return <Server {...p} />; }
+function DiagramLayer({ icon: Icon, title, tone, children }: { icon: any; title: string; tone: "sky"|"violet"|"indigo"|"emerald"; children: React.ReactNode }) {
+  const toneCls = { sky: "border-sky-200 bg-sky-50/70", violet: "border-violet-200 bg-violet-50/70", indigo: "border-indigo-200 bg-indigo-50/70", emerald: "border-emerald-200 bg-emerald-50/70" }[tone];
+  const txtCls = { sky: "text-sky-700", violet: "text-violet-700", indigo: "text-indigo-700", emerald: "text-emerald-700" }[tone];
+  return (
+    <div className={cn("rounded-md border p-2", toneCls)}>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Icon className={cn("h-3 w-3", txtCls)} />
+        <span className={cn("text-[9px] font-bold uppercase tracking-wider", txtCls)}>{title}</span>
+      </div>
+      <div className="flex items-center justify-center gap-1">{children}</div>
+    </div>
+  );
+}
+function SvcBox({ color, label, sub }: { color: string; label: string; sub?: string }) {
+  return (
+    <div className="relative flex flex-col items-center min-w-[60px]">
+      <div className="relative h-10 w-14 rounded-md bg-white border border-slate-300 shadow-sm overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: color }} />
+        <div className="h-full grid place-items-center pt-1">
+          <span className="text-[10px] font-bold text-slate-800 leading-none">{label}</span>
+        </div>
+      </div>
+      {sub && <span className="mt-0.5 text-[8px] text-muted-foreground">{sub}</span>}
+    </div>
+  );
+}
+function Connector({ dashed, label }: { dashed?: boolean; label?: string }) {
+  return (
+    <div className="relative flex flex-col items-center mt-[-12px]">
+      <svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray={dashed ? "3 3" : undefined} /></svg>
+      {label && <span className="text-[7px] text-slate-500 -mt-0.5">{label}</span>}
+    </div>
+  );
+}
+function VLink() {
+  return (
+    <div className="flex justify-center my-1">
+      <svg width="10" height="14"><line x1="5" y1="0" x2="5" y2="14" stroke="#94a3b8" strokeWidth="1.5" /><polygon points="2,10 8,10 5,14" fill="#94a3b8" /></svg>
+    </div>
+  );
+}
+
 
 const environments = [
   { name: "Production",          type: "Prod",    hosting: "AWS EKS",       status: "Healthy",    coverage: "100%", backup: "Daily",   db: "Oracle 19c",  last: "Jun 5, 2026",  tone: "green" as const },
