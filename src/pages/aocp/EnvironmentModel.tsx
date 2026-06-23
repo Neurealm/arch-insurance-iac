@@ -41,6 +41,50 @@ const envKpis = [
 
 function Layers2(p: any) { return <Server {...p} />; }
 
+function DiagramLayer({ icon: Icon, title, tone, children }: { icon: any; title: string; tone: "sky"|"violet"|"indigo"|"emerald"; children: React.ReactNode }) {
+  const toneCls = { sky: "border-sky-200 bg-sky-50/70", violet: "border-violet-200 bg-violet-50/70", indigo: "border-indigo-200 bg-indigo-50/70", emerald: "border-emerald-200 bg-emerald-50/70" }[tone];
+
+  const txtCls = { sky: "text-sky-700", violet: "text-violet-700", indigo: "text-indigo-700", emerald: "text-emerald-700" }[tone];
+  return (
+    <div className={cn("rounded-md border p-2", toneCls)}>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Icon className={cn("h-3 w-3", txtCls)} />
+        <span className={cn("text-[9px] font-bold uppercase tracking-wider", txtCls)}>{title}</span>
+      </div>
+      <div className="flex items-center justify-center gap-1">{children}</div>
+    </div>
+  );
+}
+function SvcBox({ color, label, sub }: { color: string; label: string; sub?: string }) {
+  return (
+    <div className="relative flex flex-col items-center min-w-[60px]">
+      <div className="relative h-10 w-14 rounded-md bg-white border border-slate-300 shadow-sm overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: color }} />
+        <div className="h-full grid place-items-center pt-1">
+          <span className="text-[10px] font-bold text-slate-800 leading-none">{label}</span>
+        </div>
+      </div>
+      {sub && <span className="mt-0.5 text-[8px] text-muted-foreground">{sub}</span>}
+    </div>
+  );
+}
+function Connector({ dashed, label }: { dashed?: boolean; label?: string }) {
+  return (
+    <div className="relative flex flex-col items-center mt-[-12px]">
+      <svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray={dashed ? "3 3" : undefined} /></svg>
+      {label && <span className="text-[7px] text-slate-500 -mt-0.5">{label}</span>}
+    </div>
+  );
+}
+function VLink() {
+  return (
+    <div className="flex justify-center my-1">
+      <svg width="10" height="14"><line x1="5" y1="0" x2="5" y2="14" stroke="#94a3b8" strokeWidth="1.5" /><polygon points="2,10 8,10 5,14" fill="#94a3b8" /></svg>
+    </div>
+  );
+}
+
+
 const environments = [
   { name: "Production",          type: "Prod",    hosting: "AWS EKS",       status: "Healthy",    coverage: "100%", backup: "Daily",   db: "Oracle 19c",  last: "Jun 5, 2026",  tone: "green" as const },
   { name: "Pre-Production",      type: "Non-Prod", hosting: "AWS EKS",      status: "Healthy",    coverage: "92%",  backup: "Daily",   db: "Oracle 19c",  last: "Jun 4, 2026",  tone: "green" as const },
@@ -123,33 +167,93 @@ export default function EnvironmentModel() {
           {/* Row 2: Topology + Summary + NOVA */}
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
             {/* Topology */}
-            <Card className="xl:col-span-4">
-              <SectionTitle>Environment Topology Map</SectionTitle>
-              <div className="space-y-2">
-                {topology.map((t, i) => (
-                  <div key={t.layer}>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <div className="h-6 w-6 rounded-md bg-blue-50 text-blue-600 grid place-items-center shrink-0">
-                        <t.icon className="h-3 w-3" />
-                      </div>
-                      <span className="text-[11px] font-bold">{t.layer}</span>
-                    </div>
-                    <div className="ml-8 flex flex-wrap gap-1.5 mb-2">
-                      {t.items.map(item => (
-                        <span key={item} className="px-2 py-0.5 rounded-md bg-accent border border-border text-[10px] font-medium">{item}</span>
-                      ))}
-                    </div>
-                    {i < topology.length - 1 && (
-                      <div className="ml-3 h-3 w-px bg-border mx-auto" />
-                    )}
-                  </div>
-                ))}
+            <Card className="xl:col-span-4 overflow-hidden">
+              <div className="flex items-center justify-between mb-3">
+                <SectionTitle>Environment Topology Map</SectionTitle>
+                <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> AWS</span>
+                  <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> On-Prem</span>
+                </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-border grid grid-cols-3 gap-2 text-center">
-                {[["Prod","AWS EKS","green"],["Non-Prod","Hybrid","blue"],["DR","AWS EKS","emerald"]].map(([e,h,c]) => (
-                  <div key={e} className={`rounded-lg p-2 bg-${c}-50 border border-${c}-100`}>
-                    <div className={`text-[11px] font-bold text-${c}-700`}>{e}</div>
-                    <div className="text-[10px] text-muted-foreground">{h}</div>
+
+              {/* Architectural diagram (Cloudcraft / Lucid-style) */}
+              <div className="relative rounded-lg border border-border bg-[linear-gradient(hsl(var(--muted))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--muted))_1px,transparent_1px)] bg-[size:18px_18px] p-3">
+                {/* Internet cloud */}
+                <div className="flex justify-center mb-2">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-300 shadow-sm">
+                    <Globe className="h-3 w-3 text-slate-600" />
+                    <span className="text-[10px] font-bold text-slate-700">Internet / Clients</span>
+                  </div>
+                </div>
+                <div className="mx-auto h-3 w-px bg-slate-400/60" />
+
+                {/* AWS Region container */}
+                <div className="relative rounded-lg border-2 border-dashed border-blue-300 bg-blue-50/30 p-2.5 pt-4">
+                  <span className="absolute -top-2 left-2 px-1.5 py-0.5 bg-blue-600 text-white text-[8px] font-bold uppercase tracking-wider rounded">AWS · us-east-1</span>
+
+                  {/* Edge / LB layer */}
+                  <DiagramLayer icon={Globe} title="Edge · Load Balancer" tone="sky">
+                    <SvcBox color="#ff9900" label="ALB" sub="Prod" />
+                    <Connector />
+                    <SvcBox color="#ff9900" label="ALB" sub="Pre-Prod" />
+                  </DiagramLayer>
+
+                  <VLink />
+
+                  {/* App tier */}
+                  <DiagramLayer icon={Package} title="Application Tier" tone="violet">
+                    <SvcBox color="#326ce5" label="EKS" sub="4 nodes" />
+                    <Connector />
+                    <SvcBox color="#6db33f" label="Spring Boot" sub="Services" />
+                  </DiagramLayer>
+
+                  <VLink />
+
+                  {/* Integration */}
+                  <DiagramLayer icon={Activity} title="Integration / Mesh" tone="indigo">
+                    <SvcBox color="#231f20" label="Kafka" sub="Cluster" />
+                    <Connector />
+                    <SvcBox color="#dc382d" label="Redis" sub="Cache" />
+                    <Connector />
+                    <SvcBox color="#ff4f8b" label="API GW" sub="Edge" />
+                  </DiagramLayer>
+
+                  <VLink />
+
+                  {/* Data tier */}
+                  <DiagramLayer icon={Database} title="Data Tier" tone="emerald">
+                    <SvcBox color="#f80000" label="Oracle 19c" sub="Primary" />
+                    <Connector dashed label="repl" />
+                    <SvcBox color="#f80000" label="Oracle 19c" sub="Standby" />
+                  </DiagramLayer>
+                </div>
+
+                {/* Cross-cutting monitoring rail */}
+                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50/60 p-2">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Monitor className="h-3 w-3 text-amber-700" />
+                    <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider">Observability (cross-cutting)</span>
+                  </div>
+                  <div className="flex items-center justify-around">
+                    <SvcBox color="#632ca6" label="Datadog" sub="APM" />
+                    <Connector />
+                    <SvcBox color="#65a637" label="Splunk" sub="Logs" />
+                    <Connector />
+                    <SvcBox color="#06ac38" label="PagerDuty" sub="Alerts" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Environment footprint legend */}
+              <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                {[
+                  { e: "Prod", h: "AWS EKS", cls: "bg-emerald-50 border-emerald-200 text-emerald-700" },
+                  { e: "Non-Prod", h: "Hybrid", cls: "bg-blue-50 border-blue-200 text-blue-700" },
+                  { e: "DR", h: "AWS EKS", cls: "bg-violet-50 border-violet-200 text-violet-700" },
+                ].map(x => (
+                  <div key={x.e} className={cn("rounded-lg p-2 border", x.cls)}>
+                    <div className="text-[11px] font-bold">{x.e}</div>
+                    <div className="text-[10px] text-muted-foreground">{x.h}</div>
                   </div>
                 ))}
               </div>
