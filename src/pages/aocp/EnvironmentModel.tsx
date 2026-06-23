@@ -40,7 +40,10 @@ const envKpis = [
 ];
 
 function Layers2(p: any) { return <Server {...p} />; }
+
+function DiagramLayer({ icon: Icon, title, tone, children }: { icon: any; title: string; tone: "sky"|"violet"|"indigo"|"emerald"; children: React.ReactNode }) {
   const toneCls = { sky: "border-sky-200 bg-sky-50/70", violet: "border-violet-200 bg-violet-50/70", indigo: "border-indigo-200 bg-indigo-50/70", emerald: "border-emerald-200 bg-emerald-50/70" }[tone];
+
   const txtCls = { sky: "text-sky-700", violet: "text-violet-700", indigo: "text-indigo-700", emerald: "text-emerald-700" }[tone];
   return (
     <div className={cn("rounded-md border p-2", toneCls)}>
