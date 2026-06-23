@@ -576,31 +576,6 @@ function ChartCard({ title, subtitle, children, onClick }: any) {
   );
 }
 
-function WorldMapSVG() {
-  // Simplified continental outlines for a clean reference map
-  return (
-    <svg viewBox="0 0 960 500" className="absolute inset-0 w-full h-full opacity-40" preserveAspectRatio="xMidYMid meet">
-      <g fill="#cbd5e1" stroke="#94a3b8" strokeWidth="0.5">
-        {/* North America */}
-        <path d="M 80,120 L 180,90 L 280,110 L 320,180 L 280,240 L 220,260 L 160,240 L 110,200 L 80,160 Z" />
-        {/* South America */}
-        <path d="M 240,290 L 320,300 L 340,380 L 300,440 L 260,420 L 240,360 Z" />
-        {/* Europe */}
-        <path d="M 460,110 L 550,100 L 570,160 L 540,200 L 480,190 L 450,150 Z" />
-        {/* Africa */}
-        <path d="M 480,210 L 580,210 L 600,310 L 550,400 L 500,380 L 470,300 Z" />
-        {/* Asia */}
-        <path d="M 580,90 L 800,100 L 830,200 L 780,260 L 700,270 L 620,230 L 580,170 Z" />
-        {/* Australia */}
-        <path d="M 740,360 L 830,360 L 850,410 L 800,430 L 750,410 Z" />
-      </g>
-      <g stroke="#94a3b8" strokeWidth="0.3" strokeDasharray="2 3" fill="none">
-        {Array.from({ length: 8 }).map((_, i) => <line key={i} x1="0" y1={i * 62 + 30} x2="960" y2={i * 62 + 30} />)}
-        {Array.from({ length: 12 }).map((_, i) => <line key={i} x1={i * 80} y1="0" x2={i * 80} y2="500" />)}
-      </g>
-    </svg>
-  );
-}
 
 function PanelContent({ tab, panel }: { tab: string; panel: any }) {
   if (panel.kind === "region") {
