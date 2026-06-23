@@ -1,7 +1,8 @@
 import DashboardLayout from "./_layout";
 import { PageHeader, Section, Donut, Sparkline, MiniBars, Progress, Row } from "@/components/practice-library/widgets";
 import { ExecKpiCard, ExecSummaryCard, BottomCallout } from "@/components/practice-library/exec";
-import { ShieldCheck, Target, Clock, AlertTriangle, Gauge, DollarSign, Database, Server, HardDrive, Network as NetIcon, Cpu, MemoryStick, CheckCircle2, CircleDot } from "lucide-react";
+import { ShieldCheck, Target, Clock, AlertTriangle, Gauge, DollarSign, Database, Server, HardDrive, Network as NetIcon, Cpu, MemoryStick, CheckCircle2, CircleDot, KeyRound, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const trendUp = [10,11,10,12,13,14,15,14,16,17,18,19,20];
 const trendDown = [22,20,21,19,18,17,16,17,15,14,13,12];
