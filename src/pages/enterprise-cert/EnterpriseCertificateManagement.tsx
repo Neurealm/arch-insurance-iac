@@ -88,16 +88,18 @@ const RISK_MATRIX: Record<string, number[]> = {
   Healthcare: [11, 37, 132, 408],
 };
 
-// World regions with approximate SVG coordinates
+// World regions with geographic coordinates [lon, lat]
 const REGIONS = [
-  { id: "na", name: "North America", x: 220, y: 175, certs: 87234, apps: 784, services: 122, critical: 1843, renewals: 2193, violations: 71, compliance: 96.4, incidents: 12 },
-  { id: "eu", name: "Europe", x: 510, y: 165, certs: 64891, apps: 612, services: 98, critical: 1421, renewals: 1782, violations: 54, compliance: 97.1, incidents: 8 },
-  { id: "ap", name: "Asia Pacific", x: 720, y: 220, certs: 58412, apps: 521, services: 84, critical: 1287, renewals: 1648, violations: 62, compliance: 94.8, incidents: 11 },
-  { id: "sa", name: "South America", x: 290, y: 360, certs: 18241, apps: 184, services: 28, critical: 412, renewals: 521, violations: 18, compliance: 93.2, incidents: 4 },
-  { id: "me", name: "Middle East", x: 580, y: 245, certs: 12384, apps: 142, services: 22, critical: 318, renewals: 384, violations: 14, compliance: 92.6, incidents: 3 },
-  { id: "af", name: "Africa", x: 530, y: 320, certs: 6892, apps: 78, services: 12, critical: 142, renewals: 218, violations: 9, compliance: 91.4, incidents: 2 },
-  { id: "au", name: "Australia", x: 780, y: 380, certs: 2793, apps: 38, services: 6, critical: 84, renewals: 112, violations: 4, compliance: 95.8, incidents: 1 },
+  { id: "na", name: "North America", coords: [-100, 45] as [number, number], certs: 87234, apps: 784, services: 122, critical: 1843, renewals: 2193, violations: 71, compliance: 96.4, incidents: 12 },
+  { id: "eu", name: "Europe", coords: [12, 50] as [number, number], certs: 64891, apps: 612, services: 98, critical: 1421, renewals: 1782, violations: 54, compliance: 97.1, incidents: 8 },
+  { id: "ap", name: "Asia Pacific", coords: [110, 30] as [number, number], certs: 58412, apps: 521, services: 84, critical: 1287, renewals: 1648, violations: 62, compliance: 94.8, incidents: 11 },
+  { id: "sa", name: "South America", coords: [-60, -15] as [number, number], certs: 18241, apps: 184, services: 28, critical: 412, renewals: 521, violations: 18, compliance: 93.2, incidents: 4 },
+  { id: "me", name: "Middle East", coords: [45, 28] as [number, number], certs: 12384, apps: 142, services: 22, critical: 318, renewals: 384, violations: 14, compliance: 92.6, incidents: 3 },
+  { id: "af", name: "Africa", coords: [20, 0] as [number, number], certs: 6892, apps: 78, services: 12, critical: 142, renewals: 218, violations: 9, compliance: 91.4, incidents: 2 },
+  { id: "au", name: "Australia", coords: [134, -25] as [number, number], certs: 2793, apps: 38, services: 6, critical: 84, renewals: 112, violations: 4, compliance: 95.8, incidents: 1 },
 ];
+
+const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 const OPS_QUEUE = [
   { id: 1, type: "Certificate Renewal", target: "api.payments.corp", status: "running", agent: "Renewal Planner", time: "2m ago", severity: "info" },
