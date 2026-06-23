@@ -364,7 +364,8 @@ export function EocSidebar({
   const { isAdmin } = useAuth();
   const { scoped, routes } = useTenantScope();
   const visibleTree = useMemo(() => {
-    const base = isAdmin ? tree : tree.filter((n) => n.key !== "settings");
+    const base = isAdmin ? tree : tree.filter((n) => !ADMIN_ONLY_KEYS.has(n.key));
+
     if (!scoped) return base;
     // Always-visible top-level keys for tenant members
     const ALWAYS_KEYS = new Set(["home"]);
