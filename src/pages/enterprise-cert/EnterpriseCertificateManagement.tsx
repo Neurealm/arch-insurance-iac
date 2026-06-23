@@ -8,6 +8,7 @@ import {
   PlayCircle, ChevronRight, MapPin, Layers, ShieldAlert, Workflow, Eye
 } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, AreaChart, Area, LineChart, Line, CartesianGrid } from "recharts";
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 
 // ---------- DATA ----------
 const KPI_GROUPS = [
