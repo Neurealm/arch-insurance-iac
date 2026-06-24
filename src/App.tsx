@@ -449,6 +449,7 @@ const App = () => (
           <Route path="/practice-library/infrastructure-hybrid-platform" element={<InfraDashboard />} />
           <Route path="/enterprise-certificate-management" element={<EnterpriseCertificateManagement />} />
           <Route path="/enterprise-certificate-management/risk-exposure" element={<RiskExposureMap />} />
+          <Route path="/enterprise-certificate-management/lifecycle" element={<LifecycleJourney />} />
           <Route path="/practice-library/network-connectivity" element={<NetworkDashboard />} />
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />
