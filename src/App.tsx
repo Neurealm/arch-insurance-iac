@@ -20,6 +20,7 @@ import CertificateChangeManagementCenter from "./pages/enterprise-cert/Certifica
 import CertificateIntegrationsHub from "./pages/enterprise-cert/CertificateIntegrationsHub.tsx";
 import SecurityPostureCenter from "./pages/enterprise-cert/SecurityPostureCenter.tsx";
 import ComplianceCenter from "./pages/enterprise-cert/ComplianceCenter.tsx";
+import AuditEvidenceCenter from "./pages/enterprise-cert/AuditEvidenceCenter.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
