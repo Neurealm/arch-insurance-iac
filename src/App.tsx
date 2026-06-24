@@ -8,6 +8,7 @@ import AiEngineeringBacklog from "./pages/ai-engineering/Backlog.tsx";
 import AnswersActions from "./pages/ai-engineering/AnswersActions.tsx";
 import AgenticDataFoundation from "./pages/ai-engineering/AgenticDataFoundation.tsx";
 import EnterpriseCertificateManagement from "./pages/enterprise-cert/EnterpriseCertificateManagement.tsx";
+import RiskExposureMap from "./pages/enterprise-cert/RiskExposureMap.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
