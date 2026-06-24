@@ -367,7 +367,7 @@ const genericDetail = (title: string, breadcrumb: string, lines: string[]): Pane
 const navSections = [
   { label: "Command Center", items: [
     { id: "ops", label: "Operations Overview", icon: LayoutDashboard, active: true },
-    { id: "risk", label: "Risk & Exposure", icon: ShieldAlert },
+    { id: "risk", label: "Risk & Exposure", icon: ShieldAlert, to: "/enterprise-certificate-management/risk-exposure" },
     { id: "map", label: "Global Map", icon: Globe },
     { id: "life", label: "Lifecycle", icon: Activity },
     { id: "biz", label: "Business Services", icon: Briefcase },
