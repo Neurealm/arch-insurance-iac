@@ -32,7 +32,7 @@ const navSections = [
   ]},
   { label: "Operations", items: [
     { id: "auto", label: "Automations", icon: Zap },
-    { id: "co", label: "Digital Coworkers", icon: Bot },
+    { id: "co", label: "Digital Coworkers", icon: Bot, to: "/enterprise-certificate-management/digital-coworkers" },
     { id: "oc", label: "Operations Center", icon: ServerCog },
     { id: "cm", label: "Change Manager", icon: GitBranch },
     { id: "int", label: "Integrations", icon: Plug },
