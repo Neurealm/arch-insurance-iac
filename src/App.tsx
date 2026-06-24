@@ -9,6 +9,7 @@ import AnswersActions from "./pages/ai-engineering/AnswersActions.tsx";
 import AgenticDataFoundation from "./pages/ai-engineering/AgenticDataFoundation.tsx";
 import EnterpriseCertificateManagement from "./pages/enterprise-cert/EnterpriseCertificateManagement.tsx";
 import RiskExposureMap from "./pages/enterprise-cert/RiskExposureMap.tsx";
+import LifecycleJourney from "./pages/enterprise-cert/LifecycleJourney.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
