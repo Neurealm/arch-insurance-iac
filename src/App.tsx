@@ -13,6 +13,7 @@ import LifecycleJourney from "./pages/enterprise-cert/LifecycleJourney.tsx";
 import DigitalCoworkerWorkforce from "./pages/enterprise-cert/DigitalCoworkerWorkforce.tsx";
 import OperationsCenter from "./pages/enterprise-cert/OperationsCenter.tsx";
 import AgenticExecutionCenter from "./pages/enterprise-cert/AgenticExecutionCenter.tsx";
+import GlobalOperationsMap from "./pages/enterprise-cert/GlobalOperationsMap.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
@@ -456,6 +457,7 @@ const App = () => (
           <Route path="/enterprise-certificate-management/digital-coworkers" element={<DigitalCoworkerWorkforce />} />
           <Route path="/enterprise-certificate-management/operations-center" element={<OperationsCenter />} />
           <Route path="/enterprise-certificate-management/agentic-execution" element={<AgenticExecutionCenter />} />
+          <Route path="/enterprise-certificate-management/global-map" element={<GlobalOperationsMap />} />
           <Route path="/practice-library/network-connectivity" element={<NetworkDashboard />} />
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />

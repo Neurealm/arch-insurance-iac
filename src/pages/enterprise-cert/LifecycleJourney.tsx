@@ -19,7 +19,7 @@ const navSections = [
   { label: "Command Center", items: [
     { id: "ops", label: "Operations Overview", icon: LayoutDashboard, to: "/enterprise-certificate-management" },
     { id: "risk", label: "Risk & Exposure", icon: ShieldAlert, to: "/enterprise-certificate-management/risk-exposure" },
-    { id: "map", label: "Global Map", icon: Globe },
+    { id: "map", label: "Global Map", icon: Globe, to: "/enterprise-certificate-management/global-map" },
     { id: "life", label: "Lifecycle", icon: Activity, active: true },
     { id: "biz", label: "Business Services", icon: Briefcase },
     { id: "rep", label: "Reports", icon: FileText },
