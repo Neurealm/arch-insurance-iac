@@ -465,6 +465,7 @@ const App = () => (
           <Route path="/enterprise-certificate-management/business-services" element={<BusinessServicesImpactCenter />} />
           <Route path="/enterprise-certificate-management/reports" element={<ReportsExecutiveIntelligence />} />
           <Route path="/enterprise-certificate-management/change-manager" element={<CertificateChangeManagementCenter />} />
+          <Route path="/enterprise-certificate-management/integrations" element={<CertificateIntegrationsHub />} />
           <Route path="/practice-library/network-connectivity" element={<NetworkDashboard />} />
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />
