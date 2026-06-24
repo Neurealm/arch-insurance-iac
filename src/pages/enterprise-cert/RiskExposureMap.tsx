@@ -4,7 +4,7 @@ import {
   Activity, AlertTriangle, Bell, BookCheck, Bot, Briefcase, Building2, Cog, FileSearch, FileText,
   GitBranch, Globe, HelpCircle, KeyRound, LayoutDashboard, Package, Plug, RefreshCw, ScrollText,
   Scale, Search, Server, ServerCog, ShieldAlert, ShieldCheck, UserCog, Users, Zap, Cloud,
-  Network, ChevronRight, X, Play, Layers, Map as MapIcon, GitMerge,
+  Network, ChevronRight, X, Play, Layers, Map as MapIcon, GitMerge, Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactFlow, {
