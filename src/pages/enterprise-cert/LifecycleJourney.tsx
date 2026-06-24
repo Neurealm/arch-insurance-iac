@@ -509,15 +509,8 @@ function StageCard({ s, idx, onClick, onDouble, onHover }: {
               h.border,
             )}
           >
-            {s.frictions.length > 0 && (
-              <div className="absolute -top-2 left-2 flex gap-1">
-                {s.frictions.slice(0, 2).map((f) => (
-                  <span key={f} className="inline-flex items-center gap-1 bg-rose-50 border border-rose-200 text-rose-700 text-[9.5px] font-semibold px-1.5 py-0.5 rounded-full shadow-sm">
-                    <AlertTriangle className="h-2.5 w-2.5" /> {f}
-                  </span>
-                ))}
-              </div>
-            )}
+            {/* friction pills removed */}
+
             <div className="flex items-center gap-2 mb-2">
               <span className={cn("h-8 w-8 rounded-lg grid place-items-center", h.bg, h.text)}>
                 <s.icon className="h-4 w-4" />
