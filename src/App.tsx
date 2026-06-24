@@ -19,6 +19,7 @@ import ReportsExecutiveIntelligence from "./pages/enterprise-cert/ReportsExecuti
 import CertificateChangeManagementCenter from "./pages/enterprise-cert/CertificateChangeManagementCenter.tsx";
 import CertificateIntegrationsHub from "./pages/enterprise-cert/CertificateIntegrationsHub.tsx";
 import SecurityPostureCenter from "./pages/enterprise-cert/SecurityPostureCenter.tsx";
+import ComplianceCenter from "./pages/enterprise-cert/ComplianceCenter.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
@@ -468,6 +469,7 @@ const App = () => (
           <Route path="/enterprise-certificate-management/change-manager" element={<CertificateChangeManagementCenter />} />
           <Route path="/enterprise-certificate-management/integrations" element={<CertificateIntegrationsHub />} />
           <Route path="/enterprise-certificate-management/security-posture" element={<SecurityPostureCenter />} />
+          <Route path="/enterprise-certificate-management/compliance-center" element={<ComplianceCenter />} />
           <Route path="/practice-library/network-connectivity" element={<NetworkDashboard />} />
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />
