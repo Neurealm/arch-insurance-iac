@@ -12,6 +12,7 @@ import RiskExposureMap from "./pages/enterprise-cert/RiskExposureMap.tsx";
 import LifecycleJourney from "./pages/enterprise-cert/LifecycleJourney.tsx";
 import DigitalCoworkerWorkforce from "./pages/enterprise-cert/DigitalCoworkerWorkforce.tsx";
 import OperationsCenter from "./pages/enterprise-cert/OperationsCenter.tsx";
+import AgenticExecutionCenter from "./pages/enterprise-cert/AgenticExecutionCenter.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
