@@ -22,7 +22,7 @@ const navSections = [
     { id: "map", label: "Global Map", icon: Globe, to: "/enterprise-certificate-management/global-map" },
     { id: "life", label: "Lifecycle", icon: Activity, active: true },
     { id: "biz", label: "Business Services", icon: Briefcase, to: "/enterprise-certificate-management/business-services" },
-    { id: "rep", label: "Reports", icon: FileText },
+    { id: "rep", label: "Reports", icon: FileText, to: "/enterprise-certificate-management/reports" },
   ]},
   { label: "Operations", items: [
     { id: "auto", label: "Agentic Execution Center", icon: Sparkles, to: "/enterprise-certificate-management/agentic-execution" },
