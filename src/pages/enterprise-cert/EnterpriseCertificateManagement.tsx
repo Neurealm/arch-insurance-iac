@@ -613,25 +613,27 @@ export default function EnterpriseCertificateManagement() {
               </div>
             </Card>
 
-            <Card title="Global Footprint" delay={0.8} className="col-span-12 lg:col-span-4"
+            <Card title="Global Footprint" delay={0.8} className="col-span-12 lg:col-span-4 flex flex-col"
               action={<button className="text-[11px] text-blue-600 font-semibold" onClick={() => open(genericDetail("Global Footprint", "Operations Overview › Global", regions.map(r => `${r.label}: ${r.count} certificates`)))}>View global map →</button>}
             >
-              <div className="h-[230px] -mx-2">
-                <ComposableMap projection="geoEqualEarth" projectionConfig={{ scale: 130 }} style={{ width: "100%", height: "100%" }}>
+              <div className="flex-1 min-h-[340px] -mx-4 -mb-4 rounded-b-xl overflow-hidden bg-slate-50/60">
+                <ComposableMap projection="geoEqualEarth" projectionConfig={{ scale: 175 }} style={{ width: "100%", height: "100%" }}>
                   <Geographies geography={geoUrl}>
                     {({ geographies }) =>
-                      geographies.map((g) => <Geography key={g.rsmKey} geography={g} fill="#e2e8f0" stroke="#cbd5e1" strokeWidth={0.4} style={{ default: { outline: "none" }, hover: { fill: "#dbeafe", outline: "none" }, pressed: { outline: "none" } }} />)
+                      geographies.map((g) => <Geography key={g.rsmKey} geography={g} fill="#e2e8f0" stroke="#cbd5e1" strokeWidth={0.4} style={{ default: { outline: "none" }, hover: { fill: "#dbeafe", outline: "none", cursor: "pointer" }, pressed: { outline: "none" } }} />)
                     }
                   </Geographies>
                   {regions.map((r, i) => (
                     <Marker key={r.id} coordinates={r.coords} onClick={() => open(genericDetail(`${r.label} Region`, `Global Footprint › ${r.label}`, [`${r.count} certificates`, "Regional CAs and ACME endpoints active", "Geo-specific compliance: GDPR / HIPAA / APRA depending on region"]))}>
-                      <motion.circle initial={{ scale: 0 }} animate={{ scale: [0, 1.4, 1] }} transition={{ duration: 0.6, delay: 1 + i * 0.1 }} r={18} fill="#3b82f6" fillOpacity={0.85} stroke="#1d4ed8" strokeWidth={1} style={{ cursor: "pointer" }} />
-                      <text textAnchor="middle" y={3} style={{ fontSize: 9, fontWeight: 700, fill: "white", pointerEvents: "none" }}>{r.count}</text>
+                      <motion.circle initial={{ scale: 0 }} animate={{ scale: [0, 1.4, 1] }} transition={{ duration: 0.6, delay: 1 + i * 0.1 }} r={22} fill="#3b82f6" fillOpacity={0.9} stroke="#1d4ed8" strokeWidth={1.2} style={{ cursor: "pointer" }} />
+                      <text textAnchor="middle" y={4} style={{ fontSize: 11, fontWeight: 800, fill: "white", pointerEvents: "none" }}>{r.count}</text>
+                      <text textAnchor="middle" y={38} style={{ fontSize: 10, fontWeight: 600, fill: "#1e293b", pointerEvents: "none" }}>{r.label}</text>
                     </Marker>
                   ))}
                 </ComposableMap>
               </div>
             </Card>
+
           </div>
 
           {/* Activity feed row separated below to mimic image with feed as 4-wide */}
