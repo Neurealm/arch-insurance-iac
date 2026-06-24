@@ -31,7 +31,7 @@ const navSections = [
   ]},
   { label: "Security & Compliance", items: [
     { id: "sec", label: "Security Posture", icon: ShieldCheck, to: "/enterprise-certificate-management/security-posture" },
-    { id: "com", label: "Compliance Center", icon: BookCheck },
+    { id: "com", label: "Compliance Center", icon: BookCheck, to: "/enterprise-certificate-management/compliance-center" },
     { id: "audit", label: "Audit & Evidence", icon: FileSearch },
     { id: "pol", label: "Policy Engine", icon: Scale },
     { id: "ct", label: "CT Logs Monitor", icon: ScrollText },
