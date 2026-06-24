@@ -9,6 +9,7 @@ import AnswersActions from "./pages/ai-engineering/AnswersActions.tsx";
 import AgenticDataFoundation from "./pages/ai-engineering/AgenticDataFoundation.tsx";
 import EnterpriseCertificateManagement from "./pages/enterprise-cert/EnterpriseCertificateManagement.tsx";
 import RiskExposureMap from "./pages/enterprise-cert/RiskExposureMap.tsx";
+import LifecycleJourney from "./pages/enterprise-cert/LifecycleJourney.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
@@ -448,6 +449,7 @@ const App = () => (
           <Route path="/practice-library/infrastructure-hybrid-platform" element={<InfraDashboard />} />
           <Route path="/enterprise-certificate-management" element={<EnterpriseCertificateManagement />} />
           <Route path="/enterprise-certificate-management/risk-exposure" element={<RiskExposureMap />} />
+          <Route path="/enterprise-certificate-management/lifecycle" element={<LifecycleJourney />} />
           <Route path="/practice-library/network-connectivity" element={<NetworkDashboard />} />
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />
