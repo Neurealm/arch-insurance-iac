@@ -35,7 +35,7 @@ const navSections = [
     { id: "com", label: "Compliance Center", icon: BookCheck, to: "/enterprise-certificate-management/compliance-center" },
     { id: "audit", label: "Audit & Evidence", icon: FileSearch, to: "/enterprise-certificate-management/audit-evidence", active: true },
     { id: "pol", label: "Policy Engine", icon: Scale, to: "/enterprise-certificate-management/policy-engine" },
-    { id: "ct", label: "CT Logs Monitor", icon: ScrollText },
+    { id: "ct", label: "CT Logs Monitor", icon: ScrollText, to: "/enterprise-certificate-management/ct-logs-monitor" },
   ]},
   { label: "Administration", items: [
     { id: "inv", label: "Inventory", icon: Package },
