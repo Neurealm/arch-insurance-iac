@@ -29,7 +29,7 @@ const navSections = [
     { id: "co", label: "Digital Coworkers", icon: Bot, to: "/enterprise-certificate-management/digital-coworkers" },
     { id: "oc", label: "Operations Center", icon: ServerCog, to: "/enterprise-certificate-management/operations-center" },
     { id: "cm", label: "Change Manager", icon: GitBranch, to: "/enterprise-certificate-management/change-manager" },
-    { id: "int", label: "Integrations", icon: Plug },
+    { id: "int", label: "Integrations", icon: Plug, to: "/enterprise-certificate-management/integrations" },
   ]},
   { label: "Security & Compliance", items: [
     { id: "sec", label: "Security Posture", icon: ShieldCheck },

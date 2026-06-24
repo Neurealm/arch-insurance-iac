@@ -17,6 +17,7 @@ import GlobalOperationsMap from "./pages/enterprise-cert/GlobalOperationsMap.tsx
 import BusinessServicesImpactCenter from "./pages/enterprise-cert/BusinessServicesImpactCenter.tsx";
 import ReportsExecutiveIntelligence from "./pages/enterprise-cert/ReportsExecutiveIntelligence.tsx";
 import CertificateChangeManagementCenter from "./pages/enterprise-cert/CertificateChangeManagementCenter.tsx";
+import CertificateIntegrationsHub from "./pages/enterprise-cert/CertificateIntegrationsHub.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
@@ -464,6 +465,7 @@ const App = () => (
           <Route path="/enterprise-certificate-management/business-services" element={<BusinessServicesImpactCenter />} />
           <Route path="/enterprise-certificate-management/reports" element={<ReportsExecutiveIntelligence />} />
           <Route path="/enterprise-certificate-management/change-manager" element={<CertificateChangeManagementCenter />} />
+          <Route path="/enterprise-certificate-management/integrations" element={<CertificateIntegrationsHub />} />
           <Route path="/practice-library/network-connectivity" element={<NetworkDashboard />} />
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />
