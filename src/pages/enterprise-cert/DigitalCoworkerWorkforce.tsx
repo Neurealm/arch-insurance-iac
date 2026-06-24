@@ -22,7 +22,7 @@ const navSections = [
     { id: "rep", label: "Reports", icon: FileText },
   ]},
   { label: "Operations", items: [
-    { id: "auto", label: "Automations", icon: Zap },
+    { id: "auto", label: "Agentic Execution Center", icon: Sparkles, to: "/enterprise-certificate-management/agentic-execution" },
     { id: "co", label: "Digital Coworkers", icon: Bot, to: "/enterprise-certificate-management/digital-coworkers", active: true },
     { id: "oc", label: "Operations Center", icon: ServerCog, to: "/enterprise-certificate-management/operations-center" },
     { id: "cm", label: "Change Manager", icon: GitBranch },
