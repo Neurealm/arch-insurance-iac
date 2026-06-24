@@ -31,7 +31,7 @@ const navSections = [
     { id: "int", label: "Integrations", icon: Plug, to: "/enterprise-certificate-management/integrations" },
   ]},
   { label: "Security & Compliance", items: [
-    { id: "sec", label: "Security Posture", icon: ShieldCheck },
+    { id: "sec", label: "Security Posture", icon: ShieldCheck, to: "/enterprise-certificate-management/security-posture" },
     { id: "com", label: "Compliance Center", icon: BookCheck },
     { id: "audit", label: "Audit & Evidence", icon: FileSearch },
     { id: "pol", label: "Policy Engine", icon: Scale },
