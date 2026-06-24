@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Bell, HelpCircle, Settings, RefreshCw, Download, ArrowUp, ArrowDown,
@@ -366,7 +367,7 @@ const genericDetail = (title: string, breadcrumb: string, lines: string[]): Pane
 const navSections = [
   { label: "Command Center", items: [
     { id: "ops", label: "Operations Overview", icon: LayoutDashboard, active: true },
-    { id: "risk", label: "Risk & Exposure", icon: ShieldAlert },
+    { id: "risk", label: "Risk & Exposure", icon: ShieldAlert, to: "/enterprise-certificate-management/risk-exposure" },
     { id: "map", label: "Global Map", icon: Globe },
     { id: "life", label: "Lifecycle", icon: Activity },
     { id: "biz", label: "Business Services", icon: Briefcase },
@@ -412,15 +413,16 @@ function Sidebar() {
           <div key={s.label} className="mt-4">
             <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">{s.label}</div>
             <div className="mt-1 space-y-0.5">
-              {s.items.map((it) => (
-                <button key={it.id} className={cn(
+              {s.items.map((it: any) => {
+                const inner = (<><it.icon className="h-4 w-4" /><span>{it.label}</span></>);
+                const cls = cn(
                   "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-colors",
                   it.active ? "bg-blue-50 text-blue-700 font-semibold" : "text-slate-600 hover:bg-slate-50"
-                )}>
-                  <it.icon className="h-4 w-4" />
-                  <span>{it.label}</span>
-                </button>
-              ))}
+                );
+                return it.to
+                  ? <Link key={it.id} to={it.to} className={cls}>{inner}</Link>
+                  : <button key={it.id} className={cls}>{inner}</button>;
+              })}
             </div>
           </div>
         ))}
