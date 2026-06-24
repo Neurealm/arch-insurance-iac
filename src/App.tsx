@@ -473,6 +473,7 @@ const App = () => (
           <Route path="/enterprise-certificate-management/security-posture" element={<SecurityPostureCenter />} />
           <Route path="/enterprise-certificate-management/compliance-center" element={<ComplianceCenter />} />
           <Route path="/enterprise-certificate-management/audit-evidence" element={<AuditEvidenceCenter />} />
+          <Route path="/enterprise-certificate-management/policy-engine" element={<PolicyEngine />} />
           <Route path="/practice-library/network-connectivity" element={<NetworkDashboard />} />
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />
