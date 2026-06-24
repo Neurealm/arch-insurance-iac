@@ -8,7 +8,7 @@ import {
   Scale, ScrollText, Package, Building2, UserCog, Cog, X, ChevronRight,
   CheckCircle2, AlertTriangle, Clock, UserX, FileWarning, ShieldX, PieChart as PieIcon,
   TrendingUp, Repeat, Rocket, RotateCcw, Ban, UserCheck, ListChecks, Briefcase as BriefcaseIcon,
-  Server, Cloud, Building, AppWindow, Cable, Layers, DollarSign,
+  Server, Cloud, Building, AppWindow, Cable, Layers, DollarSign, Sparkles,
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RTooltip, LineChart, Line,
