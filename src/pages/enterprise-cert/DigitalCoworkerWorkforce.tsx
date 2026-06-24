@@ -65,7 +65,7 @@ function Sidebar() {
                 const inner = (<><it.icon className="h-4 w-4" /><span>{it.label}</span></>);
                 const cls = cn(
                   "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-colors",
-                  it.active ? "bg-blue-50 text-blue-700 font-semibold" : "text-blue-700 hover:bg-blue-50"
+                  it.active ? "bg-blue-50 text-blue-700 font-semibold" : "text-blue-700 font-semibold hover:bg-blue-50"
                 );
                 return it.to
                   ? <Link key={it.id} to={it.to} className={cls}>{inner}</Link>
