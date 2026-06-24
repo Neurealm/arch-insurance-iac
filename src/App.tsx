@@ -21,6 +21,7 @@ import CertificateIntegrationsHub from "./pages/enterprise-cert/CertificateInteg
 import SecurityPostureCenter from "./pages/enterprise-cert/SecurityPostureCenter.tsx";
 import ComplianceCenter from "./pages/enterprise-cert/ComplianceCenter.tsx";
 import AuditEvidenceCenter from "./pages/enterprise-cert/AuditEvidenceCenter.tsx";
+import PolicyEngine from "./pages/enterprise-cert/PolicyEngine.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
