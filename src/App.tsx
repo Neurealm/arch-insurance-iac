@@ -10,6 +10,7 @@ import AgenticDataFoundation from "./pages/ai-engineering/AgenticDataFoundation.
 import EnterpriseCertificateManagement from "./pages/enterprise-cert/EnterpriseCertificateManagement.tsx";
 import RiskExposureMap from "./pages/enterprise-cert/RiskExposureMap.tsx";
 import LifecycleJourney from "./pages/enterprise-cert/LifecycleJourney.tsx";
+import DigitalCoworkerWorkforce from "./pages/enterprise-cert/DigitalCoworkerWorkforce.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
@@ -450,6 +451,7 @@ const App = () => (
           <Route path="/enterprise-certificate-management" element={<EnterpriseCertificateManagement />} />
           <Route path="/enterprise-certificate-management/risk-exposure" element={<RiskExposureMap />} />
           <Route path="/enterprise-certificate-management/lifecycle" element={<LifecycleJourney />} />
+          <Route path="/enterprise-certificate-management/digital-coworkers" element={<DigitalCoworkerWorkforce />} />
           <Route path="/practice-library/network-connectivity" element={<NetworkDashboard />} />
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />
