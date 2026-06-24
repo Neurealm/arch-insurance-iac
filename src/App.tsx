@@ -16,6 +16,7 @@ import AgenticExecutionCenter from "./pages/enterprise-cert/AgenticExecutionCent
 import GlobalOperationsMap from "./pages/enterprise-cert/GlobalOperationsMap.tsx";
 import BusinessServicesImpactCenter from "./pages/enterprise-cert/BusinessServicesImpactCenter.tsx";
 import ReportsExecutiveIntelligence from "./pages/enterprise-cert/ReportsExecutiveIntelligence.tsx";
+import CertificateChangeManagementCenter from "./pages/enterprise-cert/CertificateChangeManagementCenter.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
