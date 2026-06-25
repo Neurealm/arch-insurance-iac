@@ -287,6 +287,7 @@ const SCENARIOS: Scenario[] = [
     ],
     overall: { label: "Low", tone: "text-emerald-300" },
     confidence: 94,
+    rawScores: [92, 95, 96, 80, 95],
   },
   {
     id: 3, title: "Maintain Tomorrow", sub: "(May 24)", num: "3",
