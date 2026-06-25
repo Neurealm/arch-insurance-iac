@@ -232,6 +232,7 @@ import PowerMap from "./pages/practice-library/dashboards/PowerMap.tsx";
 import PowerAlerts from "./pages/practice-library/dashboards/PowerAlerts.tsx";
 import AiOptimization from "./pages/practice-library/dashboards/AiOptimization.tsx";
 import HistoricalAnalysis from "./pages/practice-library/dashboards/HistoricalAnalysis.tsx";
+import Forecasting from "./pages/practice-library/dashboards/Forecasting.tsx";
 import RealTimeMonitoring from "./pages/practice-library/dashboards/RealTimeMonitoring.tsx";
 import NetworkDashboard from "./pages/practice-library/dashboards/NetworkDashboard.tsx";
 import CloudDashboard from "./pages/practice-library/dashboards/CloudDashboard.tsx";
