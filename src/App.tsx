@@ -31,6 +31,7 @@ import SeadMaintenanceSim from "./pages/sead/MaintenanceDecisionSimulator.tsx";
 import SeadFactoryImpact from "./pages/sead/FactoryImpactSimulator.tsx";
 import SeadDecisionCenter from "./pages/sead/AIMaintenanceDecisionCenter.tsx";
 import SeadHumanGovernance from "./pages/sead/HumanGovernanceCenter.tsx";
+import SeadAIReasoningPlayback from "./pages/sead/AIReasoningPlayback.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
 import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
