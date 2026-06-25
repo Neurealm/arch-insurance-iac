@@ -5,7 +5,8 @@ import {
   Plug, ChevronLeft, ChevronsUpDown, Calendar, Filter, AlertTriangle, Info,
   Search, X, MoreHorizontal, CheckCircle2, StickyNote, ChevronRight,
   CircleDot, ShieldAlert,
-, Brain } from "lucide-react";
+  Brain,
+} from "lucide-react";
 
 /* ---------- side rail (matches Power Admin Console / Power Map) ---------- */
 const navGroups: { title: string; items: { label: string; icon: any; to?: string; active?: boolean; badge?: number }[] }[] = [
