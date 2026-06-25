@@ -29,6 +29,7 @@ import SeadEquipmentHealth from "./pages/sead/EquipmentHealthIntelligence.tsx";
 import SeadCrossDomain from "./pages/sead/CrossDomainContextTwin.tsx";
 import SeadMaintenanceSim from "./pages/sead/MaintenanceDecisionSimulator.tsx";
 import SeadFactoryImpact from "./pages/sead/FactoryImpactSimulator.tsx";
+import SeadDecisionCenter from "./pages/sead/AIMaintenanceDecisionCenter.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
 import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
@@ -299,6 +300,7 @@ const App = () => (
           <Route path="/sead/cross-domain-context-twin" element={<ProtectedRoute><SeadCrossDomain /></ProtectedRoute>} />
           <Route path="/sead/maintenance-decision-simulator" element={<ProtectedRoute><SeadMaintenanceSim /></ProtectedRoute>} />
           <Route path="/sead/factory-impact-simulator" element={<ProtectedRoute><SeadFactoryImpact /></ProtectedRoute>} />
+          <Route path="/sead/ai-maintenance-decision-center" element={<ProtectedRoute><SeadDecisionCenter /></ProtectedRoute>} />
           <Route path="/semiconductor/command-center" element={<ProtectedRoute><ScenarioProvider><SemiCommandCenter /></ScenarioProvider></ProtectedRoute>} />
           <Route path="/semiconductor/digital-twin" element={<ProtectedRoute><ScenarioProvider><SemiDigitalTwin /></ScenarioProvider></ProtectedRoute>} />
           <Route path="/semiconductor/production-flow" element={<ProtectedRoute><ScenarioProvider><SemiProductionFlow /></ScenarioProvider></ProtectedRoute>} />

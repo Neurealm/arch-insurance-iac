@@ -372,6 +372,7 @@ const RAIL = [
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision Sim", to: "/sead/maintenance-decision-simulator" },
   { icon: Factory, label: "Factory Impact", to: "/sead/factory-impact-simulator" },
+  { icon: Sparkles, label: "Decision Center", to: "/sead/ai-maintenance-decision-center" },
 ];
 
 function ModuleRail() {
