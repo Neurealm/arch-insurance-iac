@@ -8,7 +8,7 @@ import { Sparkles,
   Truck, Users, UserCog, Briefcase, Beaker, FlaskConical, CircleDot,
   TrendingUp, TrendingDown, CheckCircle2, X, Info, Clock, AlertTriangle,
   Cpu, Database, ShieldCheck, HardHat, Command, Pause, Play, Download, Filter, Activity,
-  Gavel, Brain, Scale, Target as TargetIcon } from "lucide-react";
+  Gavel, Brain, Scale, Target as TargetIcon, BookOpen} from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { AppShell } from "@/components/eoc/AppShell";
 

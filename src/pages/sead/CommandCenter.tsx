@@ -7,7 +7,7 @@ import {
   TrendingDown, TrendingUp, Wrench, Bot, Gauge, Lightbulb, GitBranch, Share2,
   Building2, Network as NetIcon, Boxes, Cpu, Workflow,
   CheckCircle2, Gavel, Brain, Scale, Command as CommandIcon, RefreshCw, Pause, Play,
-  Clock, Filter, X, ArrowRight, Zap, Target as TargetIcon } from "lucide-react";
+  Clock, Filter, X, ArrowRight, Zap, Target as TargetIcon, BookOpen} from "lucide-react";
 import {
   Area, AreaChart, Cell, Pie, PieChart, ResponsiveContainer,
 } from "recharts";
