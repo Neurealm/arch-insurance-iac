@@ -128,13 +128,14 @@ function Rail() {
             <div className="px-4 py-1 text-[10px] uppercase tracking-wider text-slate-500">{g.title}</div>
             {g.items.map((it) => {
               const Icon = it.icon;
-              return (
-                <div key={it.label} className={`mx-2 px-3 py-2 rounded flex items-center gap-2 cursor-pointer ${it.active ? "bg-blue-600/15 text-blue-300" : "hover:bg-slate-800/60"}`}>
+              const inner = (
+                <div className={`mx-2 px-3 py-2 rounded flex items-center gap-2 cursor-pointer ${it.active ? "bg-blue-600/15 text-blue-300" : "hover:bg-slate-800/60"}`}>
                   <Icon className="h-3.5 w-3.5" />
                   <span className="flex-1">{it.label}</span>
                   {it.badge && <span className="text-[10px] bg-rose-500 text-white rounded-full px-1.5">{it.badge}</span>}
                 </div>
               );
+              return it.to ? <Link key={it.label} to={it.to}>{inner}</Link> : <div key={it.label}>{inner}</div>;
             })}
           </div>
         ))}
