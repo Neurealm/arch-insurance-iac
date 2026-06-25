@@ -418,37 +418,49 @@ export default function DigitalTwin() {
               </Canvas>
 
               {/* sensor hotspots overlay */}
-              {sensors.map((sn, i) => (
-                <button
-                  key={sn.key}
-                  onClick={() => { setOpenSensor(sn.key); setDrawer("sensor"); }}
-                  onMouseEnter={() => setOpenSensor(sn.key)}
-                  style={{ top: sn.pos.top, left: sn.pos.left, right: sn.pos.right, animationDelay: `${i * 120}ms` }}
-                  className={cn(
-                    "absolute z-10 w-[170px] text-left rounded-lg border px-2.5 py-1.5 backdrop-blur transition-all animate-[fadeIn_0.4s_ease-out_both]",
-                    sn.abnormal
-                      ? "border-rose-500/50 bg-rose-950/40 shadow-[0_0_22px_rgba(244,63,94,0.25)]"
-                      : "border-sky-500/40 bg-sky-950/30",
-                  )}
-                >
-                  <div className="text-[10.5px] text-slate-300">{sn.label}</div>
-                  <div className="text-sm font-semibold">{sn.value}</div>
-                  <div className={cn("text-[10.5px] font-medium", sn.abnormal ? "text-rose-400" : "text-emerald-400")}>{sn.delta}</div>
-                  {sn.abnormal && (
-                    <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping" />
-                  )}
-                  {openSensor === sn.key && (
-                    <div className="absolute z-20 left-full ml-2 top-0 w-[230px] rounded-md bg-slate-950/95 border border-slate-700 p-2.5 text-[11px] shadow-xl space-y-1">
-                      <div className="font-semibold text-sm">{sn.label}</div>
-                      <div className="flex justify-between"><span className="text-slate-400">Expected</span><span>{sn.expected}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400">Current</span><span className={sn.abnormal ? "text-rose-300" : ""}>{sn.value}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400">Baseline (30d)</span><span>{sn.baseline}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400">Duration</span><span>{sn.duration}</span></div>
-                      <div className="pt-1 border-t border-slate-800 text-slate-300">{sn.failure}</div>
-                    </div>
-                  )}
-                </button>
-              ))}
+              {sensors.map((sn, i) => {
+                const onRight = sn.pos.right !== undefined;
+                return (
+                  <button
+                    key={sn.key}
+                    onClick={() => { setOpenSensor(sn.key); setDrawer("sensor"); }}
+                    onMouseEnter={() => setOpenSensor(sn.key)}
+                    onMouseLeave={() => setOpenSensor((cur) => (cur === sn.key ? null : cur))}
+                    onFocus={() => setOpenSensor(sn.key)}
+                    onBlur={() => setOpenSensor((cur) => (cur === sn.key ? null : cur))}
+                    aria-label={`${sn.label}: ${sn.value} (${sn.delta})`}
+                    style={{ top: sn.pos.top, left: sn.pos.left, right: sn.pos.right, animationDelay: `${i * 120}ms` }}
+                    className={cn(
+                      "absolute z-10 w-[170px] text-left rounded-lg border px-2.5 py-1.5 backdrop-blur transition-all animate-[fadeIn_0.4s_ease-out_both] hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-sky-400/60",
+                      sn.abnormal
+                        ? "border-rose-500/50 bg-rose-950/40 shadow-[0_0_22px_rgba(244,63,94,0.25)]"
+                        : "border-sky-500/40 bg-sky-950/30",
+                    )}
+                  >
+                    <div className="text-[10.5px] text-slate-300">{sn.label}</div>
+                    <div className="text-sm font-semibold">{sn.value}</div>
+                    <div className={cn("text-[10.5px] font-medium", sn.abnormal ? "text-rose-400" : "text-emerald-400")}>{sn.delta}</div>
+                    {sn.abnormal && (
+                      <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping" />
+                    )}
+                    {openSensor === sn.key && (
+                      <div
+                        className={cn(
+                          "absolute z-30 top-0 w-[230px] rounded-md bg-slate-950/95 border border-slate-700 p-2.5 text-[11px] shadow-xl space-y-1",
+                          onRight ? "right-full mr-2" : "left-full ml-2",
+                        )}
+                      >
+                        <div className="font-semibold text-sm">{sn.label}</div>
+                        <div className="flex justify-between"><span className="text-slate-400">Expected</span><span>{sn.expected}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-400">Current</span><span className={sn.abnormal ? "text-rose-300" : ""}>{sn.value}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-400">Baseline (30d)</span><span>{sn.baseline}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-400">Duration</span><span>{sn.duration}</span></div>
+                        <div className="pt-1 border-t border-slate-800 text-slate-300">{sn.failure}</div>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Right analysis */}
@@ -688,15 +700,18 @@ export default function DigitalTwin() {
 function Kpi({ label, value, sub, icon: Icon, tone }: { label: string; value: string; sub: string; icon: any; tone: "sky" | "rose" }) {
   const c = tone === "rose" ? "text-rose-400" : "text-slate-100";
   return (
-    <Tooltip content={`${label}: ${value} — ${sub}`}>
-      <div className="w-full text-left">
-        <div className="text-[11px] text-slate-400">{label}</div>
-        <div className={cn("text-[28px] font-bold tabular-nums leading-tight mt-0.5", c)}>{value}</div>
-        <div className="flex items-center gap-1.5 text-[10.5px] text-slate-400 mt-0.5">
-          <Icon className="h-3 w-3" /> {sub}
+    <div className="group relative w-full text-left" title={`${label}: ${value} — ${sub}`}>
+      <div className="text-[11px] text-slate-400">{label}</div>
+      <div className={cn("text-[28px] font-bold tabular-nums leading-tight mt-0.5", c)}>{value}</div>
+      <div className="flex items-center gap-1.5 text-[10.5px] text-slate-400 mt-0.5">
+        <Icon className="h-3 w-3" /> {sub}
+      </div>
+      <div className="pointer-events-none absolute -top-1 left-0 -translate-y-full opacity-0 group-hover:opacity-100 transition-opacity z-20">
+        <div className="px-2.5 py-1.5 rounded-md bg-slate-950/95 border border-slate-700 text-[11px] text-slate-200 whitespace-nowrap shadow-xl">
+          {label}: <span className="font-semibold">{value}</span> — {sub}
         </div>
       </div>
-    </Tooltip>
+    </div>
   );
 }
 
