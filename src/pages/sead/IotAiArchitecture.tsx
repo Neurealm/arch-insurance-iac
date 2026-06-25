@@ -8,7 +8,7 @@ import {
   Cpu, Radio, Database, Layers, ShieldCheck, Workflow, ArrowRight,
   Activity, Zap, Cloud, GitMerge, Search, Download, Maximize2, Play, Pause,
   CheckCircle2, AlertTriangle, BarChart3, Lock, FileText, Wind, Thermometer,
-  Server, Antenna,
+  Server, Antenna, X,
 } from "lucide-react";
 
 /* ============================= atoms ============================= */
