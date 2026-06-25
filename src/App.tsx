@@ -541,6 +541,7 @@ const App = () => (
           <Route path="/practice-library/infrastructure-hybrid-platform/forecasting" element={<Forecasting />} />
           <Route path="/practice-library/infrastructure-hybrid-platform/real-time-monitoring" element={<RealTimeMonitoring />} />
           <Route path="/practice-library/infrastructure-hybrid-platform/capacity-management" element={<CapacityManagement />} />
+          <Route path="/practice-library/infrastructure-hybrid-platform/power-capping" element={<PowerCapping />} />
           <Route path="/enterprise-certificate-management" element={<EnterpriseCertificateManagement />} />
           <Route path="/enterprise-certificate-management/risk-exposure" element={<RiskExposureMap />} />
           <Route path="/enterprise-certificate-management/lifecycle" element={<LifecycleJourney />} />
