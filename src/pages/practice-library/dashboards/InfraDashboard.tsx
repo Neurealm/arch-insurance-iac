@@ -117,12 +117,17 @@ export default function InfraDashboard() {
           <Row label="Patch Compliance" right={<span className="font-semibold">98.1% <span className="text-emerald-600 text-[10px]">▲ 1.9 pp</span></span>} />
           <div className="mt-3 rounded-lg bg-emerald-50 p-2 text-[11px] text-emerald-700">Strong operational execution</div>
         </Section>
-        <Section title="Protection & Resilience">
+        <Section title="Power Mgmt — On-Prem & Physical Plant">
           <div className="grid grid-cols-2 gap-3 text-center">
-            <div><div className="text-[10px] text-muted-foreground">Backup Success</div><Donut value={99} size={60} stroke={8} color="hsl(142 71% 45%)" label="99.6%" /><div className="text-[9px] text-muted-foreground mt-1">SLA: ≥ 99%</div></div>
-            <div><div className="text-[10px] text-muted-foreground">DR Readiness</div><Donut value={94} size={60} stroke={8} color="hsl(217 91% 60%)" label="94%" /><div className="text-[9px] text-muted-foreground mt-1">Target: ≥ 90%</div></div>
+            <div><div className="text-[10px] text-muted-foreground">PUE (Avg)</div><Donut value={72} size={60} stroke={8} color="hsl(142 71% 45%)" label="1.42" /><div className="text-[9px] text-muted-foreground mt-1">Target: ≤ 1.50</div></div>
+            <div><div className="text-[10px] text-muted-foreground">UPS / Genset Ready</div><Donut value={98} size={60} stroke={8} color="hsl(217 91% 60%)" label="98%" /><div className="text-[9px] text-muted-foreground mt-1">Last test: 6d ago</div></div>
           </div>
-          <div className="mt-3"><div className="text-[10px] text-muted-foreground mb-1">RPO / RTO Compliance</div><Sparkline data={trendUp} width={220} height={36} color="hsl(142 71% 45%)" fill /></div>
+          <div className="mt-3 grid grid-cols-3 gap-1 text-center">
+            <div className="rounded bg-muted/40 p-1.5"><div className="text-sm font-bold">68%</div><div className="text-[9px] text-muted-foreground">Rack Load</div></div>
+            <div className="rounded bg-muted/40 p-1.5"><div className="text-sm font-bold">22.4°C</div><div className="text-[9px] text-muted-foreground">Cold Aisle</div></div>
+            <div className="rounded bg-muted/40 p-1.5"><div className="text-sm font-bold">0</div><div className="text-[9px] text-muted-foreground">Power Events 30D</div></div>
+          </div>
+          <div className="mt-2"><div className="text-[10px] text-muted-foreground mb-1">kWh Trend (7D)</div><Sparkline data={[420,438,431,445,452,447,461]} width={220} height={36} color="hsl(142 71% 45%)" fill /></div>
         </Section>
         <Section title="Risk & Compliance Posture">
           <div className="flex items-center gap-3">
