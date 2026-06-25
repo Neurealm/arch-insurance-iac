@@ -292,15 +292,29 @@ const DOMAINS: DomainCard[] = [
 
 /* ---------- domain card ---------- */
 
-function DomainNode({ d, selected, onClick, onDouble }: { d: DomainCard; selected: boolean; onClick: () => void; onDouble: () => void }) {
+const DomainNode = memo(function DomainNode({
+  d, selected, dimmed, hovered, onClick, onDouble, onHover, nodeRef,
+}: {
+  d: DomainCard; selected: boolean; dimmed: boolean; hovered: boolean;
+  onClick: () => void; onDouble: () => void; onHover: (id: string | null) => void;
+  nodeRef: (el: HTMLButtonElement | null) => void;
+}) {
   const sev = SEV_COLORS[d.severity];
   return (
     <button
+      ref={nodeRef}
       onClick={onClick}
       onDoubleClick={onDouble}
-      className={`w-full text-left rounded-xl border bg-[#0a1020]/80 backdrop-blur-md transition group ${
-        selected ? "border-sky-400/60 shadow-[0_0_30px_-6px_rgba(56,189,248,0.55)]" : "border-white/[0.08] hover:border-white/20"
-      }`}
+      onMouseEnter={() => onHover(d.id)}
+      onMouseLeave={() => onHover(null)}
+      data-domain={d.id}
+      className={`w-full text-left rounded-xl border bg-[#0a1020]/80 backdrop-blur-md transition-all duration-200 group ${
+        selected
+          ? "border-sky-400/60 shadow-[0_0_30px_-6px_rgba(56,189,248,0.55)] -translate-y-0.5"
+          : hovered
+          ? "border-white/30 -translate-y-0.5"
+          : "border-white/[0.08] hover:border-white/20"
+      } ${dimmed ? "opacity-35" : "opacity-100"}`}
       style={{ boxShadow: selected ? undefined : `0 0 0 1px ${sev.glow.replace("0.7", "0.18").replace("0.65", "0.18").replace("0.6", "0.18").replace("0.55", "0.16")} inset` }}
     >
       <div className="flex items-center justify-between px-3 pt-2.5 pb-1.5">
@@ -308,9 +322,12 @@ function DomainNode({ d, selected, onClick, onDouble }: { d: DomainCard; selecte
           <d.icon className="h-3.5 w-3.5" style={{ color: d.accent }} />
           <span className="text-[10.5px] font-bold tracking-[0.14em] text-slate-200">{d.title}</span>
         </div>
-        <span className="h-4 min-w-4 px-1 rounded-md text-[10px] font-bold grid place-items-center" style={{ backgroundColor: `${d.accent}22`, color: d.accent }}>
-          {d.badge}
-        </span>
+        <div className="flex items-center gap-1">
+          <span className={`h-1.5 w-1.5 rounded-full ${sev.dot} ${d.severity !== "ok" ? "animate-pulse" : ""}`} />
+          <span className="h-4 min-w-4 px-1 rounded-md text-[10px] font-bold grid place-items-center" style={{ backgroundColor: `${d.accent}22`, color: d.accent }}>
+            {d.badge}
+          </span>
+        </div>
       </div>
       <div className="border-t border-white/[0.05] px-3 py-2 space-y-1.5">
         {d.rows.map((r, i) => (
@@ -325,7 +342,7 @@ function DomainNode({ d, selected, onClick, onDouble }: { d: DomainCard; selecte
       </div>
     </button>
   );
-}
+});
 
 /* ---------- center node ---------- */
 
