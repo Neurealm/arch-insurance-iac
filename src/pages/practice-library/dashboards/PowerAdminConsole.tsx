@@ -89,7 +89,7 @@ const navGroups: { title: string; items: { label: string; icon: any; to?: string
     { label: "Alerts", icon: Bell, badge: 3, to: "/practice-library/infrastructure-hybrid-platform/power-alerts" },
   ]},
   { title: "Monitoring", items: [
-    { label: "Real-time Monitoring", icon: Activity },
+    { label: "Real-time Monitoring", icon: Activity, to: "/practice-library/infrastructure-hybrid-platform/real-time-monitoring" },
     { label: "Historical Analysis", icon: BarChart3 },
     { label: "Forecasting", icon: TrendingUp },
   ]},
