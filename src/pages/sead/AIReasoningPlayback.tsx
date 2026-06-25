@@ -29,6 +29,7 @@ const RAIL = [
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
   { icon: Brain, label: "AI Reasoning", to: "/sead/ai-reasoning-playback", active: true },
+  { icon: Gauge, label: "Confidence\nExplorer", to: "/sead/confidence-explorer" },
 ];
 
 function ModuleRail() {

@@ -8,7 +8,7 @@ import {
   Droplets, Zap, DollarSign, Download, FileText, X, Cpu, Star, Award,
   FlaskConical, ClipboardCheck, Hammer, BadgeCheck, ArrowRight, Building2,
   HardHat, ListChecks,
-  Gavel, Brain,
+  Gavel, Brain, Gauge,
 } from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
@@ -50,6 +50,7 @@ const RAIL = [
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center", active: true },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
   { icon: Brain, label: "AI Reasoning", to: "/sead/ai-reasoning-playback" },
+  { icon: Gauge, label: "Confidence\nExplorer", to: "/sead/confidence-explorer" },
 ];
 
 function ModuleRail() {
