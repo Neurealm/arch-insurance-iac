@@ -880,6 +880,7 @@ export default function FocCommandCenter() {
             </div>
           </main>
         </div>
+        <SelectionDrawer />
       </div>
     </AppShell>
   );
