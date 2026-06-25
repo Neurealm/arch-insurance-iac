@@ -85,7 +85,7 @@ function CapacityBar({ label, total, used, unit = "MW", color = "bg-emerald-500"
 const navGroups: { title: string; items: { label: string; icon: any; active?: boolean; badge?: number }[] }[] = [
   { title: "Overview", items: [
     { label: "Power Overview", icon: Zap, active: true },
-    { label: "Power Map", icon: MapIcon },
+    { label: "Power Map", icon: MapIcon, to: "/practice-library/infrastructure-hybrid-platform/power-map" },
     { label: "Alerts", icon: Bell, badge: 3 },
   ]},
   { title: "Monitoring", items: [
