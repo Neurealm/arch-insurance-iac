@@ -529,6 +529,7 @@ const App = () => (
           <Route path="/practice-library/infrastructure-hybrid-platform" element={<InfraDashboard />} />
           <Route path="/practice-library/infrastructure-hybrid-platform/power-admin-console" element={<PowerAdminConsole />} />
           <Route path="/practice-library/infrastructure-hybrid-platform/power-map" element={<PowerMap />} />
+          <Route path="/practice-library/infrastructure-hybrid-platform/power-alerts" element={<PowerAlerts />} />
           <Route path="/enterprise-certificate-management" element={<EnterpriseCertificateManagement />} />
           <Route path="/enterprise-certificate-management/risk-exposure" element={<RiskExposureMap />} />
           <Route path="/enterprise-certificate-management/lifecycle" element={<LifecycleJourney />} />
