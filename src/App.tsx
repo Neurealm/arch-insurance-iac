@@ -41,6 +41,7 @@ import SeadOutcomeTracker from "./pages/sead/OutcomeTracker.tsx";
 import SeadMultiAgentCollaboration from "./pages/sead/MultiAgentCollaboration.tsx";
 import SeadHumanInTheLoop from "./pages/sead/HumanInTheLoop.tsx";
 import SeadEngineeringSandbox from "./pages/sead/EngineeringSandbox.tsx";
+import SeadDigitalCoworkerConversation from "./pages/sead/DigitalCoworkerConversation.tsx";
 import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
@@ -324,6 +325,7 @@ const App = () => (
           <Route path="/sead/multi-agent-collaboration" element={<ProtectedRoute><SeadMultiAgentCollaboration /></ProtectedRoute>} />
           <Route path="/sead/human-in-the-loop" element={<ProtectedRoute><SeadHumanInTheLoop /></ProtectedRoute>} />
           <Route path="/sead/engineering-sandbox" element={<ProtectedRoute><SeadEngineeringSandbox /></ProtectedRoute>} />
+          <Route path="/sead/digital-coworker-conversation" element={<ProtectedRoute><SeadDigitalCoworkerConversation /></ProtectedRoute>} />
           <Route path="/sead/simulation-comparison" element={<ProtectedRoute><SeadSimulationComparison /></ProtectedRoute>} />
 
           <Route path="/semiconductor/command-center" element={<ProtectedRoute><ScenarioProvider><SemiCommandCenter /></ScenarioProvider></ProtectedRoute>} />
