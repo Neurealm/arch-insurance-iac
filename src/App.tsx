@@ -29,6 +29,7 @@ import SeadEquipmentHealth from "./pages/sead/EquipmentHealthIntelligence.tsx";
 import SeadCrossDomain from "./pages/sead/CrossDomainContextTwin.tsx";
 import SeadMaintenanceSim from "./pages/sead/MaintenanceDecisionSimulator.tsx";
 import SeadFactoryImpact from "./pages/sead/FactoryImpactSimulator.tsx";
+import SeadDecisionCenter from "./pages/sead/AIMaintenanceDecisionCenter.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
 import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
