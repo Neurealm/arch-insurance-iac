@@ -234,6 +234,7 @@ import AiOptimization from "./pages/practice-library/dashboards/AiOptimization.t
 import HistoricalAnalysis from "./pages/practice-library/dashboards/HistoricalAnalysis.tsx";
 import Forecasting from "./pages/practice-library/dashboards/Forecasting.tsx";
 import CapacityManagement from "./pages/practice-library/dashboards/CapacityManagement.tsx";
+import PowerCapping from "./pages/practice-library/dashboards/PowerCapping.tsx";
 import RealTimeMonitoring from "./pages/practice-library/dashboards/RealTimeMonitoring.tsx";
 import NetworkDashboard from "./pages/practice-library/dashboards/NetworkDashboard.tsx";
 import CloudDashboard from "./pages/practice-library/dashboards/CloudDashboard.tsx";
