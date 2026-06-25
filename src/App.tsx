@@ -42,6 +42,7 @@ import SeadMultiAgentCollaboration from "./pages/sead/MultiAgentCollaboration.ts
 import SeadHumanInTheLoop from "./pages/sead/HumanInTheLoop.tsx";
 import SeadEngineeringSandbox from "./pages/sead/EngineeringSandbox.tsx";
 import SeadDigitalCoworkerConversation from "./pages/sead/DigitalCoworkerConversation.tsx";
+import SeadIotAiArchitecture from "./pages/sead/IotAiArchitecture.tsx";
 import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
