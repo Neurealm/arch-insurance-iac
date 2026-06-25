@@ -10,7 +10,7 @@ import {
   ShieldCheck, Sparkles, Star, ThermometerSun, TrendingDown, TrendingUp,
   Wrench, X, Zap, ZoomIn, CheckCircle2, AlertCircle, RefreshCw, Clock,
   Workflow, FlaskConical, Database, Network as NetIcon,
-  Gavel, Brain, Scale, Target as TargetIcon, BookOpen} from "lucide-react";
+  Gavel, Brain, Scale, Target as TargetIcon, BookOpen, Users} from "lucide-react";
 import {
   Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer,
   Tooltip as RTooltip, XAxis, YAxis,
@@ -238,6 +238,7 @@ const RAIL = [
   { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
   { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
+  { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
 ];
 
 function ModuleRail() {

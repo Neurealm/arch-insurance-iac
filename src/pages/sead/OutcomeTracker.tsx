@@ -5,7 +5,7 @@ import {
   Bell, Boxes, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
   Target as TargetIcon, TrendingUp, TrendingDown, CheckCircle2, AlertTriangle,
-  Clock, DollarSign, Search, Download, ArrowRight, Activity, Award, BookOpen} from "lucide-react";
+  Clock, DollarSign, Search, Download, ArrowRight, Activity, Award, BookOpen, Users} from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
   BarChart, Bar, Cell,
@@ -38,6 +38,7 @@ const RAIL = [
   { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
   { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker", active: true },
+  { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
 ];
 
 function ModuleRail() {

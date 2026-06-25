@@ -38,6 +38,7 @@ import SeadWhatIf from "./pages/sead/WhatIf.tsx";
 import SeadKnowledgeGraph from "./pages/sead/KnowledgeGraph.tsx";
 import SeadOperationalLearning from "./pages/sead/OperationalLearning.tsx";
 import SeadOutcomeTracker from "./pages/sead/OutcomeTracker.tsx";
+import SeadMultiAgentCollaboration from "./pages/sead/MultiAgentCollaboration.tsx";
 import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
@@ -318,6 +319,7 @@ const App = () => (
           <Route path="/sead/knowledge-graph" element={<ProtectedRoute><SeadKnowledgeGraph /></ProtectedRoute>} />
           <Route path="/sead/operational-learning" element={<ProtectedRoute><SeadOperationalLearning /></ProtectedRoute>} />
           <Route path="/sead/outcome-tracker" element={<ProtectedRoute><SeadOutcomeTracker /></ProtectedRoute>} />
+          <Route path="/sead/multi-agent-collaboration" element={<ProtectedRoute><SeadMultiAgentCollaboration /></ProtectedRoute>} />
           <Route path="/sead/simulation-comparison" element={<ProtectedRoute><SeadSimulationComparison /></ProtectedRoute>} />
 
           <Route path="/semiconductor/command-center" element={<ProtectedRoute><ScenarioProvider><SemiCommandCenter /></ScenarioProvider></ProtectedRoute>} />
