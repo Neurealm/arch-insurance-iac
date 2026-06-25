@@ -33,6 +33,7 @@ import SeadDecisionCenter from "./pages/sead/AIMaintenanceDecisionCenter.tsx";
 import SeadHumanGovernance from "./pages/sead/HumanGovernanceCenter.tsx";
 import SeadAIReasoningPlayback from "./pages/sead/AIReasoningPlayback.tsx";
 import SeadConfidenceExplorer from "./pages/sead/ConfidenceExplorer.tsx";
+import SeadExplainability from "./pages/sead/Explainability.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
 import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
