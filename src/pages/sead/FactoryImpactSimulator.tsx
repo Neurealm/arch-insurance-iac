@@ -442,8 +442,8 @@ function CalloutCard({ top, left, tone, title, lines, icon: Ico, onClick, arrow 
   return (
     <motion.button onClick={onClick}
       initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }} style={{ top, left }}
-      className={`absolute min-w-[150px] text-left rounded-md border backdrop-blur-md px-2.5 py-1.5 hover:scale-[1.03] transition-transform ${palette[tone]}`}>
+      transition={{ duration: 0.4 }} style={{ top, left, transform: "translate(-50%, -50%)" }}
+      className={`absolute min-w-[150px] text-left rounded-md border backdrop-blur-md px-2.5 py-1.5 hover:scale-[1.03] transition-transform z-10 ${palette[tone]}`}>
       <div className="flex items-center gap-1.5 mb-0.5">
         {Ico ? <Ico className="h-3 w-3" /> : <span className={`h-1.5 w-1.5 rounded-full ${dotColor[tone]} animate-pulse`} />}
         <span className="text-[11px] font-semibold tracking-tight">{title}</span>
