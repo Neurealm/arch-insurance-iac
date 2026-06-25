@@ -83,27 +83,73 @@ function ModuleRail() {
 
 /* ============================= header ============================= */
 function AppHeader() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const time = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const date = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
   return (
-    <header className="flex items-center gap-4 px-6 h-[72px] border-b border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-transparent backdrop-blur-xl">
+    <header className="flex items-center gap-4 px-6 h-[72px] border-b border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-transparent backdrop-blur-xl sticky top-0 z-30">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-sky-500 via-indigo-500 to-fuchsia-500 grid place-items-center shadow-[0_0_28px_-6px_rgba(99,102,241,0.7)] font-black text-white text-[15px]">N</div>
+        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-rose-500 via-rose-600 to-rose-700 grid place-items-center shadow-[0_0_28px_-6px_rgba(244,63,94,0.7)] font-black text-white text-[15px] tracking-tight">
+          TI
+        </div>
         <div className="leading-tight">
-          <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-semibold">Neurealm · NeuGAIN</div>
+          <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-semibold">Texas Instruments</div>
           <div className="text-[16px] font-semibold text-white tracking-tight">Industrial IoT → AI Maintenance Decision Architecture</div>
-          <div className="text-[11px] text-slate-400">From machine telemetry to governed, explainable maintenance decisions</div>
+          <div className="text-[11px] text-slate-400">From machine telemetry to governed, explainable decisions — DFW Semiconductor Fab</div>
         </div>
       </div>
+
       <div className="flex-1" />
-      <div className="hidden md:flex items-center gap-2">
+
+      <div className="hidden lg:flex items-center gap-2">
         <Pill tone="emerald"><CheckCircle2 className="h-3 w-3" /> Pipeline Healthy</Pill>
         <Pill tone="sky"><Activity className="h-3 w-3" /> 14.2K events/s</Pill>
         <Pill tone="violet"><Brain className="h-3 w-3" /> 9 AI Agents</Pill>
       </div>
-      <div className="flex items-center gap-1.5 ml-3">
-        <button className="h-9 w-9 grid place-items-center rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.04]"><Search className="h-4 w-4" /></button>
-        <button className="h-9 w-9 grid place-items-center rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.04]"><Bell className="h-4 w-4" /></button>
-        <button className="h-9 w-9 grid place-items-center rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.04]"><HelpCircle className="h-4 w-4" /></button>
+
+      <button
+        className="group relative w-[240px] h-9 rounded-lg bg-white/[0.03] border border-white/[0.06] pl-9 pr-12 text-left text-[12px] text-slate-400 hover:border-sky-400/40 hover:bg-white/[0.05] transition"
+      >
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+        Search layers, components…
+        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 h-5 px-1.5 grid place-items-center rounded text-[10px] text-slate-400 bg-white/[0.05] border border-white/[0.08]">⌘K</kbd>
+      </button>
+
+      <button className="h-9 px-3 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center gap-2 text-[12px] text-slate-200 hover:bg-white/[0.06]">
+        <Factory className="h-4 w-4 text-sky-400" />
+        <div className="text-left leading-tight">
+          <div className="font-medium">DFW Semiconductor Fab</div>
+          <div className="text-[10px] text-slate-400 flex items-center gap-1">
+            <MapPin className="h-2.5 w-2.5" /> Richardson, Texas
+          </div>
+        </div>
+        <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+      </button>
+
+      <div className="text-right leading-tight">
+        <div className="text-[12px] text-slate-200 tabular-nums">{date} • {time} CT</div>
+        <div className="text-[10px] text-emerald-400 flex items-center gap-1 justify-end">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+            <span className="relative rounded-full bg-emerald-400 h-1.5 w-1.5" />
+          </span>
+          Live
+        </div>
       </div>
+
+      <button className="relative h-9 w-9 rounded-lg bg-white/[0.03] border border-white/[0.06] grid place-items-center text-slate-300 hover:bg-white/[0.06]">
+        <Bell className="h-4 w-4" />
+        <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold grid place-items-center">3</span>
+      </button>
+      <button className="h-9 w-9 rounded-lg bg-white/[0.03] border border-white/[0.06] grid place-items-center text-slate-300 hover:bg-white/[0.06]">
+        <HelpCircle className="h-4 w-4" />
+      </button>
+      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 grid place-items-center text-[11px] font-bold text-white">AO</div>
     </header>
   );
 }
