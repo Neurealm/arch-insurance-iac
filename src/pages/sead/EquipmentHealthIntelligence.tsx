@@ -226,13 +226,7 @@ const RAIL = [
   { icon: LayoutGrid, label: "Command\nCenter", to: "/sead/command-center" },
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: Building2, label: "Equipment", active: true },
-  { icon: Workflow, label: "Production" },
-  { icon: Wrench, label: "Maintenance" },
-  { icon: Gauge, label: "Quality" },
   { icon: Factory, label: "Facilities" },
-  { icon: Bot, label: "AI Insights" },
-  { icon: FileBarChart2, label: "Reports" },
-  { icon: SettingsIcon, label: "Settings", badge: 7 },
 ];
 
 function ModuleRail() {
