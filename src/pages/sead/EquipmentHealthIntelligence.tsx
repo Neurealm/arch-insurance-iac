@@ -227,6 +227,7 @@ const RAIL = [
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
+  { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Building2, label: "Equipment", active: true },
   { icon: Factory, label: "Facilities" },
 ];
