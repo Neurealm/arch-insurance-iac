@@ -24,6 +24,7 @@ import AuditEvidenceCenter from "./pages/enterprise-cert/AuditEvidenceCenter.tsx
 import PolicyEngine from "./pages/enterprise-cert/PolicyEngine.tsx";
 import CtLogsMonitor from "./pages/enterprise-cert/CtLogsMonitor.tsx";
 import SemiCommandCenter from "./pages/semiconductor/CommandCenter.tsx";
+import SeadCommandCenter from "./pages/sead/CommandCenter.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
 import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
