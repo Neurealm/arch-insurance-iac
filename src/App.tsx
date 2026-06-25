@@ -229,6 +229,7 @@ import EucPracticeDashboard from "./pages/practice-library/dashboards/EucDashboa
 import InfraDashboard from "./pages/practice-library/dashboards/InfraDashboard.tsx";
 import PowerAdminConsole from "./pages/practice-library/dashboards/PowerAdminConsole.tsx";
 import PowerMap from "./pages/practice-library/dashboards/PowerMap.tsx";
+import PowerAlerts from "./pages/practice-library/dashboards/PowerAlerts.tsx";
 import NetworkDashboard from "./pages/practice-library/dashboards/NetworkDashboard.tsx";
 import CloudDashboard from "./pages/practice-library/dashboards/CloudDashboard.tsx";
 import ApplicationDashboard from "./pages/practice-library/dashboards/ApplicationDashboard.tsx";
