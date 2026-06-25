@@ -55,17 +55,9 @@ function useCountUp(target: number, duration = 1100) {
 const RAIL = [
   { icon: LayoutGrid, label: "Command\nCenter", to: "/sead/command-center" },
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
-  { icon: NetIcon, label: "Cross-Domain", active: true },
+  { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin", active: true },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
-  { icon: Building2, label: "Equipment" },
-  { icon: Workflow, label: "Production" },
-  { icon: Wrench, label: "Maintenance" },
-  { icon: Gauge, label: "Quality" },
-  { icon: Factory, label: "Facilities" },
-  { icon: Bot, label: "AI Insights" },
-  { icon: FileBarChart2, label: "Reports" },
-  { icon: SettingsIcon, label: "Settings" },
 ];
 
 function ModuleRail() {
