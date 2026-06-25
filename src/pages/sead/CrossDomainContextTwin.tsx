@@ -839,17 +839,132 @@ function ContextDrawer({ open, id, onClose }: { open: boolean; id: string | null
   );
 }
 
+/* ---------- command palette ---------- */
+
+function CommandPalette({ open, onClose, onJumpDomain, onSetTab, onOpenDrawer }: {
+  open: boolean; onClose: () => void;
+  onJumpDomain: (id: string) => void;
+  onSetTab: (t: string) => void;
+  onOpenDrawer: (id: string) => void;
+}) {
+  const [q, setQ] = useState("");
+  useEffect(() => { if (!open) setQ(""); }, [open]);
+
+  const items = useMemo(() => {
+    const list: { kind: string; label: string; hint?: string; run: () => void }[] = [
+      ...DOMAINS.map((d) => ({ kind: "Domain", label: d.title, hint: `${d.severity.toUpperCase()} · ${d.badge} signals`, run: () => onJumpDomain(d.id) })),
+      ...DOMAINS.map((d) => ({ kind: "Inspect", label: `Open ${d.title} drawer`, run: () => onOpenDrawer(d.id) })),
+      ...TABS.map((t) => ({ kind: "Tab", label: t, run: () => onSetTab(t) })),
+    ];
+    const needle = q.trim().toLowerCase();
+    return needle ? list.filter((i) => i.label.toLowerCase().includes(needle) || i.kind.toLowerCase().includes(needle)) : list.slice(0, 14);
+  }, [q, onJumpDomain, onOpenDrawer, onSetTab]);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[100] grid place-items-start pt-[12vh] bg-black/55 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-[560px] rounded-xl border border-white/10 bg-[#0a1020] shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-white/10">
+          <Search className="h-4 w-4 text-slate-500" />
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Jump to domain, tab, or action…"
+            className="flex-1 bg-transparent outline-none text-[13px] text-slate-100 placeholder:text-slate-500" />
+          <span className="text-[10px] text-slate-500 px-1.5 py-0.5 border border-white/10 rounded">ESC</span>
+        </div>
+        <div className="max-h-[360px] overflow-y-auto py-1">
+          {items.length === 0 && <div className="px-4 py-6 text-center text-[12px] text-slate-500">No matches</div>}
+          {items.map((it, i) => (
+            <button key={i} onClick={() => { it.run(); onClose(); }}
+              className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left hover:bg-white/[0.04]">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-[9px] uppercase tracking-wider text-slate-500 w-14 shrink-0">{it.kind}</span>
+                <span className="text-[12.5px] text-slate-100 truncate">{it.label}</span>
+              </div>
+              {it.hint && <span className="text-[10.5px] text-slate-500 shrink-0">{it.hint}</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- live event ticker ---------- */
+
+const TICKER_SEED = [
+  { sev: "elevated", txt: "ETCH-217 RF reflected power +3.2% (rolling 5m)" },
+  { sev: "monitor", txt: "Lot LOT-A2391 queued for CMP-038 (alt tool)" },
+  { sev: "critical", txt: "Customer commitment LOT-A2394 at risk — ETA -4h" },
+  { sev: "ok", txt: "Utility window confirmed 22:00–04:00 CT" },
+  { sev: "elevated", txt: "Tech TS-04 on-call confirmed for PM window" },
+  { sev: "monitor", txt: "Vendor P-9981 ETA refreshed: 2 days" },
+] as const;
+
+function EventTicker({ paused }: { paused: boolean }) {
+  return (
+    <div className="overflow-hidden border-t border-white/[0.06] bg-white/[0.015]">
+      <div className={`flex gap-8 whitespace-nowrap py-2 px-4 text-[11.5px] ${paused ? "" : "animate-[ticker_45s_linear_infinite]"}`}
+        style={{ animationPlayState: paused ? "paused" : "running" }}>
+        {[...TICKER_SEED, ...TICKER_SEED].map((e, i) => {
+          const sev = SEV_COLORS[e.sev as Severity];
+          return (
+            <span key={i} className="flex items-center gap-2 text-slate-300">
+              <span className={`h-1.5 w-1.5 rounded-full ${sev.dot}`} />
+              <span className={`uppercase tracking-wider text-[9.5px] ${sev.text}`}>{e.sev}</span>
+              <span>{e.txt}</span>
+              <span className="text-slate-600">•</span>
+            </span>
+          );
+        })}
+      </div>
+      <style>{`@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+    </div>
+  );
+}
+
 /* ---------- the page ---------- */
 
 export default function CrossDomainContextTwin() {
   const [tab, setTab] = useState("Impact Map");
   const [selected, setSelected] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [filter, setFilter] = useState<Set<Severity>>(new Set());
+  const [paused, setPaused] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
-  const openDrawer = (id: string) => {
-    setDrawerId(id);
-    setDrawerOpen(true);
+  const openDrawer = useCallback((id: string) => { setDrawerId(id); setDrawerOpen(true); }, []);
+
+  // Hotkeys: ⌘K palette, ESC close, P pause, 1–9 select domain, X export
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && e.key.toLowerCase() === "k") { e.preventDefault(); setPaletteOpen((v) => !v); return; }
+      if (e.key === "Escape") { setPaletteOpen(false); setDrawerOpen(false); setSelected(null); return; }
+      const tgt = e.target as HTMLElement | null;
+      if (tgt && (tgt.tagName === "INPUT" || tgt.tagName === "TEXTAREA")) return;
+      if (e.key.toLowerCase() === "p") setPaused((p) => !p);
+      if (/^[1-9]$/.test(e.key)) {
+        const idx = Number(e.key) - 1;
+        if (DOMAINS[idx]) setSelected(DOMAINS[idx].id);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2200); };
+
+  const exportCsv = () => {
+    const header = "domain,severity,signals,row1,row2,row3";
+    const lines = DOMAINS.map((d) => [d.title, d.severity, d.badge, ...d.rows.map((r) => `"${r.text}${r.emphasis ? " " + r.emphasis : ""}"`)].join(","));
+    const blob = new Blob([header + "\n" + lines.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `etch-217-cross-domain-${Date.now()}.csv`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    showToast("Snapshot exported");
   };
 
   return (
@@ -868,32 +983,87 @@ export default function CrossDomainContextTwin() {
           <main className="flex-1 min-w-0 px-5 py-4 space-y-4">
             <TitleBar />
 
+            {/* Action bar */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button onClick={() => setPaletteOpen(true)}
+                className="h-8 px-2.5 rounded-md bg-white/[0.03] border border-white/[0.08] flex items-center gap-2 text-[11.5px] text-slate-200 hover:bg-white/[0.06]">
+                <Command className="h-3.5 w-3.5 text-sky-300" /> Quick jump
+                <span className="text-[9.5px] text-slate-500 px-1 py-0.5 border border-white/10 rounded ml-1">⌘K</span>
+              </button>
+              <button onClick={() => setPaused((p) => !p)}
+                className="h-8 px-2.5 rounded-md bg-white/[0.03] border border-white/[0.08] flex items-center gap-2 text-[11.5px] text-slate-200 hover:bg-white/[0.06]">
+                {paused ? <Play className="h-3.5 w-3.5 text-emerald-300" /> : <Pause className="h-3.5 w-3.5 text-amber-300" />}
+                {paused ? "Resume stream" : "Pause stream"}
+              </button>
+              <button onClick={exportCsv}
+                className="h-8 px-2.5 rounded-md bg-white/[0.03] border border-white/[0.08] flex items-center gap-2 text-[11.5px] text-slate-200 hover:bg-white/[0.06]">
+                <Download className="h-3.5 w-3.5 text-sky-300" /> Export snapshot
+              </button>
+              {selected && (
+                <button onClick={() => setSelected(null)}
+                  className="h-8 px-2.5 rounded-md bg-sky-500/10 border border-sky-400/30 flex items-center gap-2 text-[11.5px] text-sky-200 hover:bg-sky-500/15">
+                  <X className="h-3.5 w-3.5" /> Clear focus: {DOMAINS.find((d) => d.id === selected)?.title}
+                </button>
+              )}
+              <div className="flex-1" />
+              <span className="text-[10.5px] text-slate-500">Hotkeys: <kbd className="px-1 border border-white/10 rounded">1–9</kbd> focus · <kbd className="px-1 border border-white/10 rounded">P</kbd> pause · <kbd className="px-1 border border-white/10 rounded">Esc</kbd> clear</span>
+            </div>
+
             <GlassCard className="p-0 overflow-hidden">
               <ContextTabs active={tab} onChange={setTab} />
 
               <div className="grid grid-cols-12 gap-4 p-4">
                 <div className="col-span-12 xl:col-span-9">
-                  <ImpactMap selected={selected} setSelected={setSelected} onOpenDrawer={openDrawer} />
+                  <ImpactMap
+                    selected={selected}
+                    setSelected={setSelected}
+                    onOpenDrawer={openDrawer}
+                    filter={filter}
+                    setFilter={setFilter}
+                    hovered={hovered}
+                    setHovered={setHovered}
+                    paused={paused}
+                  />
                 </div>
                 <div className="col-span-12 xl:col-span-3">
                   <ImpactSummary />
                 </div>
               </div>
+
+              <EventTicker paused={paused} />
             </GlassCard>
 
             <TopImpactedEntities />
 
             <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-2 border-t border-white/[0.05]">
               <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className={`h-1.5 w-1.5 rounded-full ${paused ? "bg-amber-400" : "bg-emerald-400 animate-pulse"}`} />
                 Knowledge graph streaming · MES · AMHS · SECS/GEM · EDA · Historian
               </span>
-              <span>Texas Instruments · DFW Fab · Cross-Domain Context Twin v1.0</span>
+              <span>Texas Instruments · DFW Fab · Cross-Domain Context Twin v1.1</span>
             </div>
           </main>
         </div>
 
         <ContextDrawer open={drawerOpen} id={drawerId} onClose={() => setDrawerOpen(false)} />
+
+        <CommandPalette
+          open={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          onJumpDomain={(id) => setSelected(id)}
+          onSetTab={setTab}
+          onOpenDrawer={openDrawer}
+        />
+
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }}
+              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] rounded-lg border border-emerald-400/40 bg-emerald-500/10 backdrop-blur-md px-4 py-2 text-[12px] text-emerald-200">
+              {toast}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </AppShell>
   );
