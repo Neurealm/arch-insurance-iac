@@ -693,11 +693,11 @@ export default function MaintenanceDecisionSimulator() {
               </div>
             </section>
 
-            <section className="grid grid-cols-1 xl:grid-cols-4 gap-3">
-              <Assumptions />
-              <Controls />
-              <div className="xl:col-span-1"><ImpactChart /></div>
-              <Weighting />
+            <section className="grid grid-cols-1 xl:grid-cols-12 gap-3">
+              <div className="xl:col-span-3"><Assumptions /></div>
+              <div className="xl:col-span-3"><Controls /></div>
+              <div className="xl:col-span-3"><ImpactChart /></div>
+              <div className="xl:col-span-3"><Weighting /></div>
             </section>
 
             <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-2 border-t border-white/[0.05]">
