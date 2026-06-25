@@ -5,8 +5,7 @@ import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2,
   CheckCircle2, RotateCcw, SlidersHorizontal, Database, Droplet, Truck,
-  Users, Activity, Wind, FileWarning, UserPlus, ArrowUp, ArrowDown,
-} from "lucide-react";
+  Users, Activity, Wind, FileWarning, UserPlus, ArrowUp, ArrowDown, Scale} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 import {
   BarChart, Bar as RBar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
@@ -29,6 +28,7 @@ const RAIL = [
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
+  { icon: Scale, label: "Simulation\nComparison", to: "/sead/simulation-comparison" },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },

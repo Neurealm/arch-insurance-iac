@@ -10,8 +10,7 @@ import {
   ShieldCheck, Sparkles, Star, ThermometerSun, TrendingDown, TrendingUp,
   Wrench, X, Zap, ZoomIn, CheckCircle2, AlertCircle, RefreshCw, Clock,
   Workflow, FlaskConical, Database, Network as NetIcon,
-  Gavel, Brain,
-} from "lucide-react";
+  Gavel, Brain, Scale} from "lucide-react";
 import {
   Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer,
   Tooltip as RTooltip, XAxis, YAxis,
@@ -228,6 +227,7 @@ const RAIL = [
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence", active: true },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
+  { icon: Scale, label: "Simulation\nComparison", to: "/sead/simulation-comparison" },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },

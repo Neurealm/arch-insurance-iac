@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2, Database, BookOpen,
-  Puzzle, ShieldCheck, Sun, Box, AlertTriangle, Info, CheckCircle2, RefreshCw,
-} from "lucide-react";
+  Puzzle, ShieldCheck, Sun, Box, AlertTriangle, Info, CheckCircle2, RefreshCw, Scale} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RTooltip,
@@ -27,6 +26,7 @@ const RAIL = [
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
+  { icon: Scale, label: "Simulation\nComparison", to: "/sead/simulation-comparison" },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },

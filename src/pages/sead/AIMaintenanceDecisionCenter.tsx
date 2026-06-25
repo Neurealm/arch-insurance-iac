@@ -8,8 +8,7 @@ import {
   Droplets, Zap, DollarSign, Download, FileText, X, Cpu, Star, Award,
   FlaskConical, ClipboardCheck, Hammer, BadgeCheck, ArrowRight, Building2,
   HardHat, ListChecks,
-  Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2,
-} from "lucide-react";
+  Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale} from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
 } from "recharts";
@@ -46,6 +45,7 @@ const RAIL = [
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
+  { icon: Scale, label: "Simulation\nComparison", to: "/sead/simulation-comparison" },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center", active: true },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },

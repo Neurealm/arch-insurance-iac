@@ -5,8 +5,7 @@ import {
   Bell, Boxes, ChevronDown, ChevronRight, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Play, Pause, SkipBack, SkipForward, Activity,
   TrendingUp, BookOpen, ClipboardList, Users, BarChart3, Trophy, CheckCircle2, Wand2,
-  Gauge, Lightbulb, GitBranch, Share2, ShieldCheck, AlertTriangle, Database, Cpu, Settings, ScrollText, Clock,
-} from "lucide-react";
+  Gauge, Lightbulb, GitBranch, Share2, ShieldCheck, AlertTriangle, Database, Cpu, Settings, ScrollText, Clock, Scale} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
@@ -25,6 +24,7 @@ const RAIL = [
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
+  { icon: Scale, label: "Simulation\nComparison", to: "/sead/simulation-comparison" },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },

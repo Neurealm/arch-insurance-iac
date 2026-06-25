@@ -6,8 +6,7 @@ import {
   Wrench, Sparkles, ShieldCheck, CheckCircle2, Clock, AlertTriangle, Users,
   DollarSign, FileText, X, Send, ArrowRight, ArrowLeft, MessageSquare, Paperclip,
   Hammer, ClipboardCheck, Droplets, HardHat, Building2, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Activity, Shield,
-  FileCheck2, Lock, ScrollText,
-} from "lucide-react";
+  FileCheck2, Lock, ScrollText, Scale} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
@@ -26,6 +25,7 @@ const RAIL = [
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
+  { icon: Scale, label: "Simulation\nComparison", to: "/sead/simulation-comparison" },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center", active: true },

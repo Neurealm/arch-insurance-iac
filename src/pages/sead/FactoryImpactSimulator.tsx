@@ -7,8 +7,7 @@ import {
   Workflow, Bot, Gauge, Lightbulb, GitBranch, Share2, AlertTriangle, Cpu, Play, Pause, RefreshCw,
   Plus, Minus, Maximize2, CheckCircle2, X, Sparkles, Droplets, Users,
   ShieldCheck, TrendingUp, TrendingDown, Activity,
-  Gavel, Brain,
-} from "lucide-react";
+  Gavel, Brain, Scale} from "lucide-react";
 import {
   Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, Area, AreaChart,
@@ -45,6 +44,7 @@ const RAIL = [
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
+  { icon: Scale, label: "Simulation\nComparison", to: "/sead/simulation-comparison" },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator", active: true },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
