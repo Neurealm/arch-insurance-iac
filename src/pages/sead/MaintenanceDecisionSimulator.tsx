@@ -745,10 +745,137 @@ function ReasoningDrawer({ open, onClose, scenarioId }: { open: boolean; onClose
   );
 }
 
+/* ============ command palette ============ */
+function CommandPalette({ open, onClose, actions }: {
+  open: boolean; onClose: () => void;
+  actions: { kind: string; label: string; hint?: string; run: () => void }[];
+}) {
+  const [q, setQ] = useState("");
+  useEffect(() => { if (!open) setQ(""); }, [open]);
+  const items = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return needle ? actions.filter((a) => a.label.toLowerCase().includes(needle) || a.kind.toLowerCase().includes(needle)) : actions.slice(0, 16);
+  }, [q, actions]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[100] grid place-items-start pt-[12vh] bg-black/55 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-[560px] mx-auto rounded-xl border border-white/10 bg-[#0a1020] shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-white/10">
+          <Search className="h-4 w-4 text-slate-500" />
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Jump to scenario or run action…"
+            className="flex-1 bg-transparent outline-none text-[13px] text-slate-100 placeholder:text-slate-500" />
+          <span className="text-[10px] text-slate-500 px-1.5 py-0.5 border border-white/10 rounded">ESC</span>
+        </div>
+        <div className="max-h-[360px] overflow-y-auto py-1">
+          {items.length === 0 && <div className="px-4 py-6 text-center text-[12px] text-slate-500">No matches</div>}
+          {items.map((it, i) => (
+            <button key={i} onClick={() => { it.run(); onClose(); }}
+              className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left hover:bg-white/[0.04]">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-[9px] uppercase tracking-wider text-slate-500 w-16 shrink-0">{it.kind}</span>
+                <span className="text-[12.5px] text-slate-100 truncate">{it.label}</span>
+              </div>
+              {it.hint && <span className="text-[10.5px] text-slate-500 shrink-0">{it.hint}</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ============ page ============ */
 export default function MaintenanceDecisionSimulator() {
   const [drawer, setDrawer] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
-  const open = (id: number) => setDrawer({ open: true, id });
+  const [vals, setVals] = useState(WEIGHTS.map((w) => w.v));
+  const [pinned, setPinned] = useState<Set<number>>(new Set());
+  const [busy, setBusy] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"score" | "confidence" | "downtime">("score");
+
+  const open = useCallback((id: number) => setDrawer({ open: true, id }), []);
+  const showToast = (m: string) => { setToast(m); setTimeout(() => setToast(null), 2200); };
+  const resetWeights = () => { setVals(WEIGHTS.map((w) => w.v)); showToast("Weights reset"); };
+
+  const togglePin = (id: number) => {
+    const n = new Set(pinned);
+    n.has(id) ? n.delete(id) : n.add(id);
+    setPinned(n);
+  };
+
+  const rerun = useCallback(() => {
+    setBusy(true);
+    setTimeout(() => { setBusy(false); showToast("Simulation refreshed"); }, 1100);
+  }, []);
+
+  // Live composite score per scenario (0-100), normalized by total weight.
+  const scored = useMemo(() => {
+    const total = Math.max(1, vals.reduce((a, b) => a + b, 0));
+    return SCENARIOS.map((s) => {
+      const sum = s.rawScores.reduce((a, v, i) => a + v * vals[i], 0);
+      return { id: s.id, composite: sum / total };
+    });
+  }, [vals]);
+
+  const rankMap = useMemo(() => {
+    const sorted = [...scored].sort((a, b) => b.composite - a.composite);
+    const m: Record<number, number> = {};
+    sorted.forEach((x, i) => (m[x.id] = i + 1));
+    return m;
+  }, [scored]);
+
+  const topId = useMemo(() => scored.reduce((a, b) => (b.composite > a.composite ? b : a)).id, [scored]);
+  const aiPickComposite = scored.find((x) => x.id === 2)?.composite ?? 0;
+
+  const displayed = useMemo(() => {
+    const base = [...SCENARIOS];
+    if (sortBy === "score") base.sort((a, b) => rankMap[a.id] - rankMap[b.id]);
+    if (sortBy === "confidence") base.sort((a, b) => b.confidence - a.confidence);
+    if (sortBy === "downtime") base.sort((a, b) => a.downtime.localeCompare(b.downtime));
+    return base;
+  }, [sortBy, rankMap]);
+
+  const exportCsv = () => {
+    const header = "scenario,rank,composite,confidence,downtime,overall,recommended";
+    const lines = SCENARIOS.map((s) => {
+      const c = scored.find((x) => x.id === s.id)!;
+      return [s.title, rankMap[s.id], c.composite.toFixed(2), s.confidence, s.downtime, s.overall.label, s.rec ? "yes" : "no"].join(",");
+    });
+    const blob = new Blob([header + "\n" + lines.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `decision-sim-${Date.now()}.csv`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    showToast("Scenarios exported");
+  };
+
+  // Hotkeys
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && e.key.toLowerCase() === "k") { e.preventDefault(); setPaletteOpen((v) => !v); return; }
+      if (e.key === "Escape") { setPaletteOpen(false); setDrawer({ open: false, id: null }); return; }
+      const tgt = e.target as HTMLElement | null;
+      if (tgt && (tgt.tagName === "INPUT" || tgt.tagName === "TEXTAREA")) return;
+      if (e.key.toLowerCase() === "r") rerun();
+      if (e.key.toLowerCase() === "e") exportCsv();
+      if (/^[1-4]$/.test(e.key)) open(Number(e.key));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, rerun, scored, rankMap]);
+
+  const paletteActions = useMemo(() => ([
+    ...SCENARIOS.map((s) => ({ kind: "Scenario", label: `Open ${s.title}`, hint: `#${rankMap[s.id]} · ${s.confidence}% conf`, run: () => open(s.id) })),
+    ...SCENARIOS.map((s) => ({ kind: "Pin", label: `${pinned.has(s.id) ? "Unpin" : "Pin"} ${s.title}`, run: () => togglePin(s.id) })),
+    { kind: "Action", label: "Re-run Simulation", hint: "R", run: rerun },
+    { kind: "Action", label: "Export CSV snapshot", hint: "E", run: exportCsv },
+    { kind: "Action", label: "Reset weights", run: resetWeights },
+    { kind: "Sort", label: "Sort by Composite Score", run: () => setSortBy("score") },
+    { kind: "Sort", label: "Sort by Confidence", run: () => setSortBy("confidence") },
+    { kind: "Sort", label: "Sort by Downtime", run: () => setSortBy("downtime") },
+  ]), [rankMap, pinned, rerun, vals, scored]);
+
   return (
     <AppShell>
       <div className="min-h-screen bg-[#06080f] text-slate-200">
@@ -764,15 +891,70 @@ export default function MaintenanceDecisionSimulator() {
           <main className="flex-1 min-w-0 px-5 py-4 space-y-4">
             <ContextBar onReason={() => open(2)} />
 
+            {/* Action toolbar */}
+            <div className="sticky top-0 z-30 -mx-5 px-5 py-2 bg-[#06080f]/85 backdrop-blur-md border-b border-white/[0.05]">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button onClick={() => setPaletteOpen(true)}
+                  className="h-8 px-2.5 rounded-md bg-white/[0.03] border border-white/[0.08] flex items-center gap-2 text-[11.5px] text-slate-200 hover:bg-white/[0.06]">
+                  <Command className="h-3.5 w-3.5 text-sky-300" /> Quick jump
+                  <span className="text-[9.5px] text-slate-500 px-1 py-0.5 border border-white/10 rounded ml-1">⌘K</span>
+                </button>
+                <button onClick={rerun} disabled={busy}
+                  className="h-8 px-2.5 rounded-md bg-gradient-to-r from-sky-500/80 to-indigo-500/80 text-white text-[11.5px] flex items-center gap-2 hover:brightness-110 disabled:opacity-60">
+                  <RefreshCw className={`h-3.5 w-3.5 ${busy ? "animate-spin" : ""}`} /> Re-run simulation
+                  <span className="text-[9.5px] text-white/70 px-1 py-0.5 border border-white/20 rounded ml-1">R</span>
+                </button>
+                <button onClick={exportCsv}
+                  className="h-8 px-2.5 rounded-md bg-white/[0.03] border border-white/[0.08] flex items-center gap-2 text-[11.5px] text-slate-200 hover:bg-white/[0.06]">
+                  <Download className="h-3.5 w-3.5 text-sky-300" /> Export
+                  <span className="text-[9.5px] text-slate-500 px-1 py-0.5 border border-white/10 rounded ml-1">E</span>
+                </button>
+                <div className="flex items-center gap-1 ml-2 text-[10.5px] text-slate-500">
+                  Sort by:
+                  {(["score", "confidence", "downtime"] as const).map((k) => (
+                    <button key={k} onClick={() => setSortBy(k)}
+                      className={`px-2 py-1 rounded-md border ${sortBy === k ? "bg-sky-500/10 border-sky-400/40 text-sky-200" : "bg-white/[0.02] border-white/[0.06] text-slate-400 hover:text-slate-200"}`}>
+                      {k === "score" ? "Composite" : k === "confidence" ? "Confidence" : "Downtime"}
+                    </button>
+                  ))}
+                </div>
+                {pinned.size > 0 && (
+                  <button onClick={() => setPinned(new Set())}
+                    className="h-8 px-2.5 rounded-md bg-sky-500/10 border border-sky-400/30 text-sky-200 text-[11.5px] flex items-center gap-1.5 hover:bg-sky-500/15">
+                    <X className="h-3.5 w-3.5" /> Clear {pinned.size} pinned
+                  </button>
+                )}
+                <div className="flex-1" />
+                <span className="text-[10.5px] text-slate-500">Hotkeys: <kbd className="px-1 border border-white/10 rounded">1–4</kbd> inspect · <kbd className="px-1 border border-white/10 rounded">R</kbd> re-run · <kbd className="px-1 border border-white/10 rounded">E</kbd> export</span>
+              </div>
+            </div>
+
             <section>
               <div className="flex items-baseline justify-between mb-3 px-1">
                 <div>
                   <div className="text-[16px] font-semibold text-white">Compare Maintenance Window Options</div>
-                  <div className="text-[11.5px] text-slate-400">AI simulates outcomes for each option based on current factory state and constraints.</div>
+                  <div className="text-[11.5px] text-slate-400">Composite scores update live as you adjust the weighting sliders on the right.</div>
                 </div>
+                <div className="text-[10.5px] text-slate-500">Top scorer: <span className="text-emerald-300 font-semibold">{SCENARIOS.find((s) => s.id === topId)?.title}</span></div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-                {SCENARIOS.map((s) => <ScenarioCard key={s.id} s={s} onClick={() => open(s.id)} />)}
+                {displayed.map((s) => {
+                  const sc = scored.find((x) => x.id === s.id)!;
+                  return (
+                    <ScenarioCard
+                      key={s.id}
+                      s={s}
+                      onClick={() => open(s.id)}
+                      composite={sc.composite}
+                      rank={rankMap[s.id]}
+                      delta={s.id === 2 ? null : sc.composite - aiPickComposite}
+                      pinned={pinned.has(s.id)}
+                      onPin={() => togglePin(s.id)}
+                      busy={busy}
+                      isTop={s.id === topId}
+                    />
+                  );
+                })}
               </div>
             </section>
 
@@ -780,7 +962,7 @@ export default function MaintenanceDecisionSimulator() {
               <div className="xl:col-span-3"><Assumptions /></div>
               <div className="xl:col-span-3"><Controls /></div>
               <div className="xl:col-span-3"><ImpactChart /></div>
-              <div className="xl:col-span-3"><Weighting /></div>
+              <div className="xl:col-span-3"><Weighting vals={vals} setVals={setVals} onReset={resetWeights} /></div>
             </section>
 
             <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-2 border-t border-white/[0.05]">
@@ -788,12 +970,24 @@ export default function MaintenanceDecisionSimulator() {
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Simulation engine streaming · MES · CMMS · APC · SECS/GEM · EDA
               </span>
-              <span>Texas Instruments · DFW Fab · Maintenance Decision Simulator v1.0</span>
+              <span>Texas Instruments · DFW Fab · Maintenance Decision Simulator v1.1</span>
             </div>
           </main>
         </div>
 
         <ReasoningDrawer open={drawer.open} scenarioId={drawer.id} onClose={() => setDrawer({ open: false, id: null })} />
+
+        <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} actions={paletteActions} />
+
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }}
+              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] rounded-lg border border-emerald-400/40 bg-emerald-500/10 backdrop-blur-md px-4 py-2 text-[12px] text-emerald-200">
+              {toast}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </AppShell>
   );
