@@ -5,7 +5,7 @@ import {
   Bell, Boxes, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
   Target as TargetIcon, TrendingUp, TrendingDown, CheckCircle2, AlertTriangle,
-  Clock, DollarSign, Search, Download, ArrowRight, Activity, Award, BookOpen, Users, UserCheck} from "lucide-react";
+  Clock, DollarSign, Search, Download, ArrowRight, Activity, Award, BookOpen, Users, UserCheck, FlaskConical} from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
   BarChart, Bar, Cell,

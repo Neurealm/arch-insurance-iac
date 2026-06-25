@@ -8,7 +8,7 @@ import {
   TrendingUp, BookOpen, ClipboardList, Users, BarChart3, Trophy, CheckCircle2, Wand2,
   Gauge, Lightbulb, GitBranch, Share2, ShieldCheck, AlertTriangle, Database, Cpu, Settings,
   ScrollText, Clock, Scale, Command, Search, Download, RotateCcw, Filter, Star, Keyboard,
-  Repeat, X, Zap, Target as TargetIcon, UserCheck} from "lucide-react";
+  Repeat, X, Zap, Target as TargetIcon, UserCheck, FlaskConical} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */

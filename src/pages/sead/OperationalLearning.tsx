@@ -6,7 +6,7 @@ import {
   Wrench, Sparkles, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
   Target as TargetIcon, BookOpen, TrendingUp, TrendingDown, ArrowRight,
   CheckCircle2, AlertTriangle, RefreshCw, Database, Cpu, Layers, GraduationCap,
-  Activity, Download, Search, Users, UserCheck} from "lucide-react";
+  Activity, Download, Search, Users, UserCheck, FlaskConical} from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
   Line, LineChart, BarChart, Bar, Cell, RadarChart, Radar,

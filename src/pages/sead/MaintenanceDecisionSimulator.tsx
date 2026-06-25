@@ -7,7 +7,7 @@ import {
   Settings as SettingsIcon, Wrench, Workflow, Bot, AlertTriangle,
   Cpu, TrendingUp, TrendingDown, Shield, Clock, User, Star, CheckCircle2, X,
   Sparkles, Activity, DollarSign, Zap, Info, Command, Download, Pin, RefreshCw,
-  Gavel, Brain, Scale, Trophy, Minus, Target as TargetIcon, BookOpen, Users, UserCheck} from "lucide-react";
+  Gavel, Brain, Scale, Trophy, Minus, Target as TargetIcon, BookOpen, Users, UserCheck, FlaskConical} from "lucide-react";
 import {
   Area, AreaChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend,

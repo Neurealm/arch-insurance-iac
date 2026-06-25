@@ -7,7 +7,7 @@ import {
   Target as TargetIcon, BookOpen, Users, UserCheck, ArrowRight, CheckCircle2,
   Calendar, Clock, XCircle, Lightbulb as Bulb, Star, RefreshCw, Save, Send,
   Sparkles as SparkIcon, BookOpen as Book, FileText, BarChart3,
-} from "lucide-react";
+, FlaskConical} from "lucide-react";
 import {
   LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
 } from "recharts";

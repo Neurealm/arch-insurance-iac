@@ -5,7 +5,7 @@ import {
   Bell, Boxes, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
   Target as TargetIcon, BookOpen, Users, Activity, ArrowRight, CheckCircle2,
-  MessageSquare, Zap, DollarSign, Cpu, Database, FileSearch, UserCheck} from "lucide-react";
+  MessageSquare, Zap, DollarSign, Cpu, Database, FileSearch, UserCheck, FlaskConical} from "lucide-react";
 
 /* ============================= atoms ============================= */
 function GlassCard({ children, className = "" }: any) {

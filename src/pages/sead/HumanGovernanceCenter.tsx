@@ -8,7 +8,7 @@ import {
   DollarSign, FileText, X, Send, ArrowRight, ArrowLeft, MessageSquare, Paperclip,
   Hammer, ClipboardCheck, Droplets, HardHat, Building2, Gavel, Brain, Gauge, Lightbulb,
   GitBranch, Share2, Activity, Shield, FileCheck2, Lock, ScrollText, Scale,
-  Command, Search, Download, RotateCcw, Play, Filter, ArrowUpDown, Keyboard, Zap, Target as TargetIcon, BookOpen, UserCheck} from "lucide-react";
+  Command, Search, Download, RotateCcw, Play, Filter, ArrowUpDown, Keyboard, Zap, Target as TargetIcon, BookOpen, UserCheck, FlaskConical} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
