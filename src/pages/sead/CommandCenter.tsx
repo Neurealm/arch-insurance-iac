@@ -372,6 +372,7 @@ const RAIL = [
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision Sim", to: "/sead/maintenance-decision-simulator" },
+  { icon: Scale, label: "Simulation Comparison", to: "/sead/simulation-comparison" },
   { icon: Factory, label: "Factory Impact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision Center", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
