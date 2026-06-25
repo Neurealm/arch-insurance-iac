@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import {
+import { Sparkles,
   ArrowLeft, Bell, Boxes, Building2, ChevronDown, Factory, FileBarChart2,
   Gauge, HelpCircle, LayoutGrid, Network as NetIcon, Plus, Minus, Maximize2,
   Settings as SettingsIcon, Search, Star, Wrench, Workflow, Zap, Bot,
@@ -58,6 +58,7 @@ const RAIL = [
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin", active: true },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
+  { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
 ];
 
 function ModuleRail() {
