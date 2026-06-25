@@ -368,11 +368,115 @@ function CenterNode() {
 
 /* ---------- impact map ---------- */
 
-function ImpactMap({ selected, setSelected, onOpenDrawer }: { selected: string | null; setSelected: (id: string | null) => void; onOpenDrawer: (id: string) => void }) {
-  // 4 col x 4 row implicit grid; center node sits in cols 1-3 row 2.
-  // Use CSS grid for layout, SVG overlay for animated lines anchored at center.
+type ImpactMapProps = {
+  selected: string | null;
+  setSelected: (id: string | null) => void;
+  onOpenDrawer: (id: string) => void;
+  filter: Set<Severity>;
+  setFilter: (f: Set<Severity>) => void;
+  hovered: string | null;
+  setHovered: (id: string | null) => void;
+  paused: boolean;
+};
+
+function ImpactMap({ selected, setSelected, onOpenDrawer, filter, setFilter, hovered, setHovered, paused }: ImpactMapProps) {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const centerRef = useRef<HTMLDivElement | null>(null);
+  const nodeRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [paths, setPaths] = useState<Record<string, string>>({});
+  const [size, setSize] = useState({ w: 1000, h: 700 });
+
+  const recompute = useCallback(() => {
+    const wrap = wrapRef.current;
+    const center = centerRef.current;
+    if (!wrap || !center) return;
+    const wr = wrap.getBoundingClientRect();
+    const cr = center.getBoundingClientRect();
+    const cx = cr.left + cr.width / 2 - wr.left;
+    const cy = cr.top + cr.height / 2 - wr.top;
+    const next: Record<string, string> = {};
+    DOMAINS.forEach((d) => {
+      const el = nodeRefs.current[d.id];
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const nx = r.left + r.width / 2 - wr.left;
+      const ny = r.top + r.height / 2 - wr.top;
+      const mx = (cx + nx) / 2;
+      const my = (cy + ny) / 2 - Math.min(40, Math.abs(nx - cx) * 0.18);
+      next[d.id] = `M${cx},${cy} Q${mx},${my} ${nx},${ny}`;
+    });
+    setPaths(next);
+    setSize({ w: wr.width, h: wr.height });
+  }, []);
+
+  useLayoutEffect(() => {
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    if (wrapRef.current) ro.observe(wrapRef.current);
+    window.addEventListener("resize", recompute);
+    return () => { ro.disconnect(); window.removeEventListener("resize", recompute); };
+  }, [recompute]);
+
+  const visible = (d: DomainCard) => filter.size === 0 || filter.has(d.severity);
+  const focus = selected ?? hovered;
+  const isDim = (id: string) => (!!focus && focus !== id) || (filter.size > 0 && !filter.has(DOMAINS.find((d) => d.id === id)!.severity));
+
+  const toggleSev = (s: Severity) => {
+    const next = new Set(filter);
+    next.has(s) ? next.delete(s) : next.add(s);
+    setFilter(next);
+  };
+
+  const renderCell = (idx: number, extra = "") => {
+    const d = DOMAINS[idx];
+    return (
+      <div className={extra}>
+        <DomainNode
+          d={d}
+          selected={selected === d.id}
+          hovered={hovered === d.id}
+          dimmed={isDim(d.id)}
+          onClick={() => setSelected(selected === d.id ? null : d.id)}
+          onDouble={() => onOpenDrawer(d.id)}
+          onHover={setHovered}
+          nodeRef={(el) => { nodeRefs.current[d.id] = el; }}
+        />
+      </div>
+    );
+  };
+
   return (
     <GlassCard className="p-0 overflow-hidden relative">
+      {/* severity filter bar */}
+      <div className="relative z-10 flex items-center gap-2 px-4 py-2 border-b border-white/[0.05] bg-white/[0.015]">
+        <Filter className="h-3.5 w-3.5 text-slate-500" />
+        <span className="text-[10px] uppercase tracking-wider text-slate-500 mr-1">Severity</span>
+        {(["critical", "elevated", "monitor", "ok"] as Severity[]).map((s) => {
+          const active = filter.has(s);
+          const sev = SEV_COLORS[s];
+          return (
+            <button
+              key={s}
+              onClick={() => toggleSev(s)}
+              className={`flex items-center gap-1.5 text-[10.5px] px-2 py-1 rounded-md border transition ${
+                active ? `${sev.bg} ${sev.border} ${sev.text}` : "bg-white/[0.02] border-white/[0.06] text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${sev.dot}`} />
+              {s}
+            </button>
+          );
+        })}
+        {filter.size > 0 && (
+          <button onClick={() => setFilter(new Set())} className="text-[10.5px] text-slate-500 hover:text-slate-200 ml-1">Clear</button>
+        )}
+        <div className="flex-1" />
+        <span className={`flex items-center gap-1.5 text-[10.5px] ${paused ? "text-amber-300" : "text-emerald-300"}`}>
+          <Activity className="h-3 w-3" />
+          {paused ? "Stream paused" : "Streaming live"}
+        </span>
+      </div>
+
       {/* grid background */}
       <div
         className="absolute inset-0 opacity-[0.18] pointer-events-none"
@@ -387,68 +491,62 @@ function ImpactMap({ selected, setSelected, onOpenDrawer }: { selected: string |
         style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(56,189,248,0.10), transparent 60%)" }}
       />
 
-      <div className="relative grid grid-cols-5 gap-x-4 gap-y-3 p-6 min-h-[640px]">
-        {/* Row 1 */}
-        <div className="col-start-2"><DomainNode d={DOMAINS[0]} selected={selected === "production"} onClick={() => setSelected("production")} onDouble={() => onOpenDrawer("production")} /></div>
-        <div className="col-start-3"><DomainNode d={DOMAINS[1]} selected={selected === "dispatch"} onClick={() => setSelected("dispatch")} onDouble={() => onOpenDrawer("dispatch")} /></div>
-        <div className="col-start-4"><DomainNode d={DOMAINS[2]} selected={selected === "quality"} onClick={() => setSelected("quality")} onDouble={() => onOpenDrawer("quality")} /></div>
-
-        {/* Row 2 — engineering / center / maintenance */}
-        <div className="col-start-1 row-start-2 self-center"><DomainNode d={DOMAINS[3]} selected={selected === "engineering"} onClick={() => setSelected("engineering")} onDouble={() => onOpenDrawer("engineering")} /></div>
-        <div className="col-start-3 row-start-2 grid place-items-center"><CenterNode /></div>
-        <div className="col-start-5 row-start-2 self-center"><DomainNode d={DOMAINS[4]} selected={selected === "maintenance"} onClick={() => setSelected("maintenance")} onDouble={() => onOpenDrawer("maintenance")} /></div>
-
-        {/* Row 3 */}
-        <div className="col-start-2 row-start-3"><DomainNode d={DOMAINS[5]} selected={selected === "customers"} onClick={() => setSelected("customers")} onDouble={() => onOpenDrawer("customers")} /></div>
-        <div className="col-start-3 row-start-3"><DomainNode d={DOMAINS[6]} selected={selected === "utilities"} onClick={() => setSelected("utilities")} onDouble={() => onOpenDrawer("utilities")} /></div>
-        <div className="col-start-4 row-start-3"><DomainNode d={DOMAINS[7]} selected={selected === "technicians"} onClick={() => setSelected("technicians")} onDouble={() => onOpenDrawer("technicians")} /></div>
-
-        {/* Row 4 */}
-        <div className="col-start-3 row-start-4"><DomainNode d={DOMAINS[8]} selected={selected === "supply"} onClick={() => setSelected("supply")} onDouble={() => onOpenDrawer("supply")} /></div>
-      </div>
-
-      {/* SVG animated relationship lines — purely decorative since exact card positions are CSS-driven.
-          Render symbolic curved beams emanating from center. */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 1000 700">
-        <defs>
-          {DOMAINS.map((d) => {
-            const sev = SEV_COLORS[d.severity];
+      <div ref={wrapRef} className="relative grid grid-cols-5 gap-x-4 gap-y-3 p-6 min-h-[640px]">
+        {/* SVG lines anchored to real positions */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" width={size.w} height={size.h}>
+          <defs>
+            {DOMAINS.map((d) => {
+              const sev = SEV_COLORS[d.severity];
+              return (
+                <linearGradient key={d.id} id={`grad-${d.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor={sev.stroke} stopOpacity="0.05" />
+                  <stop offset="50%" stopColor={sev.stroke} stopOpacity="0.7" />
+                  <stop offset="100%" stopColor={sev.stroke} stopOpacity="0.95" />
+                </linearGradient>
+              );
+            })}
+          </defs>
+          {DOMAINS.map((dom) => {
+            const path = paths[dom.id];
+            if (!path) return null;
+            const sev = SEV_COLORS[dom.severity];
+            const focused = !!focus && focus === dom.id;
+            const dim = isDim(dom.id) ? 0.12 : focused ? 1 : 0.85;
+            const sw = focused ? 3.2 : 2;
             return (
-              <linearGradient key={d.id} id={`grad-${d.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor={sev.stroke} stopOpacity="0.0" />
-                <stop offset="50%" stopColor={sev.stroke} stopOpacity="0.7" />
-                <stop offset="100%" stopColor={sev.stroke} stopOpacity="0.9" />
-              </linearGradient>
+              <g key={dom.id} style={{ opacity: dim, transition: "opacity 200ms" }}>
+                <path d={path} stroke={`url(#grad-${dom.id})`} strokeWidth={sw} fill="none" strokeLinecap="round" />
+                {!paused && (
+                  <circle r={focused ? 4.5 : 3.2} fill={sev.stroke} style={{ filter: `drop-shadow(0 0 6px ${sev.glow})` }}>
+                    <animateMotion dur={focused ? "2s" : "3.4s"} repeatCount="indefinite" path={path} />
+                  </circle>
+                )}
+              </g>
             );
           })}
-        </defs>
-        {[
-          { id: DOMAINS[0].id, d: "M500,340 C420,260 360,200 280,150" },
-          { id: DOMAINS[1].id, d: "M500,340 C500,260 500,210 500,150" },
-          { id: DOMAINS[2].id, d: "M500,340 C580,260 640,200 720,150" },
-          { id: DOMAINS[3].id, d: "M500,340 C400,340 230,340 130,340" },
-          { id: DOMAINS[4].id, d: "M500,340 C600,340 770,340 870,340" },
-          { id: DOMAINS[5].id, d: "M500,340 C420,420 360,480 280,540" },
-          { id: DOMAINS[6].id, d: "M500,340 C500,420 500,480 500,540" },
-          { id: DOMAINS[7].id, d: "M500,340 C580,420 640,480 720,540" },
-          { id: DOMAINS[8].id, d: "M500,340 C500,500 500,580 500,650" },
-        ].map((seg) => {
-          const dom = DOMAINS.find((d) => d.id === seg.id)!;
-          const sev = SEV_COLORS[dom.severity];
-          const dim = selected && selected !== dom.id ? 0.15 : 1;
-          return (
-            <g key={seg.id} style={{ opacity: dim }}>
-              <path d={seg.d} stroke={`url(#grad-${seg.id})`} strokeWidth={2.2} fill="none" />
-              <circle r="3.5" fill={sev.stroke}>
-                <animateMotion dur="3.2s" repeatCount="indefinite" path={seg.d} />
-              </circle>
-            </g>
-          );
-        })}
-      </svg>
+        </svg>
+
+        {/* Row 1 */}
+        {renderCell(0, "col-start-2 relative z-[1]")}
+        {renderCell(1, "col-start-3 relative z-[1]")}
+        {renderCell(2, "col-start-4 relative z-[1]")}
+
+        {/* Row 2 */}
+        {renderCell(3, "col-start-1 row-start-2 self-center relative z-[1]")}
+        <div ref={centerRef} className="col-start-3 row-start-2 grid place-items-center relative z-[1]"><CenterNode /></div>
+        {renderCell(4, "col-start-5 row-start-2 self-center relative z-[1]")}
+
+        {/* Row 3 */}
+        {renderCell(5, "col-start-2 row-start-3 relative z-[1]")}
+        {renderCell(6, "col-start-3 row-start-3 relative z-[1]")}
+        {renderCell(7, "col-start-4 row-start-3 relative z-[1]")}
+
+        {/* Row 4 */}
+        {renderCell(8, "col-start-3 row-start-4 relative z-[1]")}
+      </div>
 
       {/* zoom controls */}
-      <div className="absolute left-4 bottom-4 flex flex-col gap-1.5">
+      <div className="absolute left-4 bottom-4 flex flex-col gap-1.5 z-10">
         {[Plus, Minus, Maximize2, SettingsIcon].map((I, i) => (
           <button key={i} className="h-8 w-8 rounded-md bg-white/[0.04] border border-white/[0.08] grid place-items-center text-slate-300 hover:bg-white/[0.08]">
             <I className="h-3.5 w-3.5" />
@@ -457,13 +555,13 @@ function ImpactMap({ selected, setSelected, onOpenDrawer }: { selected: string |
       </div>
 
       {/* legend */}
-      <div className="absolute left-20 bottom-4 flex items-center gap-4 text-[11px] text-slate-400">
-        <span className="uppercase tracking-wider text-slate-500">Impact Level</span>
+      <div className="absolute left-20 bottom-4 flex items-center gap-4 text-[11px] text-slate-400 z-10">
+        <span className="uppercase tracking-wider text-slate-500">Impact</span>
         {[
-          { c: "bg-rose-500", l: "High" },
-          { c: "bg-amber-500", l: "Medium" },
-          { c: "bg-sky-500", l: "Low" },
-          { c: "bg-slate-500", l: "Informational" },
+          { c: "bg-rose-500", l: "Critical" },
+          { c: "bg-orange-500", l: "Elevated" },
+          { c: "bg-yellow-500", l: "Monitor" },
+          { c: "bg-emerald-500", l: "OK" },
         ].map((x) => (
           <span key={x.l} className="flex items-center gap-1.5">
             <span className={`h-2.5 w-2.5 rounded-full ${x.c}`} /> {x.l}
