@@ -353,27 +353,52 @@ function ConfidenceGauge({ value, color }: { value: number; color: string }) {
   );
 }
 
-function ScenarioCard({ s, onClick }: { s: Scenario; onClick: () => void }) {
+const ScenarioCard = memo(function ScenarioCard({
+  s, onClick, composite, rank, delta, pinned, onPin, busy, isTop,
+}: {
+  s: Scenario; onClick: () => void;
+  composite: number; rank: number; delta: number | null;
+  pinned: boolean; onPin: () => void; busy: boolean; isTop: boolean;
+}) {
   const conf = useCountUp(s.confidence);
+  const score = useCountUp(composite, 700);
+  const rankColors = ["text-emerald-300 bg-emerald-500/15 border-emerald-500/40", "text-sky-300 bg-sky-500/15 border-sky-500/40", "text-amber-300 bg-amber-500/15 border-amber-500/40", "text-slate-300 bg-white/[0.05] border-white/[0.10]"];
   return (
-    <motion.button
-      onClick={onClick}
+    <motion.div
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: s.id * 0.05 }}
-      className={`group text-left rounded-xl border bg-gradient-to-b from-white/[0.03] to-white/[0.01] p-4 transition relative ${
-        s.rec
+      className={`group relative rounded-xl border bg-gradient-to-b from-white/[0.03] to-white/[0.01] p-4 transition ${
+        isTop
           ? "border-emerald-400/50 shadow-[0_0_40px_-10px_rgba(16,185,129,0.55)] ring-1 ring-emerald-400/30"
+          : pinned
+          ? "border-sky-400/50 shadow-[0_0_30px_-10px_rgba(56,189,248,0.55)] ring-1 ring-sky-400/30"
           : "border-white/[0.07] hover:border-white/[0.14]"
       }`}
     >
-      {s.rec && (
-        <div className="absolute -top-2 right-3 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-400 text-emerald-950">
-          ★ AI Pick
+      {/* top badges */}
+      <div className="absolute -top-2 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
+        <div className={`text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${rankColors[Math.min(rank - 1, 3)]}`}>
+          #{rank} Rank
+        </div>
+        {isTop && (
+          <div className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-400 text-emerald-950 flex items-center gap-1">
+            <Trophy className="h-3 w-3" /> Top Score
+          </div>
+        )}
+      </div>
+
+      {busy && (
+        <div className="absolute inset-0 z-10 rounded-xl bg-[#06080f]/70 backdrop-blur-sm grid place-items-center pointer-events-none">
+          <div className="flex items-center gap-2 text-[11px] text-sky-300">
+            <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Re-simulating…
+          </div>
         </div>
       )}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
+
+      {/* header row */}
+      <div className="flex items-start justify-between mb-3 mt-1">
+        <button onClick={onClick} className="flex items-center gap-3 text-left">
           <div
             className="h-7 w-7 rounded-full grid place-items-center text-[12px] font-bold text-white"
             style={{ background: s.hex, boxShadow: `0 0 18px -3px ${s.hex}` }}
@@ -384,15 +409,54 @@ function ScenarioCard({ s, onClick }: { s: Scenario; onClick: () => void }) {
             <div className="text-[15px] font-semibold text-white leading-tight">{s.title}</div>
             <div className="text-[10.5px] text-slate-400">{s.sub}</div>
           </div>
-        </div>
-        <div className="text-right">
-          <div className="text-[10px] uppercase tracking-wider text-slate-500">Est. Downtime</div>
-          <div className="text-[15px] font-semibold text-white tabular-nums">{s.downtime}</div>
+        </button>
+        <div className="flex items-start gap-2">
+          <button
+            onClick={onPin}
+            title={pinned ? "Unpin scenario" : "Pin scenario for comparison"}
+            className={`h-7 w-7 rounded-md grid place-items-center border ${
+              pinned ? "bg-sky-500/15 border-sky-400/40 text-sky-300" : "bg-white/[0.03] border-white/[0.06] text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Pin className="h-3.5 w-3.5" />
+          </button>
+          <div className="text-right">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500">Downtime</div>
+            <div className="text-[14px] font-semibold text-white tabular-nums">{s.downtime}</div>
+          </div>
         </div>
       </div>
 
-      <div className={`text-[10.5px] font-medium px-2 py-1 rounded border mb-3 inline-flex items-center gap-1.5 ${s.badgeTone}`}>
-        {s.rec && <Star className="h-3 w-3" />} {s.badge}
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <div className={`text-[10.5px] font-medium px-2 py-1 rounded border inline-flex items-center gap-1.5 ${s.badgeTone}`}>
+          {s.rec && <Star className="h-3 w-3" />} {s.badge}
+        </div>
+        {delta !== null && (
+          <span className={`text-[10.5px] font-semibold px-2 py-1 rounded border inline-flex items-center gap-1 ${
+            delta > 0 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+            : delta < 0 ? "bg-rose-500/10 border-rose-500/30 text-rose-300"
+            : "bg-white/[0.04] border-white/[0.08] text-slate-300"
+          }`}>
+            {delta > 0 ? <TrendingUp className="h-3 w-3" /> : delta < 0 ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+            {delta > 0 ? "+" : ""}{delta.toFixed(1)} vs AI pick
+          </span>
+        )}
+      </div>
+
+      {/* composite score bar */}
+      <div className="mb-3 rounded-md bg-white/[0.02] border border-white/[0.05] px-3 py-2">
+        <div className="flex items-center justify-between text-[10.5px] text-slate-400 mb-1.5">
+          <span className="uppercase tracking-wider">Composite Score (live)</span>
+          <span className="text-white text-[13px] font-bold tabular-nums">{score.toFixed(1)}</span>
+        </div>
+        <div className="h-1.5 w-full rounded-full bg-white/[0.06] overflow-hidden">
+          <motion.div
+            className="h-full rounded-full"
+            style={{ background: `linear-gradient(90deg, ${s.hex}66, ${s.hex})` }}
+            animate={{ width: `${composite}%` }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          />
+        </div>
       </div>
 
       <div className="space-y-1.5">
@@ -418,9 +482,13 @@ function ScenarioCard({ s, onClick }: { s: Scenario; onClick: () => void }) {
           <span className="text-[14px] font-bold text-white tabular-nums">{conf.toFixed(0)}%</span>
         </div>
       </div>
-    </motion.button>
+
+      <button onClick={onClick} className="mt-3 w-full h-8 rounded-md bg-white/[0.04] border border-white/[0.07] text-[11.5px] text-slate-200 hover:bg-white/[0.08]">
+        Open Decision Drawer →
+      </button>
+    </motion.div>
   );
-}
+});
 
 /* ============ assumptions ============ */
 const ASSUMPTIONS = [
