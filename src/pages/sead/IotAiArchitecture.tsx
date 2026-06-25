@@ -393,7 +393,7 @@ export default function IotAiArchitecture() {
   const activeLayer = useMemo(() => LAYERS.find(l => l.id === active)!, [active]);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(1200px_600px_at_10%_-10%,rgba(59,130,246,0.12),transparent_60%),radial-gradient(900px_500px_at_110%_10%,rgba(168,85,247,0.10),transparent_60%),#06070d] text-slate-200">
+    <div className="min-h-screen bg-[radial-gradient(1200px_600px_at_10%_-10%,rgba(56,189,248,0.10),transparent_60%),radial-gradient(900px_500px_at_110%_10%,rgba(244,63,94,0.07),transparent_60%),#0a0e1a] text-slate-200">
       <div className="flex">
         <ModuleRail />
         <div className="flex-1 min-w-0">
