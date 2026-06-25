@@ -693,7 +693,7 @@ function MaintenanceOpportunities() {
                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${PRIORITY_STYLES[m.priority]}`}>{m.priority}</span>
                 <div className="min-w-0 flex-1">
                   <div className="text-[13px] text-white font-semibold flex items-center gap-1.5">
-                    <m.icon className={`h-3.5 w-3.5 ${s.color}`} /> {m.name}
+                    <span className={`h-1.5 w-1.5 rounded-full ${s.color.replace("text-", "bg-")}`} /> {m.name}
                   </div>
                 </div>
                 {m.action && <span className="text-[10px] text-emerald-300">{m.action}</span>}
