@@ -225,6 +225,7 @@ function Spark({ data, color }: { data: any[]; color: string }) {
 const RAIL = [
   { icon: LayoutGrid, label: "Command\nCenter", to: "/sead/command-center" },
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
+  { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Building2, label: "Equipment", active: true },
   { icon: Factory, label: "Facilities" },
 ];
