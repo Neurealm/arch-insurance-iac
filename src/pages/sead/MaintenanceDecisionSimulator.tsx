@@ -244,6 +244,8 @@ type Scenario = {
   metrics: { label: string; value: string; tone: string; seedColor: string; seed: number }[];
   overall: { label: string; tone: string };
   confidence: number;
+  // 0–100 scores for [Capacity, Yield, Risk-avoidance, Resource, Commitments]
+  rawScores: [number, number, number, number, number];
 };
 
 const SCENARIOS: Scenario[] = [
