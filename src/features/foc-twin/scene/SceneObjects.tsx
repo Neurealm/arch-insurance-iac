@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
-import { BUILDINGS, AMHS_PATHS, ROADS, STATUS_COLOR } from "./buildings";
-import { useTwinStore, type BuildingMeta } from "./store";
+import { BUILDINGS, AMHS_PATHS, ROADS, STATUS_COLOR } from "../buildings";
+import { useTwinStore, type BuildingMeta } from "../store";
 
 /* =====================================================================
    Scene primitives — built from primitives (no GLTF dependency) so the
