@@ -369,6 +369,7 @@ function KpiCard({ k }: { k: any }) {
 const RAIL = [
   { icon: LayoutGrid, label: "Command Center", active: true },
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
+  { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Building2, label: "Fab Areas" },
   { icon: Factory, label: "Equipment" },
   { icon: Workflow, label: "Production" },
