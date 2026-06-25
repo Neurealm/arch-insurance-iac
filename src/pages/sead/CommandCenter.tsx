@@ -7,7 +7,7 @@ import {
   TrendingDown, TrendingUp, Wrench, Bot, Gauge, Lightbulb, GitBranch, Share2,
   Building2, Network as NetIcon, Boxes, Cpu, Workflow,
   CheckCircle2, Gavel, Brain, Scale, Command as CommandIcon, RefreshCw, Pause, Play,
-  Clock, Filter, X, ArrowRight, Zap, Target as TargetIcon } from "lucide-react";
+  Clock, Filter, X, ArrowRight, Zap, Target as TargetIcon, BookOpen} from "lucide-react";
 import {
   Area, AreaChart, Cell, Pie, PieChart, ResponsiveContainer,
 } from "recharts";
@@ -338,6 +338,7 @@ const RAIL = [
   { icon: Lightbulb,  label: "Explainability",       to: "/sead/explainability" },
   { icon: GitBranch,  label: "What If",              to: "/sead/what-if" },
   { icon: Share2,     label: "Knowledge\nGraph",     to: "/sead/knowledge-graph" },
+  { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
 ];
 

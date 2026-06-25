@@ -36,6 +36,7 @@ import SeadConfidenceExplorer from "./pages/sead/ConfidenceExplorer.tsx";
 import SeadExplainability from "./pages/sead/Explainability.tsx";
 import SeadWhatIf from "./pages/sead/WhatIf.tsx";
 import SeadKnowledgeGraph from "./pages/sead/KnowledgeGraph.tsx";
+import SeadOperationalLearning from "./pages/sead/OperationalLearning.tsx";
 import SeadOutcomeTracker from "./pages/sead/OutcomeTracker.tsx";
 import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
@@ -315,6 +316,7 @@ const App = () => (
           <Route path="/sead/explainability" element={<ProtectedRoute><SeadExplainability /></ProtectedRoute>} />
           <Route path="/sead/what-if" element={<ProtectedRoute><SeadWhatIf /></ProtectedRoute>} />
           <Route path="/sead/knowledge-graph" element={<ProtectedRoute><SeadKnowledgeGraph /></ProtectedRoute>} />
+          <Route path="/sead/operational-learning" element={<ProtectedRoute><SeadOperationalLearning /></ProtectedRoute>} />
           <Route path="/sead/outcome-tracker" element={<ProtectedRoute><SeadOutcomeTracker /></ProtectedRoute>} />
           <Route path="/sead/simulation-comparison" element={<ProtectedRoute><SeadSimulationComparison /></ProtectedRoute>} />
 

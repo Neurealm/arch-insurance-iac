@@ -9,7 +9,7 @@ import {
   ClipboardCheck, Hammer, BadgeCheck, ArrowRight, Building2,
   HardHat, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
   Search, Command as CmdIcon, Keyboard, Send, ThumbsUp, ThumbsDown, RotateCcw,
-  Filter, ArrowUpDown, Target as TargetIcon } from "lucide-react";
+  Filter, ArrowUpDown, Target as TargetIcon, BookOpen} from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
 } from "recharts";
@@ -55,6 +55,7 @@ const RAIL = [
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
   { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
+  { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
 ];
 

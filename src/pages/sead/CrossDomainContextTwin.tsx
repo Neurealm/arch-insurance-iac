@@ -8,7 +8,7 @@ import { Sparkles,
   Truck, Users, UserCog, Briefcase, Beaker, FlaskConical, CircleDot,
   TrendingUp, TrendingDown, CheckCircle2, X, Info, Clock, AlertTriangle,
   Cpu, Database, ShieldCheck, HardHat, Command, Pause, Play, Download, Filter, Activity,
-  Gavel, Brain, Scale, Target as TargetIcon } from "lucide-react";
+  Gavel, Brain, Scale, Target as TargetIcon, BookOpen} from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { AppShell } from "@/components/eoc/AppShell";
 
@@ -66,6 +66,7 @@ const RAIL = [
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
   { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
+  { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
 ];
 

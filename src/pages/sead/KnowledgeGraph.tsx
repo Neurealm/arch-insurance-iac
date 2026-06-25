@@ -6,7 +6,7 @@ import {
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2,
   Search, Users, Link2, Clock, Activity, Plus, Minus, Crosshair, X, Maximize2,
   Layers, Grid3x3, ChevronRight, Package, Building2, Droplet, Wind, ClipboardList,
-  TrendingUp, Settings as SettingsIcon, FileText, ArrowRight, Scale, Target as TargetIcon } from "lucide-react";
+  TrendingUp, Settings as SettingsIcon, FileText, ArrowRight, Scale, Target as TargetIcon, BookOpen} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
@@ -34,6 +34,7 @@ const RAIL = [
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
   { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph", active: true },
+  { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
 ];
 
