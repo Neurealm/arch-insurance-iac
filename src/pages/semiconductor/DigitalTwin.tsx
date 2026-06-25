@@ -1,15 +1,13 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Html, Float } from "@react-three/drei";
-import * as THREE from "three";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, ReferenceLine, Tooltip as RTooltip,
+  Line, LineChart,
 } from "recharts";
 import {
   Activity, AlertTriangle, Bell, Cpu, Factory, Gauge, HelpCircle, Layers, LayoutGrid,
   Settings, ChevronRight, ChevronLeft, X, ArrowRight, CheckCircle2, Clock, Radio,
-  TrendingUp, Database, Wind, Thermometer, Zap, Workflow, Users, BookOpen, Brain,
-  Power, Play, Pause, Eye,
+  TrendingUp, Database, Workflow, BookOpen, Brain,
+  Play, Pause, Search, Command, Camera, Check, Filter, Download, Maximize2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,22 +48,26 @@ const SENSORS: Record<string, Sensor[]> = {
 };
 
 const ANOMALY_SERIES = [
-  { t: "09:50", y: 12, w: 50 }, { t: "09:54", y: 14, w: 50 }, { t: "09:58", y: 18, w: 50 },
-  { t: "10:02", y: 22, w: 50 }, { t: "10:06", y: 28, w: 50 }, { t: "10:10", y: 41, w: 50 },
-  { t: "10:14", y: 54, w: 50 }, { t: "10:18", y: 66, w: 50 }, { t: "10:22", y: 78, w: 50 },
+  { t: "09:50", y: 12 }, { t: "09:54", y: 14 }, { t: "09:58", y: 18 },
+  { t: "10:02", y: 22 }, { t: "10:06", y: 28 }, { t: "10:10", y: 41 },
+  { t: "10:14", y: 54 }, { t: "10:18", y: 66 }, { t: "10:22", y: 78 },
 ];
 
+const SPARK_SOURCES = [10,12,14,13,16,18,21,24,22,26,28,30].map((y,i)=>({i,y}));
+const SPARK_STREAM  = [4,6,5,7,9,11,10,13,15,14,17,19].map((y,i)=>({i,y}));
+const SPARK_ANOM    = [1,2,1,3,2,4,5,4,6,7,6,7].map((y,i)=>({i,y}));
+
 const NAV = [
-  { id: "cmd",    label: "Command\nCenter", icon: LayoutGrid },
-  { id: "twin",   label: "Digital\nTwin",   icon: Cpu, active: true },
-  { id: "eq",     label: "Equipment",       icon: Factory },
-  { id: "prod",   label: "Production",      icon: TrendingUp },
-  { id: "disp",   label: "Dispatch",        icon: Workflow },
-  { id: "fac",    label: "Facilities",      icon: Layers },
-  { id: "ai",     label: "AI Agents",       icon: Brain },
-  { id: "kg",     label: "Knowledge\nGraph",icon: BookOpen },
-  { id: "rep",    label: "Reports",         icon: Activity },
-  { id: "set",    label: "Settings",        icon: Settings },
+  { id: "cmd",  label: "Command\nCenter", icon: LayoutGrid },
+  { id: "twin", label: "Digital\nTwin",   icon: Cpu, active: true },
+  { id: "eq",   label: "Equipment",       icon: Factory },
+  { id: "prod", label: "Production",      icon: TrendingUp },
+  { id: "disp", label: "Dispatch",        icon: Workflow },
+  { id: "fac",  label: "Facilities",      icon: Layers },
+  { id: "ai",   label: "AI Agents",       icon: Brain },
+  { id: "kg",   label: "Knowledge\nGraph",icon: BookOpen },
+  { id: "rep",  label: "Reports",         icon: Activity },
+  { id: "set",  label: "Settings",        icon: Settings },
 ];
 
 const STEPS = [
@@ -74,6 +76,15 @@ const STEPS = [
   { n: 3, label: "Identify Impact" },
   { n: 4, label: "Simulate Options" },
   { n: 5, label: "Recommend" },
+];
+
+const TICKER_EVENTS = [
+  { t: "10:24:08", icon: AlertTriangle, tone: "rose", msg: "ETCH-217 anomaly score crossed 75 (HIGH)" },
+  { t: "10:23:47", icon: Activity,      tone: "amber",msg: "Motor vibration X axis +65.4% on ETCH-217" },
+  { t: "10:22:11", icon: Cpu,           tone: "sky",  msg: "CMP-038 pad pressure trend re-classified MEDIUM" },
+  { t: "10:21:02", icon: Database,      tone: "emerald", msg: "FDC chamber-state ingest at 99.98% (healthy)" },
+  { t: "10:19:48", icon: Radio,         tone: "sky",  msg: "18.5K events/s, latency 142ms p95" },
+  { t: "10:18:12", icon: AlertTriangle, tone: "amber",msg: "Pattern match: ETCH-217 vs INC-2024-0418 (94% sim)" },
 ];
 
 /* ----------------------------- helpers ----------------------------- */
@@ -97,123 +108,17 @@ function sevTone(s: Sev) {
   return s === "HIGH" ? "text-rose-400" : s === "MEDIUM" ? "text-amber-400" : "text-sky-400";
 }
 
-/* ----------------------------- 3D scene ----------------------------- */
+/* ----------------------------- 3D scene (lazy) ----------------------------- */
 
-function PlasmaCore() {
-  const ref = useRef<THREE.Mesh>(null);
-  useFrame((s) => {
-    if (!ref.current) return;
-    const t = s.clock.elapsedTime;
-    ref.current.scale.setScalar(1 + Math.sin(t * 2.4) * 0.06);
-    (ref.current.material as THREE.MeshStandardMaterial).emissiveIntensity = 2.2 + Math.sin(t * 3) * 0.6;
-  });
-  return (
-    <mesh ref={ref} position={[0, 0.2, 0]}>
-      <sphereGeometry args={[0.55, 32, 32]} />
-      <meshStandardMaterial color="#ff3b5c" emissive="#ff3b5c" emissiveIntensity={2.5} transparent opacity={0.85} />
-    </mesh>
-  );
-}
-
-function Chamber() {
-  return (
-    <group>
-      {/* base plinth */}
-      <mesh position={[0, -1.1, 0]} receiveShadow>
-        <boxGeometry args={[5.4, 0.2, 3.6]} />
-        <meshStandardMaterial color="#0c1424" metalness={0.6} roughness={0.4} />
-      </mesh>
-      {/* main chamber body */}
-      <mesh position={[0, 0, 0]} castShadow>
-        <boxGeometry args={[3.2, 2.2, 2.6]} />
-        <meshStandardMaterial color="#1a2438" metalness={0.85} roughness={0.25} />
-      </mesh>
-      {/* viewing window */}
-      <mesh position={[0, 0.05, 1.31]}>
-        <cylinderGeometry args={[0.78, 0.78, 0.04, 48]} />
-        <meshStandardMaterial color="#000814" emissive="#ff2b4a" emissiveIntensity={0.4} metalness={0.9} roughness={0.1} />
-      </mesh>
-      <mesh position={[0, 0.05, 1.34]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.78, 0.05, 16, 64]} />
-        <meshStandardMaterial color="#ff3b5c" emissive="#ff3b5c" emissiveIntensity={2} />
-      </mesh>
-      <mesh position={[0, 0.05, 1.36]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.95, 0.015, 16, 64]} />
-        <meshStandardMaterial color="#ff5577" emissive="#ff5577" emissiveIntensity={1.2} transparent opacity={0.6} />
-      </mesh>
-      <group position={[0, 0.05, 0.9]}>
-        <PlasmaCore />
-      </group>
-      {/* side equipment racks */}
-      <mesh position={[-2.4, -0.2, 0]}>
-        <boxGeometry args={[1.4, 1.8, 2.4]} />
-        <meshStandardMaterial color="#141d2f" metalness={0.7} roughness={0.35} />
-      </mesh>
-      <mesh position={[2.4, -0.2, 0]}>
-        <boxGeometry args={[1.4, 1.8, 2.4]} />
-        <meshStandardMaterial color="#141d2f" metalness={0.7} roughness={0.35} />
-      </mesh>
-      {/* status leds */}
-      {[-2.4, 2.4].map((x, i) => (
-        <mesh key={i} position={[x, 0.5, 1.21]}>
-          <sphereGeometry args={[0.05, 12, 12]} />
-          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={2} />
-        </mesh>
-      ))}
-      {/* top exhaust */}
-      <mesh position={[0, 1.5, 0]}>
-        <cylinderGeometry args={[0.5, 0.7, 0.7, 24]} />
-        <meshStandardMaterial color="#1a2438" metalness={0.8} roughness={0.3} />
-      </mesh>
-      {/* AMR cart */}
-      <group position={[-1.6, -0.85, 1.8]}>
-        <mesh>
-          <boxGeometry args={[0.9, 0.4, 0.6]} />
-          <meshStandardMaterial color="#0f1a2e" metalness={0.6} roughness={0.4} />
-        </mesh>
-        <mesh position={[0, 0.25, 0]}>
-          <boxGeometry args={[0.6, 0.1, 0.4]} />
-          <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={0.8} />
-        </mesh>
-      </group>
-      {/* floor grid glow */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.18, 0]}>
-        <planeGeometry args={[8, 5]} />
-        <meshBasicMaterial color="#0a1428" />
-      </mesh>
-    </group>
-  );
-}
-
-function Scene() {
-  const cam = useRef<THREE.Group>(null);
-  useFrame((s) => {
-    if (!cam.current) return;
-    const t = s.clock.elapsedTime * 0.15;
-    cam.current.rotation.y = Math.sin(t) * 0.12;
-  });
-  return (
-    <>
-      <ambientLight intensity={0.35} />
-      <directionalLight position={[6, 6, 5]} intensity={1.1} color="#dbeafe" />
-      <pointLight position={[0, 0.5, 1.5]} intensity={2.2} color="#ff3b5c" distance={6} />
-      <pointLight position={[-3, 2, 3]} intensity={1.2} color="#60a5fa" />
-      <pointLight position={[3, 2, 3]} intensity={1.0} color="#22d3ee" />
-      <group ref={cam}>
-        <Float speed={0.6} rotationIntensity={0.05} floatIntensity={0.15}>
-          <Chamber />
-        </Float>
-      </group>
-    </>
-  );
-}
+const TwinScene = lazy(() => import("./_DigitalTwinScene"));
 
 /* ----------------------------- UI bits ----------------------------- */
 
-function Pill({ children, tone = "blue" }: { children: React.ReactNode; tone?: "blue" | "red" | "amber" | "emerald" }) {
+function Pill({ children, tone = "blue" }: { children: React.ReactNode; tone?: "blue" | "red" | "amber" | "emerald" | "slate" }) {
   const t = tone === "red"   ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
           : tone === "amber" ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
           : tone === "emerald"? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+          : tone === "slate" ? "bg-slate-800/60 text-slate-300 border-slate-700"
           : "bg-sky-500/15 text-sky-300 border-sky-500/30";
   return <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[11px] font-medium", t)}>{children}</span>;
 }
@@ -240,6 +145,14 @@ export default function DigitalTwin() {
   const [drawer, setDrawer] = useState<"analysis" | "sensor" | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [paused, setPaused] = useState(false);
+  const [query, setQuery] = useState("");
+  const [sevFilter, setSevFilter] = useState<"ALL" | Sev>("ALL");
+  const [range, setRange] = useState<"30m" | "2h" | "24h">("30m");
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [paletteQ, setPaletteQ] = useState("");
+  const [ackd, setAckd] = useState<Record<string, boolean>>({});
+  const [snapshot, setSnapshot] = useState<null | string>(null);
+  const [tickerIdx, setTickerIdx] = useState(0);
 
   const equip = useMemo(() => EQUIPS.find((e) => e.id === equipId)!, [equipId]);
   const sensors = SENSORS[equipId] ?? SENSORS["ETCH-217"];
@@ -247,6 +160,47 @@ export default function DigitalTwin() {
   const sources = useCountUp(2847);
   const stream = useCountUp(18540);
   const anom = useCountUp(7);
+
+  // ticker rotation, paused honors Pause toggle
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => setTickerIdx((i) => (i + 1) % TICKER_EVENTS.length), 2800);
+    return () => clearInterval(id);
+  }, [paused]);
+
+  // command palette ⌘K / Ctrl+K + number hotkeys to switch equipment
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault(); setPaletteOpen((o) => !o); return;
+      }
+      if (e.key === "Escape") { setPaletteOpen(false); setDrawer(null); return; }
+      if (!paletteOpen && /^[1-5]$/.test(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        if (EQUIPS[idx]) setEquipId(EQUIPS[idx].id);
+      }
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [paletteOpen]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return EQUIPS.filter((e) =>
+      (sevFilter === "ALL" || e.sev === sevFilter) &&
+      (!q || e.id.toLowerCase().includes(q) || e.sub.toLowerCase().includes(q) || e.tool.toLowerCase().includes(q))
+    );
+  }, [query, sevFilter]);
+
+  const takeSnapshot = useCallback(() => {
+    const stamp = new Date().toLocaleTimeString();
+    setSnapshot(`Snapshot saved · ${equip.id} @ ${stamp}`);
+    setTimeout(() => setSnapshot(null), 2400);
+  }, [equip.id]);
+
+  const ackCurrent = useCallback(() => {
+    setAckd((a) => ({ ...a, [equip.id]: true }));
+  }, [equip.id]);
 
   return (
     <div className="min-h-screen bg-[#070b15] text-slate-100">
@@ -257,7 +211,7 @@ export default function DigitalTwin() {
             <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-500 grid place-items-center text-white font-bold">N</div>
             <div className="font-semibold tracking-tight">Neurealm</div>
           </div>
-          <div className="w-[260px] shrink-0">
+          <div className="w-[240px] shrink-0">
             <div className="text-[15px] font-semibold leading-tight">Digital Coworker</div>
             <div className="text-xs text-slate-400">Maintenance Optimization Agent</div>
           </div>
@@ -286,31 +240,57 @@ export default function DigitalTwin() {
               );
             })}
           </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="text-right">
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setPaletteOpen(true)}
+              className="hidden md:inline-flex items-center gap-2 h-9 px-3 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-400 hover:border-slate-500"
+              title="Open command palette"
+            >
+              <Search className="h-3.5 w-3.5" />
+              <span>Jump to equipment…</span>
+              <kbd className="ml-2 px-1.5 py-0.5 rounded border border-slate-700 bg-slate-950 text-[10px] text-slate-400 inline-flex items-center gap-0.5">
+                <Command className="h-2.5 w-2.5" />K
+              </kbd>
+            </button>
+            <div className="text-right hidden xl:block">
               <div className="text-sm font-semibold leading-tight">DFW Semiconductor Fab</div>
               <div className="text-[11px] text-slate-400">📍 Richardson, Texas</div>
             </div>
-            <div className="h-8 w-px bg-slate-800" />
-            <div className="text-right">
-              <div className="text-[11px] text-slate-400">May 23, 2025  10:24 AM CT</div>
-              <Pill tone="emerald"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />Live</Pill>
-            </div>
-            <button className="relative h-9 w-9 rounded-lg bg-slate-900 border border-slate-700 grid place-items-center hover:border-slate-500">
+            <Pill tone="emerald"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />Live</Pill>
+            <button className="relative h-9 w-9 rounded-lg bg-slate-900 border border-slate-700 grid place-items-center hover:border-slate-500" title="Notifications">
               <Bell className="h-4 w-4" />
               <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-rose-500 text-[10px] font-bold grid place-items-center">5</span>
             </button>
-            <button className="h-9 w-9 rounded-lg bg-slate-900 border border-slate-700 grid place-items-center hover:border-slate-500">
+            <button className="h-9 w-9 rounded-lg bg-slate-900 border border-slate-700 grid place-items-center hover:border-slate-500" title="Help">
               <HelpCircle className="h-4 w-4" />
             </button>
             <div className="h-9 w-9 rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-500 grid place-items-center text-xs font-bold">AO</div>
           </div>
         </div>
+
+        {/* live ticker */}
+        <div className="border-t border-slate-800/70 bg-[#070d1c] h-7 flex items-center text-[11px] overflow-hidden">
+          <span className="px-3 h-full grid place-items-center border-r border-slate-800/70 text-[10px] font-semibold tracking-[0.18em] text-slate-500 shrink-0">LIVE EVENTS</span>
+          <div className="flex-1 px-3 overflow-hidden">
+            <div key={tickerIdx} className="animate-[fadeIn_0.4s_ease-out] flex items-center gap-2 text-slate-300">
+              {(() => {
+                const ev = TICKER_EVENTS[tickerIdx]; const I = ev.icon;
+                const c = ev.tone === "rose" ? "text-rose-400" : ev.tone === "amber" ? "text-amber-400" : ev.tone === "emerald" ? "text-emerald-400" : "text-sky-400";
+                return <>
+                  <span className="text-slate-500 tabular-nums">{ev.t}</span>
+                  <I className={cn("h-3.5 w-3.5", c)} />
+                  <span>{ev.msg}</span>
+                </>;
+              })()}
+            </div>
+          </div>
+          <div className="px-3 text-slate-500 shrink-0">{paused ? "paused" : `${tickerIdx + 1} / ${TICKER_EVENTS.length}`}</div>
+        </div>
       </header>
 
       <div className="flex">
         {/* LEFT NAV */}
-        <aside className="w-[88px] shrink-0 border-r border-slate-800 bg-[#0a1020] min-h-[calc(100vh-4rem)] py-3 flex flex-col items-stretch gap-1 px-2">
+        <aside className="w-[88px] shrink-0 border-r border-slate-800 bg-[#0a1020] min-h-[calc(100vh-5.75rem)] py-3 flex flex-col items-stretch gap-1 px-2">
           {NAV.map((n) => {
             const Icon = n.icon;
             return (
@@ -338,7 +318,14 @@ export default function DigitalTwin() {
           {/* Top section: title + KPIs */}
           <section className="grid grid-cols-12 gap-4">
             <div className="col-span-12 xl:col-span-7 rounded-xl border border-slate-800 bg-gradient-to-br from-[#0d1426] to-[#0a1020] p-4">
-              <div className="text-[10px] font-semibold tracking-[0.18em] text-slate-500">STEP 1 OF 14</div>
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] font-semibold tracking-[0.18em] text-slate-500">STEP 1 OF 14</div>
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                  <span>Hotkeys</span>
+                  <kbd className="px-1 rounded border border-slate-700 bg-slate-950 text-slate-400">1–5</kbd>
+                  <span>select equipment</span>
+                </div>
+              </div>
               <div className="flex items-start justify-between gap-3 mt-1">
                 <h1 className="text-[26px] font-bold tracking-tight">Detect Abnormal Equipment Behavior</h1>
                 <Pill tone="blue">
@@ -353,9 +340,9 @@ export default function DigitalTwin() {
             </div>
 
             <div className="col-span-12 xl:col-span-5 rounded-xl border border-slate-800 bg-[#0a1020] p-4 grid grid-cols-3 gap-4 relative">
-              <Kpi label="Data Sources" value={sources} sub="IoT Tags Streaming" icon={Database} tone="sky" />
-              <Kpi label="Streaming Rate" value={stream} sub="Events / Second" icon={Radio} tone="sky" />
-              <Kpi label="Anomalies Detected" value={anom} sub="In Last 5 Minutes" icon={AlertTriangle} tone="rose" />
+              <Kpi label="Data Sources"        value={sources} sub="IoT Tags Streaming" icon={Database}        tone="sky"   spark={SPARK_SOURCES} sparkColor="#38bdf8" />
+              <Kpi label="Streaming Rate"      value={stream}  sub="Events / Second"    icon={Radio}           tone="sky"   spark={SPARK_STREAM}  sparkColor="#22d3ee" />
+              <Kpi label="Anomalies Detected"  value={anom}    sub="In Last 5 Minutes"  icon={AlertTriangle}   tone="rose"  spark={SPARK_ANOM}    sparkColor="#f43f5e" />
             </div>
           </section>
 
@@ -363,7 +350,10 @@ export default function DigitalTwin() {
           <section className="grid grid-cols-12 gap-4">
             {/* Left anomaly card */}
             <div className="col-span-12 xl:col-span-3 rounded-xl border border-rose-500/30 bg-gradient-to-br from-rose-950/30 to-[#0a1020] p-4 space-y-3">
-              <div className="text-[10px] font-semibold tracking-[0.18em] text-rose-400">ANOMALY DETECTED</div>
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] font-semibold tracking-[0.18em] text-rose-400">ANOMALY DETECTED</div>
+                {ackd[equip.id] && <Pill tone="emerald"><Check className="h-3 w-3" />Ack</Pill>}
+              </div>
               <div className="flex items-start gap-3">
                 <div className="h-11 w-11 rounded-lg bg-rose-500/15 border border-rose-500/40 grid place-items-center">
                   <AlertTriangle className="h-5 w-5 text-rose-400" />
@@ -390,6 +380,29 @@ export default function DigitalTwin() {
                   </div>
                 ))}
               </dl>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button
+                  onClick={ackCurrent}
+                  disabled={!!ackd[equip.id]}
+                  className="h-8 rounded-lg border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-emerald-200 text-[11px] font-semibold inline-flex items-center justify-center gap-1"
+                  title="Acknowledge anomaly"
+                >
+                  <Check className="h-3.5 w-3.5" /> Ack
+                </button>
+                <button
+                  onClick={takeSnapshot}
+                  className="h-8 rounded-lg border border-slate-700 bg-slate-900 hover:border-slate-500 text-slate-200 text-[11px] font-semibold inline-flex items-center justify-center gap-1"
+                  title="Save snapshot"
+                >
+                  <Camera className="h-3.5 w-3.5" /> Snap
+                </button>
+                <button
+                  className="h-8 rounded-lg border border-slate-700 bg-slate-900 hover:border-slate-500 text-slate-200 text-[11px] font-semibold inline-flex items-center justify-center gap-1"
+                  title="Export evidence"
+                >
+                  <Download className="h-3.5 w-3.5" /> CSV
+                </button>
+              </div>
               <button
                 onClick={() => setDrawer("analysis")}
                 className="w-full h-9 rounded-lg border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-200 text-xs font-semibold inline-flex items-center justify-between px-3"
@@ -399,23 +412,27 @@ export default function DigitalTwin() {
             </div>
 
             {/* 3D scene */}
-            <div className="col-span-12 xl:col-span-6 rounded-xl border border-slate-800 bg-[#06101f] relative overflow-hidden min-h-[460px]">
+            <div className="col-span-12 xl:col-span-6 rounded-xl border border-slate-800 bg-[#06101f] relative overflow-hidden min-h-[480px]">
               <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 px-3 py-1 rounded-md bg-slate-950/80 border border-slate-700 text-xs">
                 <span className="font-semibold">{equip.id}</span>
                 <span className="text-sky-300 ml-1.5">{equip.sub}</span>
               </div>
-              <Canvas
-                shadows
-                camera={{ position: [4.5, 2.2, 5.5], fov: 42 }}
-                className="!h-[460px]"
-                gl={{ antialias: true }}
-              >
-                <color attach="background" args={["#06101f"]} />
-                <Suspense fallback={null}>
-                  <Scene />
-                </Suspense>
-                <OrbitControls enablePan={false} minDistance={4} maxDistance={9} maxPolarAngle={Math.PI / 2.1} />
-              </Canvas>
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+                <button className="h-7 w-7 rounded-md bg-slate-950/80 border border-slate-700 grid place-items-center hover:border-slate-500" title="Fullscreen">
+                  <Maximize2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              <Suspense fallback={
+                <div className="h-[480px] grid place-items-center text-slate-500 text-sm">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="h-8 w-8 rounded-full border-2 border-slate-700 border-t-sky-400 animate-spin" />
+                    <span>Initializing 3D twin…</span>
+                  </div>
+                </div>
+              }>
+                <TwinScene />
+              </Suspense>
 
               {/* sensor hotspots overlay */}
               {sensors.map((sn, i) => {
@@ -446,7 +463,7 @@ export default function DigitalTwin() {
                     {openSensor === sn.key && (
                       <div
                         className={cn(
-                          "absolute z-30 top-0 w-[230px] rounded-md bg-slate-950/95 border border-slate-700 p-2.5 text-[11px] shadow-xl space-y-1",
+                          "absolute z-30 top-0 w-[240px] rounded-md bg-slate-950/95 border border-slate-700 p-2.5 text-[11px] shadow-xl space-y-1",
                           onRight ? "right-full mr-2" : "left-full ml-2",
                         )}
                       >
@@ -455,6 +472,13 @@ export default function DigitalTwin() {
                         <div className="flex justify-between"><span className="text-slate-400">Current</span><span className={sn.abnormal ? "text-rose-300" : ""}>{sn.value}</span></div>
                         <div className="flex justify-between"><span className="text-slate-400">Baseline (30d)</span><span>{sn.baseline}</span></div>
                         <div className="flex justify-between"><span className="text-slate-400">Duration</span><span>{sn.duration}</span></div>
+                        <div className="h-9 -mx-0.5">
+                          <ResponsiveContainer>
+                            <LineChart data={SPARK_SOURCES.map((p, idx) => ({ i: idx, y: 50 + Math.sin(idx) * 8 + (sn.abnormal ? idx * 2 : 0) }))}>
+                              <Line type="monotone" dataKey="y" stroke={sn.abnormal ? "#f43f5e" : "#38bdf8"} strokeWidth={1.5} dot={false} isAnimationActive={false} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
                         <div className="pt-1 border-t border-slate-800 text-slate-300">{sn.failure}</div>
                       </div>
                     )}
@@ -498,11 +522,20 @@ export default function DigitalTwin() {
               <div className="rounded-xl border border-slate-800 bg-[#0a1020] p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-[10px] font-semibold tracking-[0.18em] text-slate-500">ANOMALY TIMELINE</div>
-                  <select className="h-6 text-[11px] bg-slate-900 border border-slate-700 rounded px-1.5">
-                    <option>Last 30 Minutes</option>
-                    <option>Last 2 Hours</option>
-                    <option>Last 24 Hours</option>
-                  </select>
+                  <div className="inline-flex rounded-md border border-slate-700 bg-slate-900 p-0.5 text-[10px]">
+                    {(["30m","2h","24h"] as const).map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setRange(r)}
+                        className={cn(
+                          "px-2 h-5 rounded transition",
+                          range === r ? "bg-sky-500/20 text-sky-200" : "text-slate-400 hover:text-slate-200"
+                        )}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="h-[140px]">
                   <ResponsiveContainer>
@@ -517,13 +550,15 @@ export default function DigitalTwin() {
                       <YAxis tick={{ fill: "#64748b", fontSize: 10 }} axisLine={{ stroke: "#1f2937" }} tickLine={false} domain={[0, 100]} />
                       <RTooltip contentStyle={{ background: "#0a1020", border: "1px solid #334155", fontSize: 11 }} />
                       <ReferenceLine y={50} stroke="#f59e0b" strokeDasharray="4 3" label={{ value: "Warning", position: "insideTopLeft", fill: "#f59e0b", fontSize: 10 }} />
+                      <ReferenceLine y={75} stroke="#f43f5e" strokeDasharray="4 3" label={{ value: "Critical", position: "insideTopLeft", fill: "#f43f5e", fontSize: 10 }} />
                       <Area type="monotone" dataKey="y" stroke="#f43f5e" strokeWidth={2} fill="url(#anomG)" isAnimationActive animationDuration={1500} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="flex items-center gap-3 text-[10px] text-slate-400 mt-1">
                   <span className="inline-flex items-center gap-1"><span className="h-0.5 w-3 bg-rose-500" />Anomaly Score</span>
-                  <span className="inline-flex items-center gap-1"><span className="h-0.5 w-3 border-t border-dashed border-amber-500" />Warning Threshold</span>
+                  <span className="inline-flex items-center gap-1"><span className="h-0.5 w-3 border-t border-dashed border-amber-500" />Warning</span>
+                  <span className="inline-flex items-center gap-1"><span className="h-0.5 w-3 border-t border-dashed border-rose-500" />Critical</span>
                 </div>
               </div>
             </div>
@@ -596,14 +631,48 @@ export default function DigitalTwin() {
               </div>
             </div>
 
-            {/* Top 5 anomalies */}
+            {/* Top anomalies — with search + filter */}
             <div className="col-span-12 xl:col-span-3 rounded-xl border border-slate-800 bg-[#0a1020] p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-[11px] font-semibold tracking-wide">TOP 5 ACTIVE ANOMALIES</div>
+                <div className="text-[11px] font-semibold tracking-wide">ACTIVE ANOMALIES</div>
                 <button className="text-[10px] text-sky-300 hover:underline">View All</button>
               </div>
+
+              <div className="relative mb-2">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search tool, type…"
+                  className="w-full h-7 pl-7 pr-2 rounded-md bg-slate-900 border border-slate-700 text-[11.5px] placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+                />
+              </div>
+              <div className="flex items-center gap-1 mb-2">
+                <Filter className="h-3 w-3 text-slate-500" />
+                {(["ALL","HIGH","MEDIUM","LOW"] as const).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSevFilter(s)}
+                    className={cn(
+                      "px-1.5 h-5 rounded text-[10px] font-semibold border transition",
+                      sevFilter === s
+                        ? s === "HIGH" ? "bg-rose-500/20 text-rose-200 border-rose-500/40"
+                        : s === "MEDIUM" ? "bg-amber-500/20 text-amber-200 border-amber-500/40"
+                        : s === "LOW" ? "bg-sky-500/20 text-sky-200 border-sky-500/40"
+                        : "bg-slate-700/40 text-slate-100 border-slate-600"
+                        : "bg-slate-900 text-slate-400 border-slate-700 hover:text-slate-200"
+                    )}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+
               <ul className="space-y-1.5">
-                {EQUIPS.map((e) => (
+                {filtered.length === 0 && (
+                  <li className="text-[11px] text-slate-500 text-center py-4">No matches</li>
+                )}
+                {filtered.map((e, idx) => (
                   <li key={e.id}>
                     <button
                       onClick={() => setEquipId(e.id)}
@@ -619,13 +688,17 @@ export default function DigitalTwin() {
                         <Cpu className={cn("h-4 w-4", sevTone(e.sev))} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[12px] font-semibold truncate">{e.id}</div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="text-[12px] font-semibold truncate">{e.id}</div>
+                          {ackd[e.id] && <Check className="h-3 w-3 text-emerald-400" />}
+                        </div>
                         <div className="text-[10.5px] text-slate-400 truncate">{e.sub}</div>
                       </div>
                       <div className="text-right">
                         <div className={cn("text-sm font-bold tabular-nums", sevTone(e.sev))}>{e.score}</div>
                         <div className={cn("text-[9.5px] font-semibold", sevTone(e.sev))}>{e.sev}</div>
                       </div>
+                      <kbd className="ml-1 hidden sm:inline-flex h-4 px-1 rounded border border-slate-700 bg-slate-950 text-[9px] text-slate-500">{idx + 1}</kbd>
                     </button>
                   </li>
                 ))}
@@ -639,6 +712,7 @@ export default function DigitalTwin() {
             <Telemetry label="Streaming Since">10:12:34 AM</Telemetry>
             <Telemetry label="Data Health"><span className="font-semibold text-emerald-300">99.98%</span></Telemetry>
             <Telemetry label="Model Confidence"><span className="font-semibold">High (94.2%)</span></Telemetry>
+            <Telemetry label="Latency p95"><span className="font-semibold">142 ms</span></Telemetry>
             <div className="ml-auto flex items-center gap-3">
               <label className="inline-flex items-center gap-2">
                 <span className="text-slate-400">Auto-refresh</span>
@@ -687,6 +761,77 @@ export default function DigitalTwin() {
         </div>
       )}
 
+      {/* Command palette */}
+      {paletteOpen && (
+        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[14vh] px-4" onClick={() => setPaletteOpen(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="relative w-full max-w-lg rounded-xl bg-[#0a1020] border border-slate-700 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2 border-b border-slate-800 px-3 h-11">
+              <Search className="h-4 w-4 text-slate-500" />
+              <input
+                autoFocus
+                value={paletteQ}
+                onChange={(e) => setPaletteQ(e.target.value)}
+                placeholder="Type to jump to equipment, step, or action…"
+                className="flex-1 bg-transparent outline-none text-sm placeholder:text-slate-500"
+              />
+              <kbd className="px-1.5 py-0.5 rounded border border-slate-700 bg-slate-950 text-[10px] text-slate-400">ESC</kbd>
+            </div>
+            <div className="max-h-[50vh] overflow-y-auto py-1">
+              <div className="px-3 py-1 text-[10px] font-semibold tracking-[0.18em] text-slate-500">EQUIPMENT</div>
+              {EQUIPS.filter((e) => !paletteQ || `${e.id} ${e.sub} ${e.tool}`.toLowerCase().includes(paletteQ.toLowerCase())).map((e) => (
+                <button
+                  key={e.id}
+                  onClick={() => { setEquipId(e.id); setPaletteOpen(false); setPaletteQ(""); }}
+                  className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-slate-900 text-left"
+                >
+                  <Cpu className={cn("h-4 w-4", sevTone(e.sev))} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium">{e.id}</div>
+                    <div className="text-[11px] text-slate-400 truncate">{e.sub} · {e.tool}</div>
+                  </div>
+                  <Pill tone={e.sev === "HIGH" ? "red" : e.sev === "MEDIUM" ? "amber" : "blue"}>{e.sev}</Pill>
+                </button>
+              ))}
+              <div className="px-3 pt-2 pb-1 text-[10px] font-semibold tracking-[0.18em] text-slate-500">STEPS</div>
+              {STEPS.filter((s) => !paletteQ || s.label.toLowerCase().includes(paletteQ.toLowerCase())).map((s) => (
+                <button
+                  key={s.n}
+                  onClick={() => { setActiveStep(s.n); setPaletteOpen(false); setPaletteQ(""); }}
+                  className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-slate-900 text-left"
+                >
+                  <div className="h-5 w-5 rounded-full bg-slate-800 grid place-items-center text-[10px] font-bold">{s.n}</div>
+                  <div className="text-sm">{s.label}</div>
+                </button>
+              ))}
+              <div className="px-3 pt-2 pb-1 text-[10px] font-semibold tracking-[0.18em] text-slate-500">ACTIONS</div>
+              <button onClick={() => { setDrawer("analysis"); setPaletteOpen(false); }} className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-slate-900 text-left">
+                <ChevronRight className="h-4 w-4 text-sky-400" /><span className="text-sm">Open full analysis</span>
+              </button>
+              <button onClick={() => { takeSnapshot(); setPaletteOpen(false); }} className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-slate-900 text-left">
+                <Camera className="h-4 w-4 text-sky-400" /><span className="text-sm">Save snapshot</span>
+              </button>
+              <button onClick={() => { ackCurrent(); setPaletteOpen(false); }} className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-slate-900 text-left">
+                <Check className="h-4 w-4 text-emerald-400" /><span className="text-sm">Acknowledge current anomaly</span>
+              </button>
+              <button onClick={() => { setPaused((p) => !p); setPaletteOpen(false); }} className="w-full px-3 py-2 flex items-center gap-2.5 hover:bg-slate-900 text-left">
+                {paused ? <Play className="h-4 w-4 text-emerald-400" /> : <Pause className="h-4 w-4 text-amber-400" />}
+                <span className="text-sm">{paused ? "Resume live stream" : "Pause live stream"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* snapshot toast */}
+      {snapshot && (
+        <div className="fixed bottom-5 right-5 z-[70] animate-[fadeIn_0.25s_ease-out]">
+          <div className="px-3.5 py-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 text-xs font-medium inline-flex items-center gap-2 shadow-xl backdrop-blur">
+            <Check className="h-4 w-4" /> {snapshot}
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform: translateY(0) } }
         @keyframes slideIn { from { transform: translateX(100%) } to { transform: translateX(0) } }
@@ -697,19 +842,28 @@ export default function DigitalTwin() {
 
 /* ----------------------------- small subcomponents ----------------------------- */
 
-function Kpi({ label, value, sub, icon: Icon, tone }: { label: string; value: string; sub: string; icon: any; tone: "sky" | "rose" }) {
+function Kpi({ label, value, sub, icon: Icon, tone, spark, sparkColor }: {
+  label: string; value: string; sub: string; icon: any; tone: "sky" | "rose";
+  spark?: { i: number; y: number }[]; sparkColor?: string;
+}) {
   const c = tone === "rose" ? "text-rose-400" : "text-slate-100";
   return (
     <div className="group relative w-full text-left" title={`${label}: ${value} — ${sub}`}>
       <div className="text-[11px] text-slate-400">{label}</div>
-      <div className={cn("text-[28px] font-bold tabular-nums leading-tight mt-0.5", c)}>{value}</div>
+      <div className="flex items-end justify-between gap-2">
+        <div className={cn("text-[28px] font-bold tabular-nums leading-tight mt-0.5", c)}>{value}</div>
+        {spark && (
+          <div className="h-9 w-20 -mb-0.5">
+            <ResponsiveContainer>
+              <LineChart data={spark}>
+                <Line type="monotone" dataKey="y" stroke={sparkColor || "#38bdf8"} strokeWidth={1.5} dot={false} isAnimationActive />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
       <div className="flex items-center gap-1.5 text-[10.5px] text-slate-400 mt-0.5">
         <Icon className="h-3 w-3" /> {sub}
-      </div>
-      <div className="pointer-events-none absolute -top-1 left-0 -translate-y-full opacity-0 group-hover:opacity-100 transition-opacity z-20">
-        <div className="px-2.5 py-1.5 rounded-md bg-slate-950/95 border border-slate-700 text-[11px] text-slate-200 whitespace-nowrap shadow-xl">
-          {label}: <span className="font-semibold">{value}</span> — {sub}
-        </div>
       </div>
     </div>
   );
