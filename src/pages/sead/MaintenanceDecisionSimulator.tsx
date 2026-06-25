@@ -608,13 +608,20 @@ const WEIGHTS = [
   { label: "Resource Utilization", v: 15 },
   { label: "Business Commitments", v: 10 },
 ];
-function Weighting() {
-  const [vals, setVals] = useState(WEIGHTS.map((w) => w.v));
+function Weighting({ vals, setVals, onReset }: { vals: number[]; setVals: (v: number[]) => void; onReset: () => void }) {
+  const total = vals.reduce((a, b) => a + b, 0);
   return (
     <GlassCard className="p-4">
-      <div className="text-[12px] font-semibold text-white">Decision Criteria (Weighting)</div>
-      <div className="text-[10.5px] text-slate-400 mb-3">Adjust priorities driving the AI recommendation</div>
-      <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-[12px] font-semibold text-white">Decision Criteria (Weighting)</div>
+          <div className="text-[10.5px] text-slate-400">Re-ranks scenarios live as you adjust</div>
+        </div>
+        <span className={`text-[10.5px] px-2 py-0.5 rounded border tabular-nums ${
+          total === 100 ? "border-emerald-500/30 text-emerald-300 bg-emerald-500/10" : "border-amber-500/30 text-amber-300 bg-amber-500/10"
+        }`}>Σ {total}%</span>
+      </div>
+      <div className="space-y-3 mt-3">
         {WEIGHTS.map((w, i) => (
           <div key={w.label}>
             <div className="flex items-center justify-between text-[11.5px] text-slate-300 mb-1">
@@ -629,7 +636,7 @@ function Weighting() {
           </div>
         ))}
       </div>
-      <button className="text-[11px] text-sky-300 hover:text-sky-200 mt-3">Customize Weights →</button>
+      <button onClick={onReset} className="text-[11px] text-sky-300 hover:text-sky-200 mt-3">Reset to defaults</button>
     </GlassCard>
   );
 }
