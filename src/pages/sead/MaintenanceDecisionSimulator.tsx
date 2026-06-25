@@ -307,6 +307,7 @@ const SCENARIOS: Scenario[] = [
     ],
     overall: { label: "Medium", tone: "text-amber-300" },
     confidence: 79,
+    rawScores: [70, 80, 70, 65, 70],
   },
   {
     id: 4, title: "Maintain Next Week", sub: "(May 27–28)", num: "4",
