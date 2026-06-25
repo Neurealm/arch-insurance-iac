@@ -7,7 +7,7 @@ import {
   Settings as SettingsIcon, Wrench, Workflow, Bot, AlertTriangle,
   Cpu, TrendingUp, TrendingDown, Shield, Clock, User, Star, CheckCircle2, X,
   Sparkles, Activity, DollarSign, Zap, Info, Command, Download, Pin, RefreshCw,
-  Gavel, Brain, Scale, Trophy, Minus, Target as TargetIcon, BookOpen} from "lucide-react";
+  Gavel, Brain, Scale, Trophy, Minus, Target as TargetIcon, BookOpen, Users} from "lucide-react";
 import {
   Area, AreaChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend,
@@ -60,6 +60,8 @@ const RAIL = [
   { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
   { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
+  { icon: Users, label: "Multi-Agent
+Collaboration", to: "/sead/multi-agent-collaboration" },
 ];
 function ModuleRail() {
   const nav = useNavigate();
