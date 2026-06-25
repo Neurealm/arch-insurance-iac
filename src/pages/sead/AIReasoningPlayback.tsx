@@ -5,7 +5,7 @@ import {
   Bell, Boxes, ChevronDown, ChevronRight, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Play, Pause, SkipBack, SkipForward, Activity,
   TrendingUp, BookOpen, ClipboardList, Users, BarChart3, Trophy, CheckCircle2, Wand2,
-  Gauge, Lightbulb, GitBranch, ShieldCheck, AlertTriangle, Database, Cpu, Settings, ScrollText, Clock,
+  Gauge, Lightbulb, GitBranch, Share2, ShieldCheck, AlertTriangle, Database, Cpu, Settings, ScrollText, Clock,
 } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
@@ -32,6 +32,7 @@ const RAIL = [
   { icon: Gauge, label: "Confidence\nExplorer", to: "/sead/confidence-explorer" },
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
+  { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
 ];
 
 function ModuleRail() {

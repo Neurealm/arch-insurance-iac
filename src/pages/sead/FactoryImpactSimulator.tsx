@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Bell, Boxes, Building2, ChevronDown, Factory, HelpCircle,
   LayoutGrid, Network as NetIcon, Settings as SettingsIcon, Wrench,
-  Workflow, Bot, Gauge, Lightbulb, GitBranch, AlertTriangle, Cpu, Play, Pause, RefreshCw,
+  Workflow, Bot, Gauge, Lightbulb, GitBranch, Share2, AlertTriangle, Cpu, Play, Pause, RefreshCw,
   Plus, Minus, Maximize2, CheckCircle2, X, Sparkles, Droplets, Users,
   ShieldCheck, TrendingUp, TrendingDown, Activity,
   Gavel, Brain,
@@ -52,6 +52,7 @@ const RAIL = [
   { icon: Gauge, label: "Confidence\nExplorer", to: "/sead/confidence-explorer" },
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
+  { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
 ];
 function ModuleRail() {
   const nav = useNavigate();

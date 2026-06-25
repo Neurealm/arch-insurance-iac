@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Activity, AlertTriangle, ArrowLeft, Bell, Bot, Boxes, Building2,
-  ChevronDown, Cpu, Factory, FileBarChart2, Gauge, Lightbulb, GitBranch, HardHat, HelpCircle,
+  ChevronDown, Cpu, Factory, FileBarChart2, Gauge, Lightbulb, GitBranch, Share2, HardHat, HelpCircle,
   Info, LayoutGrid, MapPin, MoveDiagonal, RotateCw, Search, Settings as SettingsIcon,
   ShieldCheck, Sparkles, Star, ThermometerSun, TrendingDown, TrendingUp,
   Wrench, X, Zap, ZoomIn, CheckCircle2, AlertCircle, RefreshCw, Clock,
@@ -235,6 +235,7 @@ const RAIL = [
   { icon: Gauge, label: "Confidence\nExplorer", to: "/sead/confidence-explorer" },
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
+  { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
 ];
 
 function ModuleRail() {

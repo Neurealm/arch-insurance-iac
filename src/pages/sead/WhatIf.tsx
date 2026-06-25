@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
-  Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch,
+  Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2,
   CheckCircle2, RotateCcw, SlidersHorizontal, Database, Droplet, Truck,
   Users, Activity, Wind, FileWarning, UserPlus, ArrowUp, ArrowDown,
 } from "lucide-react";
@@ -36,6 +36,7 @@ const RAIL = [
   { icon: Gauge, label: "Confidence\nExplorer", to: "/sead/confidence-explorer" },
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
   { icon: GitBranch, label: "What If", to: "/sead/what-if", active: true },
+  { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
 ];
 
 function ModuleRail() {

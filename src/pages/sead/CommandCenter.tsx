@@ -23,7 +23,7 @@ import {
   Zap,
   Wrench,
   Bot,
-  Gauge, Lightbulb, GitBranch,
+  Gauge, Lightbulb, GitBranch, Share2,
   FileBarChart2,
   Building2,
   Network as NetIcon,
@@ -379,6 +379,7 @@ const RAIL = [
   { icon: Gauge, label: "Confidence\nExplorer", to: "/sead/confidence-explorer" },
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
+  { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
 ];
 
 function ModuleRail() {
