@@ -374,7 +374,8 @@ const RAIL = [
   { icon: Wrench, label: "Decision Sim", to: "/sead/maintenance-decision-simulator" },
   { icon: Factory, label: "Factory Impact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision Center", to: "/sead/ai-maintenance-decision-center" },
-  { icon: Gavel, Brain, label: "Human\nGovernance", to: "/sead/human-governance-center" },
+  { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
+  { icon: Brain, label: "AI Reasoning", to: "/sead/ai-reasoning-playback" },
 ];
 
 function ModuleRail() {
