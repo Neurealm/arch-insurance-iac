@@ -36,6 +36,7 @@ const RAIL = [
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration", active: true },
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
+  { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
 ];
 
 function ModuleRail() {
