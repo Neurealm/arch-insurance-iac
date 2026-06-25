@@ -6,7 +6,7 @@ import {
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2,
   Scale, Star, Award, Cpu, Users, DollarSign, Clock, Droplet, ShieldAlert,
   TrendingUp, TrendingDown, CheckCircle2, Download, RotateCcw, Plus, Search,
-  Command as CmdIcon, Pin, Trophy, Play, ArrowUpDown, Keyboard, Minus, Target as TargetIcon, BookOpen} from "lucide-react";
+  Command as CmdIcon, Pin, Trophy, Play, ArrowUpDown, Keyboard, Minus, Target as TargetIcon, BookOpen, UserCheck} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 import {
   BarChart, Bar as RBar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
@@ -39,6 +39,8 @@ const RAIL = [
   { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
+  { icon: UserCheck, label: "Human-
+in-the-Loop", to: "/sead/human-in-the-loop" },
 ];
 
 function ModuleRail() {

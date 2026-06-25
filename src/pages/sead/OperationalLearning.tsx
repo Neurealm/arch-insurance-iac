@@ -6,7 +6,7 @@ import {
   Wrench, Sparkles, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
   Target as TargetIcon, BookOpen, TrendingUp, TrendingDown, ArrowRight,
   CheckCircle2, AlertTriangle, RefreshCw, Database, Cpu, Layers, GraduationCap,
-  Activity, Download, Search, Users} from "lucide-react";
+  Activity, Download, Search, Users, UserCheck} from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
   Line, LineChart, BarChart, Bar, Cell, RadarChart, Radar,
@@ -41,6 +41,8 @@ const RAIL = [
   { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning", active: true },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
+  { icon: UserCheck, label: "Human-
+in-the-Loop", to: "/sead/human-in-the-loop" },
 ];
 
 function ModuleRail() {

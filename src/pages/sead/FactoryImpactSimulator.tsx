@@ -8,7 +8,7 @@ import {
   Plus, Minus, CheckCircle2, X, Sparkles, Droplets, Users,
   ShieldCheck, TrendingDown, Activity,
   Gavel, Brain, Scale, Search, Command as CmdIcon, Keyboard, Download,
-  SkipBack, SkipForward, Layers as LayersIcon, Eye, EyeOff, Target as TargetIcon, BookOpen} from "lucide-react";
+  SkipBack, SkipForward, Layers as LayersIcon, Eye, EyeOff, Target as TargetIcon, BookOpen, UserCheck} from "lucide-react";
 import {
   Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid,
   Tooltip, Area, AreaChart,
@@ -57,6 +57,8 @@ const RAIL = [
   { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
+  { icon: UserCheck, label: "Human-
+in-the-Loop", to: "/sead/human-in-the-loop" },
 ];
 function ModuleRail() {
   const nav = useNavigate();

@@ -9,7 +9,7 @@ import {
   ClipboardCheck, Hammer, BadgeCheck, ArrowRight, Building2,
   HardHat, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
   Search, Command as CmdIcon, Keyboard, Send, ThumbsUp, ThumbsDown, RotateCcw,
-  Filter, ArrowUpDown, Target as TargetIcon, BookOpen} from "lucide-react";
+  Filter, ArrowUpDown, Target as TargetIcon, BookOpen, UserCheck} from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
 } from "recharts";
@@ -58,6 +58,8 @@ const RAIL = [
   { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
+  { icon: UserCheck, label: "Human-
+in-the-Loop", to: "/sead/human-in-the-loop" },
 ];
 
 function ModuleRail() {
