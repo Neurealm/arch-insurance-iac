@@ -19,7 +19,7 @@ const navGroups: { title: string; items: { label: string; icon: any; to?: string
     { label: "Forecasting", icon: TrendingUp, active: true },
   ]},
   { title: "Management", items: [
-    { label: "Capacity Management", icon: Gauge },
+    { label: "Capacity Management", icon: Gauge, to: "/practice-library/infrastructure-hybrid-platform/capacity-management" },
     { label: "Power Capping", icon: CircleDot },
     { label: "Workload Optimization", icon: Cpu },
     { label: "Policy Management", icon: Layers },
