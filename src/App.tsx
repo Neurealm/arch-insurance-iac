@@ -227,6 +227,7 @@ import { Navigate } from "react-router-dom";
 import ItsmDashboard from "./pages/practice-library/dashboards/ItsmDashboard.tsx";
 import EucPracticeDashboard from "./pages/practice-library/dashboards/EucDashboard.tsx";
 import InfraDashboard from "./pages/practice-library/dashboards/InfraDashboard.tsx";
+import PowerAdminConsole from "./pages/practice-library/dashboards/PowerAdminConsole.tsx";
 import NetworkDashboard from "./pages/practice-library/dashboards/NetworkDashboard.tsx";
 import CloudDashboard from "./pages/practice-library/dashboards/CloudDashboard.tsx";
 import ApplicationDashboard from "./pages/practice-library/dashboards/ApplicationDashboard.tsx";
