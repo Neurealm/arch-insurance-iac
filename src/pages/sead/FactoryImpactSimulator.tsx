@@ -7,7 +7,7 @@ import {
   Workflow, Bot, Gauge, AlertTriangle, Cpu, Play, Pause, RefreshCw,
   Plus, Minus, Maximize2, CheckCircle2, X, Sparkles, Droplets, Users,
   ShieldCheck, TrendingUp, TrendingDown, Activity,
-, Gavel,
+  Gavel,
 } from "lucide-react";
 import {
   Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid,

@@ -8,7 +8,7 @@ import {
   Droplets, Zap, DollarSign, Download, FileText, X, Cpu, Star, Award,
   FlaskConical, ClipboardCheck, Hammer, BadgeCheck, ArrowRight, Building2,
   HardHat, ListChecks,
-, Gavel,
+  Gavel,
 } from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
