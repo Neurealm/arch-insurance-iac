@@ -1,3 +1,4 @@
+import { SeadRail } from "@/components/sead/SeadRail";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
