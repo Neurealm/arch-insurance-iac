@@ -700,15 +700,18 @@ export default function DigitalTwin() {
 function Kpi({ label, value, sub, icon: Icon, tone }: { label: string; value: string; sub: string; icon: any; tone: "sky" | "rose" }) {
   const c = tone === "rose" ? "text-rose-400" : "text-slate-100";
   return (
-    <Tooltip content={`${label}: ${value} — ${sub}`}>
-      <div className="w-full text-left">
-        <div className="text-[11px] text-slate-400">{label}</div>
-        <div className={cn("text-[28px] font-bold tabular-nums leading-tight mt-0.5", c)}>{value}</div>
-        <div className="flex items-center gap-1.5 text-[10.5px] text-slate-400 mt-0.5">
-          <Icon className="h-3 w-3" /> {sub}
+    <div className="group relative w-full text-left" title={`${label}: ${value} — ${sub}`}>
+      <div className="text-[11px] text-slate-400">{label}</div>
+      <div className={cn("text-[28px] font-bold tabular-nums leading-tight mt-0.5", c)}>{value}</div>
+      <div className="flex items-center gap-1.5 text-[10.5px] text-slate-400 mt-0.5">
+        <Icon className="h-3 w-3" /> {sub}
+      </div>
+      <div className="pointer-events-none absolute -top-1 left-0 -translate-y-full opacity-0 group-hover:opacity-100 transition-opacity z-20">
+        <div className="px-2.5 py-1.5 rounded-md bg-slate-950/95 border border-slate-700 text-[11px] text-slate-200 whitespace-nowrap shadow-xl">
+          {label}: <span className="font-semibold">{value}</span> — {sub}
         </div>
       </div>
-    </Tooltip>
+    </div>
   );
 }
 
