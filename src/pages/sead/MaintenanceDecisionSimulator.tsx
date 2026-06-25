@@ -7,7 +7,7 @@ import {
   Settings as SettingsIcon, Wrench, Workflow, Bot, AlertTriangle,
   Cpu, TrendingUp, TrendingDown, Shield, Clock, User, Star, CheckCircle2, X,
   Sparkles, Activity, DollarSign, Zap, Info, Command, Download, Pin, RefreshCw,
-  Gavel, Brain, Scale, Trophy, Minus, Target as TargetIcon, BookOpen, Users, UserCheck, FlaskConical} from "lucide-react";
+  Gavel, Brain, Scale, Trophy, Minus, Target as TargetIcon, BookOpen, Users, UserCheck, FlaskConical, MessageSquare} from "lucide-react";
 import {
   Area, AreaChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend,
@@ -63,6 +63,7 @@ const RAIL = [
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
+  { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
 ];
 function ModuleRail() {
   const nav = useNavigate();

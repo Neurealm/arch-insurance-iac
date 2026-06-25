@@ -7,7 +7,7 @@ import {
   Target as TargetIcon, BookOpen, Users, ArrowRight, ArrowLeft, UserCheck,
   Save, Share2 as ShareIcon, FileDown, Edit3, Info, CheckCircle2, Plus,
   Eye, Copy, Trash2, RefreshCw, FlaskConical
-} from "lucide-react";
+, MessageSquare} from "lucide-react";
 
 /* ============================= atoms ============================= */
 function GlassCard({ children, className = "" }: any) {
@@ -39,6 +39,7 @@ const RAIL = [
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox", active: true },
+  { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
 ];
 
 function ModuleRail() {

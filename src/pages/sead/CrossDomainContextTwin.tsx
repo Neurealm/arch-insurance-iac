@@ -8,7 +8,7 @@ import { Sparkles,
   Truck, Users, UserCog, Briefcase, Beaker, FlaskConical, CircleDot,
   TrendingUp, TrendingDown, CheckCircle2, X, Info, Clock, AlertTriangle,
   Cpu, Database, ShieldCheck, HardHat, Command, Pause, Play, Download, Filter, Activity,
-  Gavel, Brain, Scale, Target as TargetIcon, BookOpen, UserCheck} from "lucide-react";
+  Gavel, Brain, Scale, Target as TargetIcon, BookOpen, UserCheck, MessageSquare} from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { AppShell } from "@/components/eoc/AppShell";
 
@@ -71,6 +71,7 @@ const RAIL = [
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
+  { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
 ];
 
 function ModuleRail() {

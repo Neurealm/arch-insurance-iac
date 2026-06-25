@@ -5,7 +5,7 @@ import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2, Star, Activity,
   ShieldCheck, Users, Zap, Briefcase, Box, CheckCircle2, Database, BookOpen,
-  TrendingUp, Target, Clock, DollarSign, Download, Play, BarChart3, Wallet, Scale, Target as TargetIcon, UserCheck, FlaskConical} from "lucide-react";
+  TrendingUp, Target, Clock, DollarSign, Download, Play, BarChart3, Wallet, Scale, Target as TargetIcon, UserCheck, FlaskConical, MessageSquare} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
@@ -38,6 +38,7 @@ const RAIL = [
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
+  { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
 ];
 
 function ModuleRail() {

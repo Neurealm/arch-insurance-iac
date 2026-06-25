@@ -7,7 +7,7 @@ import {
   Target as TargetIcon, BookOpen, Users, UserCheck, ArrowRight, CheckCircle2,
   Calendar, Clock, XCircle, Lightbulb as Bulb, Star, RefreshCw, Save, Send,
   Sparkles as SparkIcon, BookOpen as Book, FileText, BarChart3, FlaskConical,
-} from "lucide-react";
+, MessageSquare} from "lucide-react";
 import {
   LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
 } from "recharts";
@@ -42,6 +42,7 @@ const RAIL = [
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop", active: true },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
+  { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
 ];
 
 function ModuleRail() {
