@@ -6,8 +6,7 @@ import {
   Wrench, Sparkles, ShieldCheck, CheckCircle2, Clock, AlertTriangle, Users,
   DollarSign, FileText, X, Send, ArrowRight, ArrowLeft, MessageSquare, Paperclip,
   Hammer, ClipboardCheck, Droplets, HardHat, Building2, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Activity, Shield,
-  FileCheck2, Lock, ScrollText,
-} from "lucide-react";
+  FileCheck2, Lock, ScrollText, Scale} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */

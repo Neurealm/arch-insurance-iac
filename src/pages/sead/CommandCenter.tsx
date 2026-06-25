@@ -36,8 +36,7 @@ import {
   ShieldCheck,
   TriangleAlert,
   CheckCircle2,
-  Gavel, Brain,
-} from "lucide-react";
+  Gavel, Brain, Scale} from "lucide-react";
 import {
   Area,
   AreaChart,

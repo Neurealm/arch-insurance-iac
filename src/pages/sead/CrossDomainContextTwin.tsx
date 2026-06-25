@@ -8,8 +8,7 @@ import { Sparkles,
   Truck, Users, UserCog, Briefcase, Beaker, FlaskConical, CircleDot,
   TrendingUp, TrendingDown, CheckCircle2, X, Info, Clock, AlertTriangle,
   Cpu, Database, ShieldCheck, HardHat,
-  Gavel, Brain,
-} from "lucide-react";
+  Gavel, Brain, Scale} from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { AppShell } from "@/components/eoc/AppShell";
 

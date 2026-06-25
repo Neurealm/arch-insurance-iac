@@ -6,8 +6,7 @@ import {
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2,
   Search, Users, Link2, Clock, Activity, Plus, Minus, Crosshair, X, Maximize2,
   Layers, Grid3x3, ChevronRight, Package, Building2, Droplet, Wind, ClipboardList,
-  TrendingUp, Settings as SettingsIcon, FileText, ArrowRight,
-} from "lucide-react";
+  TrendingUp, Settings as SettingsIcon, FileText, ArrowRight, Scale} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */

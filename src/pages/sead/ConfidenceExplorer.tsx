@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2, Database, BookOpen,
-  Puzzle, ShieldCheck, Sun, Box, AlertTriangle, Info, CheckCircle2, RefreshCw,
-} from "lucide-react";
+  Puzzle, ShieldCheck, Sun, Box, AlertTriangle, Info, CheckCircle2, RefreshCw, Scale} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RTooltip,

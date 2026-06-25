@@ -8,8 +8,7 @@ import {
   Droplets, Zap, DollarSign, Download, FileText, X, Cpu, Star, Award,
   FlaskConical, ClipboardCheck, Hammer, BadgeCheck, ArrowRight, Building2,
   HardHat, ListChecks,
-  Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2,
-} from "lucide-react";
+  Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale} from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
 } from "recharts";
