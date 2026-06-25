@@ -327,6 +327,7 @@ const SCENARIOS: Scenario[] = [
     ],
     overall: { label: "Medium", tone: "text-amber-300" },
     confidence: 61,
+    rawScores: [80, 55, 35, 88, 60],
   },
 ];
 
