@@ -233,6 +233,7 @@ import PowerAlerts from "./pages/practice-library/dashboards/PowerAlerts.tsx";
 import AiOptimization from "./pages/practice-library/dashboards/AiOptimization.tsx";
 import HistoricalAnalysis from "./pages/practice-library/dashboards/HistoricalAnalysis.tsx";
 import Forecasting from "./pages/practice-library/dashboards/Forecasting.tsx";
+import CapacityManagement from "./pages/practice-library/dashboards/CapacityManagement.tsx";
 import RealTimeMonitoring from "./pages/practice-library/dashboards/RealTimeMonitoring.tsx";
 import NetworkDashboard from "./pages/practice-library/dashboards/NetworkDashboard.tsx";
 import CloudDashboard from "./pages/practice-library/dashboards/CloudDashboard.tsx";
@@ -538,6 +539,7 @@ const App = () => (
           <Route path="/practice-library/infrastructure-hybrid-platform/historical-analysis" element={<HistoricalAnalysis />} />
           <Route path="/practice-library/infrastructure-hybrid-platform/forecasting" element={<Forecasting />} />
           <Route path="/practice-library/infrastructure-hybrid-platform/real-time-monitoring" element={<RealTimeMonitoring />} />
+          <Route path="/practice-library/infrastructure-hybrid-platform/capacity-management" element={<CapacityManagement />} />
           <Route path="/enterprise-certificate-management" element={<EnterpriseCertificateManagement />} />
           <Route path="/enterprise-certificate-management/risk-exposure" element={<RiskExposureMap />} />
           <Route path="/enterprise-certificate-management/lifecycle" element={<LifecycleJourney />} />
