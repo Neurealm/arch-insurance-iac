@@ -8,7 +8,7 @@ import {
   Cpu, Radio, Database, Layers, ShieldCheck, Workflow, ArrowRight,
   Activity, Zap, Cloud, GitMerge, Search, Download, Maximize2, Play, Pause,
   CheckCircle2, AlertTriangle, BarChart3, Lock, FileText, Wind, Thermometer,
-  Server, Antenna,
+  Server, Antenna, X,
 } from "lucide-react";
 
 /* ============================= atoms ============================= */
@@ -386,39 +386,191 @@ function LayerCard({ layer, index, active, onClick, flowing }: any) {
   );
 }
 
+/* ============================= Command Palette ============================= */
+function CommandPalette({ open, onClose, onJump }: { open: boolean; onClose: () => void; onJump: (id: string) => void }) {
+  const [q, setQ] = useState("");
+  useEffect(() => { if (open) setQ(""); }, [open]);
+  const items = useMemo(() => {
+    const rows: { kind: string; name: string; layerId: string }[] = [];
+    LAYERS.forEach(l => {
+      rows.push({ kind: "Layer", name: `${l.n}. ${l.title}`, layerId: l.id });
+      l.components.forEach(c => rows.push({ kind: l.title.split(" ")[0], name: c.label, layerId: l.id }));
+    });
+    const s = q.trim().toLowerCase();
+    return (s ? rows.filter(r => r.name.toLowerCase().includes(s) || r.kind.toLowerCase().includes(s)) : rows).slice(0, 12);
+  }, [q]);
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-[14vh] px-4" onClick={onClose}>
+          <motion.div initial={{ y: -10, opacity: 0, scale: 0.98 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: -8, opacity: 0 }}
+            transition={{ duration: 0.18 }} onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-[640px] rounded-2xl border border-white/10 bg-black/95 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)] overflow-hidden">
+            <div className="flex items-center gap-3 px-4 h-12 border-b border-white/[0.06]">
+              <Search className="h-4 w-4 text-slate-400" />
+              <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Escape" && onClose()}
+                placeholder="Search layers, components, models, gateways…"
+                className="flex-1 bg-transparent text-[13px] text-slate-100 placeholder:text-slate-500 outline-none" />
+              <kbd className="text-[10px] px-1.5 h-5 grid place-items-center rounded bg-white/[0.06] border border-white/[0.08] text-slate-400">ESC</kbd>
+            </div>
+            <div className="max-h-[50vh] overflow-y-auto py-2">
+              {items.length === 0 ? <div className="px-4 py-6 text-center text-[12px] text-slate-500">No matches.</div> :
+                items.map((r, i) => (
+                  <button key={i} onClick={() => { onJump(r.layerId); onClose(); }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-white/[0.05] transition">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 w-14 truncate">{r.kind}</span>
+                    <span className="text-[13px] text-slate-100 flex-1 truncate">{r.name}</span>
+                    <ArrowRight className="h-3.5 w-3.5 text-slate-500" />
+                  </button>
+                ))}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 /* ============================= page ============================= */
 export default function IotAiArchitecture() {
   const [active, setActive] = useState<string>("ai");
   const [flowing, setFlowing] = useState(true);
+  const [focusMode, setFocusMode] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [events, setEvents] = useState(14237);
+  const [decisions, setDecisions] = useState(142);
   const activeLayer = useMemo(() => LAYERS.find(l => l.id === active)!, [active]);
 
+  // live counters
+  useEffect(() => {
+    if (!flowing) return;
+    const t = setInterval(() => {
+      setEvents(e => e + Math.floor(Math.random() * 80 + 20));
+      if (Math.random() > 0.7) setDecisions(d => d + 1);
+    }, 1000);
+    return () => clearInterval(t);
+  }, [flowing]);
+
+  // jump to layer + scroll into view
+  const jumpTo = (id: string) => {
+    setActive(id);
+    setTimeout(() => document.getElementById(`layer-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 30);
+  };
+
+  // keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      const typing = tag === "INPUT" || tag === "TEXTAREA";
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPaletteOpen(true); return; }
+      if (typing) return;
+      if (e.key === "p" || e.key === "P") { setFlowing(v => !v); }
+      if (e.key === "f" || e.key === "F") { setFocusMode(v => !v); }
+      const n = parseInt(e.key, 10);
+      if (n >= 1 && n <= 6) { const l = LAYERS[n - 1]; if (l) jumpTo(l.id); }
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        const idx = LAYERS.findIndex(l => l.id === active);
+        const next = e.key === "ArrowDown" ? Math.min(LAYERS.length - 1, idx + 1) : Math.max(0, idx - 1);
+        jumpTo(LAYERS[next].id);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [active]);
+
+  const filteredLayers = useMemo(() => {
+    const s = query.trim().toLowerCase();
+    if (!s) return LAYERS.map(l => ({ layer: l, hit: false }));
+    return LAYERS.map(l => {
+      const hit = l.title.toLowerCase().includes(s) || l.subtitle.toLowerCase().includes(s) ||
+        l.components.some(c => c.label.toLowerCase().includes(s) || (c.meta || "").toLowerCase().includes(s));
+      return { layer: l, hit };
+    });
+  }, [query]);
+
   return (
-    <div className="min-h-screen bg-[radial-gradient(1200px_600px_at_10%_-10%,rgba(56,189,248,0.10),transparent_60%),radial-gradient(900px_500px_at_110%_10%,rgba(244,63,94,0.07),transparent_60%),#0a0e1a] text-slate-200">
-      <div className="flex">
+    <div className="min-h-screen bg-black text-slate-200">
+      {/* subtle ambient glow on pure black */}
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(800px_400px_at_15%_-5%,rgba(56,189,248,0.07),transparent_60%),radial-gradient(700px_400px_at_110%_5%,rgba(244,63,94,0.05),transparent_60%)]" />
+      <div className="relative z-10 flex">
         <ModuleRail />
         <div className="flex-1 min-w-0">
           <AppHeader />
 
+          {/* pipeline ribbon mini-nav */}
+          <div className="px-6 pt-4">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-2 flex items-center gap-1.5 overflow-x-auto">
+              {LAYERS.map((l, i) => {
+                const isActive = active === l.id;
+                return (
+                  <div key={l.id} className="flex items-center gap-1.5 shrink-0">
+                    <button onClick={() => jumpTo(l.id)}
+                      className={`group flex items-center gap-2 px-2.5 h-9 rounded-lg border text-[11.5px] transition ${
+                        isActive ? `${l.dot} text-white border-white/20 shadow-[0_0_18px_-6px_rgba(255,255,255,0.5)]`
+                          : "bg-white/[0.02] text-slate-300 border-white/[0.06] hover:bg-white/[0.06]"
+                      }`}>
+                      <span className={`h-5 w-5 rounded-md grid place-items-center text-[10px] font-bold ${isActive ? "bg-white/20" : l.dot + " text-white"}`}>{l.n}</span>
+                      <span className="font-medium truncate max-w-[140px]">{l.title.replace(" Layer", "")}</span>
+                      <kbd className={`text-[9px] px-1 rounded ${isActive ? "bg-white/20 text-white" : "bg-white/[0.05] text-slate-500 border border-white/[0.08]"}`}>{l.n}</kbd>
+                    </button>
+                    {i < LAYERS.length - 1 && (
+                      <motion.span animate={flowing ? { opacity: [0.3, 1, 0.3] } : { opacity: 0.4 }}
+                        transition={{ duration: 1.6, repeat: Infinity, delay: i * 0.2 }}
+                        className="text-slate-600 text-[14px]">›</motion.span>
+                    )}
+                  </div>
+                );
+              })}
+              <div className="flex-1" />
+              <button onClick={() => setFocusMode(v => !v)}
+                className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 h-9 rounded-lg border text-[11px] transition ${
+                  focusMode ? "bg-sky-500/15 text-sky-200 border-sky-400/30" : "bg-white/[0.02] text-slate-300 border-white/[0.06] hover:bg-white/[0.06]"
+                }`}>
+                <Maximize2 className="h-3.5 w-3.5" /> Focus
+                <kbd className="text-[9px] px-1 rounded bg-white/[0.06] text-slate-400">F</kbd>
+              </button>
+              <button onClick={() => setFlowing(v => !v)}
+                className="shrink-0 inline-flex items-center gap-1.5 px-2.5 h-9 rounded-lg bg-white/[0.02] border border-white/[0.06] text-[11px] text-slate-300 hover:bg-white/[0.06]">
+                {flowing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                {flowing ? "Pause" : "Play"}
+                <kbd className="text-[9px] px-1 rounded bg-white/[0.06] text-slate-400">P</kbd>
+              </button>
+            </div>
+          </div>
+
           {/* hero strip */}
-          <div className="px-6 pt-5">
+          <div className="px-6 pt-4">
             <div className="grid grid-cols-12 gap-4">
               <GlassCard className="col-span-12 lg:col-span-8 p-5">
                 <div className="flex items-start gap-4">
                   <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-sky-500/20 to-indigo-500/20 border border-white/10 grid place-items-center">
                     <Layers className="h-5 w-5 text-sky-300" />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Key Message</div>
                     <div className="mt-1 text-[15px] text-white leading-snug">
                       NeuGAIN does not just collect IoT data. It converts machine telemetry into a <span className="text-emerald-300 font-semibold">governed, explainable maintenance decision</span> by combining sensor health, production context, utility constraints, engineering rules, and business priorities.
                     </div>
+                    {/* layer search */}
+                    <div className="mt-3 relative max-w-[420px]">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+                      <input value={query} onChange={e => setQuery(e.target.value)}
+                        placeholder="Filter layers & components…"
+                        className="w-full h-9 pl-9 pr-9 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[12px] text-slate-100 placeholder:text-slate-500 outline-none focus:border-sky-400/40" />
+                      {query && (
+                        <button onClick={() => setQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 grid place-items-center rounded text-slate-400 hover:text-white hover:bg-white/[0.06]">
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1.5">
-                    <button
-                      onClick={() => setFlowing(v => !v)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.04] text-[11.5px] text-slate-200 hover:bg-white/[0.08]"
-                    >
-                      {flowing ? <><Pause className="h-3.5 w-3.5" /> Pause Flow</> : <><Play className="h-3.5 w-3.5" /> Play Flow</>}
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <button onClick={() => setPaletteOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.04] text-[11.5px] text-slate-200 hover:bg-white/[0.08]">
+                      <Search className="h-3.5 w-3.5" /> Quick Jump <kbd className="text-[9px] px-1 rounded bg-white/[0.06] text-slate-400">⌘K</kbd>
                     </button>
                     <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.04] text-[11.5px] text-slate-200 hover:bg-white/[0.08]">
                       <Download className="h-3.5 w-3.5" /> Export Blueprint
@@ -428,16 +580,25 @@ export default function IotAiArchitecture() {
               </GlassCard>
 
               <GlassCard className="col-span-12 lg:col-span-4 p-5">
-                <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Pipeline Telemetry</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Pipeline Telemetry</div>
+                  <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className={`absolute inset-0 rounded-full bg-emerald-400 ${flowing ? "animate-ping" : ""} opacity-75`} />
+                      <span className="relative rounded-full bg-emerald-400 h-1.5 w-1.5" />
+                    </span>
+                    {flowing ? "Streaming" : "Paused"}
+                  </span>
+                </div>
                 <div className="mt-3 grid grid-cols-3 gap-3">
                   {[
-                    { k: "End-to-end", v: "4.6s", l: "p95 latency" },
-                    { k: "Decisions", v: "142", l: "today" },
-                    { k: "Auto-Approved", v: "61%", l: "HITL skipped" },
+                    { k: "Events", v: events.toLocaleString(), l: "ingested today" },
+                    { k: "Decisions", v: String(decisions), l: "rec'd today" },
+                    { k: "Auto-Appr", v: "61%", l: "HITL skipped" },
                   ].map(s => (
                     <div key={s.k} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
                       <div className="text-[9.5px] uppercase tracking-wider text-slate-400">{s.k}</div>
-                      <div className="text-[18px] font-semibold text-white tracking-tight">{s.v}</div>
+                      <div className="text-[18px] font-semibold text-white tracking-tight tabular-nums">{s.v}</div>
                       <div className="text-[10px] text-slate-500">{s.l}</div>
                     </div>
                   ))}
@@ -448,24 +609,30 @@ export default function IotAiArchitecture() {
 
           {/* layers + side rails */}
           <div className="px-6 py-5 grid grid-cols-12 gap-4">
-            {/* layers */}
             <div className="col-span-12 xl:col-span-9 space-y-5">
-              {LAYERS.map((l, i) => (
-                <LayerCard
-                  key={l.id}
-                  layer={l}
-                  index={i}
-                  active={active === l.id}
-                  flowing={flowing && active === l.id}
-                  onClick={() => setActive(l.id)}
-                />
-              ))}
+              {filteredLayers.map(({ layer: l, hit }, i) => {
+                const dimmed = focusMode && active !== l.id;
+                const queryHit = query.trim() && hit;
+                return (
+                  <div key={l.id} id={`layer-${l.id}`} className={`transition-all duration-300 ${dimmed ? "opacity-30 scale-[0.99]" : "opacity-100"} ${queryHit ? "ring-2 ring-sky-400/40 rounded-2xl" : ""}`}>
+                    <LayerCard
+                      layer={l}
+                      index={i}
+                      active={active === l.id}
+                      flowing={flowing && (active === l.id || !focusMode)}
+                      onClick={() => setActive(l.id)}
+                    />
+                  </div>
+                );
+              })}
 
               {/* feedback loop */}
               <GlassCard className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-lg bg-amber-500/15 border border-amber-400/25 grid place-items-center">
-                    <GitMerge className="h-4 w-4 text-amber-300" />
+                    <motion.div animate={flowing ? { rotate: 360 } : {}} transition={{ duration: 8, repeat: Infinity, ease: "linear" }}>
+                      <GitMerge className="h-4 w-4 text-amber-300" />
+                    </motion.div>
                   </div>
                   <div className="flex-1">
                     <div className="text-[12.5px] font-semibold text-white">Feedback & Learning Loop</div>
@@ -479,7 +646,7 @@ export default function IotAiArchitecture() {
               </GlassCard>
             </div>
 
-            {/* side rails: outcomes + governance + detail */}
+            {/* side rails */}
             <div className="col-span-12 xl:col-span-3 space-y-4">
               <GlassCard className="p-4">
                 <div className="text-[11px] uppercase tracking-[0.2em] text-emerald-300/90 font-semibold">Outcomes & Value</div>
@@ -517,12 +684,7 @@ export default function IotAiArchitecture() {
 
               {/* selected layer drawer */}
               <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeLayer.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                >
+                <motion.div key={activeLayer.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
                   <GlassCard className="p-4">
                     <div className="flex items-center gap-2">
                       <div className={`h-6 w-6 rounded-md grid place-items-center ${activeLayer.dot} text-white text-[11px] font-bold`}>{activeLayer.n}</div>
@@ -544,10 +706,23 @@ export default function IotAiArchitecture() {
                   </GlassCard>
                 </motion.div>
               </AnimatePresence>
+
+              {/* keyboard hints */}
+              <GlassCard className="p-3">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-semibold mb-2">Keyboard</div>
+                <div className="grid grid-cols-2 gap-1.5 text-[10.5px] text-slate-300">
+                  <div className="flex items-center justify-between"><span>Quick jump</span><kbd className="px-1 rounded bg-white/[0.06] border border-white/[0.08] text-slate-400">⌘K</kbd></div>
+                  <div className="flex items-center justify-between"><span>Pause flow</span><kbd className="px-1 rounded bg-white/[0.06] border border-white/[0.08] text-slate-400">P</kbd></div>
+                  <div className="flex items-center justify-between"><span>Focus mode</span><kbd className="px-1 rounded bg-white/[0.06] border border-white/[0.08] text-slate-400">F</kbd></div>
+                  <div className="flex items-center justify-between"><span>Layer 1–6</span><kbd className="px-1 rounded bg-white/[0.06] border border-white/[0.08] text-slate-400">1-6</kbd></div>
+                  <div className="flex items-center justify-between col-span-2"><span>Next / Previous layer</span><span className="flex gap-0.5"><kbd className="px-1 rounded bg-white/[0.06] border border-white/[0.08] text-slate-400">↑</kbd><kbd className="px-1 rounded bg-white/[0.06] border border-white/[0.08] text-slate-400">↓</kbd></span></div>
+                </div>
+              </GlassCard>
             </div>
           </div>
         </div>
       </div>
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} onJump={jumpTo} />
     </div>
   );
 }
