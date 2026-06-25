@@ -287,79 +287,11 @@ function KpiCard({ k }: { k: any }) {
   );
 }
 
-/* ---------- Digital Twin viewport (placeholder, architected for R3F) ---------- */
+/* ---------- Digital Twin viewport (production R3F scene) ---------- */
 
-function DigitalTwinViewport() {
-  return (
-    <div className="relative h-[420px] w-full overflow-hidden rounded-lg border border-white/[0.06] bg-[radial-gradient(ellipse_at_center,_rgba(56,189,248,0.10),_rgba(2,6,23,0.0)_60%)]">
-      {/* animated grid */}
-      <div
-        className="absolute inset-0 opacity-[0.35]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(56,189,248,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.10) 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-          maskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
-        }}
-      />
-      {/* sweep */}
-      <motion.div
-        className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-sky-400/10 to-transparent"
-        animate={{ x: ["0%", "400%"] }}
-        transition={{ duration: 6, ease: "linear", repeat: Infinity }}
-      />
-      {/* placeholder fab tiles */}
-      <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 gap-2 p-8">
-        {Array.from({ length: 24 }).map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 0.45 + (i % 5) * 0.08, scale: 1 }}
-            transition={{ delay: i * 0.02, duration: 0.4 }}
-            className="rounded-md border border-white/[0.06] bg-white/[0.03] shadow-[0_0_24px_-12px_rgba(56,189,248,0.4)_inset]"
-          />
-        ))}
-      </div>
-      {/* center loader */}
-      <div className="absolute inset-0 grid place-items-center pointer-events-none">
-        <div className="flex flex-col items-center gap-3">
-          <div className="relative h-14 w-14">
-            <motion.div
-              className="absolute inset-0 rounded-full border-2 border-sky-400/60"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 4, ease: "linear", repeat: Infinity }}
-              style={{ borderRightColor: "transparent", borderBottomColor: "transparent" }}
-            />
-            <div className="absolute inset-2 rounded-full bg-sky-400/10 border border-sky-400/30 grid place-items-center">
-              <Boxes className="h-5 w-5 text-sky-300" />
-            </div>
-          </div>
-          <div className="text-[12px] uppercase tracking-[0.2em] text-sky-300/90">
-            Preparing Factory Digital Twin
-          </div>
-          <div className="text-[11px] text-slate-400">
-            React Three Fiber scene mounts here in Prompt&nbsp;2
-          </div>
-        </div>
-      </div>
-      {/* corner camera controls placeholder */}
-      <div className="absolute right-3 top-3 flex flex-col gap-1.5">
-        {["+", "−", "⟳"].map((s) => (
-          <button
-            key={s}
-            className="h-7 w-7 grid place-items-center rounded-md bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:bg-white/[0.08] transition"
-          >
-            {s}
-          </button>
-        ))}
-      </div>
-      <div className="absolute left-3 bottom-3 flex items-center gap-2 text-[10px] text-slate-400">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        Twin Stream • 60 fps target • WebGL 2
-      </div>
-    </div>
-  );
-}
+import { DigitalTwinViewport } from "@/features/foc-twin/DigitalTwinViewport";
+import { SelectionDrawer } from "@/features/foc-twin/SelectionDrawer";
+
 
 /* ---------- left sub-nav (Twin module rail) ---------- */
 
