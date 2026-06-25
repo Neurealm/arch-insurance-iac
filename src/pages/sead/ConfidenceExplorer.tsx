@@ -8,7 +8,7 @@ import {
   Puzzle, ShieldCheck, Sun, Box, AlertTriangle, Info, CheckCircle2, RefreshCw, Scale,
   Command, Search, Download, RotateCcw, Filter, Keyboard, ArrowUpDown, TrendingUp, TrendingDown,
   Zap, X, Plus,
-} , Target as TargetIcon } from "lucide-react";
+, Target as TargetIcon } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RTooltip, ReferenceLine,

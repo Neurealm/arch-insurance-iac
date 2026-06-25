@@ -9,7 +9,7 @@ import {
   Hammer, ClipboardCheck, Droplets, HardHat, Building2, Gavel, Brain, Gauge, Lightbulb,
   GitBranch, Share2, Activity, Shield, FileCheck2, Lock, ScrollText, Scale,
   Command, Search, Download, RotateCcw, Play, Filter, ArrowUpDown, Keyboard, Zap,
-} , Target as TargetIcon } from "lucide-react";
+, Target as TargetIcon } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */

@@ -7,7 +7,7 @@ import {
   Settings as SettingsIcon, Wrench, Workflow, Bot, AlertTriangle,
   Cpu, TrendingUp, TrendingDown, Shield, Clock, User, Star, CheckCircle2, X,
   Sparkles, Activity, DollarSign, Zap, Info, Command, Download, Pin, RefreshCw,
-  Gavel, Brain, Scale, Trophy, Minus} , Target as TargetIcon } from "lucide-react";
+  Gavel, Brain, Scale, Trophy, Minus, Target as TargetIcon } from "lucide-react";
 import {
   Area, AreaChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend,
