@@ -8,8 +8,7 @@ import {
   Plus, Minus, CheckCircle2, X, Sparkles, Droplets, Users,
   ShieldCheck, TrendingDown, Activity,
   Gavel, Brain, Scale, Search, Command as CmdIcon, Keyboard, Download,
-  SkipBack, SkipForward, Layers as LayersIcon, Eye, EyeOff,
-} from "lucide-react";
+  SkipBack, SkipForward, Layers as LayersIcon, Eye, EyeOff, Target as TargetIcon } from "lucide-react";
 import {
   Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid,
   Tooltip, Area, AreaChart,
@@ -55,6 +54,7 @@ const RAIL = [
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
   { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
+  { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
 ];
 function ModuleRail() {
   const nav = useNavigate();

@@ -5,7 +5,7 @@ import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2, Star, Activity,
   ShieldCheck, Users, Zap, Briefcase, Box, CheckCircle2, Database, BookOpen,
-  TrendingUp, Target, Clock, DollarSign, Download, Play, BarChart3, Wallet, Scale} from "lucide-react";
+  TrendingUp, Target, Clock, DollarSign, Download, Play, BarChart3, Wallet, Scale, Target as TargetIcon } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
@@ -33,6 +33,7 @@ const RAIL = [
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability", active: true },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
   { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
+  { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
 ];
 
 function ModuleRail() {

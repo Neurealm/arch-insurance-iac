@@ -8,8 +8,7 @@ import {
   DollarSign, FileText, X, Send, ArrowRight, ArrowLeft, MessageSquare, Paperclip,
   Hammer, ClipboardCheck, Droplets, HardHat, Building2, Gavel, Brain, Gauge, Lightbulb,
   GitBranch, Share2, Activity, Shield, FileCheck2, Lock, ScrollText, Scale,
-  Command, Search, Download, RotateCcw, Play, Filter, ArrowUpDown, Keyboard, Zap,
-} from "lucide-react";
+  Command, Search, Download, RotateCcw, Play, Filter, ArrowUpDown, Keyboard, Zap, Target as TargetIcon } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
@@ -37,6 +36,7 @@ const RAIL = [
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
   { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
+  { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
 ];
 
 function ModuleRail() {
