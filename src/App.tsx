@@ -36,6 +36,7 @@ import SeadConfidenceExplorer from "./pages/sead/ConfidenceExplorer.tsx";
 import SeadExplainability from "./pages/sead/Explainability.tsx";
 import SeadWhatIf from "./pages/sead/WhatIf.tsx";
 import SeadKnowledgeGraph from "./pages/sead/KnowledgeGraph.tsx";
+import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
 import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
