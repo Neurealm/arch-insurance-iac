@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -367,7 +368,7 @@ function KpiCard({ k }: { k: any }) {
 
 const RAIL = [
   { icon: LayoutGrid, label: "Command Center", active: true },
-  { icon: Boxes, label: "Digital Twin" },
+  { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: Building2, label: "Fab Areas" },
   { icon: Factory, label: "Equipment" },
   { icon: Workflow, label: "Production" },
@@ -382,11 +383,13 @@ const RAIL = [
 ];
 
 function ModuleRail() {
+  const navigate = useNavigate();
   return (
     <aside className="w-[84px] shrink-0 border-r border-white/[0.06] bg-white/[0.015] py-3 flex flex-col items-center gap-0.5">
-      {RAIL.map((r) => (
+      {RAIL.map((r: any) => (
         <button
           key={r.label}
+          onClick={() => r.to && navigate(r.to)}
           className={`group relative w-[72px] py-2.5 rounded-lg flex flex-col items-center gap-1 transition ${
             r.active
               ? "bg-sky-500/10 text-sky-300 ring-1 ring-sky-400/30 shadow-[0_0_24px_-12px_rgba(56,189,248,0.8)]"
