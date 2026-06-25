@@ -4,7 +4,7 @@ import {
   Gauge, Settings as SettingsIcon, Battery, Power, Cpu, Layers, FileText, PieChart,
   Plug, ChevronLeft, ChevronsUpDown, Server, Leaf, DollarSign, Waves, PencilLine,
   CircleDot, ShieldAlert, ArrowRight,
-} , Brain } from "lucide-react";
+, Brain } from "lucide-react";
 
 /* ---------- side rail ---------- */
 const navGroups: { title: string; items: { label: string; icon: any; to?: string; active?: boolean; badge?: number }[] }[] = [

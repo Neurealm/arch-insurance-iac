@@ -4,7 +4,7 @@ import {
   Gauge, Settings as SettingsIcon, Battery, Power, Cpu, Layers, FileText, PieChart,
   Plug, ChevronLeft, ChevronsUpDown, Calendar, Filter, ArrowRight, CircleDot, ShieldAlert,
   Fan, Wind,
-} , Brain } from "lucide-react";
+, Brain } from "lucide-react";
 
 /* ---------- Side rail (shared structure with Power Admin Console) ---------- */
 const navGroups: { title: string; items: { label: string; icon: any; to?: string; active?: boolean; badge?: number }[] }[] = [
