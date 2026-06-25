@@ -36,7 +36,7 @@ import {
   ShieldCheck,
   TriangleAlert,
   CheckCircle2,
-, Gavel,
+  Gavel,
 } from "lucide-react";
 import {
   Area,
