@@ -33,6 +33,8 @@ const RAIL = [
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability", active: true },
   { icon: GitBranch, label: "What If", to: "/sead/what-if" },
   { icon: Share2, label: "Knowledge\nGraph", to: "/sead/knowledge-graph" },
+  { icon: TargetIcon, label: "Outcome
+Tracker", to: "/sead/outcome-tracker" },
 ];
 
 function ModuleRail() {
