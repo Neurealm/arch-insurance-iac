@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Bell, Boxes, Building2, ChevronDown, Factory, FileBarChart2,
-  Gauge, HelpCircle, LayoutGrid, Network as NetIcon, Search,
+  Gauge, Lightbulb, HelpCircle, LayoutGrid, Network as NetIcon, Search,
   Settings as SettingsIcon, Wrench, Workflow, Bot, AlertTriangle,
   Cpu, TrendingUp, Shield, Clock, User, Star, CheckCircle2, X,
   Sparkles, Activity, DollarSign, Zap, Info,

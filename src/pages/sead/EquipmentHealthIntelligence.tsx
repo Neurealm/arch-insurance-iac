@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Activity, AlertTriangle, ArrowLeft, Bell, Bot, Boxes, Building2,
-  ChevronDown, Cpu, Factory, FileBarChart2, Gauge, HardHat, HelpCircle,
+  ChevronDown, Cpu, Factory, FileBarChart2, Gauge, Lightbulb, HardHat, HelpCircle,
   Info, LayoutGrid, MapPin, MoveDiagonal, RotateCw, Search, Settings as SettingsIcon,
   ShieldCheck, Sparkles, Star, ThermometerSun, TrendingDown, TrendingUp,
   Wrench, X, Zap, ZoomIn, CheckCircle2, AlertCircle, RefreshCw, Clock,

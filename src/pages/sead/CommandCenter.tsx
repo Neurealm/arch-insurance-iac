@@ -23,7 +23,7 @@ import {
   Zap,
   Wrench,
   Bot,
-  Gauge,
+  Gauge, Lightbulb,
   FileBarChart2,
   Building2,
   Network as NetIcon,

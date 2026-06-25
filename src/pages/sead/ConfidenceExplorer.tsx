@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
-  Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Database, BookOpen,
+  Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, Database, BookOpen,
   Puzzle, ShieldCheck, Sun, Box, AlertTriangle, Info, CheckCircle2, RefreshCw,
 } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";

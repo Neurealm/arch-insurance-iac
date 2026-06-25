@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Bell, Boxes, Building2, ChevronDown, Factory, HelpCircle,
   LayoutGrid, Network as NetIcon, Settings as SettingsIcon, Wrench,
-  Workflow, Bot, Gauge, AlertTriangle, Cpu, Play, Pause, RefreshCw,
+  Workflow, Bot, Gauge, Lightbulb, AlertTriangle, Cpu, Play, Pause, RefreshCw,
   Plus, Minus, Maximize2, CheckCircle2, X, Sparkles, Droplets, Users,
   ShieldCheck, TrendingUp, TrendingDown, Activity,
   Gavel, Brain,

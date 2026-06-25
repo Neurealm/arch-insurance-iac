@@ -5,7 +5,7 @@ import {
   Bell, Boxes, ChevronDown, ChevronRight, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Play, Pause, SkipBack, SkipForward, Activity,
   TrendingUp, BookOpen, ClipboardList, Users, BarChart3, Trophy, CheckCircle2, Wand2,
-  Gauge, ShieldCheck, AlertTriangle, Database, Cpu, Settings, ScrollText, Clock,
+  Gauge, Lightbulb, ShieldCheck, AlertTriangle, Database, Cpu, Settings, ScrollText, Clock,
 } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 

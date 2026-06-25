@@ -5,7 +5,7 @@ import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, ShieldCheck, CheckCircle2, Clock, AlertTriangle, Users,
   DollarSign, FileText, X, Send, ArrowRight, ArrowLeft, MessageSquare, Paperclip,
-  Hammer, ClipboardCheck, Droplets, HardHat, Building2, Gavel, Brain, Gauge, Activity, Shield,
+  Hammer, ClipboardCheck, Droplets, HardHat, Building2, Gavel, Brain, Gauge, Lightbulb, Activity, Shield,
   FileCheck2, Lock, ScrollText,
 } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";

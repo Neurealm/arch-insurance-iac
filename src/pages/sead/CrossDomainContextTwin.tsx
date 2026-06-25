@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Sparkles,
   ArrowLeft, Bell, Boxes, Building2, ChevronDown, Factory, FileBarChart2,
-  Gauge, HelpCircle, LayoutGrid, Network as NetIcon, Plus, Minus, Maximize2,
+  Gauge, Lightbulb, HelpCircle, LayoutGrid, Network as NetIcon, Plus, Minus, Maximize2,
   Settings as SettingsIcon, Search, Star, Wrench, Workflow, Zap, Bot,
   Truck, Users, UserCog, Briefcase, Beaker, FlaskConical, CircleDot,
   TrendingUp, TrendingDown, CheckCircle2, X, Info, Clock, AlertTriangle,

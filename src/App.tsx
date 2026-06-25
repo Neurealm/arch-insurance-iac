@@ -308,6 +308,7 @@ const App = () => (
           <Route path="/sead/human-governance-center" element={<ProtectedRoute><SeadHumanGovernance /></ProtectedRoute>} />
           <Route path="/sead/ai-reasoning-playback" element={<ProtectedRoute><SeadAIReasoningPlayback /></ProtectedRoute>} />
           <Route path="/sead/confidence-explorer" element={<ProtectedRoute><SeadConfidenceExplorer /></ProtectedRoute>} />
+          <Route path="/sead/explainability" element={<ProtectedRoute><SeadExplainability /></ProtectedRoute>} />
           <Route path="/semiconductor/command-center" element={<ProtectedRoute><ScenarioProvider><SemiCommandCenter /></ScenarioProvider></ProtectedRoute>} />
           <Route path="/semiconductor/digital-twin" element={<ProtectedRoute><ScenarioProvider><SemiDigitalTwin /></ScenarioProvider></ProtectedRoute>} />
           <Route path="/semiconductor/production-flow" element={<ProtectedRoute><ScenarioProvider><SemiProductionFlow /></ScenarioProvider></ProtectedRoute>} />
