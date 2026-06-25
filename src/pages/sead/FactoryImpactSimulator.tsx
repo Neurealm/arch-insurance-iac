@@ -9,7 +9,7 @@ import {
   ShieldCheck, TrendingDown, Activity,
   Gavel, Brain, Scale, Search, Command as CmdIcon, Keyboard, Download,
   SkipBack, SkipForward, Layers as LayersIcon, Eye, EyeOff,
-} from "lucide-react";
+} , Target as TargetIcon } from "lucide-react";
 import {
   Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid,
   Tooltip, Area, AreaChart,

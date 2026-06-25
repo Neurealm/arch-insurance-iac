@@ -5,7 +5,7 @@ import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2,
   CheckCircle2, RotateCcw, SlidersHorizontal, Database, Droplet, Truck,
-  Users, Activity, Wind, FileWarning, UserPlus, ArrowUp, ArrowDown, Scale} from "lucide-react";
+  Users, Activity, Wind, FileWarning, UserPlus, ArrowUp, ArrowDown, Scale} , Target as TargetIcon } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 import {
   BarChart, Bar as RBar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,

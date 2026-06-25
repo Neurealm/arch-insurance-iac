@@ -10,7 +10,7 @@ import {
   HardHat, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
   Search, Command as CmdIcon, Keyboard, Send, ThumbsUp, ThumbsDown, RotateCcw,
   Filter, ArrowUpDown,
-} from "lucide-react";
+} , Target as TargetIcon } from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
 } from "recharts";

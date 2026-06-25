@@ -9,7 +9,7 @@ import {
   Gauge, Lightbulb, GitBranch, Share2, ShieldCheck, AlertTriangle, Database, Cpu, Settings,
   ScrollText, Clock, Scale, Command, Search, Download, RotateCcw, Filter, Star, Keyboard,
   Repeat, X, Zap,
-} from "lucide-react";
+} , Target as TargetIcon } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
