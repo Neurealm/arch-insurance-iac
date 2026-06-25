@@ -221,6 +221,13 @@ const tree: Node[] = [
       { key: "ir",       label: "Cyber Resilience, Incident Response & Recovery",           icon: Activity,    to: "/practice-library/cyber-security/resilience-ir" },
     ],
   },
+  {
+    key: "sead",
+    label: "S.E.A.D. RunOps",
+    icon: Sparkles2,
+    to: "/practice-library/sead-runops",
+    navOnClick: true,
+  },
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
   { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
   { key: "services",   label: "Business Services",   icon: Boxes,         to: "/itsm/exec-biz-ops/business-services" },
