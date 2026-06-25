@@ -6,8 +6,7 @@ import {
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2,
   Scale, Star, Award, Cpu, Users, DollarSign, Clock, Droplet, ShieldAlert,
   TrendingUp, TrendingDown, CheckCircle2, Download, RotateCcw, Plus, Search,
-  Command as CmdIcon, Pin, Trophy, Play, ArrowUpDown, Keyboard, Minus,
-, Target as TargetIcon } from "lucide-react";
+  Command as CmdIcon, Pin, Trophy, Play, ArrowUpDown, Keyboard, Minus, Target as TargetIcon } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 import {
   BarChart, Bar as RBar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
