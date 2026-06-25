@@ -44,14 +44,7 @@ const RAIL = [
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
-  { icon: Factory, label: "Factory\nImpact", active: true },
-  { icon: Building2, label: "Equipment" },
-  { icon: Workflow, label: "Production" },
-  { icon: Gauge, label: "Quality" },
-  { icon: Building2, label: "Facilities" },
-  { icon: Bot, label: "AI Insights" },
-  { icon: Bell, label: "Alerts" },
-  { icon: SettingsIcon, label: "Settings", badge: 2 },
+  { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator", active: true },
 ];
 function ModuleRail() {
   const nav = useNavigate();
