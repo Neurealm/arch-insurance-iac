@@ -2,14 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
-  Wrench, Sparkles, ShieldCheck, ArrowUp,
-  ArrowDown, Minus as MinusIcon, CheckCircle2, Clock, AlertTriangle, Users,
-  Droplets, DollarSign, Download, X, Cpu, Star, Award,
-  ClipboardCheck, Hammer, BadgeCheck, ArrowRight, Building2,
-  HardHat, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
-  Search, Command as CmdIcon, Keyboard, Send, ThumbsUp, ThumbsDown, RotateCcw,
-  Filter, ArrowUpDown, Target as TargetIcon, BookOpen, UserCheck, FlaskConical, MessageSquare} from "lucide-react";
+  Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon, Wrench, Sparkles, ShieldCheck, ArrowUp, ArrowDown, Minus as MinusIcon, CheckCircle2, Clock, AlertTriangle, Users, Droplets, DollarSign, Download, X, Cpu, Star, Award, ClipboardCheck, Hammer, BadgeCheck, ArrowRight, Building2, HardHat, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale, Search, Command as CmdIcon, Keyboard, Send, ThumbsUp, ThumbsDown, RotateCcw, Filter, ArrowUpDown, Target as TargetIcon, BookOpen, UserCheck, FlaskConical, MessageSquare, Network,
+} from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
 } from "recharts";
@@ -61,6 +55,7 @@ const RAIL = [
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
   { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
+  { icon: Network, label: "IoT→AI\nArchitecture", to: "/sead/iot-ai-architecture" },
 ];
 
 function ModuleRail() {

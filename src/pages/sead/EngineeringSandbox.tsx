@@ -2,12 +2,8 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  Bell, Boxes, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
-  Wrench, Sparkles, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
-  Target as TargetIcon, BookOpen, Users, ArrowRight, ArrowLeft, UserCheck,
-  Save, Share2 as ShareIcon, FileDown, Edit3, Info, CheckCircle2, Plus,
-  Eye, Copy, Trash2, RefreshCw, FlaskConical
-, MessageSquare} from "lucide-react";
+  Bell, Boxes, Factory, HelpCircle, LayoutGrid, Network as NetIcon, Wrench, Sparkles, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale, Target as TargetIcon, BookOpen, Users, ArrowRight, ArrowLeft, UserCheck, Save, Share2 as ShareIcon, FileDown, Edit3, Info, CheckCircle2, Plus, Eye, Copy, Trash2, RefreshCw, FlaskConical, MessageSquare, Network,
+} from "lucide-react";
 
 /* ============================= atoms ============================= */
 function GlassCard({ children, className = "" }: any) {
@@ -40,6 +36,7 @@ const RAIL = [
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox", active: true },
   { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
+  { icon: Network, label: "IoT→AI\nArchitecture", to: "/sead/iot-ai-architecture" },
 ];
 
 function ModuleRail() {

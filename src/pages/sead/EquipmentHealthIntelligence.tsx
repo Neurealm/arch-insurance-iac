@@ -4,13 +4,8 @@ import { OrbitControls, Environment, Html } from "@react-three/drei";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  Activity, AlertTriangle, ArrowLeft, Bell, Bot, Boxes, Building2,
-  ChevronDown, Cpu, Factory, FileBarChart2, Gauge, Lightbulb, GitBranch, Share2, HardHat, HelpCircle,
-  Info, LayoutGrid, MapPin, MoveDiagonal, RotateCw, Search, Settings as SettingsIcon,
-  ShieldCheck, Sparkles, Star, ThermometerSun, TrendingDown, TrendingUp,
-  Wrench, X, Zap, ZoomIn, CheckCircle2, AlertCircle, RefreshCw, Clock,
-  Workflow, FlaskConical, Database, Network as NetIcon,
-  Gavel, Brain, Scale, Target as TargetIcon, BookOpen, Users, UserCheck, MessageSquare} from "lucide-react";
+  Activity, AlertTriangle, ArrowLeft, Bell, Bot, Boxes, Building2, ChevronDown, Cpu, Factory, FileBarChart2, Gauge, Lightbulb, GitBranch, Share2, HardHat, HelpCircle, Info, LayoutGrid, MapPin, MoveDiagonal, RotateCw, Search, Settings as SettingsIcon, ShieldCheck, Sparkles, Star, ThermometerSun, TrendingDown, TrendingUp, Wrench, X, Zap, ZoomIn, CheckCircle2, AlertCircle, RefreshCw, Clock, Workflow, FlaskConical, Database, Network as NetIcon, Gavel, Brain, Scale, Target as TargetIcon, BookOpen, Users, UserCheck, MessageSquare, Network,
+} from "lucide-react";
 import {
   Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer,
   Tooltip as RTooltip, XAxis, YAxis,
@@ -242,6 +237,7 @@ const RAIL = [
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
   { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
+  { icon: Network, label: "IoT→AI\nArchitecture", to: "/sead/iot-ai-architecture" },
 ];
 
 function ModuleRail() {

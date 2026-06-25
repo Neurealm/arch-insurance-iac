@@ -3,11 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
-  Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2, Database, BookOpen,
-  Puzzle, ShieldCheck, Sun, Box, AlertTriangle, Info, CheckCircle2, RefreshCw, Scale,
-  Command, Search, Download, RotateCcw, Filter, Keyboard, ArrowUpDown, TrendingUp, TrendingDown,
-  Zap, X, Plus, Target as TargetIcon, Users, UserCheck, FlaskConical, MessageSquare} from "lucide-react";
+  Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon, Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2, Database, BookOpen, Puzzle, ShieldCheck, Sun, Box, AlertTriangle, Info, CheckCircle2, RefreshCw, Scale, Command, Search, Download, RotateCcw, Filter, Keyboard, ArrowUpDown, TrendingUp, TrendingDown, Zap, X, Plus, Target as TargetIcon, Users, UserCheck, FlaskConical, MessageSquare, Network,
+} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RTooltip, ReferenceLine,
@@ -44,6 +41,7 @@ const RAIL = [
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
   { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
+  { icon: Network, label: "IoT→AI\nArchitecture", to: "/sead/iot-ai-architecture" },
 ];
 
 function ModuleRail() {

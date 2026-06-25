@@ -1,14 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Sparkles,
-  ArrowLeft, Bell, Boxes, Building2, ChevronDown, Factory, FileBarChart2,
-  Gauge, Lightbulb, GitBranch, Share2, HelpCircle, LayoutGrid, Network as NetIcon, Plus, Minus, Maximize2,
-  Settings as SettingsIcon, Search, Star, Wrench, Workflow, Zap, Bot,
-  Truck, Users, UserCog, Briefcase, Beaker, FlaskConical, CircleDot,
-  TrendingUp, TrendingDown, CheckCircle2, X, Info, Clock, AlertTriangle,
-  Cpu, Database, ShieldCheck, HardHat, Command, Pause, Play, Download, Filter, Activity,
-  Gavel, Brain, Scale, Target as TargetIcon, BookOpen, UserCheck, MessageSquare} from "lucide-react";
+import {
+  Sparkles, ArrowLeft, Bell, Boxes, Building2, ChevronDown, Factory, FileBarChart2, Gauge, Lightbulb, GitBranch, Share2, HelpCircle, LayoutGrid, Network as NetIcon, Plus, Minus, Maximize2, Settings as SettingsIcon, Search, Star, Wrench, Workflow, Zap, Bot, Truck, Users, UserCog, Briefcase, Beaker, FlaskConical, CircleDot, TrendingUp, TrendingDown, CheckCircle2, X, Info, Clock, AlertTriangle, Cpu, Database, ShieldCheck, HardHat, Command, Pause, Play, Download, Filter, Activity, Gavel, Brain, Scale, Target as TargetIcon, BookOpen, UserCheck, MessageSquare, Network,
+} from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { AppShell } from "@/components/eoc/AppShell";
 
@@ -72,6 +67,7 @@ const RAIL = [
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
   { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
+  { icon: Network, label: "IoT→AI\nArchitecture", to: "/sead/iot-ai-architecture" },
 ];
 
 function ModuleRail() {
