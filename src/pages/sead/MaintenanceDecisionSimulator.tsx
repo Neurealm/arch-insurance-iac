@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Bell, Boxes, Building2, ChevronDown, Factory, FileBarChart2,
   Gauge, Lightbulb, GitBranch, Share2, HelpCircle, LayoutGrid, Network as NetIcon, Search,
   Settings as SettingsIcon, Wrench, Workflow, Bot, AlertTriangle,
-  Cpu, TrendingUp, Shield, Clock, User, Star, CheckCircle2, X,
-  Sparkles, Activity, DollarSign, Zap, Info,
-  Gavel, Brain, Scale} from "lucide-react";
+  Cpu, TrendingUp, TrendingDown, Shield, Clock, User, Star, CheckCircle2, X,
+  Sparkles, Activity, DollarSign, Zap, Info, Command, Download, Pin, RefreshCw,
+  Gavel, Brain, Scale, Trophy, Minus} from "lucide-react";
 import {
   Area, AreaChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend,
