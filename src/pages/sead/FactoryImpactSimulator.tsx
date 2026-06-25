@@ -7,7 +7,7 @@ import {
   Workflow, Bot, Gauge, AlertTriangle, Cpu, Play, Pause, RefreshCw,
   Plus, Minus, Maximize2, CheckCircle2, X, Sparkles, Droplets, Users,
   ShieldCheck, TrendingUp, TrendingDown, Activity,
-  Gavel,
+  Gavel, Brain,
 } from "lucide-react";
 import {
   Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid,
@@ -48,6 +48,7 @@ const RAIL = [
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator", active: true },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
+  { icon: Brain, label: "AI Reasoning", to: "/sead/ai-reasoning-playback" },
 ];
 function ModuleRail() {
   const nav = useNavigate();

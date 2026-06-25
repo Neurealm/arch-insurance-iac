@@ -10,7 +10,7 @@ import {
   ShieldCheck, Sparkles, Star, ThermometerSun, TrendingDown, TrendingUp,
   Wrench, X, Zap, ZoomIn, CheckCircle2, AlertCircle, RefreshCw, Clock,
   Workflow, FlaskConical, Database, Network as NetIcon,
-  Gavel,
+  Gavel, Brain,
 } from "lucide-react";
 import {
   Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer,
@@ -231,6 +231,7 @@ const RAIL = [
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
+  { icon: Brain, label: "AI Reasoning", to: "/sead/ai-reasoning-playback" },
 ];
 
 function ModuleRail() {

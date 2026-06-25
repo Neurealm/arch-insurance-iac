@@ -36,7 +36,7 @@ import {
   ShieldCheck,
   TriangleAlert,
   CheckCircle2,
-  Gavel,
+  Gavel, Brain,
 } from "lucide-react";
 import {
   Area,
@@ -375,6 +375,7 @@ const RAIL = [
   { icon: Factory, label: "Factory Impact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision Center", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
+  { icon: Brain, label: "AI Reasoning", to: "/sead/ai-reasoning-playback" },
 ];
 
 function ModuleRail() {

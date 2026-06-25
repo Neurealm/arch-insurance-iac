@@ -5,7 +5,7 @@ import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, ShieldCheck, CheckCircle2, Clock, AlertTriangle, Users,
   DollarSign, FileText, X, Send, ArrowRight, ArrowLeft, MessageSquare, Paperclip,
-  Hammer, ClipboardCheck, Droplets, HardHat, Building2, Gavel, Activity, Shield,
+  Hammer, ClipboardCheck, Droplets, HardHat, Building2, Gavel, Brain, Activity, Shield,
   FileCheck2, Lock, ScrollText,
 } from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
@@ -29,6 +29,7 @@ const RAIL = [
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center", active: true },
+  { icon: Brain, label: "AI Reasoning", to: "/sead/ai-reasoning-playback" },
 ];
 
 function ModuleRail() {
