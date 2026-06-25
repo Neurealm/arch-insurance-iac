@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Sparkles,
@@ -7,7 +7,7 @@ import { Sparkles,
   Settings as SettingsIcon, Search, Star, Wrench, Workflow, Zap, Bot,
   Truck, Users, UserCog, Briefcase, Beaker, FlaskConical, CircleDot,
   TrendingUp, TrendingDown, CheckCircle2, X, Info, Clock, AlertTriangle,
-  Cpu, Database, ShieldCheck, HardHat,
+  Cpu, Database, ShieldCheck, HardHat, Command, Pause, Play, Download, Filter, Activity,
   Gavel, Brain, Scale} from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { AppShell } from "@/components/eoc/AppShell";
@@ -292,15 +292,29 @@ const DOMAINS: DomainCard[] = [
 
 /* ---------- domain card ---------- */
 
-function DomainNode({ d, selected, onClick, onDouble }: { d: DomainCard; selected: boolean; onClick: () => void; onDouble: () => void }) {
+const DomainNode = memo(function DomainNode({
+  d, selected, dimmed, hovered, onClick, onDouble, onHover, nodeRef,
+}: {
+  d: DomainCard; selected: boolean; dimmed: boolean; hovered: boolean;
+  onClick: () => void; onDouble: () => void; onHover: (id: string | null) => void;
+  nodeRef: (el: HTMLButtonElement | null) => void;
+}) {
   const sev = SEV_COLORS[d.severity];
   return (
     <button
+      ref={nodeRef}
       onClick={onClick}
       onDoubleClick={onDouble}
-      className={`w-full text-left rounded-xl border bg-[#0a1020]/80 backdrop-blur-md transition group ${
-        selected ? "border-sky-400/60 shadow-[0_0_30px_-6px_rgba(56,189,248,0.55)]" : "border-white/[0.08] hover:border-white/20"
-      }`}
+      onMouseEnter={() => onHover(d.id)}
+      onMouseLeave={() => onHover(null)}
+      data-domain={d.id}
+      className={`w-full text-left rounded-xl border bg-[#0a1020]/80 backdrop-blur-md transition-all duration-200 group ${
+        selected
+          ? "border-sky-400/60 shadow-[0_0_30px_-6px_rgba(56,189,248,0.55)] -translate-y-0.5"
+          : hovered
+          ? "border-white/30 -translate-y-0.5"
+          : "border-white/[0.08] hover:border-white/20"
+      } ${dimmed ? "opacity-35" : "opacity-100"}`}
       style={{ boxShadow: selected ? undefined : `0 0 0 1px ${sev.glow.replace("0.7", "0.18").replace("0.65", "0.18").replace("0.6", "0.18").replace("0.55", "0.16")} inset` }}
     >
       <div className="flex items-center justify-between px-3 pt-2.5 pb-1.5">
@@ -308,9 +322,12 @@ function DomainNode({ d, selected, onClick, onDouble }: { d: DomainCard; selecte
           <d.icon className="h-3.5 w-3.5" style={{ color: d.accent }} />
           <span className="text-[10.5px] font-bold tracking-[0.14em] text-slate-200">{d.title}</span>
         </div>
-        <span className="h-4 min-w-4 px-1 rounded-md text-[10px] font-bold grid place-items-center" style={{ backgroundColor: `${d.accent}22`, color: d.accent }}>
-          {d.badge}
-        </span>
+        <div className="flex items-center gap-1">
+          <span className={`h-1.5 w-1.5 rounded-full ${sev.dot} ${d.severity !== "ok" ? "animate-pulse" : ""}`} />
+          <span className="h-4 min-w-4 px-1 rounded-md text-[10px] font-bold grid place-items-center" style={{ backgroundColor: `${d.accent}22`, color: d.accent }}>
+            {d.badge}
+          </span>
+        </div>
       </div>
       <div className="border-t border-white/[0.05] px-3 py-2 space-y-1.5">
         {d.rows.map((r, i) => (
@@ -325,7 +342,7 @@ function DomainNode({ d, selected, onClick, onDouble }: { d: DomainCard; selecte
       </div>
     </button>
   );
-}
+});
 
 /* ---------- center node ---------- */
 
@@ -351,11 +368,115 @@ function CenterNode() {
 
 /* ---------- impact map ---------- */
 
-function ImpactMap({ selected, setSelected, onOpenDrawer }: { selected: string | null; setSelected: (id: string | null) => void; onOpenDrawer: (id: string) => void }) {
-  // 4 col x 4 row implicit grid; center node sits in cols 1-3 row 2.
-  // Use CSS grid for layout, SVG overlay for animated lines anchored at center.
+type ImpactMapProps = {
+  selected: string | null;
+  setSelected: (id: string | null) => void;
+  onOpenDrawer: (id: string) => void;
+  filter: Set<Severity>;
+  setFilter: (f: Set<Severity>) => void;
+  hovered: string | null;
+  setHovered: (id: string | null) => void;
+  paused: boolean;
+};
+
+function ImpactMap({ selected, setSelected, onOpenDrawer, filter, setFilter, hovered, setHovered, paused }: ImpactMapProps) {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const centerRef = useRef<HTMLDivElement | null>(null);
+  const nodeRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [paths, setPaths] = useState<Record<string, string>>({});
+  const [size, setSize] = useState({ w: 1000, h: 700 });
+
+  const recompute = useCallback(() => {
+    const wrap = wrapRef.current;
+    const center = centerRef.current;
+    if (!wrap || !center) return;
+    const wr = wrap.getBoundingClientRect();
+    const cr = center.getBoundingClientRect();
+    const cx = cr.left + cr.width / 2 - wr.left;
+    const cy = cr.top + cr.height / 2 - wr.top;
+    const next: Record<string, string> = {};
+    DOMAINS.forEach((d) => {
+      const el = nodeRefs.current[d.id];
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const nx = r.left + r.width / 2 - wr.left;
+      const ny = r.top + r.height / 2 - wr.top;
+      const mx = (cx + nx) / 2;
+      const my = (cy + ny) / 2 - Math.min(40, Math.abs(nx - cx) * 0.18);
+      next[d.id] = `M${cx},${cy} Q${mx},${my} ${nx},${ny}`;
+    });
+    setPaths(next);
+    setSize({ w: wr.width, h: wr.height });
+  }, []);
+
+  useLayoutEffect(() => {
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    if (wrapRef.current) ro.observe(wrapRef.current);
+    window.addEventListener("resize", recompute);
+    return () => { ro.disconnect(); window.removeEventListener("resize", recompute); };
+  }, [recompute]);
+
+  const visible = (d: DomainCard) => filter.size === 0 || filter.has(d.severity);
+  const focus = selected ?? hovered;
+  const isDim = (id: string) => (!!focus && focus !== id) || (filter.size > 0 && !filter.has(DOMAINS.find((d) => d.id === id)!.severity));
+
+  const toggleSev = (s: Severity) => {
+    const next = new Set(filter);
+    next.has(s) ? next.delete(s) : next.add(s);
+    setFilter(next);
+  };
+
+  const renderCell = (idx: number, extra = "") => {
+    const d = DOMAINS[idx];
+    return (
+      <div className={extra}>
+        <DomainNode
+          d={d}
+          selected={selected === d.id}
+          hovered={hovered === d.id}
+          dimmed={isDim(d.id)}
+          onClick={() => setSelected(selected === d.id ? null : d.id)}
+          onDouble={() => onOpenDrawer(d.id)}
+          onHover={setHovered}
+          nodeRef={(el) => { nodeRefs.current[d.id] = el; }}
+        />
+      </div>
+    );
+  };
+
   return (
     <GlassCard className="p-0 overflow-hidden relative">
+      {/* severity filter bar */}
+      <div className="relative z-10 flex items-center gap-2 px-4 py-2 border-b border-white/[0.05] bg-white/[0.015]">
+        <Filter className="h-3.5 w-3.5 text-slate-500" />
+        <span className="text-[10px] uppercase tracking-wider text-slate-500 mr-1">Severity</span>
+        {(["critical", "elevated", "monitor", "ok"] as Severity[]).map((s) => {
+          const active = filter.has(s);
+          const sev = SEV_COLORS[s];
+          return (
+            <button
+              key={s}
+              onClick={() => toggleSev(s)}
+              className={`flex items-center gap-1.5 text-[10.5px] px-2 py-1 rounded-md border transition ${
+                active ? `${sev.bg} ${sev.border} ${sev.text}` : "bg-white/[0.02] border-white/[0.06] text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${sev.dot}`} />
+              {s}
+            </button>
+          );
+        })}
+        {filter.size > 0 && (
+          <button onClick={() => setFilter(new Set())} className="text-[10.5px] text-slate-500 hover:text-slate-200 ml-1">Clear</button>
+        )}
+        <div className="flex-1" />
+        <span className={`flex items-center gap-1.5 text-[10.5px] ${paused ? "text-amber-300" : "text-emerald-300"}`}>
+          <Activity className="h-3 w-3" />
+          {paused ? "Stream paused" : "Streaming live"}
+        </span>
+      </div>
+
       {/* grid background */}
       <div
         className="absolute inset-0 opacity-[0.18] pointer-events-none"
@@ -370,68 +491,62 @@ function ImpactMap({ selected, setSelected, onOpenDrawer }: { selected: string |
         style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(56,189,248,0.10), transparent 60%)" }}
       />
 
-      <div className="relative grid grid-cols-5 gap-x-4 gap-y-3 p-6 min-h-[640px]">
-        {/* Row 1 */}
-        <div className="col-start-2"><DomainNode d={DOMAINS[0]} selected={selected === "production"} onClick={() => setSelected("production")} onDouble={() => onOpenDrawer("production")} /></div>
-        <div className="col-start-3"><DomainNode d={DOMAINS[1]} selected={selected === "dispatch"} onClick={() => setSelected("dispatch")} onDouble={() => onOpenDrawer("dispatch")} /></div>
-        <div className="col-start-4"><DomainNode d={DOMAINS[2]} selected={selected === "quality"} onClick={() => setSelected("quality")} onDouble={() => onOpenDrawer("quality")} /></div>
-
-        {/* Row 2 — engineering / center / maintenance */}
-        <div className="col-start-1 row-start-2 self-center"><DomainNode d={DOMAINS[3]} selected={selected === "engineering"} onClick={() => setSelected("engineering")} onDouble={() => onOpenDrawer("engineering")} /></div>
-        <div className="col-start-3 row-start-2 grid place-items-center"><CenterNode /></div>
-        <div className="col-start-5 row-start-2 self-center"><DomainNode d={DOMAINS[4]} selected={selected === "maintenance"} onClick={() => setSelected("maintenance")} onDouble={() => onOpenDrawer("maintenance")} /></div>
-
-        {/* Row 3 */}
-        <div className="col-start-2 row-start-3"><DomainNode d={DOMAINS[5]} selected={selected === "customers"} onClick={() => setSelected("customers")} onDouble={() => onOpenDrawer("customers")} /></div>
-        <div className="col-start-3 row-start-3"><DomainNode d={DOMAINS[6]} selected={selected === "utilities"} onClick={() => setSelected("utilities")} onDouble={() => onOpenDrawer("utilities")} /></div>
-        <div className="col-start-4 row-start-3"><DomainNode d={DOMAINS[7]} selected={selected === "technicians"} onClick={() => setSelected("technicians")} onDouble={() => onOpenDrawer("technicians")} /></div>
-
-        {/* Row 4 */}
-        <div className="col-start-3 row-start-4"><DomainNode d={DOMAINS[8]} selected={selected === "supply"} onClick={() => setSelected("supply")} onDouble={() => onOpenDrawer("supply")} /></div>
-      </div>
-
-      {/* SVG animated relationship lines — purely decorative since exact card positions are CSS-driven.
-          Render symbolic curved beams emanating from center. */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 1000 700">
-        <defs>
-          {DOMAINS.map((d) => {
-            const sev = SEV_COLORS[d.severity];
+      <div ref={wrapRef} className="relative grid grid-cols-5 gap-x-4 gap-y-3 p-6 min-h-[640px]">
+        {/* SVG lines anchored to real positions */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" width={size.w} height={size.h}>
+          <defs>
+            {DOMAINS.map((d) => {
+              const sev = SEV_COLORS[d.severity];
+              return (
+                <linearGradient key={d.id} id={`grad-${d.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor={sev.stroke} stopOpacity="0.05" />
+                  <stop offset="50%" stopColor={sev.stroke} stopOpacity="0.7" />
+                  <stop offset="100%" stopColor={sev.stroke} stopOpacity="0.95" />
+                </linearGradient>
+              );
+            })}
+          </defs>
+          {DOMAINS.map((dom) => {
+            const path = paths[dom.id];
+            if (!path) return null;
+            const sev = SEV_COLORS[dom.severity];
+            const focused = !!focus && focus === dom.id;
+            const dim = isDim(dom.id) ? 0.12 : focused ? 1 : 0.85;
+            const sw = focused ? 3.2 : 2;
             return (
-              <linearGradient key={d.id} id={`grad-${d.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor={sev.stroke} stopOpacity="0.0" />
-                <stop offset="50%" stopColor={sev.stroke} stopOpacity="0.7" />
-                <stop offset="100%" stopColor={sev.stroke} stopOpacity="0.9" />
-              </linearGradient>
+              <g key={dom.id} style={{ opacity: dim, transition: "opacity 200ms" }}>
+                <path d={path} stroke={`url(#grad-${dom.id})`} strokeWidth={sw} fill="none" strokeLinecap="round" />
+                {!paused && (
+                  <circle r={focused ? 4.5 : 3.2} fill={sev.stroke} style={{ filter: `drop-shadow(0 0 6px ${sev.glow})` }}>
+                    <animateMotion dur={focused ? "2s" : "3.4s"} repeatCount="indefinite" path={path} />
+                  </circle>
+                )}
+              </g>
             );
           })}
-        </defs>
-        {[
-          { id: DOMAINS[0].id, d: "M500,340 C420,260 360,200 280,150" },
-          { id: DOMAINS[1].id, d: "M500,340 C500,260 500,210 500,150" },
-          { id: DOMAINS[2].id, d: "M500,340 C580,260 640,200 720,150" },
-          { id: DOMAINS[3].id, d: "M500,340 C400,340 230,340 130,340" },
-          { id: DOMAINS[4].id, d: "M500,340 C600,340 770,340 870,340" },
-          { id: DOMAINS[5].id, d: "M500,340 C420,420 360,480 280,540" },
-          { id: DOMAINS[6].id, d: "M500,340 C500,420 500,480 500,540" },
-          { id: DOMAINS[7].id, d: "M500,340 C580,420 640,480 720,540" },
-          { id: DOMAINS[8].id, d: "M500,340 C500,500 500,580 500,650" },
-        ].map((seg) => {
-          const dom = DOMAINS.find((d) => d.id === seg.id)!;
-          const sev = SEV_COLORS[dom.severity];
-          const dim = selected && selected !== dom.id ? 0.15 : 1;
-          return (
-            <g key={seg.id} style={{ opacity: dim }}>
-              <path d={seg.d} stroke={`url(#grad-${seg.id})`} strokeWidth={2.2} fill="none" />
-              <circle r="3.5" fill={sev.stroke}>
-                <animateMotion dur="3.2s" repeatCount="indefinite" path={seg.d} />
-              </circle>
-            </g>
-          );
-        })}
-      </svg>
+        </svg>
+
+        {/* Row 1 */}
+        {renderCell(0, "col-start-2 relative z-[1]")}
+        {renderCell(1, "col-start-3 relative z-[1]")}
+        {renderCell(2, "col-start-4 relative z-[1]")}
+
+        {/* Row 2 */}
+        {renderCell(3, "col-start-1 row-start-2 self-center relative z-[1]")}
+        <div ref={centerRef} className="col-start-3 row-start-2 grid place-items-center relative z-[1]"><CenterNode /></div>
+        {renderCell(4, "col-start-5 row-start-2 self-center relative z-[1]")}
+
+        {/* Row 3 */}
+        {renderCell(5, "col-start-2 row-start-3 relative z-[1]")}
+        {renderCell(6, "col-start-3 row-start-3 relative z-[1]")}
+        {renderCell(7, "col-start-4 row-start-3 relative z-[1]")}
+
+        {/* Row 4 */}
+        {renderCell(8, "col-start-3 row-start-4 relative z-[1]")}
+      </div>
 
       {/* zoom controls */}
-      <div className="absolute left-4 bottom-4 flex flex-col gap-1.5">
+      <div className="absolute left-4 bottom-4 flex flex-col gap-1.5 z-10">
         {[Plus, Minus, Maximize2, SettingsIcon].map((I, i) => (
           <button key={i} className="h-8 w-8 rounded-md bg-white/[0.04] border border-white/[0.08] grid place-items-center text-slate-300 hover:bg-white/[0.08]">
             <I className="h-3.5 w-3.5" />
@@ -440,13 +555,13 @@ function ImpactMap({ selected, setSelected, onOpenDrawer }: { selected: string |
       </div>
 
       {/* legend */}
-      <div className="absolute left-20 bottom-4 flex items-center gap-4 text-[11px] text-slate-400">
-        <span className="uppercase tracking-wider text-slate-500">Impact Level</span>
+      <div className="absolute left-20 bottom-4 flex items-center gap-4 text-[11px] text-slate-400 z-10">
+        <span className="uppercase tracking-wider text-slate-500">Impact</span>
         {[
-          { c: "bg-rose-500", l: "High" },
-          { c: "bg-amber-500", l: "Medium" },
-          { c: "bg-sky-500", l: "Low" },
-          { c: "bg-slate-500", l: "Informational" },
+          { c: "bg-rose-500", l: "Critical" },
+          { c: "bg-orange-500", l: "Elevated" },
+          { c: "bg-yellow-500", l: "Monitor" },
+          { c: "bg-emerald-500", l: "OK" },
         ].map((x) => (
           <span key={x.l} className="flex items-center gap-1.5">
             <span className={`h-2.5 w-2.5 rounded-full ${x.c}`} /> {x.l}
@@ -724,17 +839,132 @@ function ContextDrawer({ open, id, onClose }: { open: boolean; id: string | null
   );
 }
 
+/* ---------- command palette ---------- */
+
+function CommandPalette({ open, onClose, onJumpDomain, onSetTab, onOpenDrawer }: {
+  open: boolean; onClose: () => void;
+  onJumpDomain: (id: string) => void;
+  onSetTab: (t: string) => void;
+  onOpenDrawer: (id: string) => void;
+}) {
+  const [q, setQ] = useState("");
+  useEffect(() => { if (!open) setQ(""); }, [open]);
+
+  const items = useMemo(() => {
+    const list: { kind: string; label: string; hint?: string; run: () => void }[] = [
+      ...DOMAINS.map((d) => ({ kind: "Domain", label: d.title, hint: `${d.severity.toUpperCase()} · ${d.badge} signals`, run: () => onJumpDomain(d.id) })),
+      ...DOMAINS.map((d) => ({ kind: "Inspect", label: `Open ${d.title} drawer`, run: () => onOpenDrawer(d.id) })),
+      ...TABS.map((t) => ({ kind: "Tab", label: t, run: () => onSetTab(t) })),
+    ];
+    const needle = q.trim().toLowerCase();
+    return needle ? list.filter((i) => i.label.toLowerCase().includes(needle) || i.kind.toLowerCase().includes(needle)) : list.slice(0, 14);
+  }, [q, onJumpDomain, onOpenDrawer, onSetTab]);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[100] grid place-items-start pt-[12vh] bg-black/55 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-[560px] rounded-xl border border-white/10 bg-[#0a1020] shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-white/10">
+          <Search className="h-4 w-4 text-slate-500" />
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Jump to domain, tab, or action…"
+            className="flex-1 bg-transparent outline-none text-[13px] text-slate-100 placeholder:text-slate-500" />
+          <span className="text-[10px] text-slate-500 px-1.5 py-0.5 border border-white/10 rounded">ESC</span>
+        </div>
+        <div className="max-h-[360px] overflow-y-auto py-1">
+          {items.length === 0 && <div className="px-4 py-6 text-center text-[12px] text-slate-500">No matches</div>}
+          {items.map((it, i) => (
+            <button key={i} onClick={() => { it.run(); onClose(); }}
+              className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left hover:bg-white/[0.04]">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-[9px] uppercase tracking-wider text-slate-500 w-14 shrink-0">{it.kind}</span>
+                <span className="text-[12.5px] text-slate-100 truncate">{it.label}</span>
+              </div>
+              {it.hint && <span className="text-[10.5px] text-slate-500 shrink-0">{it.hint}</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- live event ticker ---------- */
+
+const TICKER_SEED = [
+  { sev: "elevated", txt: "ETCH-217 RF reflected power +3.2% (rolling 5m)" },
+  { sev: "monitor", txt: "Lot LOT-A2391 queued for CMP-038 (alt tool)" },
+  { sev: "critical", txt: "Customer commitment LOT-A2394 at risk — ETA -4h" },
+  { sev: "ok", txt: "Utility window confirmed 22:00–04:00 CT" },
+  { sev: "elevated", txt: "Tech TS-04 on-call confirmed for PM window" },
+  { sev: "monitor", txt: "Vendor P-9981 ETA refreshed: 2 days" },
+] as const;
+
+function EventTicker({ paused }: { paused: boolean }) {
+  return (
+    <div className="overflow-hidden border-t border-white/[0.06] bg-white/[0.015]">
+      <div className={`flex gap-8 whitespace-nowrap py-2 px-4 text-[11.5px] ${paused ? "" : "animate-[ticker_45s_linear_infinite]"}`}
+        style={{ animationPlayState: paused ? "paused" : "running" }}>
+        {[...TICKER_SEED, ...TICKER_SEED].map((e, i) => {
+          const sev = SEV_COLORS[e.sev as Severity];
+          return (
+            <span key={i} className="flex items-center gap-2 text-slate-300">
+              <span className={`h-1.5 w-1.5 rounded-full ${sev.dot}`} />
+              <span className={`uppercase tracking-wider text-[9.5px] ${sev.text}`}>{e.sev}</span>
+              <span>{e.txt}</span>
+              <span className="text-slate-600">•</span>
+            </span>
+          );
+        })}
+      </div>
+      <style>{`@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+    </div>
+  );
+}
+
 /* ---------- the page ---------- */
 
 export default function CrossDomainContextTwin() {
   const [tab, setTab] = useState("Impact Map");
   const [selected, setSelected] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [filter, setFilter] = useState<Set<Severity>>(new Set());
+  const [paused, setPaused] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
-  const openDrawer = (id: string) => {
-    setDrawerId(id);
-    setDrawerOpen(true);
+  const openDrawer = useCallback((id: string) => { setDrawerId(id); setDrawerOpen(true); }, []);
+
+  // Hotkeys: ⌘K palette, ESC close, P pause, 1–9 select domain, X export
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && e.key.toLowerCase() === "k") { e.preventDefault(); setPaletteOpen((v) => !v); return; }
+      if (e.key === "Escape") { setPaletteOpen(false); setDrawerOpen(false); setSelected(null); return; }
+      const tgt = e.target as HTMLElement | null;
+      if (tgt && (tgt.tagName === "INPUT" || tgt.tagName === "TEXTAREA")) return;
+      if (e.key.toLowerCase() === "p") setPaused((p) => !p);
+      if (/^[1-9]$/.test(e.key)) {
+        const idx = Number(e.key) - 1;
+        if (DOMAINS[idx]) setSelected(DOMAINS[idx].id);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2200); };
+
+  const exportCsv = () => {
+    const header = "domain,severity,signals,row1,row2,row3";
+    const lines = DOMAINS.map((d) => [d.title, d.severity, d.badge, ...d.rows.map((r) => `"${r.text}${r.emphasis ? " " + r.emphasis : ""}"`)].join(","));
+    const blob = new Blob([header + "\n" + lines.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `etch-217-cross-domain-${Date.now()}.csv`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    showToast("Snapshot exported");
   };
 
   return (
@@ -753,32 +983,87 @@ export default function CrossDomainContextTwin() {
           <main className="flex-1 min-w-0 px-5 py-4 space-y-4">
             <TitleBar />
 
+            {/* Action bar */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button onClick={() => setPaletteOpen(true)}
+                className="h-8 px-2.5 rounded-md bg-white/[0.03] border border-white/[0.08] flex items-center gap-2 text-[11.5px] text-slate-200 hover:bg-white/[0.06]">
+                <Command className="h-3.5 w-3.5 text-sky-300" /> Quick jump
+                <span className="text-[9.5px] text-slate-500 px-1 py-0.5 border border-white/10 rounded ml-1">⌘K</span>
+              </button>
+              <button onClick={() => setPaused((p) => !p)}
+                className="h-8 px-2.5 rounded-md bg-white/[0.03] border border-white/[0.08] flex items-center gap-2 text-[11.5px] text-slate-200 hover:bg-white/[0.06]">
+                {paused ? <Play className="h-3.5 w-3.5 text-emerald-300" /> : <Pause className="h-3.5 w-3.5 text-amber-300" />}
+                {paused ? "Resume stream" : "Pause stream"}
+              </button>
+              <button onClick={exportCsv}
+                className="h-8 px-2.5 rounded-md bg-white/[0.03] border border-white/[0.08] flex items-center gap-2 text-[11.5px] text-slate-200 hover:bg-white/[0.06]">
+                <Download className="h-3.5 w-3.5 text-sky-300" /> Export snapshot
+              </button>
+              {selected && (
+                <button onClick={() => setSelected(null)}
+                  className="h-8 px-2.5 rounded-md bg-sky-500/10 border border-sky-400/30 flex items-center gap-2 text-[11.5px] text-sky-200 hover:bg-sky-500/15">
+                  <X className="h-3.5 w-3.5" /> Clear focus: {DOMAINS.find((d) => d.id === selected)?.title}
+                </button>
+              )}
+              <div className="flex-1" />
+              <span className="text-[10.5px] text-slate-500">Hotkeys: <kbd className="px-1 border border-white/10 rounded">1–9</kbd> focus · <kbd className="px-1 border border-white/10 rounded">P</kbd> pause · <kbd className="px-1 border border-white/10 rounded">Esc</kbd> clear</span>
+            </div>
+
             <GlassCard className="p-0 overflow-hidden">
               <ContextTabs active={tab} onChange={setTab} />
 
               <div className="grid grid-cols-12 gap-4 p-4">
                 <div className="col-span-12 xl:col-span-9">
-                  <ImpactMap selected={selected} setSelected={setSelected} onOpenDrawer={openDrawer} />
+                  <ImpactMap
+                    selected={selected}
+                    setSelected={setSelected}
+                    onOpenDrawer={openDrawer}
+                    filter={filter}
+                    setFilter={setFilter}
+                    hovered={hovered}
+                    setHovered={setHovered}
+                    paused={paused}
+                  />
                 </div>
                 <div className="col-span-12 xl:col-span-3">
                   <ImpactSummary />
                 </div>
               </div>
+
+              <EventTicker paused={paused} />
             </GlassCard>
 
             <TopImpactedEntities />
 
             <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-2 border-t border-white/[0.05]">
               <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className={`h-1.5 w-1.5 rounded-full ${paused ? "bg-amber-400" : "bg-emerald-400 animate-pulse"}`} />
                 Knowledge graph streaming · MES · AMHS · SECS/GEM · EDA · Historian
               </span>
-              <span>Texas Instruments · DFW Fab · Cross-Domain Context Twin v1.0</span>
+              <span>Texas Instruments · DFW Fab · Cross-Domain Context Twin v1.1</span>
             </div>
           </main>
         </div>
 
         <ContextDrawer open={drawerOpen} id={drawerId} onClose={() => setDrawerOpen(false)} />
+
+        <CommandPalette
+          open={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          onJumpDomain={(id) => setSelected(id)}
+          onSetTab={setTab}
+          onOpenDrawer={openDrawer}
+        />
+
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }}
+              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] rounded-lg border border-emerald-400/40 bg-emerald-500/10 backdrop-blur-md px-4 py-2 text-[12px] text-emerald-200">
+              {toast}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </AppShell>
   );
