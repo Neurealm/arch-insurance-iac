@@ -8,7 +8,7 @@ import {
   Droplets, Zap, DollarSign, Download, FileText, X, Cpu, Star, Award,
   FlaskConical, ClipboardCheck, Hammer, BadgeCheck, ArrowRight, Building2,
   HardHat, ListChecks,
-  Gavel, Brain, Gauge, Lightbulb,
+  Gavel, Brain, Gauge, Lightbulb, GitBranch,
 } from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
@@ -52,6 +52,7 @@ const RAIL = [
   { icon: Brain, label: "AI Reasoning", to: "/sead/ai-reasoning-playback" },
   { icon: Gauge, label: "Confidence\nExplorer", to: "/sead/confidence-explorer" },
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
+  { icon: GitBranch, label: "What If", to: "/sead/what-if" },
 ];
 
 function ModuleRail() {
