@@ -26,6 +26,7 @@ import CtLogsMonitor from "./pages/enterprise-cert/CtLogsMonitor.tsx";
 import SemiCommandCenter from "./pages/semiconductor/CommandCenter.tsx";
 import SeadCommandCenter from "./pages/sead/CommandCenter.tsx";
 import SeadEquipmentHealth from "./pages/sead/EquipmentHealthIntelligence.tsx";
+import SeadCrossDomain from "./pages/sead/CrossDomainContextTwin.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
 import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
@@ -293,6 +294,7 @@ const App = () => (
           <Route path="/sead/command-center" element={<ProtectedRoute><SeadCommandCenter /></ProtectedRoute>} />
           <Route path="/sead/equipment-health-intelligence" element={<ProtectedRoute><SeadEquipmentHealth /></ProtectedRoute>} />
           <Route path="/sead/equipment-health-intelligence/:equipmentId" element={<ProtectedRoute><SeadEquipmentHealth /></ProtectedRoute>} />
+          <Route path="/sead/cross-domain-context-twin" element={<ProtectedRoute><SeadCrossDomain /></ProtectedRoute>} />
           <Route path="/semiconductor/command-center" element={<ProtectedRoute><ScenarioProvider><SemiCommandCenter /></ScenarioProvider></ProtectedRoute>} />
           <Route path="/semiconductor/digital-twin" element={<ProtectedRoute><ScenarioProvider><SemiDigitalTwin /></ScenarioProvider></ProtectedRoute>} />
           <Route path="/semiconductor/production-flow" element={<ProtectedRoute><ScenarioProvider><SemiProductionFlow /></ScenarioProvider></ProtectedRoute>} />
