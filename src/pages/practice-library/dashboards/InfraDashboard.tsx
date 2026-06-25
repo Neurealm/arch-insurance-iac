@@ -128,6 +128,9 @@ export default function InfraDashboard() {
             <div className="rounded bg-muted/40 p-1.5"><div className="text-sm font-bold">0</div><div className="text-[9px] text-muted-foreground">Power Events 30D</div></div>
           </div>
           <div className="mt-2"><div className="text-[10px] text-muted-foreground mb-1">kWh Trend (7D)</div><Sparkline data={[420,438,431,445,452,447,461]} width={220} height={36} color="hsl(142 71% 45%)" fill /></div>
+          <Link to="/practice-library/infrastructure-hybrid-platform/power-admin-console" className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700">
+            Admin Console <ExternalLink className="h-3 w-3" />
+          </Link>
         </Section>
         <Section title="Risk & Compliance Posture">
           <div className="flex items-center gap-3">
