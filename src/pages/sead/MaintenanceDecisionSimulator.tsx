@@ -7,6 +7,7 @@ import {
   Settings as SettingsIcon, Wrench, Workflow, Bot, AlertTriangle,
   Cpu, TrendingUp, Shield, Clock, User, Star, CheckCircle2, X,
   Sparkles, Activity, DollarSign, Zap, Info,
+, Gavel,
 } from "lucide-react";
 import {
   Area, AreaChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis,
@@ -51,6 +52,7 @@ const RAIL = [
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator", active: true },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center" },
+  { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
 ];
 function ModuleRail() {
   const nav = useNavigate();

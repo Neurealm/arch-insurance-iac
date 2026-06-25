@@ -8,6 +8,7 @@ import {
   Droplets, Zap, DollarSign, Download, FileText, X, Cpu, Star, Award,
   FlaskConical, ClipboardCheck, Hammer, BadgeCheck, ArrowRight, Building2,
   HardHat, ListChecks,
+, Gavel,
 } from "lucide-react";
 import {
   Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
@@ -47,6 +48,7 @@ const RAIL = [
   { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
   { icon: Factory, label: "Factory\nImpact", to: "/sead/factory-impact-simulator" },
   { icon: Sparkles, label: "Decision\nCenter", to: "/sead/ai-maintenance-decision-center", active: true },
+  { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
 ];
 
 function ModuleRail() {
