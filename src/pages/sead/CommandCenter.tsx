@@ -367,22 +367,11 @@ function KpiCard({ k }: { k: any }) {
 /* ---------- left rail ---------- */
 
 const RAIL = [
-  { icon: LayoutGrid, label: "Command Center", active: true },
+  { icon: LayoutGrid, label: "Command Center", to: "/sead/command-center", active: true },
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", to: "/sead/cross-domain-context-twin" },
   { icon: Wrench, label: "Decision Sim", to: "/sead/maintenance-decision-simulator" },
   { icon: Factory, label: "Factory Impact", to: "/sead/factory-impact-simulator" },
-  { icon: Building2, label: "Fab Areas" },
-  { icon: Factory, label: "Equipment" },
-  { icon: Workflow, label: "Production" },
-  { icon: Wrench, label: "Maintenance" },
-  { icon: Gauge, label: "Yield" },
-  { icon: Zap, label: "Utilities" },
-  { icon: Bot, label: "AI Insights" },
-  { icon: HardHat, label: "Engineering" },
-  { icon: FileBarChart2, label: "Reports" },
-  { icon: Bell, label: "Alerts" },
-  { icon: SettingsIcon, label: "Administration" },
 ];
 
 function ModuleRail() {
