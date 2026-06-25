@@ -86,7 +86,7 @@ const navGroups: { title: string; items: { label: string; icon: any; to?: string
   { title: "Overview", items: [
     { label: "Power Overview", icon: Zap, active: true },
     { label: "Power Map", icon: MapIcon, to: "/practice-library/infrastructure-hybrid-platform/power-map" },
-    { label: "Alerts", icon: Bell, badge: 3 },
+    { label: "Alerts", icon: Bell, badge: 3, to: "/practice-library/infrastructure-hybrid-platform/power-alerts" },
   ]},
   { title: "Monitoring", items: [
     { label: "Real-time Monitoring", icon: Activity },
