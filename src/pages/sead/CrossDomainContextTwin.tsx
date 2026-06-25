@@ -56,6 +56,7 @@ const RAIL = [
   { icon: LayoutGrid, label: "Command\nCenter", to: "/sead/command-center" },
   { icon: Boxes, label: "Digital Twin", to: "/sead/equipment-health-intelligence" },
   { icon: NetIcon, label: "Cross-Domain", active: true },
+  { icon: Wrench, label: "Decision\nSim", to: "/sead/maintenance-decision-simulator" },
   { icon: Building2, label: "Equipment" },
   { icon: Workflow, label: "Production" },
   { icon: Wrench, label: "Maintenance" },
