@@ -23,7 +23,7 @@ import {
   Zap,
   Wrench,
   Bot,
-  Gauge, Lightbulb,
+  Gauge, Lightbulb, GitBranch,
   FileBarChart2,
   Building2,
   Network as NetIcon,
@@ -378,6 +378,7 @@ const RAIL = [
   { icon: Brain, label: "AI Reasoning", to: "/sead/ai-reasoning-playback" },
   { icon: Gauge, label: "Confidence\nExplorer", to: "/sead/confidence-explorer" },
   { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
+  { icon: GitBranch, label: "What If", to: "/sead/what-if" },
 ];
 
 function ModuleRail() {
