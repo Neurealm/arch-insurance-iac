@@ -5,7 +5,7 @@ import {
   Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2,
   CheckCircle2, RotateCcw, SlidersHorizontal, Database, Droplet, Truck,
-  Users, Activity, Wind, FileWarning, UserPlus, ArrowUp, ArrowDown, Scale, Target as TargetIcon, BookOpen, UserCheck} from "lucide-react";
+  Users, Activity, Wind, FileWarning, UserPlus, ArrowUp, ArrowDown, Scale, Target as TargetIcon, BookOpen, UserCheck, FlaskConical} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 import {
   BarChart, Bar as RBar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
@@ -41,6 +41,7 @@ const RAIL = [
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
+  { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
 ];
 
 function ModuleRail() {

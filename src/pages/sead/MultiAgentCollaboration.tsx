@@ -5,7 +5,7 @@ import {
   Bell, Boxes, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
   Wrench, Sparkles, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
   Target as TargetIcon, BookOpen, Users, Activity, ArrowRight, CheckCircle2,
-  MessageSquare, Zap, DollarSign, Cpu, Database, FileSearch, UserCheck} from "lucide-react";
+  MessageSquare, Zap, DollarSign, Cpu, Database, FileSearch, UserCheck, FlaskConical} from "lucide-react";
 
 /* ============================= atoms ============================= */
 function GlassCard({ children, className = "" }: any) {
@@ -36,6 +36,7 @@ const RAIL = [
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration", active: true },
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
+  { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
 ];
 
 function ModuleRail() {

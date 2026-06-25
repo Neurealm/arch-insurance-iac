@@ -6,7 +6,7 @@ import {
   Wrench, Sparkles, Gavel, Brain, Gauge, Lightbulb, GitBranch, Share2, Scale,
   Target as TargetIcon, BookOpen, Users, UserCheck, ArrowRight, CheckCircle2,
   Calendar, Clock, XCircle, Lightbulb as Bulb, Star, RefreshCw, Save, Send,
-  Sparkles as SparkIcon, BookOpen as Book, FileText, BarChart3,
+  Sparkles as SparkIcon, BookOpen as Book, FileText, BarChart3, FlaskConical,
 } from "lucide-react";
 import {
   LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine,
@@ -41,6 +41,7 @@ const RAIL = [
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop", active: true },
+  { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
 ];
 
 function ModuleRail() {

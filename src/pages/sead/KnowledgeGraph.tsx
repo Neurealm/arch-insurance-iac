@@ -6,7 +6,7 @@ import {
   Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2,
   Search, Users, Link2, Clock, Activity, Plus, Minus, Crosshair, X, Maximize2,
   Layers, Grid3x3, ChevronRight, Package, Building2, Droplet, Wind, ClipboardList,
-  TrendingUp, Settings as SettingsIcon, FileText, ArrowRight, Scale, Target as TargetIcon, BookOpen, UserCheck} from "lucide-react";
+  TrendingUp, Settings as SettingsIcon, FileText, ArrowRight, Scale, Target as TargetIcon, BookOpen, UserCheck, FlaskConical} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
@@ -38,6 +38,7 @@ const RAIL = [
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
+  { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
 ];
 
 function ModuleRail() {
