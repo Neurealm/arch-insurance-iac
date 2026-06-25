@@ -315,6 +315,7 @@ const App = () => (
           <Route path="/sead/explainability" element={<ProtectedRoute><SeadExplainability /></ProtectedRoute>} />
           <Route path="/sead/what-if" element={<ProtectedRoute><SeadWhatIf /></ProtectedRoute>} />
           <Route path="/sead/knowledge-graph" element={<ProtectedRoute><SeadKnowledgeGraph /></ProtectedRoute>} />
+          <Route path="/sead/outcome-tracker" element={<ProtectedRoute><SeadOutcomeTracker /></ProtectedRoute>} />
           <Route path="/sead/simulation-comparison" element={<ProtectedRoute><SeadSimulationComparison /></ProtectedRoute>} />
 
           <Route path="/semiconductor/command-center" element={<ProtectedRoute><ScenarioProvider><SemiCommandCenter /></ScenarioProvider></ProtectedRoute>} />
