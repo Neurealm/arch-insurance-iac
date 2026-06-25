@@ -238,128 +238,193 @@ function TwinKpi({ icon: Ico, label, value, sub, color, delta }: any) {
 }
 
 /* ============ isometric factory SVG ============ */
-function Box3D({ x, y, w, h, depth = 18, color, glow }: any) {
-  const top = `${x},${y} ${x + w},${y} ${x + w - depth},${y - depth} ${x - depth},${y - depth}`;
+// Isometric box rendered with proper top/front/side faces.
+// (x,y) is the front-bottom-left corner of the box; depth goes back-up-right.
+function IsoBox({ x, y, w, h, depth = 14, color, glow, highlight = false }: any) {
+  const dx = depth * 0.9;  // back-right offset
+  const dy = depth * 0.55; // back-up offset
   const front = `${x},${y} ${x + w},${y} ${x + w},${y + h} ${x},${y + h}`;
-  const side = `${x + w},${y} ${x + w - depth},${y - depth} ${x + w - depth},${y + h - depth} ${x + w},${y + h}`;
+  const top   = `${x},${y} ${x + w},${y} ${x + w + dx},${y - dy} ${x + dx},${y - dy}`;
+  const side  = `${x + w},${y} ${x + w + dx},${y - dy} ${x + w + dx},${y + h - dy} ${x + w},${y + h}`;
   return (
-    <g style={glow ? { filter: `drop-shadow(0 0 14px ${glow})` } : {}}>
-      <polygon points={front} fill={color} opacity={0.95} />
-      <polygon points={side} fill={color} opacity={0.7} />
-      <polygon points={top} fill={color} style={{ filter: "brightness(1.4)" }} />
+    <g style={glow ? { filter: `drop-shadow(0 0 14px ${glow})` } : undefined}>
+      <polygon points={top}   fill={color} style={{ filter: highlight ? "brightness(1.55)" : "brightness(1.35)" }} />
+      <polygon points={front} fill={color} opacity={highlight ? 0.98 : 0.9} />
+      <polygon points={side}  fill={color} opacity={highlight ? 0.78 : 0.62} />
+      {/* subtle top edge highlight */}
+      <line x1={x} y1={y} x2={x + w} y2={y} stroke="rgba(255,255,255,0.18)" strokeWidth="0.6" />
     </g>
   );
 }
 
 type LayerKey = "flow" | "wip" | "util" | "bottle" | "utility" | "cust";
 
-function FactoryTwin({ onOpenDrawer, layers, view, zoom, speed, scrubHour }: any) {
-  const flows = [
-    { d: "M 250 270 C 320 280, 420 280, 500 290", color: "#22d3ee", layer: "flow" },
-    { d: "M 530 320 C 540 360, 540 420, 540 460", color: "#a78bfa", layer: "wip" },
-    { d: "M 580 290 C 660 290, 700 290, 760 290", color: "#22d3ee", layer: "flow" },
-    { d: "M 250 320 C 320 360, 420 420, 480 460", color: "#ec4899", layer: "wip" },
-    { d: "M 580 320 C 680 360, 780 400, 880 440", color: "#10b981", layer: "cust" },
-    { d: "M 250 250 C 320 230, 420 230, 500 270", color: "#f59e0b", layer: "util" },
-  ];
-  const bays = useMemo(() => {
-    const arr: any[] = [];
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) {
-      arr.push({ id: `fe-${r}-${c}`, x: 110 + c * 36, y: 220 + r * 34, w: 26, h: 18, tone: "ok" });
-    }
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) {
-      arr.push({ id: `at-${r}-${c}`, x: 720 + c * 36, y: 220 + r * 34, w: 26, h: 18, tone: "muted" });
-    }
-    for (let c = 0; c < 6; c++) {
-      arr.push({ id: `be-${c}`, x: 380 + c * 38, y: 460, w: 28, h: 18, tone: "muted" });
-    }
-    return arr;
-  }, []);
+// SVG viewBox is 1200 × 560. All anchors live in this coord space so leaders + overlay align.
+const VB_W = 1200;
+const VB_H = 560;
 
-  // heatmap palette per cell pseudo-randomly
+// Cluster builder: a dense isometric grid of cabinets
+function buildCluster(originX: number, originY: number, cols: number, rows: number, cellW = 30, cellH = 22, gapX = 4, gapY = 8) {
+  const arr: { id: string; x: number; y: number; w: number; h: number; cx: number; cy: number }[] = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // iso skew: each row shifts back-up-right
+      const sx = originX + c * (cellW + gapX) + r * 10;
+      const sy = originY + r * (cellH + gapY) - r * 6;
+      arr.push({
+        id: `${originX}-${c}-${r}`,
+        x: sx, y: sy, w: cellW, h: cellH,
+        cx: sx + cellW / 2, cy: sy + cellH / 2,
+      });
+    }
+  }
+  return arr;
+}
+
+function FactoryTwin({ onOpenDrawer, layers, view, zoom, speed, scrubHour }: any) {
+  // --- equipment clusters ---
+  const frontEnd = useMemo(() => buildCluster(70,  230, 5, 4), []);
+  const assembly = useMemo(() => buildCluster(840, 230, 5, 4), []);
+  const middleA  = useMemo(() => buildCluster(420, 230, 3, 2), []);  // small bank above etch
+  const middleB  = useMemo(() => buildCluster(420, 360, 3, 2), []);  // small bank below etch
+  const backEnd  = useMemo(() => buildCluster(330, 470, 8, 1, 32, 22, 4, 0), []);
+
+  // --- anchors used by leader lines & callouts ---
+  // anchor = where the leader meets the equipment (svg coords)
+  // card   = where the floating HTML card sits (svg coords; overlay converts to %)
+  const ANCHORS = {
+    etch217:  { ax: 600, ay: 290, cx: 600, cy: 80,  color: "#f43f5e", layer: "bottle" as LayerKey },
+    alt215:   { ax: 180, ay: 295, cx: 240, cy: 200, color: "#22d3ee", layer: "util"   as LayerKey },
+    alt220:   { ax: 470, ay: 480, cx: 440, cy: 410, color: "#f59e0b", layer: "util"   as LayerKey },
+    wipAsm:   { ax: 920, ay: 290, cx: 820, cy: 200, color: "#a78bfa", layer: "wip"    as LayerKey },
+    queue:    { ax: 360, ay: 480, cx: 100, cy: 430, color: "#ec4899", layer: "wip"    as LayerKey },
+    utility:  { ax: 720, ay: 470, cx: 740, cy: 420, color: "#14b8a6", layer: "utility" as LayerKey },
+    customer: { ax: 1040, ay: 290, cx: 1080, cy: 210, color: "#10b981", layer: "cust" as LayerKey },
+  };
+
+  const dur = `${3 / speed}s`;
+
+  // build curved leader (svg coords) anchor → card
+  const leader = (a: { ax: number; ay: number; cx: number; cy: number }) => {
+    const mx = (a.ax + a.cx) / 2;
+    return `M ${a.ax} ${a.ay} C ${mx} ${a.ay}, ${a.cx} ${(a.ay + a.cy) / 2}, ${a.cx} ${a.cy}`;
+  };
+
   const heatColor = (id: string) => {
     let h = 0; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 100;
     if (h > 88) return "#ef4444"; if (h > 70) return "#f59e0b"; if (h > 40) return "#3b82f6"; return "#10b981";
   };
 
-  const dur = `${3 / speed}s`;
+  const renderBank = (bank: any[], baseColor: string, dimmed = false) => bank.map((b) => {
+    const c = view === "heatmap" ? heatColor(b.id) : baseColor;
+    return <IsoBox key={b.id} x={b.x} y={b.y} w={b.w} h={b.h} depth={view === "2D" ? 0 : 14} color={c} highlight={!dimmed} />;
+  });
+
+  // overlay-position helper: svg coords → CSS %
+  const pct = (svgX: number, svgY: number) => ({
+    left: `${(svgX / VB_W) * 100}%`,
+    top:  `${(svgY / VB_H) * 100}%`,
+  });
 
   return (
-    <div className="relative w-full h-[520px] rounded-lg overflow-hidden bg-[radial-gradient(ellipse_at_center,_#0c1426_0%,_#06080f_70%)] border border-white/[0.06]">
-      <svg viewBox="0 0 1100 520" className="absolute inset-0 w-full h-full" style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}>
+    <div className="relative w-full h-[560px] rounded-lg overflow-hidden bg-[radial-gradient(ellipse_at_50%_60%,_#0e1830_0%,_#06070d_75%)] border border-white/[0.06]">
+      <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid meet" style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}>
         <defs>
-          <pattern id="iso-grid" width="40" height="22" patternUnits="userSpaceOnUse" patternTransform="skewX(-30)">
-            <path d="M40 0 L0 0 0 22" fill="none" stroke="rgba(56,189,248,0.06)" strokeWidth="0.7" />
+          <pattern id="iso-grid" width="34" height="20" patternUnits="userSpaceOnUse" patternTransform="skewX(-30)">
+            <path d="M34 0 L0 0 0 20" fill="none" stroke="rgba(99,179,237,0.08)" strokeWidth="0.6" />
           </pattern>
           <linearGradient id="floor-fade" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#0b1426" />
-            <stop offset="100%" stopColor="#05070d" />
+            <stop offset="0%"  stopColor="#0b1426" />
+            <stop offset="60%" stopColor="#070c18" />
+            <stop offset="100%" stopColor="#04060c" />
           </linearGradient>
+          <radialGradient id="hotspot-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(244,63,94,0.55)" />
+            <stop offset="100%" stopColor="rgba(244,63,94,0)" />
+          </radialGradient>
+          {/* per-anchor gradients for leader lines */}
+          {Object.entries(ANCHORS).map(([k, a]) => (
+            <linearGradient key={k} id={`grad-${k}`} x1={a.ax} y1={a.ay} x2={a.cx} y2={a.cy} gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor={a.color} stopOpacity="0.95" />
+              <stop offset="100%" stopColor={a.color} stopOpacity="0.35" />
+            </linearGradient>
+          ))}
         </defs>
-        <rect width="1100" height="520" fill="url(#floor-fade)" />
-        <rect width="1100" height="520" fill="url(#iso-grid)" opacity="0.6" />
 
-        <text x="180" y="195" fill="#94a3b8" fontSize="11" letterSpacing="2">FRONT END</text>
-        <text x="780" y="195" fill="#94a3b8" fontSize="11" letterSpacing="2">ASSEMBLY &amp; TEST</text>
-        <text x="430" y="500" fill="#94a3b8" fontSize="11" letterSpacing="2">BACK END</text>
+        <rect width={VB_W} height={VB_H} fill="url(#floor-fade)" />
+        <rect width={VB_W} height={VB_H} fill="url(#iso-grid)" opacity="0.55" />
 
-        {/* equipment */}
-        {bays.map((b: any) => {
-          const palette = view === "heatmap" ? heatColor(b.id)
-            : b.tone === "ok" ? "#3b82f6" : b.tone === "alt" ? "#f59e0b" : b.tone === "alert" ? "#ef4444" : "#475569";
-          return <Box3D key={b.id} x={b.x} y={b.y} w={b.w} h={b.h} depth={view === "2D" ? 0 : 18} color={palette} />;
-        })}
+        {/* floor zone outlines */}
+        <g stroke="rgba(148,163,184,0.10)" strokeWidth="0.8" strokeDasharray="3 5" fill="none">
+          <rect x="50"  y="210" width="360" height="200" rx="6" />
+          <rect x="820" y="210" width="330" height="200" rx="6" />
+          <rect x="310" y="455" width="540" height="65"  rx="6" />
+        </g>
+        <text x="80"  y="200" fill="#94a3b8" fontSize="11" letterSpacing="3" fontWeight="600">FRONT END</text>
+        <text x="855" y="200" fill="#94a3b8" fontSize="11" letterSpacing="3" fontWeight="600">ASSEMBLY &amp; TEST</text>
+        <text x="540" y="540" fill="#94a3b8" fontSize="11" letterSpacing="3" fontWeight="600">BACK END</text>
 
-        {/* central etch hotspot */}
+        {/* equipment banks */}
+        {renderBank(frontEnd, "#2563eb")}
+        {renderBank(assembly, "#475569", true)}
+        {renderBank(middleA,  "#1e293b", true)}
+        {renderBank(middleB,  "#1e293b", true)}
+        {renderBank(backEnd,  "#334155", true)}
+
+        {/* central ETCH-217 hotspot */}
         <g onClick={() => onOpenDrawer("etch-217")} style={{ cursor: "pointer" }}>
-          <Box3D x={500} y={270} w={70} h={42} depth={view === "2D" ? 0 : 26} color="#dc2626" glow="rgba(239,68,68,0.7)" />
-          <circle cx="535" cy="260" r="18" fill="rgba(239,68,68,0.25)">
-            <animate attributeName="r" values="18;32;18" dur={dur} repeatCount="indefinite" />
-            <animate attributeName="opacity" values="0.5;0;0.5" dur={dur} repeatCount="indefinite" />
+          <circle cx={ANCHORS.etch217.ax} cy={ANCHORS.etch217.ay + 6} r="60" fill="url(#hotspot-glow)">
+            <animate attributeName="r" values="50;72;50" dur={dur} repeatCount="indefinite" />
           </circle>
+          <IsoBox x={ANCHORS.etch217.ax - 28} y={ANCHORS.etch217.ay - 10} w={56} h={36} depth={view === "2D" ? 0 : 22} color="#dc2626" glow="rgba(239,68,68,0.75)" highlight />
         </g>
 
-        {/* flow / wip / util / cust lines */}
-        {flows.filter((l) => layers.has(l.layer)).map((l, i) => (
-          <g key={i}>
-            <path d={l.d} stroke={l.color} strokeWidth="1.6" fill="none" opacity="0.45" />
-            <path d={l.d} stroke={l.color} strokeWidth="2.4" fill="none" strokeDasharray="6 10" opacity="0.9">
-              <animate attributeName="stroke-dashoffset" from="0" to="-160" dur={dur} repeatCount="indefinite" />
+        {/* leader lines: anchor → callout */}
+        {Object.entries(ANCHORS).filter(([, a]) => layers.has(a.layer)).map(([k, a]) => (
+          <g key={k}>
+            <path d={leader(a)} stroke={`url(#grad-${k})`} strokeWidth="1.5" fill="none" opacity="0.55" />
+            <path d={leader(a)} stroke={a.color} strokeWidth="1.8" fill="none" strokeDasharray="5 8" opacity="0.9">
+              <animate attributeName="stroke-dashoffset" from="0" to="-130" dur={dur} repeatCount="indefinite" />
             </path>
+            {/* anchor pip on equipment */}
+            <circle cx={a.ax} cy={a.ay} r="3" fill={a.color}>
+              <animate attributeName="opacity" values="1;0.3;1" dur={dur} repeatCount="indefinite" />
+            </circle>
           </g>
         ))}
 
-        {/* scrub indicator: horizontal sweep */}
-        <line x1={120 + scrubHour * 12} y1="200" x2={120 + scrubHour * 12} y2="490"
-          stroke="rgba(56,189,248,0.45)" strokeWidth="1" strokeDasharray="3 4" />
+        {/* time-scrub vertical sweep */}
+        <line x1={70 + scrubHour * 14} y1="210" x2={70 + scrubHour * 14} y2="520"
+          stroke="rgba(56,189,248,0.4)" strokeWidth="1" strokeDasharray="3 5" />
       </svg>
 
-      {/* floating callouts (filtered by layers) */}
+      {/* HTML callout overlay — positions match SVG anchors */}
       {layers.has("bottle") && (
-        <CalloutCard top={68} left={350} tone="alert" title="ETCH-217" lines={["Maint. Tonight", "10:00 PM – 2:00 AM"]} arrow="down" onClick={() => onOpenDrawer("etch-217")} />
+        <CalloutCard {...pct(ANCHORS.etch217.cx, ANCHORS.etch217.cy)} tone="alert" title="ETCH-217" lines={["Maint. Tonight", "10:00 PM – 2:00 AM"]} arrow="down" onClick={() => onOpenDrawer("etch-217")} />
       )}
       {layers.has("util") && (<>
-        <CalloutCard top={210} left={170} tone="amber" title="Alt Tool" lines={["ETCH-215", "Load: 68%"]} onClick={() => onOpenDrawer("alt-215")} />
-        <CalloutCard top={335} left={350} tone="amber" title="Alt Tool" lines={["ETCH-220", "Load: 82%"]} onClick={() => onOpenDrawer("alt-220")} />
+        <CalloutCard {...pct(ANCHORS.alt215.cx, ANCHORS.alt215.cy)} tone="amber" title="Alt Tool" lines={["ETCH-215", "Load: 68%"]} onClick={() => onOpenDrawer("alt-215")} />
+        <CalloutCard {...pct(ANCHORS.alt220.cx, ANCHORS.alt220.cy)} tone="amber" title="Alt Tool" lines={["ETCH-220", "Load: 82%"]} onClick={() => onOpenDrawer("alt-220")} />
       </>)}
       {layers.has("wip") && (<>
-        <CalloutCard top={210} left={550} tone="violet" title="WIP Increase" lines={["Assembly", "+18 lots"]} icon={ShieldCheck} onClick={() => onOpenDrawer("wip")} />
-        <CalloutCard top={358} left={130} tone="fuchsia" title="Queue Build" lines={["CMP Area", "+12 lots"]} icon={Users} onClick={() => onOpenDrawer("queue")} />
+        <CalloutCard {...pct(ANCHORS.wipAsm.cx, ANCHORS.wipAsm.cy)} tone="violet" title="WIP Increase" lines={["Assembly", "+18 lots"]} icon={ShieldCheck} onClick={() => onOpenDrawer("wip")} />
+        <CalloutCard {...pct(ANCHORS.queue.cx, ANCHORS.queue.cy)} tone="fuchsia" title="Queue Build" lines={["CMP Area", "+12 lots"]} icon={Users} onClick={() => onOpenDrawer("queue")} />
       </>)}
       {layers.has("utility") && (
-        <CalloutCard top={335} left={580} tone="sky" title="Utility Impact" lines={["Chilled Water", "+6% (1.2 hrs)"]} icon={Droplets} onClick={() => onOpenDrawer("util")} />
+        <CalloutCard {...pct(ANCHORS.utility.cx, ANCHORS.utility.cy)} tone="sky" title="Utility Impact" lines={["Chilled Water", "+6% (1.2 hrs)"]} icon={Droplets} onClick={() => onOpenDrawer("util")} />
       )}
       {layers.has("cust") && (
-        <CalloutCard top={210} left={780} tone="emerald" title="Customer Orders" lines={["On Track", "0 at risk"]} icon={CheckCircle2} onClick={() => onOpenDrawer("cust")} />
+        <CalloutCard {...pct(ANCHORS.customer.cx, ANCHORS.customer.cy)} tone="emerald" title="Customer Orders" lines={["On Track", "0 at risk"]} icon={CheckCircle2} onClick={() => onOpenDrawer("cust")} />
       )}
 
       {/* legend chip */}
-      <div className="absolute top-3 left-3 text-[10px] text-slate-400 px-2 py-1 rounded-md bg-black/30 border border-white/[0.06] backdrop-blur">
+      <div className="absolute top-3 left-3 text-[10px] text-slate-400 px-2 py-1 rounded-md bg-black/40 border border-white/[0.06] backdrop-blur">
         View: <span className="text-slate-200 font-medium">{view}</span> · Zoom: <span className="text-slate-200 font-medium">{Math.round(zoom * 100)}%</span> · Speed: <span className="text-slate-200 font-medium">{speed}x</span>
       </div>
     </div>
   );
 }
+
 
 function CalloutCard({ top, left, tone, title, lines, icon: Ico, onClick, arrow }: any) {
   const palette: Record<string, string> = {
@@ -377,8 +442,8 @@ function CalloutCard({ top, left, tone, title, lines, icon: Ico, onClick, arrow 
   return (
     <motion.button onClick={onClick}
       initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }} style={{ top, left }}
-      className={`absolute min-w-[150px] text-left rounded-md border backdrop-blur-md px-2.5 py-1.5 hover:scale-[1.03] transition-transform ${palette[tone]}`}>
+      transition={{ duration: 0.4 }} style={{ top, left, transform: "translate(-50%, -50%)" }}
+      className={`absolute min-w-[150px] text-left rounded-md border backdrop-blur-md px-2.5 py-1.5 hover:scale-[1.03] transition-transform z-10 ${palette[tone]}`}>
       <div className="flex items-center gap-1.5 mb-0.5">
         {Ico ? <Ico className="h-3 w-3" /> : <span className={`h-1.5 w-1.5 rounded-full ${dotColor[tone]} animate-pulse`} />}
         <span className="text-[11px] font-semibold tracking-tight">{title}</span>
