@@ -239,8 +239,7 @@ const RAIL = [
   { icon: BookOpen, label: "Operational\nLearning", to: "/sead/operational-learning" },
   { icon: TargetIcon, label: "Outcome\nTracker", to: "/sead/outcome-tracker" },
   { icon: Users, label: "Multi-Agent\nCollaboration", to: "/sead/multi-agent-collaboration" },
-  { icon: UserCheck, label: "Human-
-in-the-Loop", to: "/sead/human-in-the-loop" },
+  { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
 ];
 
 function ModuleRail() {
