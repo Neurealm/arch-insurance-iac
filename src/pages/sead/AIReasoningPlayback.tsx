@@ -3,12 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  Bell, Boxes, ChevronDown, ChevronRight, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
-  Wrench, Sparkles, Gavel, Brain, ArrowLeft, Play, Pause, SkipBack, SkipForward, Activity,
-  TrendingUp, BookOpen, ClipboardList, Users, BarChart3, Trophy, CheckCircle2, Wand2,
-  Gauge, Lightbulb, GitBranch, Share2, ShieldCheck, AlertTriangle, Database, Cpu, Settings,
-  ScrollText, Clock, Scale, Command, Search, Download, RotateCcw, Filter, Star, Keyboard,
-  Repeat, X, Zap, Target as TargetIcon, UserCheck, FlaskConical, MessageSquare} from "lucide-react";
+  Bell, Boxes, ChevronDown, ChevronRight, Factory, HelpCircle, LayoutGrid, Network as NetIcon, Wrench, Sparkles, Gavel, Brain, ArrowLeft, Play, Pause, SkipBack, SkipForward, Activity, TrendingUp, BookOpen, ClipboardList, Users, BarChart3, Trophy, CheckCircle2, Wand2, Gauge, Lightbulb, GitBranch, Share2, ShieldCheck, AlertTriangle, Database, Cpu, Settings, ScrollText, Clock, Scale, Command, Search, Download, RotateCcw, Filter, Star, Keyboard, Repeat, X, Zap, Target as TargetIcon, UserCheck, FlaskConical, MessageSquare, Network,
+} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
@@ -42,6 +38,7 @@ const RAIL = [
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
   { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
+  { icon: Network, label: "IoT→AI\nArchitecture", to: "/sead/iot-ai-architecture" },
 ];
 
 function ModuleRail() {

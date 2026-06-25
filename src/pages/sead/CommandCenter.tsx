@@ -2,12 +2,8 @@ import { useEffect, useState, useMemo, useCallback, useRef, memo, lazy, Suspense
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Activity, AlertTriangle, Bell, ChevronDown, Factory, HelpCircle, Info,
-  LayoutGrid, MapPin, Maximize2, Search, ShieldCheck, Sparkles,
-  TrendingDown, TrendingUp, Wrench, Bot, Gauge, Lightbulb, GitBranch, Share2,
-  Building2, Network as NetIcon, Boxes, Cpu, Workflow,
-  CheckCircle2, Gavel, Brain, Scale, Command as CommandIcon, RefreshCw, Pause, Play,
-  Clock, Filter, X, ArrowRight, Zap, Target as TargetIcon, BookOpen, Users, UserCheck, FlaskConical, MessageSquare} from "lucide-react";
+  Activity, AlertTriangle, Bell, ChevronDown, Factory, HelpCircle, Info, LayoutGrid, MapPin, Maximize2, Search, ShieldCheck, Sparkles, TrendingDown, TrendingUp, Wrench, Bot, Gauge, Lightbulb, GitBranch, Share2, Building2, Network as NetIcon, Boxes, Cpu, Workflow, CheckCircle2, Gavel, Brain, Scale, Command as CommandIcon, RefreshCw, Pause, Play, Clock, Filter, X, ArrowRight, Zap, Target as TargetIcon, BookOpen, Users, UserCheck, FlaskConical, MessageSquare, Network,
+} from "lucide-react";
 import {
   Area, AreaChart, Cell, Pie, PieChart, ResponsiveContainer,
 } from "recharts";
@@ -344,6 +340,7 @@ const RAIL = [
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
   { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
+  { icon: Network, label: "IoT→AI\nArchitecture", to: "/sead/iot-ai-architecture" },
 ];
 
 function ModuleRail() {

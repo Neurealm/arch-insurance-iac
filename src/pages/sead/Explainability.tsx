@@ -2,10 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon,
-  Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2, Star, Activity,
-  ShieldCheck, Users, Zap, Briefcase, Box, CheckCircle2, Database, BookOpen,
-  TrendingUp, Target, Clock, DollarSign, Download, Play, BarChart3, Wallet, Scale, Target as TargetIcon, UserCheck, FlaskConical, MessageSquare} from "lucide-react";
+  Bell, Boxes, ChevronDown, Factory, HelpCircle, LayoutGrid, Network as NetIcon, Wrench, Sparkles, Gavel, Brain, ArrowLeft, Gauge, Lightbulb, GitBranch, Share2, Star, Activity, ShieldCheck, Users, Zap, Briefcase, Box, CheckCircle2, Database, BookOpen, TrendingUp, Target, Clock, DollarSign, Download, Play, BarChart3, Wallet, Scale, Target as TargetIcon, UserCheck, FlaskConical, MessageSquare, Network,
+} from "lucide-react";
 import etchImg from "@/assets/etch-chamber-3d.jpg";
 
 /* ============================= atoms ============================= */
@@ -39,6 +37,7 @@ const RAIL = [
   { icon: UserCheck, label: "Human-\nin-the-Loop", to: "/sead/human-in-the-loop" },
   { icon: FlaskConical, label: "Engineering\nSandbox", to: "/sead/engineering-sandbox" },
   { icon: MessageSquare, label: "Digital Coworker\nConversation", to: "/sead/digital-coworker-conversation" },
+  { icon: Network, label: "IoT→AI\nArchitecture", to: "/sead/iot-ai-architecture" },
 ];
 
 function ModuleRail() {
