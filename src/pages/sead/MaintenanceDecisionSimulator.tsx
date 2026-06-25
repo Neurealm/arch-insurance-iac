@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Bell, Boxes, Building2, ChevronDown, Factory, FileBarChart2,
-  Gauge, HelpCircle, LayoutGrid, Network as NetIcon, Search,
+  Gauge, Lightbulb, HelpCircle, LayoutGrid, Network as NetIcon, Search,
   Settings as SettingsIcon, Wrench, Workflow, Bot, AlertTriangle,
   Cpu, TrendingUp, Shield, Clock, User, Star, CheckCircle2, X,
   Sparkles, Activity, DollarSign, Zap, Info,
@@ -55,6 +55,7 @@ const RAIL = [
   { icon: Gavel, label: "Human\nGovernance", to: "/sead/human-governance-center" },
   { icon: Brain, label: "AI Reasoning", to: "/sead/ai-reasoning-playback" },
   { icon: Gauge, label: "Confidence\nExplorer", to: "/sead/confidence-explorer" },
+  { icon: Lightbulb, label: "Explainability", to: "/sead/explainability" },
 ];
 function ModuleRail() {
   const nav = useNavigate();
