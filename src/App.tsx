@@ -24,6 +24,7 @@ import AuditEvidenceCenter from "./pages/enterprise-cert/AuditEvidenceCenter.tsx
 import PolicyEngine from "./pages/enterprise-cert/PolicyEngine.tsx";
 import CtLogsMonitor from "./pages/enterprise-cert/CtLogsMonitor.tsx";
 import SemiCommandCenter from "./pages/semiconductor/CommandCenter.tsx";
+import SeadCommandCenter from "./pages/sead/CommandCenter.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
 import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
@@ -288,6 +289,7 @@ const App = () => (
           <Route path="/no-access" element={<NoAccess />} />
           <Route path="/profile" element={<UpdateProfile />} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/sead/command-center" element={<ProtectedRoute><SeadCommandCenter /></ProtectedRoute>} />
           <Route path="/semiconductor/command-center" element={<ProtectedRoute><ScenarioProvider><SemiCommandCenter /></ScenarioProvider></ProtectedRoute>} />
           <Route path="/semiconductor/digital-twin" element={<ProtectedRoute><ScenarioProvider><SemiDigitalTwin /></ScenarioProvider></ProtectedRoute>} />
           <Route path="/semiconductor/production-flow" element={<ProtectedRoute><ScenarioProvider><SemiProductionFlow /></ScenarioProvider></ProtectedRoute>} />

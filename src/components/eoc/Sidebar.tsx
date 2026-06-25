@@ -227,6 +227,9 @@ const tree: Node[] = [
     icon: Sparkles2,
     to: "/practice-library/sead-runops",
     navOnClick: true,
+    children: [
+      { key: "sead-cc", label: "Command Center", icon: LayoutGrid, to: "/sead/command-center" },
+    ],
   },
   {
     key: "semi",
