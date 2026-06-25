@@ -38,6 +38,7 @@ import SeadWhatIf from "./pages/sead/WhatIf.tsx";
 import SeadKnowledgeGraph from "./pages/sead/KnowledgeGraph.tsx";
 import SeadOperationalLearning from "./pages/sead/OperationalLearning.tsx";
 import SeadOutcomeTracker from "./pages/sead/OutcomeTracker.tsx";
+import SeadMultiAgentCollaboration from "./pages/sead/MultiAgentCollaboration.tsx";
 import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
 import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
