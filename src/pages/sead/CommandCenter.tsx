@@ -784,15 +784,15 @@ function UtilityStatus() {
         <div className="text-[10px] uppercase tracking-wider text-slate-500 text-right">Optimal</div>
         <div className="text-[10px] uppercase tracking-wider text-slate-500 text-right">Status</div>
         {UTILITIES.map((u) => (
-          <>
-            <div key={u.name + "n"} className="text-slate-200">{u.name}</div>
+          <div key={u.name} className="contents">
+            <div className="text-slate-200">{u.name}</div>
             <div className="text-slate-300 text-right tabular-nums">{u.cur}</div>
             <div className="text-slate-400 text-right tabular-nums">{u.opt}</div>
             <div className={`text-right flex items-center justify-end gap-1 ${u.color}`}>
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: "currentColor" }} />
               {u.status}
             </div>
-          </>
+          </div>
         ))}
       </div>
     </GlassCard>
