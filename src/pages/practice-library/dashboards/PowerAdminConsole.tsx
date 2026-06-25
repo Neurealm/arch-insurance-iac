@@ -4,7 +4,7 @@ import {
   Activity, Map as MapIcon, BarChart3, TrendingUp, Gauge, Settings as SettingsIcon,
   Battery, Power, Cpu, Layers, FileText, PieChart, Plug, ChevronLeft, ArrowRight,
   CircleDot, ShieldAlert,
-} , Brain } from "lucide-react";
+, Brain } from "lucide-react";
 
 /* ---------- tiny chart primitives (SVG) ---------- */
 function LineChart({
