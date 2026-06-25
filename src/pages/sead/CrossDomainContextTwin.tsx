@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Sparkles,
@@ -7,7 +7,7 @@ import { Sparkles,
   Settings as SettingsIcon, Search, Star, Wrench, Workflow, Zap, Bot,
   Truck, Users, UserCog, Briefcase, Beaker, FlaskConical, CircleDot,
   TrendingUp, TrendingDown, CheckCircle2, X, Info, Clock, AlertTriangle,
-  Cpu, Database, ShieldCheck, HardHat,
+  Cpu, Database, ShieldCheck, HardHat, Command, Pause, Play, Download, Filter, Activity,
   Gavel, Brain, Scale} from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { AppShell } from "@/components/eoc/AppShell";
