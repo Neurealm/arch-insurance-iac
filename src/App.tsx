@@ -33,6 +33,7 @@ import SemiResourceOptimization from "./pages/semiconductor/ResourceOptimization
 import SemiKnowledgeGraph from "./pages/semiconductor/KnowledgeGraph.tsx";
 import SemiProofOfValue from "./pages/semiconductor/ProofOfValue.tsx";
 import SemiFacilitator from "./pages/semiconductor/Facilitator.tsx";
+import { ScenarioProvider } from "./features/semiconductor/state/ScenarioContext.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
