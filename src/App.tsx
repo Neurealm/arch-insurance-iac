@@ -33,6 +33,7 @@ import SemiResourceOptimization from "./pages/semiconductor/ResourceOptimization
 import SemiKnowledgeGraph from "./pages/semiconductor/KnowledgeGraph.tsx";
 import SemiProofOfValue from "./pages/semiconductor/ProofOfValue.tsx";
 import SemiFacilitator from "./pages/semiconductor/Facilitator.tsx";
+import { ScenarioProvider } from "./features/semiconductor/state/ScenarioContext.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
@@ -287,16 +288,17 @@ const App = () => (
           <Route path="/no-access" element={<NoAccess />} />
           <Route path="/profile" element={<UpdateProfile />} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/semiconductor/command-center" element={<ProtectedRoute><SemiCommandCenter /></ProtectedRoute>} />
-          <Route path="/semiconductor/digital-twin" element={<ProtectedRoute><SemiDigitalTwin /></ProtectedRoute>} />
-          <Route path="/semiconductor/production-flow" element={<ProtectedRoute><SemiProductionFlow /></ProtectedRoute>} />
-          <Route path="/semiconductor/physical-automation" element={<ProtectedRoute><SemiPhysicalAutomation /></ProtectedRoute>} />
-          <Route path="/semiconductor/vision-operations" element={<ProtectedRoute><SemiVisionOperations /></ProtectedRoute>} />
-          <Route path="/semiconductor/operations-intelligence" element={<ProtectedRoute><SemiOperationsIntelligence /></ProtectedRoute>} />
-          <Route path="/semiconductor/resource-optimization" element={<ProtectedRoute><SemiResourceOptimization /></ProtectedRoute>} />
-          <Route path="/semiconductor/knowledge-graph" element={<ProtectedRoute><SemiKnowledgeGraph /></ProtectedRoute>} />
-          <Route path="/semiconductor/proof-of-value" element={<ProtectedRoute><SemiProofOfValue /></ProtectedRoute>} />
-          <Route path="/semiconductor/facilitator" element={<ProtectedRoute><SemiFacilitator /></ProtectedRoute>} />
+          <Route path="/semiconductor/command-center" element={<ProtectedRoute><ScenarioProvider><SemiCommandCenter /></ScenarioProvider></ProtectedRoute>} />
+          <Route path="/semiconductor/digital-twin" element={<ProtectedRoute><ScenarioProvider><SemiDigitalTwin /></ScenarioProvider></ProtectedRoute>} />
+          <Route path="/semiconductor/production-flow" element={<ProtectedRoute><ScenarioProvider><SemiProductionFlow /></ScenarioProvider></ProtectedRoute>} />
+          <Route path="/semiconductor/physical-automation" element={<ProtectedRoute><ScenarioProvider><SemiPhysicalAutomation /></ScenarioProvider></ProtectedRoute>} />
+          <Route path="/semiconductor/vision-operations" element={<ProtectedRoute><ScenarioProvider><SemiVisionOperations /></ScenarioProvider></ProtectedRoute>} />
+          <Route path="/semiconductor/operations-intelligence" element={<ProtectedRoute><ScenarioProvider><SemiOperationsIntelligence /></ScenarioProvider></ProtectedRoute>} />
+          <Route path="/semiconductor/resource-optimization" element={<ProtectedRoute><ScenarioProvider><SemiResourceOptimization /></ScenarioProvider></ProtectedRoute>} />
+          <Route path="/semiconductor/knowledge-graph" element={<ProtectedRoute><ScenarioProvider><SemiKnowledgeGraph /></ScenarioProvider></ProtectedRoute>} />
+          <Route path="/semiconductor/proof-of-value" element={<ProtectedRoute><ScenarioProvider><SemiProofOfValue /></ScenarioProvider></ProtectedRoute>} />
+          <Route path="/semiconductor/facilitator" element={<ProtectedRoute><ScenarioProvider><SemiFacilitator /></ScenarioProvider></ProtectedRoute>} />
+
           <Route path="/ai-engineering/backlog" element={<ProtectedRoute><AiEngineeringBacklog /></ProtectedRoute>} />
           <Route path="/ai-engineering/answers-actions" element={<ProtectedRoute><AnswersActions /></ProtectedRoute>} />
           <Route path="/ai-engineering/agentic-data-foundation" element={<ProtectedRoute><AgenticDataFoundation /></ProtectedRoute>} />
