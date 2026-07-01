@@ -63,7 +63,7 @@ const NODE_DETAILS: Record<NodeId, {
   deps: ["Kafka", "Kinesis", "Fluent Bit", "OTel Collector"].slice(0, rand(1,3)),
   errors: ["Schema drift", "Rate limit", "Auth token expiry", "Deserialization failure"].slice(0, rand(1,3)),
   frameworks: ["SOC 2", "ISO 27001", "HIPAA", "PCI-DSS"].slice(0, rand(1,3)),
-]])) as any;
+}])) as any;
 
 /* ============================== 3D Scene ============================== */
 function OrbitingNodes({ onHover, hoverId }: { onHover: (id: NodeId | null) => void; hoverId: NodeId | null }) {
