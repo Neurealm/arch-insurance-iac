@@ -107,14 +107,14 @@ function Spark({ data, color }: { data: number[]; color: string }) {
 }
 
 function HygieneGauge({ value }: { value: number }) {
-  // Half circle 0-100
-  const angle = (value / 100) * 180 - 180;
+  const v = Math.min(100, Math.max(0, value));
+  const angle = (v / 100) * 180 - 180;
   const R = 46, cx = 60, cy = 60;
   const rad = (a: number) => (a * Math.PI) / 180;
   const x = cx + R * Math.cos(rad(angle));
   const y = cy + R * Math.sin(rad(angle));
   return (
-    <svg viewBox="0 0 120 80" className="w-full h-32">
+    <svg viewBox="0 0 120 78" className="w-full h-32">
       <defs>
         <linearGradient id="gauge" x1="0" x2="1">
           <stop offset="0" stopColor="#f43f5e" />
@@ -125,7 +125,8 @@ function HygieneGauge({ value }: { value: number }) {
       <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`} stroke="url(#gauge)" strokeWidth="12" fill="none" strokeLinecap="round" />
       <line x1={cx} y1={cy} x2={x} y2={y} stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" />
       <circle cx={cx} cy={cy} r="4" fill="#0f172a" />
-      <text x={cx} y="45" textAnchor="middle" className="fill-slate-900" fontSize="16" fontWeight="700">{value}%</text>
+      <text x={cx} y={cy - 18} textAnchor="middle" className="fill-slate-900" fontSize="16" fontWeight="700">{v}%</text>
+      <text x={cx} y={cy + 14} textAnchor="middle" className="fill-slate-500" fontSize="8">Hygiene Score</text>
     </svg>
   );
 }

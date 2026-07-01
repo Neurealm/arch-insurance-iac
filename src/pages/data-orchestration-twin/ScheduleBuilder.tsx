@@ -446,18 +446,22 @@ const Spark = ({ points, color = "#3b82f6", w = 84, h = 26 }: { points: number[]
 };
 
 function Gauge2({ value, label, color }: { value: number; label: string; color: string }) {
-  const angle = Math.min(180, Math.max(0, value * 1.8));
-  const rad = (angle - 90) * (Math.PI / 180);
-  const x = 40 + Math.cos(rad) * 32; const y = 42 + Math.sin(rad) * 32;
-  const large = angle > 180 ? 1 : 0;
+  const v = Math.min(100, Math.max(0, value));
+  const angle = (v / 100) * 180; // 0..180 across the arc
+  // Geometry: arc center (cx,cy)=(50,52), radius 36, arc spans left(14,52) → right(86,52)
+  const cx = 50, cy = 52, R = 36;
+  const theta = (180 - angle) * (Math.PI / 180); // 180° = left start, 0° = right end
+  const x = cx + R * Math.cos(theta);
+  const y = cy - R * Math.sin(theta);
   return (
     <div className="flex flex-col items-center">
-      <svg width="80" height="52">
-        <path d="M 8 42 A 32 32 0 0 1 72 42" fill="none" stroke="#e2e8f0" strokeWidth="6" strokeLinecap="round" />
-        <path d={`M 8 42 A 32 32 0 ${large} 1 ${x.toFixed(1)} ${y.toFixed(1)}`} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round" />
-        <text x="40" y="40" textAnchor="middle" style={{ fontSize: 12, fontWeight: 700, fill: "#0f172a" }}>{Math.round(value)}%</text>
+      <svg width="100" height="64" viewBox="0 0 100 64" className="overflow-visible">
+        <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`} fill="none" stroke="#e2e8f0" strokeWidth="6" strokeLinecap="round" />
+        <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${x.toFixed(2)} ${y.toFixed(2)}`} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round" />
+        {/* value sits comfortably inside the arc, well above baseline */}
+        <text x={cx} y={cy - 10} textAnchor="middle" style={{ fontSize: 14, fontWeight: 700, fill: "#0f172a" }}>{Math.round(v)}%</text>
       </svg>
-      <div className="text-[10px] text-slate-500 mt-0.5">{label}</div>
+      <div className="text-[10px] text-slate-500 mt-1 leading-tight text-center whitespace-nowrap">{label}</div>
     </div>
   );
 }
