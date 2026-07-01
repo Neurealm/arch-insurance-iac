@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Database, CheckCircle2, Activity, Clock, Share2, Droplet, Target,
   Search, Filter, Download, RefreshCw, X, ChevronDown, ChevronRight,
@@ -169,6 +170,15 @@ export default function LogSourceInventoryAndScopeRegistry() {
       <header className="mb-5 flex items-start justify-between gap-6">
         <div>
           <h1 className="text-[28px] font-bold text-slate-900 leading-tight">Log Source Inventory & Scope Registry</h1>
+          <Link
+            to="/data-orchestration-twin/log-source-inventory-and-scope-registry/datadog-log-profile"
+            className="mt-1 inline-flex items-center gap-1.5 text-[13px] font-semibold text-indigo-600 hover:text-indigo-700 group"
+          >
+            <span className="h-4 w-4 rounded bg-gradient-to-br from-violet-500 to-indigo-600 grid place-items-center text-[10px]">🐶</span>
+            DataDog Log Profile
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">ACTIVE</span>
+            <span className="opacity-0 group-hover:opacity-100 transition">→</span>
+          </Link>
           <p className="text-[13px] text-slate-600 mt-1">Enterprise inventory of every data source participating in the Data Orchestration Platform.</p>
           <p className="text-[11px] text-slate-500 mt-0.5 max-w-3xl">Every downstream orchestration decision begins with accurate source inventory, metadata, ownership, engineering configuration, and operational health.</p>
         </div>
