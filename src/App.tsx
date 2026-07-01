@@ -473,6 +473,7 @@ const App = () => (
             <Route path="no-duplication-strategy-and-retention-policy/scenario/:slug" element={<NoDuplicationScenarioModeler />} />
             <Route path="options-and-tradeoff-matrix" element={<OptionsAndTradeoffMatrix />} />
             <Route path="connector-access-and-governance-registry" element={<ConnectorAccessGovernanceRegistry />} />
+            <Route path="connector-access-and-governance-registry/method/:slug" element={<ConnectionMethodProfile />} />
             <Route path="fetch-orchestration-scheduler" element={<FetchOrchestrationScheduler />} />
             <Route path="source-onboarding-factory" element={<SourceOnboardingFactory />} />
             <Route path="assisted-schema-discovery-and-field-mapping" element={<AssistedSchemaDiscoveryAndFieldMapping />} />
