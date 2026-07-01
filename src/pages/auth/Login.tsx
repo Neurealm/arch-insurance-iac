@@ -21,6 +21,9 @@ export default function Login() {
   const [workspace, setWorkspace] = useState("neurealm");
   const [showPassword, setShowPassword] = useState(false);
   const [tenants, setTenants] = useState<{ id: string; name: string; slug: string }[]>([]);
+  const [verifying, setVerifying] = useState(false);
+  const [authComplete, setAuthComplete] = useState(false);
+  const [pendingNav, setPendingNav] = useState<null | (() => void)>(null);
 
   useEffect(() => {
     (async () => {
