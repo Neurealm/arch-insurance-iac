@@ -204,7 +204,7 @@ export default function ConnectorAccessGovernanceRegistry() {
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <div>
               <div className="font-semibold text-slate-900">Connector &amp; Access Inventory</div>
-              <div className="text-xs text-slate-500">Click any row to load into the Governance Intelligence panel</div>
+              <div className="text-xs text-slate-500">Click any row to open its Connection Method Profile — cyber posture &amp; forecast per strategy</div>
             </div>
             <div className="text-[11px] text-slate-500">Showing {rows.length} of 122 connectors</div>
           </div>
