@@ -479,6 +479,7 @@ const App = () => (
             <Route path="connector-access-and-governance-registry" element={<ConnectorAccessGovernanceRegistry />} />
             <Route path="connector-access-and-governance-registry/method/:slug" element={<ConnectionMethodProfile />} />
             <Route path="fetch-orchestration-scheduler" element={<FetchOrchestrationScheduler />} />
+            <Route path="fetch-orchestration-scheduler/schedule-builder/:slug" element={<ScheduleBuilder />} />
             <Route path="source-onboarding-factory" element={<SourceOnboardingFactory />} />
             <Route path="assisted-schema-discovery-and-field-mapping" element={<AssistedSchemaDiscoveryAndFieldMapping />} />
             <Route path="schema-drift-and-exception-workbench" element={<SchemaDriftAndExceptionWorkbench />} />
