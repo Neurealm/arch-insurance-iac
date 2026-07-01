@@ -251,6 +251,8 @@ import LifecycleTechDebt from "./pages/aocp/LifecycleTechDebt.tsx";
 import AdminModel from "./pages/aocp/AdminModel.tsx";
 import AocpPlaceholder from "./pages/aocp/AocpPlaceholder.tsx";
 import ProdResilienceTwin from "./pages/prod-twin/ProdResilienceTwin.tsx";
+import DataOrchLayout from "./pages/data-orchestration-twin/DataOrchLayout.tsx";
+import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
@@ -432,6 +434,10 @@ const App = () => (
           <Route path="/transformation-journey" element={<TransformationJourney />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
           <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
+          <Route path="/data-orchestration-twin" element={<DataOrchLayout />}>
+            <Route index element={<DataOrchPage />} />
+            <Route path=":slug" element={<DataOrchPage />} />
+          </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
           
           <Route path="/product-line-map" element={<ProductLineMap />} />
