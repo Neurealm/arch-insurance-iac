@@ -5,6 +5,7 @@ import {
   Radar, Lock, FileText, Activity, Users, Brain, Gauge, X, Sparkles,
   Copy, Clock, Server, MapPin, Wifi, ChevronRight,
 } from "lucide-react";
+import { AppShell } from "@/components/eoc/AppShell";
 
 /* ============================================================
    TELEMETRY ENGINE — everything randomized on each mount
@@ -157,7 +158,9 @@ export default function AuthOrchestration() {
   const elapsedSec = ((Date.now() - startedAt.current) / 1000).toFixed(2);
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-white text-slate-900">
+    <AppShell>
+    <div className="relative min-h-screen flex-1 w-full overflow-hidden bg-white text-slate-900">
+
       <AmbientBackground />
 
       {/* Top bar */}
@@ -316,8 +319,11 @@ export default function AuthOrchestration() {
         {drawer && <EngineeringDrawer payload={drawer} tel={tel} onClose={() => setDrawer(null)} />}
       </AnimatePresence>
     </div>
+    </AppShell>
   );
 }
+
+
 
 /* ============================================================
    TRUST ENGINE (SVG hero)
