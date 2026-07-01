@@ -139,6 +139,25 @@ export default function SourceOnboardingFactory() {
 
   return (
     <div className="min-h-full bg-white text-slate-900">
+      {/* L→R progress animation keyframes (packet shuttle + fill sweep) */}
+      <style>{`
+        @keyframes sof-packet {
+          0%   { transform: translateX(-20%); opacity: 0; }
+          8%   { opacity: 1; }
+          92%  { opacity: 1; }
+          100% { transform: translateX(120%); opacity: 0; }
+        }
+        @keyframes sof-fill {
+          0%   { transform: scaleX(0); }
+          85%  { transform: scaleX(1); }
+          100% { transform: scaleX(1); opacity: 0.15; }
+        }
+        @keyframes sof-bar-grow {
+          0%   { width: 15%; }
+          85%  { width: 100%; }
+          100% { width: 100%; opacity: 0.85; }
+        }
+      `}</style>
       {/* Header */}
       <div className="px-8 pt-6 pb-4 border-b border-slate-100">
         <div className="flex items-start justify-between gap-6">
