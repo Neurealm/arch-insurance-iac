@@ -267,6 +267,7 @@ import SchemaDriftAndExceptionWorkbench from "./pages/data-orchestration-twin/Sc
 import LogHygieneCompletenessAndStandardizationConsole from "./pages/data-orchestration-twin/LogHygieneCompletenessAndStandardizationConsole.tsx";
 import HydrationAndEnrichmentMethodSelector from "./pages/data-orchestration-twin/HydrationAndEnrichmentMethodSelector.tsx";
 import HydratedRecordBuilder from "./pages/data-orchestration-twin/HydratedRecordBuilder.tsx";
+import DataLineageAndTraceabilityView from "./pages/data-orchestration-twin/DataLineageAndTraceabilityView.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
@@ -464,6 +465,7 @@ const App = () => (
             <Route path="log-hygiene-completeness-and-standardization-console" element={<LogHygieneCompletenessAndStandardizationConsole />} />
             <Route path="hydration-and-enrichment-method-selector" element={<HydrationAndEnrichmentMethodSelector />} />
             <Route path="hydrated-record-builder" element={<HydratedRecordBuilder />} />
+            <Route path="data-lineage-and-traceability-view" element={<DataLineageAndTraceabilityView />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
