@@ -140,18 +140,31 @@ const Donut = ({slices, center}:{slices:{n:number;tone:Tone}[]; center:string}) 
 };
 
 const Gauge = ({v,label}:{v:number;label:string}) => {
-  const cx=90,cy=95,r=64;
+  // Coordinate system: 200×140 viewBox, arc center at (100,100), radius 72, stroke 14.
+  // Arc spans y = 28 (apex) → 100 (baseline), x = 28 → 172. Leaves clean space above (value)
+  // and below (label) with zero overlap.
+  const cx = 100, cy = 100, r = 72;
   const pct = Math.min(100, Math.max(0, v));
-  const a=Math.PI*(1-pct/100);
-  const x=cx+r*Math.cos(a), y=cy-r*Math.sin(a);
-  const large=pct>50?1:0;
+  const a = Math.PI * (1 - pct / 100);
+  const x = cx + r * Math.cos(a), y = cy - r * Math.sin(a);
+  const large = pct > 50 ? 1 : 0;
   return (
-    <svg width={180} height={130} viewBox="0 0 180 130">
-      <defs><linearGradient id="gGrad" x1="0" x2="1"><stop offset="0%" stopColor="#f43f5e"/><stop offset="55%" stopColor="#f59e0b"/><stop offset="100%" stopColor="#10b981"/></linearGradient></defs>
-      <path d={`M ${cx-r},${cy} A ${r},${r} 0 0,1 ${cx+r},${cy}`} stroke="#e2e8f0" strokeWidth={14} fill="none" strokeLinecap="round"/>
-      <path d={`M ${cx-r},${cy} A ${r},${r} 0 ${large},1 ${x},${y}`} stroke="url(#gGrad)" strokeWidth={14} fill="none" strokeLinecap="round"/>
-      <text x={cx} y={cy-14} textAnchor="middle" className="fill-slate-900" style={{fontSize:26,fontWeight:700}}>{pct}%</text>
-      <text x={cx} y={cy+22} textAnchor="middle" className="fill-slate-500" style={{fontSize:11,fontWeight:500}}>{label}</text>
+    <svg width={200} height={140} viewBox="0 0 200 140" className="block">
+      <defs>
+        <linearGradient id="gGrad" x1="0" x2="1">
+          <stop offset="0%" stopColor="#f43f5e" />
+          <stop offset="55%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#10b981" />
+        </linearGradient>
+      </defs>
+      {/* Track */}
+      <path d={`M ${cx - r},${cy} A ${r},${r} 0 0,1 ${cx + r},${cy}`} stroke="#e2e8f0" strokeWidth={14} fill="none" strokeLinecap="round" />
+      {/* Value arc */}
+      <path d={`M ${cx - r},${cy} A ${r},${r} 0 ${large},1 ${x},${y}`} stroke="url(#gGrad)" strokeWidth={14} fill="none" strokeLinecap="round" />
+      {/* Value — visually centered inside the arc bowl */}
+      <text x={cx} y={cy - 18} textAnchor="middle" dominantBaseline="middle" className="fill-slate-900" style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em" }}>{pct}%</text>
+      {/* Label — sits below the baseline with clear breathing room */}
+      <text x={cx} y={cy + 26} textAnchor="middle" dominantBaseline="middle" className="fill-slate-500" style={{ fontSize: 11, fontWeight: 500 }}>{label}</text>
     </svg>
   );
 };
