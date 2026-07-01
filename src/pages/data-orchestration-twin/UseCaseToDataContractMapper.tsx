@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Target, Layers, Table as TableIcon, Clock, ShieldCheck, Link2,
   MapPin, Network, BarChart3, GitBranch, CheckCircle2, Info,
   ChevronDown, RefreshCw, X, Cpu, Activity, Boxes, Workflow,
   Server, Users, Route as RouteIcon, AlertTriangle, Calendar,
-  Wifi, AppWindow,
+  Wifi, AppWindow, ExternalLink,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
