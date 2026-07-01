@@ -468,6 +468,7 @@ const App = () => (
             <Route path="use-case-to-data-contract-mapper" element={<UseCaseToDataContractMapper />} />
             <Route path="log-source-inventory-and-scope-registry" element={<LogSourceInventoryAndScopeRegistry />} />
             <Route path="log-source-inventory-and-scope-registry/datadog-log-profile" element={<DataDogLogProfile />} />
+            <Route path="log-source-inventory-and-scope-registry/:slug/cyber-threat-intelligence" element={<CyberThreatIntelligenceAndIocAnalysis />} />
             <Route path="data-placement-and-economics-decision-engine" element={<DataPlacementDecisionEngine />} />
             <Route path="data-placement-and-economics-decision-engine/scenario/:slug" element={<PlacementScenarioModeler />} />
             <Route path="no-duplication-strategy-and-retention-policy" element={<NoDuplicationStrategyAndRetentionPolicy />} />
