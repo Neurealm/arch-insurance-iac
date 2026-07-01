@@ -318,8 +318,11 @@ export default function AuthOrchestration() {
         {drawer && <EngineeringDrawer payload={drawer} tel={tel} onClose={() => setDrawer(null)} />}
       </AnimatePresence>
     </div>
+    </AppShell>
   );
 }
+
+
 
 /* ============================================================
    TRUST ENGINE (SVG hero)
