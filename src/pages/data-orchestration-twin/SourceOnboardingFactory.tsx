@@ -490,8 +490,9 @@ export default function SourceOnboardingFactory() {
               ))}
             </div>
             <div className="mt-3 relative h-16 rounded-md bg-slate-950 overflow-hidden border border-slate-800">
+              <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500/10 via-indigo-500/15 to-emerald-500/25 origin-left" style={{ width: "100%", transform: "scaleX(0)", animation: "sof-fill 6s ease-in-out infinite" }}/>
               {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="absolute top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-indigo-400" style={{ left: `${((tick * 8 + i * 14) % 100)}%`, transition: "left 1.4s linear", opacity: 0.7 }}/>
+                <div key={i} className="absolute top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.8)]" style={{ left: 0, animation: `sof-packet 4.5s linear ${i * 0.45}s infinite` }}/>
               ))}
               <div className="absolute inset-y-0 left-0 w-14 bg-gradient-to-r from-blue-500/20 to-transparent border-r border-slate-800 flex items-center justify-center text-[10px] text-blue-300">Discover</div>
               <div className="absolute inset-y-0 right-0 w-14 bg-gradient-to-l from-emerald-500/20 to-transparent border-l border-slate-800 flex items-center justify-center text-[10px] text-emerald-300">Live</div>
