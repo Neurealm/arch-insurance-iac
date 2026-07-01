@@ -11,6 +11,7 @@ import {
   ShieldHalf,
   ClipboardList,
   ArrowRightLeft, Rocket, Compass, Gauge, X, Database,
+  Search as SearchIcon, Star, Clock, Circle,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
