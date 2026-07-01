@@ -467,6 +467,7 @@ const App = () => (
             <Route path="hydration-and-enrichment-method-selector" element={<HydrationAndEnrichmentMethodSelector />} />
             <Route path="hydrated-record-builder" element={<HydratedRecordBuilder />} />
             <Route path="data-lineage-and-traceability-view" element={<DataLineageAndTraceabilityView />} />
+            <Route path="canonical-operational-data-model" element={<CanonicalOperationalDataModel />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
