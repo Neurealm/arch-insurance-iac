@@ -270,6 +270,7 @@ import HydratedRecordBuilder from "./pages/data-orchestration-twin/HydratedRecor
 import DataLineageAndTraceabilityView from "./pages/data-orchestration-twin/DataLineageAndTraceabilityView.tsx";
 import CanonicalOperationalDataModel from "./pages/data-orchestration-twin/CanonicalOperationalDataModel.tsx";
 import RelationshipKeyAndGraphProjectionBuilder from "./pages/data-orchestration-twin/RelationshipKeyAndGraphProjectionBuilder.tsx";
+import QueryReadinessAndConfidenceScorecard from "./pages/data-orchestration-twin/QueryReadinessAndConfidenceScorecard.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
@@ -470,6 +471,7 @@ const App = () => (
             <Route path="data-lineage-and-traceability-view" element={<DataLineageAndTraceabilityView />} />
             <Route path="canonical-operational-data-model" element={<CanonicalOperationalDataModel />} />
             <Route path="relationship-key-and-graph-projection-builder" element={<RelationshipKeyAndGraphProjectionBuilder />} />
+            <Route path="query-readiness-and-confidence-scorecard" element={<QueryReadinessAndConfidenceScorecard />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
