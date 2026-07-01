@@ -1,7 +1,8 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Html, OrbitControls, Sparkles, Stars } from "@react-three/drei";
+import { Html, Line as DreiLine, OrbitControls, RoundedBox } from "@react-three/drei";
+import { DataDogLogo } from "@/components/brand/DataDogLogo";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -65,173 +66,254 @@ const NODE_DETAILS: Record<NodeId, {
   frameworks: ["SOC 2", "ISO 27001", "HIPAA", "PCI-DSS"].slice(0, rand(1,3)),
 }])) as any;
 
-/* ============================== 3D Scene ============================== */
-function OrbitingNodes({ onHover, hoverId }: { onHover: (id: NodeId | null) => void; hoverId: NodeId | null }) {
-  const grpRef = useRef<THREE.Group>(null);
-  useFrame((_, dt) => { if (grpRef.current) grpRef.current.rotation.y += dt * 0.05; });
+/* ============================== 3D Scene (AWS-style architecture) ============================== */
+
+type Status = "healthy" | "warning" | "degraded" | "critical" | "remediating";
+const statusColor: Record<Status, string> = {
+  healthy: "#10b981",
+  warning: "#f59e0b",
+  degraded: "#f97316",
+  critical: "#ef4444",
+  remediating: "#632CA6",
+};
+
+function HealthRing({ status, radius = 0.9 }: { status: Status; radius?: number }) {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame((_, dt) => {
+    if (ref.current) ref.current.rotation.z += dt * 0.35;
+  });
   return (
-    <group ref={grpRef}>
-      {NODES.map((n, i) => {
-        const r = 3.6;
-        const a = (n.angle * Math.PI) / 180;
-        const x = Math.cos(a) * r;
-        const z = Math.sin(a) * r;
-        const y = Math.sin(i * 0.9) * 0.35;
-        const color = n.health === "green" ? "#10b981" : n.health === "amber" ? "#f59e0b" : "#ef4444";
-        const active = hoverId === n.id;
-        return (
-          <group key={n.id} position={[x, y, z]}>
-            <mesh onPointerOver={() => onHover(n.id)} onPointerOut={() => onHover(null)}>
-              <sphereGeometry args={[active ? 0.22 : 0.16, 24, 24]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={active ? 1.6 : 0.8} />
-            </mesh>
-            {/* Beam to center */}
-            <mesh position={[-x/2, -y/2, -z/2]} rotation={[0, Math.atan2(x, z), 0]}>
-              <boxGeometry args={[0.02, 0.02, r]} />
-              <meshBasicMaterial color={color} transparent opacity={active ? 0.7 : 0.22} />
-            </mesh>
-          </group>
-        );
-      })}
-    </group>
+    <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+      <ringGeometry args={[radius, radius + 0.06, 48]} />
+      <meshBasicMaterial color={statusColor[status]} transparent opacity={0.85} />
+    </mesh>
   );
 }
 
-function DataPackets() {
-  const ref = useRef<THREE.Points>(null);
-  const count = 500;
-  const positions = useMemo(() => {
-    const arr = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const r = 1.2 + Math.random() * 2.4;
-      const a = Math.random() * Math.PI * 2;
-      arr[i*3] = Math.cos(a)*r;
-      arr[i*3+1] = (Math.random()-0.5)*1.2;
-      arr[i*3+2] = Math.sin(a)*r;
-    }
-    return arr;
-  }, []);
-  useFrame(({ clock }) => {
-    if (!ref.current) return;
-    const t = clock.getElapsedTime();
-    const geom = ref.current.geometry as THREE.BufferGeometry;
-    const pos = geom.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < count; i++) {
-      const ix = i*3, iy = i*3+1, iz = i*3+2;
-      const x = pos.array[ix] as number;
-      const z = pos.array[iz] as number;
-      const r = Math.hypot(x, z);
-      const a = Math.atan2(z, x) + 0.008 + (0.002 * Math.sin(t + i));
-      const nr = Math.max(0.9, r - 0.008);
-      (pos.array as any)[ix] = Math.cos(a) * nr;
-      (pos.array as any)[iz] = Math.sin(a) * nr;
-      if (nr <= 1.0) {
-        const nr2 = 3.4;
-        const a2 = Math.random() * Math.PI * 2;
-        (pos.array as any)[ix] = Math.cos(a2) * nr2;
-        (pos.array as any)[iz] = Math.sin(a2) * nr2;
-      }
-    }
-    pos.needsUpdate = true;
-  });
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} count={count} />
-      </bufferGeometry>
-      <pointsMaterial size={0.05} color="#7c9cff" transparent opacity={0.85} sizeAttenuation />
-    </points>
-  );
-}
-
-function CoreEngine() {
-  const ring1 = useRef<THREE.Mesh>(null);
-  const ring2 = useRef<THREE.Mesh>(null);
-  const core = useRef<THREE.Mesh>(null);
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
-    if (ring1.current) ring1.current.rotation.z = t * 0.4;
-    if (ring2.current) { ring2.current.rotation.x = t * 0.3; ring2.current.rotation.y = t * 0.2; }
-    if (core.current) {
-      const s = 1 + Math.sin(t*1.5)*0.05;
-      core.current.scale.setScalar(s);
+function ArchNode({
+  position, label, sub, status, color = "#ffffff", scale = 1,
+  onHover, hoverId, id,
+}: {
+  position: [number, number, number]; label: string; sub?: string; status: Status;
+  color?: string; scale?: number;
+  onHover: (id: NodeId | null) => void; hoverId: NodeId | null; id: NodeId;
+}) {
+  const grp = useRef<THREE.Group>(null);
+  useFrame((s) => {
+    if (grp.current) {
+      grp.current.position.y = position[1] + Math.sin(s.clock.elapsedTime * 1.2 + position[0]) * 0.03;
     }
   });
+  const active = hoverId === id;
   return (
-    <group>
-      {/* Platform */}
-      <mesh position={[0, -1.1, 0]} rotation={[-Math.PI/2, 0, 0]}>
-        <ringGeometry args={[1.4, 1.9, 64]} />
-        <meshStandardMaterial color="#4f46e5" emissive="#4f46e5" emissiveIntensity={0.7} transparent opacity={0.55} />
-      </mesh>
-      <mesh position={[0, -1.15, 0]} rotation={[-Math.PI/2, 0, 0]}>
-        <circleGeometry args={[1.4, 64]} />
-        <meshStandardMaterial color="#0b1220" transparent opacity={0.75} />
-      </mesh>
-      {/* Rings */}
-      <mesh ref={ring1}>
-        <torusGeometry args={[1.55, 0.02, 16, 128]} />
-        <meshStandardMaterial color="#8b5cf6" emissive="#8b5cf6" emissiveIntensity={1.2} />
-      </mesh>
-      <mesh ref={ring2}>
-        <torusGeometry args={[1.85, 0.015, 16, 128]} />
-        <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={1} />
-      </mesh>
-      {/* Core energy sphere */}
-      <mesh ref={core}>
-        <sphereGeometry args={[0.9, 48, 48]} />
-        <meshPhysicalMaterial
-          color="#6366f1"
-          emissive="#a78bfa"
-          emissiveIntensity={0.9}
-          roughness={0.12}
-          metalness={0.6}
-          transmission={0.5}
-          thickness={0.6}
-          clearcoat={1}
+    <group
+      ref={grp}
+      position={position}
+      onPointerOver={(e) => { e.stopPropagation(); onHover(id); document.body.style.cursor = "pointer"; }}
+      onPointerOut={() => { onHover(null); document.body.style.cursor = "default"; }}
+    >
+      <RoundedBox args={[1.25 * scale, 0.5 * scale, 1.25 * scale]} radius={0.08} smoothness={4}>
+        <meshStandardMaterial
+          color={color}
+          metalness={0.1}
+          roughness={0.35}
+          emissive={active ? statusColor[status] : "#000"}
+          emissiveIntensity={active ? 0.3 : 0}
         />
-      </mesh>
-      {/* Inner glow */}
-      <mesh>
-        <sphereGeometry args={[1.05, 48, 48]} />
-        <meshBasicMaterial color="#7c3aed" transparent opacity={0.08} />
-      </mesh>
-      {/* DataDog silhouette (stylized paw dots) */}
-      <Float speed={2} rotationIntensity={0.3} floatIntensity={0.6}>
-        <group position={[0, 0.05, 0]}>
-          <Html center distanceFactor={6} zIndexRange={[0,0]}>
-            <div className="text-[42px] font-black text-white/90 tracking-tight select-none drop-shadow-[0_0_18px_rgba(139,92,246,0.9)]">
-              🐶
-            </div>
-          </Html>
-        </group>
-      </Float>
+      </RoundedBox>
+      <HealthRing status={status} radius={0.88 * scale} />
+      <Html position={[0, 0.55 * scale, 0]} center distanceFactor={8} occlude={false}>
+        <div className="pointer-events-none whitespace-nowrap text-[11px] font-semibold text-slate-800 bg-white/90 backdrop-blur px-2 py-0.5 rounded border border-slate-200 shadow-sm">
+          {label}
+          {sub && <span className="ml-1 text-[9.5px] font-normal text-slate-500">{sub}</span>}
+        </div>
+      </Html>
     </group>
   );
 }
 
-function Scene({ onHover, hoverId }: { onHover: (id: NodeId | null) => void; hoverId: NodeId | null }) {
+function Zone({
+  position, size, color, label, opacity = 0.12,
+}: { position: [number, number, number]; size: [number, number]; color: string; label?: string; opacity?: number }) {
+  return (
+    <group position={position}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={size} />
+        <meshBasicMaterial color={color} transparent opacity={opacity} />
+      </mesh>
+      <DreiLine
+        points={[
+          [-size[0] / 2, 0.01, -size[1] / 2], [size[0] / 2, 0.01, -size[1] / 2],
+          [size[0] / 2, 0.01, size[1] / 2], [-size[0] / 2, 0.01, size[1] / 2],
+          [-size[0] / 2, 0.01, -size[1] / 2],
+        ]}
+        color={color} lineWidth={1.2} transparent opacity={0.55}
+      />
+      {label && (
+        <Html position={[-size[0] / 2 + 0.1, 0.05, -size[1] / 2 + 0.1]} distanceFactor={10}>
+          <div className="pointer-events-none text-[10px] uppercase tracking-wider text-slate-500 font-semibold">{label}</div>
+        </Html>
+      )}
+    </group>
+  );
+}
+
+function TrafficFlow({
+  from, to, weight, status,
+}: { from: [number, number, number]; to: [number, number, number]; weight: number; status: Status }) {
+  const ref = useRef<THREE.Mesh>(null);
+  const t = useRef(Math.random());
+  useFrame((_, dt) => {
+    t.current += dt * (0.35 + weight * 0.8);
+    if (t.current > 1) t.current = 0;
+    if (ref.current) {
+      ref.current.position.x = from[0] + (to[0] - from[0]) * t.current;
+      ref.current.position.y = from[1] + (to[1] - from[1]) * t.current + 0.35;
+      ref.current.position.z = from[2] + (to[2] - from[2]) * t.current;
+    }
+  });
+  const opacity = 0.28 + weight * 0.55;
   return (
     <>
-      <color attach="background" args={["#050818"]} />
-      <fog attach="fog" args={["#050818", 8, 18]} />
-      <ambientLight intensity={0.35} />
-      <pointLight position={[6, 6, 4]} intensity={1.2} color="#7c9cff" />
-      <pointLight position={[-6, -3, -4]} intensity={0.9} color="#8b5cf6" />
-      <Stars radius={30} depth={40} count={800} factor={2} fade speed={0.6} />
-      <Sparkles count={80} scale={8} size={2} speed={0.4} color="#a78bfa" />
-      <CoreEngine />
-      <DataPackets />
-      <OrbitingNodes onHover={onHover} hoverId={hoverId} />
-      <OrbitControls enablePan={false} enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+      <DreiLine
+        points={[from, [(from[0] + to[0]) / 2, Math.max(from[1], to[1]) + 0.55, (from[2] + to[2]) / 2], to]}
+        color={statusColor[status]} lineWidth={1 + weight * 2} transparent opacity={opacity}
+      />
+      <mesh ref={ref}>
+        <sphereGeometry args={[0.07 + weight * 0.05, 12, 12]} />
+        <meshBasicMaterial color={statusColor[status]} />
+      </mesh>
     </>
   );
 }
 
+/** DataDog paw core: floating logo mark on a purple platform */
+function DataDogCore({ position }: { position: [number, number, number] }) {
+  const grp = useRef<THREE.Group>(null);
+  useFrame((s) => {
+    if (grp.current) grp.current.position.y = position[1] + Math.sin(s.clock.elapsedTime * 1.4) * 0.05;
+  });
+  return (
+    <group position={position} ref={grp}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}>
+        <ringGeometry args={[0.95, 1.15, 64]} />
+        <meshBasicMaterial color="#632CA6" transparent opacity={0.55} />
+      </mesh>
+      <RoundedBox args={[1.5, 0.55, 1.5]} radius={0.1} smoothness={4}>
+        <meshStandardMaterial color="#ffffff" metalness={0.15} roughness={0.3} emissive="#632CA6" emissiveIntensity={0.2} />
+      </RoundedBox>
+      <Html position={[0, 0.65, 0]} center distanceFactor={7} occlude={false}>
+        <div className="pointer-events-none flex flex-col items-center gap-1">
+          <DataDogLogo size={44} />
+          <div className="text-[11px] font-bold text-slate-800 bg-white/95 px-2 py-0.5 rounded border border-slate-200 shadow-sm">
+            Datadog Log Intake
+          </div>
+        </div>
+      </Html>
+    </group>
+  );
+}
+
+/* Pipeline nodes: sources → agents → intake → processing → destinations */
+const POS = {
+  // Sources (left column)
+  src_k8s:    [-6.0, 0.3, -2.2] as [number, number, number],
+  src_aws:    [-6.0, 0.3,  0.0] as [number, number, number],
+  src_okta:   [-6.0, 0.3,  2.2] as [number, number, number],
+  // Agents (aggregation)
+  agent:      [-3.2, 0.3,  0.0] as [number, number, number],
+  // DataDog intake core
+  intake:     [ 0.0, 0.3,  0.0] as [number, number, number],
+  // Processing lane
+  parse:      [ 2.8, 0.3, -1.6] as [number, number, number],
+  enrich:     [ 2.8, 0.3,  1.6] as [number, number, number],
+  index:      [ 5.2, 0.3,  0.0] as [number, number, number],
+  // Destinations (right)
+  snowflake:  [ 7.6, 0.3, -2.2] as [number, number, number],
+  splunk:     [ 7.6, 0.3,  0.0] as [number, number, number],
+  s3:         [ 7.6, 0.3,  2.2] as [number, number, number],
+};
+
+
+
+
+function Scene({ onHover, hoverId }: { onHover: (id: NodeId | null) => void; hoverId: NodeId | null }) {
+  return (
+    <>
+      <ambientLight intensity={0.9} />
+      <directionalLight position={[5, 10, 5]} intensity={0.55} />
+      <directionalLight position={[-5, 8, -5]} intensity={0.3} />
+
+      {/* Platform */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[1, 0, 0]}>
+        <planeGeometry args={[16, 8]} />
+        <meshBasicMaterial color="#632CA6" transparent opacity={0.04} />
+      </mesh>
+      <DreiLine
+        points={[[-7, 0.005, -3.7], [8.4, 0.005, -3.7], [8.4, 0.005, 3.7], [-7, 0.005, 3.7], [-7, 0.005, -3.7]]}
+        color="#632CA6" lineWidth={1.4} transparent opacity={0.35}
+      />
+      <Html position={[-6.9, 0.05, -3.6]} distanceFactor={10}>
+        <div className="pointer-events-none text-[10px] uppercase tracking-wider font-semibold text-violet-700/80">
+          Datadog Log Pipeline · Multi-Region
+        </div>
+      </Html>
+
+      {/* Zones */}
+      <Zone position={[-6, 0.01, 0]} size={[2.2, 6.6]} color="#0ea5e9" label="Log Sources" />
+      <Zone position={[-3.2, 0.01, 0]} size={[2.2, 3.4]} color="#10b981" label="Agents" />
+      <Zone position={[0, 0.01, 0]} size={[2.4, 3.4]} color="#632CA6" label="Intake" opacity={0.14} />
+      <Zone position={[4.0, 0.01, 0]} size={[5.2, 6.2]} color="#8b5cf6" label="Processing" />
+      <Zone position={[7.6, 0.01, 0]} size={[2.2, 6.6]} color="#f59e0b" label="Destinations" />
+
+      {/* Source nodes */}
+      <ArchNode id="sources" position={POS.src_k8s}  label="Kubernetes"  sub="prod" status="healthy" color="#dbeafe" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="sources" position={POS.src_aws}  label="AWS CloudTrail" status="healthy" color="#dbeafe" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="sources" position={POS.src_okta} label="Okta · M365" status="warning" color="#dbeafe" onHover={onHover} hoverId={hoverId} />
+
+      {/* Agent aggregator */}
+      <ArchNode id="ingest" position={POS.agent} label="Datadog Agent" sub="OTel · Fluent" status="healthy" color="#ecfdf5" onHover={onHover} hoverId={hoverId} />
+
+      {/* Intake core (DataDog logo) */}
+      <DataDogCore position={POS.intake} />
+
+      {/* Processing lane */}
+      <ArchNode id="parse"  position={POS.parse}  label="Parse · Grok"    status="healthy"    color="#f5f3ff" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="enrich" position={POS.enrich} label="Enrich · PII"    status="warning"    color="#f5f3ff" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="index"  position={POS.index}  label="Index · Dedup"   status="remediating" color="#ede9fe" scale={1.05} onHover={onHover} hoverId={hoverId} />
+
+      {/* Destinations */}
+      <ArchNode id="lake"  position={POS.snowflake} label="Snowflake"       status="healthy" color="#fef3c7" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="siem"  position={POS.splunk}    label="Splunk · SIEM"   status="healthy" color="#fef3c7" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="cold"  position={POS.s3}        label="S3 · Cold"       status="healthy" color="#fef3c7" onHover={onHover} hoverId={hoverId} />
+
+      {/* Traffic: sources → agent */}
+      <TrafficFlow from={POS.src_k8s}  to={POS.agent} weight={0.9} status="healthy" />
+      <TrafficFlow from={POS.src_aws}  to={POS.agent} weight={0.6} status="healthy" />
+      <TrafficFlow from={POS.src_okta} to={POS.agent} weight={0.35} status="warning" />
+
+      {/* Agent → intake */}
+      <TrafficFlow from={POS.agent} to={POS.intake} weight={1} status="healthy" />
+
+      {/* Intake → processing */}
+      <TrafficFlow from={POS.intake} to={POS.parse}  weight={0.7} status="healthy" />
+      <TrafficFlow from={POS.intake} to={POS.enrich} weight={0.7} status="warning" />
+      <TrafficFlow from={POS.parse}  to={POS.index}  weight={0.6} status="healthy" />
+      <TrafficFlow from={POS.enrich} to={POS.index}  weight={0.6} status="remediating" />
+
+      {/* Index → destinations */}
+      <TrafficFlow from={POS.index} to={POS.snowflake} weight={0.55} status="healthy" />
+      <TrafficFlow from={POS.index} to={POS.splunk}    weight={0.75} status="healthy" />
+      <TrafficFlow from={POS.index} to={POS.s3}        weight={0.5}  status="healthy" />
+    </>
+  );
+}
+
+
 /* ============================== Page ============================== */
 export default function DataDogLogProfile() {
   const [now, setNow] = useState(() => new Date());
-  const [autoRefresh, setAutoRefresh] = useState<"30s" | "1m" | "5m">("1m");
+  const [autoRefresh, setAutoRefresh] = useState<"30s" | "1m" | "5m">("5m");
   const [tick, setTick] = useState(0);
   const [hoverId, setHoverId] = useState<NodeId | null>(null);
   const [drawer, setDrawer] = useState<{ title: string; kind: string } | null>(null);
@@ -277,12 +359,12 @@ export default function DataDogLogProfile() {
   ] as const;
 
   const toneMap: Record<string, string> = {
-    violet: "from-violet-500/20 to-violet-500/5 text-violet-300 ring-violet-500/30",
-    blue: "from-blue-500/20 to-blue-500/5 text-blue-300 ring-blue-500/30",
-    emerald: "from-emerald-500/20 to-emerald-500/5 text-emerald-300 ring-emerald-500/30",
-    amber: "from-amber-500/20 to-amber-500/5 text-amber-300 ring-amber-500/30",
-    indigo: "from-indigo-500/20 to-indigo-500/5 text-indigo-300 ring-indigo-500/30",
-    rose: "from-rose-500/20 to-rose-500/5 text-rose-300 ring-rose-500/30",
+    violet: "from-violet-50 to-white text-violet-700 ring-violet-200",
+    blue: "from-sky-50 to-white text-sky-700 ring-sky-200",
+    emerald: "from-emerald-50 to-white text-emerald-700 ring-emerald-200",
+    amber: "from-amber-50 to-white text-amber-700 ring-amber-200",
+    indigo: "from-indigo-50 to-white text-indigo-700 ring-indigo-200",
+    rose: "from-rose-50 to-white text-rose-700 ring-rose-200",
   };
 
   const QUALITY = [
@@ -352,20 +434,22 @@ export default function DataDogLogProfile() {
   const hoverDet = hoverId ? NODE_DETAILS[hoverId] : null;
 
   return (
-    <div className="min-h-full bg-slate-50">
+    <div className="min-h-full bg-gradient-to-br from-slate-50 via-white to-violet-50/40 text-slate-900">
       {/* Header */}
-      <header className="px-6 pt-5 pb-4 border-b border-slate-200 bg-white sticky top-0 z-20">
+      <header className="px-6 pt-5 pb-4 border-b border-slate-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-20">
         <div className="flex items-start justify-between gap-6">
           <div className="min-w-0">
             <nav className="text-[11px] text-slate-500 flex items-center gap-1.5 mb-1.5">
-              <Link to="/data-orchestration-twin" className="hover:text-indigo-600">Orchestration Hub</Link>
+              <Link to="/data-orchestration-twin" className="hover:text-violet-700">Orchestration Hub</Link>
               <ChevronRight className="h-3 w-3" />
-              <Link to="/data-orchestration-twin/log-source-inventory-and-scope-registry" className="hover:text-indigo-600">Log Profiles</Link>
+              <Link to="/data-orchestration-twin/log-source-inventory-and-scope-registry" className="hover:text-violet-700">Log Profiles</Link>
               <ChevronRight className="h-3 w-3" />
-              <span className="text-slate-800 font-medium">DataDog Log Profile</span>
+              <span className="text-slate-800 font-medium">Datadog Log Profile</span>
             </nav>
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 grid place-items-center shadow-lg shadow-violet-500/30 text-white text-xl">🐶</div>
+              <div className="h-12 w-12 rounded-xl bg-white ring-1 ring-violet-200 grid place-items-center shadow-sm shadow-violet-500/10">
+                <DataDogLogo size={28} />
+              </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-[26px] font-black text-slate-900 tracking-tight leading-none">DataDog Log Profile</h1>
@@ -444,53 +528,63 @@ export default function DataDogLogProfile() {
 
       <div className="p-6 grid grid-cols-12 gap-5">
         {/* Hero 3D + Right column */}
-        <section className="col-span-8 relative rounded-2xl overflow-hidden ring-1 ring-slate-900/10 shadow-xl" style={{ height: 620 }}>
+        <section className="col-span-8 relative rounded-2xl overflow-hidden ring-1 ring-slate-200 shadow-xl bg-gradient-to-br from-white via-slate-50 to-violet-50/60" style={{ height: 620 }}>
           <div className="absolute inset-0">
-            <Canvas camera={{ position: [0, 1.5, 7], fov: 55 }} dpr={[1, 1.5]}>
+            <Canvas camera={{ position: [2, 6, 11], fov: 45 }} dpr={[1, 1.6]}>
               <Suspense fallback={null}>
                 <Scene onHover={setHoverId} hoverId={hoverId} />
+                <OrbitControls enablePan enableRotate enableZoom maxPolarAngle={Math.PI / 2.1} minDistance={6} maxDistance={22} />
               </Suspense>
             </Canvas>
           </div>
           {/* Overlay - header chip */}
           <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-            <div className="pointer-events-auto rounded-lg bg-slate-950/70 backdrop-blur ring-1 ring-white/10 px-3 py-1.5">
-              <div className="text-[10px] text-slate-300 uppercase tracking-wider">DataDog Schema & Orchestration Engine</div>
-              <div className="text-[13px] font-semibold text-white">Living Digital Twin · 20-layer Log Pipeline</div>
+            <div className="pointer-events-auto rounded-lg bg-white/90 backdrop-blur ring-1 ring-slate-200 px-3 py-1.5 shadow-sm">
+              <div className="text-[10px] text-slate-500 uppercase tracking-wider">Datadog Schema & Orchestration Engine</div>
+              <div className="text-[13px] font-semibold text-slate-900">Living Digital Twin · Source → Intake → Destination</div>
             </div>
-            <div className="pointer-events-auto rounded-lg bg-slate-950/70 backdrop-blur ring-1 ring-white/10 px-3 py-1.5 flex items-center gap-3 text-[11px] text-slate-200">
-              <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> {tele.eventsPerSec.toLocaleString()} events/s</span>
-              <span className="text-slate-500">•</span>
-              <span>Latency <span className="text-white font-semibold">{tele.latencyMs}ms</span></span>
-              <span className="text-slate-500">•</span>
-              <span>Compress <span className="text-white font-semibold">{tele.compression}%</span></span>
+            <div className="pointer-events-auto rounded-lg bg-white/90 backdrop-blur ring-1 ring-slate-200 px-3 py-1.5 flex items-center gap-3 text-[11px] text-slate-700 shadow-sm">
+              <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> {tele.eventsPerSec.toLocaleString()} events/s</span>
+              <span className="text-slate-300">•</span>
+              <span>Latency <span className="text-slate-900 font-semibold">{tele.latencyMs}ms</span></span>
+              <span className="text-slate-300">•</span>
+              <span>Compress <span className="text-slate-900 font-semibold">{tele.compression}%</span></span>
             </div>
+          </div>
+          {/* Legend */}
+          <div className="absolute bottom-3 left-3 flex gap-1.5 text-[10px] z-10 pointer-events-none">
+            {(["healthy", "warning", "remediating"] as Status[]).map((s) => (
+              <div key={s} className="flex items-center gap-1 bg-white/85 px-2 py-1 rounded border border-slate-200 shadow-sm">
+                <span className="w-2 h-2 rounded-full" style={{ background: statusColor[s] }} />
+                <span className="text-slate-700 capitalize">{s}</span>
+              </div>
+            ))}
           </div>
           {/* Hover panel */}
           <AnimatePresence>
             {hoverNode && hoverDet && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
-                className="absolute bottom-3 left-3 w-[340px] rounded-xl bg-slate-950/85 backdrop-blur-lg ring-1 ring-white/10 p-4 text-slate-100 shadow-2xl"
+                className="absolute bottom-3 left-32 w-[340px] rounded-xl bg-white/95 backdrop-blur-lg ring-1 ring-slate-200 p-4 text-slate-800 shadow-2xl"
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <hoverNode.icon className="h-4 w-4 text-violet-300" />
-                  <div className="text-[13px] font-semibold">{hoverNode.name}</div>
-                  <span className={`ml-auto text-[9.5px] px-1.5 py-0.5 rounded-full ring-1 ${hoverNode.health === "green" ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30" : "bg-amber-500/15 text-amber-300 ring-amber-500/30"}`}>
+                  <hoverNode.icon className="h-4 w-4 text-violet-600" />
+                  <div className="text-[13px] font-semibold text-slate-900">{hoverNode.name}</div>
+                  <span className={`ml-auto text-[9.5px] px-1.5 py-0.5 rounded-full ring-1 ${hoverNode.health === "green" ? "bg-emerald-50 text-emerald-700 ring-emerald-200" : "bg-amber-50 text-amber-700 ring-amber-200"}`}>
                     {hoverNode.health === "green" ? "Healthy" : "Warning"}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-300 leading-relaxed">{hoverDet.business}</p>
+                <p className="text-[11px] text-slate-600 leading-relaxed">{hoverDet.business}</p>
                 <div className="mt-2 grid grid-cols-2 gap-1.5 text-[10.5px]">
-                  <Mini l="Records Today" v={abbr(rand(1e9, 15e9))} />
-                  <Mini l="Success Rate" v={`${rand(96, 100, 1)}%`} />
-                  <Mini l="Avg Latency" v={`${rand(30, 250)}ms`} />
-                  <Mini l="Queue Depth" v={String(rand(0, 200))} />
-                  <Mini l="AI Confidence" v={`${rand(94, 99, 1)}%`} />
-                  <Mini l="Owner" v={hoverDet.owner} />
+                  <Mini2 l="Records Today" v={abbr(rand(1e9, 15e9))} />
+                  <Mini2 l="Success Rate" v={`${rand(96, 100, 1)}%`} />
+                  <Mini2 l="Avg Latency" v={`${rand(30, 250)}ms`} />
+                  <Mini2 l="Queue Depth" v={String(rand(0, 200))} />
+                  <Mini2 l="AI Confidence" v={`${rand(94, 99, 1)}%`} />
+                  <Mini2 l="Owner" v={hoverDet.owner} />
                 </div>
                 <button onClick={() => setDrawer({ title: hoverNode.name, kind: "node" })}
-                  className="mt-3 w-full text-[11px] font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-md py-1.5 inline-flex items-center justify-center gap-1">
+                  className="mt-3 w-full text-[11px] font-semibold text-white bg-violet-600 hover:bg-violet-500 rounded-md py-1.5 inline-flex items-center justify-center gap-1">
                   Open Engineering Details <ArrowRight className="h-3 w-3" />
                 </button>
               </motion.div>
