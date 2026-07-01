@@ -233,7 +233,7 @@ export default function FetchOrchestrationScheduler() {
             <table className="w-full text-xs">
               <thead className="text-slate-500 bg-slate-50/60">
                 <tr className="text-left">
-                  {["Source","Domain","Platform","Method","Strategy","Pattern","Next Run","Last Run","Fresh","Lat","Retry","Prio","BP","Status","Conf",""].map(h => (
+                  {["Source","Domain","Platform","Method","Strategy","Pattern","Next Run","Last Run","Fresh","Lat","Retry","Prio","BP","Status","Conf","Builder",""].map(h => (
                     <th key={h} className="px-3 py-2 font-medium whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
