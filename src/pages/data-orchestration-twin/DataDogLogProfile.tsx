@@ -1,7 +1,8 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Html, OrbitControls, Sparkles, Stars } from "@react-three/drei";
+import { Html, Line, OrbitControls, RoundedBox } from "@react-three/drei";
+import { DataDogLogo } from "@/components/brand/DataDogLogo";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
 import {
