@@ -265,6 +265,7 @@ import SourceOnboardingFactory from "./pages/data-orchestration-twin/SourceOnboa
 import AssistedSchemaDiscoveryAndFieldMapping from "./pages/data-orchestration-twin/AssistedSchemaDiscoveryAndFieldMapping.tsx";
 import SchemaDriftAndExceptionWorkbench from "./pages/data-orchestration-twin/SchemaDriftAndExceptionWorkbench.tsx";
 import LogHygieneCompletenessAndStandardizationConsole from "./pages/data-orchestration-twin/LogHygieneCompletenessAndStandardizationConsole.tsx";
+import HydrationAndEnrichmentMethodSelector from "./pages/data-orchestration-twin/HydrationAndEnrichmentMethodSelector.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
@@ -460,6 +461,7 @@ const App = () => (
             <Route path="assisted-schema-discovery-and-field-mapping" element={<AssistedSchemaDiscoveryAndFieldMapping />} />
             <Route path="schema-drift-and-exception-workbench" element={<SchemaDriftAndExceptionWorkbench />} />
             <Route path="log-hygiene-completeness-and-standardization-console" element={<LogHygieneCompletenessAndStandardizationConsole />} />
+            <Route path="hydration-and-enrichment-method-selector" element={<HydrationAndEnrichmentMethodSelector />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
