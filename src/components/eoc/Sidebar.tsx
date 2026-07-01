@@ -439,14 +439,14 @@ function NavSearch({ tree }: { tree: Node[] }) {
 
 /* ---------- Favorites + Recents ---------- */
 
-const FavCtx = React.createContext<{ isFav: (to: string) => boolean; toggle: (to: string) => void } | null>(null);
+const FavCtx = React.createContext<{ favs: string[]; isFav: (to: string) => boolean; toggle: (to: string) => void } | null>(null);
 
 function NavFavorites({ tree, pathname }: { tree: Node[]; pathname: string }) {
   const ctx = React.useContext(FavCtx);
   const nav = useNavigate();
-  if (!ctx?.favs?.length && !ctx) return null;
+  if (!ctx || !ctx.favs.length) return null;
   const flat = flattenTree(tree);
-  const favItems = flat.filter((f) => ctx?.isFav(f.to));
+  const favItems = flat.filter((f) => ctx.isFav(f.to));
   if (!favItems.length) return null;
   return (
     <div className="pt-1">
