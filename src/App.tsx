@@ -470,6 +470,7 @@ const App = () => (
             <Route path="data-placement-and-economics-decision-engine" element={<DataPlacementDecisionEngine />} />
             <Route path="data-placement-and-economics-decision-engine/scenario/:slug" element={<PlacementScenarioModeler />} />
             <Route path="no-duplication-strategy-and-retention-policy" element={<NoDuplicationStrategyAndRetentionPolicy />} />
+            <Route path="no-duplication-strategy-and-retention-policy/scenario/:slug" element={<NoDuplicationScenarioModeler />} />
             <Route path="options-and-tradeoff-matrix" element={<OptionsAndTradeoffMatrix />} />
             <Route path="connector-access-and-governance-registry" element={<ConnectorAccessGovernanceRegistry />} />
             <Route path="fetch-orchestration-scheduler" element={<FetchOrchestrationScheduler />} />
