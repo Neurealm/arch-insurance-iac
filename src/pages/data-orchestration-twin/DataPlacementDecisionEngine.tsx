@@ -200,7 +200,7 @@ export default function DataPlacementDecisionEngine() {
         <section className="col-span-8 bg-white rounded-xl border border-slate-200 shadow-sm">
           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
             <h2 className="text-[13px] font-semibold text-slate-800">Placement Decision Matrix</h2>
-            <div className="text-[10.5px] text-slate-500">Click a row to inspect the engineering rationale</div>
+            <div className="text-[10.5px] text-slate-500">Click a row to open the scenario forecast modeler →</div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-[11.5px]">
