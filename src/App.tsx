@@ -467,6 +467,7 @@ const App = () => (
             <Route path="log-source-inventory-and-scope-registry" element={<LogSourceInventoryAndScopeRegistry />} />
             <Route path="log-source-inventory-and-scope-registry/datadog-log-profile" element={<DataDogLogProfile />} />
             <Route path="data-placement-and-economics-decision-engine" element={<DataPlacementDecisionEngine />} />
+            <Route path="data-placement-and-economics-decision-engine/scenario/:slug" element={<PlacementScenarioModeler />} />
             <Route path="no-duplication-strategy-and-retention-policy" element={<NoDuplicationStrategyAndRetentionPolicy />} />
             <Route path="options-and-tradeoff-matrix" element={<OptionsAndTradeoffMatrix />} />
             <Route path="connector-access-and-governance-registry" element={<ConnectorAccessGovernanceRegistry />} />
