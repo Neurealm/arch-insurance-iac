@@ -439,7 +439,8 @@ export default function SourceOnboardingFactory() {
                 ))}
               </div>
               <div className="mt-3 relative h-1.5 rounded-full bg-slate-800 overflow-hidden">
-                {[0,1,2,3,4].map(i => <div key={i} className="absolute top-0 h-1.5 w-8 rounded-full bg-indigo-400/70" style={{ left: `${((tick * 6 + i * 20) % 100)}%`, transition: "left 1.4s linear" }}/>)}
+                <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 via-indigo-400 to-emerald-400 rounded-full origin-left" style={{ animation: "sof-bar-grow 5s ease-in-out infinite" }}/>
+                {[0,1,2,3,4].map(i => <div key={i} className="absolute top-0 h-1.5 w-10 rounded-full bg-white/60" style={{ left: 0, animation: `sof-packet 4s linear ${i * 0.8}s infinite` }}/>)}
               </div>
             </div>
           </div>
