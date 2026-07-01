@@ -670,16 +670,28 @@ function ExpandedSourceRow({ row, onOpen }: { row: SrcRow; onOpen: (title: strin
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex items-center gap-4 mb-3">
-        {["overview","schema","engineering","monitoring","security","history"].map(t => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`text-[11.5px] capitalize pb-1.5 border-b-2 transition ${
-              tab === t ? "border-blue-600 text-blue-700 font-semibold" : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            {t}
-          </button>
+        {["overview","schema","engineering","monitoring","security","history"].map((t, idx) => (
+          <>
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`text-[11.5px] capitalize pb-1.5 border-b-2 transition ${
+                tab === t ? "border-blue-600 text-blue-700 font-semibold" : "border-transparent text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {t}
+            </button>
+            {idx === 0 && (
+              <Link
+                key="cyber-link"
+                to={`/data-orchestration-twin/log-source-inventory-and-scope-registry/${row.name}/cyber-threat-intelligence`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 text-[11.5px] pb-1.5 border-b-2 border-transparent text-rose-600 hover:text-rose-700 font-semibold"
+              >
+                <ShieldAlert className="h-3 w-3" /> Cyber Threat Intelligence &amp; IoC Analysis
+              </Link>
+            )}
+          </>
         ))}
         <div className="ml-auto flex items-center gap-2">
           <span className="text-[10px] uppercase tracking-wider text-slate-500">Engineering Score</span>
