@@ -115,14 +115,19 @@ export default function DataOrchLayout() {
                       className={({ isActive }) =>
                         cn(
                           "group w-full flex items-center gap-2 rounded-lg transition-colors",
-                          collapsed ? "h-9 justify-center" : "px-3 py-1.5 text-[12.5px]",
+                          collapsed ? "h-9 justify-center" : "py-1.5 text-[12.5px]",
+                          !collapsed && (p.nested ? "pl-7 pr-3" : "px-3"),
                           isActive
                             ? "bg-sidebar-primary/15 text-sidebar-primary font-semibold ring-1 ring-sidebar-primary/25"
                             : "text-sidebar-foreground/80 hover:bg-white/[0.05] hover:text-white",
                         )
                       }
                     >
-                      <Circle className="h-1.5 w-1.5 fill-current shrink-0 opacity-60" />
+                      {p.nested && !collapsed ? (
+                        <span className="text-sidebar-foreground/40 text-[10px] shrink-0">└</span>
+                      ) : (
+                        <Circle className="h-1.5 w-1.5 fill-current shrink-0 opacity-60" />
+                      )}
                       {!collapsed && <span className="flex-1 truncate leading-snug">{p.title}</span>}
                     </NavLink>
                   ))}
