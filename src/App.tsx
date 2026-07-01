@@ -475,6 +475,7 @@ const App = () => (
             <Route path="relationship-key-and-graph-projection-builder" element={<RelationshipKeyAndGraphProjectionBuilder />} />
             <Route path="query-readiness-and-confidence-scorecard" element={<QueryReadinessAndConfidenceScorecard />} />
             <Route path="performance-latency-and-freshness-lab" element={<PerformanceLatencyAndFreshnessLab />} />
+            <Route path="context-graph-and-agentic-query-handoff-layer" element={<ContextGraphAndAgenticQueryHandoffLayer />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
