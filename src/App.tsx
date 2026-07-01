@@ -262,6 +262,7 @@ import OptionsAndTradeoffMatrix from "./pages/data-orchestration-twin/OptionsAnd
 import ConnectorAccessGovernanceRegistry from "./pages/data-orchestration-twin/ConnectorAccessGovernanceRegistry.tsx";
 import FetchOrchestrationScheduler from "./pages/data-orchestration-twin/FetchOrchestrationScheduler.tsx";
 import SourceOnboardingFactory from "./pages/data-orchestration-twin/SourceOnboardingFactory.tsx";
+import AssistedSchemaDiscoveryAndFieldMapping from "./pages/data-orchestration-twin/AssistedSchemaDiscoveryAndFieldMapping.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
@@ -454,6 +455,7 @@ const App = () => (
             <Route path="connector-access-and-governance-registry" element={<ConnectorAccessGovernanceRegistry />} />
             <Route path="fetch-orchestration-scheduler" element={<FetchOrchestrationScheduler />} />
             <Route path="source-onboarding-factory" element={<SourceOnboardingFactory />} />
+            <Route path="assisted-schema-discovery-and-field-mapping" element={<AssistedSchemaDiscoveryAndFieldMapping />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
