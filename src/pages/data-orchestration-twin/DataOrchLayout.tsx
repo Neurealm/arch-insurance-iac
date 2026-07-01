@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { Database, ArrowLeft, ChevronsLeft, ChevronsRight, Circle } from "lucide-react";
+import { Database, ArrowLeft, ArrowRight, ChevronsLeft, ChevronsRight, Circle } from "lucide-react";
 import { doPages, doGroups } from "./pages";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +9,10 @@ let cachedScroll = 0;
 
 export default function DataOrchLayout() {
   const location = useLocation();
-  const active = doPages.find((p) => location.pathname.endsWith(p.slug));
+  const activeIdx = doPages.findIndex((p) => location.pathname.endsWith(p.slug));
+  const active = activeIdx >= 0 ? doPages[activeIdx] : undefined;
+  const prev = activeIdx > 0 ? doPages[activeIdx - 1] : null;
+  const next = activeIdx >= 0 && activeIdx < doPages.length - 1 ? doPages[activeIdx + 1] : null;
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("dataOrch.collapsed") === "1";
@@ -147,6 +150,34 @@ export default function DataOrchLayout() {
           </div>
         </div>
         <Outlet />
+        {active && (prev || next) && (
+          <nav className="px-6 py-6 border-t border-slate-200 bg-white flex items-center justify-between gap-3">
+            {prev ? (
+              <Link
+                to={`/data-orchestration-twin/${prev.slug}`}
+                className="group flex-1 max-w-[46%] flex items-center gap-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 px-4 py-3 transition"
+              >
+                <ArrowLeft className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 shrink-0" />
+                <div className="min-w-0 text-left">
+                  <div className="text-[10px] font-semibold tracking-wider uppercase text-slate-500">Previous</div>
+                  <div className="text-[13px] font-semibold text-slate-900 truncate">{prev.title}</div>
+                </div>
+              </Link>
+            ) : <div className="flex-1" />}
+            {next ? (
+              <Link
+                to={`/data-orchestration-twin/${next.slug}`}
+                className="group flex-1 max-w-[46%] flex items-center justify-end gap-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 px-4 py-3 transition"
+              >
+                <div className="min-w-0 text-right">
+                  <div className="text-[10px] font-semibold tracking-wider uppercase text-slate-500">Next</div>
+                  <div className="text-[13px] font-semibold text-slate-900 truncate">{next.title}</div>
+                </div>
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 shrink-0" />
+              </Link>
+            ) : <div className="flex-1" />}
+          </nav>
+        )}
       </main>
     </div>
   );
