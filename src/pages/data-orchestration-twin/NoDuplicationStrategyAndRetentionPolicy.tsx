@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Database, ShieldCheck, Layers, Boxes, Archive, Ban, DollarSign, CheckCircle2,
   Filter, BookOpen, Download, RefreshCw, X, MoreVertical, Info, ArrowRight,
@@ -147,6 +148,8 @@ export default function NoDuplicationStrategyAndRetentionPolicy() {
   const [drawer, setDrawer] = useState<null | { title: string; subtitle?: string; kind: string }>(null);
   const openDrawer = (title: string, kind: string, subtitle?: string) => setDrawer({ title, kind, subtitle });
   const selected = ROWS[selectedIdx];
+  const navigate = useNavigate();
+  const slugify = (n: string) => n.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 
   const donutCircum = 2 * Math.PI * 52;
   const donutOffsets = useMemo(() => {
@@ -254,7 +257,7 @@ export default function NoDuplicationStrategyAndRetentionPolicy() {
                   return (
                     <tr
                       key={r.name}
-                      onClick={() => setSelectedIdx(i)}
+                      onClick={() => { setSelectedIdx(i); navigate(`/data-orchestration-twin/no-duplication-strategy-and-retention-policy/scenario/${slugify(r.name)}`); }}
                       className={`border-b border-slate-50 cursor-pointer transition ${isSel ? "bg-blue-50/60" : "hover:bg-slate-50"}`}
                     >
                       <td className="px-3 py-2 text-slate-400 tabular-nums">{i + 1}</td>
