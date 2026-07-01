@@ -291,6 +291,236 @@ function pathMatches(pathname: string, to?: string, exact?: boolean) {
   return pathname === to || pathname.startsWith(to + "/");
 }
 
+/* ---------- Flatten + favorites + recents ---------- */
+
+type FlatItem = { key: string; label: string; to: string; icon?: LucideIcon; parents: string[] };
+
+function flattenTree(nodes: Node[], parents: string[] = []): FlatItem[] {
+  const out: FlatItem[] = [];
+  for (const n of nodes) {
+    if (n.to) out.push({ key: n.key, label: n.label, to: n.to, icon: n.icon, parents });
+    if (n.children?.length) out.push(...flattenTree(n.children, [...parents, n.label]));
+  }
+  return out;
+}
+
+const FAV_KEY = "eoc.favorites";
+const RECENT_KEY = "eoc.recents";
+
+function useFavorites() {
+  const [favs, setFavs] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(window.localStorage.getItem(FAV_KEY) || "[]"); } catch { return []; }
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch {}
+  }, [favs]);
+  const toggle = (to: string) =>
+    setFavs((prev) => (prev.includes(to) ? prev.filter((x) => x !== to) : [to, ...prev].slice(0, 12)));
+  return { favs, toggle, isFav: (to: string) => favs.includes(to) };
+}
+
+function useRecents(pathname: string) {
+  const [rec, setRec] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(window.localStorage.getItem(RECENT_KEY) || "[]"); } catch { return []; }
+  });
+  useEffect(() => {
+    if (!pathname) return;
+    setRec((prev) => {
+      const next = [pathname, ...prev.filter((p) => p !== pathname)].slice(0, 5);
+      try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+  return rec;
+}
+
+/* ---------- Search palette ---------- */
+
+function NavSearch({ tree }: { tree: Node[] }) {
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  const nav = useNavigate();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const flat = useMemo(() => flattenTree(tree), [tree]);
+  const results = useMemo(() => {
+    if (!q.trim()) return [];
+    const needle = q.toLowerCase();
+    return flat
+      .filter((f) => f.label.toLowerCase().includes(needle) || f.parents.join(" ").toLowerCase().includes(needle))
+      .slice(0, 8);
+  }, [q, flat]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setOpen(true);
+      } else if (e.key === "Escape") {
+        setOpen(false);
+        inputRef.current?.blur();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => { setActive(0); }, [q]);
+
+  const commit = (idx = active) => {
+    const item = results[idx];
+    if (!item) return;
+    nav(item.to);
+    setQ("");
+    setOpen(false);
+    inputRef.current?.blur();
+  };
+
+  return (
+    <div className="px-2 pb-2">
+      <div className="relative">
+        <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-sidebar-foreground/50" />
+        <input
+          ref={inputRef}
+          value={q}
+          onChange={(e) => { setQ(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 120)}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") { e.preventDefault(); setActive((i) => Math.min(i + 1, Math.max(results.length - 1, 0))); }
+            else if (e.key === "ArrowUp") { e.preventDefault(); setActive((i) => Math.max(i - 1, 0)); }
+            else if (e.key === "Enter") { e.preventDefault(); commit(); }
+          }}
+          placeholder="Search pages, dashboards, twins…"
+          className="w-full h-9 pl-8 pr-12 rounded-lg bg-white/[0.06] hover:bg-white/[0.09] focus:bg-white/10 border border-white/10 focus:border-white/20 text-[12.5px] text-sidebar-foreground placeholder:text-sidebar-foreground/40 outline-none transition-colors"
+        />
+        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 text-[9.5px] font-semibold text-sidebar-foreground/50 bg-white/10 border border-white/10 rounded px-1.5 py-0.5">
+          ⌘K
+        </kbd>
+        {open && results.length > 0 && (
+          <div className="absolute z-40 mt-1 left-0 right-0 rounded-lg bg-[hsl(230_60%_9%)] border border-white/10 shadow-2xl overflow-hidden">
+            <div className="px-2.5 py-1.5 text-[9.5px] font-semibold tracking-[0.14em] text-sidebar-foreground/50 border-b border-white/5">
+              PAGES · {results.length}
+            </div>
+            {results.map((r, i) => {
+              const Icon = r.icon;
+              return (
+                <button
+                  key={r.to}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => commit(i)}
+                  onMouseEnter={() => setActive(i)}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-2.5 py-2 text-left text-[12px] transition-colors",
+                    i === active ? "bg-white/10 text-white" : "text-sidebar-foreground/85 hover:bg-white/5",
+                  )}
+                >
+                  {Icon && <Icon className="h-3.5 w-3.5 shrink-0 opacity-80" />}
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate">{r.label}</div>
+                    {r.parents.length > 0 && (
+                      <div className="text-[10px] text-sidebar-foreground/45 truncate">{r.parents.join(" › ")}</div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Favorites + Recents ---------- */
+
+const FavCtx = React.createContext<{ isFav: (to: string) => boolean; toggle: (to: string) => void } | null>(null);
+
+function NavFavorites({ tree, pathname }: { tree: Node[]; pathname: string }) {
+  const ctx = React.useContext(FavCtx);
+  const nav = useNavigate();
+  if (!ctx?.favs?.length && !ctx) return null;
+  const flat = flattenTree(tree);
+  const favItems = flat.filter((f) => ctx?.isFav(f.to));
+  if (!favItems.length) return null;
+  return (
+    <div className="pt-1">
+      <div className="px-3 pt-2 pb-1.5 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.16em] text-sidebar-foreground/45">
+        <Star className="h-2.5 w-2.5" /> PINNED
+      </div>
+      <div className="space-y-0.5">
+        {favItems.map((f) => {
+          const Icon = f.icon;
+          const active = pathMatches(pathname, f.to);
+          return (
+            <button
+              key={f.to}
+              onClick={() => nav(f.to)}
+              className={cn(
+                "group w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12.5px] transition-colors",
+                active
+                  ? "bg-sidebar-primary/15 text-sidebar-primary font-semibold"
+                  : "text-sidebar-foreground/85 hover:bg-white/5 hover:text-white",
+              )}
+            >
+              {Icon && <Icon className="h-3.5 w-3.5 shrink-0 opacity-80" />}
+              <span className="flex-1 truncate text-left">{f.label}</span>
+              <Star
+                className="h-3 w-3 fill-amber-300 text-amber-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => { e.stopPropagation(); ctx?.toggle(f.to); }}
+              />
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function NavRecent({ tree, pathname }: { tree: Node[]; pathname: string }) {
+  const recents = useRecents(pathname);
+  const nav = useNavigate();
+  const flat = useMemo(() => flattenTree(tree), [tree]);
+  const items = recents
+    .map((path) => flat.find((f) => f.to === path))
+    .filter((x): x is FlatItem => !!x)
+    .slice(0, 4);
+  if (items.length === 0) return null;
+  return (
+    <div className="pt-1">
+      <div className="px-3 pt-2 pb-1.5 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.16em] text-sidebar-foreground/45">
+        <Clock className="h-2.5 w-2.5" /> RECENT
+      </div>
+      <div className="space-y-0.5">
+        {items.map((r) => {
+          const Icon = r.icon;
+          const active = pathMatches(pathname, r.to);
+          return (
+            <button
+              key={r.to}
+              onClick={() => nav(r.to)}
+              className={cn(
+                "w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12.5px] transition-colors",
+                active
+                  ? "bg-sidebar-primary/15 text-sidebar-primary font-semibold"
+                  : "text-sidebar-foreground/80 hover:bg-white/5 hover:text-white",
+              )}
+            >
+              {Icon && <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" />}
+              <span className="flex-1 truncate text-left">{r.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /** True at the `md` breakpoint and up. Used to gate the desktop-only collapse. */
 function useIsDesktop() {
   const query = "(min-width: 768px)";
