@@ -258,6 +258,7 @@ import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/Execu
 import UseCaseToDataContractMapper from "./pages/data-orchestration-twin/UseCaseToDataContractMapper.tsx";
 import SiteResilienceCoworker from "./pages/data-orchestration-twin/SiteResilienceCoworker.tsx";
 import LogSourceInventoryAndScopeRegistry from "./pages/data-orchestration-twin/LogSourceInventoryAndScopeRegistry.tsx";
+import DataDogLogProfile from "./pages/data-orchestration-twin/DataDogLogProfile.tsx";
 import DataPlacementDecisionEngine from "./pages/data-orchestration-twin/DataPlacementDecisionEngine.tsx";
 import NoDuplicationStrategyAndRetentionPolicy from "./pages/data-orchestration-twin/NoDuplicationStrategyAndRetentionPolicy.tsx";
 import OptionsAndTradeoffMatrix from "./pages/data-orchestration-twin/OptionsAndTradeoffMatrix.tsx";
