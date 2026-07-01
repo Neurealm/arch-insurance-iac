@@ -268,6 +268,7 @@ import LogHygieneCompletenessAndStandardizationConsole from "./pages/data-orches
 import HydrationAndEnrichmentMethodSelector from "./pages/data-orchestration-twin/HydrationAndEnrichmentMethodSelector.tsx";
 import HydratedRecordBuilder from "./pages/data-orchestration-twin/HydratedRecordBuilder.tsx";
 import DataLineageAndTraceabilityView from "./pages/data-orchestration-twin/DataLineageAndTraceabilityView.tsx";
+import CanonicalOperationalDataModel from "./pages/data-orchestration-twin/CanonicalOperationalDataModel.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
