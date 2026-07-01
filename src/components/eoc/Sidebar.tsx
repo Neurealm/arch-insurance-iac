@@ -349,12 +349,14 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-const SECTION_LABELS: Record<string, string> = {
-  home: "PLATFORM",
-  "ai-engineering": "PRACTICES",
-  "carve-op": "OPERATIONS",
-  questionnaires: "ADMIN WORKSPACE",
-};
+const SECTIONS: { label: string; keys: string[] }[] = [
+  { label: "PLATFORM",       keys: ["home", "ops"] },
+  { label: "DIGITAL TWINS",  keys: ["aocp", "sre-practice", "sead", "semi"] },
+  { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
+  { label: "PRACTICES",      keys: ["runops", "cyber"] },
+  { label: "OPERATIONS",     keys: ["carve-op", "itsm", "services", "coworkers", "crm"] },
+  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "settings"] },
+];
 
 const ADMIN_ONLY_KEYS = new Set(["questionnaires", "settings", "crm"]);
 
