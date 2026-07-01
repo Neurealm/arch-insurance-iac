@@ -623,7 +623,9 @@ export default function RelationshipKeyAndGraphProjectionBuilder() {
                 ) : (
                   <>
                     <div className="flex items-center gap-2">
-                      <div className={`h-8 w-8 rounded-lg grid place-items-center ${T[(drawer as Entity).tone].bg}`}><(drawer as Entity).icon className={`h-4 w-4 ${T[(drawer as Entity).tone].text}`}/></div>
+                      {(() => { const E = drawer as Entity; const Ic = E.icon; return (
+                        <div className={`h-8 w-8 rounded-lg grid place-items-center ${T[E.tone].bg}`}><Ic className={`h-4 w-4 ${T[E.tone].text}`}/></div>
+                      ); })()}
                       <div>
                         <div className="text-[10px] uppercase text-slate-500 font-semibold">Canonical Entity · {(drawer as Entity).version}</div>
                         <div className="text-lg font-semibold text-slate-900">{(drawer as Entity).name}</div>
