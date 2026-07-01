@@ -274,6 +274,7 @@ import QueryReadinessAndConfidenceScorecard from "./pages/data-orchestration-twi
 import PerformanceLatencyAndFreshnessLab from "./pages/data-orchestration-twin/PerformanceLatencyAndFreshnessLab.tsx";
 import ContextGraphAndAgenticQueryHandoffLayer from "./pages/data-orchestration-twin/ContextGraphAndAgenticQueryHandoffLayer.tsx";
 import DataGapRegisterAndEngineeringBacklog from "./pages/data-orchestration-twin/DataGapRegisterAndEngineeringBacklog.tsx";
+import SowExecutionPlanAndAcceptanceDashboard from "./pages/data-orchestration-twin/SowExecutionPlanAndAcceptanceDashboard.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
@@ -478,6 +479,7 @@ const App = () => (
             <Route path="performance-latency-and-freshness-lab" element={<PerformanceLatencyAndFreshnessLab />} />
             <Route path="context-graph-and-agentic-query-handoff-layer" element={<ContextGraphAndAgenticQueryHandoffLayer />} />
             <Route path="data-gap-register-and-engineering-backlog" element={<DataGapRegisterAndEngineeringBacklog />} />
+            <Route path="sow-execution-plan-and-acceptance-dashboard" element={<SowExecutionPlanAndAcceptanceDashboard />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
