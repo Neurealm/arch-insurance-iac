@@ -464,6 +464,7 @@ const App = () => (
             <Route path="executive-control-plane" element={<DataOrchExecutiveControlPlane />} />
             <Route path="use-case-to-data-contract-mapper" element={<UseCaseToDataContractMapper />} />
             <Route path="log-source-inventory-and-scope-registry" element={<LogSourceInventoryAndScopeRegistry />} />
+            <Route path="log-source-inventory-and-scope-registry/datadog-log-profile" element={<DataDogLogProfile />} />
             <Route path="data-placement-and-economics-decision-engine" element={<DataPlacementDecisionEngine />} />
             <Route path="no-duplication-strategy-and-retention-policy" element={<NoDuplicationStrategyAndRetentionPolicy />} />
             <Route path="options-and-tradeoff-matrix" element={<OptionsAndTradeoffMatrix />} />
