@@ -272,6 +272,7 @@ import CanonicalOperationalDataModel from "./pages/data-orchestration-twin/Canon
 import RelationshipKeyAndGraphProjectionBuilder from "./pages/data-orchestration-twin/RelationshipKeyAndGraphProjectionBuilder.tsx";
 import QueryReadinessAndConfidenceScorecard from "./pages/data-orchestration-twin/QueryReadinessAndConfidenceScorecard.tsx";
 import PerformanceLatencyAndFreshnessLab from "./pages/data-orchestration-twin/PerformanceLatencyAndFreshnessLab.tsx";
+import ContextGraphAndAgenticQueryHandoffLayer from "./pages/data-orchestration-twin/ContextGraphAndAgenticQueryHandoffLayer.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
@@ -474,6 +475,7 @@ const App = () => (
             <Route path="relationship-key-and-graph-projection-builder" element={<RelationshipKeyAndGraphProjectionBuilder />} />
             <Route path="query-readiness-and-confidence-scorecard" element={<QueryReadinessAndConfidenceScorecard />} />
             <Route path="performance-latency-and-freshness-lab" element={<PerformanceLatencyAndFreshnessLab />} />
+            <Route path="context-graph-and-agentic-query-handoff-layer" element={<ContextGraphAndAgenticQueryHandoffLayer />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
