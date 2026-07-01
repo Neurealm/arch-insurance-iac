@@ -82,13 +82,13 @@ const workstreams = [
 
 /* ============== Milestone cards ============== */
 const milestones = [
-  { m:"M1", t:"Current State Documentation", target:"Apr 18, 2025", status:"Complete",    tone:"emerald", acc:"5/5" },
-  { m:"M2", t:"Data Readiness Report",       target:"Apr 28, 2025", status:"Complete",    tone:"emerald", acc:"6/6" },
-  { m:"M3", t:"Architecture Validation",     target:"May 15, 2025", status:"In Progress", tone:"blue",    acc:"4/6" },
-  { m:"M4", t:"Failure Analysis Report",     target:"May 23, 2025", status:"In Progress", tone:"blue",    acc:"3/5" },
-  { m:"M5", t:"Solution Design",             target:"Jun 6, 2025",  status:"Planned",     tone:"amber",   acc:"0/6" },
-  { m:"M6", t:"Backlog Execution Complete",  target:"Jun 25, 2025", status:"Planned",     tone:"amber",   acc:"0/4" },
-  { m:"M7", t:"Acceptance & Handoff",        target:"Jun 30, 2025", status:"Planned",     tone:"amber",   acc:"0/2" },
+  { m:"M1", t:"Current State Documentation", target:"Apr 18, 2026", status:"Complete",    tone:"emerald", acc:"5/5" },
+  { m:"M2", t:"Data Readiness Report",       target:"Apr 28, 2026", status:"Complete",    tone:"emerald", acc:"6/6" },
+  { m:"M3", t:"Architecture Validation",     target:"May 15, 2026", status:"In Progress", tone:"blue",    acc:"4/6" },
+  { m:"M4", t:"Failure Analysis Report",     target:"May 23, 2026", status:"In Progress", tone:"blue",    acc:"3/5" },
+  { m:"M5", t:"Solution Design",             target:"Jun 6, 2026",  status:"Planned",     tone:"amber",   acc:"0/6" },
+  { m:"M6", t:"Backlog Execution Complete",  target:"Jun 25, 2026", status:"Planned",     tone:"amber",   acc:"0/4" },
+  { m:"M7", t:"Acceptance & Handoff",        target:"Jun 30, 2026", status:"Planned",     tone:"amber",   acc:"0/2" },
 ];
 
 /* ============== Acceptance criteria detail ============== */
@@ -186,7 +186,7 @@ export default function SowExecutionPlanAndAcceptanceDashboard() {
     const base = 76;
     const shift = Math.round((sliders.risk-45)*0.4 - (sliders.velocity-70)*0.3 - (sliders.capacity-60)*0.25 + (75-sliders.accept)*0.2);
     const days = Math.max(30, base + shift);
-    return { days, label:`Jun ${Math.min(30, 30 - Math.min(0, days-76)) + Math.max(0, days-76)} 2025` };
+    return { days, label:`Jun ${Math.min(30, 30 - Math.min(0, days-76)) + Math.max(0, days-76)} 2026` };
   },[sliders]);
 
   return (
@@ -216,7 +216,7 @@ export default function SowExecutionPlanAndAcceptanceDashboard() {
           <div className="flex items-center gap-2 shrink-0">
             <div className="text-right text-[10.5px] text-slate-500 mr-2">
               <div>Last Updated</div>
-              <div className="text-slate-700 font-medium">May 12, 2025 10:32 AM</div>
+              <div className="text-slate-700 font-medium">May 12, 2026 10:32 AM</div>
             </div>
             <button className="h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-[12px] flex items-center gap-1.5"><Filter className="h-3.5 w-3.5"/>Filters</button>
             <button className="h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-[12px] flex items-center gap-1.5"><Clock className="h-3.5 w-3.5"/>Full Engagement</button>

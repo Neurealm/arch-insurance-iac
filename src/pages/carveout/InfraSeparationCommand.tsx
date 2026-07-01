@@ -18,7 +18,7 @@ const kpis: KPI[] = [
   { label: "Blocking Issues", value: "14", sub: "↓ 5 vs last 7 days", subColor: "text-red-600", icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
   { label: "Independent from BD", value: "Compute 81% | Storage 79%", sub: "Platform 83% | Network 84% | Identity 88%", subColor: "text-blue-600", icon: ShieldCheck, color: "text-blue-600", bg: "bg-blue-50" },
   { label: "Day 1 Readiness Score", value: "A-", sub: "Good", subColor: "text-emerald-600", icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
-  { label: "Days to Day 1", value: "18", sub: "June 6, 2025", subColor: "text-blue-600", icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
+  { label: "Days to Day 1", value: "18", sub: "June 6, 2026", subColor: "text-blue-600", icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
 ];
 
 const layers = [
@@ -73,11 +73,11 @@ const blocking = [
 ];
 
 const recentActivity = [
-  { t: "Production environment PROD-APP1 fully independent from BD", time: "May 12, 2025 09:14 AM", tone: "ok" },
-  { t: "Storage replication for DW-ANALYTICS completed", time: "May 11, 2025 04:32 PM", tone: "ok" },
-  { t: "Identity trust cutover validation for 7 environments in progress", time: "May 11, 2025 11:08 AM", tone: "info" },
-  { t: "Blocking: Firewall rules still dependent on BD core network", time: "May 10, 2025 02:45 PM", tone: "warn" },
-  { t: "Network link migration completed for 12 sites", time: "May 09, 2025 10:21 AM", tone: "ok" },
+  { t: "Production environment PROD-APP1 fully independent from BD", time: "May 12, 2026 09:14 AM", tone: "ok" },
+  { t: "Storage replication for DW-ANALYTICS completed", time: "May 11, 2026 04:32 PM", tone: "ok" },
+  { t: "Identity trust cutover validation for 7 environments in progress", time: "May 11, 2026 11:08 AM", tone: "info" },
+  { t: "Blocking: Firewall rules still dependent on BD core network", time: "May 10, 2026 02:45 PM", tone: "warn" },
+  { t: "Network link migration completed for 12 sites", time: "May 09, 2026 10:21 AM", tone: "ok" },
 ];
 
 const wwh = {

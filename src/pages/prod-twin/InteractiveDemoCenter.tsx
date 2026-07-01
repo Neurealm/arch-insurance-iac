@@ -227,10 +227,10 @@ const INVEST = [
 ];
 
 const MILESTONES = [
-  { name: "Service Catalog Complete",  date: "May 31, 2025", status: "On Track", tone: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  { name: "Golden Image Baseline",     date: "Jun 30, 2025", status: "On Track", tone: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  { name: "SLO Framework Live",        date: "Aug 15, 2025", status: "At Risk",  tone: "bg-amber-50 text-amber-700 ring-amber-200" },
-  { name: "DR Drill #1 Complete",      date: "Oct 15, 2025", status: "Planned",  tone: "bg-slate-100 text-slate-600 ring-slate-200" },
+  { name: "Service Catalog Complete",  date: "May 31, 2026", status: "On Track", tone: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+  { name: "Golden Image Baseline",     date: "Jun 30, 2026", status: "On Track", tone: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+  { name: "SLO Framework Live",        date: "Aug 15, 2026", status: "At Risk",  tone: "bg-amber-50 text-amber-700 ring-amber-200" },
+  { name: "DR Drill #1 Complete",      date: "Oct 15, 2026", status: "Planned",  tone: "bg-slate-100 text-slate-600 ring-slate-200" },
   { name: "First Cloud Migration Wave",date: "Jan 15, 2026", status: "Planned",  tone: "bg-slate-100 text-slate-600 ring-slate-200" },
 ];
 

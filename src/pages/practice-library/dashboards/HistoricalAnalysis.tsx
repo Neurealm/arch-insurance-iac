@@ -325,7 +325,7 @@ export default function HistoricalAnalysis() {
               <span className="absolute -top-1 -right-1 h-4 w-4 grid place-items-center text-[10px] rounded-full bg-rose-500 text-white">3</span>
             </button>
             <button className="h-9 px-3 rounded border border-slate-700 bg-slate-900 text-xs flex items-center gap-2"><MapIcon className="h-4 w-4" /> DC1 — Ashburn <ChevronsUpDown className="h-3 w-3" /></button>
-            <button className="h-9 px-3 rounded border border-slate-700 bg-slate-900 text-xs flex items-center gap-2"><Calendar className="h-4 w-4" /> May 13 — May 20, 2024 <ChevronsUpDown className="h-3 w-3" /></button>
+            <button className="h-9 px-3 rounded border border-slate-700 bg-slate-900 text-xs flex items-center gap-2"><Calendar className="h-4 w-4" /> May 13 — May 20, 2026 <ChevronsUpDown className="h-3 w-3" /></button>
             <button className="h-9 px-3 rounded border border-slate-700 bg-slate-900 text-xs">Compare</button>
             <button className="h-9 px-3 rounded bg-blue-600 text-white text-xs flex items-center gap-2"><Download className="h-4 w-4" /> Export</button>
           </div>
@@ -358,7 +358,7 @@ export default function HistoricalAnalysis() {
             <KpiCard icon={Activity} color="bg-blue-500/10 text-blue-400" label="Average Load" value="8.42" unit="MW"
               sub="↓ 5.6% vs May 6 – May 12" spark={<Sparkline color="#3b82f6" seed={1} />} />
             <KpiCard icon={Zap} color="bg-violet-500/10 text-violet-400" label="Peak Load" value="13.21" unit="MW"
-              sub="May 17, 2024 04:30 PM" subColor="text-slate-400" spark={<Sparkline color="#a855f7" seed={2} />} />
+              sub="May 17, 2026 04:30 PM" subColor="text-slate-400" spark={<Sparkline color="#a855f7" seed={2} />} />
             <KpiCard icon={Gauge} color="bg-emerald-500/10 text-emerald-400" label="Total Energy" value="2,842" unit="MWh"
               sub="↓ 4.2% vs May 6 – May 12" spark={<Sparkline color="#10b981" seed={3} />} />
             <KpiCard icon={Droplets} color="bg-cyan-500/10 text-cyan-400" label="Average PUE" value="1.38" unit=""
@@ -377,8 +377,8 @@ export default function HistoricalAnalysis() {
                 <div className="text-xs text-slate-400">Peak: <span className="text-white">13.21 MW</span></div>
               </div>
               <div className="mt-1 flex items-center gap-4 text-[11px] text-slate-400">
-                <span className="flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-blue-500" /> May 13 – May 20, 2024</span>
-                <span className="flex items-center gap-1"><span className="h-0.5 w-3 bg-slate-500" /> May 6 – May 12, 2024 (Previous)</span>
+                <span className="flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-blue-500" /> May 13 – May 20, 2026</span>
+                <span className="flex items-center gap-1"><span className="h-0.5 w-3 bg-slate-500" /> May 6 – May 12, 2026 (Previous)</span>
               </div>
               <FacilityLoadChart />
             </div>
@@ -387,8 +387,8 @@ export default function HistoricalAnalysis() {
                 <div className="font-semibold text-white flex items-center gap-2">Load Duration Curve <span className="text-slate-500 text-xs">ⓘ</span></div>
               </div>
               <div className="mt-1 flex items-center gap-4 text-[11px] text-slate-400">
-                <span className="flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-violet-500" /> May 13 – May 20, 2024</span>
-                <span className="flex items-center gap-1"><span className="h-0.5 w-3 bg-violet-400 opacity-60" /> May 6 – May 12, 2024 (Previous)</span>
+                <span className="flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-violet-500" /> May 13 – May 20, 2026</span>
+                <span className="flex items-center gap-1"><span className="h-0.5 w-3 bg-violet-400 opacity-60" /> May 6 – May 12, 2026 (Previous)</span>
               </div>
               <div className="grid grid-cols-[1fr_220px] gap-3">
                 <LoadDurationCurve />
@@ -524,7 +524,7 @@ export default function HistoricalAnalysis() {
             <span>|</span>
             <span>All times shown in EDT</span>
             <span>|</span>
-            <span>Last updated: <span className="text-white">May 20, 2024 10:30:15 AM EDT</span></span>
+            <span>Last updated: <span className="text-white">May 20, 2026 10:30:15 AM EDT</span></span>
             <span className="ml-auto flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Auto-refresh: <span className="text-white">On</span></span>
           </div>
         </div>

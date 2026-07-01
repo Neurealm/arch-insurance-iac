@@ -106,11 +106,11 @@ const regionsHealth = [
 ];
 
 const activities = [
-  { time: "May 12, 2025 09:15 AM", act: "Replication caught up", sys: "STG-ARRAY-01", status: "Success", c: "text-emerald-600", I: CheckCircle },
-  { time: "May 12, 2025 08:42 AM", act: "Backup completed", sys: "STG-FILE-01", status: "Success", c: "text-emerald-600", I: CheckCircle },
-  { time: "May 12, 2025 07:33 AM", act: "Integrity check passed", sys: "STG-DB-01", status: "Success", c: "text-emerald-600", I: CheckCircle },
-  { time: "May 12, 2025 06:21 AM", act: "Capacity threshold warning", sys: "STG-OBJ-01", status: "Warning", c: "text-amber-600", I: AlertTriangle },
-  { time: "May 12, 2025 05:58 AM", act: "Replication lag detected", sys: "STG-ARCH-01", status: "Alert", c: "text-red-600", I: AlertCircle },
+  { time: "May 12, 2026 09:15 AM", act: "Replication caught up", sys: "STG-ARRAY-01", status: "Success", c: "text-emerald-600", I: CheckCircle },
+  { time: "May 12, 2026 08:42 AM", act: "Backup completed", sys: "STG-FILE-01", status: "Success", c: "text-emerald-600", I: CheckCircle },
+  { time: "May 12, 2026 07:33 AM", act: "Integrity check passed", sys: "STG-DB-01", status: "Success", c: "text-emerald-600", I: CheckCircle },
+  { time: "May 12, 2026 06:21 AM", act: "Capacity threshold warning", sys: "STG-OBJ-01", status: "Warning", c: "text-amber-600", I: AlertTriangle },
+  { time: "May 12, 2026 05:58 AM", act: "Replication lag detected", sys: "STG-ARCH-01", status: "Alert", c: "text-red-600", I: AlertCircle },
 ];
 
 function statusTone(s: string) {

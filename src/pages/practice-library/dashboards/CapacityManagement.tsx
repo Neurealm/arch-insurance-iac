@@ -216,10 +216,10 @@ export default function CapacityManagement() {
     { name: "Data Hall F", load: 1100, cap: 1500, pct: 73 },
   ];
   const headroom = [
-    { r: "Power (kW)", h: "2,880 kW (18%)", d: "Nov 15, 2024", s: "At Risk", c: "text-rose-400" },
-    { r: "IT Load (kW)", h: "2,550 kW (17%)", d: "Sep 28, 2024", s: "At Risk", c: "text-rose-400" },
-    { r: "Cooling (Tons)", h: "770 Tons (15%)", d: "Dec 10, 2024", s: "At Risk", c: "text-rose-400" },
-    { r: "Rack Space", h: "320 Racks (16%)", d: "Feb 14, 2025", s: "Monitor", c: "text-amber-400" },
+    { r: "Power (kW)", h: "2,880 kW (18%)", d: "Nov 15, 2026", s: "At Risk", c: "text-rose-400" },
+    { r: "IT Load (kW)", h: "2,550 kW (17%)", d: "Sep 28, 2026", s: "At Risk", c: "text-rose-400" },
+    { r: "Cooling (Tons)", h: "770 Tons (15%)", d: "Dec 10, 2026", s: "At Risk", c: "text-rose-400" },
+    { r: "Rack Space", h: "320 Racks (16%)", d: "Feb 14, 2026", s: "Monitor", c: "text-amber-400" },
     { r: "Network (Gbps)", h: "3,200 Gbps (32%)", d: "N/A", s: "Good", c: "text-emerald-400" },
   ];
   const consumers = [
@@ -249,7 +249,7 @@ export default function CapacityManagement() {
           <div className="flex items-center gap-2">
             <Select icon={Bell} value="" badge={3} />
             <Select icon={MapIcon} value="DC1 — Ashburn" />
-            <Select icon={Calendar} value="May 13 — May 20, 2024" />
+            <Select icon={Calendar} value="May 13 — May 20, 2026" />
             <button className="h-9 px-3 rounded bg-blue-600 hover:bg-blue-500 text-white text-xs flex items-center gap-2">
               <Download className="h-3.5 w-3.5" /> Export
             </button>
@@ -481,7 +481,7 @@ export default function CapacityManagement() {
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Data Source: Integrated DCIM</span>
             <span>All times shown in EDT</span>
-            <span>Last updated: May 20, 2024 10:30:15 AM EDT</span>
+            <span>Last updated: May 20, 2026 10:30:15 AM EDT</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Auto-refresh: On</span>

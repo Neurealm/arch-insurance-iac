@@ -160,7 +160,7 @@ export default function DataLineageAndTraceabilityView() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <div className="text-[11px] text-slate-500 mr-1">Last Updated <span className="text-slate-800 font-medium">May 12, 2025 10:32 AM</span></div>
+          <div className="text-[11px] text-slate-500 mr-1">Last Updated <span className="text-slate-800 font-medium">May 12, 2026 10:32 AM</span></div>
           <button className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-slate-200 text-slate-700 text-xs hover:bg-slate-50"><Search className="h-3.5 w-3.5"/>Lineage Search</button>
           <button className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-slate-200 text-slate-700 text-xs hover:bg-slate-50"><Clock className="h-3.5 w-3.5"/>7D</button>
           <button className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-slate-200 text-slate-700 text-xs hover:bg-slate-50"><Rewind className="h-3.5 w-3.5"/>Replay</button>
@@ -208,7 +208,7 @@ export default function DataLineageAndTraceabilityView() {
                 <div className="mt-1 text-[11px] text-slate-500">
                   Record ID: <span className="font-mono text-slate-700">0f3e2b90-4d25-4e31-9b2a-7f5e8c1d9b77</span>
                   <span className="mx-2">·</span>
-                  Event Time: <span className="font-mono text-slate-700">2025-05-12T10:15:22Z</span>
+                  Event Time: <span className="font-mono text-slate-700">2026-05-12T10:15:22Z</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">

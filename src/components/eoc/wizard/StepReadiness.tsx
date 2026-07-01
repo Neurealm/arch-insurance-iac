@@ -116,7 +116,7 @@ export function StepReadiness({ onLaunch }: { onLaunch: () => void }) {
               ["Environment","Production"],
               ["Region","US East (N. Virginia)"],
               ["High Availability","Enabled (Multi-AZ)"],
-              ["Last Validation","May 14, 2025 10:30 AM"],
+              ["Last Validation","May 14, 2026 10:30 AM"],
               ["Created By","Jane Smith"],
               ["Deployment Owner","John Anderson"],
             ].map(([k, v]) => (

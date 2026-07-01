@@ -18,9 +18,9 @@ const CUSTOMERS = [
 ];
 
 const ENGAGEMENTS = [
-  { name: "Waters Digital Platform Support", type: "New Managed Services", stage: "Discovery", stageColor: "#3b82f6", date: "Jun 30, 2025", owner: "Mark Davis", status: "Active", statusColor: "#10b981", activity: "May 12, 2025" },
-  { name: "LIMS Application Support Renewal", type: "Renewal", stage: "Pricing", stageColor: "#f59e0b", date: "May 15, 2025", owner: "Mark Davis", status: "Active", statusColor: "#10b981", activity: "May 08, 2025" },
-  { name: "Cloud Migration & Support", type: "Transformation", stage: "Transition", stageColor: "#8b5cf6", date: "Aug 15, 2025", owner: "Lisa Chen", status: "Planning", statusColor: "#64748b", activity: "May 02, 2025" },
+  { name: "Waters Digital Platform Support", type: "New Managed Services", stage: "Discovery", stageColor: "#3b82f6", date: "Jun 30, 2026", owner: "Mark Davis", status: "Active", statusColor: "#10b981", activity: "May 12, 2026" },
+  { name: "LIMS Application Support Renewal", type: "Renewal", stage: "Pricing", stageColor: "#f59e0b", date: "May 15, 2026", owner: "Mark Davis", status: "Active", statusColor: "#10b981", activity: "May 08, 2026" },
+  { name: "Cloud Migration & Support", type: "Transformation", stage: "Transition", stageColor: "#8b5cf6", date: "Aug 15, 2026", owner: "Lisa Chen", status: "Planning", statusColor: "#64748b", activity: "May 02, 2026" },
 ];
 
 function ProgressPill({ label, value, color = "#22c55e" }: { label: string; value: string; color?: string }) {
@@ -82,7 +82,7 @@ export default function CustomerSelectionDemo() {
             <ProgressPill label="Confidence" value="82%" />
             <div className="border-l border-border pl-3 pr-3">
               <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Last Updated</div>
-              <div className="font-semibold text-[11px]">May 12, 2025</div>
+              <div className="font-semibold text-[11px]">May 12, 2026</div>
             </div>
             <div className="border-l border-border pl-3 flex items-center gap-1.5">
               <div className="h-6 w-6 rounded-full bg-emerald-500 text-white text-[9px] font-bold flex items-center justify-center">SJ</div>
@@ -227,7 +227,7 @@ export default function CustomerSelectionDemo() {
                     <button className="ml-auto text-[10px] text-blue-600 font-semibold hover:underline">View in Salesforce ↗</button>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-[11px]">
-                    {[["Open Opportunities","2"],["Account Health","Healthy ●"],["Pipeline Value","$4.2M"],["Relationship Strength","Strong ●"],["Last CRM Sync","May 12, 2025 9:15 AM"],["Next Touchpoint","May 20, 2025"]].map(([k,v]) => (
+                    {[["Open Opportunities","2"],["Account Health","Healthy ●"],["Pipeline Value","$4.2M"],["Relationship Strength","Strong ●"],["Last CRM Sync","May 12, 2026 9:15 AM"],["Next Touchpoint","May 20, 2026"]].map(([k,v]) => (
                       <div key={k} className="border border-border rounded-lg p-2">
                         <div className="text-[10px] text-muted-foreground">{k}</div>
                         <div className={cn("font-bold mt-0.5", v.includes("Healthy") || v.includes("Strong") ? "text-emerald-600" : "")}>{v}</div>

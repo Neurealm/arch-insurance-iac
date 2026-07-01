@@ -29,7 +29,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Medium", tone: "yellow" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I proactively identify members with upcoming renewals, determine eligibility requirements, and coordinate outreach across multiple channels. I track member responses, collect and validate required documents, and ensure timely case resolution to prevent coverage gaps.",

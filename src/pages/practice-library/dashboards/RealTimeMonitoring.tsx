@@ -467,7 +467,7 @@ export default function RealTimeMonitoring() {
           <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Auto-refresh: 10s</span>
-              <span>Last updated: May 20, 2024 10:30:15 AM EDT</span>
+              <span>Last updated: May 20, 2026 10:30:15 AM EDT</span>
             </div>
             <span className="flex items-center gap-1 text-emerald-400">● Data is live</span>
           </div>

@@ -26,7 +26,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Low", tone: "green" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I assist providers with authorizations, claims questions, portal navigation, and general inquiries. I resolve issues, guide users to the right information, and reduce the need for live agent support.",

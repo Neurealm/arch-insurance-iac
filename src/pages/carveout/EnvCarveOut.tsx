@@ -84,10 +84,10 @@ const issues = [
 ];
 
 const activities = [
-  { icon: CheckCircle, color: "text-emerald-600", text: "Completed replication for PREPROD-EU-WEST-01", time: "May 12, 2025 09:15 AM" },
-  { icon: CheckCircle, color: "text-emerald-600", text: "Validation passed for 12 environments", time: "May 12, 2025 08:42 AM" },
-  { icon: AlertTriangle, color: "text-amber-600", text: "Detected config drift in 4 environments", time: "May 12, 2025 07:31 AM" },
-  { icon: Info, color: "text-blue-600", text: "Replication lag resolved for PROD-APAC-02", time: "May 12, 2025 06:15 AM" },
+  { icon: CheckCircle, color: "text-emerald-600", text: "Completed replication for PREPROD-EU-WEST-01", time: "May 12, 2026 09:15 AM" },
+  { icon: CheckCircle, color: "text-emerald-600", text: "Validation passed for 12 environments", time: "May 12, 2026 08:42 AM" },
+  { icon: AlertTriangle, color: "text-amber-600", text: "Detected config drift in 4 environments", time: "May 12, 2026 07:31 AM" },
+  { icon: Info, color: "text-blue-600", text: "Replication lag resolved for PROD-APAC-02", time: "May 12, 2026 06:15 AM" },
 ];
 
 function colorPct(v: number) {

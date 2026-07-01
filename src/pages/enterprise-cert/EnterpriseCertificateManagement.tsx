@@ -55,7 +55,7 @@ const mk = (over: Partial<PaneDetail> & Pick<PaneDetail, "title" | "breadcrumb">
   evidence: [],
   diagnostic: {
     rootCause: "—", related: [], workflow: [], recommended: "—",
-    opportunity: "—", risk: "Medium", owner: "PKI Operations", updated: "Jun 23, 2025 10:21 AM EDT",
+    opportunity: "—", risk: "Medium", owner: "PKI Operations", updated: "Jun 23, 2026 10:21 AM EDT",
   },
   ...over,
 });
@@ -139,7 +139,7 @@ const KPIS: KPI[] = [
         workflow: ["Detect", "Validate owner", "Enroll new cert", "Stage", "Deploy", "Verify"],
         recommended: "Run Urgent Renewal Agent across 287-cert queue with SRE auto-approve",
         opportunity: "Cut manual approval steps via pre-approved policy on T1 services",
-        risk: "Critical", owner: "SRE + PKI On-call", updated: "Jun 23, 2025 10:23 AM EDT",
+        risk: "Critical", owner: "SRE + PKI On-call", updated: "Jun 23, 2026 10:23 AM EDT",
       },
     }),
   },
@@ -475,7 +475,7 @@ function Header() {
         </div>
       </div>
       <div className="px-6 pb-2.5 flex items-center justify-end gap-2 text-xs text-slate-500">
-        <span>Data as of: Jun 23, 2025 10:24 AM EDT</span>
+        <span>Data as of: Jun 23, 2026 10:24 AM EDT</span>
         <Button variant="outline" size="sm" className="h-8 ml-2"><RefreshCw className="h-3.5 w-3.5 mr-1" /> Refresh</Button>
         <Button variant="outline" size="sm" className="h-8"><Download className="h-3.5 w-3.5 mr-1" /> Export</Button>
       </div>

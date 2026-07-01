@@ -14,7 +14,7 @@ const kpis: KPI[] = [
   { label: "At Risk", value: "28", sub: "3.3%", subColor: "text-red-600", icon: AlertCircle, color: "text-red-600", bg: "bg-red-50" },
   { label: "Cutover Success Rate", value: "97.8%", sub: "Last 30 Days", subColor: "text-violet-600", icon: Activity, color: "text-violet-600", bg: "bg-violet-50" },
   { label: "TSA Exit Milestone", value: "Phase 3", sub: "In Progress", subColor: "text-emerald-600", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
-  { label: "TSA Exit Target Date", value: "Aug 15, 2025", sub: "Day 1 Readiness", subColor: "text-blue-600", icon: Calendar, color: "text-blue-600", bg: "bg-blue-50" },
+  { label: "TSA Exit Target Date", value: "Aug 15, 2026", sub: "Day 1 Readiness", subColor: "text-blue-600", icon: Calendar, color: "text-blue-600", bg: "bg-blue-50" },
 ];
 
 const wwh = {
@@ -33,34 +33,34 @@ const outcomes: Outcome[] = [
   { icon: CheckCircle, color: "text-emerald-600", title: "ALL CRITICAL DEPENDENCIES", l1: "Resolved" },
   { icon: ShieldCheck, color: "text-amber-600", title: "ZERO SEV-1 CUTOVER FAILURES", l1: "" },
   { icon: Database, color: "text-violet-600", title: "DATA PROTECTED & VALIDATED", l1: "" },
-  { icon: Flag, color: "text-blue-600", title: "ON TRACK FOR TSA EXIT", l1: "Aug 15, 2025" },
+  { icon: Flag, color: "text-blue-600", title: "ON TRACK FOR TSA EXIT", l1: "Aug 15, 2026" },
 ];
 
 const waves = [
-  { wave: "Wave 1 — Foundation", workloads: 112, pct: "13.3%", status: "Completed", progress: 100, date: "Apr 15, 2025" },
-  { wave: "Wave 2 — Core Apps", workloads: 198, pct: "23.5%", status: "Completed", progress: 100, date: "Apr 30, 2025" },
-  { wave: "Wave 3 — Business Apps", workloads: 214, pct: "25.4%", status: "In Progress", progress: 72, date: "May 20, 2025" },
-  { wave: "Wave 4 — Data & Analytics", workloads: 156, pct: "18.5%", status: "In Progress", progress: 48, date: "Jun 10, 2025" },
-  { wave: "Wave 5 — Long Tail Apps", workloads: 104, pct: "12.4%", status: "Planned", progress: 0, date: "Jun 30, 2025" },
-  { wave: "Wave 6 — Decommission", workloads: 58, pct: "6.9%", status: "Planned", progress: 0, date: "Jul 15, 2025" },
+  { wave: "Wave 1 — Foundation", workloads: 112, pct: "13.3%", status: "Completed", progress: 100, date: "Apr 15, 2026" },
+  { wave: "Wave 2 — Core Apps", workloads: 198, pct: "23.5%", status: "Completed", progress: 100, date: "Apr 30, 2026" },
+  { wave: "Wave 3 — Business Apps", workloads: 214, pct: "25.4%", status: "In Progress", progress: 72, date: "May 20, 2026" },
+  { wave: "Wave 4 — Data & Analytics", workloads: 156, pct: "18.5%", status: "In Progress", progress: 48, date: "Jun 10, 2026" },
+  { wave: "Wave 5 — Long Tail Apps", workloads: 104, pct: "12.4%", status: "Planned", progress: 0, date: "Jun 30, 2026" },
+  { wave: "Wave 6 — Decommission", workloads: 58, pct: "6.9%", status: "Planned", progress: 0, date: "Jul 15, 2026" },
 ];
 
 const workloadStatus = [
-  { id: "ERP-PROD-01", app: "ERP Platform", crit: "High", bd: "BD-DC1", tgt: "Waters-DC1", wave: "Wave 2", status: "Completed", sync: "100%", date: "Apr 28, 2025", result: "Success" },
-  { id: "CRM-PROD-01", app: "CRM", crit: "High", bd: "BD-DC1", tgt: "AWS-US-EAST", wave: "Wave 2", status: "Completed", sync: "100%", date: "Apr 30, 2025", result: "Success" },
-  { id: "DW-PROD-01", app: "Data Warehouse", crit: "High", bd: "BD-DC2", tgt: "Azure-US-EAST", wave: "Wave 3", status: "In Progress", sync: "82%", date: "May 22, 2025", result: "—" },
-  { id: "HR-PROD-01", app: "HR Portal", crit: "Medium", bd: "BD-DC1", tgt: "Waters-DC1", wave: "Wave 3", status: "In Progress", sync: "67%", date: "May 18, 2025", result: "—" },
-  { id: "ANALYTICS-01", app: "Analytics Platform", crit: "Medium", bd: "BD-DC2", tgt: "AWS-US-EAST", wave: "Wave 4", status: "In Progress", sync: "41%", date: "Jun 05, 2025", result: "—" },
-  { id: "FILESRV-01", app: "File Services", crit: "Low", bd: "BD-DC1", tgt: "Waters-DC1", wave: "Wave 5", status: "Planned", sync: "0%", date: "Jun 28, 2025", result: "—" },
-  { id: "LEGACY-APP-12", app: "Legacy App", crit: "Low", bd: "BD-DC2", tgt: "Waters-DC2", wave: "Wave 5", status: "Planned", sync: "0%", date: "Jun 30, 2025", result: "—" },
+  { id: "ERP-PROD-01", app: "ERP Platform", crit: "High", bd: "BD-DC1", tgt: "Waters-DC1", wave: "Wave 2", status: "Completed", sync: "100%", date: "Apr 28, 2026", result: "Success" },
+  { id: "CRM-PROD-01", app: "CRM", crit: "High", bd: "BD-DC1", tgt: "AWS-US-EAST", wave: "Wave 2", status: "Completed", sync: "100%", date: "Apr 30, 2026", result: "Success" },
+  { id: "DW-PROD-01", app: "Data Warehouse", crit: "High", bd: "BD-DC2", tgt: "Azure-US-EAST", wave: "Wave 3", status: "In Progress", sync: "82%", date: "May 22, 2026", result: "—" },
+  { id: "HR-PROD-01", app: "HR Portal", crit: "Medium", bd: "BD-DC1", tgt: "Waters-DC1", wave: "Wave 3", status: "In Progress", sync: "67%", date: "May 18, 2026", result: "—" },
+  { id: "ANALYTICS-01", app: "Analytics Platform", crit: "Medium", bd: "BD-DC2", tgt: "AWS-US-EAST", wave: "Wave 4", status: "In Progress", sync: "41%", date: "Jun 05, 2026", result: "—" },
+  { id: "FILESRV-01", app: "File Services", crit: "Low", bd: "BD-DC1", tgt: "Waters-DC1", wave: "Wave 5", status: "Planned", sync: "0%", date: "Jun 28, 2026", result: "—" },
+  { id: "LEGACY-APP-12", app: "Legacy App", crit: "Low", bd: "BD-DC2", tgt: "Waters-DC2", wave: "Wave 5", status: "Planned", sync: "0%", date: "Jun 30, 2026", result: "—" },
 ];
 
 const tsaPhases = [
-  { phase: "Phase 1 — Foundation Exit", desc: "Core infra and platform exit", date: "Apr 15, 2025", status: "Completed" },
-  { phase: "Phase 2 — Core Workloads", desc: "Core business applications exit", date: "Apr 30, 2025", status: "Completed" },
-  { phase: "Phase 3 — Majority Workloads", desc: "Majority of workloads exited", date: "May 31, 2025", status: "In Progress" },
-  { phase: "Phase 4 — Final Workloads", desc: "Long tail workloads exit", date: "Jun 30, 2025", status: "Planned" },
-  { phase: "Phase 5 — Decommission BD", desc: "BD environments decommissioned", date: "Aug 15, 2025", status: "Planned" },
+  { phase: "Phase 1 — Foundation Exit", desc: "Core infra and platform exit", date: "Apr 15, 2026", status: "Completed" },
+  { phase: "Phase 2 — Core Workloads", desc: "Core business applications exit", date: "Apr 30, 2026", status: "Completed" },
+  { phase: "Phase 3 — Majority Workloads", desc: "Majority of workloads exited", date: "May 31, 2026", status: "In Progress" },
+  { phase: "Phase 4 — Final Workloads", desc: "Long tail workloads exit", date: "Jun 30, 2026", status: "Planned" },
+  { phase: "Phase 5 — Decommission BD", desc: "BD environments decommissioned", date: "Aug 15, 2026", status: "Planned" },
 ];
 
 const risks = [
@@ -73,11 +73,11 @@ const risks = [
 ];
 
 const recent = [
-  { time: "May 12, 2025 09:15 AM", act: "Completed cutover: CRM-PROD-01", wl: 1, status: "Success" },
-  { time: "May 12, 2025 07:42 AM", act: "Started migration: DW-PROD-01", wl: 1, status: "In Progress" },
-  { time: "May 11, 2025 08:21 PM", act: "Data sync lag resolved: ANALYTICS-01", wl: 1, status: "Resolved" },
-  { time: "May 11, 2025 05:33 PM", act: "Network dependency cleared: HR-PROD-01", wl: 1, status: "Resolved" },
-  { time: "May 11, 2025 11:08 AM", act: "Pre-cutover validation passed: ERP-PROD-01", wl: 1, status: "Success" },
+  { time: "May 12, 2026 09:15 AM", act: "Completed cutover: CRM-PROD-01", wl: 1, status: "Success" },
+  { time: "May 12, 2026 07:42 AM", act: "Started migration: DW-PROD-01", wl: 1, status: "In Progress" },
+  { time: "May 11, 2026 08:21 PM", act: "Data sync lag resolved: ANALYTICS-01", wl: 1, status: "Resolved" },
+  { time: "May 11, 2026 05:33 PM", act: "Network dependency cleared: HR-PROD-01", wl: 1, status: "Resolved" },
+  { time: "May 11, 2026 11:08 AM", act: "Pre-cutover validation passed: ERP-PROD-01", wl: 1, status: "Success" },
 ];
 
 const dependency = [
@@ -246,7 +246,7 @@ export default function DcExitMigration() {
             <span className="flex items-center gap-1"><span className="h-2 w-2 bg-emerald-500 rounded-sm" /> Completed</span>
             <span className="flex items-center gap-1"><span className="h-2 w-2 bg-blue-500 rounded-sm" /> In Progress</span>
             <span className="flex items-center gap-1"><span className="h-2 w-2 bg-slate-300 rounded-sm" /> Planned</span>
-            <span className="ml-auto text-red-500 font-semibold">Day 1 Aug 15, 2025</span>
+            <span className="ml-auto text-red-500 font-semibold">Day 1 Aug 15, 2026</span>
           </div>
           <div className="space-y-2 relative">
             {timelineWaves.map((w) => (

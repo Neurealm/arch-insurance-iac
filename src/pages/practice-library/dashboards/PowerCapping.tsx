@@ -279,7 +279,7 @@ export default function PowerCapping() {
           <div className="flex items-center gap-2">
             <Select icon={Bell} value="" badge={3} />
             <Select icon={MapIcon} value="DC1 — Ashburn" />
-            <Select icon={Calendar} value="May 13 — May 20, 2024" />
+            <Select icon={Calendar} value="May 13 — May 20, 2026" />
             <button className="h-9 px-3 rounded bg-blue-600 hover:bg-blue-500 text-white text-xs flex items-center gap-2">
               <Download className="h-3.5 w-3.5" /> Export
             </button>
@@ -510,7 +510,7 @@ export default function PowerCapping() {
         <footer className="mt-auto border-t border-slate-800 px-6 py-3 text-[11px] text-slate-400 flex items-center justify-between bg-[#0b1220]">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Power Capping Engine: <span className="text-emerald-400">Operational</span></span>
-            <span>Last updated: May 20, 2024 10:30:15 AM EDT</span>
+            <span>Last updated: May 20, 2026 10:30:15 AM EDT</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Auto-refresh: On</span>

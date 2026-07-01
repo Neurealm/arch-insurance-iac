@@ -29,7 +29,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Medium", tone: "yellow" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I identify members discharged from behavioral health and substance use inpatient or residential care, assess risk, and ensure timely follow-up, outreach, and care plan activation to reduce readmissions and support long-term recovery.",

@@ -26,7 +26,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Low", tone: "green" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I monitor, secure, and optimize FHIR and CMS APIs. I ensure compliance with industry standards, manage OAuth governance, and support seamless data exchange for members, providers, and CMS.",

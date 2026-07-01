@@ -65,7 +65,7 @@ function AppHeader({ onOpenPalette }: any) {
         <ChevronDown className="h-3.5 w-3.5 text-slate-400 ml-1" />
       </div>
       <div className="h-11 px-3 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center gap-2">
-        <div className="text-[11.5px] text-slate-300">May 23, 2025 · 10:24 AM CT</div>
+        <div className="text-[11.5px] text-slate-300">May 23, 2026 · 10:24 AM CT</div>
         <span className="flex items-center gap-1 text-[10px] text-emerald-300">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
         </span>
@@ -88,10 +88,10 @@ type Opt = {
   score: number; confidence: number; downtime: string;
 };
 const OPTIONS: Opt[] = [
-  { id: "now",      rank: 3, label: "Maintain Now",       sub: "(Today)",                     window: "12:00 PM – 4:00 PM", date: "May 23, 2025", prod: -1240, yieldStr: "-0.18%", rev: "-$1.24M", revNum: -1.24, oee: -2.3, risk: "Low",       riskTone: "text-emerald-300", tech: "High",   techTone: "text-rose-300",    score: 68, confidence: 81, downtime: "4h 00m" },
-  { id: "tonight",  rank: 1, label: "Maintain Tonight",   sub: "(10:00 PM – 2:00 AM)",        window: "10:00 PM – 2:00 AM", date: "May 23, 2025", prod: -320,  yieldStr: "-0.02%", rev: "-$0.24M", revNum: -0.24, oee: -0.6, risk: "Very High", riskTone: "text-rose-300",    tech: "Medium", techTone: "text-amber-300",   score: 94, confidence: 94, downtime: "2h 30m" },
-  { id: "tomorrow", rank: 2, label: "Maintain Tomorrow",  sub: "(May 24)",                    window: "08:00 PM – 12:00 AM",date: "May 24, 2025", prod: -780,  yieldStr: "-0.07%", rev: "-$0.81M", revNum: -0.81, oee: -1.4, risk: "High",      riskTone: "text-rose-300",    tech: "High",   techTone: "text-rose-300",    score: 79, confidence: 86, downtime: "3h 15m" },
-  { id: "next",     rank: 4, label: "Maintain Next Week", sub: "(May 27–28)",                 window: "11:00 PM – 3:00 AM", date: "May 28, 2025", prod: -120,  yieldStr: "-0.31%", rev: "-$0.12M", revNum: -0.12, oee: -0.2, risk: "Very High", riskTone: "text-rose-300",    tech: "Low",    techTone: "text-emerald-300", score: 61, confidence: 72, downtime: "4h 00m" },
+  { id: "now",      rank: 3, label: "Maintain Now",       sub: "(Today)",                     window: "12:00 PM – 4:00 PM", date: "May 23, 2026", prod: -1240, yieldStr: "-0.18%", rev: "-$1.24M", revNum: -1.24, oee: -2.3, risk: "Low",       riskTone: "text-emerald-300", tech: "High",   techTone: "text-rose-300",    score: 68, confidence: 81, downtime: "4h 00m" },
+  { id: "tonight",  rank: 1, label: "Maintain Tonight",   sub: "(10:00 PM – 2:00 AM)",        window: "10:00 PM – 2:00 AM", date: "May 23, 2026", prod: -320,  yieldStr: "-0.02%", rev: "-$0.24M", revNum: -0.24, oee: -0.6, risk: "Very High", riskTone: "text-rose-300",    tech: "Medium", techTone: "text-amber-300",   score: 94, confidence: 94, downtime: "2h 30m" },
+  { id: "tomorrow", rank: 2, label: "Maintain Tomorrow",  sub: "(May 24)",                    window: "08:00 PM – 12:00 AM",date: "May 24, 2026", prod: -780,  yieldStr: "-0.07%", rev: "-$0.81M", revNum: -0.81, oee: -1.4, risk: "High",      riskTone: "text-rose-300",    tech: "High",   techTone: "text-rose-300",    score: 79, confidence: 86, downtime: "3h 15m" },
+  { id: "next",     rank: 4, label: "Maintain Next Week", sub: "(May 27–28)",                 window: "11:00 PM – 3:00 AM", date: "May 28, 2026", prod: -120,  yieldStr: "-0.31%", rev: "-$0.12M", revNum: -0.12, oee: -0.2, risk: "Very High", riskTone: "text-rose-300",    tech: "Low",    techTone: "text-emerald-300", score: 61, confidence: 72, downtime: "4h 00m" },
 ];
 
 const scoreColor = (s: number) => s >= 90 ? "bg-emerald-400" : s >= 75 ? "bg-sky-400" : s >= 60 ? "bg-amber-400" : "bg-rose-400";
@@ -587,7 +587,7 @@ function IntelligenceDrawer({ open, id, onClose }: { open: boolean; id: string |
                 <>
                   <p>Bayesian RUL estimate: 18 days (CI 14–22) using vacuum vibration, He leak progression, and pressure stability features. Monte Carlo (5,000 trials) over Factory Twin shows P(unplanned failure &gt; cost of planned) crossing at day 18.</p>
                   <p className="text-slate-400">Discrete-event simulation: 320 wafer delta on the Maintain Tonight scenario across MES + AMHS routing using FactoryWorks lot priorities and SECS/GEM real-time tool states.</p>
-                  <p className="text-slate-500 text-[11px]">Model: ETCH-RUL v3.2 · Inference: 2025-05-23 10:24 CT · Feature importance dominated by vacuum vibration X (28%) and RF stability (22%).</p>
+                  <p className="text-slate-500 text-[11px]">Model: ETCH-RUL v3.2 · Inference: 2026-05-23 10:24 CT · Feature importance dominated by vacuum vibration X (28%) and RF stability (22%).</p>
                 </>
               )}
             </div>

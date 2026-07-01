@@ -155,7 +155,7 @@ export default function EngagementProfileDemo() {
               <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Engagement Information</div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <Field label="Engagement Name"><Input value="Waters Digital Platform Support" /></Field>
-                <Field label="Opportunity ID (CRM)"><Input value="OPP-2025-004512" /></Field>
+                <Field label="Opportunity ID (CRM)"><Input value="OPP-2026-004512" /></Field>
                 <Field label="Opportunity Type"><Select value="New Managed Services" /></Field>
                 <Field label="Buying Stage"><Select value="Solution Evaluation" /></Field>
                 <Field label="Scope Type"><Select value="Application Support & Operations" /></Field>
@@ -180,7 +180,7 @@ export default function EngagementProfileDemo() {
                   <Calendar className="h-3.5 w-3.5" /> Key Dates
                 </div>
                 <div className="space-y-2">
-                  {[["Target Proposal Date","Jun 30, 2025"],["Desired Start Date","Sep 01, 2025"],["Target Contract Signature","Jul 15, 2025"],["Estimated Transition Start","Sep 15, 2025"]].map(([k,v]) => (
+                  {[["Target Proposal Date","Jun 30, 2026"],["Desired Start Date","Sep 01, 2026"],["Target Contract Signature","Jul 15, 2026"],["Estimated Transition Start","Sep 15, 2026"]].map(([k,v]) => (
                     <div key={k} className="flex items-center justify-between text-[11px] border-b border-border pb-1.5 last:border-0">
                       <span className="text-muted-foreground">{k} <span className="text-rose-500">*</span></span>
                       <div className="flex items-center gap-1.5 border border-border rounded px-2 py-1 bg-slate-50 font-semibold">
@@ -253,7 +253,7 @@ export default function EngagementProfileDemo() {
               <div className="rounded-lg border bg-white p-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Engagement Summary <span className="text-[9px] text-blue-500">(AI Generated)</span></div>
                 <p className="text-[10px] text-muted-foreground leading-relaxed">
-                  Waters Corp is evaluating a managed services engagement for their Claims Processing Platform. This is a high priority strategic opportunity with target proposal by June 30, 2025 and desired start on September 1, 2025.
+                  Waters Corp is evaluating a managed services engagement for their Claims Processing Platform. This is a high priority strategic opportunity with target proposal by June 30, 2026 and desired start on September 1, 2026.
                 </p>
                 <button className="mt-1.5 text-[10px] text-blue-600 font-semibold hover:underline">View Full Summary</button>
               </div>

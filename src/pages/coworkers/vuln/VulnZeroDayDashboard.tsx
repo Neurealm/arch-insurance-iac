@@ -134,11 +134,11 @@ const heatRows: { svc: string; vals: [number, number, number, number] }[] = [
 ];
 
 const topVulns = [
-  ["CVE-2025-31324", "Critical", 287, "up"],
-  ["CVE-2025-29927", "Critical", 198, "up"],
-  ["CVE-2025-27363", "High", 176, "up"],
-  ["CVE-2025-24983", "High", 142, "down"],
-  ["CVE-2025-22457", "High", 118, "down"],
+  ["CVE-2026-31324", "Critical", 287, "up"],
+  ["CVE-2026-29927", "Critical", 198, "up"],
+  ["CVE-2026-27363", "High", 176, "up"],
+  ["CVE-2026-24983", "High", 142, "down"],
+  ["CVE-2026-22457", "High", 118, "down"],
 ] as const;
 
 const workflow = [
@@ -182,7 +182,7 @@ export default function VulnZeroDayDashboard() {
                 </div>
               </div>
               <button className="h-9 px-3 rounded-lg border border-border bg-card text-xs font-semibold flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5" /> May 20, 2025
+                <Calendar className="h-3.5 w-3.5" /> May 20, 2026
               </button>
               <button className="relative h-9 w-9 rounded-lg border border-border bg-card grid place-items-center">
                 <Bell className="h-4 w-4" />
@@ -233,14 +233,14 @@ export default function VulnZeroDayDashboard() {
                 </div>
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-500 text-white">P1</span>
               </div>
-              <div className="text-sm font-bold mt-1">Active Zero-Day: CVE-2025-31324</div>
+              <div className="text-sm font-bold mt-1">Active Zero-Day: CVE-2026-31324</div>
               <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
                 Actively exploited vulnerability in edge devices. Immediate action required.
               </p>
               <div className="mt-3 space-y-1.5 text-[11px]">
                 <Row label="Impacted Assets" value="287" />
                 <Row label="Criticality" value={<span className="text-rose-600 font-bold">Critical</span>} />
-                <Row label="First Seen" value="May 19, 2025 08:42 AM" />
+                <Row label="First Seen" value="May 19, 2026 08:42 AM" />
                 <Row label="Status" value={<span className="px-2 py-0.5 rounded bg-violet-50 text-violet-700 text-[10px] font-bold">In Progress</span>} />
               </div>
               <button className="text-[11px] font-semibold text-violet-700 mt-3 inline-flex items-center gap-1">
@@ -317,7 +317,7 @@ export default function VulnZeroDayDashboard() {
                 <div className="text-sm font-bold mb-2">Top Priorities <span className="text-[10px] font-normal text-muted-foreground">(Next 24-48 hrs)</span></div>
                 <div className="space-y-2 text-[11px]">
                   {[
-                    { p: "P1", c: "bg-rose-500", t: "Remediate CVE-2025-31324 on 287 assets" },
+                    { p: "P1", c: "bg-rose-500", t: "Remediate CVE-2026-31324 on 287 assets" },
                     { p: "P2", c: "bg-orange-500", t: "Review 22 exception requests" },
                     { p: "P3", c: "bg-amber-500", t: "Remediate high exposures in Payment Processing service" },
                   ].map((x, i) => (
@@ -338,7 +338,7 @@ export default function VulnZeroDayDashboard() {
                   {[
                     ["Exception approved for 10.0.1.25", "10:12 AM"],
                     ["Patch deployed on 56 assets", "09:58 AM"],
-                    ["New CVE-2025-29927 detected", "09:41 AM"],
+                    ["New CVE-2026-29927 detected", "09:41 AM"],
                     ["Owner assigned for 34 assets", "09:23 AM"],
                   ].map(([t, time]) => (
                     <div key={t} className="flex justify-between gap-2">
@@ -400,7 +400,7 @@ export default function VulnZeroDayDashboard() {
               <div>
                 <div className="text-[12px] font-bold">AI Insight</div>
                 <div className="text-[11px] text-muted-foreground leading-snug">
-                  Concentrate on CVE-2025-31324 and related asset groups. Remediating these will reduce your critical exposure by an estimated 42%.
+                  Concentrate on CVE-2026-31324 and related asset groups. Remediating these will reduce your critical exposure by an estimated 42%.
                 </div>
               </div>
             </div>

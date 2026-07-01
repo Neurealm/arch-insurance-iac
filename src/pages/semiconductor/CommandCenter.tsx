@@ -22,11 +22,11 @@ import { cn } from "@/lib/utils";
 type Severity = "Critical" | "High" | "Medium" | "Low";
 
 const EQUIPMENT = [
-  { id: "ETCH-217", name: "Metal Etch", severity: "Critical" as Severity, rul: 4.2, prob: 37, node: "45nm – 130nm", type: "Plasma Etch", loc: "Fab 2 · Bay 12", criticality: "HIGH", lastPm: "Apr 28, 2024", lotsAffected: 37, vendor: "Lam Research", recipe: "MTL-CU-2.1" },
-  { id: "PVD-142", name: "TiN Deposition", severity: "High" as Severity, rul: 9.1, prob: 22, node: "65nm – 180nm", type: "PVD Sputter", loc: "Fab 1 · Bay 07", criticality: "HIGH", lastPm: "May 02, 2024", lotsAffected: 21, vendor: "Applied Materials", recipe: "TIN-BAR-0.8" },
-  { id: "CMP-038", name: "Polish", severity: "Medium" as Severity, rul: 12.3, prob: 14, node: "90nm – 180nm", type: "Chemical Mech. Polish", loc: "Fab 2 · Bay 03", criticality: "MEDIUM", lastPm: "Apr 19, 2024", lotsAffected: 12, vendor: "Applied Materials", recipe: "CMP-OX-1.4" },
-  { id: "PHOTO-096", name: "Scanner", severity: "Low" as Severity, rul: 18.7, prob: 6, node: "65nm – 130nm", type: "DUV Lithography", loc: "Fab 1 · Bay 02", criticality: "MEDIUM", lastPm: "May 11, 2024", lotsAffected: 4, vendor: "ASML", recipe: "LITH-MET1-A" },
-  { id: "DIFF-011", name: "Diffusion", severity: "Low" as Severity, rul: 22.4, prob: 3, node: "130nm – 180nm", type: "Diffusion Furnace", loc: "Fab 2 · Bay 11", criticality: "LOW", lastPm: "May 09, 2024", lotsAffected: 2, vendor: "TEL", recipe: "DIFF-N2O-3" },
+  { id: "ETCH-217", name: "Metal Etch", severity: "Critical" as Severity, rul: 4.2, prob: 37, node: "45nm – 130nm", type: "Plasma Etch", loc: "Fab 2 · Bay 12", criticality: "HIGH", lastPm: "Apr 28, 2026", lotsAffected: 37, vendor: "Lam Research", recipe: "MTL-CU-2.1" },
+  { id: "PVD-142", name: "TiN Deposition", severity: "High" as Severity, rul: 9.1, prob: 22, node: "65nm – 180nm", type: "PVD Sputter", loc: "Fab 1 · Bay 07", criticality: "HIGH", lastPm: "May 02, 2026", lotsAffected: 21, vendor: "Applied Materials", recipe: "TIN-BAR-0.8" },
+  { id: "CMP-038", name: "Polish", severity: "Medium" as Severity, rul: 12.3, prob: 14, node: "90nm – 180nm", type: "Chemical Mech. Polish", loc: "Fab 2 · Bay 03", criticality: "MEDIUM", lastPm: "Apr 19, 2026", lotsAffected: 12, vendor: "Applied Materials", recipe: "CMP-OX-1.4" },
+  { id: "PHOTO-096", name: "Scanner", severity: "Low" as Severity, rul: 18.7, prob: 6, node: "65nm – 130nm", type: "DUV Lithography", loc: "Fab 1 · Bay 02", criticality: "MEDIUM", lastPm: "May 11, 2026", lotsAffected: 4, vendor: "ASML", recipe: "LITH-MET1-A" },
+  { id: "DIFF-011", name: "Diffusion", severity: "Low" as Severity, rul: 22.4, prob: 3, node: "130nm – 180nm", type: "Diffusion Furnace", loc: "Fab 2 · Bay 11", criticality: "LOW", lastPm: "May 09, 2026", lotsAffected: 2, vendor: "TEL", recipe: "DIFF-N2O-3" },
 ];
 
 const RUL_BY_EQ: Record<string, { d: string; y: number }[]> = {

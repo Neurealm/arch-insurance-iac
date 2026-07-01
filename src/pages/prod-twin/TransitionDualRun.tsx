@@ -87,10 +87,10 @@ const PHASES: { id: string; n: number; title: string; status: PhaseStatus; metri
 ];
 
 const DUAL_RUN = [
-  { id: "cgm", service: "Caregiver Mobile",   sub: "Member app, auth, APIs", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 2 Reverse Shadow", phaseTone: "blue",    status: "On Track", risk: "low" as Risk,    slo: "low" as Risk,    next: "Shadow Support", date: "Jul 15, 2025" },
-  { id: "clm", service: "Claims Processing", sub: "Claims intake, adjudication", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 1 Knowledge Capture", phaseTone: "violet", status: "On Track", risk: "medium" as Risk, slo: "high" as Risk,   next: "Reverse Shadow", date: "Jul 31, 2025" },
-  { id: "pay", service: "Payroll",            sub: "Provider payroll, payments", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 2 Reverse Shadow", phaseTone: "blue",    status: "On Track", risk: "low" as Risk,    slo: "medium" as Risk, next: "Shadow Support", date: "Jul 15, 2025" },
-  { id: "pp",  service: "Provider Portal",    sub: "Provider web portal",     cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 1 Knowledge Capture", phaseTone: "violet", status: "On Track", risk: "medium" as Risk, slo: "medium" as Risk, next: "Reverse Shadow", date: "Jul 31, 2025" },
+  { id: "cgm", service: "Caregiver Mobile",   sub: "Member app, auth, APIs", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 2 Reverse Shadow", phaseTone: "blue",    status: "On Track", risk: "low" as Risk,    slo: "low" as Risk,    next: "Shadow Support", date: "Jul 15, 2026" },
+  { id: "clm", service: "Claims Processing", sub: "Claims intake, adjudication", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 1 Knowledge Capture", phaseTone: "violet", status: "On Track", risk: "medium" as Risk, slo: "high" as Risk,   next: "Reverse Shadow", date: "Jul 31, 2026" },
+  { id: "pay", service: "Payroll",            sub: "Provider payroll, payments", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 2 Reverse Shadow", phaseTone: "blue",    status: "On Track", risk: "low" as Risk,    slo: "medium" as Risk, next: "Shadow Support", date: "Jul 15, 2026" },
+  { id: "pp",  service: "Provider Portal",    sub: "Provider web portal",     cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 1 Knowledge Capture", phaseTone: "violet", status: "On Track", risk: "medium" as Risk, slo: "medium" as Risk, next: "Reverse Shadow", date: "Jul 31, 2026" },
   { id: "idd", service: "IDD / Citrix",       sub: "Thick client environment", cur: "Incumbent", fut: "Neurealm + Client", phase: "Phase 0 Discovery Complete", phaseTone: "emerald", status: "Complete", risk: "low" as Risk, slo: "low" as Risk,   next: "Knowledge Capture", date: "Complete" },
 ];
 
@@ -129,12 +129,12 @@ const ACCESS = [
 ];
 
 const CALENDAR = [
-  { id: "c1", date: "Jun 28, 2025", label: "Knowledge Capture Complete",  status: "On Track" },
-  { id: "c2", date: "Jul 31, 2025", label: "Reverse Shadow Complete",     status: "On Track" },
-  { id: "c3", date: "Aug 15, 2025", label: "Shadow Support Begin",        status: "Planned"  },
-  { id: "c4", date: "Sep 1, 2025",  label: "Co-Run Start",                status: "Planned"  },
-  { id: "c5", date: "Oct 15, 2025", label: "Takeover Phase Start",        status: "Planned"  },
-  { id: "c6", date: "Dec 1, 2025",  label: "Stabilization Checkpoint",    status: "Planned"  },
+  { id: "c1", date: "Jun 28, 2026", label: "Knowledge Capture Complete",  status: "On Track" },
+  { id: "c2", date: "Jul 31, 2026", label: "Reverse Shadow Complete",     status: "On Track" },
+  { id: "c3", date: "Aug 15, 2026", label: "Shadow Support Begin",        status: "Planned"  },
+  { id: "c4", date: "Sep 1, 2026",  label: "Co-Run Start",                status: "Planned"  },
+  { id: "c5", date: "Oct 15, 2026", label: "Takeover Phase Start",        status: "Planned"  },
+  { id: "c6", date: "Dec 1, 2026",  label: "Stabilization Checkpoint",    status: "Planned"  },
   { id: "c7", date: "Feb 1, 2026",  label: "Modernization Acceleration",  status: "Planned"  },
 ];
 
@@ -156,11 +156,11 @@ const INSIGHTS = [
 ];
 
 const MILESTONES = [
-  { id: "m1", title: "Completed stakeholder mapping", date: "May 16, 2025", tone: "ok" },
-  { id: "m2", title: "Captured 286 runbooks",         date: "May 16, 2025", tone: "ok" },
-  { id: "m3", title: "Observed 68 critical workflows", date: "May 15, 2025", tone: "ok" },
-  { id: "m4", title: "Access delay in Datadog",       date: "May 16, 2025", tone: "warn" },
-  { id: "m5", title: "Reverse shadow sessions ongoing", date: "May 16, 2025", tone: "info" },
+  { id: "m1", title: "Completed stakeholder mapping", date: "May 16, 2026", tone: "ok" },
+  { id: "m2", title: "Captured 286 runbooks",         date: "May 16, 2026", tone: "ok" },
+  { id: "m3", title: "Observed 68 critical workflows", date: "May 15, 2026", tone: "ok" },
+  { id: "m4", title: "Access delay in Datadog",       date: "May 16, 2026", tone: "warn" },
+  { id: "m5", title: "Reverse shadow sessions ongoing", date: "May 16, 2026", tone: "info" },
 ];
 
 /* ---------------- COMPONENT ---------------- */
@@ -488,7 +488,7 @@ export default function TransitionDualRun() {
                   {CALENDAR.map((c) => (
                     <button key={c.id} onClick={() => open({ kind: "milestone", title: c.label, subtitle: c.date, data: c })} className="w-full text-left flex items-center justify-between rounded hover:bg-blue-50/40 p-1.5">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="text-[10px] text-slate-500 tabular-nums w-[68px] shrink-0">{c.date.replace(", 2025","").replace(", 2026","")}</div>
+                        <div className="text-[10px] text-slate-500 tabular-nums w-[68px] shrink-0">{c.date.replace(", 2026","").replace(", 2026","")}</div>
                         <div className="text-[11px] text-slate-800 truncate">{c.label}</div>
                       </div>
                       <Badge className={cn("h-4 text-[9px] px-1.5", c.status === "On Track" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600")}>{c.status}</Badge>

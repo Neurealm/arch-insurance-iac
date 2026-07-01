@@ -65,7 +65,7 @@ export default function VulnDashboard() {
           <div className="mt-2 text-[10px] text-rose-600">⚠ Critical + High 636 (3.5%) ▼ 21% vs last month</div>
         </Section>
         <Section title="Top Vulnerabilities (This Month)">
-          {[["CVE-2024-3094","9.8","248","18%","down"],["CVE-2024-21413","9.1","186","15%","down"],["CVE-2024-27956","8.8","162","8%","down"],["CVE-2024-23334","8.6","148","12%","down"],["CVE-2024-50379","8.1","124","5%","down"]].map(([c,s,n,t,d]:any)=>(
+          {[["CVE-2026-3094","9.8","248","18%","down"],["CVE-2026-21413","9.1","186","15%","down"],["CVE-2026-27956","8.8","162","8%","down"],["CVE-2026-23334","8.6","148","12%","down"],["CVE-2026-50379","8.1","124","5%","down"]].map(([c,s,n,t,d]:any)=>(
             <div key={c} className="flex items-center text-xs py-1 border-b last:border-0">
               <span className="flex-1">{c}</span><span className="w-10 text-right text-rose-600 font-semibold">{s}</span>
               <span className="w-10 text-right font-semibold">{n}</span>

@@ -186,10 +186,10 @@ const INVESTMENT = [
 ];
 
 const MILESTONES = [
-  { label: "Service Catalog Complete", date: "May 31, 2025", status: "On Track", tone: "bg-emerald-100 text-emerald-700" },
-  { label: "Golden Image Baseline",    date: "Jun 30, 2025", status: "On Track", tone: "bg-emerald-100 text-emerald-700" },
-  { label: "SLO Framework Live",       date: "Aug 15, 2025", status: "At Risk",  tone: "bg-amber-100 text-amber-700" },
-  { label: "DR Drill #1 Complete",     date: "Oct 15, 2025", status: "Planned",  tone: "bg-slate-100 text-slate-700" },
+  { label: "Service Catalog Complete", date: "May 31, 2026", status: "On Track", tone: "bg-emerald-100 text-emerald-700" },
+  { label: "Golden Image Baseline",    date: "Jun 30, 2026", status: "On Track", tone: "bg-emerald-100 text-emerald-700" },
+  { label: "SLO Framework Live",       date: "Aug 15, 2026", status: "At Risk",  tone: "bg-amber-100 text-amber-700" },
+  { label: "DR Drill #1 Complete",     date: "Oct 15, 2026", status: "Planned",  tone: "bg-slate-100 text-slate-700" },
   { label: "First Cloud Migration Wave", date: "Jan 15, 2026", status: "Planned", tone: "bg-slate-100 text-slate-700" },
 ];
 
@@ -496,7 +496,7 @@ export default function ModernizationRoadmap() {
           </div>
         </section>
 
-        <footer className="px-6 py-3 border-t border-slate-200 text-[11px] text-slate-400 bg-white">© 2025 Client. All rights reserved.</footer>
+        <footer className="px-6 py-3 border-t border-slate-200 text-[11px] text-slate-400 bg-white">© 2026 Client. All rights reserved.</footer>
       </div>
 
       {/* Drawer */}

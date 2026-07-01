@@ -137,7 +137,7 @@ function Header() {
       </div>
       <div className="px-6 pb-2 flex items-center justify-between text-[11px] text-slate-500">
         <div className="flex items-center gap-3">
-          <span>Data as of: <strong className="text-slate-700">Jun 23, 2025 10:24 AM EDT</strong></span>
+          <span>Data as of: <strong className="text-slate-700">Jun 23, 2026 10:24 AM EDT</strong></span>
           <span className="h-1 w-1 rounded-full bg-slate-300" />
           <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live telemetry</span>
         </div>
@@ -401,14 +401,14 @@ const PANES: Record<string, Pane> = {
       { label: "Load balancer", value: "Azure App Gateway (WAF v2)" },
     ],
     evidence: [
-      { ts: "10:14 EDT", text: "CT log entry verified · Cloudflare Nimbus 2025" },
+      { ts: "10:14 EDT", text: "CT log entry verified · Cloudflare Nimbus 2026" },
       { ts: "09:02 EDT", text: "OCSP responder healthy (DigiCert)" },
       { ts: "Yesterday", text: "SOC 2 control CC7.2 attested" },
     ],
     timeline: [
-      { ts: "Jun 30, 2025", text: "Certificate expires" },
-      { ts: "Jun 23, 2025", text: "Renewal window opened (T-7)" },
-      { ts: "Jun 20, 2024", text: "Issued by DigiCert Global Root G2" },
+      { ts: "Jun 30, 2026", text: "Certificate expires" },
+      { ts: "Jun 23, 2026", text: "Renewal window opened (T-7)" },
+      { ts: "Jun 20, 2026", text: "Issued by DigiCert Global Root G2" },
     ],
   },
   c2: {
@@ -426,7 +426,7 @@ const PANES: Record<string, Pane> = {
     actions: [{ label: "Schedule Renewal", primary: true, icon: Play }, { label: "Simulate Impact", icon: Activity }],
     technical: [{ label: "Algorithm", value: "ECDSA P-256" }, { label: "Issuer", value: "DigiCert Global Root G3" }],
     evidence: [{ ts: "08:30 EDT", text: "K8s secret synced to 18 pods" }],
-    timeline: [{ ts: "Jul 11, 2025", text: "Certificate expires" }],
+    timeline: [{ ts: "Jul 11, 2026", text: "Certificate expires" }],
   },
   c3: {
     title: "DigiCert TLS RSA 2048", badge: "Healthy", badgeTone: "low",
@@ -436,7 +436,7 @@ const PANES: Record<string, Pane> = {
     topDeps: ["Payment Service", "VM Scale Set"], coworkers: ["CertRenewal-Bot"],
     automations: [{ name: "Auto-renewal", status: "Armed" }], actions: [{ label: "View Details", primary: true }],
     technical: [{ label: "Algorithm", value: "RSA 2048" }],
-    timeline: [{ ts: "Jul 25, 2025", text: "Auto-renewal scheduled" }],
+    timeline: [{ ts: "Jul 25, 2026", text: "Auto-renewal scheduled" }],
   },
   cp: {
     title: "Customer Portal", badge: "Tier 1 Critical", badgeTone: "critical",

@@ -546,7 +546,7 @@ export default function PlatformEngineeringFactory() {
         </div>
 
         <div className="border-t border-slate-200 bg-white px-6 py-2 text-[11px] text-slate-500">
-          Last updated: May 22, 2025 · Source: Client Platform Engineering Factory
+          Last updated: May 22, 2026 · Source: Client Platform Engineering Factory
         </div>
       </div>
 

@@ -62,7 +62,7 @@ const WorkflowDetail = () => {
             <div className="text-xs text-muted-foreground"><span className="font-semibold text-foreground">Purpose:</span> Validate end-to-end patient ability to send a secure message</div>
           </div>
           <KV label="Workflow ID" value="MYCHART-SM-001" />
-          <KV label="Last Modified" value="May 10, 2025 10:15 AM" />
+          <KV label="Last Modified" value="May 10, 2026 10:15 AM" />
           <KV label="Created By" value="Digital Coworker" />
           <KV label="Synthetic Identity" value="PATIENT_SYN_01" badge />
         </div>

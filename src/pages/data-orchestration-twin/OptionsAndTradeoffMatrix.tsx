@@ -358,7 +358,7 @@ export default function OptionsAndTradeoffMatrix() {
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs text-slate-500">Last Updated <b className="text-slate-700">May 12, 2025 10:32 AM</b></span>
+            <span className="text-xs text-slate-500">Last Updated <b className="text-slate-700">May 12, 2026 10:32 AM</b></span>
             <button onClick={()=>openDrawer("Strategy Filters")} className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50">
               <Filter size={14}/> Filters
             </button>

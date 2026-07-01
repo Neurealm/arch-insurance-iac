@@ -107,10 +107,10 @@ const investment = [
 ];
 
 const milestones = [
-  { id: "m1", label: "Service Catalog Complete", date: "May 31, 2025", status: "On Track" },
-  { id: "m2", label: "Golden Image Baseline", date: "Jun 30, 2025", status: "On Track" },
-  { id: "m3", label: "SLO Framework Live", date: "Aug 15, 2025", status: "At Risk" },
-  { id: "m4", label: "DR Drill #1", date: "Oct 15, 2025", status: "Planned" },
+  { id: "m1", label: "Service Catalog Complete", date: "May 31, 2026", status: "On Track" },
+  { id: "m2", label: "Golden Image Baseline", date: "Jun 30, 2026", status: "On Track" },
+  { id: "m3", label: "SLO Framework Live", date: "Aug 15, 2026", status: "At Risk" },
+  { id: "m4", label: "DR Drill #1", date: "Oct 15, 2026", status: "Planned" },
   { id: "m5", label: "Cloud Migration Wave #1", date: "Jan 15, 2026", status: "Planned" },
   { id: "m6", label: "Acquisition Factory Launch", date: "Apr 30, 2026", status: "Planned" },
 ];

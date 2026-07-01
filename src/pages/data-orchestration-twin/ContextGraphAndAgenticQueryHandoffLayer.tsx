@@ -548,7 +548,7 @@ export default function ContextGraphAndAgenticQueryHandoffLayer(){
     "criticality": "Tier 1",
     "consumers": ["SIEM Agent", "SOAR", "Analyst Copilot"]
   },
-  "handoff_timestamp": "2025-05-12T10:30:22Z"
+  "handoff_timestamp": "2026-05-12T10:30:22Z"
 }`}
           </pre>
         </div>

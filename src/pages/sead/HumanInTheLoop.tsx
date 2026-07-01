@@ -37,7 +37,7 @@ function AppHeader() {
         <Factory className="h-4 w-4 text-sky-300" /> Fab: DFW Semiconductor Fab
       </div>
       <div className="h-11 px-3 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center gap-2 text-[12px] text-slate-300">
-        <span>May 23, 2025 10:24 AM CT</span>
+        <span>May 23, 2026 10:24 AM CT</span>
         <span className="ml-2 inline-flex items-center gap-1 text-emerald-300">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
         </span>
@@ -72,10 +72,10 @@ const impactRows = [
 ];
 
 const decisionHistory = [
-  { date: "May 21, 2025 9:12 AM", decision: "Approved", window: "May 21, 10:00 PM – May 22, 2:00 AM", conf: "91%", outcome: "Completed", reviewer: "Alex Operator", notes: "Followed recommendation" },
-  { date: "May 18, 2025 10:03 AM", decision: "Modified", window: "May 18, 10:00 PM – May 19, 2:00 AM", conf: "88%", outcome: "Completed", reviewer: "Alex Operator", notes: "Shifted 1 day due to production" },
-  { date: "May 15, 2025 8:45 AM", decision: "Approved", window: "May 15, 10:00 PM – May 16, 2:00 AM", conf: "93%", outcome: "Completed", reviewer: "Jamie Lee", notes: "Low risk, off-peak window" },
-  { date: "May 12, 2025 11:20 AM", decision: "Rejected", window: "—", conf: "85%", outcome: "Deferred", reviewer: "Jamie Lee", notes: "Decided to monitor longer" },
+  { date: "May 21, 2026 9:12 AM", decision: "Approved", window: "May 21, 10:00 PM – May 22, 2:00 AM", conf: "91%", outcome: "Completed", reviewer: "Alex Operator", notes: "Followed recommendation" },
+  { date: "May 18, 2026 10:03 AM", decision: "Modified", window: "May 18, 10:00 PM – May 19, 2:00 AM", conf: "88%", outcome: "Completed", reviewer: "Alex Operator", notes: "Shifted 1 day due to production" },
+  { date: "May 15, 2026 8:45 AM", decision: "Approved", window: "May 15, 10:00 PM – May 16, 2:00 AM", conf: "93%", outcome: "Completed", reviewer: "Jamie Lee", notes: "Low risk, off-peak window" },
+  { date: "May 12, 2026 11:20 AM", decision: "Rejected", window: "—", conf: "85%", outcome: "Deferred", reviewer: "Jamie Lee", notes: "Decided to monitor longer" },
 ];
 
 const influenceOpts = [
@@ -174,7 +174,7 @@ export default function HumanInTheLoop() {
                   <div className="leading-tight">
                     <div className="text-white text-[13px] font-semibold">Alex Operator</div>
                     <div className="text-[10.5px] text-slate-400">Role: Maintenance Manager</div>
-                    <div className="text-[10.5px] text-slate-500">May 23, 2025 10:24 AM CT</div>
+                    <div className="text-[10.5px] text-slate-500">May 23, 2026 10:24 AM CT</div>
                   </div>
                 </div>
               </div>
@@ -260,9 +260,9 @@ export default function HumanInTheLoop() {
                   <div className="text-[11.5px] text-slate-400 mb-2">If modifying, select a new window</div>
                   <div className="grid grid-cols-4 gap-3">
                     {[
-                      { l: "Start", v: "May 29, 2025", icon: Calendar },
+                      { l: "Start", v: "May 29, 2026", icon: Calendar },
                       { l: "", v: "10:00 PM", icon: Clock },
-                      { l: "End", v: "May 29, 2025", icon: Calendar },
+                      { l: "End", v: "May 29, 2026", icon: Calendar },
                       { l: "", v: "2:00 AM", icon: Clock },
                     ].map((f, i) => (
                       <div key={i}>

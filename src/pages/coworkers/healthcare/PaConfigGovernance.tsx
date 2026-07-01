@@ -26,7 +26,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Medium", tone: "yellow" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I monitor and govern prior authorization configurations across policies, systems, and vendors. I detect configuration drift, validate routing logic, and ensure accurate, timely updates to reduce defects and friction.",

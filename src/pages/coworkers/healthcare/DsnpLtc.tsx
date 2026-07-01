@@ -29,7 +29,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Low", tone: "green" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I help care teams coordinate and navigate services for Dual Eligible Special Needs Plan (D-SNP) and LTSS members. I identify needs, close care gaps, facilitate referrals, and ensure members receive the right services at the right time across all touchpoints.",

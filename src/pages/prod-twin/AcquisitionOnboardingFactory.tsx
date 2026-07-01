@@ -555,7 +555,7 @@ export default function AcquisitionOnboardingFactory() {
               <TabsContent value="overview" className="mt-3 space-y-2 text-sm">
                 <div className="grid grid-cols-2 gap-2">
                   <Field label="Business Purpose" value="Caregiver scheduling, EVV, claims" />
-                  <Field label="Acquisition Date" value="Q2 2024" />
+                  <Field label="Acquisition Date" value="Q2 2026" />
                   <Field label="Customer Impact" value="High — mission critical workflows" />
                   <Field label="Revenue Impact" value="$18M ARR" />
                   <Field label="Owner" value="VP Product Operations" />
@@ -564,7 +564,7 @@ export default function AcquisitionOnboardingFactory() {
               </TabsContent>
               <TabsContent value="arch" className="mt-3 text-sm text-slate-700">Hosting: {drawer?.data?.hosting}. Identity federated via Okta. Multi-cloud DB on Oracle + RDS Postgres. Networking via TGW.</TabsContent>
               <TabsContent value="deps" className="mt-3 text-sm text-slate-700">142 services, 612 integrations, 38 data flows mapped by Dependency Mapper.</TabsContent>
-              <TabsContent value="sec" className="mt-3 text-sm text-slate-700">EDR 88% · Identity 62% · Backup validated · 14 critical CVEs open · Recovery tested 2025-05.</TabsContent>
+              <TabsContent value="sec" className="mt-3 text-sm text-slate-700">EDR 88% · Identity 62% · Backup validated · 14 critical CVEs open · Recovery tested 2026-05.</TabsContent>
               <TabsContent value="ops" className="mt-3 text-sm text-slate-700">SLO registered for top 8 workflows. On-call integrated with Client PagerDuty. Runbooks 71% complete.</TabsContent>
               <TabsContent value="mod" className="mt-3 text-sm text-slate-700">12 modernization tracks. 4 candidates for containerization. 2 sunset candidates.</TabsContent>
               <TabsContent value="actions" className="mt-3 space-y-2">

@@ -677,9 +677,9 @@ function ReasoningDrawer({ open, onClose, scenarioId }: { open: boolean; onClose
               )}
               {tab === "Historical" && (
                 <ul className="space-y-1.5">
-                  <li>Case ETCH-203 · 2024-11 — similar leak signature, PM @ tonight window, prevented 18h unplanned downtime</li>
-                  <li>Case ETCH-211 · 2025-02 — deferred PM 9 days, resulted in chamber match failure, 22h unplanned</li>
-                  <li>Case ETCH-217 · 2024-08 — same recipe ME-28-A1, PM extended RUL by 71 days</li>
+                  <li>Case ETCH-203 · 2026-11 — similar leak signature, PM @ tonight window, prevented 18h unplanned downtime</li>
+                  <li>Case ETCH-211 · 2026-02 — deferred PM 9 days, resulted in chamber match failure, 22h unplanned</li>
+                  <li>Case ETCH-217 · 2026-08 — same recipe ME-28-A1, PM extended RUL by 71 days</li>
                 </ul>
               )}
             </div>

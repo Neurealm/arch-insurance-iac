@@ -188,7 +188,7 @@ export default function HydrationAndEnrichmentMethodSelector() {
         <div className="flex items-center gap-2 shrink-0">
           <div className="text-[11px] text-slate-500 mr-2 text-right leading-tight">
             <div>Last Updated</div>
-            <div className="font-semibold text-slate-700 tabular-nums">May 12, 2025 · 10:32 AM</div>
+            <div className="font-semibold text-slate-700 tabular-nums">May 12, 2026 · 10:32 AM</div>
           </div>
           <button className="h-9 px-3 rounded-lg border border-slate-200 text-[12px] font-medium text-slate-700 hover:bg-slate-50 inline-flex items-center gap-1.5"><Filter className="h-3.5 w-3.5" /> Filters</button>
           <button className="h-9 px-3 rounded-lg border border-slate-200 text-[12px] font-medium text-slate-700 hover:bg-slate-50 inline-flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Method Library</button>
@@ -281,7 +281,7 @@ export default function HydrationAndEnrichmentMethodSelector() {
               </div>
               <div className="font-mono text-[11px] leading-relaxed text-slate-700 space-y-0.5">
                 <div>{`{`}</div>
-                <div className="pl-3">"event_time": "2025-05-12T10:15:22Z",</div>
+                <div className="pl-3">"event_time": "2026-05-12T10:15:22Z",</div>
                 <div className="pl-3">"src_ip": "10.1.2.3",</div>
                 <div className="pl-3">"dst_ip": "52.23.10.5",</div>
                 <div className="pl-3">"action": "allow",</div>
@@ -310,7 +310,7 @@ export default function HydrationAndEnrichmentMethodSelector() {
               </div>
               <div className="font-mono text-[11px] leading-relaxed text-slate-800 space-y-0.5">
                 {[
-                  { l:`"event_time": "2025-05-12T10:15:22Z"`, kept:true },
+                  { l:`"event_time": "2026-05-12T10:15:22Z"`, kept:true },
                   { l:`"src_ip": "10.1.2.3"`, kept:true },
                   { l:`"dst_ip": "52.23.10.5"`, kept:true },
                   { l:`"action": "allow"`, kept:true },
