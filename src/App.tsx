@@ -268,6 +268,7 @@ import OptionsAndTradeoffMatrix from "./pages/data-orchestration-twin/OptionsAnd
 import ConnectorAccessGovernanceRegistry from "./pages/data-orchestration-twin/ConnectorAccessGovernanceRegistry.tsx";
 import ConnectionMethodProfile from "./pages/data-orchestration-twin/ConnectionMethodProfile.tsx";
 import FetchOrchestrationScheduler from "./pages/data-orchestration-twin/FetchOrchestrationScheduler.tsx";
+import ScheduleBuilder from "./pages/data-orchestration-twin/ScheduleBuilder.tsx";
 import SourceOnboardingFactory from "./pages/data-orchestration-twin/SourceOnboardingFactory.tsx";
 import AssistedSchemaDiscoveryAndFieldMapping from "./pages/data-orchestration-twin/AssistedSchemaDiscoveryAndFieldMapping.tsx";
 import SchemaDriftAndExceptionWorkbench from "./pages/data-orchestration-twin/SchemaDriftAndExceptionWorkbench.tsx";
@@ -478,6 +479,7 @@ const App = () => (
             <Route path="connector-access-and-governance-registry" element={<ConnectorAccessGovernanceRegistry />} />
             <Route path="connector-access-and-governance-registry/method/:slug" element={<ConnectionMethodProfile />} />
             <Route path="fetch-orchestration-scheduler" element={<FetchOrchestrationScheduler />} />
+            <Route path="fetch-orchestration-scheduler/schedule-builder/:slug" element={<ScheduleBuilder />} />
             <Route path="source-onboarding-factory" element={<SourceOnboardingFactory />} />
             <Route path="assisted-schema-discovery-and-field-mapping" element={<AssistedSchemaDiscoveryAndFieldMapping />} />
             <Route path="schema-drift-and-exception-workbench" element={<SchemaDriftAndExceptionWorkbench />} />
