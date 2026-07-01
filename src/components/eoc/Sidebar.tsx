@@ -31,6 +31,10 @@ type Node = {
   to?: string;
   badge?: string;
   badgeTone?: "critical" | "warning";
+  /** Small text pill next to label, e.g. LIVE / NEW / BETA / DRAFT. */
+  pill?: "LIVE" | "NEW" | "BETA" | "DRAFT";
+  /** Tiny status dot beside the label. */
+  statusDot?: "green" | "amber" | "red" | "blue";
   children?: Node[];
   exact?: boolean;
   /** If true, clicking the row navigates to `to` AND expands children (instead of just toggling). */
