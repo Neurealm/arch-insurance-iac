@@ -259,6 +259,7 @@ import UseCaseToDataContractMapper from "./pages/data-orchestration-twin/UseCase
 import SiteResilienceCoworker from "./pages/data-orchestration-twin/SiteResilienceCoworker.tsx";
 import LogSourceInventoryAndScopeRegistry from "./pages/data-orchestration-twin/LogSourceInventoryAndScopeRegistry.tsx";
 import DataDogLogProfile from "./pages/data-orchestration-twin/DataDogLogProfile.tsx";
+import CyberThreatIntelligenceAndIocAnalysis from "./pages/data-orchestration-twin/CyberThreatIntelligenceAndIocAnalysis.tsx";
 import DataPlacementDecisionEngine from "./pages/data-orchestration-twin/DataPlacementDecisionEngine.tsx";
 import PlacementScenarioModeler from "./pages/data-orchestration-twin/PlacementScenarioModeler.tsx";
 import NoDuplicationStrategyAndRetentionPolicy from "./pages/data-orchestration-twin/NoDuplicationStrategyAndRetentionPolicy.tsx";
@@ -468,6 +469,7 @@ const App = () => (
             <Route path="use-case-to-data-contract-mapper" element={<UseCaseToDataContractMapper />} />
             <Route path="log-source-inventory-and-scope-registry" element={<LogSourceInventoryAndScopeRegistry />} />
             <Route path="log-source-inventory-and-scope-registry/datadog-log-profile" element={<DataDogLogProfile />} />
+            <Route path="log-source-inventory-and-scope-registry/:slug/cyber-threat-intelligence" element={<CyberThreatIntelligenceAndIocAnalysis />} />
             <Route path="data-placement-and-economics-decision-engine" element={<DataPlacementDecisionEngine />} />
             <Route path="data-placement-and-economics-decision-engine/scenario/:slug" element={<PlacementScenarioModeler />} />
             <Route path="no-duplication-strategy-and-retention-policy" element={<NoDuplicationStrategyAndRetentionPolicy />} />
