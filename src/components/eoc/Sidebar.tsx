@@ -264,6 +264,7 @@ const tree: Node[] = [
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers", children: coworkerChildren },
   { key: "questionnaires", label: "Questionnaires", icon: ClipboardList, to: "/questionnaires" },
   { key: "settings",   label: "Settings",            icon: Settings,      to: "/settings", exact: true },
+  { key: "auth-orch",  label: "Auth Orchestration",  icon: ShieldCheck,   to: "/auth-orchestration" },
   { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
 ];
 
@@ -585,7 +586,7 @@ const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "itsm", "services", "coworkers", "crm"] },
-  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "settings"] },
+  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "settings", "auth-orch"] },
 ];
 
 const ADMIN_ONLY_KEYS = new Set(["questionnaires", "settings", "crm"]);
