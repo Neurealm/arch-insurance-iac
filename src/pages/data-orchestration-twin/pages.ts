@@ -7,6 +7,7 @@ export interface DoPage {
   metrics: { label: string; value: string; sub: string; tone: "emerald" | "blue" | "amber" | "rose" | "violet" }[];
   columns: { heading: string; items: string[] }[];
   workflow: string[];
+  nested?: boolean;
 }
 
 const g = (group: string) => group;
