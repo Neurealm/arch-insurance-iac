@@ -253,6 +253,7 @@ import AocpPlaceholder from "./pages/aocp/AocpPlaceholder.tsx";
 import ProdResilienceTwin from "./pages/prod-twin/ProdResilienceTwin.tsx";
 import DataOrchLayout from "./pages/data-orchestration-twin/DataOrchLayout.tsx";
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
+import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
