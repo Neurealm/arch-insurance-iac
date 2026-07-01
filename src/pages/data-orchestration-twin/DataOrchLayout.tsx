@@ -9,7 +9,10 @@ let cachedScroll = 0;
 
 export default function DataOrchLayout() {
   const location = useLocation();
-  const active = doPages.find((p) => location.pathname.endsWith(p.slug));
+  const activeIdx = doPages.findIndex((p) => location.pathname.endsWith(p.slug));
+  const active = activeIdx >= 0 ? doPages[activeIdx] : undefined;
+  const prev = activeIdx > 0 ? doPages[activeIdx - 1] : null;
+  const next = activeIdx >= 0 && activeIdx < doPages.length - 1 ? doPages[activeIdx + 1] : null;
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("dataOrch.collapsed") === "1";
