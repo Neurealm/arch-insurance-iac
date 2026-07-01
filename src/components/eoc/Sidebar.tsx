@@ -667,33 +667,92 @@ export function EocSidebar({
       <nav
         ref={navRef}
         aria-label="Sections"
-        className="sidebar-scroll flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-0.5"
+        className="sidebar-scroll flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-1"
       >
-        {visibleTree.map((node) => {
-          const label = !collapsed ? SECTION_LABELS[node.key] : undefined;
+        {!collapsed && (
+          <NavSearch tree={visibleTree} />
+        )}
+        {!collapsed && <NavFavorites tree={visibleTree} pathname={pathname} />}
+        {!collapsed && <NavRecent tree={visibleTree} pathname={pathname} />}
+
+        {(() => {
+          const byKey = new Map(visibleTree.map((n) => [n.key, n] as const));
+          const claimed = new Set<string>();
           return (
-            <div key={node.key}>
-              {label && (
-                <div className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-[0.14em] text-sidebar-foreground/50">
-                  {label}
-                </div>
-              )}
-              <SidebarNode
-                node={node}
-                depth={0}
-                parentKey="root"
-                collapsed={collapsed}
-                pathname={pathname}
-                isOpen={isOpen}
-                toggleOpen={toggleOpen}
-                togglePin={togglePin}
-                pinned={pinned}
-                persistScroll={persistNavScroll}
-              />
-            </div>
+            <>
+              {SECTIONS.map((section) => {
+                const nodes = section.keys
+                  .map((k) => byKey.get(k))
+                  .filter((n): n is Node => {
+                    if (!n) return false;
+                    claimed.add(n.key);
+                    return true;
+                  });
+                if (!nodes.length) return null;
+                return (
+                  <div key={section.label} className="pt-3">
+                    {!collapsed && (
+                      <div className="px-3 pt-2 pb-1.5 text-[10px] font-semibold tracking-[0.16em] text-sidebar-foreground/45">
+                        {section.label}
+                      </div>
+                    )}
+                    <div className="space-y-0.5">
+                      {nodes.map((node) => (
+                        <SidebarNode
+                          key={node.key}
+                          node={node}
+                          depth={0}
+                          parentKey="root"
+                          collapsed={collapsed}
+                          pathname={pathname}
+                          isOpen={isOpen}
+                          toggleOpen={toggleOpen}
+                          togglePin={togglePin}
+                          pinned={pinned}
+                          persistScroll={persistNavScroll}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Uncategorized fallback (keeps future nodes visible even if not sectioned yet) */}
+              {(() => {
+                const rest = visibleTree.filter((n) => !claimed.has(n.key));
+                if (!rest.length) return null;
+                return (
+                  <div className="pt-3">
+                    {!collapsed && (
+                      <div className="px-3 pt-2 pb-1.5 text-[10px] font-semibold tracking-[0.16em] text-sidebar-foreground/45">
+                        MORE
+                      </div>
+                    )}
+                    <div className="space-y-0.5">
+                      {rest.map((node) => (
+                        <SidebarNode
+                          key={node.key}
+                          node={node}
+                          depth={0}
+                          parentKey="root"
+                          collapsed={collapsed}
+                          pathname={pathname}
+                          isOpen={isOpen}
+                          toggleOpen={toggleOpen}
+                          togglePin={togglePin}
+                          pinned={pinned}
+                          persistScroll={persistNavScroll}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </>
           );
-        })}
+        })()}
       </nav>
+
 
       {/* Quick Actions */}
       <div className="px-3 pt-2 shrink-0">
