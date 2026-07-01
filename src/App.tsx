@@ -257,6 +257,7 @@ import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/Execu
 import UseCaseToDataContractMapper from "./pages/data-orchestration-twin/UseCaseToDataContractMapper.tsx";
 import LogSourceInventoryAndScopeRegistry from "./pages/data-orchestration-twin/LogSourceInventoryAndScopeRegistry.tsx";
 import DataPlacementDecisionEngine from "./pages/data-orchestration-twin/DataPlacementDecisionEngine.tsx";
+import NoDuplicationStrategyAndRetentionPolicy from "./pages/data-orchestration-twin/NoDuplicationStrategyAndRetentionPolicy.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
@@ -444,6 +445,7 @@ const App = () => (
             <Route path="use-case-to-data-contract-mapper" element={<UseCaseToDataContractMapper />} />
             <Route path="log-source-inventory-and-scope-registry" element={<LogSourceInventoryAndScopeRegistry />} />
             <Route path="data-placement-and-economics-decision-engine" element={<DataPlacementDecisionEngine />} />
+            <Route path="no-duplication-strategy-and-retention-policy" element={<NoDuplicationStrategyAndRetentionPolicy />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
