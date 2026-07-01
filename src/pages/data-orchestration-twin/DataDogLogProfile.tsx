@@ -28,6 +28,20 @@ const abbr = (n: number) => {
   return String(n);
 };
 
+type AutoRefresh = "30s" | "1m" | "5m";
+const AUTO_REFRESH_MS: Record<AutoRefresh, number> = {
+  "30s": 30_000,
+  "1m": 60_000,
+  "5m": 300_000,
+};
+const AUTO_REFRESH_LABEL: Record<AutoRefresh, string> = {
+  "30s": "30 seconds",
+  "1m": "1 minute",
+  "5m": "5 minutes",
+};
+const spark = (base: number, len = 20) =>
+  Array.from({ length: len }, (_, i) => ({ i, v: Math.max(0, base * (0.75 + Math.random() * 0.5)) }));
+
 const NODES = [
   { id: "sources", name: "Source Connectors", icon: Cloud, angle: 0, health: "green" },
   { id: "ingest", name: "Log Ingestion", icon: Waves, angle: 18, health: "green" },
@@ -312,20 +326,17 @@ function Scene({ onHover, hoverId }: { onHover: (id: NodeId | null) => void; hov
 
 /* ============================== Page ============================== */
 export default function DataDogLogProfile() {
-  const [now, setNow] = useState(() => new Date());
-  const [autoRefresh, setAutoRefresh] = useState<"30s" | "1m" | "5m">("5m");
+  const [lastUpdated, setLastUpdated] = useState(() => new Date());
+  const [autoRefresh, setAutoRefresh] = useState<AutoRefresh>("5m");
   const [tick, setTick] = useState(0);
   const [hoverId, setHoverId] = useState<NodeId | null>(null);
   const [drawer, setDrawer] = useState<{ title: string; kind: string } | null>(null);
 
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    const ms = autoRefresh === "30s" ? 30000 : autoRefresh === "1m" ? 60000 : 300000;
-    const t = setInterval(() => setTick((x) => x + 1), ms);
+    const t = setInterval(() => {
+      setLastUpdated(new Date());
+      setTick((x) => x + 1);
+    }, AUTO_REFRESH_MS[autoRefresh]);
     return () => clearInterval(t);
   }, [autoRefresh]);
 
@@ -346,17 +357,14 @@ export default function DataDogLogProfile() {
     queueDepth: rand(10, 800),
   }), [tick]);
 
-  const spark = (base: number, len = 20) =>
-    Array.from({ length: len }, (_, i) => ({ i, v: Math.max(0, base * (0.75 + Math.random() * 0.5)) }));
-
-  const KPIS = [
+  const KPIS = useMemo(() => [
     { label: "Logs Ingested (24h)", value: `${(tele.logs24h / 1e12).toFixed(2)} TB`, delta: `+${rand(8, 22, 1)}%`, icon: Waves, tone: "violet", data: spark(tele.logs24h) },
     { label: "Events Processed", value: abbr(tele.events), delta: `+${rand(6, 20, 1)}%`, icon: Activity, tone: "blue", data: spark(tele.events) },
     { label: "Sources Connected", value: String(tele.sources), delta: `+${rand(2, 12)}`, icon: Cloud, tone: "emerald", data: spark(tele.sources) },
     { label: "Pipelines", value: String(tele.pipelines), delta: `+${rand(1, 5)}`, icon: GitBranch, tone: "amber", data: spark(tele.pipelines) },
     { label: "Transformation Jobs", value: abbr(tele.jobs), delta: `+${rand(10, 45)}`, icon: Cpu, tone: "indigo", data: spark(tele.jobs) },
     { label: "Delivery Destinations", value: String(tele.dests), delta: `+${rand(1, 7)}`, icon: Server, tone: "rose", data: spark(tele.dests) },
-  ] as const;
+  ] as const, [tele]);
 
   const toneMap: Record<string, string> = {
     violet: "from-violet-50 to-white text-violet-700 ring-violet-200",
@@ -367,7 +375,7 @@ export default function DataDogLogProfile() {
     rose: "from-rose-50 to-white text-rose-700 ring-rose-200",
   };
 
-  const QUALITY = [
+  const QUALITY = useMemo(() => [
     { name: "Completeness", v: rand(97, 100, 1) },
     { name: "Accuracy", v: rand(95, 99, 1) },
     { name: "Consistency", v: rand(94, 99, 1) },
@@ -378,25 +386,25 @@ export default function DataDogLogProfile() {
     { name: "Schema Compliance", v: rand(98, 100, 1) },
     { name: "Freshness", v: rand(95, 99, 1) },
     { name: "Availability", v: rand(99, 100, 2) },
-  ];
-  const overallQ = Number((QUALITY.reduce((a, b) => a + b.v, 0) / QUALITY.length).toFixed(1));
+  ], [tick]);
+  const overallQ = useMemo(() => Number((QUALITY.reduce((a, b) => a + b.v, 0) / QUALITY.length).toFixed(1)), [QUALITY]);
 
-  const REFRESH = [
+  const REFRESH = useMemo(() => [
     { l: "P50", v: `${rand(1, 3)}m ${rand(10, 55)}s`, tag: "Excellent" },
     { l: "P95", v: `${rand(3, 6)}m ${rand(0, 59)}s`, tag: "Good" },
     { l: "P99", v: `${rand(6, 12)}m ${rand(0, 59)}s`, tag: "Good" },
     { l: "Avg", v: `${rand(2, 4)}m ${rand(0, 59)}s`, tag: "Excellent" },
     { l: "Longest", v: `${rand(14, 26)}m`, tag: "Watch" },
     { l: "Queue", v: String(tele.queueDepth), tag: "Live" },
-  ];
+  ], [tick, tele.queueDepth]);
 
-  const VOLUME = Array.from({ length: 30 }, (_, i) => ({
+  const VOLUME = useMemo(() => Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
     ingested: rand(1.8, 3.2, 2),
     processed: rand(1.6, 3.0, 2),
-  }));
+  })), [tick]);
 
-  const TOP_SOURCES = [
+  const TOP_SOURCES = useMemo(() => [
     { n: "kube-cluster-prod", v: rand(500, 750), p: rand(20, 30) },
     { n: "aws-cloudtrail", v: rand(350, 500), p: rand(14, 20) },
     { n: "apm-services", v: rand(400, 550), p: rand(16, 22) },
@@ -404,17 +412,61 @@ export default function DataDogLogProfile() {
     { n: "datadog-agent", v: rand(170, 260), p: rand(6, 10) },
     { n: "okta-events", v: rand(120, 200), p: rand(4, 7) },
     { n: "m365-audit", v: rand(90, 160), p: rand(3, 6) },
-  ];
+  ], [tick]);
 
   const FACETS = ["hostname", "service", "namespace", "cluster", "container", "severity", "application", "region", "availability_zone", "pod"];
+  const FACET_VALUES = useMemo(() => FACETS.slice(0, 7).map((f) => ({
+    f,
+    v: rand(1500, 14000),
+  })), [tick]);
 
-  const ANOMALIES = [
+  const ANOMALIES = useMemo(() => [
     { t: "Spike Detection", d: "Unusual error rate in payment-service", sev: "High", when: `${rand(1, 30)}m ago` },
     { t: "Missing Logs", d: "Gap detected in okta-events (12min)", sev: "High", when: `${rand(5, 45)}m ago` },
     { t: "Schema Drift", d: "New field observed in kube-apiserver", sev: "Medium", when: `${rand(10, 60)}m ago` },
     { t: "Parsing Errors", d: "JSON decode failures on nginx-ingress", sev: "Medium", when: `${rand(10, 60)}m ago` },
     { t: "Late Events", d: "Events delayed >5min from cloudtrail", sev: "Low", when: `${rand(20, 90)}m ago` },
-  ];
+  ], [tick]);
+
+  const hoverMetrics = useMemo(() => Object.fromEntries(NODES.map((n) => [n.id, {
+    records: abbr(rand(1e9, 15e9)),
+    success: `${rand(96, 100, 1)}%`,
+    latency: `${rand(30, 250)}ms`,
+    queue: String(rand(0, 200)),
+    confidence: `${rand(94, 99, 1)}%`,
+  }])), [tick]) as Record<NodeId, { records: string; success: string; latency: string; queue: string; confidence: string }>;
+
+  const volumeSummary = useMemo(() => ({
+    dailyAvg: `${rand(2.1, 2.6, 2)} TB`,
+    projected: `${rand(78, 88, 1)} TB`,
+    compression: `${tele.compression}%`,
+  }), [tick, tele.compression]);
+
+  const pipelineHealth = useMemo(() => {
+    const failed = rand(0, 2);
+    const warning = rand(2, 4);
+    const running = Math.max(0, tele.pipelines - warning - failed);
+    const total = Math.max(1, running + warning + failed);
+    return {
+      chart: [
+        { name: "Running", value: running, fill: "#10b981" },
+        { name: "Warning", value: warning, fill: "#f59e0b" },
+        { name: "Failed", value: failed, fill: "#ef4444" },
+      ],
+      rows: [
+        { dot: "#10b981", l: "Running", v: `${running} · ${((running / total) * 100).toFixed(1)}%` },
+        { dot: "#f59e0b", l: "Warning", v: `${warning} · ${((warning / total) * 100).toFixed(1)}%` },
+        { dot: "#ef4444", l: "Failed", v: `${failed} · ${((failed / total) * 100).toFixed(1)}%` },
+        { dot: "#94a3b8", l: "Avg Runtime", v: `${rand(1, 5)}m ${rand(0, 59)}s` },
+      ],
+    };
+  }, [tick, tele.pipelines]);
+
+  const drawerMetrics = useMemo(() => ({
+    costPerTb: `$${rand(38,72)}`,
+    mttrImpact: `-${rand(24,48)}%`,
+    storageSaved: `$${rand(28,64)}K / yr`,
+  }), [tick]);
 
   const AI_INSIGHTS = [
     "Schema drift detected in Kubernetes ingress logs — auto-mapping suggested.",
@@ -432,6 +484,7 @@ export default function DataDogLogProfile() {
 
   const hoverNode = hoverId ? NODES.find((n) => n.id === hoverId)! : null;
   const hoverDet = hoverId ? NODE_DETAILS[hoverId] : null;
+  const hoverLive = hoverId ? hoverMetrics[hoverId] : null;
 
   return (
     <div className="min-h-full bg-gradient-to-br from-slate-50 via-white to-violet-50/40 text-slate-900">
@@ -464,20 +517,21 @@ export default function DataDogLogProfile() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white p-1">
               <span className="text-[10px] text-slate-500 pl-2">Auto-refresh</span>
+              <span className="text-[10px] text-slate-500 pl-2 whitespace-nowrap">Auto-refresh</span>
               {(["30s","1m","5m"] as const).map((r) => (
-                <button key={r} onClick={() => setAutoRefresh(r)}
+                <button key={r} onClick={() => { setAutoRefresh(r); setLastUpdated(new Date()); setTick((x) => x + 1); }}
                   className={`text-[11px] px-2 py-1 rounded-md font-medium ${autoRefresh === r ? "bg-indigo-600 text-white" : "text-slate-600 hover:bg-slate-100"}`}>
                   {r}
                 </button>
               ))}
-              <button onClick={() => setTick((x) => x + 1)} className="ml-1 h-6 w-6 grid place-items-center rounded-md hover:bg-slate-100" title="Refresh now">
+              <button onClick={() => { setLastUpdated(new Date()); setTick((x) => x + 1); }} className="ml-1 h-6 w-6 grid place-items-center rounded-md hover:bg-slate-100" title="Refresh now">
                 <RefreshCw className="h-3 w-3 text-slate-600" />
               </button>
             </div>
             <div className="text-right">
               <div className="text-[10px] text-slate-500">Last Updated</div>
               <div className="text-[12px] font-semibold text-slate-800 tabular-nums">
-                {now.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} · {now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                {lastUpdated.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} · {lastUpdated.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
               </div>
               <div className="text-[10px] text-slate-500 mt-0.5">Env <span className="text-emerald-600 font-semibold">Production</span> · AWS us-east-1 · Azure eastus2 · GCP us-central1</div>
             </div>
@@ -576,11 +630,11 @@ export default function DataDogLogProfile() {
                 </div>
                 <p className="text-[11px] text-slate-600 leading-relaxed">{hoverDet.business}</p>
                 <div className="mt-2 grid grid-cols-2 gap-1.5 text-[10.5px]">
-                  <Mini2 l="Records Today" v={abbr(rand(1e9, 15e9))} />
-                  <Mini2 l="Success Rate" v={`${rand(96, 100, 1)}%`} />
-                  <Mini2 l="Avg Latency" v={`${rand(30, 250)}ms`} />
-                  <Mini2 l="Queue Depth" v={String(rand(0, 200))} />
-                  <Mini2 l="AI Confidence" v={`${rand(94, 99, 1)}%`} />
+                  <Mini2 l="Records Today" v={hoverLive?.records ?? "—"} />
+                  <Mini2 l="Success Rate" v={hoverLive?.success ?? "—"} />
+                  <Mini2 l="Avg Latency" v={hoverLive?.latency ?? "—"} />
+                  <Mini2 l="Queue Depth" v={hoverLive?.queue ?? "—"} />
+                  <Mini2 l="AI Confidence" v={hoverLive?.confidence ?? "—"} />
                   <Mini2 l="Owner" v={hoverDet.owner} />
                 </div>
                 <button onClick={() => setDrawer({ title: hoverNode.name, kind: "node" })}
@@ -694,9 +748,9 @@ export default function DataDogLogProfile() {
               </ResponsiveContainer>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-1.5 text-[10.5px]">
-              <Mini2 l="Daily Avg" v={`${rand(2.1, 2.6, 2)} TB`} />
-              <Mini2 l="Projected 30d" v={`${rand(78, 88, 1)} TB`} />
-              <Mini2 l="Compression" v={`${tele.compression}%`} />
+              <Mini2 l="Daily Avg" v={volumeSummary.dailyAvg} />
+              <Mini2 l="Projected 30d" v={volumeSummary.projected} />
+              <Mini2 l="Compression" v={volumeSummary.compression} />
               <Mini2 l="Hot / Cold / Archive" v="34% / 41% / 25%" />
             </div>
           </div>
@@ -722,8 +776,7 @@ export default function DataDogLogProfile() {
           {/* Top Facets */}
           <Card title="Top Parsed Fields" hint="By Cardinality">
             <div className="space-y-1.5">
-              {FACETS.slice(0, 7).map((f) => {
-                const v = rand(1500, 14000);
+              {FACET_VALUES.map(({ f, v }) => {
                 return (
                   <div key={f} className="flex items-center gap-2 text-[11px]">
                     <span className="text-slate-800 flex-1 truncate font-mono">{f}</span>
@@ -759,21 +812,14 @@ export default function DataDogLogProfile() {
               <div className="h-[110px] w-[110px]">
                 <ResponsiveContainer>
                   <PieChart>
-                    <Pie data={[
-                      { name: "Running", value: 24, fill: "#10b981" },
-                      { name: "Warning", value: 3, fill: "#f59e0b" },
-                      { name: "Failed", value: 1, fill: "#ef4444" },
-                    ]} dataKey="value" innerRadius={30} outerRadius={50} paddingAngle={2}>
+                    <Pie data={pipelineHealth.chart} dataKey="value" innerRadius={30} outerRadius={50} paddingAngle={2}>
                       <Cell />
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
               </div>
               <div className="flex-1 space-y-1 text-[11px]">
-                <Row dot="#10b981" l="Running" v={`${rand(22, 30)} · 85.7%`} />
-                <Row dot="#f59e0b" l="Warning" v={`${rand(2, 4)} · 10.7%`} />
-                <Row dot="#ef4444" l="Failed" v={`${rand(0, 2)} · 3.6%`} />
-                <Row dot="#94a3b8" l="Avg Runtime" v={`${rand(1, 5)}m ${rand(0, 59)}s`} />
+                {pipelineHealth.rows.map((r) => <Row key={r.l} dot={r.dot} l={r.l} v={r.v} />)}
               </div>
             </div>
           </Card>
@@ -803,7 +849,7 @@ export default function DataDogLogProfile() {
           <div className="flex items-center gap-2 mb-3">
             <Zap className="h-4 w-4 text-amber-300" />
             <div className="text-[13px] font-bold">Live Enterprise Telemetry Engine</div>
-            <span className="text-[10px] text-slate-400">Regenerates every {autoRefresh}</span>
+            <span className="text-[10px] text-slate-400">Data and charts refresh every {AUTO_REFRESH_LABEL[autoRefresh]}</span>
             <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-emerald-300"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> streaming</span>
           </div>
           <div className="grid grid-cols-8 gap-2">
@@ -847,9 +893,9 @@ export default function DataDogLogProfile() {
               <p><b className="text-white">Value.</b> Every improvement in parse quality, classification accuracy, and dedup ratio compounds into faster MTTR, lower storage cost, and audit-ready observability.</p>
               <div className="grid grid-cols-2 gap-2 mt-2">
                 <Mini3 l="Business Owner" v="VP Observability" />
-                <Mini3 l="Cost / TB / mo" v={`$${rand(38,72)}`} />
-                <Mini3 l="MTTR Impact" v={`-${rand(24,48)}%`} />
-                <Mini3 l="Storage Saved" v={`$${rand(28,64)}K / yr`} />
+                <Mini3 l="Cost / TB / mo" v={drawerMetrics.costPerTb} />
+                <Mini3 l="MTTR Impact" v={drawerMetrics.mttrImpact} />
+                <Mini3 l="Storage Saved" v={drawerMetrics.storageSaved} />
               </div>
             </TabsContent>
             <TabsContent value="tech" className="mt-3 text-[11.5px] text-slate-300 space-y-2">
