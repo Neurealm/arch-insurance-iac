@@ -298,10 +298,13 @@ export default function ProdResilienceTwin() {
         {/* SRE Data Orchestration */}
         <div className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-200/80 px-6 py-3">
           <div className="flex items-center gap-4">
-            <div className="shrink-0 min-w-[180px]">
-              <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">SRE Data Orchestration</div>
-              <div className="text-[11px] text-slate-600 mt-0.5">Signals feeding SRE workflows</div>
-            </div>
+            <a href="/data-orchestration-twin" className="shrink-0 min-w-[180px] group cursor-pointer">
+              <div className="text-[11px] font-semibold text-indigo-600 uppercase tracking-wide group-hover:text-indigo-700 flex items-center gap-1">
+                SRE Data Orchestration
+                <span className="text-indigo-400 group-hover:translate-x-0.5 transition-transform">→</span>
+              </div>
+              <div className="text-[11px] text-slate-600 mt-0.5 group-hover:text-slate-800">Open Data Orchestration Twin module</div>
+            </a>
             <div className="flex items-center gap-2 overflow-x-auto flex-1">
               {[
                 { label: "Telemetry Coverage", value: "97.4%", sub: "1,842 services instrumented", tone: "emerald", status: "Healthy" },
