@@ -257,7 +257,7 @@ export default function NoDuplicationStrategyAndRetentionPolicy() {
                   return (
                     <tr
                       key={r.name}
-                      onClick={() => setSelectedIdx(i)}
+                      onClick={() => { setSelectedIdx(i); navigate(`/data-orchestration-twin/no-duplication-strategy-and-retention-policy/scenario/${slugify(r.name)}`); }}
                       className={`border-b border-slate-50 cursor-pointer transition ${isSel ? "bg-blue-50/60" : "hover:bg-slate-50"}`}
                     >
                       <td className="px-3 py-2 text-slate-400 tabular-nums">{i + 1}</td>
