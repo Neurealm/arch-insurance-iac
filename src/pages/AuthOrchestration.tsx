@@ -143,7 +143,7 @@ export default function AuthOrchestration() {
 
   // Overall progress + stage sequencing
   useEffect(() => {
-    const total = 22000; // ~22s cinematic run
+    const total = 11000; // ~11s cinematic run (2× speed)
     const t = setInterval(() => {
       const elapsed = Date.now() - startedAt.current;
       const p = Math.min(100, (elapsed / total) * 100);
