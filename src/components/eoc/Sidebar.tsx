@@ -1149,10 +1149,40 @@ function SidebarNode(props: NodeProps) {
         onClick={handleRowClick}
       >
         {active && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-sidebar-primary" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r bg-sidebar-primary shadow-[0_0_10px_hsl(var(--sidebar-primary)/0.6)]" />
         )}
-        {Icon && <Icon className={cn(depth === 0 ? "h-[18px] w-[18px]" : "h-3.5 w-3.5", "shrink-0")} />}
-        <span className={cn("flex-1 text-left truncate", depth === 0 ? "font-medium" : "")}>{node.label}</span>
+        {Icon && (
+          <Icon className={cn(
+            depth === 0 ? "h-[18px] w-[18px]" : "h-3.5 w-3.5",
+            "shrink-0 transition-transform duration-200 group-hover:scale-110",
+          )} />
+        )}
+        <span className={cn("flex-1 text-left truncate", depth === 0 ? "font-semibold" : "")}>{node.label}</span>
+
+        {node.statusDot && (
+          <span
+            className={cn(
+              "h-1.5 w-1.5 rounded-full shrink-0",
+              node.statusDot === "green" && "bg-emerald-400",
+              node.statusDot === "amber" && "bg-amber-400",
+              node.statusDot === "red" && "bg-rose-400",
+              node.statusDot === "blue" && "bg-sky-400",
+            )}
+            aria-hidden
+          />
+        )}
+
+        {node.pill && (
+          <span className={cn(
+            "text-[8.5px] font-bold px-1.5 py-0.5 rounded tracking-wide shrink-0",
+            node.pill === "LIVE" && "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30",
+            node.pill === "NEW" && "bg-sky-500/20 text-sky-300 border border-sky-400/30",
+            node.pill === "BETA" && "bg-purple-500/20 text-purple-300 border border-purple-400/30",
+            node.pill === "DRAFT" && "bg-slate-500/25 text-slate-300 border border-slate-400/30",
+          )}>
+            {node.pill}
+          </span>
+        )}
 
         {node.badge && (
           <span className={cn(
@@ -1162,6 +1192,29 @@ function SidebarNode(props: NodeProps) {
             {node.badge}
           </span>
         )}
+
+        {/* Favorite star (leaves only) */}
+        {!hasChildren && node.to && (() => {
+          const fav = React.useContext(FavCtx);
+          const to = node.to;
+          if (!fav) return null;
+          const isFav = fav.isFav(to);
+          return (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); fav.toggle(to); }}
+              aria-label={isFav ? "Unpin from favorites" : "Pin to favorites"}
+              title={isFav ? "Remove from Pinned" : "Add to Pinned"}
+              className={cn(
+                "h-5 w-5 grid place-items-center rounded transition-opacity",
+                isFav ? "opacity-100 text-amber-300" : "opacity-0 group-hover:opacity-60 hover:opacity-100",
+              )}
+            >
+              <Star className={cn("h-3 w-3", isFav && "fill-current")} />
+            </button>
+          );
+        })()}
+
 
         {hasChildren && (
           <>
