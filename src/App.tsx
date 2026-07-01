@@ -256,6 +256,7 @@ import DataOrchLayout from "./pages/data-orchestration-twin/DataOrchLayout.tsx";
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
 import UseCaseToDataContractMapper from "./pages/data-orchestration-twin/UseCaseToDataContractMapper.tsx";
+import SiteResilienceCoworker from "./pages/data-orchestration-twin/SiteResilienceCoworker.tsx";
 import LogSourceInventoryAndScopeRegistry from "./pages/data-orchestration-twin/LogSourceInventoryAndScopeRegistry.tsx";
 import DataPlacementDecisionEngine from "./pages/data-orchestration-twin/DataPlacementDecisionEngine.tsx";
 import NoDuplicationStrategyAndRetentionPolicy from "./pages/data-orchestration-twin/NoDuplicationStrategyAndRetentionPolicy.tsx";
@@ -628,6 +629,7 @@ const App = () => (
           <Route path="/practice-library/cyber-security/resilience-ir" element={<ResilienceDashboard />} />
           <Route path="/settings" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
           <Route path="/auth-orchestration" element={<AuthOrchestration />} />
+          <Route path="/data-orchestration-twin/site-resilience-detect-and-isolate-network-issue" element={<SiteResilienceCoworker />} />
           <Route path="/questionnaires" element={<ProtectedRoute><Questionnaires /></ProtectedRoute>} />
           <Route path="/settings/approvals" element={<ProtectedRoute requireAdmin><UserApprovals /></ProtectedRoute>} />
           <Route path="/settings/organization" element={<ProtectedRoute requireAdmin><OrganizationLayout /></ProtectedRoute>}>
