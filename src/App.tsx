@@ -436,7 +436,8 @@ const App = () => (
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
           <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
           <Route path="/data-orchestration-twin" element={<DataOrchLayout />}>
-            <Route index element={<DataOrchPage />} />
+            <Route index element={<DataOrchExecutiveControlPlane />} />
+            <Route path="executive-control-plane" element={<DataOrchExecutiveControlPlane />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
