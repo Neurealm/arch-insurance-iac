@@ -295,6 +295,46 @@ export default function ProdResilienceTwin() {
           </div>
         </div>
 
+        {/* SRE Data Orchestration */}
+        <div className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-200/80 px-6 py-3">
+          <div className="flex items-center gap-4">
+            <div className="shrink-0 min-w-[180px]">
+              <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">SRE Data Orchestration</div>
+              <div className="text-[11px] text-slate-600 mt-0.5">Signals feeding SRE workflows</div>
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto flex-1">
+              {[
+                { label: "Telemetry Coverage", value: "97.4%", sub: "1,842 services instrumented", tone: "emerald", status: "Healthy" },
+                { label: "Pipeline Freshness", value: "14s", sub: "p95 ingest → query", tone: "emerald", status: "SLA met" },
+                { label: "Signal Quality", value: "92%", sub: "Alerts w/ actionable context", tone: "blue", status: "Trending up" },
+                { label: "Correlation Accuracy", value: "88%", sub: "Incidents auto-linked", tone: "blue", status: "Stable" },
+                { label: "Runbook Data Readiness", value: "81%", sub: "Runbooks w/ live evidence", tone: "amber", status: "Improving" },
+              ].map((k) => {
+                const toneMap: Record<string, string> = {
+                  emerald: "text-emerald-600 border-emerald-200 bg-emerald-50/60",
+                  blue: "text-blue-600 border-blue-200 bg-blue-50/60",
+                  amber: "text-amber-600 border-amber-200 bg-amber-50/60",
+                };
+                return (
+                  <button
+                    key={k.label}
+                    onClick={() => openDrawer(k.label, `SRE Data Orchestration — ${k.status}`)}
+                    className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded-lg border ${toneMap[k.tone]} hover:shadow-sm transition`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-600">{k.label}</div>
+                      <span className={`text-[9px] font-semibold ${toneMap[k.tone].split(' ')[0]}`}>{k.status}</span>
+                    </div>
+                    <div className={`text-2xl font-bold leading-tight mt-0.5 ${toneMap[k.tone].split(' ')[0]}`}>{k.value}</div>
+                    <div className="text-[10px] text-slate-500 leading-tight">{k.sub}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+
         {/* Content */}
         <div className="px-6 py-4 space-y-4">
 
