@@ -1195,26 +1195,21 @@ function SidebarNode(props: NodeProps) {
         )}
 
         {/* Favorite star (leaves only) */}
-        {!hasChildren && node.to && (() => {
-          const fav = React.useContext(FavCtx);
-          const to = node.to;
-          if (!fav) return null;
-          const isFav = fav.isFav(to);
-          return (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); fav.toggle(to); }}
-              aria-label={isFav ? "Unpin from favorites" : "Pin to favorites"}
-              title={isFav ? "Remove from Pinned" : "Add to Pinned"}
-              className={cn(
-                "h-5 w-5 grid place-items-center rounded transition-opacity",
-                isFav ? "opacity-100 text-amber-300" : "opacity-0 group-hover:opacity-60 hover:opacity-100",
-              )}
-            >
-              <Star className={cn("h-3 w-3", isFav && "fill-current")} />
-            </button>
-          );
-        })()}
+        {!hasChildren && node.to && fav && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); fav.toggle(node.to!); }}
+            aria-label={fav.isFav(node.to) ? "Unpin from favorites" : "Pin to favorites"}
+            title={fav.isFav(node.to) ? "Remove from Pinned" : "Add to Pinned"}
+            className={cn(
+              "h-5 w-5 grid place-items-center rounded transition-opacity",
+              fav.isFav(node.to) ? "opacity-100 text-amber-300" : "opacity-0 group-hover:opacity-60 hover:opacity-100",
+            )}
+          >
+            <Star className={cn("h-3 w-3", fav.isFav(node.to) && "fill-current")} />
+          </button>
+        )}
+
 
 
         {hasChildren && (
