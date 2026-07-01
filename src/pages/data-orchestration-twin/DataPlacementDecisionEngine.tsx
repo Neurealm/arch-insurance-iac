@@ -123,6 +123,7 @@ function Sparkline({ data, color = "#8b5cf6" }: { data: number[]; color?: string
 
 /* ---------------- Page ---------------- */
 export default function DataPlacementDecisionEngine() {
+  const navigate = useNavigate();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [drawer, setDrawer] = useState<null | { title: string; subtitle?: string; kind: string }>(null);
   const openDrawer = (title: string, kind: string, subtitle?: string) => setDrawer({ title, kind, subtitle });
