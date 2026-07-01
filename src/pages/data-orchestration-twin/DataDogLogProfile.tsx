@@ -234,10 +234,8 @@ const POS = {
   s3:         [ 7.6, 0.3,  2.2] as [number, number, number],
 };
 
-type NodeId =
-  | "sources" | "ingest" | "parse" | "norm" | "enrich" | "classify"
-  | "pii" | "dedup" | "schema" | "quality" | "gov" | "index"
-  | "ai" | "ml" | "alert" | "dash" | "siem" | "lake" | "cold" | "retain";
+
+
 
 function Scene({ onHover, hoverId }: { onHover: (id: NodeId | null) => void; hoverId: NodeId | null }) {
   return (
