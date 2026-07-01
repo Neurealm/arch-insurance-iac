@@ -173,6 +173,7 @@ export default function Login() {
         </Button>
       </form>
     </AuthLayout>
+    </>
   );
 }
 
