@@ -823,7 +823,10 @@ export function EocSidebar({
     setOpenByParent(keep);
   };
 
+  const favApi = useFavorites();
+
   return (
+    <FavCtx.Provider value={favApi}>
     <aside
       aria-label="Primary navigation"
       data-collapsed={collapsed ? "true" : "false"}
