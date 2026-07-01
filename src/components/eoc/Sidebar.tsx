@@ -1025,6 +1025,7 @@ export function EocSidebar({
       {/* User profile */}
       <UserPill collapsed={collapsed} />
     </aside>
+    </FavCtx.Provider>
   );
 }
 
