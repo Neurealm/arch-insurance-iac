@@ -136,48 +136,44 @@ export default function DataOrchLayout() {
       {/* Content */}
       <main className="flex-1 min-w-0">
         {/* Top bar */}
-        <div className="bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-10">
-          <div className="flex items-center gap-2 text-[11px] text-slate-500">
+        <div className="bg-white border-b border-slate-200 px-6 py-2 sticky top-0 z-10 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-[11px] text-slate-500 min-w-0">
             <Link to="/prod-resilience-twin" className="hover:text-indigo-600">Resilience Twin</Link>
             <span>/</span>
             <span className="text-slate-700 font-medium">Data Orchestration Twin</span>
             {active && (
               <>
                 <span>/</span>
-                <span className="text-indigo-600 font-semibold">{active.title}</span>
+                <span className="text-indigo-600 font-semibold truncate">{active.title}</span>
               </>
             )}
           </div>
+          {active && (prev || next) && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              {prev ? (
+                <Link
+                  to={`/data-orchestration-twin/${prev.slug}`}
+                  title={`Previous: ${prev.title}`}
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 px-2 py-1 text-[11px] text-slate-700 hover:text-indigo-700 transition max-w-[220px]"
+                >
+                  <ArrowLeft className="h-3 w-3 shrink-0" />
+                  <span className="truncate">{prev.title}</span>
+                </Link>
+              ) : null}
+              {next ? (
+                <Link
+                  to={`/data-orchestration-twin/${next.slug}`}
+                  title={`Next: ${next.title}`}
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 px-2 py-1 text-[11px] text-slate-700 hover:text-indigo-700 transition max-w-[220px]"
+                >
+                  <span className="truncate">{next.title}</span>
+                  <ArrowRight className="h-3 w-3 shrink-0" />
+                </Link>
+              ) : null}
+            </div>
+          )}
         </div>
         <Outlet />
-        {active && (prev || next) && (
-          <nav className="px-6 py-6 border-t border-slate-200 bg-white flex items-center justify-between gap-3">
-            {prev ? (
-              <Link
-                to={`/data-orchestration-twin/${prev.slug}`}
-                className="group flex-1 max-w-[46%] flex items-center gap-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 px-4 py-3 transition"
-              >
-                <ArrowLeft className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 shrink-0" />
-                <div className="min-w-0 text-left">
-                  <div className="text-[10px] font-semibold tracking-wider uppercase text-slate-500">Previous</div>
-                  <div className="text-[13px] font-semibold text-slate-900 truncate">{prev.title}</div>
-                </div>
-              </Link>
-            ) : <div className="flex-1" />}
-            {next ? (
-              <Link
-                to={`/data-orchestration-twin/${next.slug}`}
-                className="group flex-1 max-w-[46%] flex items-center justify-end gap-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 px-4 py-3 transition"
-              >
-                <div className="min-w-0 text-right">
-                  <div className="text-[10px] font-semibold tracking-wider uppercase text-slate-500">Next</div>
-                  <div className="text-[13px] font-semibold text-slate-900 truncate">{next.title}</div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 shrink-0" />
-              </Link>
-            ) : <div className="flex-1" />}
-          </nav>
-        )}
       </main>
     </div>
   );
