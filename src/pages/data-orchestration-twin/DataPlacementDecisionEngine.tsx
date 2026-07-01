@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Database, CheckCircle2, Cloud, Layers, Clock, Archive, Share2, Ban,
   Filter, Calculator, Download, RefreshCw, X, MoreVertical, Info,
@@ -122,6 +123,7 @@ function Sparkline({ data, color = "#8b5cf6" }: { data: number[]; color?: string
 
 /* ---------------- Page ---------------- */
 export default function DataPlacementDecisionEngine() {
+  const navigate = useNavigate();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [drawer, setDrawer] = useState<null | { title: string; subtitle?: string; kind: string }>(null);
   const openDrawer = (title: string, kind: string, subtitle?: string) => setDrawer({ title, kind, subtitle });
@@ -198,7 +200,7 @@ export default function DataPlacementDecisionEngine() {
         <section className="col-span-8 bg-white rounded-xl border border-slate-200 shadow-sm">
           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
             <h2 className="text-[13px] font-semibold text-slate-800">Placement Decision Matrix</h2>
-            <div className="text-[10.5px] text-slate-500">Click a row to inspect the engineering rationale</div>
+            <div className="text-[10.5px] text-slate-500">Click a row to open the scenario forecast modeler →</div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-[11.5px]">
@@ -226,7 +228,7 @@ export default function DataPlacementDecisionEngine() {
                   return (
                     <tr
                       key={r.name}
-                      onClick={() => setSelectedIdx(i)}
+                      onClick={() => { setSelectedIdx(i); navigate(`/data-orchestration-twin/data-placement-and-economics-decision-engine/scenario/${r.name}`); }}
                       className={`border-b border-slate-50 cursor-pointer transition ${isSel ? "bg-blue-50/60" : "hover:bg-slate-50"}`}
                     >
                       <td className="px-3 py-2 text-slate-400 tabular-nums">{i + 1}</td>
