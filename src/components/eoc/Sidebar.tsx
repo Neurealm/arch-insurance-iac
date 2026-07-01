@@ -1047,6 +1047,7 @@ type NodeProps = {
 function SidebarNode(props: NodeProps) {
   const { node, depth, parentKey, collapsed, pathname, isOpen, toggleOpen, togglePin, pinned, persistScroll } = props;
   const nav = useNavigate();
+  const fav = React.useContext(FavCtx);
   const Icon = node.icon;
   const hasChildren = !!node.children?.length;
   const id = `${parentKey}/${node.key}`;
