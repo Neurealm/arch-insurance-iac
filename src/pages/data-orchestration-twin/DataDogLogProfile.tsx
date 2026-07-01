@@ -516,7 +516,6 @@ export default function DataDogLogProfile() {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white p-1">
-              <span className="text-[10px] text-slate-500 pl-2">Auto-refresh</span>
               <span className="text-[10px] text-slate-500 pl-2 whitespace-nowrap">Auto-refresh</span>
               {(["30s","1m","5m"] as const).map((r) => (
                 <button key={r} onClick={() => { setAutoRefresh(r); setLastUpdated(new Date()); setTick((x) => x + 1); }}
