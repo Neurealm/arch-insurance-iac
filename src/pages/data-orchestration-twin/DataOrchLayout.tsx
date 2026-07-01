@@ -150,6 +150,34 @@ export default function DataOrchLayout() {
           </div>
         </div>
         <Outlet />
+        {active && (prev || next) && (
+          <nav className="px-6 py-6 border-t border-slate-200 bg-white flex items-center justify-between gap-3">
+            {prev ? (
+              <Link
+                to={`/data-orchestration-twin/${prev.slug}`}
+                className="group flex-1 max-w-[46%] flex items-center gap-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 px-4 py-3 transition"
+              >
+                <ArrowLeft className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 shrink-0" />
+                <div className="min-w-0 text-left">
+                  <div className="text-[10px] font-semibold tracking-wider uppercase text-slate-500">Previous</div>
+                  <div className="text-[13px] font-semibold text-slate-900 truncate">{prev.title}</div>
+                </div>
+              </Link>
+            ) : <div className="flex-1" />}
+            {next ? (
+              <Link
+                to={`/data-orchestration-twin/${next.slug}`}
+                className="group flex-1 max-w-[46%] flex items-center justify-end gap-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 px-4 py-3 transition"
+              >
+                <div className="min-w-0 text-right">
+                  <div className="text-[10px] font-semibold tracking-wider uppercase text-slate-500">Next</div>
+                  <div className="text-[13px] font-semibold text-slate-900 truncate">{next.title}</div>
+                </div>
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 shrink-0" />
+              </Link>
+            ) : <div className="flex-1" />}
+          </nav>
+        )}
       </main>
     </div>
   );
