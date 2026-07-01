@@ -471,6 +471,7 @@ const App = () => (
             <Route path="data-lineage-and-traceability-view" element={<DataLineageAndTraceabilityView />} />
             <Route path="canonical-operational-data-model" element={<CanonicalOperationalDataModel />} />
             <Route path="relationship-key-and-graph-projection-builder" element={<RelationshipKeyAndGraphProjectionBuilder />} />
+            <Route path="query-readiness-and-confidence-scorecard" element={<QueryReadinessAndConfidenceScorecard />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
