@@ -109,9 +109,9 @@ function tierColor(t: string) {
 }
 function StatChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md bg-slate-900/60 ring-1 ring-slate-700 px-2.5 py-1.5">
-      <div className="text-[9px] uppercase tracking-wider text-slate-400">{label}</div>
-      <div className="text-[12px] font-semibold text-slate-100 tabular-nums">{value}</div>
+    <div className="rounded-md bg-slate-100 ring-1 ring-slate-200 px-2.5 py-1.5">
+      <div className="text-[9px] uppercase tracking-wider text-slate-500">{label}</div>
+      <div className="text-[12px] font-semibold text-slate-900 tabular-nums">{value}</div>
     </div>
   );
 }
@@ -145,14 +145,14 @@ export default function SiteResilienceCoworker() {
 
   return (
     <AppShell>
-      <div className="min-h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100">
+      <div className="min-h-full bg-gradient-to-b from-white via-slate-50 to-white text-slate-900">
         {/* Header */}
-        <header className="px-6 pt-5 pb-4 border-b border-slate-800/70 sticky top-0 z-10 bg-slate-950/85 backdrop-blur">
+        <header className="px-6 pt-5 pb-4 border-b border-slate-200 sticky top-0 z-10 bg-white/85 backdrop-blur">
           <div className="flex items-start justify-between gap-6">
             <div>
               <Link
                 to="/data-orchestration-twin/use-case-to-data-contract-mapper"
-                className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-200 mb-2"
+                className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-200 mb-2"
               >
                 <ArrowLeft className="h-3 w-3" /> Back to Use Case Mapper
               </Link>
@@ -162,7 +162,7 @@ export default function SiteResilienceCoworker() {
               <h1 className="text-[26px] font-bold leading-tight mt-0.5">
                 Site Resilience — Detect &amp; Isolate Network Issue
               </h1>
-              <p className="text-[12px] text-slate-400 mt-1 max-w-3xl">
+              <p className="text-[12px] text-slate-500 mt-1 max-w-3xl">
                 The brain of the site-resilience coworker: everything it knows, how it reasons, what it consumes, what it can execute, and how every recommendation is derived.
               </p>
             </div>
@@ -182,17 +182,17 @@ export default function SiteResilienceCoworker() {
         <div className="p-6 space-y-5">
           {/* Executive summary */}
           <section className="grid grid-cols-12 gap-4">
-            <div className="col-span-8 rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+            <div className="col-span-8 rounded-xl bg-white ring-1 ring-slate-200 p-5">
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="h-4 w-4 text-blue-400" />
                 <h2 className="text-[13px] font-semibold">Executive Summary</h2>
               </div>
-              <p className="text-[13px] text-slate-300 leading-relaxed">
+              <p className="text-[13px] text-slate-600 leading-relaxed">
                 Automatically detect, isolate, diagnose, and orchestrate remediation for enterprise network outages before users experience disruption — across branch, campus, plant, hospital, retail, and data-center estates.
               </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {["Reduce MTTR","Reduce P1 incidents","Improve SLA","Improve UX","Reduce engineer workload","Prevent cascading failures","Improve resilience"].map((b) => (
-                  <span key={b} className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 ring-1 ring-blue-500/30">{b}</span>
+                  <span key={b} className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 ring-1 ring-blue-500/30">{b}</span>
                 ))}
               </div>
             </div>
@@ -205,16 +205,16 @@ export default function SiteResilienceCoworker() {
                 { l: "Automation Success", v: "91%" },
                 { l: "P1 Prevented / mo", v: "38" },
               ].map((k) => (
-                <div key={k.l} className="rounded-lg bg-slate-900/70 ring-1 ring-slate-800 p-3">
+                <div key={k.l} className="rounded-lg bg-white ring-1 ring-slate-200 p-3">
                   <div className="text-[9px] uppercase tracking-wider text-slate-500">{k.l}</div>
-                  <div className="text-[18px] font-bold text-slate-100 tabular-nums">{k.v}</div>
+                  <div className="text-[18px] font-bold text-slate-900 tabular-nums">{k.v}</div>
                 </div>
               ))}
             </div>
           </section>
 
           {/* Workflow */}
-          <section className="rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+          <section className="rounded-xl bg-white ring-1 ring-slate-200 p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Workflow className="h-4 w-4 text-blue-400" />
@@ -236,15 +236,15 @@ export default function SiteResilienceCoworker() {
                         ? "bg-blue-500/15 ring-blue-400/60 shadow-[0_0_0_1px_rgba(59,130,246,0.4)]"
                         : done
                         ? "bg-emerald-500/5 ring-emerald-500/25 hover:ring-emerald-400/50"
-                        : "bg-slate-800/50 ring-slate-700 hover:ring-slate-500"
+                        : "bg-slate-50 ring-slate-200 hover:ring-slate-400"
                     }`}
                   >
                     <div className="flex items-center gap-1.5">
-                      <Icon className={`h-3.5 w-3.5 ${active ? "text-blue-300" : done ? "text-emerald-400" : "text-slate-400"}`} />
+                      <Icon className={`h-3.5 w-3.5 ${active ? "text-blue-700" : done ? "text-emerald-400" : "text-slate-500"}`} />
                       <div className="text-[9px] uppercase tracking-wider text-slate-500">Step {i + 1}</div>
                     </div>
-                    <div className="mt-1 text-[11px] font-semibold text-slate-100">{s.label}</div>
-                    <div className="mt-1 h-1 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="mt-1 text-[11px] font-semibold text-slate-900">{s.label}</div>
+                    <div className="mt-1 h-1 rounded-full bg-slate-100 overflow-hidden">
                       <div
                         className={`h-full ${active ? "bg-blue-400" : done ? "bg-emerald-400" : "bg-slate-700"}`}
                         style={{ width: `${active ? 60 + (pulse % 40) : done ? 100 : 8}%` }}
@@ -258,7 +258,7 @@ export default function SiteResilienceCoworker() {
 
           {/* Row: Data Contract + Data Sources */}
           <section className="grid grid-cols-12 gap-4">
-            <div className="col-span-5 rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+            <div className="col-span-5 rounded-xl bg-white ring-1 ring-slate-200 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Database className="h-4 w-4 text-blue-400" />
                 <h2 className="text-[13px] font-semibold">Data Contract Summary</h2>
@@ -277,7 +277,7 @@ export default function SiteResilienceCoworker() {
               </div>
             </div>
 
-            <div className="col-span-7 rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+            <div className="col-span-7 rounded-xl bg-white ring-1 ring-slate-200 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Boxes className="h-4 w-4 text-blue-400" />
                 <h2 className="text-[13px] font-semibold">Data Sources</h2>
@@ -294,10 +294,10 @@ export default function SiteResilienceCoworker() {
                         title: `${src} — Connector`,
                         body: <SourceDrawer name={src} />,
                       })}
-                      className="text-left rounded-md bg-slate-800/60 ring-1 ring-slate-700 hover:ring-blue-500/40 p-2"
+                      className="text-left rounded-md bg-slate-50 ring-1 ring-slate-200 hover:ring-blue-500/40 p-2"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="text-[11px] font-medium text-slate-100 truncate">{src}</div>
+                        <div className="text-[11px] font-medium text-slate-900 truncate">{src}</div>
                         <span className={`h-1.5 w-1.5 rounded-full ${ok ? "bg-emerald-400" : "bg-amber-400"} animate-pulse`} />
                       </div>
                       <div className="mt-1 flex justify-between text-[9px] text-slate-500 tabular-nums">
@@ -313,23 +313,23 @@ export default function SiteResilienceCoworker() {
 
           {/* Reasoning + RCA */}
           <section className="grid grid-cols-12 gap-4">
-            <div className="col-span-7 rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+            <div className="col-span-7 rounded-xl bg-white ring-1 ring-slate-200 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Brain className="h-4 w-4 text-blue-400" />
                 <h2 className="text-[13px] font-semibold">AI Reasoning Engine</h2>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {REASONING_LAYERS.map((l, i) => (
-                  <div key={l.name} className="rounded-lg bg-slate-800/60 ring-1 ring-slate-700 p-2.5">
+                  <div key={l.name} className="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-2.5">
                     <div className="flex items-center justify-between">
-                      <div className="text-[11px] font-semibold text-slate-100">{i + 1}. {l.name}</div>
+                      <div className="text-[11px] font-semibold text-slate-900">{i + 1}. {l.name}</div>
                       <div className="text-[10px] text-emerald-300 tabular-nums">{l.acc}%</div>
                     </div>
-                    <div className="mt-1 flex justify-between text-[9px] text-slate-400">
+                    <div className="mt-1 flex justify-between text-[9px] text-slate-500">
                       <span>{l.model}</span>
                       <span className="tabular-nums">{l.features} feats</span>
                     </div>
-                    <div className="mt-1.5 h-1 rounded-full bg-slate-900 overflow-hidden">
+                    <div className="mt-1.5 h-1 rounded-full bg-slate-100 overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-blue-500 to-emerald-400" style={{ width: `${l.acc}%` }} />
                     </div>
                   </div>
@@ -337,7 +337,7 @@ export default function SiteResilienceCoworker() {
               </div>
             </div>
 
-            <div className="col-span-5 rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+            <div className="col-span-5 rounded-xl bg-white ring-1 ring-slate-200 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Target className="h-4 w-4 text-blue-400" />
                 <h2 className="text-[13px] font-semibold">Root Cause Models</h2>
@@ -354,14 +354,14 @@ export default function SiteResilienceCoworker() {
                         setDrawer({ title: `${r.name} — Root Cause Model`, body: <RcaDrawer name={r.name} conf={r.conf} /> });
                       }}
                       className={`w-full text-left rounded-md p-2 ring-1 ${
-                        active ? "bg-blue-500/15 ring-blue-400/60" : "bg-slate-800/50 ring-slate-700 hover:ring-slate-500"
+                        active ? "bg-blue-500/15 ring-blue-400/60" : "bg-slate-50 ring-slate-200 hover:ring-slate-400"
                       }`}
                     >
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-medium text-slate-100">{r.name}</span>
-                        <span className="tabular-nums text-slate-300">{r.conf}%</span>
+                        <span className="font-medium text-slate-900">{r.name}</span>
+                        <span className="tabular-nums text-slate-600">{r.conf}%</span>
                       </div>
-                      <div className="mt-1 h-1.5 rounded-full bg-slate-900 overflow-hidden">
+                      <div className="mt-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-rose-400 via-amber-400 to-emerald-400"
                           style={{ width: `${r.conf}%` }}
@@ -376,7 +376,7 @@ export default function SiteResilienceCoworker() {
 
           {/* Knowledge Graph + Confidence */}
           <section className="grid grid-cols-12 gap-4">
-            <div className="col-span-7 rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+            <div className="col-span-7 rounded-xl bg-white ring-1 ring-slate-200 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Network className="h-4 w-4 text-blue-400" />
                 <h2 className="text-[13px] font-semibold">Knowledge Graph</h2>
@@ -384,7 +384,7 @@ export default function SiteResilienceCoworker() {
               </div>
               <KgSvg pulse={pulse} onNode={(n) => setDrawer({ title: `${n} — Graph Node`, body: <NodeDrawer name={n} /> })} />
             </div>
-            <div className="col-span-5 rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+            <div className="col-span-5 rounded-xl bg-white ring-1 ring-slate-200 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Gauge className="h-4 w-4 text-blue-400" />
                 <h2 className="text-[13px] font-semibold">Confidence Engine</h2>
@@ -392,8 +392,8 @@ export default function SiteResilienceCoworker() {
               <ConfidenceGauge pulse={pulse} />
               <div className="mt-3 grid grid-cols-2 gap-1.5 text-[10px]">
                 {["Telemetry", "Historical Similarity", "Topology", "CMDB", "User Impact", "App Impact", "Current Health", "Data Freshness", "AI Agreement"].map((f, i) => (
-                  <div key={f} className="flex items-center justify-between rounded bg-slate-800/60 ring-1 ring-slate-700 px-2 py-1">
-                    <span className="text-slate-300">{f}</span>
+                  <div key={f} className="flex items-center justify-between rounded bg-slate-50 ring-1 ring-slate-200 px-2 py-1">
+                    <span className="text-slate-600">{f}</span>
                     <span className="tabular-nums text-emerald-300">{(88 + ((i + pulse) % 11)).toFixed(0)}%</span>
                   </div>
                 ))}
@@ -402,7 +402,7 @@ export default function SiteResilienceCoworker() {
           </section>
 
           {/* Automation Library */}
-          <section className="rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+          <section className="rounded-xl bg-white ring-1 ring-slate-200 p-5">
             <div className="flex items-center gap-2 mb-3">
               <Zap className="h-4 w-4 text-blue-400" />
               <h2 className="text-[13px] font-semibold">Automation Library</h2>
@@ -413,13 +413,13 @@ export default function SiteResilienceCoworker() {
                 <button
                   key={a.name}
                   onClick={() => setDrawer({ title: `${a.name} — Automation`, body: <AutomationDrawer a={a} /> })}
-                  className="text-left rounded-lg bg-slate-800/60 ring-1 ring-slate-700 hover:ring-blue-500/40 p-3"
+                  className="text-left rounded-lg bg-slate-50 ring-1 ring-slate-200 hover:ring-blue-500/40 p-3"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="text-[11px] font-semibold text-slate-100">{a.name}</div>
+                    <div className="text-[11px] font-semibold text-slate-900">{a.name}</div>
                     <span className={`text-[9px] uppercase px-1.5 py-0.5 rounded-full ring-1 ${tierColor(a.tier)}`}>{a.tier === "green" ? "Auto" : a.tier === "yellow" ? "Recommend" : "Approve"}</span>
                   </div>
-                  <div className="mt-1.5 grid grid-cols-3 gap-1 text-[9px] text-slate-400">
+                  <div className="mt-1.5 grid grid-cols-3 gap-1 text-[9px] text-slate-500">
                     <div><span className="text-slate-500">time </span><span className="text-slate-200 tabular-nums">{a.time}</span></div>
                     <div><span className="text-slate-500">risk </span><span className="text-slate-200 tabular-nums">{a.risk}</span></div>
                     <div><span className="text-slate-500">succ </span><span className="text-emerald-300 tabular-nums">{a.success}%</span></div>
@@ -430,17 +430,17 @@ export default function SiteResilienceCoworker() {
           </section>
 
           {/* Data Quality */}
-          <section className="rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+          <section className="rounded-xl bg-white ring-1 ring-slate-200 p-5">
             <div className="flex items-center gap-2 mb-3">
               <ShieldCheck className="h-4 w-4 text-blue-400" />
               <h2 className="text-[13px] font-semibold">Data Quality</h2>
             </div>
             <div className="grid grid-cols-8 gap-2">
               {DATA_QUALITY.map((d) => (
-                <div key={d.label} title={d.def} className="rounded-lg bg-slate-800/60 ring-1 ring-slate-700 p-2.5">
+                <div key={d.label} title={d.def} className="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-2.5">
                   <div className="text-[9px] uppercase tracking-wider text-slate-500">{d.label}</div>
-                  <div className="text-[16px] font-bold text-slate-100 tabular-nums mt-0.5">
-                    {d.value}{d.unit ? <span className="text-[10px] text-slate-400 ml-0.5">{d.unit}</span> : "%"}
+                  <div className="text-[16px] font-bold text-slate-900 tabular-nums mt-0.5">
+                    {d.value}{d.unit ? <span className="text-[10px] text-slate-500 ml-0.5">{d.unit}</span> : "%"}
                   </div>
                 </div>
               ))}
@@ -448,7 +448,7 @@ export default function SiteResilienceCoworker() {
           </section>
 
           {/* Live Telemetry */}
-          <section className="rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+          <section className="rounded-xl bg-white ring-1 ring-slate-200 p-5">
             <div className="flex items-center gap-2 mb-3">
               <Activity className="h-4 w-4 text-blue-400" />
               <h2 className="text-[13px] font-semibold">Live Enterprise Telemetry</h2>
@@ -458,14 +458,14 @@ export default function SiteResilienceCoworker() {
             </div>
             <div className="grid grid-cols-6 gap-2">
               {telemetry.rows.map((r, i) => (
-                <div key={i} className="rounded-md bg-slate-800/50 ring-1 ring-slate-700 p-2 text-[10px]">
+                <div key={i} className="rounded-md bg-slate-50 ring-1 ring-slate-200 p-2 text-[10px]">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">{r.site}</span>
+                    <span className="text-slate-500">{r.site}</span>
                     <span className={r.loss > 3 ? "text-rose-300" : r.loss > 1 ? "text-amber-300" : "text-emerald-300"}>{r.loss}% loss</span>
                   </div>
                   <div className="mt-1 text-slate-200 font-medium truncate">{r.device}</div>
                   <div className="text-slate-500">{r.isp} · {r.region}</div>
-                  <div className="mt-1 flex justify-between text-slate-400 tabular-nums">
+                  <div className="mt-1 flex justify-between text-slate-500 tabular-nums">
                     <span>{r.lat}ms</span><span>{r.bw} Gbps</span><span>cpu {r.cpu}%</span>
                   </div>
                 </div>
@@ -480,7 +480,7 @@ export default function SiteResilienceCoworker() {
           </section>
 
           {/* Success Metrics */}
-          <section className="rounded-xl bg-slate-900/70 ring-1 ring-slate-800 p-5">
+          <section className="rounded-xl bg-white ring-1 ring-slate-200 p-5">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="h-4 w-4 text-blue-400" />
               <h2 className="text-[13px] font-semibold">Success Metrics</h2>
@@ -492,9 +492,9 @@ export default function SiteResilienceCoworker() {
                 ["Financial Savings / mo","$2.7M"],["Availability","99.982%"],["Mean Confidence","98.6%"],
                 ["Incident Accuracy","96.2%"],["Continuous Learning","+2.4% MoM"],
               ].map(([l,v]) => (
-                <div key={l} className="rounded-lg bg-slate-800/60 ring-1 ring-slate-700 p-2.5">
+                <div key={l} className="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-2.5">
                   <div className="text-[9px] uppercase tracking-wider text-slate-500">{l}</div>
-                  <div className="text-[15px] font-bold text-slate-100 tabular-nums">{v}</div>
+                  <div className="text-[15px] font-bold text-slate-900 tabular-nums">{v}</div>
                 </div>
               ))}
             </div>
@@ -503,9 +503,9 @@ export default function SiteResilienceCoworker() {
 
         {/* Right engineering drawer */}
         <Sheet open={!!drawer} onOpenChange={(o) => !o && setDrawer(null)}>
-          <SheetContent side="right" className="w-[520px] sm:max-w-[520px] bg-slate-950 text-slate-100 border-l border-slate-800 overflow-y-auto">
+          <SheetContent side="right" className="w-[520px] sm:max-w-[520px] bg-white text-slate-900 border-l border-slate-200 overflow-y-auto">
             <SheetHeader>
-              <SheetTitle className="text-slate-100 flex items-center gap-2">
+              <SheetTitle className="text-slate-900 flex items-center gap-2">
                 <Cpu className="h-4 w-4 text-blue-400" />
                 {drawer?.title}
               </SheetTitle>
@@ -522,25 +522,25 @@ export default function SiteResilienceCoworker() {
 function StageDrawer({ stage }: { stage: typeof WORKFLOW_STAGES[number] }) {
   return (
     <Tabs defaultValue="exec" className="w-full">
-      <TabsList className="grid grid-cols-4 bg-slate-900 text-[11px]">
+      <TabsList className="grid grid-cols-4 bg-slate-100 text-[11px]">
         <TabsTrigger value="exec">Exec</TabsTrigger>
         <TabsTrigger value="tech">Technical</TabsTrigger>
         <TabsTrigger value="contract">Contract</TabsTrigger>
         <TabsTrigger value="ops">Ops</TabsTrigger>
       </TabsList>
-      <TabsContent value="exec" className="mt-3 space-y-2 text-[12px] text-slate-300">
+      <TabsContent value="exec" className="mt-3 space-y-2 text-[12px] text-slate-600">
         <DrawerLine k="Purpose" v={stage.desc} />
         <DrawerLine k="Business Value" v="Reduces MTTR, protects SLA, prevents cascading impact across dependent services." />
         <DrawerLine k="Owner" v="RunOps AI Platform · NetOps Guild" />
       </TabsContent>
-      <TabsContent value="tech" className="mt-3 space-y-2 text-[12px] text-slate-300">
+      <TabsContent value="tech" className="mt-3 space-y-2 text-[12px] text-slate-600">
         <DrawerLine k="Models Used" v="GNN + Transformer + XGBoost ensemble" />
         <DrawerLine k="Feature Engineering" v="Rolling entropy, sequence embeddings, topology walk features" />
         <DrawerLine k="Reasoning Chain" v="Symptom → correlated signals → dependency projection → weighted candidates → ranked cause" />
         <DrawerLine k="APIs / MCP" v="/mcp/network/isolate · /api/topology/hydrate · /mcp/rca/rank" />
       </TabsContent>
-      <TabsContent value="contract" className="mt-3 space-y-2 text-[12px] text-slate-300">
-        <pre className="text-[10px] bg-slate-900 ring-1 ring-slate-800 rounded p-3 overflow-auto">
+      <TabsContent value="contract" className="mt-3 space-y-2 text-[12px] text-slate-600">
+        <pre className="text-[10px] bg-slate-100 ring-1 ring-slate-200 rounded p-3 overflow-auto">
 {`{
   "event": "network.degradation.detected",
   "site_id": "string",
@@ -550,7 +550,7 @@ function StageDrawer({ stage }: { stage: typeof WORKFLOW_STAGES[number] }) {
 }`}
         </pre>
       </TabsContent>
-      <TabsContent value="ops" className="mt-3 space-y-2 text-[12px] text-slate-300">
+      <TabsContent value="ops" className="mt-3 space-y-2 text-[12px] text-slate-600">
         <DrawerLine k="Rollback" v="Snapshotted routing + config diff replay via NetBrain" />
         <DrawerLine k="Failure Modes" v="Partial telemetry loss, stale CMDB, conflicting change window" />
         <DrawerLine k="Audit" v="Every decision + evidence chain persisted to immutable ledger" />
@@ -561,7 +561,7 @@ function StageDrawer({ stage }: { stage: typeof WORKFLOW_STAGES[number] }) {
 
 function SourceDrawer({ name }: { name: string }) {
   return (
-    <div className="space-y-2 text-[12px] text-slate-300">
+    <div className="space-y-2 text-[12px] text-slate-600">
       <DrawerLine k="Connector" v={name} />
       <DrawerLine k="Auth" v={pick(["OAuth2", "mTLS", "API key (rotating)", "IAM role"]) as string} />
       <DrawerLine k="Refresh" v={`${rand(5, 60)}s`} />
@@ -574,7 +574,7 @@ function SourceDrawer({ name }: { name: string }) {
 
 function RcaDrawer({ name, conf }: { name: string; conf: number }) {
   return (
-    <div className="space-y-2 text-[12px] text-slate-300">
+    <div className="space-y-2 text-[12px] text-slate-600">
       <DrawerLine k="Confidence" v={`${conf}%`} />
       <DrawerLine k="Signals" v="packet loss, jitter, BGP flaps, syslog errors, tunnel state" />
       <DrawerLine k="Correlations" v="Change ledger, provider status, ThousandEyes path metrics" />
@@ -586,7 +586,7 @@ function RcaDrawer({ name, conf }: { name: string; conf: number }) {
 
 function AutomationDrawer({ a }: { a: typeof AUTOMATIONS[number] }) {
   return (
-    <div className="space-y-2 text-[12px] text-slate-300">
+    <div className="space-y-2 text-[12px] text-slate-600">
       <DrawerLine k="Automation ID" v={`auto.${a.name.toLowerCase().replace(/\s+/g, "_")}`} />
       <DrawerLine k="Approval" v={a.tier === "red" ? "Required (Change Advisory)" : a.tier === "yellow" ? "Recommend + owner ack" : "None (autonomous)"} />
       <DrawerLine k="Execution Time" v={a.time} />
@@ -599,7 +599,7 @@ function AutomationDrawer({ a }: { a: typeof AUTOMATIONS[number] }) {
 
 function NodeDrawer({ name }: { name: string }) {
   return (
-    <div className="space-y-2 text-[12px] text-slate-300">
+    <div className="space-y-2 text-[12px] text-slate-600">
       <DrawerLine k="Node" v={name} />
       <DrawerLine k="Dependencies" v="Upstream and downstream relationships mapped via CMDB + live traces" />
       <DrawerLine k="Blast Radius" v={`${rand(2, 34)} services · ${rand(120, 4200)} users`} />
@@ -611,7 +611,7 @@ function NodeDrawer({ name }: { name: string }) {
 /* ================= Small primitives ================= */
 function DrawerLine({ k, v }: { k: string; v: string }) {
   return (
-    <div className="rounded-md bg-slate-900 ring-1 ring-slate-800 p-2.5">
+    <div className="rounded-md bg-slate-100 ring-1 ring-slate-200 p-2.5">
       <div className="text-[9px] uppercase tracking-wider text-slate-500">{k}</div>
       <div className="text-slate-200 leading-relaxed">{v}</div>
     </div>
@@ -625,7 +625,7 @@ function ContractBlock({ label, text, list }: { label: string; text?: string; li
       {list && (
         <div className="flex flex-wrap gap-1">
           {list.map((x) => (
-            <span key={x} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800/70 ring-1 ring-slate-700 text-slate-300">{x}</span>
+            <span key={x} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 ring-1 ring-slate-200 text-slate-600">{x}</span>
           ))}
         </div>
       )}
@@ -634,9 +634,9 @@ function ContractBlock({ label, text, list }: { label: string; text?: string; li
 }
 function MiniStat({ l, v }: { l: string; v: string }) {
   return (
-    <div className="rounded-md bg-slate-800/60 ring-1 ring-slate-700 p-2">
+    <div className="rounded-md bg-slate-50 ring-1 ring-slate-200 p-2">
       <div className="text-[9px] uppercase tracking-wider text-slate-500">{l}</div>
-      <div className="text-[12px] text-slate-100 font-semibold tabular-nums">{v}</div>
+      <div className="text-[12px] text-slate-900 font-semibold tabular-nums">{v}</div>
     </div>
   );
 }
