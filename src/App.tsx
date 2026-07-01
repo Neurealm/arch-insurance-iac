@@ -265,6 +265,7 @@ import NoDuplicationStrategyAndRetentionPolicy from "./pages/data-orchestration-
 import NoDuplicationScenarioModeler from "./pages/data-orchestration-twin/NoDuplicationScenarioModeler.tsx";
 import OptionsAndTradeoffMatrix from "./pages/data-orchestration-twin/OptionsAndTradeoffMatrix.tsx";
 import ConnectorAccessGovernanceRegistry from "./pages/data-orchestration-twin/ConnectorAccessGovernanceRegistry.tsx";
+import ConnectionMethodProfile from "./pages/data-orchestration-twin/ConnectionMethodProfile.tsx";
 import FetchOrchestrationScheduler from "./pages/data-orchestration-twin/FetchOrchestrationScheduler.tsx";
 import SourceOnboardingFactory from "./pages/data-orchestration-twin/SourceOnboardingFactory.tsx";
 import AssistedSchemaDiscoveryAndFieldMapping from "./pages/data-orchestration-twin/AssistedSchemaDiscoveryAndFieldMapping.tsx";
@@ -473,6 +474,7 @@ const App = () => (
             <Route path="no-duplication-strategy-and-retention-policy/scenario/:slug" element={<NoDuplicationScenarioModeler />} />
             <Route path="options-and-tradeoff-matrix" element={<OptionsAndTradeoffMatrix />} />
             <Route path="connector-access-and-governance-registry" element={<ConnectorAccessGovernanceRegistry />} />
+            <Route path="connector-access-and-governance-registry/method/:slug" element={<ConnectionMethodProfile />} />
             <Route path="fetch-orchestration-scheduler" element={<FetchOrchestrationScheduler />} />
             <Route path="source-onboarding-factory" element={<SourceOnboardingFactory />} />
             <Route path="assisted-schema-discovery-and-field-mapping" element={<AssistedSchemaDiscoveryAndFieldMapping />} />

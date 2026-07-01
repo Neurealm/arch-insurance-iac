@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Plug, CheckCircle2, Lock, Users, Key, ShieldCheck, AlertTriangle, RefreshCw,
   Filter, Download, Search, Settings2, ChevronRight, Info,
@@ -128,6 +129,7 @@ function Donut({ segments, centerTitle, centerSub }: { segments: { label: string
 
 /* ---------------- Page ---------------- */
 export default function ConnectorAccessGovernanceRegistry() {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<Row>(ROWS[0]);
   const [drawer, setDrawer] = useState<{ open: boolean; title: string }>({ open: false, title: "" });
   const [q, setQ] = useState("");
@@ -202,7 +204,7 @@ export default function ConnectorAccessGovernanceRegistry() {
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <div>
               <div className="font-semibold text-slate-900">Connector &amp; Access Inventory</div>
-              <div className="text-xs text-slate-500">Click any row to load into the Governance Intelligence panel</div>
+              <div className="text-xs text-slate-500">Click any row to open its Connection Method Profile — cyber posture &amp; forecast per strategy</div>
             </div>
             <div className="text-[11px] text-slate-500">Showing {rows.length} of 122 connectors</div>
           </div>
@@ -229,7 +231,7 @@ export default function ConnectorAccessGovernanceRegistry() {
                   const t = tone[r.iconTone];
                   return (
                     <tr key={r.name}
-                      onClick={()=>setSelected(r)}
+                      onClick={()=>{ setSelected(r); navigate(`/data-orchestration-twin/connector-access-and-governance-registry/method/${r.name}`); }}
                       className={`cursor-pointer border-b border-slate-100 transition
                         ${active ? "bg-blue-50/60" : "hover:bg-slate-50"}`}>
                       <td className="px-3 py-2.5">
