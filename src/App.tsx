@@ -273,6 +273,7 @@ import RelationshipKeyAndGraphProjectionBuilder from "./pages/data-orchestration
 import QueryReadinessAndConfidenceScorecard from "./pages/data-orchestration-twin/QueryReadinessAndConfidenceScorecard.tsx";
 import PerformanceLatencyAndFreshnessLab from "./pages/data-orchestration-twin/PerformanceLatencyAndFreshnessLab.tsx";
 import ContextGraphAndAgenticQueryHandoffLayer from "./pages/data-orchestration-twin/ContextGraphAndAgenticQueryHandoffLayer.tsx";
+import DataGapRegisterAndEngineeringBacklog from "./pages/data-orchestration-twin/DataGapRegisterAndEngineeringBacklog.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
