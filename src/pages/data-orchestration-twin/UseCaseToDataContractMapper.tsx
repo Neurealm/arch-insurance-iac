@@ -232,7 +232,16 @@ export default function UseCaseToDataContractMapper() {
             <h2 className="text-[13px] font-semibold text-slate-800">1. Use Case Overview</h2>
           </div>
           <div className="p-4 border-l-4 border-blue-500 ml-3 my-2 space-y-3 text-[12px]">
-            <Row label="Use Case" value={useCase} />
+            <div className="grid grid-cols-[110px_1fr] gap-3">
+              <div className="text-slate-500">Use Case</div>
+              <Link
+                to="/data-orchestration-twin/site-resilience-detect-and-isolate-network-issue"
+                className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center gap-1 group"
+              >
+                <span className="truncate">{useCase}</span>
+                <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100 shrink-0" />
+              </Link>
+            </div>
             <Row label="Description" value="Detect degradation or outage at a site, determine impact, identify root cause and recommend isolation/remediation." wrap />
             <div>
               <div className="text-slate-500 mb-1.5">Primary Questions</div>
