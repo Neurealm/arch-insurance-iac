@@ -157,7 +157,9 @@ export default function AuthOrchestration() {
   const elapsedSec = ((Date.now() - startedAt.current) / 1000).toFixed(2);
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-white text-slate-900">
+    <AppShell>
+    <div className="relative min-h-screen flex-1 w-full overflow-hidden bg-white text-slate-900">
+
       <AmbientBackground />
 
       {/* Top bar */}
