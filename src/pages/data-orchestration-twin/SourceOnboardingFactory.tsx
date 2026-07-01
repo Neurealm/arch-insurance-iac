@@ -467,7 +467,7 @@ export default function SourceOnboardingFactory() {
                       <div className="text-[11px] text-slate-200">{r.l}</div>
                     </div>
                     <div className="mt-1 h-1 bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-indigo-400/70" style={{ width: `${60 + ((tick * 7 + i * 9) % 40)}%`, transition: "width 1.4s linear" }}/>
+                      <div className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full origin-left" style={{ width: "100%", transform: "scaleX(0)", animation: `sof-fill 3.6s ease-in-out ${i * 0.35}s infinite` }}/>
                     </div>
                   </div>
                 );
