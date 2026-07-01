@@ -228,7 +228,7 @@ export default function DataPlacementDecisionEngine() {
                   return (
                     <tr
                       key={r.name}
-                      onClick={() => setSelectedIdx(i)}
+                      onClick={() => { setSelectedIdx(i); navigate(`/data-orchestration-twin/data-placement-and-economics-decision-engine/scenario/${r.name}`); }}
                       className={`border-b border-slate-50 cursor-pointer transition ${isSel ? "bg-blue-50/60" : "hover:bg-slate-50"}`}
                     >
                       <td className="px-3 py-2 text-slate-400 tabular-nums">{i + 1}</td>
