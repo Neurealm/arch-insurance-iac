@@ -215,7 +215,7 @@ export default function SourceOnboardingFactory() {
             </div>
             <div className="grid grid-cols-8 gap-2">
               {STAGES.map((s, i) => {
-                const active = (tick + i) % 8 < 3;
+                const active = ((i - tick) % 8 + 8) % 8 < 3;
                 const Icon = s.icon;
                 return (
                   <button key={s.n} onClick={() => openDrawer(`Stage ${s.n} · ${s.l}`, "stage")}
