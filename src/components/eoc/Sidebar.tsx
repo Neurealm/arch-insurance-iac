@@ -185,6 +185,12 @@ const tree: Node[] = [
     ],
   },
   {
+    key: "sre-data-orch",
+    label: "SRE Data Orchestration",
+    icon: Database,
+    to: "/data-orchestration-twin",
+  },
+  {
     key: "runops",
     label: "RunOps Practice",
     icon: BookOpen,
