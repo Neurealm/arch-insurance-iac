@@ -128,10 +128,10 @@ const PRR = [
 
 const CADENCE = [
   { name: "Weekly SRE Review",       when: "Every Tuesday 10:00 ET",   tag: "On Track" },
-  { name: "Monthly Reliability Review", when: "Next: May 27, 2025",    tag: "On Track" },
-  { name: "Quarterly Reliability Review", when: "Next: Jul 18, 2025",  tag: "Scheduled" },
-  { name: "QBR / Leadership Review", when: "Next: Jun 10, 2025",       tag: "Scheduled" },
-  { name: "Board Readout",           when: "Next: Jun 24, 2025",       tag: "Scheduled" },
+  { name: "Monthly Reliability Review", when: "Next: May 27, 2026",    tag: "On Track" },
+  { name: "Quarterly Reliability Review", when: "Next: Jul 18, 2026",  tag: "Scheduled" },
+  { name: "QBR / Leadership Review", when: "Next: Jun 10, 2026",       tag: "Scheduled" },
+  { name: "Board Readout",           when: "Next: Jun 24, 2026",       tag: "Scheduled" },
 ];
 
 const PRODUCT_LINES = ["All Product Lines","HHA Enterprise","Sandata Fuse","SAM","Provider Pro","Pavilio","Self Direction","Generations"];
@@ -630,7 +630,7 @@ export default function SreOperatingModel() {
         </div>
 
         <div className="border-t border-slate-200 bg-white px-6 py-2 text-[11px] text-slate-500">
-          Last updated: May 16, 2025 9:30 AM ET · Source: Client Digital Twin
+          Last updated: May 16, 2026 9:30 AM ET · Source: Client Digital Twin
         </div>
       </div>
 

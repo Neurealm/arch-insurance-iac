@@ -26,7 +26,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Medium", tone: "yellow" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I monitor, validate, and optimize HIE and integration feeds to ensure timely, accurate data delivery across systems. I detect issues early, coordinate resolutions, and drive continuous reliability improvements.",

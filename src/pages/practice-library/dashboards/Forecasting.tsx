@@ -315,7 +315,7 @@ export default function Forecasting() {
           <div className="flex items-center gap-2 text-xs">
             <button className="relative px-2 py-1.5 rounded border border-slate-700 hover:bg-slate-800"><Bell className="h-4 w-4" /><span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] rounded-full px-1">3</span></button>
             <div className="px-2 py-1.5 rounded border border-slate-700 flex items-center gap-2"><Server className="h-3.5 w-3.5" /> DC1 - Ashburn</div>
-            <div className="px-2 py-1.5 rounded border border-slate-700 flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> May 20 – May 27, 2024 ▾</div>
+            <div className="px-2 py-1.5 rounded border border-slate-700 flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> May 20 – May 27, 2026 ▾</div>
             <button className="p-1.5 rounded border border-slate-700 hover:bg-slate-800"><RefreshCw className="h-4 w-4" /></button>
             <button className="px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5"><Download className="h-3.5 w-3.5" /> Export</button>
           </div>
@@ -331,8 +331,8 @@ export default function Forecasting() {
 
           {/* KPI row */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-            <Kpi icon={Calendar} iconBg="bg-blue-500/15 text-blue-400" label="Forecast Horizon" value="7" unit="Days" footer="May 20 – May 27, 2024" />
-            <Kpi icon={Activity} iconBg="bg-sky-500/15 text-sky-400" label="Predicted Peak Load" value="13.8" unit="MW" footer="May 23, 2024 2:00 PM" />
+            <Kpi icon={Calendar} iconBg="bg-blue-500/15 text-blue-400" label="Forecast Horizon" value="7" unit="Days" footer="May 20 – May 27, 2026" />
+            <Kpi icon={Activity} iconBg="bg-sky-500/15 text-sky-400" label="Predicted Peak Load" value="13.8" unit="MW" footer="May 23, 2026 2:00 PM" />
             <Kpi icon={Bolt} iconBg="bg-emerald-500/15 text-emerald-400" label="Avg. Daily Energy" value="2,845" unit="MWh" footer={<span className="text-emerald-400">↑ 3.2% <span className="text-slate-500">vs last 7 days</span></span>} />
             <Kpi icon={DollarSign} iconBg="bg-amber-500/15 text-amber-400" label="Total Cost (Forecast)" value="$247,850" footer={<span className="text-amber-400">↑ 4.8% <span className="text-slate-500">vs last 7 days</span></span>} />
             <Kpi icon={Target} iconBg="bg-violet-500/15 text-violet-400" label="Model Confidence" value="92%" footer="High" />
@@ -449,7 +449,7 @@ export default function Forecasting() {
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Data Source: <span className="text-slate-200">Integrated DCIM</span></span>
               <span>Model: <span className="text-slate-200">RunOps AI Forecasting Engine</span></span>
-              <span>Last updated: <span className="text-slate-200">May 20, 2024 10:30:15 AM EDT</span></span>
+              <span>Last updated: <span className="text-slate-200">May 20, 2026 10:30:15 AM EDT</span></span>
             </div>
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Auto-refresh: <span className="text-slate-200">On</span></span>

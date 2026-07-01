@@ -26,7 +26,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Medium", tone: "yellow" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I find documentation and coding gaps, prioritize by impact, and coordinate with providers to capture and support accurate HCC/CRG coding—improving RAF, quality, and audit readiness.",

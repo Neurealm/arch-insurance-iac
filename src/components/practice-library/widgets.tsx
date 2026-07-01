@@ -241,8 +241,8 @@ export function PageHeader({
   eyebrow,
   title,
   subtitle,
-  dateRange = "May 12 – Jun 12, 2024",
-  compareRange = "vs Apr 12 – May 12, 2024",
+  dateRange = "May 12 – Jun 12, 2026",
+  compareRange = "vs Apr 12 – May 12, 2026",
 }: {
   eyebrow?: string;
   title: string;

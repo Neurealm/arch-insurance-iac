@@ -470,7 +470,7 @@ export default function HybridCloudWorkbench() {
         </div>
 
         <div className="border-t border-slate-200 bg-white px-6 py-2 text-[11px] text-slate-500">
-          Last updated: May 22, 2025 · Source: Client Modernization Workbench
+          Last updated: May 22, 2026 · Source: Client Modernization Workbench
         </div>
       </div>
 

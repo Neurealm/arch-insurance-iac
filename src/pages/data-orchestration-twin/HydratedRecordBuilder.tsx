@@ -49,7 +49,7 @@ const METHODS: { key: MethodKey; label: string; icon: any; tone: Tone; success: 
 
 type Field = { field: string; value: string; source: string; method: MethodKey | "raw"; conf: number; ts: string; version: string; raw?: boolean; };
 const DERIVED_FIELDS: Field[] = [
-  { field:"event_time",        value:"2025-05-12T10:15:22Z",           source:"Raw Log",           method:"raw",         conf:1.00, ts:"10:15:22", version:"—",   raw:true },
+  { field:"event_time",        value:"2026-05-12T10:15:22Z",           source:"Raw Log",           method:"raw",         conf:1.00, ts:"10:15:22", version:"—",   raw:true },
   { field:"src_ip",            value:"10.1.2.3",                       source:"Raw Log",           method:"raw",         conf:1.00, ts:"10:15:22", version:"—",   raw:true },
   { field:"dst_ip",            value:"52.23.10.5",                     source:"Raw Log",           method:"raw",         conf:1.00, ts:"10:15:22", version:"—",   raw:true },
   { field:"src_port",          value:"51244",                          source:"Raw Log",           method:"raw",         conf:1.00, ts:"10:15:22", version:"—",   raw:true },
@@ -74,7 +74,7 @@ const DERIVED_FIELDS: Field[] = [
 ];
 
 const RAW_JSON = `{
-  "event_time": "2025-05-12T10:15:22.222Z",
+  "event_time": "2026-05-12T10:15:22.222Z",
   "src_ip": "10.1.2.3",
   "dst_ip": "52.23.10.5",
   "src_port": 51244,
@@ -208,7 +208,7 @@ export default function HydratedRecordBuilder() {
         <div className="flex items-center gap-2 shrink-0">
           <div className="text-[11px] text-slate-500 mr-2 text-right leading-tight">
             <div>Last Updated</div>
-            <div className="font-semibold text-slate-700 tabular-nums">May 12, 2025 · 10:32 AM</div>
+            <div className="font-semibold text-slate-700 tabular-nums">May 12, 2026 · 10:32 AM</div>
           </div>
           <select className="h-9 px-2 rounded-lg border border-slate-200 text-[12px] font-medium text-slate-700 hover:bg-slate-50">
             <option>Record: 6f3e2b90-4d25</option>

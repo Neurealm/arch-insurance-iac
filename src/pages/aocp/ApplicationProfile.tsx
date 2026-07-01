@@ -88,7 +88,7 @@ const lifecycle = [
   { phase: "Go-Live", date: "Jan 2022", status: "done" },
   { phase: "Stable", date: "Jun 2022", status: "done" },
   { phase: "Enhancements", date: "2023–24", status: "done" },
-  { phase: "Modernize", date: "2025–26", status: "active" },
+  { phase: "Modernize", date: "2026–26", status: "active" },
   { phase: "Cloud-Native", date: "2027", status: "future" },
 ];
 
@@ -253,7 +253,7 @@ export default function ApplicationProfile() {
                   ["Vendor / Owner",     "Molina Corp (Internal)"],
                   ["Business Unit",      "Claims Operations"],
                   ["Go-Live Date",       "January 2022"],
-                  ["Application ID",     "APP-2024-CPP-001"],
+                  ["Application ID",     "APP-2026-CPP-001"],
                   ["CMDB CI",            "CI-CPP-PROD-001"],
                   ["Hosting",            "Hybrid (AWS + On-Prem)"],
                 ].map(([l, v]) => (

@@ -357,9 +357,9 @@ const initiatives: Initiative[] = [
 
 /* ---------------- Customer Engagement ---------------- */
 const customerMetrics = [
-  { name: "Executive Meetings", baseline: "8/yr", target: "12/yr", actual: "14/yr", forecast: "16/yr", status: "On Track" as RAG, note: "Next: May 20, 2025" },
-  { name: "QBR Completion",      baseline: "75%",  target: "100%", actual: "100%",  forecast: "100%",  status: "On Track" as RAG, note: "Next: May 28, 2025" },
-  { name: "Steering Committee",  baseline: "Q",    target: "Monthly", actual: "Monthly", forecast: "Monthly", status: "On Track" as RAG, note: "Next: Jun 5, 2025" },
+  { name: "Executive Meetings", baseline: "8/yr", target: "12/yr", actual: "14/yr", forecast: "16/yr", status: "On Track" as RAG, note: "Next: May 20, 2026" },
+  { name: "QBR Completion",      baseline: "75%",  target: "100%", actual: "100%",  forecast: "100%",  status: "On Track" as RAG, note: "Next: May 28, 2026" },
+  { name: "Steering Committee",  baseline: "Q",    target: "Monthly", actual: "Monthly", forecast: "Monthly", status: "On Track" as RAG, note: "Next: Jun 5, 2026" },
   { name: "Open Actions",        baseline: "22",   target: "<15",  actual: "12",   forecast: "8",     status: "On Track" as RAG },
   { name: "Customer Sentiment",  baseline: "68%",  target: "85%",  actual: "92%",  forecast: "94%",   status: "On Track" as RAG, note: "Positive 4.6 / 5" },
   { name: "Relationship Health", baseline: "72%",  target: "85%",  actual: "87%",  forecast: "92%",   status: "On Track" as RAG, note: "Strong" },
@@ -585,7 +585,7 @@ export default function EngagementManagerTwin() {
                         <span className="text-emerald-700 font-bold">92%</span>
                       </div>
                       <Progress value={92} className="h-1.5 mt-1.5" />
-                      <div className="text-[10px] text-slate-400 mt-2">Insights generated: May 14, 2025 8:45 AM</div>
+                      <div className="text-[10px] text-slate-400 mt-2">Insights generated: May 14, 2026 8:45 AM</div>
                     </div>
                   </div>
                 </div>

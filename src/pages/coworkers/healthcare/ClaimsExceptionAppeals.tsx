@@ -26,7 +26,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Low", tone: "green" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I identify, analyze, and resolve claim exceptions, prepare appeals with supporting documentation, and ensure accurate application of policies to reduce rework and improve payment accuracy.",
@@ -87,7 +87,7 @@ const config: CoworkerConfig = {
       { time: "8:58 AM", tone: "green", icon: CheckCircle2, title: "Exception auto-resolved for Claim #87654321", subtitle: "Duplicate claim – policy edit applied" },
       { time: "8:52 AM", tone: "blue", icon: Info, title: "Appeal package generated for Claim #12345678", subtitle: "Medical necessity documentation attached" },
       { time: "8:46 AM", tone: "purple", icon: Mail, title: "Information request sent to provider", subtitle: "Missing diagnosis code – Claim #99887766" },
-      { time: "8:40 AM", tone: "orange", icon: AlertTriangle, title: "Policy update applied", subtitle: "New authorization rule effective 5/27/2025" },
+      { time: "8:40 AM", tone: "orange", icon: AlertTriangle, title: "Policy update applied", subtitle: "New authorization rule effective 5/27/2026" },
       { time: "8:35 AM", tone: "green", icon: CheckCircle2, title: "Appeal approved for Claim #55667788", subtitle: "Payment overturned – $8,452 recovered" },
     ],
   },

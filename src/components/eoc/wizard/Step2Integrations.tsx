@@ -23,7 +23,7 @@ const stats = [
   { label: "Connected", value: "8", sub: "67%", icon: CheckCircle2, tone: "healthy" },
   { label: "In Progress", value: "2", sub: "17%", icon: Clock, tone: "warning" },
   { label: "Not Connected", value: "2", sub: "16%", icon: XCircle, tone: "critical" },
-  { label: "Last Validation", value: "May 14, 2025 10:30 AM", sub: "View Details", icon: Calendar, tone: "muted" },
+  { label: "Last Validation", value: "May 14, 2026 10:30 AM", sub: "View Details", icon: Calendar, tone: "muted" },
 ];
 
 const toneMap: any = {
@@ -133,7 +133,7 @@ function StatusRow({ status, pct }: { status: Status; pct?: number }) {
         <div className="text-[11px] font-semibold text-status-healthy inline-flex items-center gap-1.5">
           <CheckCircle2 className="h-3.5 w-3.5" /> Connected
         </div>
-        <div className="text-[10px] text-muted-foreground mt-1">Last validated: May 14, 2025</div>
+        <div className="text-[10px] text-muted-foreground mt-1">Last validated: May 14, 2026</div>
       </div>
     );
   if (status === "progress")

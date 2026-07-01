@@ -14,7 +14,7 @@ const kpis: KPI[] = [
   { label: "Total Workloads",   value: "178",        sub: "100%",                    subColor: "text-blue-600",    icon: Database,    color: "text-blue-600",    bg: "bg-blue-50" },
   { label: "Workloads Migrated",value: "72",         sub: "40%",                     subColor: "text-emerald-600", icon: CheckCircle2,color: "text-emerald-600", bg: "bg-emerald-50" },
   { label: "Cutover Readiness (Avg.)", value: "78%", sub: "+8% vs last 7 days",      subColor: "text-emerald-600", icon: PieIcon,     color: "text-amber-600",   bg: "bg-amber-50" },
-  { label: "Est. Program Completion", value: "Aug 15, 2025", sub: "68 days remaining", subColor: "text-violet-600", icon: Calendar,   color: "text-violet-600",  bg: "bg-violet-50" },
+  { label: "Est. Program Completion", value: "Aug 15, 2026", sub: "68 days remaining", subColor: "text-violet-600", icon: Calendar,   color: "text-violet-600",  bg: "bg-violet-50" },
 ];
 
 const wwh = {
@@ -43,12 +43,12 @@ const outcomes: Outcome[] = [
 ];
 
 const waves = [
-  { w: "Wave 1", n: "Foundation & Quick Wins",     prio: "High",   pc: "bg-red-100 text-red-700",      wl: 24, status: "Completed",   sc: "bg-emerald-100 text-emerald-700", start: "Apr 15, 2025", cut: "May 5, 2025",  prog: 100, bar: "hsl(142 71% 45%)", read: 95, dot: "bg-emerald-500" },
-  { w: "Wave 2", n: "Customer Applications",       prio: "High",   pc: "bg-red-100 text-red-700",      wl: 32, status: "Completed",   sc: "bg-emerald-100 text-emerald-700", start: "May 6, 2025",  cut: "May 26, 2025", prog: 100, bar: "hsl(142 71% 45%)", read: 92, dot: "bg-emerald-500" },
-  { w: "Wave 3", n: "Business Applications",       prio: "Medium", pc: "bg-amber-100 text-amber-700",  wl: 38, status: "In Progress", sc: "bg-amber-100 text-amber-700",     start: "May 27, 2025", cut: "Jun 16, 2025", prog: 65,  bar: "hsl(38 92% 50%)",  read: 72, dot: "bg-amber-500" },
-  { w: "Wave 4", n: "Data & Analytics Platform",   prio: "Medium", pc: "bg-amber-100 text-amber-700",  wl: 34, status: "In Progress", sc: "bg-amber-100 text-amber-700",     start: "Jun 17, 2025", cut: "Jul 7, 2025",  prog: 30,  bar: "hsl(38 92% 50%)",  read: 60, dot: "bg-amber-500" },
-  { w: "Wave 5", n: "Collaboration & Productivity",prio: "Low",    pc: "bg-blue-100 text-blue-700",    wl: 28, status: "Planned",     sc: "bg-blue-100 text-blue-700",       start: "Jul 8, 2025",  cut: "Jul 28, 2025", prog: 0,   bar: "hsl(217 91% 60%)", read: null, dot: "bg-slate-300" },
-  { w: "Wave 6", n: "Long Tail & Optimization",    prio: "Low",    pc: "bg-blue-100 text-blue-700",    wl: 22, status: "Planned",     sc: "bg-blue-100 text-blue-700",       start: "Jul 29, 2025", cut: "Aug 15, 2025", prog: 0,   bar: "hsl(217 91% 60%)", read: null, dot: "bg-slate-300" },
+  { w: "Wave 1", n: "Foundation & Quick Wins",     prio: "High",   pc: "bg-red-100 text-red-700",      wl: 24, status: "Completed",   sc: "bg-emerald-100 text-emerald-700", start: "Apr 15, 2026", cut: "May 5, 2026",  prog: 100, bar: "hsl(142 71% 45%)", read: 95, dot: "bg-emerald-500" },
+  { w: "Wave 2", n: "Customer Applications",       prio: "High",   pc: "bg-red-100 text-red-700",      wl: 32, status: "Completed",   sc: "bg-emerald-100 text-emerald-700", start: "May 6, 2026",  cut: "May 26, 2026", prog: 100, bar: "hsl(142 71% 45%)", read: 92, dot: "bg-emerald-500" },
+  { w: "Wave 3", n: "Business Applications",       prio: "Medium", pc: "bg-amber-100 text-amber-700",  wl: 38, status: "In Progress", sc: "bg-amber-100 text-amber-700",     start: "May 27, 2026", cut: "Jun 16, 2026", prog: 65,  bar: "hsl(38 92% 50%)",  read: 72, dot: "bg-amber-500" },
+  { w: "Wave 4", n: "Data & Analytics Platform",   prio: "Medium", pc: "bg-amber-100 text-amber-700",  wl: 34, status: "In Progress", sc: "bg-amber-100 text-amber-700",     start: "Jun 17, 2026", cut: "Jul 7, 2026",  prog: 30,  bar: "hsl(38 92% 50%)",  read: 60, dot: "bg-amber-500" },
+  { w: "Wave 5", n: "Collaboration & Productivity",prio: "Low",    pc: "bg-blue-100 text-blue-700",    wl: 28, status: "Planned",     sc: "bg-blue-100 text-blue-700",       start: "Jul 8, 2026",  cut: "Jul 28, 2026", prog: 0,   bar: "hsl(217 91% 60%)", read: null, dot: "bg-slate-300" },
+  { w: "Wave 6", n: "Long Tail & Optimization",    prio: "Low",    pc: "bg-blue-100 text-blue-700",    wl: 22, status: "Planned",     sc: "bg-blue-100 text-blue-700",       start: "Jul 29, 2026", cut: "Aug 15, 2026", prog: 0,   bar: "hsl(217 91% 60%)", read: null, dot: "bg-slate-300" },
 ];
 
 const dep = [
@@ -79,11 +79,11 @@ const wlByWave = [
 ];
 
 const inFlight = [
-  { wl: "ERP Core",            owner: "Finance",        wave: "Wave 3", cut: "Jun 6, 2025",  prog: 70, read: 75, rc: "text-amber-600",   dot: "bg-amber-500" },
-  { wl: "CRM Platform",        owner: "Sales",          wave: "Wave 3", cut: "Jun 9, 2025",  prog: 60, read: 70, rc: "text-amber-600",   dot: "bg-amber-500" },
-  { wl: "Data Warehouse",      owner: "Data & Analytics", wave: "Wave 4", cut: "Jun 24, 2025", prog: 40, read: 62, rc: "text-amber-600", dot: "bg-amber-500" },
-  { wl: "Manufacturing System",owner: "Operations",     wave: "Wave 4", cut: "Jun 27, 2025", prog: 25, read: 55, rc: "text-amber-600",   dot: "bg-amber-500" },
-  { wl: "Supplier Portal",     owner: "Procurement",    wave: "Wave 3", cut: "Jun 11, 2025", prog: 80, read: 80, rc: "text-emerald-600", dot: "bg-emerald-500" },
+  { wl: "ERP Core",            owner: "Finance",        wave: "Wave 3", cut: "Jun 6, 2026",  prog: 70, read: 75, rc: "text-amber-600",   dot: "bg-amber-500" },
+  { wl: "CRM Platform",        owner: "Sales",          wave: "Wave 3", cut: "Jun 9, 2026",  prog: 60, read: 70, rc: "text-amber-600",   dot: "bg-amber-500" },
+  { wl: "Data Warehouse",      owner: "Data & Analytics", wave: "Wave 4", cut: "Jun 24, 2026", prog: 40, read: 62, rc: "text-amber-600", dot: "bg-amber-500" },
+  { wl: "Manufacturing System",owner: "Operations",     wave: "Wave 4", cut: "Jun 27, 2026", prog: 25, read: 55, rc: "text-amber-600",   dot: "bg-amber-500" },
+  { wl: "Supplier Portal",     owner: "Procurement",    wave: "Wave 3", cut: "Jun 11, 2026", prog: 80, read: 80, rc: "text-emerald-600", dot: "bg-emerald-500" },
 ];
 
 const readinessDist = [
@@ -93,11 +93,11 @@ const readinessDist = [
 ];
 
 const milestones = [
-  { d: "May 26, 2025", l: "Complete Wave 2 Cutover", icon: CheckCircle2, c: "text-emerald-600" },
-  { d: "Jun 16, 2025", l: "Complete Wave 3 Cutover", icon: Clock,        c: "text-amber-600" },
-  { d: "Jul 7, 2025",  l: "Complete Wave 4 Cutover", icon: Clock,        c: "text-slate-400" },
-  { d: "Jul 28, 2025", l: "Complete Wave 5 Cutover", icon: Clock,        c: "text-slate-400" },
-  { d: "Aug 15, 2025", l: "Program Completion",      icon: Flag,         c: "text-slate-400" },
+  { d: "May 26, 2026", l: "Complete Wave 2 Cutover", icon: CheckCircle2, c: "text-emerald-600" },
+  { d: "Jun 16, 2026", l: "Complete Wave 3 Cutover", icon: Clock,        c: "text-amber-600" },
+  { d: "Jul 7, 2026",  l: "Complete Wave 4 Cutover", icon: Clock,        c: "text-slate-400" },
+  { d: "Jul 28, 2026", l: "Complete Wave 5 Cutover", icon: Clock,        c: "text-slate-400" },
+  { d: "Aug 15, 2026", l: "Program Completion",      icon: Flag,         c: "text-slate-400" },
 ];
 
 export default function MigrationWavePlanning() {

@@ -75,14 +75,14 @@ const FAILURE_PROB = [
 ];
 
 const KHI = [
-  { name: "Chamber Pressure Stability", val: "2.1%", trend: "down", status: "Good", color: "#22c55e", base: "1.8%", warn: "3.0%", crit: "5.0%", cal: "May 02, 2025", spark: [2.4, 2.3, 2.2, 2.1, 2.0, 2.0, 2.1], sparkColor: "#22c55e" },
-  { name: "Vacuum Pump Vibration (X)", val: "2.8 mm/s", trend: "up", status: "Fair", color: "#f59e0b", base: "1.9", warn: "2.5", crit: "4.0", cal: "Apr 18, 2025", spark: [2.1, 2.2, 2.4, 2.5, 2.6, 2.7, 2.8], sparkColor: "#f59e0b", deltaText: "+18%", deltaColor: "text-rose-400" },
-  { name: "He Helium Leak Rate", val: "3.2 sccm", trend: "up", status: "Fair", color: "#f59e0b", base: "2.4", warn: "3.5", crit: "5.5", cal: "May 12, 2025", spark: [2.6, 2.7, 2.9, 3.0, 3.1, 3.2, 3.2], sparkColor: "#f59e0b", deltaText: "+12%", deltaColor: "text-rose-400" },
-  { name: "Electrode Temperature", val: "41.2 °C", trend: "flat", status: "Good", color: "#22c55e", base: "40.0", warn: "48.0", crit: "55.0", cal: "May 09, 2025", spark: [40.8, 41.0, 41.1, 41.0, 41.2, 41.1, 41.2], sparkColor: "#22c55e", deltaText: "+2%", deltaColor: "text-emerald-400" },
-  { name: "RF Power Stability", val: "96.4%", trend: "down", status: "Poor", color: "#ef4444", base: "99.1%", warn: "98.0%", crit: "97.0%", cal: "Apr 30, 2025", spark: [98.8, 98.5, 98.0, 97.5, 97.0, 96.7, 96.4], sparkColor: "#ef4444", deltaText: "-5%", deltaColor: "text-rose-400" },
-  { name: "Gas Flow Stability (Cl2)", val: "98.6%", trend: "flat", status: "Good", color: "#22c55e", base: "98.5%", warn: "97.0%", crit: "95.0%", cal: "May 15, 2025", spark: [98.5, 98.6, 98.5, 98.7, 98.6, 98.6, 98.6], sparkColor: "#22c55e", deltaText: "+1%", deltaColor: "text-emerald-400" },
-  { name: "ESC Throttle Valve Cycles", val: "2.3K", trend: "up", status: "Fair", color: "#f59e0b", base: "1.8K", warn: "2.5K", crit: "3.5K", cal: "Mar 22, 2025", spark: [1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.3], sparkColor: "#f59e0b", deltaText: "+22%", deltaColor: "text-rose-400" },
-  { name: "Chiller Delta T", val: "2.1 °C", trend: "flat", status: "Good", color: "#22c55e", base: "2.0", warn: "3.5", crit: "5.0", cal: "May 10, 2025", spark: [2.0, 2.1, 2.0, 2.1, 2.1, 2.0, 2.1], sparkColor: "#22c55e", deltaText: "+3%", deltaColor: "text-emerald-400" },
+  { name: "Chamber Pressure Stability", val: "2.1%", trend: "down", status: "Good", color: "#22c55e", base: "1.8%", warn: "3.0%", crit: "5.0%", cal: "May 02, 2026", spark: [2.4, 2.3, 2.2, 2.1, 2.0, 2.0, 2.1], sparkColor: "#22c55e" },
+  { name: "Vacuum Pump Vibration (X)", val: "2.8 mm/s", trend: "up", status: "Fair", color: "#f59e0b", base: "1.9", warn: "2.5", crit: "4.0", cal: "Apr 18, 2026", spark: [2.1, 2.2, 2.4, 2.5, 2.6, 2.7, 2.8], sparkColor: "#f59e0b", deltaText: "+18%", deltaColor: "text-rose-400" },
+  { name: "He Helium Leak Rate", val: "3.2 sccm", trend: "up", status: "Fair", color: "#f59e0b", base: "2.4", warn: "3.5", crit: "5.5", cal: "May 12, 2026", spark: [2.6, 2.7, 2.9, 3.0, 3.1, 3.2, 3.2], sparkColor: "#f59e0b", deltaText: "+12%", deltaColor: "text-rose-400" },
+  { name: "Electrode Temperature", val: "41.2 °C", trend: "flat", status: "Good", color: "#22c55e", base: "40.0", warn: "48.0", crit: "55.0", cal: "May 09, 2026", spark: [40.8, 41.0, 41.1, 41.0, 41.2, 41.1, 41.2], sparkColor: "#22c55e", deltaText: "+2%", deltaColor: "text-emerald-400" },
+  { name: "RF Power Stability", val: "96.4%", trend: "down", status: "Poor", color: "#ef4444", base: "99.1%", warn: "98.0%", crit: "97.0%", cal: "Apr 30, 2026", spark: [98.8, 98.5, 98.0, 97.5, 97.0, 96.7, 96.4], sparkColor: "#ef4444", deltaText: "-5%", deltaColor: "text-rose-400" },
+  { name: "Gas Flow Stability (Cl2)", val: "98.6%", trend: "flat", status: "Good", color: "#22c55e", base: "98.5%", warn: "97.0%", crit: "95.0%", cal: "May 15, 2026", spark: [98.5, 98.6, 98.5, 98.7, 98.6, 98.6, 98.6], sparkColor: "#22c55e", deltaText: "+1%", deltaColor: "text-emerald-400" },
+  { name: "ESC Throttle Valve Cycles", val: "2.3K", trend: "up", status: "Fair", color: "#f59e0b", base: "1.8K", warn: "2.5K", crit: "3.5K", cal: "Mar 22, 2026", spark: [1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.3], sparkColor: "#f59e0b", deltaText: "+22%", deltaColor: "text-rose-400" },
+  { name: "Chiller Delta T", val: "2.1 °C", trend: "flat", status: "Good", color: "#22c55e", base: "2.0", warn: "3.5", crit: "5.0", cal: "May 10, 2026", spark: [2.0, 2.1, 2.0, 2.1, 2.1, 2.0, 2.1], sparkColor: "#22c55e", deltaText: "+3%", deltaColor: "text-emerald-400" },
 ];
 
 const RECENT_ALARMS = [
@@ -93,10 +93,10 @@ const RECENT_ALARMS = [
 ];
 
 const MAINTENANCE = [
-  { icon: Wrench, title: "Preventive Maintenance", sub: "ESC & Valve Calibration", date: "May 21, 2025", ago: "2 days ago", status: "Completed" },
-  { icon: Wrench, title: "Chamber Clean", sub: "Standard Clean", date: "May 14, 2025", ago: "9 days ago", status: "Completed" },
-  { icon: Wrench, title: "RF Generator Check", sub: "RF Match Tuning", date: "May 7, 2025", ago: "16 days ago", status: "Completed" },
-  { icon: Wrench, title: "He Leak Check", sub: "Leak Rate Verification", date: "Apr 30, 2025", ago: "23 days ago", status: "Completed" },
+  { icon: Wrench, title: "Preventive Maintenance", sub: "ESC & Valve Calibration", date: "May 21, 2026", ago: "2 days ago", status: "Completed" },
+  { icon: Wrench, title: "Chamber Clean", sub: "Standard Clean", date: "May 14, 2026", ago: "9 days ago", status: "Completed" },
+  { icon: Wrench, title: "RF Generator Check", sub: "RF Match Tuning", date: "May 7, 2026", ago: "16 days ago", status: "Completed" },
+  { icon: Wrench, title: "He Leak Check", sub: "Leak Rate Verification", date: "Apr 30, 2026", ago: "23 days ago", status: "Completed" },
 ];
 
 const HEALTH_TREND_PANELS = [

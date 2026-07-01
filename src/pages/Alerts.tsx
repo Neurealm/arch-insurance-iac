@@ -97,14 +97,14 @@ const alerts: {
   id: string; sev: Severity; name: string; source: string; type: SrcType;
   status: Status; lastOccurred: string; count: number; ackBy: string | null;
 }[] = [
-  { id: "A1", sev: "Critical", name: "Database CPU Utilization is above 95%", source: "DB-Prod-01",      type: "Infrastructure", status: "New",          lastOccurred: "May 10, 2025 10:24 AM", count: 12, ackBy: null },
-  { id: "A2", sev: "Critical", name: "Web Server Down",                       source: "Web-Cluster-02", type: "Monitoring",     status: "Acknowledged", lastOccurred: "May 10, 2025 10:22 AM", count: 8,  ackBy: "Sam Wilson" },
-  { id: "A3", sev: "Warning",  name: "High Memory Usage",                     source: "App-Server-03",  type: "Infrastructure", status: "New",          lastOccurred: "May 10, 2025 10:21 AM", count: 15, ackBy: null },
-  { id: "A4", sev: "Warning",  name: "Disk Space Low ( < 10% )",              source: "File-Server-01", type: "Infrastructure", status: "New",          lastOccurred: "May 10, 2025 10:20 AM", count: 7,  ackBy: null },
-  { id: "A5", sev: "Info",     name: "Backup Completed Successfully",         source: "Backup-Server",  type: "Application",    status: "Closed",       lastOccurred: "May 10, 2025 10:18 AM", count: 1,  ackBy: "John Miller" },
-  { id: "A6", sev: "Warning",  name: "High Response Time",                    source: "API-Gateway",    type: "Monitoring",     status: "Acknowledged", lastOccurred: "May 10, 2025 10:17 AM", count: 5,  ackBy: "Priya Singh" },
-  { id: "A7", sev: "Info",     name: "SSL Certificate Expires in 15 Days",    source: "www.mycompany.com", type: "Monitoring",  status: "New",          lastOccurred: "May 10, 2025 10:16 AM", count: 1,  ackBy: null },
-  { id: "A8", sev: "Critical", name: "Network Device Unreachable",            source: "Core-Switch-01", type: "Network",        status: "New",          lastOccurred: "May 10, 2025 10:15 AM", count: 3,  ackBy: null },
+  { id: "A1", sev: "Critical", name: "Database CPU Utilization is above 95%", source: "DB-Prod-01",      type: "Infrastructure", status: "New",          lastOccurred: "May 10, 2026 10:24 AM", count: 12, ackBy: null },
+  { id: "A2", sev: "Critical", name: "Web Server Down",                       source: "Web-Cluster-02", type: "Monitoring",     status: "Acknowledged", lastOccurred: "May 10, 2026 10:22 AM", count: 8,  ackBy: "Sam Wilson" },
+  { id: "A3", sev: "Warning",  name: "High Memory Usage",                     source: "App-Server-03",  type: "Infrastructure", status: "New",          lastOccurred: "May 10, 2026 10:21 AM", count: 15, ackBy: null },
+  { id: "A4", sev: "Warning",  name: "Disk Space Low ( < 10% )",              source: "File-Server-01", type: "Infrastructure", status: "New",          lastOccurred: "May 10, 2026 10:20 AM", count: 7,  ackBy: null },
+  { id: "A5", sev: "Info",     name: "Backup Completed Successfully",         source: "Backup-Server",  type: "Application",    status: "Closed",       lastOccurred: "May 10, 2026 10:18 AM", count: 1,  ackBy: "John Miller" },
+  { id: "A6", sev: "Warning",  name: "High Response Time",                    source: "API-Gateway",    type: "Monitoring",     status: "Acknowledged", lastOccurred: "May 10, 2026 10:17 AM", count: 5,  ackBy: "Priya Singh" },
+  { id: "A7", sev: "Info",     name: "SSL Certificate Expires in 15 Days",    source: "www.mycompany.com", type: "Monitoring",  status: "New",          lastOccurred: "May 10, 2026 10:16 AM", count: 1,  ackBy: null },
+  { id: "A8", sev: "Critical", name: "Network Device Unreachable",            source: "Core-Switch-01", type: "Network",        status: "New",          lastOccurred: "May 10, 2026 10:15 AM", count: 3,  ackBy: null },
 ];
 
 const sevStyle: Record<Severity, { text: string; icon: any }> = {

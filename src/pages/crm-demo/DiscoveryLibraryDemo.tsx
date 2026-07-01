@@ -41,16 +41,16 @@ const EVIDENCE_TYPES = [
 ];
 
 const EVIDENCE = [
-  { name: "Claims Platform High Level Architecture.pdf", type: "Architecture Diagram", typeColor: "#3b82f6", source: "Enterprise Architecture", by: "Lisa Chen", date: "May 10, 2025", confidence: "High", status: "Classified", linked: "5 Screens" },
-  { name: "CMDB_Export_ClaimsPlatform.xlsx", type: "CMDB Export", typeColor: "#10b981", source: "ServiceNow CMDB", by: "Mark Davis", date: "May 09, 2025", confidence: "High", status: "Classified", linked: "7 Screens" },
-  { name: "Incident_Tickets_2024_Export.csv", type: "Ticket Data Export", typeColor: "#f59e0b", source: "ServiceNow ITSM", by: "Priya Nair", date: "May 09, 2025", confidence: "Medium", status: "Classified", linked: "4 Screens" },
-  { name: "Datadog_Metrics_Export.json", type: "Monitoring Export", typeColor: "#8b5cf6", source: "Datadog", by: "Alex Morgan", date: "May 08, 2025", confidence: "High", status: "Classified", linked: "3 Screens" },
-  { name: "AWS_Inventory_Report.xlsx", type: "Cloud Inventory", typeColor: "#6366f1", source: "AWS Organizations", by: "James Walker", date: "May 07, 2025", confidence: "Medium", status: "Classified", linked: "6 Screens" },
-  { name: "Security_Assessment_Report.pdf", type: "Security Report", typeColor: "#ef4444", source: "SecureWorks", by: "Rachel Smith", date: "May 06, 2025", confidence: "High", status: "Classified", linked: "5 Screens" },
-  { name: "Claims_App_Runbook_v2.docx", type: "Runbook / SOP", typeColor: "#0ea5e9", source: "Internal Team", by: "Tom Reynolds", date: "May 05, 2025", confidence: "Medium", status: "Review", linked: "2 Screens" },
-  { name: "MSA_WatersCorp_2025.pdf", type: "Contract / SLA", typeColor: "#14b8a6", source: "Legal Repository", by: "David Patel", date: "May 04, 2025", confidence: "High", status: "Classified", linked: "3 Screens" },
-  { name: "Discovery_Workshop_Notes_May02.docx", type: "Workshop Notes", typeColor: "#f97316", source: "Internal Team", by: "Lisa Chen", date: "May 02, 2025", confidence: "Low", status: "Review", linked: "1 Screen" },
-  { name: "Network_Topology_Visio.zip", type: "Architecture Diagram", typeColor: "#3b82f6", source: "Network Team", by: "Priya Nair", date: "Apr 30, 2025", confidence: "Medium", status: "Pending", linked: "2 Screens" },
+  { name: "Claims Platform High Level Architecture.pdf", type: "Architecture Diagram", typeColor: "#3b82f6", source: "Enterprise Architecture", by: "Lisa Chen", date: "May 10, 2026", confidence: "High", status: "Classified", linked: "5 Screens" },
+  { name: "CMDB_Export_ClaimsPlatform.xlsx", type: "CMDB Export", typeColor: "#10b981", source: "ServiceNow CMDB", by: "Mark Davis", date: "May 09, 2026", confidence: "High", status: "Classified", linked: "7 Screens" },
+  { name: "Incident_Tickets_2024_Export.csv", type: "Ticket Data Export", typeColor: "#f59e0b", source: "ServiceNow ITSM", by: "Priya Nair", date: "May 09, 2026", confidence: "Medium", status: "Classified", linked: "4 Screens" },
+  { name: "Datadog_Metrics_Export.json", type: "Monitoring Export", typeColor: "#8b5cf6", source: "Datadog", by: "Alex Morgan", date: "May 08, 2026", confidence: "High", status: "Classified", linked: "3 Screens" },
+  { name: "AWS_Inventory_Report.xlsx", type: "Cloud Inventory", typeColor: "#6366f1", source: "AWS Organizations", by: "James Walker", date: "May 07, 2026", confidence: "Medium", status: "Classified", linked: "6 Screens" },
+  { name: "Security_Assessment_Report.pdf", type: "Security Report", typeColor: "#ef4444", source: "SecureWorks", by: "Rachel Smith", date: "May 06, 2026", confidence: "High", status: "Classified", linked: "5 Screens" },
+  { name: "Claims_App_Runbook_v2.docx", type: "Runbook / SOP", typeColor: "#0ea5e9", source: "Internal Team", by: "Tom Reynolds", date: "May 05, 2026", confidence: "Medium", status: "Review", linked: "2 Screens" },
+  { name: "MSA_WatersCorp_2025.pdf", type: "Contract / SLA", typeColor: "#14b8a6", source: "Legal Repository", by: "David Patel", date: "May 04, 2026", confidence: "High", status: "Classified", linked: "3 Screens" },
+  { name: "Discovery_Workshop_Notes_May02.docx", type: "Workshop Notes", typeColor: "#f97316", source: "Internal Team", by: "Lisa Chen", date: "May 02, 2026", confidence: "Low", status: "Review", linked: "1 Screen" },
+  { name: "Network_Topology_Visio.zip", type: "Architecture Diagram", typeColor: "#3b82f6", source: "Network Team", by: "Priya Nair", date: "Apr 30, 2026", confidence: "Medium", status: "Pending", linked: "2 Screens" },
 ];
 
 function ConfBadge({ v }: { v: string }) {

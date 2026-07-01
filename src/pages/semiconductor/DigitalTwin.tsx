@@ -84,7 +84,7 @@ const TICKER_EVENTS = [
   { t: "10:22:11", icon: Cpu,           tone: "sky",  msg: "CMP-038 pad pressure trend re-classified MEDIUM" },
   { t: "10:21:02", icon: Database,      tone: "emerald", msg: "FDC chamber-state ingest at 99.98% (healthy)" },
   { t: "10:19:48", icon: Radio,         tone: "sky",  msg: "18.5K events/s, latency 142ms p95" },
-  { t: "10:18:12", icon: AlertTriangle, tone: "amber",msg: "Pattern match: ETCH-217 vs INC-2024-0418 (94% sim)" },
+  { t: "10:18:12", icon: AlertTriangle, tone: "amber",msg: "Pattern match: ETCH-217 vs INC-2026-0418 (94% sim)" },
 ];
 
 /* ----------------------------- helpers ----------------------------- */
@@ -905,8 +905,8 @@ function AnalysisBody({ equip }: { equip: Equip }) {
       </Section>
       <Section title="Similar Historical Incidents">
         <ul className="space-y-1 text-slate-300">
-          <li>· INC-2024-0418  ETCH-217  Wet-clean +3 days early avoided 14h unplanned down</li>
-          <li>· INC-2024-0207  ETCH-301  Same vibration signature → bearing replace</li>
+          <li>· INC-2026-0418  ETCH-217  Wet-clean +3 days early avoided 14h unplanned down</li>
+          <li>· INC-2026-0207  ETCH-301  Same vibration signature → bearing replace</li>
           <li>· INC-2023-1128  ETCH-217  RF matching network re-tune resolved drift</li>
         </ul>
       </Section>
@@ -927,7 +927,7 @@ function AnalysisBody({ equip }: { equip: Equip }) {
       <Section title="Open Engineering Questions">
         <ul className="list-disc list-inside text-slate-300 space-y-0.5">
           <li>Has matching network been calibrated since last wet-clean?</li>
-          <li>Confirm turbo bearing inspection interval against vendor bulletin LAM-2024-07</li>
+          <li>Confirm turbo bearing inspection interval against vendor bulletin LAM-2026-07</li>
           <li>Cross-check He leak rate against ESC clamp force trend</li>
         </ul>
       </Section>
@@ -948,7 +948,7 @@ function SensorBody({ sensor, equip }: { sensor: Sensor; equip: Equip }) {
         <p className="text-slate-300">{sensor.failure}</p>
       </Section>
       <Section title="Context">
-        <p className="text-slate-300">{sensor.label} on <b>{equip.id}</b> ({equip.tool}) at {equip.loc}. Recipe MTL-CU-2.1, last PM wet-clean Apr 28, 2024.</p>
+        <p className="text-slate-300">{sensor.label} on <b>{equip.id}</b> ({equip.tool}) at {equip.loc}. Recipe MTL-CU-2.1, last PM wet-clean Apr 28, 2026.</p>
       </Section>
       <Section title="Recommended Diagnostic">
         <ul className="list-disc list-inside text-slate-300 space-y-0.5">

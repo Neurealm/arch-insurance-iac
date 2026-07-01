@@ -120,14 +120,14 @@ const alerts: {
   source: string; sourceSub: string; resource: string; resourceSub: string;
   status: St; ago: string; ts: string; ackBy?: string; ackTs?: string;
 }[] = [
-  { sev: "Critical", title: "PDU-2A Overload Warning", sub: "Load: 95% (28.5 kW / 30 kW)", titleColor: "text-rose-400", source: "PDU-2A", sourceSub: "Rack Row A", resource: "PDU", resourceSub: "192.168.1.22", status: "Open", ago: "2m ago", ts: "May 20, 2024 10:24 AM" },
-  { sev: "Critical", title: "UPS-1 Runtime Below Threshold", sub: "Runtime: 4.2 min (Threshold: 5 min)", titleColor: "text-rose-400", source: "UPS-1", sourceSub: "Electrical Room", resource: "UPS", resourceSub: "192.168.1.10", status: "Open", ago: "7m ago", ts: "May 20, 2024 10:19 AM" },
-  { sev: "Warning", title: "High PUE Detected", sub: "PUE: 1.62 (Threshold: 1.50)", titleColor: "text-amber-400", source: "Data Hall A", sourceSub: "", resource: "PUE Sensor", resourceSub: "—", status: "Open", ago: "15m ago", ts: "May 20, 2024 10:11 AM" },
-  { sev: "Warning", title: "CRAC-2 Supply Air Temp High", sub: "Temp: 29.1°C (Threshold: 27°C)", titleColor: "text-amber-400", source: "CRAC-2", sourceSub: "Data Hall A", resource: "CRAC", resourceSub: "192.168.1.45", status: "Open", ago: "18m ago", ts: "May 20, 2024 10:08 AM" },
-  { sev: "Warning", title: "Generator-1 Fuel Level Low", sub: "Fuel Level: 22% (Threshold: 25%)", titleColor: "text-amber-400", source: "Generator-1", sourceSub: "Generator Yard", resource: "Generator", resourceSub: "192.168.1.60", status: "Acknowledged", ago: "25m ago", ts: "May 20, 2024 10:01 AM", ackBy: "john.doe", ackTs: "10:05 AM" },
-  { sev: "Informational", title: "PDU-3B Load Normalized", sub: "Load: 72% (21.6 kW / 30 kW)", titleColor: "text-sky-300", source: "PDU-3B", sourceSub: "Rack Row B", resource: "PDU", resourceSub: "192.168.1.32", status: "Open", ago: "32m ago", ts: "May 20, 2024 09:54 AM" },
-  { sev: "Informational", title: "Utility Power Restored", sub: "Source: Dominion Energy", titleColor: "text-sky-300", source: "Utility Feed A", sourceSub: "Main Switchgear", resource: "Utility", resourceSub: "—", status: "Acknowledged", ago: "45m ago", ts: "May 20, 2024 09:41 AM", ackBy: "sarah.liu", ackTs: "09:42 AM" },
-  { sev: "Informational", title: "Battery Test Completed", sub: "Result: Passed", titleColor: "text-slate-200", source: "UPS-2", sourceSub: "Electrical Room", resource: "UPS", resourceSub: "192.168.1.11", status: "Acknowledged", ago: "1h 2m ago", ts: "May 20, 2024 09:24 AM", ackBy: "system", ackTs: "09:24 AM" },
+  { sev: "Critical", title: "PDU-2A Overload Warning", sub: "Load: 95% (28.5 kW / 30 kW)", titleColor: "text-rose-400", source: "PDU-2A", sourceSub: "Rack Row A", resource: "PDU", resourceSub: "192.168.1.22", status: "Open", ago: "2m ago", ts: "May 20, 2026 10:24 AM" },
+  { sev: "Critical", title: "UPS-1 Runtime Below Threshold", sub: "Runtime: 4.2 min (Threshold: 5 min)", titleColor: "text-rose-400", source: "UPS-1", sourceSub: "Electrical Room", resource: "UPS", resourceSub: "192.168.1.10", status: "Open", ago: "7m ago", ts: "May 20, 2026 10:19 AM" },
+  { sev: "Warning", title: "High PUE Detected", sub: "PUE: 1.62 (Threshold: 1.50)", titleColor: "text-amber-400", source: "Data Hall A", sourceSub: "", resource: "PUE Sensor", resourceSub: "—", status: "Open", ago: "15m ago", ts: "May 20, 2026 10:11 AM" },
+  { sev: "Warning", title: "CRAC-2 Supply Air Temp High", sub: "Temp: 29.1°C (Threshold: 27°C)", titleColor: "text-amber-400", source: "CRAC-2", sourceSub: "Data Hall A", resource: "CRAC", resourceSub: "192.168.1.45", status: "Open", ago: "18m ago", ts: "May 20, 2026 10:08 AM" },
+  { sev: "Warning", title: "Generator-1 Fuel Level Low", sub: "Fuel Level: 22% (Threshold: 25%)", titleColor: "text-amber-400", source: "Generator-1", sourceSub: "Generator Yard", resource: "Generator", resourceSub: "192.168.1.60", status: "Acknowledged", ago: "25m ago", ts: "May 20, 2026 10:01 AM", ackBy: "john.doe", ackTs: "10:05 AM" },
+  { sev: "Informational", title: "PDU-3B Load Normalized", sub: "Load: 72% (21.6 kW / 30 kW)", titleColor: "text-sky-300", source: "PDU-3B", sourceSub: "Rack Row B", resource: "PDU", resourceSub: "192.168.1.32", status: "Open", ago: "32m ago", ts: "May 20, 2026 09:54 AM" },
+  { sev: "Informational", title: "Utility Power Restored", sub: "Source: Dominion Energy", titleColor: "text-sky-300", source: "Utility Feed A", sourceSub: "Main Switchgear", resource: "Utility", resourceSub: "—", status: "Acknowledged", ago: "45m ago", ts: "May 20, 2026 09:41 AM", ackBy: "sarah.liu", ackTs: "09:42 AM" },
+  { sev: "Informational", title: "Battery Test Completed", sub: "Result: Passed", titleColor: "text-slate-200", source: "UPS-2", sourceSub: "Electrical Room", resource: "UPS", resourceSub: "192.168.1.11", status: "Acknowledged", ago: "1h 2m ago", ts: "May 20, 2026 09:24 AM", ackBy: "system", ackTs: "09:24 AM" },
 ];
 
 /* ---------- detail trend mini chart ---------- */
@@ -295,7 +295,7 @@ export default function PowerAlerts() {
               </div>
               <div className="flex items-center justify-between text-[11px]">
                 <SeverityBadge s="Critical" />
-                <span className="text-slate-500">ID: ALT-2024-05-20-1024</span>
+                <span className="text-slate-500">ID: ALT-2026-05-20-1024</span>
               </div>
               <div>
                 <div className="text-base font-bold text-white">PDU-2A Overload Warning</div>
@@ -312,7 +312,7 @@ export default function PowerAlerts() {
                 ))}
                 <div className="flex justify-between"><span className="text-slate-400">Severity</span><span className="text-rose-400 font-semibold">Critical</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Status</span><span className="text-rose-400 font-semibold">Open</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Triggered</span><span className="text-slate-200">May 20, 2024 10:24 AM (2m ago)</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Triggered</span><span className="text-slate-200">May 20, 2026 10:24 AM (2m ago)</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Duration</span><span className="text-slate-200">2m</span></div>
                 <div className="flex justify-between"><span className="text-slate-400">Ack By</span><span className="text-slate-500">—</span></div>
               </div>

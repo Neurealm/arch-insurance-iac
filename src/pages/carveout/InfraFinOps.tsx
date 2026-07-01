@@ -107,11 +107,11 @@ const opps = [
 ];
 
 const actions = [
-  { a: "Rightsized 86 VMs",        target: "Compute", save: "$230,450", date: "May 12, 2025" },
-  { a: "Deleted 42 Unused Volumes", target: "Storage", save: "$98,760",  date: "May 11, 2025" },
-  { a: "Applied Reserved Instances", target: "Compute", save: "$72,340", date: "May 10, 2025" },
-  { a: "Stopped 23 Idle Resources",  target: "Compute", save: "$41,280", date: "May 9, 2025" },
-  { a: "Removed Unused Snapshots",   target: "Storage", save: "$28,560", date: "May 8, 2025" },
+  { a: "Rightsized 86 VMs",        target: "Compute", save: "$230,450", date: "May 12, 2026" },
+  { a: "Deleted 42 Unused Volumes", target: "Storage", save: "$98,760",  date: "May 11, 2026" },
+  { a: "Applied Reserved Instances", target: "Compute", save: "$72,340", date: "May 10, 2026" },
+  { a: "Stopped 23 Idle Resources",  target: "Compute", save: "$41,280", date: "May 9, 2026" },
+  { a: "Removed Unused Snapshots",   target: "Storage", save: "$28,560", date: "May 8, 2026" },
 ];
 
 const underutil = [

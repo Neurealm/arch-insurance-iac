@@ -184,7 +184,7 @@ export default function LogHygieneCompletenessAndStandardizationConsole() {
         <div className="flex items-center gap-2 shrink-0">
           <div className="text-[11px] text-slate-500 mr-2 text-right leading-tight">
             <div>Last Updated</div>
-            <div className="font-semibold text-slate-700 tabular-nums">May 12, 2025 · 10:32 AM</div>
+            <div className="font-semibold text-slate-700 tabular-nums">May 12, 2026 · 10:32 AM</div>
           </div>
           <button className="h-9 px-3 rounded-lg border border-slate-200 text-[12px] font-medium text-slate-700 hover:bg-slate-50 inline-flex items-center gap-1.5"><Filter className="h-3.5 w-3.5" /> Filters</button>
           <button className="h-9 px-3 rounded-lg border border-slate-200 text-[12px] font-medium text-slate-700 hover:bg-slate-50 inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Quality Policy</button>
@@ -602,7 +602,7 @@ export default function LogHygieneCompletenessAndStandardizationConsole() {
                   ["user.id","u_00341289"],
                   ["observer.hostname","web01.corp.com"],
                   ["event.severity","high"],
-                  ["event.timestamp","2025-05-12T15:14:00Z"],
+                  ["event.timestamp","2026-05-12T15:14:00Z"],
                   ["source.geo.country","US"],
                   ["event.action","allow (inferred)"],
                 ].map(([a, b]) => (
@@ -789,7 +789,7 @@ function SourceDetail({ row, onOpenDrawer }: { row: Row; onOpenDrawer: (kind: st
       <div className="font-mono text-[11px] bg-slate-950 text-slate-300 rounded p-3 space-y-0.5 overflow-x-auto">
         {[
           `{"user":"jdoe","host":"web-01","sev":"HIGH","ts":"05/12 09:14 CST"}`,
-          `{"user":"","host":"api02.corp.com","sev":"3","ts":"2025-05-12T15:14Z"}`,
+          `{"user":"","host":"api02.corp.com","sev":"3","ts":"2026-05-12T15:14Z"}`,
           `{"user":"a.smith","host":"WEB-01","sev":"warn+","ts":"1715527000"}`,
         ].map((l, i) => <div key={i}>{l}</div>)}
       </div>
@@ -826,7 +826,7 @@ function SourceDetail({ row, onOpenDrawer }: { row: Row; onOpenDrawer: (kind: st
         {[
           ["sev: HIGH",       "event.severity: high"],
           ["host: web-01",    "observer.hostname: web01.corp.com"],
-          ["ts: 05/12 09:14", "event.timestamp: 2025-05-12T15:14:00Z"],
+          ["ts: 05/12 09:14", "event.timestamp: 2026-05-12T15:14:00Z"],
           ["country: U.S.A",  "source.geo.country: US"],
         ].map(([a, b]) => (
           <div key={a} className="rounded border border-slate-200 p-2 flex items-center gap-2">

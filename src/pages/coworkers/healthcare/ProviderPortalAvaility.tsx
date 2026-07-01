@@ -26,7 +26,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Medium", tone: "yellow" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I monitor the health and performance of the provider portal and Availity transactions. I detect, triage, and escalate issues impacting providers to minimize disruption and improve their experience.",

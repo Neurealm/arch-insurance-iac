@@ -94,16 +94,16 @@ type Row = {
   status:"In Progress"|"To Do"|"Backlog"|"Done"; conf:number; op:number;
 };
 const rows: Row[] = [
-  { id:"GAP-1021", title:"Missing source IP field in firewall traffic logs",   cat:"Missing Fields",         source:"PANW Firewall", impact:"Critical", prio:"P0", effort: 8, owner:"NetOps Eng",     sprint:"S24.10", target:"May 19, 2025", status:"In Progress", conf:0.18, op:0.24 },
-  { id:"GAP-1017", title:"Interface mapping missing for VPN logs",              cat:"Unmapped Relationships", source:"VPN Logs",      impact:"High",     prio:"P1", effort: 5, owner:"Data Eng",       sprint:"S24.10", target:"May 22, 2025", status:"To Do",       conf:0.12, op:0.18 },
-  { id:"GAP-1014", title:"Slow query: Top talkers dashboard",                   cat:"Slow Queries",           source:"NetFlow",       impact:"High",     prio:"P1", effort:13, owner:"Platform Eng",   sprint:"S24.10", target:"May 26, 2025", status:"In Progress", conf:0.08, op:0.22 },
-  { id:"GAP-1009", title:"Weak identifier: user_id not unique",                 cat:"Weak Identifiers",       source:"Okta",          impact:"High",     prio:"P1", effort: 8, owner:"Identity Eng",   sprint:"S24.10", target:"May 21, 2025", status:"To Do",       conf:0.22, op:0.16 },
-  { id:"GAP-1003", title:"Schema drift in DNS logs",                            cat:"Schema Drift",           source:"DNS Logs",      impact:"Medium",   prio:"P2", effort: 5, owner:"Data Eng",       sprint:"S24.11", target:"May 28, 2025", status:"To Do",       conf:0.10, op:0.12 },
-  { id:"GAP-0998", title:"Hydration failure: device location",                  cat:"Hydration Failures",     source:"PANW Panorama", impact:"Medium",   prio:"P2", effort: 3, owner:"Data Eng",       sprint:"S24.10", target:"May 20, 2025", status:"In Progress", conf:0.14, op:0.10 },
-  { id:"GAP-0995", title:"Missing API access to SaaS App",                      cat:"Missing API Access",     source:"SaaS App",      impact:"Medium",   prio:"P2", effort: 8, owner:"Integrations Eng",sprint:"S24.11", target:"May 30, 2025", status:"To Do",       conf:0.09, op:0.14 },
-  { id:"GAP-0987", title:"Stale source: Threat Intel feed",                     cat:"Stale Sources",          source:"Threat Intel",  impact:"Low",      prio:"P3", effort: 2, owner:"SecOps Eng",     sprint:"S24.12", target:"Jun 2, 2025",  status:"Backlog",     conf:0.06, op:0.08 },
-  { id:"GAP-0982", title:"Topology gap: Cloud region mapping",                  cat:"Topology Gaps",          source:"AWS CloudTrail",impact:"Low",      prio:"P3", effort: 3, owner:"Cloud Eng",      sprint:"S24.12", target:"Jun 3, 2025",  status:"Backlog",     conf:0.05, op:0.10 },
-  { id:"GAP-0975", title:"Query performance tuning",                            cat:"Performance Tuning",     source:"Multiple",      impact:"Medium",   prio:"P2", effort: 8, owner:"Platform Eng",   sprint:"S24.11", target:"May 29, 2025", status:"In Progress", conf:0.11, op:0.15 },
+  { id:"GAP-1021", title:"Missing source IP field in firewall traffic logs",   cat:"Missing Fields",         source:"PANW Firewall", impact:"Critical", prio:"P0", effort: 8, owner:"NetOps Eng",     sprint:"S24.10", target:"May 19, 2026", status:"In Progress", conf:0.18, op:0.24 },
+  { id:"GAP-1017", title:"Interface mapping missing for VPN logs",              cat:"Unmapped Relationships", source:"VPN Logs",      impact:"High",     prio:"P1", effort: 5, owner:"Data Eng",       sprint:"S24.10", target:"May 22, 2026", status:"To Do",       conf:0.12, op:0.18 },
+  { id:"GAP-1014", title:"Slow query: Top talkers dashboard",                   cat:"Slow Queries",           source:"NetFlow",       impact:"High",     prio:"P1", effort:13, owner:"Platform Eng",   sprint:"S24.10", target:"May 26, 2026", status:"In Progress", conf:0.08, op:0.22 },
+  { id:"GAP-1009", title:"Weak identifier: user_id not unique",                 cat:"Weak Identifiers",       source:"Okta",          impact:"High",     prio:"P1", effort: 8, owner:"Identity Eng",   sprint:"S24.10", target:"May 21, 2026", status:"To Do",       conf:0.22, op:0.16 },
+  { id:"GAP-1003", title:"Schema drift in DNS logs",                            cat:"Schema Drift",           source:"DNS Logs",      impact:"Medium",   prio:"P2", effort: 5, owner:"Data Eng",       sprint:"S24.11", target:"May 28, 2026", status:"To Do",       conf:0.10, op:0.12 },
+  { id:"GAP-0998", title:"Hydration failure: device location",                  cat:"Hydration Failures",     source:"PANW Panorama", impact:"Medium",   prio:"P2", effort: 3, owner:"Data Eng",       sprint:"S24.10", target:"May 20, 2026", status:"In Progress", conf:0.14, op:0.10 },
+  { id:"GAP-0995", title:"Missing API access to SaaS App",                      cat:"Missing API Access",     source:"SaaS App",      impact:"Medium",   prio:"P2", effort: 8, owner:"Integrations Eng",sprint:"S24.11", target:"May 30, 2026", status:"To Do",       conf:0.09, op:0.14 },
+  { id:"GAP-0987", title:"Stale source: Threat Intel feed",                     cat:"Stale Sources",          source:"Threat Intel",  impact:"Low",      prio:"P3", effort: 2, owner:"SecOps Eng",     sprint:"S24.12", target:"Jun 2, 2026",  status:"Backlog",     conf:0.06, op:0.08 },
+  { id:"GAP-0982", title:"Topology gap: Cloud region mapping",                  cat:"Topology Gaps",          source:"AWS CloudTrail",impact:"Low",      prio:"P3", effort: 3, owner:"Cloud Eng",      sprint:"S24.12", target:"Jun 3, 2026",  status:"Backlog",     conf:0.05, op:0.10 },
+  { id:"GAP-0975", title:"Query performance tuning",                            cat:"Performance Tuning",     source:"Multiple",      impact:"Medium",   prio:"P2", effort: 8, owner:"Platform Eng",   sprint:"S24.11", target:"May 29, 2026", status:"In Progress", conf:0.11, op:0.15 },
 ];
 
 /* ============== Prioritization inputs ============== */
@@ -252,7 +252,7 @@ export default function DataGapRegisterAndEngineeringBacklog() {
           <div className="flex items-center gap-2 shrink-0">
             <div className="text-right text-[10.5px] text-slate-500 mr-2">
               <div>Last Updated</div>
-              <div className="text-slate-700 font-medium">May 12, 2025 10:32 AM</div>
+              <div className="text-slate-700 font-medium">May 12, 2026 10:32 AM</div>
             </div>
             <button className="h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-[12px] flex items-center gap-1.5"><Filter className="h-3.5 w-3.5"/>Filters</button>
             <button className="h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-[12px] flex items-center gap-1.5"><Boxes className="h-3.5 w-3.5"/>Categories</button>

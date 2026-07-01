@@ -26,7 +26,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Medium", tone: "yellow" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I monitor data quality and member/provider identity across systems. I detect duplicates, mismatches, and data gaps, then drive remediation to ensure trusted data for care, operations, and reporting.",

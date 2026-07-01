@@ -52,8 +52,8 @@ const costBreakdown = [
 const costTrend = [
   { d: "Feb 2023", v: 512 },
   { d: "Aug 2023", v: 486 },
-  { d: "Feb 2024", v: 462 },
-  { d: "Aug 2024", v: 438 },
+  { d: "Feb 2026", v: 462 },
+  { d: "Aug 2026", v: 438 },
   { d: "Feb 2026", v: 428 },
 ];
 

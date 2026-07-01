@@ -120,9 +120,9 @@ const ROWS: Row[] = [
     nextAction: "Approve the first production rightsizing wave and confirm product owner sign off.",
     spark: [288, 292, 290, 295, 298, 300, 302, 301, 303, 302],
     annualOpportunity: "$684K",
-    completion: "Jul 15, 2025",
+    completion: "Jul 15, 2026",
     maturity: "Operating",
-    reviewed: "May 13, 2025",
+    reviewed: "May 13, 2026",
   },
   {
     id: "B", letter: "B", name: "AWS EKS / Container Platform", icon: Boxes,
@@ -153,7 +153,7 @@ const ROWS: Row[] = [
     automation: ["Cluster rightsizing assistant", "Autoscaling recommendation workflow", "Namespace cost allocation bot", "Unused workload detector"],
     nextAction: "Complete namespace ownership mapping and publish cluster cost scorecards.",
     spark: [94, 95, 96, 97, 98, 99, 100, 101, 102, 101],
-    annualOpportunity: "$228K", completion: "Jul 18, 2025", maturity: "Defined", reviewed: "May 12, 2025",
+    annualOpportunity: "$228K", completion: "Jul 18, 2026", maturity: "Defined", reviewed: "May 12, 2026",
   },
   {
     id: "C", letter: "C", name: "GCP Self-Direction Estate", icon: Cloud,
@@ -184,7 +184,7 @@ const ROWS: Row[] = [
     automation: ["GCP idle service detector", "Project tagging validator", "Committed use recommender", "Migration candidate scorer"],
     nextAction: "Complete product owner validation of which GCP workloads are strategic versus transition candidates.",
     spark: [64, 63, 62, 62, 61, 60, 60, 60, 60, 60],
-    annualOpportunity: "$72K", completion: "Jul 22, 2025", maturity: "Operating", reviewed: "May 11, 2025",
+    annualOpportunity: "$72K", completion: "Jul 22, 2026", maturity: "Operating", reviewed: "May 11, 2026",
   },
   {
     id: "D", letter: "D", name: "Virginia Data Center", icon: HardDrive,
@@ -215,7 +215,7 @@ const ROWS: Row[] = [
     automation: ["Asset inventory reconciliation", "Dependency discovery assistant", "Storage tiering analyzer", "Migration wave planner"],
     nextAction: "Approve dependency discovery and consolidation wave design for the Virginia environment.",
     spark: [176, 177, 178, 178, 179, 179, 180, 179, 179, 179],
-    annualOpportunity: "$708K", completion: "Aug 30, 2025", maturity: "Forming", reviewed: "May 12, 2025",
+    annualOpportunity: "$708K", completion: "Aug 30, 2026", maturity: "Forming", reviewed: "May 12, 2026",
   },
   {
     id: "E", letter: "E", name: "SQL Server Bare Metal Footprint", icon: Database,
@@ -249,7 +249,7 @@ const ROWS: Row[] = [
     automation: ["Database footprint analyzer", "Stored procedure dependency mapper", "Backup cost optimizer", "SQL modernization candidate scorer", "Migration readiness assistant"],
     nextAction: "Prioritize the top 20 databases by cost, business criticality, and modernization feasibility.",
     spark: [236, 234, 232, 232, 230, 229, 229, 230, 229, 229],
-    annualOpportunity: "$828K", completion: "Sep 15, 2025", maturity: "Forming", reviewed: "May 12, 2025",
+    annualOpportunity: "$828K", completion: "Sep 15, 2026", maturity: "Forming", reviewed: "May 12, 2026",
   },
   {
     id: "F", letter: "F", name: "Backup & Recovery", icon: Shield,
@@ -281,7 +281,7 @@ const ROWS: Row[] = [
     automation: ["Backup policy analyzer", "Orphaned backup detector", "Recovery readiness bot", "Retention tier recommender", "RTO / RPO validator"],
     nextAction: "Approve tiered retention standards and run a backup policy cleanup wave.",
     spark: [114, 116, 118, 119, 120, 121, 121, 122, 121, 121],
-    annualOpportunity: "$516K", completion: "Aug 12, 2025", maturity: "Defined", reviewed: "May 13, 2025",
+    annualOpportunity: "$516K", completion: "Aug 12, 2026", maturity: "Defined", reviewed: "May 13, 2026",
   },
   {
     id: "G", letter: "G", name: "Observability Tooling", icon: Monitor,
@@ -313,7 +313,7 @@ const ROWS: Row[] = [
     automation: ["Log ingest anomaly detector", "Duplicate monitor detector", "Alert quality scorer", "Dashboard usage analyzer", "SLO coverage assistant"],
     nextAction: "Implement log ingest guardrails and map Datadog costs to service owners.",
     spark: [80, 82, 84, 85, 86, 87, 88, 88, 89, 88],
-    annualOpportunity: "$276K", completion: "Jul 30, 2025", maturity: "Defined", reviewed: "May 13, 2025",
+    annualOpportunity: "$276K", completion: "Jul 30, 2026", maturity: "Defined", reviewed: "May 13, 2026",
   },
   {
     id: "H", letter: "H", name: "Citrix / EUC Delivery", icon: Server,
@@ -343,7 +343,7 @@ const ROWS: Row[] = [
     automation: ["License utilization monitor", "Inactive user detector", "Secure browser candidate analyzer", "Citrix health check workflow"],
     nextAction: "Complete license utilization review and determine which workloads can move to secure browser access.",
     spark: [45, 45, 45, 45, 45, 45, 45, 45, 45, 45],
-    annualOpportunity: "$84K", completion: "Aug 12, 2025", maturity: "Forming", reviewed: "May 9, 2025",
+    annualOpportunity: "$84K", completion: "Aug 12, 2026", maturity: "Forming", reviewed: "May 9, 2026",
   },
   {
     id: "I", letter: "I", name: "Network & Connectivity", icon: NetIcon,
@@ -374,7 +374,7 @@ const ROWS: Row[] = [
     automation: ["Egress anomaly detector", "Route hygiene analyzer", "Firewall cost mapper", "Traffic pattern classifier"],
     nextAction: "Create product-level egress visibility and identify the top 10 traffic cost drivers.",
     spark: [56, 57, 58, 58, 59, 59, 60, 60, 61, 60],
-    annualOpportunity: "$168K", completion: "Aug 25, 2025", maturity: "Forming", reviewed: "May 12, 2025",
+    annualOpportunity: "$168K", completion: "Aug 25, 2026", maturity: "Forming", reviewed: "May 12, 2026",
   },
   {
     id: "J", letter: "J", name: "Security & IAM Controls", icon: Lock,
@@ -406,7 +406,7 @@ const ROWS: Row[] = [
     automation: ["Access review bot", "Orphaned account detector", "Privilege risk scorer", "Policy-as-code compliance bot", "IAM drift monitor"],
     nextAction: "Complete privileged access baseline and prioritize access cleanup by production risk.",
     spark: [38, 38, 39, 39, 40, 40, 40, 40, 40, 40],
-    annualOpportunity: "$48K", completion: "Aug 30, 2025", maturity: "Operating", reviewed: "May 13, 2025",
+    annualOpportunity: "$48K", completion: "Aug 30, 2026", maturity: "Operating", reviewed: "May 13, 2026",
   },
 ];
 
@@ -518,7 +518,7 @@ export default function FinOpsOperationsConsole() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50">
-                  <Calendar className="w-3.5 h-3.5" /> May 2025 (MTD) <ChevronRight className="w-3 h-3 rotate-90" />
+                  <Calendar className="w-3.5 h-3.5" /> May 2026 (MTD) <ChevronRight className="w-3 h-3 rotate-90" />
                 </button>
                 <button className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50">
                   <Filter className="w-3.5 h-3.5" /> Filters
@@ -530,7 +530,7 @@ export default function FinOpsOperationsConsole() {
                   <Share2 className="w-3.5 h-3.5" /> Share
                 </button>
                 <div className="text-[11px] text-slate-500 ml-1 inline-flex items-center gap-2">
-                  Data as of: May 13, 2025 10:30 AM ET
+                  Data as of: May 13, 2026 10:30 AM ET
                   <button className="p-1.5 rounded-md hover:bg-slate-100"><RefreshCw className="w-3.5 h-3.5 text-slate-500" /></button>
                 </div>
               </div>

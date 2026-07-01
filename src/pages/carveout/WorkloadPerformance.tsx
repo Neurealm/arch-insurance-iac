@@ -513,7 +513,7 @@ export default function WorkloadPerformance() {
           <Calendar className="h-5 w-5 text-blue-600 shrink-0" />
           <div>
             <div className="text-[10px] text-slate-500 font-medium">Data Refreshed</div>
-            <div className="text-xs font-bold text-slate-900">May 12, 2025 10:15 AM</div>
+            <div className="text-xs font-bold text-slate-900">May 12, 2026 10:15 AM</div>
             <div className="text-[9px] text-slate-500">Auto Refresh: Every 5 Minutes</div>
           </div>
         </div>

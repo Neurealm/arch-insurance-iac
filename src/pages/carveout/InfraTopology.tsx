@@ -17,7 +17,7 @@ const kpis: KPI[] = [
   { label: "Critical Dependencies", value: "312", sub: "At Risk", subColor: "text-red-600", icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
   { label: "High Risk Dependencies", value: "821", sub: "Require Attention", subColor: "text-amber-600", icon: AlertOctagon, color: "text-amber-600", bg: "bg-amber-50" },
   { label: "Orphaned Components", value: "76", sub: "Unmapped", subColor: "text-violet-600", icon: HelpCircle, color: "text-violet-600", bg: "bg-violet-50" },
-  { label: "Last Updated", value: "May 12, 2025", sub: "09:45 AM", subColor: "text-slate-500", icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
+  { label: "Last Updated", value: "May 12, 2026", sub: "09:45 AM", subColor: "text-slate-500", icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
 ];
 
 const wwh = {

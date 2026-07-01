@@ -74,10 +74,10 @@ const archHealth = [
 ];
 
 const recentChanges = [
-  { d: "May 12, 2025 10:15 AM", c: "Added Subnet to Hub VNet",   lz: "AZ-LZ-PLATFORM", impact: "Low",    ic: "text-emerald-700" },
-  { d: "May 12, 2025 09:42 AM", c: "Enabled AWS Backup Policy",  lz: "AWS-LZ-PROD",    impact: "Medium", ic: "text-amber-700" },
-  { d: "May 11, 2025 04:18 PM", c: "Updated NSG Rule",           lz: "AZ-LZ-PROD",     impact: "Low",    ic: "text-emerald-700" },
-  { d: "May 11, 2025 11:03 AM", c: "Added New Account",          lz: "AWS-LZ-NONPROD", impact: "Low",    ic: "text-emerald-700" },
+  { d: "May 12, 2026 10:15 AM", c: "Added Subnet to Hub VNet",   lz: "AZ-LZ-PLATFORM", impact: "Low",    ic: "text-emerald-700" },
+  { d: "May 12, 2026 09:42 AM", c: "Enabled AWS Backup Policy",  lz: "AWS-LZ-PROD",    impact: "Medium", ic: "text-amber-700" },
+  { d: "May 11, 2026 04:18 PM", c: "Updated NSG Rule",           lz: "AZ-LZ-PROD",     impact: "Low",    ic: "text-emerald-700" },
+  { d: "May 11, 2026 11:03 AM", c: "Added New Account",          lz: "AWS-LZ-NONPROD", impact: "Low",    ic: "text-emerald-700" },
 ];
 
 const distribution = [

@@ -124,7 +124,7 @@ function Header() {
       </div>
       <div className="px-6 pb-2 flex items-center justify-between text-[11px] text-slate-500">
         <div className="flex items-center gap-3">
-          <span>Data as of: <strong className="text-slate-700">Jun 23, 2025 10:24 AM EDT</strong></span>
+          <span>Data as of: <strong className="text-slate-700">Jun 23, 2026 10:24 AM EDT</strong></span>
           <span className="h-1 w-1 rounded-full bg-slate-300" />
           <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live telemetry</span>
         </div>
@@ -923,7 +923,7 @@ function StagePane({ open, deep, id, onClose }: {
             <div className="text-[12px] text-slate-700">
               <div className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-2">Evidence</div>
               <ul className="space-y-1.5">
-                <li>10:14 EDT · CT log entry verified (Cloudflare Nimbus 2025)</li>
+                <li>10:14 EDT · CT log entry verified (Cloudflare Nimbus 2026)</li>
                 <li>09:02 EDT · OCSP healthy (DigiCert)</li>
                 <li>Yesterday · SOC 2 CC7.2 attested</li>
               </ul>

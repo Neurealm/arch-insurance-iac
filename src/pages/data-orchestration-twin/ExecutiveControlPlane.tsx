@@ -94,13 +94,13 @@ const gapImpact = [
 ];
 
 const milestones = [
-  ["M1: Current State Documentation", "Apr 18, 2025", "Complete", 100],
-  ["M2: Data Readiness Report", "Apr 28, 2025", "Complete", 100],
-  ["M3: Architecture Validation Report", "May 15, 2025", "In Progress", 75],
-  ["M4: Failure Analysis Report", "May 21, 2025", "In Progress", 60],
-  ["M5: Solution Design & Blueprint", "Jun 6, 2025", "Planned", 0],
-  ["M6: Backlog Execution Complete", "Jun 25, 2025", "Planned", 0],
-  ["M7: Acceptance & Handoff", "Jun 30, 2025", "Planned", 0],
+  ["M1: Current State Documentation", "Apr 18, 2026", "Complete", 100],
+  ["M2: Data Readiness Report", "Apr 28, 2026", "Complete", 100],
+  ["M3: Architecture Validation Report", "May 15, 2026", "In Progress", 75],
+  ["M4: Failure Analysis Report", "May 21, 2026", "In Progress", 60],
+  ["M5: Solution Design & Blueprint", "Jun 6, 2026", "Planned", 0],
+  ["M6: Backlog Execution Complete", "Jun 25, 2026", "Planned", 0],
+  ["M7: Acceptance & Handoff", "Jun 30, 2026", "Planned", 0],
 ];
 
 const engineeringDetails = [
@@ -151,7 +151,7 @@ export default function ExecutiveControlPlane() {
         </div>
         <div className="flex items-center gap-3">
           <div className="text-[11px] text-slate-500 flex items-center gap-2">
-            <span>Last Updated: <span className="text-slate-700 font-medium">May 12, 2025 10:32 AM</span></span>
+            <span>Last Updated: <span className="text-slate-700 font-medium">May 12, 2026 10:32 AM</span></span>
             <button className="p-1 rounded hover:bg-slate-100 text-slate-500"><RefreshCw className="h-3.5 w-3.5" /></button>
           </div>
           <button className="flex items-center gap-2 text-[12px] px-3 py-2 rounded-lg border border-slate-200 bg-white hover:border-slate-300 shadow-sm">

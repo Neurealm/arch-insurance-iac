@@ -148,7 +148,7 @@ export default function PrivilegedAccessDashboard() {
                 <div className="text-[10px] text-muted-foreground">Updated: 10:24 AM</div>
               </div>
               <div className="h-9 px-3 rounded-lg border border-border bg-card flex items-center gap-2 text-xs font-semibold">
-                <Calendar className="h-3.5 w-3.5 text-muted-foreground" /> May 20, 2025
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" /> May 20, 2026
               </div>
               <button className="relative h-9 w-9 rounded-lg border border-border grid place-items-center">
                 <Bell className="h-4 w-4 text-muted-foreground" />

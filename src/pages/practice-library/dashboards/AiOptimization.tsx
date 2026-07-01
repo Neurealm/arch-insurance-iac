@@ -492,7 +492,7 @@ export default function AiOptimization() {
             </div>
             <div className="ml-auto flex items-center gap-6 text-xs">
               <div><span className="text-slate-400">Model Status:</span> <span className="text-emerald-400">● Healthy</span></div>
-              <div><span className="text-slate-400">Last Model Update:</span> <span className="text-white">May 20, 2024 10:00 AM</span></div>
+              <div><span className="text-slate-400">Last Model Update:</span> <span className="text-white">May 20, 2026 10:00 AM</span></div>
               <div><span className="text-slate-400">Next Optimization Cycle:</span> <span className="text-white">3m 45s</span></div>
             </div>
           </div>

@@ -29,7 +29,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Medium", tone: "yellow" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I identify non-adherent members, prioritize outreach, and coordinate pharmacy interventions to improve medication adherence and close care gaps that impact health outcomes and quality scores.",

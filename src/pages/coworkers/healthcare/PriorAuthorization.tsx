@@ -29,7 +29,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Medium", tone: "yellow" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I review prior authorization requests, interpret clinical and policy requirements, verify documentation, assess medical necessity, and recommend decisions to the UM team. I ensure compliance with CMS and state mandates and maintain a complete audit trail.",
@@ -90,7 +90,7 @@ const config: CoworkerConfig = {
       { time: "8:52 AM", tone: "blue", icon: Info, title: "Requested additional information from provider", subtitle: "Missing: Physical therapy notes" },
       { time: "8:48 AM", tone: "orange", icon: AlertTriangle, title: "Urgent request routed to Medical Director", subtitle: "Member 87654321 - Spinal Surgery" },
       { time: "8:44 AM", tone: "green", icon: CheckCircle2, title: "Completed peer review for DME request", subtitle: "CPT E0601 - CPAP Device" },
-      { time: "8:40 AM", tone: "purple", icon: Settings, title: "Policy rule updated", subtitle: "Added NIA Clinical Guideline updates effective 6/1/2025" },
+      { time: "8:40 AM", tone: "purple", icon: Settings, title: "Policy rule updated", subtitle: "Added NIA Clinical Guideline updates effective 6/1/2026" },
     ],
   },
   health: {

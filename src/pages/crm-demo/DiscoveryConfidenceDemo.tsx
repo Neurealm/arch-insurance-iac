@@ -26,15 +26,15 @@ function ProgressPill({ label, value, color = "#22c55e" }: { label: string; valu
 }
 
 const DOMAINS = [
-  { name: "Application Overview", completeness: 85, confidence: 82, trend: 8, trendDir: "up", verified: "May 11, 2025", quality: "High", status: "Good" },
-  { name: "Architecture", completeness: 72, confidence: 74, trend: 5, trendDir: "up", verified: "May 10, 2025", quality: "High", status: "Good" },
-  { name: "Infrastructure", completeness: 64, confidence: 69, trend: 3, trendDir: "up", verified: "May 09, 2025", quality: "Medium", status: "Fair" },
-  { name: "Cloud", completeness: 58, confidence: 61, trend: 6, trendDir: "up", verified: "May 08, 2025", quality: "Medium", status: "Fair" },
-  { name: "Identity & Access", completeness: 40, confidence: 45, trend: 2, trendDir: "up", verified: "May 07, 2025", quality: "Low", status: "Poor" },
-  { name: "Cybersecurity", completeness: 55, confidence: 57, trend: -2, trendDir: "down", verified: "May 07, 2025", quality: "Medium", status: "Fair" },
-  { name: "Observability", completeness: 60, confidence: 66, trend: 4, trendDir: "up", verified: "May 10, 2025", quality: "Medium", status: "Fair" },
-  { name: "Support & Operations", completeness: 78, confidence: 80, trend: 7, trendDir: "up", verified: "May 11, 2025", quality: "High", status: "Good" },
-  { name: "Data & Integrations", completeness: 50, confidence: 52, trend: 1, trendDir: "up", verified: "May 06, 2025", quality: "Low", status: "Fair" },
+  { name: "Application Overview", completeness: 85, confidence: 82, trend: 8, trendDir: "up", verified: "May 11, 2026", quality: "High", status: "Good" },
+  { name: "Architecture", completeness: 72, confidence: 74, trend: 5, trendDir: "up", verified: "May 10, 2026", quality: "High", status: "Good" },
+  { name: "Infrastructure", completeness: 64, confidence: 69, trend: 3, trendDir: "up", verified: "May 09, 2026", quality: "Medium", status: "Fair" },
+  { name: "Cloud", completeness: 58, confidence: 61, trend: 6, trendDir: "up", verified: "May 08, 2026", quality: "Medium", status: "Fair" },
+  { name: "Identity & Access", completeness: 40, confidence: 45, trend: 2, trendDir: "up", verified: "May 07, 2026", quality: "Low", status: "Poor" },
+  { name: "Cybersecurity", completeness: 55, confidence: 57, trend: -2, trendDir: "down", verified: "May 07, 2026", quality: "Medium", status: "Fair" },
+  { name: "Observability", completeness: 60, confidence: 66, trend: 4, trendDir: "up", verified: "May 10, 2026", quality: "Medium", status: "Fair" },
+  { name: "Support & Operations", completeness: 78, confidence: 80, trend: 7, trendDir: "up", verified: "May 11, 2026", quality: "High", status: "Good" },
+  { name: "Data & Integrations", completeness: 50, confidence: 52, trend: 1, trendDir: "up", verified: "May 06, 2026", quality: "Low", status: "Fair" },
 ];
 
 const MISSING = [
@@ -124,7 +124,7 @@ export default function DiscoveryConfidenceDemo() {
             <ProgressPill label="Overall Confidence" value="72%" />
             <div className="border-l border-border pl-3 pr-3">
               <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Last Updated</div>
-              <div className="font-semibold text-[11px]">May 12, 2025</div>
+              <div className="font-semibold text-[11px]">May 12, 2026</div>
             </div>
             <div className="border-l border-border pl-3 flex items-center gap-1.5">
               <div className="h-6 w-6 rounded-full bg-emerald-500 text-white text-[9px] font-bold flex items-center justify-center">SJ</div>
@@ -231,7 +231,7 @@ export default function DiscoveryConfidenceDemo() {
                       <td className="px-3 py-2"><ProgressBar value={68} color="#10b981" /></td>
                       <td className="px-3 py-2"><ProgressBar value={72} color="#3b82f6" /></td>
                       <td className="px-3 py-2"><span className="flex items-center gap-0.5 font-semibold text-[10px] text-emerald-600"><TrendingUp className="h-3 w-3" />▲ 6%</span></td>
-                      <td className="px-3 py-2 text-muted-foreground">May 12, 2025</td>
+                      <td className="px-3 py-2 text-muted-foreground">May 12, 2026</td>
                       <td className="px-3 py-2">—</td>
                       <td className="px-3 py-2"><StatusBadge v="Fair" /></td>
                     </tr>

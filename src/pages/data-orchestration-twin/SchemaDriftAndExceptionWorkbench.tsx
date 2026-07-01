@@ -217,7 +217,7 @@ export default function SchemaDriftAndExceptionWorkbench() {
         <div className="flex items-center gap-2 shrink-0">
           <div className="text-[11px] text-slate-500 mr-2 text-right leading-tight">
             <div>Last Updated</div>
-            <div className="font-semibold text-slate-700 tabular-nums">May 12, 2025 · 10:32 AM</div>
+            <div className="font-semibold text-slate-700 tabular-nums">May 12, 2026 · 10:32 AM</div>
           </div>
           <button className="h-9 px-3 rounded-lg border border-slate-200 text-[12px] font-medium text-slate-700 hover:bg-slate-50 inline-flex items-center gap-1.5"><Filter className="h-3.5 w-3.5" /> Filters</button>
           <button className="h-9 px-3 rounded-lg border border-slate-200 text-[12px] font-medium text-slate-700 hover:bg-slate-50 inline-flex items-center gap-1.5"><CalendarClock className="h-3.5 w-3.5" /> Time Range</button>

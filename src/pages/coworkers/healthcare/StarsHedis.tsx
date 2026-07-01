@@ -29,7 +29,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Low", tone: "green" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I continuously scan member data across clinical, pharmacy, social, and administrative sources to identify care gaps, stratify risk, and prime timely outreach and interventions. I track outcomes and measure impact on Stars, HEDIS, and QARR performance.",

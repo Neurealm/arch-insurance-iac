@@ -176,7 +176,7 @@ export default function FetchOrchestrationScheduler() {
             <p className="text-slate-400 text-sm mt-1 max-w-4xl">Every data source is continuously evaluated to determine the optimal fetch strategy using operational telemetry, source behavior, engineering rules, freshness targets, and business criticality.</p>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-slate-400">Last Updated <span className="text-slate-700 font-medium ml-1">May 12, 2025 · 10:32 AM</span></span>
+            <span className="text-slate-400">Last Updated <span className="text-slate-700 font-medium ml-1">May 12, 2026 · 10:32 AM</span></span>
             <button className="ml-3 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 inline-flex items-center gap-2"><Filter className="h-4 w-4"/>Filters</button>
             <button className="px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 inline-flex items-center gap-2"><Timer className="h-4 w-4"/>24h</button>
             <button onClick={() => openDrawer("Adaptive Scheduling Simulation", "sim")} className="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 inline-flex items-center gap-2"><Play className="h-4 w-4"/>Run Simulation</button>

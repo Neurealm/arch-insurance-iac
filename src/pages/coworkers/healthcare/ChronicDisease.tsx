@@ -29,7 +29,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "Medium", tone: "yellow" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I identify members with chronic conditions, prioritize outreach based on risk, coordinate care interventions, and track engagement to improve clinical outcomes and close care gaps.",

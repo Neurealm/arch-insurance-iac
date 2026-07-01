@@ -50,11 +50,11 @@ const distribution = [
 ];
 
 const waves = [
-  { w: "Wave 1 (Foundation)", status: "Completed",   sc: "bg-emerald-100 text-emerald-700", total: 160, mig: 160, pct: 100, date: "Mar 15, 2025", bar: "hsl(142 71% 45%)" },
-  { w: "Wave 2",              status: "Completed",   sc: "bg-emerald-100 text-emerald-700", total: 210, mig: 210, pct: 100, date: "Apr 15, 2025", bar: "hsl(142 71% 45%)" },
-  { w: "Wave 3",              status: "In Progress", sc: "bg-amber-100 text-amber-700",     total: 280, mig: 196, pct: 70,  date: "May 15, 2025", bar: "hsl(38 92% 50%)" },
-  { w: "Wave 4",              status: "In Progress", sc: "bg-amber-100 text-amber-700",     total: 320, mig: 96,  pct: 30,  date: "Jun 15, 2025", bar: "hsl(38 92% 50%)" },
-  { w: "Wave 5",              status: "Planned",     sc: "bg-blue-100 text-blue-700",       total: 308, mig: 0,   pct: 0,   date: "Jul 15, 2025", bar: "hsl(217 91% 60%)" },
+  { w: "Wave 1 (Foundation)", status: "Completed",   sc: "bg-emerald-100 text-emerald-700", total: 160, mig: 160, pct: 100, date: "Mar 15, 2026", bar: "hsl(142 71% 45%)" },
+  { w: "Wave 2",              status: "Completed",   sc: "bg-emerald-100 text-emerald-700", total: 210, mig: 210, pct: 100, date: "Apr 15, 2026", bar: "hsl(142 71% 45%)" },
+  { w: "Wave 3",              status: "In Progress", sc: "bg-amber-100 text-amber-700",     total: 280, mig: 196, pct: 70,  date: "May 15, 2026", bar: "hsl(38 92% 50%)" },
+  { w: "Wave 4",              status: "In Progress", sc: "bg-amber-100 text-amber-700",     total: 320, mig: 96,  pct: 30,  date: "Jun 15, 2026", bar: "hsl(38 92% 50%)" },
+  { w: "Wave 5",              status: "Planned",     sc: "bg-blue-100 text-blue-700",       total: 308, mig: 0,   pct: 0,   date: "Jul 15, 2026", bar: "hsl(217 91% 60%)" },
 ];
 
 const day1 = [

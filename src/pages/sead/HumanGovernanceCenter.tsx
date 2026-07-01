@@ -87,7 +87,7 @@ function AppHeader({ onPalette }: { onPalette: () => void }) {
         <ChevronDown className="h-3.5 w-3.5 text-slate-400 ml-1" />
       </div>
       <div className="h-11 px-3 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center gap-2">
-        <div className="text-[11.5px] text-slate-300">May 23, 2025 · 10:24 AM CT</div>
+        <div className="text-[11.5px] text-slate-300">May 23, 2026 · 10:24 AM CT</div>
         <span className="flex items-center gap-1 text-[10px] text-emerald-300">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
         </span>
@@ -203,7 +203,7 @@ function EquipmentStrip({ onOpen, approvedCount, total }: any) {
         <div className="leading-tight">
           <span className="inline-block px-2 py-0.5 rounded bg-emerald-500/15 ring-1 ring-emerald-400/30 text-emerald-300 text-[10.5px] font-semibold">Maintain Tonight</span>
           <div className="text-[11.5px] text-slate-300 mt-1">10:00 PM – 2:00 AM</div>
-          <div className="text-[10.5px] text-slate-500">May 23, 2025</div>
+          <div className="text-[10.5px] text-slate-500">May 23, 2026</div>
         </div>
         <div className="flex-1 flex items-stretch gap-5 flex-wrap">
           {items.map((m: any) => (
@@ -319,7 +319,7 @@ function MyApprovalTask({ approval, onAction, onInfo }: { approval: Approval; on
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Recommendation</div>
           <div className="text-[14px] font-semibold text-emerald-300 mt-1">Maintain Tonight</div>
           <div className="text-[11px] text-slate-300">10:00 PM – 2:00 AM</div>
-          <div className="text-[10.5px] text-slate-500">May 23, 2025</div>
+          <div className="text-[10.5px] text-slate-500">May 23, 2026</div>
         </div>
         <div className="col-span-6 lg:col-span-2 p-3 rounded-lg bg-white/[0.025] ring-1 ring-white/5">
           <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Your Decision</div>
@@ -448,7 +448,7 @@ function DecisionSummary({ onOpen, approvedCount, total }: any) {
       <div className="text-[13.5px] font-semibold text-white mb-3">Decision Summary</div>
       <div className="text-[10.5px] uppercase tracking-wider text-slate-500">AI Recommendation</div>
       <div className="text-[20px] font-bold text-emerald-300">Maintain Tonight</div>
-      <div className="text-[11px] text-slate-400">10:00 PM – 2:00 AM · May 23, 2025</div>
+      <div className="text-[11px] text-slate-400">10:00 PM – 2:00 AM · May 23, 2026</div>
       <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/[0.04] ring-1 ring-white/10 text-[10.5px] text-slate-300">
         <span className="h-1.5 w-1.5 rounded-full bg-sky-400 animate-pulse" /> {status}
       </div>
@@ -542,7 +542,7 @@ function GovernanceFooter({ onOpen }: any) {
         <div className="col-span-12 md:col-span-3">
           <div className="text-[12.5px] font-semibold text-white mb-2">Governance Policy</div>
           <button onClick={() => onOpen("policy")} className="text-[11.5px] text-sky-300 hover:text-sky-200 text-left">Maintenance Decision Policy v2.1</button>
-          <div className="text-[10.5px] text-slate-500 mt-1">Last Updated: Apr 12, 2025</div>
+          <div className="text-[10.5px] text-slate-500 mt-1">Last Updated: Apr 12, 2026</div>
         </div>
         <div className="col-span-12 md:col-span-3">
           <div className="text-[12.5px] font-semibold text-white mb-2">Approval Rules</div>

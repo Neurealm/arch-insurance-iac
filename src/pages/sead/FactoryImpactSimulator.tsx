@@ -733,8 +733,8 @@ function IntelligenceDrawer({ open, id, onClose }: any) {
               )}
               {tab === "Historical" && (
                 <ul className="space-y-1.5">
-                  <li>ETCH-203 · 2024-11 — analogous PM tonight window, prevented 18h unplanned downtime</li>
-                  <li>ETCH-211 · 2025-02 — deferred PM, caused 22h unplanned downtime</li>
+                  <li>ETCH-203 · 2026-11 — analogous PM tonight window, prevented 18h unplanned downtime</li>
+                  <li>ETCH-211 · 2026-02 — deferred PM, caused 22h unplanned downtime</li>
                 </ul>
               )}
             </div>

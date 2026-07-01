@@ -27,7 +27,7 @@ export function CyberHeader({
       </div>
       <div className="flex items-start gap-2">
         <button className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border bg-card shadow-sm">
-          <Calendar className="h-3.5 w-3.5" /> May 12 – Jun 12, 2024
+          <Calendar className="h-3.5 w-3.5" /> May 12 – Jun 12, 2026
         </button>
         <button className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border bg-card shadow-sm">
           <Filter className="h-3.5 w-3.5" /> Filters

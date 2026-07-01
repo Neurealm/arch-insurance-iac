@@ -26,7 +26,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "High", tone: "orange" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I continuously monitor identities, access, and authentication activity. I detect risky access, manage OAuth sprawl, and ensure compliance with access policies and reviews.",
@@ -86,7 +86,7 @@ const config: CoworkerConfig = {
     items: [
       { time: "7:55 AM", tone: "red", icon: AlertTriangle, title: "Privilege escalation detected", subtitle: "Admin account used outside policy" },
       { time: "7:38 AM", tone: "orange", icon: KeyRound, title: "New OAuth app with high privileges", subtitle: "Finance API access" },
-      { time: "7:21 AM", tone: "blue", icon: Info, title: "Access review campaign launched", subtitle: "Q2 2025 – Certify by June 10" },
+      { time: "7:21 AM", tone: "blue", icon: Info, title: "Access review campaign launched", subtitle: "Q2 2026 – Certify by June 10" },
       { time: "7:05 AM", tone: "green", icon: CheckCircle2, title: "Dormant accounts disabled", subtitle: "126 accounts" },
       { time: "6:48 AM", tone: "green", icon: TrendingUp, title: "Daily identity governance report", subtitle: "Available in Reports" },
     ],

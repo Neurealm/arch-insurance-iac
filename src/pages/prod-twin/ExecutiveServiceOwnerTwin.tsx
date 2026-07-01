@@ -83,19 +83,19 @@ const businessOutcomes = [
 ];
 
 const actionQueue = [
-  { priority: "High",   initiative: "Container Platform Modernization", desc: "Migrate priority apps to Kubernetes platform", due: "Sep 30, 2025", status: "On Track", progress: 68, impact: "High" },
-  { priority: "High",   initiative: "Major Incident Process Transformation", desc: "Implement proactive detection & response", due: "Aug 15, 2025", status: "On Track", progress: 73, impact: "High" },
-  { priority: "High",   initiative: "Agentic Operations Rollout", desc: "Deploy AI agents for incident triage & remediation", due: "Oct 15, 2025", status: "At Risk", progress: 45, impact: "High" },
-  { priority: "Medium", initiative: "Cloud Cost Optimization Program", desc: "Rightsize, reservations, and savings plans", due: "Dec 31, 2025", status: "On Track", progress: 60, impact: "Medium" },
+  { priority: "High",   initiative: "Container Platform Modernization", desc: "Migrate priority apps to Kubernetes platform", due: "Sep 30, 2026", status: "On Track", progress: 68, impact: "High" },
+  { priority: "High",   initiative: "Major Incident Process Transformation", desc: "Implement proactive detection & response", due: "Aug 15, 2026", status: "On Track", progress: 73, impact: "High" },
+  { priority: "High",   initiative: "Agentic Operations Rollout", desc: "Deploy AI agents for incident triage & remediation", due: "Oct 15, 2026", status: "At Risk", progress: 45, impact: "High" },
+  { priority: "Medium", initiative: "Cloud Cost Optimization Program", desc: "Rightsize, reservations, and savings plans", due: "Dec 31, 2026", status: "On Track", progress: 60, impact: "Medium" },
   { priority: "Medium", initiative: "Acquisition Onboarding Factory", desc: "Standardize onboarding for acquired platforms", due: "Ongoing", status: "On Track", progress: 80, impact: "High" },
 ];
 
 const reviews = [
-  { name: "QBR – Executive Review",       date: "May 22, 2025" },
-  { name: "Ops Steering Committee",       date: "May 16, 2025" },
-  { name: "Board Technology Update",      date: "Jun 5, 2025" },
-  { name: "Vendor Performance Review",    date: "Jun 12, 2025" },
-  { name: "SLA Governance Review",        date: "May 30, 2025" },
+  { name: "QBR – Executive Review",       date: "May 22, 2026" },
+  { name: "Ops Steering Committee",       date: "May 16, 2026" },
+  { name: "Board Technology Update",      date: "Jun 5, 2026" },
+  { name: "Vendor Performance Review",    date: "Jun 12, 2026" },
+  { name: "SLA Governance Review",        date: "May 30, 2026" },
 ];
 
 const aiInsights = [
@@ -743,7 +743,7 @@ export default function ExecutiveServiceOwnerTwin() {
                 <span className="font-bold text-emerald-700">92%</span>
               </div>
               <Progress value={92} className="h-1.5 mt-1 [&>div]:bg-emerald-500" />
-              <div className="text-[10px] text-slate-500 mt-2">Insights generated: May 14, 2025 • 8:45 AM</div>
+              <div className="text-[10px] text-slate-500 mt-2">Insights generated: May 14, 2026 • 8:45 AM</div>
             </section>
 
             {/* Next Reviews */}

@@ -115,7 +115,7 @@ const ALERT_COUNTS = [
 
 const RECENT_EVENTS = [
   { t: "10:19 AM", title: "MET-217 vibration trend change detected",   tag: "Monitoring", tagColor: "text-amber-300" },
-  { t: "10:15 AM", title: "Work Order WO-2025-05-217 created",         tag: "Maintenance", tagColor: "text-sky-300" },
+  { t: "10:15 AM", title: "Work Order WO-2026-05-217 created",         tag: "Maintenance", tagColor: "text-sky-300" },
   { t: "10:12 AM", title: "Bay 3 AMHS delay threshold exceeded",       tag: "Dispatch",    tagColor: "text-amber-300" },
   { t: "10:08 AM", title: "Chiller Loop B flow deviation",             tag: "Facilities",  tagColor: "text-amber-300" },
 ];

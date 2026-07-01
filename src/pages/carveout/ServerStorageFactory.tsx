@@ -99,11 +99,11 @@ const repos = [
 ];
 
 const activities = [
-  { icon: CheckCircle, color: "text-emerald-600", text: "512 builds completed successfully", time: "May 12, 2025 09:15 AM" },
-  { icon: Info, color: "text-blue-600", text: "New template 'GPU Compute Node' published", time: "May 11, 2025 04:32 PM" },
-  { icon: Info, color: "text-blue-600", text: "Base image Windows Server 2022 v3 updated", time: "May 11, 2025 11:08 AM" },
-  { icon: AlertTriangle, color: "text-red-500", text: "28 build failures detected and remediated", time: "May 10, 2025 02:30 PM" },
-  { icon: Info, color: "text-blue-600", text: "IaC module 'networking-v2' released", time: "May 09, 2025 10:21 AM" },
+  { icon: CheckCircle, color: "text-emerald-600", text: "512 builds completed successfully", time: "May 12, 2026 09:15 AM" },
+  { icon: Info, color: "text-blue-600", text: "New template 'GPU Compute Node' published", time: "May 11, 2026 04:32 PM" },
+  { icon: Info, color: "text-blue-600", text: "Base image Windows Server 2022 v3 updated", time: "May 11, 2026 11:08 AM" },
+  { icon: AlertTriangle, color: "text-red-500", text: "28 build failures detected and remediated", time: "May 10, 2026 02:30 PM" },
+  { icon: Info, color: "text-blue-600", text: "IaC module 'networking-v2' released", time: "May 09, 2026 10:21 AM" },
 ];
 
 function statusTone(s: string) {

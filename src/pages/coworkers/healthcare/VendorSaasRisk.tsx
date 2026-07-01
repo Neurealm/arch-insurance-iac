@@ -26,7 +26,7 @@ const config: CoworkerConfig = {
     ],
     automation: "Supervised (Human-in-the-Loop)",
     risk: { label: "High", tone: "orange" },
-    updated: "May 27, 2025 8:00 AM ET",
+    updated: "May 27, 2026 8:00 AM ET",
   },
   whatIDo: {
     paragraph: "I maintain visibility into vendor and SaaS services that Health Plan relies on. I assess risk, monitor operational health, and coordinate response to reduce impact and improve resilience.",

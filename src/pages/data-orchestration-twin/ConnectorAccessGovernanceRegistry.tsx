@@ -54,18 +54,18 @@ type Row = {
 };
 
 const ROWS: Row[] = [
-  { name:"panw_ngfw_traffic_raw",   desc:"NGFW Traffic Logs",     platform:"Cortex XSIAM",   icon:Shield,  iconTone:"amber",   connectorType:"XQL",       accessMethod:"XQL API",     auth:"Service Account", access:"Read Only", credOwner:"SecOps Platform", approver:"Ravi Shankar", status:"Secure",  policy:"v4.2.1", credAge:22, lastRotation:"May 05 2025", latency:18, lastSync:"10:12 AM", health:98 },
-  { name:"panw_ngfw_system_raw",    desc:"NGFW System Events",    platform:"Cortex XSIAM",   icon:Shield,  iconTone:"amber",   connectorType:"XQL",       accessMethod:"XQL API",     auth:"Service Account", access:"Read Only", credOwner:"SecOps Platform", approver:"Ravi Shankar", status:"Secure",  policy:"v4.2.1", credAge:22, lastRotation:"May 05 2025", latency:22, lastSync:"09:58 AM", health:96 },
-  { name:"firewall_threat_logs",    desc:"Threat/URL/Content",    platform:"Cortex XSIAM",   icon:Shield,  iconTone:"slate",   connectorType:"XQL",       accessMethod:"XQL API",     auth:"Service Account", access:"Read Only", credOwner:"Threat Intel Team", approver:"Arjun Kumar", status:"Secure", policy:"v4.2.1", credAge:41, lastRotation:"Apr 12 2025", latency:31, lastSync:"09:45 AM", health:94 },
-  { name:"vpn_globalprotect_logs",  desc:"GlobalProtect VPN Logs",platform:"Cortex XSIAM",   icon:Shield,  iconTone:"amber",   connectorType:"XQL",       accessMethod:"XQL API",     auth:"Service Account", access:"Read Only", credOwner:"Network Ops",       approver:"Priya J.",     status:"Secure",  policy:"v4.2.1", credAge:14, lastRotation:"May 12 2025", latency:19, lastSync:"09:41 AM", health:97 },
-  { name:"gcp_billing_export",      desc:"GCP Billing Export",    platform:"Google BigQuery",icon:Database,iconTone:"blue",    connectorType:"SQL",       accessMethod:"BigQuery SQL",auth:"Service Account", access:"Read Only", credOwner:"FinOps",            approver:"Suresh B.",    status:"Secure",  policy:"v3.8.0", credAge:8,  lastRotation:"May 18 2025", latency:74, lastSync:"10:10 AM", health:92 },
-  { name:"gcp_cloud_audit_logs",    desc:"Cloud Audit Logs",      platform:"Google BigQuery",icon:Database,iconTone:"blue",    connectorType:"SQL",       accessMethod:"BigQuery SQL",auth:"Service Account", access:"Read Only", credOwner:"Cloud Ops",         approver:"Naveen K.",    status:"Secure",  policy:"v3.8.0", credAge:8,  lastRotation:"May 18 2025", latency:68, lastSync:"10:05 AM", health:95 },
-  { name:"logicmonitor_device_stats",desc:"Device Performance Stats", platform:"LogicMonitor", icon:Activity, iconTone:"emerald", connectorType:"REST API", accessMethod:"REST API", auth:"API Key",         access:"Read Only", credOwner:"Infra Ops",         approver:"Meena R.",     status:"Secure",  policy:"v2.1.4", credAge:56, lastRotation:"Mar 28 2025", latency:112, lastSync:"09:50 AM", health:89 },
-  { name:"logicmonitor_alerts",     desc:"Infrastructure Alerts", platform:"LogicMonitor",   icon:Activity,iconTone:"emerald", connectorType:"REST API", accessMethod:"REST API",  auth:"API Key",         access:"Read Only", credOwner:"Infra Ops",         approver:"Meena R.",     status:"Secure",  policy:"v2.1.4", credAge:56, lastRotation:"Mar 28 2025", latency:98,  lastSync:"09:48 AM", health:91 },
-  { name:"datadog_metrics",         desc:"Metrics & Events",      platform:"Datadog",        icon:Activity,iconTone:"violet",  connectorType:"REST API", accessMethod:"REST API",  auth:"API Key",         access:"Read Only", credOwner:"Cloud Ops",         approver:"Naveen K.",    status:"Secure",  policy:"v2.1.4", credAge:12, lastRotation:"May 14 2025", latency:64,  lastSync:"10:01 AM", health:96 },
-  { name:"k8s_cluster_logs",        desc:"Kubernetes Cluster Logs", platform:"Kubernetes API", icon:Cpu,   iconTone:"cyan",   connectorType:"MCP",       accessMethod:"MCP Tool",    auth:"MCP",             access:"Read Only", credOwner:"Platform Eng",      approver:"Arjun Kumar",  status:"Warning", policy:"v1.9.7", credAge:82, lastRotation:"Mar 04 2025", latency:41,  lastSync:"08:22 AM", health:74 },
-  { name:"file_ingest_sftp",        desc:"Partner Data Ingest",   platform:"SFTP Server",    icon:Server,  iconTone:"slate",   connectorType:"SFTP",      accessMethod:"SFTP",        auth:"SSH Key",         access:"Read Only", credOwner:"Data Engineering",  approver:"Ravi Shankar", status:"Secure",  policy:"v2.0.0", credAge:44, lastRotation:"Apr 09 2025", latency:210, lastSync:"09:30 AM", health:88 },
-  { name:"threat_intel_feeds",      desc:"External Threat Feeds", platform:"Public API",     icon:Radio,   iconTone:"emerald", connectorType:"REST API", accessMethod:"REST API",  auth:"API Key",         access:"Read Only", credOwner:"Threat Intel Team", approver:"Arjun Kumar",  status:"Secure",  policy:"v2.1.4", credAge:19, lastRotation:"May 07 2025", latency:180, lastSync:"09:55 AM", health:93 },
+  { name:"panw_ngfw_traffic_raw",   desc:"NGFW Traffic Logs",     platform:"Cortex XSIAM",   icon:Shield,  iconTone:"amber",   connectorType:"XQL",       accessMethod:"XQL API",     auth:"Service Account", access:"Read Only", credOwner:"SecOps Platform", approver:"Ravi Shankar", status:"Secure",  policy:"v4.2.1", credAge:22, lastRotation:"May 05 2026", latency:18, lastSync:"10:12 AM", health:98 },
+  { name:"panw_ngfw_system_raw",    desc:"NGFW System Events",    platform:"Cortex XSIAM",   icon:Shield,  iconTone:"amber",   connectorType:"XQL",       accessMethod:"XQL API",     auth:"Service Account", access:"Read Only", credOwner:"SecOps Platform", approver:"Ravi Shankar", status:"Secure",  policy:"v4.2.1", credAge:22, lastRotation:"May 05 2026", latency:22, lastSync:"09:58 AM", health:96 },
+  { name:"firewall_threat_logs",    desc:"Threat/URL/Content",    platform:"Cortex XSIAM",   icon:Shield,  iconTone:"slate",   connectorType:"XQL",       accessMethod:"XQL API",     auth:"Service Account", access:"Read Only", credOwner:"Threat Intel Team", approver:"Arjun Kumar", status:"Secure", policy:"v4.2.1", credAge:41, lastRotation:"Apr 12 2026", latency:31, lastSync:"09:45 AM", health:94 },
+  { name:"vpn_globalprotect_logs",  desc:"GlobalProtect VPN Logs",platform:"Cortex XSIAM",   icon:Shield,  iconTone:"amber",   connectorType:"XQL",       accessMethod:"XQL API",     auth:"Service Account", access:"Read Only", credOwner:"Network Ops",       approver:"Priya J.",     status:"Secure",  policy:"v4.2.1", credAge:14, lastRotation:"May 12 2026", latency:19, lastSync:"09:41 AM", health:97 },
+  { name:"gcp_billing_export",      desc:"GCP Billing Export",    platform:"Google BigQuery",icon:Database,iconTone:"blue",    connectorType:"SQL",       accessMethod:"BigQuery SQL",auth:"Service Account", access:"Read Only", credOwner:"FinOps",            approver:"Suresh B.",    status:"Secure",  policy:"v3.8.0", credAge:8,  lastRotation:"May 18 2026", latency:74, lastSync:"10:10 AM", health:92 },
+  { name:"gcp_cloud_audit_logs",    desc:"Cloud Audit Logs",      platform:"Google BigQuery",icon:Database,iconTone:"blue",    connectorType:"SQL",       accessMethod:"BigQuery SQL",auth:"Service Account", access:"Read Only", credOwner:"Cloud Ops",         approver:"Naveen K.",    status:"Secure",  policy:"v3.8.0", credAge:8,  lastRotation:"May 18 2026", latency:68, lastSync:"10:05 AM", health:95 },
+  { name:"logicmonitor_device_stats",desc:"Device Performance Stats", platform:"LogicMonitor", icon:Activity, iconTone:"emerald", connectorType:"REST API", accessMethod:"REST API", auth:"API Key",         access:"Read Only", credOwner:"Infra Ops",         approver:"Meena R.",     status:"Secure",  policy:"v2.1.4", credAge:56, lastRotation:"Mar 28 2026", latency:112, lastSync:"09:50 AM", health:89 },
+  { name:"logicmonitor_alerts",     desc:"Infrastructure Alerts", platform:"LogicMonitor",   icon:Activity,iconTone:"emerald", connectorType:"REST API", accessMethod:"REST API",  auth:"API Key",         access:"Read Only", credOwner:"Infra Ops",         approver:"Meena R.",     status:"Secure",  policy:"v2.1.4", credAge:56, lastRotation:"Mar 28 2026", latency:98,  lastSync:"09:48 AM", health:91 },
+  { name:"datadog_metrics",         desc:"Metrics & Events",      platform:"Datadog",        icon:Activity,iconTone:"violet",  connectorType:"REST API", accessMethod:"REST API",  auth:"API Key",         access:"Read Only", credOwner:"Cloud Ops",         approver:"Naveen K.",    status:"Secure",  policy:"v2.1.4", credAge:12, lastRotation:"May 14 2026", latency:64,  lastSync:"10:01 AM", health:96 },
+  { name:"k8s_cluster_logs",        desc:"Kubernetes Cluster Logs", platform:"Kubernetes API", icon:Cpu,   iconTone:"cyan",   connectorType:"MCP",       accessMethod:"MCP Tool",    auth:"MCP",             access:"Read Only", credOwner:"Platform Eng",      approver:"Arjun Kumar",  status:"Warning", policy:"v1.9.7", credAge:82, lastRotation:"Mar 04 2026", latency:41,  lastSync:"08:22 AM", health:74 },
+  { name:"file_ingest_sftp",        desc:"Partner Data Ingest",   platform:"SFTP Server",    icon:Server,  iconTone:"slate",   connectorType:"SFTP",      accessMethod:"SFTP",        auth:"SSH Key",         access:"Read Only", credOwner:"Data Engineering",  approver:"Ravi Shankar", status:"Secure",  policy:"v2.0.0", credAge:44, lastRotation:"Apr 09 2026", latency:210, lastSync:"09:30 AM", health:88 },
+  { name:"threat_intel_feeds",      desc:"External Threat Feeds", platform:"Public API",     icon:Radio,   iconTone:"emerald", connectorType:"REST API", accessMethod:"REST API",  auth:"API Key",         access:"Read Only", credOwner:"Threat Intel Team", approver:"Arjun Kumar",  status:"Secure",  policy:"v2.1.4", credAge:19, lastRotation:"May 07 2026", latency:180, lastSync:"09:55 AM", health:93 },
 ];
 
 const AUTH_SEG = [
@@ -162,7 +162,7 @@ export default function ConnectorAccessGovernanceRegistry() {
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs text-slate-500">Last Updated <b className="text-slate-700">May 12, 2025 10:32 AM</b></span>
+            <span className="text-xs text-slate-500">Last Updated <b className="text-slate-700">May 12, 2026 10:32 AM</b></span>
             <button onClick={()=>open("Filters")} className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50">
               <Filter size={14}/> Filters
             </button>
@@ -277,7 +277,7 @@ export default function ConnectorAccessGovernanceRegistry() {
                         )}
                       </td>
                       <td className="px-2 py-2 text-slate-600">
-                        <div>May 12, 2025</div>
+                        <div>May 12, 2026</div>
                         <div className="text-[10px] text-slate-400">{r.lastSync}</div>
                       </td>
                       <td className="px-2 py-2 text-right">
@@ -709,7 +709,7 @@ export default function ConnectorAccessGovernanceRegistry() {
                   ["Network",             "Private link · VPC peered"],
                   ["MCP",                 "Registry v2.4"],
                   ["Service Accounts",    "sa-orchestrator"],
-                  ["Certificates",        "corp-ca-2025"],
+                  ["Certificates",        "corp-ca-2026"],
                   ["Downstream",          "XSIAM, SRE, FinOps"],
                   ["Ownership",           selected.credOwner],
                   ["Risk",                "Low"],

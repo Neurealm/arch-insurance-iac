@@ -34,7 +34,7 @@ function AppHeader() {
         <Factory className="h-4 w-4 text-sky-300" /> Fab: DFW Semiconductor Fab
       </div>
       <div className="h-11 px-3 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center gap-2 text-[12px] text-slate-300">
-        <span>May 23, 2025 10:24 AM CT</span>
+        <span>May 23, 2026 10:24 AM CT</span>
         <span className="ml-2 inline-flex items-center gap-1 text-emerald-300">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
         </span>
@@ -99,7 +99,7 @@ const clamp = (n: number, a: number, b: number) => Math.max(a, Math.min(b, n));
 /* ============================= page ============================= */
 export default function EngineeringSandbox() {
   // Parameters
-  const baseStart = new Date(2025, 4, 28, 22, 0);
+  const baseStart = new Date(2026, 4, 28, 22, 0);
   const [startOffsetH, setStartOffsetH] = useState(0); // hours from May 27 8 PM .. May 29 4 AM
   const [duration, setDuration] = useState(4.0);
   const [safetyStock, setSafetyStock] = useState(6);
@@ -160,7 +160,7 @@ export default function EngineeringSandbox() {
   }, [m]);
 
   const xs = useMemo(() => Array.from({ length: days }).map((_, i) => {
-    const d = new Date(2025, 4, 28 + i);
+    const d = new Date(2026, 4, 28 + i);
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }), []);
 
@@ -509,9 +509,9 @@ export default function EngineeringSandbox() {
                 </thead>
                 <tbody>
                   {[
-                    { n: "Experiment 1 (Current)", d: "May 23, 2025 10:22 AM", p: 3, im: "Low (–$0.07M)", ic: "text-emerald-300", cf: "86%" },
-                    { n: "Earlier Window Test", d: "May 23, 2025 9:45 AM", p: 2, im: "Medium (+$0.12M)", ic: "text-amber-300", cf: "83%" },
-                    { n: "Longer Duration Test", d: "May 22, 2025 4:15 PM", p: 2, im: "Low (–$0.03M)", ic: "text-emerald-300", cf: "88%" },
+                    { n: "Experiment 1 (Current)", d: "May 23, 2026 10:22 AM", p: 3, im: "Low (–$0.07M)", ic: "text-emerald-300", cf: "86%" },
+                    { n: "Earlier Window Test", d: "May 23, 2026 9:45 AM", p: 2, im: "Medium (+$0.12M)", ic: "text-amber-300", cf: "83%" },
+                    { n: "Longer Duration Test", d: "May 22, 2026 4:15 PM", p: 2, im: "Low (–$0.03M)", ic: "text-emerald-300", cf: "88%" },
                   ].map((r) => (
                     <tr key={r.n} className="border-t border-white/[0.06] hover:bg-white/[0.02]">
                       <td className="px-3 py-2.5 text-slate-200">{r.n}</td>

@@ -66,12 +66,12 @@ const phaseDonut = [
 ];
 
 const sites = [
-  { name: "Boston-DC1",       region: "North America", status: "Completed",  rack: "12 / 12 (100%)", cabling: "12 / 12 (100%)", ready: "Yes", target: "Apr 25, 2025" },
-  { name: "London-DC1",       region: "Europe",        status: "Completed",  rack: "18 / 18 (100%)", cabling: "18 / 18 (100%)", ready: "Yes", target: "Apr 28, 2025" },
-  { name: "Singapore-DC1",    region: "Asia Pacific",  status: "In Progress", rack: "22 / 30 (73%)",  cabling: "16 / 30 (53%)",  ready: "No",  target: "May 20, 2025" },
-  { name: "Sydney-DC1",       region: "Australia",     status: "In Progress", rack: "12 / 20 (60%)",  cabling: "8 / 20 (40%)",   ready: "No",  target: "May 18, 2025" },
-  { name: "SaoPaulo-DC1",     region: "South America", status: "In Progress", rack: "10 / 14 (72%)",  cabling: "9 / 14 (64%)",   ready: "No",  target: "May 15, 2025" },
-  { name: "Johannesburg-DC1", region: "Africa",        status: "At Risk",    rack: "6 / 16 (38%)",   cabling: "3 / 16 (19%)",   ready: "No",  target: "May 25, 2025" },
+  { name: "Boston-DC1",       region: "North America", status: "Completed",  rack: "12 / 12 (100%)", cabling: "12 / 12 (100%)", ready: "Yes", target: "Apr 25, 2026" },
+  { name: "London-DC1",       region: "Europe",        status: "Completed",  rack: "18 / 18 (100%)", cabling: "18 / 18 (100%)", ready: "Yes", target: "Apr 28, 2026" },
+  { name: "Singapore-DC1",    region: "Asia Pacific",  status: "In Progress", rack: "22 / 30 (73%)",  cabling: "16 / 30 (53%)",  ready: "No",  target: "May 20, 2026" },
+  { name: "Sydney-DC1",       region: "Australia",     status: "In Progress", rack: "12 / 20 (60%)",  cabling: "8 / 20 (40%)",   ready: "No",  target: "May 18, 2026" },
+  { name: "SaoPaulo-DC1",     region: "South America", status: "In Progress", rack: "10 / 14 (72%)",  cabling: "9 / 14 (64%)",   ready: "No",  target: "May 15, 2026" },
+  { name: "Johannesburg-DC1", region: "Africa",        status: "At Risk",    rack: "6 / 16 (38%)",   cabling: "3 / 16 (19%)",   ready: "No",  target: "May 25, 2026" },
 ];
 
 const activitySummary = [
@@ -84,13 +84,13 @@ const activitySummary = [
 ];
 
 const recent = [
-  { time: "May 12, 2025 09:15 AM", activity: "Rack installation completed (6 racks)", site: "Boston-DC1",       status: "Completed" },
-  { time: "May 12, 2025 08:45 AM", activity: "Network cabling completed (12 runs)",   site: "London-DC1",       status: "Completed" },
-  { time: "May 12, 2025 07:30 AM", activity: "Power verification passed",             site: "Singapore-DC1",    status: "Completed" },
-  { time: "May 11, 2025 06:20 PM", activity: "Racks delivered (10)",                  site: "Sydney-DC1",       status: "In Progress" },
-  { time: "May 11, 2025 05:05 PM", activity: "Network cabling in progress (40%)",     site: "SaoPaulo-DC1",     status: "In Progress" },
-  { time: "May 11, 2025 04:10 PM", activity: "Site survey completed",                 site: "Johannesburg-DC1", status: "Completed" },
-  { time: "May 11, 2025 03:22 PM", activity: "Power issue detected — remediation in progress", site: "Singapore-DC1", status: "At Risk" },
+  { time: "May 12, 2026 09:15 AM", activity: "Rack installation completed (6 racks)", site: "Boston-DC1",       status: "Completed" },
+  { time: "May 12, 2026 08:45 AM", activity: "Network cabling completed (12 runs)",   site: "London-DC1",       status: "Completed" },
+  { time: "May 12, 2026 07:30 AM", activity: "Power verification passed",             site: "Singapore-DC1",    status: "Completed" },
+  { time: "May 11, 2026 06:20 PM", activity: "Racks delivered (10)",                  site: "Sydney-DC1",       status: "In Progress" },
+  { time: "May 11, 2026 05:05 PM", activity: "Network cabling in progress (40%)",     site: "SaoPaulo-DC1",     status: "In Progress" },
+  { time: "May 11, 2026 04:10 PM", activity: "Site survey completed",                 site: "Johannesburg-DC1", status: "Completed" },
+  { time: "May 11, 2026 03:22 PM", activity: "Power issue detected — remediation in progress", site: "Singapore-DC1", status: "At Risk" },
 ];
 
 const milestones = [

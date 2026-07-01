@@ -63,12 +63,12 @@ type Row = {
 };
 
 const ROWS: Row[] = [
-  { id:45, name:"container_logs",   platform:"Kubernetes API", icon:Boxes,    iconTone:"cyan",    dataType:"Logs",    template:"K8s Logs v2",       stage:"5. Test & Validate",     progress:70,  owner:"Neeraj K.", started:"May 12, 2025", eta:"May 15, 2025", status:"In Progress", conf:0.92, auto:0.94 },
-  { id:44, name:"saas_audit_events",platform:"REST API",       icon:Cloud,    iconTone:"blue",    dataType:"Audit",   template:"SaaS Audit v1",     stage:"3. Configure & Map",     progress:45,  owner:"Priya J.",  started:"May 11, 2025", eta:"May 14, 2025", status:"In Progress", conf:0.88, auto:0.91 },
-  { id:43, name:"endpoint_metrics", platform:"LogicMonitor",   icon:Activity, iconTone:"emerald", dataType:"Metrics", template:"Metrics v1",        stage:"4. Set Placement",       progress:60,  owner:"Arjun K.",  started:"May 10, 2025", eta:"May 13, 2025", status:"In Progress", conf:0.9,  auto:0.93 },
-  { id:42, name:"threat_intel_feed",platform:"SFTP Server",    icon:Server,   iconTone:"slate",   dataType:"Feed",    template:"Threat Feed v1",    stage:"6. Security & Access",   progress:80,  owner:"Meena R.",  started:"May 9, 2025",  eta:"May 12, 2025", status:"In Progress", conf:0.86, auto:0.9  },
-  { id:41, name:"billing_export",   platform:"BigQuery",       icon:Database, iconTone:"blue",    dataType:"Billing", template:"Billing v1",        stage:"7. Schedule & Activate", progress:90,  owner:"Suresh B.", started:"May 8, 2025",  eta:"May 11, 2025", status:"Testing",     conf:0.94, auto:0.96 },
-  { id:40, name:"xdr_alerts",       platform:"XSIAM (XQL)",    icon:Shield,   iconTone:"amber",   dataType:"Alerts",  template:"XSIAM Alerts v2",   stage:"8. Monitor & Optimize",  progress:100, owner:"Ravi S.",   started:"May 7, 2025",  eta:"May 9, 2025",  status:"Active",      conf:0.98, auto:0.98 },
+  { id:45, name:"container_logs",   platform:"Kubernetes API", icon:Boxes,    iconTone:"cyan",    dataType:"Logs",    template:"K8s Logs v2",       stage:"5. Test & Validate",     progress:70,  owner:"Neeraj K.", started:"May 12, 2026", eta:"May 15, 2026", status:"In Progress", conf:0.92, auto:0.94 },
+  { id:44, name:"saas_audit_events",platform:"REST API",       icon:Cloud,    iconTone:"blue",    dataType:"Audit",   template:"SaaS Audit v1",     stage:"3. Configure & Map",     progress:45,  owner:"Priya J.",  started:"May 11, 2026", eta:"May 14, 2026", status:"In Progress", conf:0.88, auto:0.91 },
+  { id:43, name:"endpoint_metrics", platform:"LogicMonitor",   icon:Activity, iconTone:"emerald", dataType:"Metrics", template:"Metrics v1",        stage:"4. Set Placement",       progress:60,  owner:"Arjun K.",  started:"May 10, 2026", eta:"May 13, 2026", status:"In Progress", conf:0.9,  auto:0.93 },
+  { id:42, name:"threat_intel_feed",platform:"SFTP Server",    icon:Server,   iconTone:"slate",   dataType:"Feed",    template:"Threat Feed v1",    stage:"6. Security & Access",   progress:80,  owner:"Meena R.",  started:"May 9, 2026",  eta:"May 12, 2026", status:"In Progress", conf:0.86, auto:0.9  },
+  { id:41, name:"billing_export",   platform:"BigQuery",       icon:Database, iconTone:"blue",    dataType:"Billing", template:"Billing v1",        stage:"7. Schedule & Activate", progress:90,  owner:"Suresh B.", started:"May 8, 2026",  eta:"May 11, 2026", status:"Testing",     conf:0.94, auto:0.96 },
+  { id:40, name:"xdr_alerts",       platform:"XSIAM (XQL)",    icon:Shield,   iconTone:"amber",   dataType:"Alerts",  template:"XSIAM Alerts v2",   stage:"8. Monitor & Optimize",  progress:100, owner:"Ravi S.",   started:"May 7, 2026",  eta:"May 9, 2026",  status:"Active",      conf:0.98, auto:0.98 },
 ];
 
 const STATUS_DIST = [
@@ -167,7 +167,7 @@ export default function SourceOnboardingFactory() {
             <p className="text-slate-400 text-sm mt-1 max-w-4xl">Every new source follows the same repeatable engineering factory that automatically discovers metadata, validates schemas, applies governance, determines placement, and prepares the source for operational orchestration.</p>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-slate-400">Last Updated <span className="text-slate-700 font-medium ml-1">May 12, 2025 · 10:32 AM</span></span>
+            <span className="text-slate-400">Last Updated <span className="text-slate-700 font-medium ml-1">May 12, 2026 · 10:32 AM</span></span>
             <button className="ml-3 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 inline-flex items-center gap-2"><Filter className="h-4 w-4"/>Filters</button>
             <button onClick={() => openDrawer("Template Library", "tpl")} className="px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 inline-flex items-center gap-2"><Layers className="h-4 w-4"/>Templates</button>
             <button className="px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 inline-flex items-center gap-2"><Download className="h-4 w-4"/>Export</button>

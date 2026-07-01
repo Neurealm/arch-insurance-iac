@@ -48,7 +48,7 @@ function AppHeader({ onPalette }: { onPalette: () => void }) {
         <ChevronDown className="h-3.5 w-3.5 text-slate-400 ml-1" />
       </div>
       <div className="h-11 px-3 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center gap-3">
-        <div className="text-[12.5px] text-white font-semibold">May 23, 2025 10:24 AM CT</div>
+        <div className="text-[12.5px] text-white font-semibold">May 23, 2026 10:24 AM CT</div>
         <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/20 px-2 py-0.5 rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
         </span>
