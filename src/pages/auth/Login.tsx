@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { AuthLayout } from "./AuthLayout";
 import { Eye, EyeOff } from "lucide-react";
-import { AuthVerificationOverlay } from "@/components/auth/AuthVerificationOverlay";
+// AuthVerificationOverlay archived — see src/components/auth/AuthVerificationOverlay.tsx (unused).
 
 export default function Login() {
   const navigate = useNavigate();
@@ -21,9 +21,6 @@ export default function Login() {
   const [workspace, setWorkspace] = useState("neurealm");
   const [showPassword, setShowPassword] = useState(false);
   const [tenants, setTenants] = useState<{ id: string; name: string; slug: string }[]>([]);
-  const [verifying, setVerifying] = useState(false);
-  const [authComplete, setAuthComplete] = useState(false);
-  const [pendingNav, setPendingNav] = useState<null | (() => void)>(null);
 
   useEffect(() => {
     (async () => {
@@ -39,32 +36,26 @@ export default function Login() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Kick off the cinematic verification experience immediately so the user
-    // sees the security controls animate while the network calls run in parallel.
-    setVerifying(true);
-    setAuthComplete(false);
 
     const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      setVerifying(false);
       setLoading(false);
       return toast.error(error.message);
     }
     const uid = signInData.user?.id;
     try {
-      let nav: (() => void) | null = null;
       if (workspace === "neurealm") {
         const { data: roles } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", uid!);
         if (!roles || roles.length === 0) {
-          nav = () => navigate("/no-access", { replace: true, state: { workspace: "NeuRealm" } });
+          navigate("/no-access", { replace: true, state: { workspace: "NeuRealm" } });
+          return;
         }
       } else {
         const tenant = tenants.find((t) => t.slug === workspace);
         if (!tenant) {
-          setVerifying(false);
           await supabase.auth.signOut();
           toast.error("Selected workspace not found.");
           return;
@@ -76,17 +67,13 @@ export default function Login() {
           .eq("tenant_id", tenant.id)
           .maybeSingle();
         if (!m) {
-          nav = () => navigate("/no-access", { replace: true, state: { workspace: tenant.name } });
+          navigate("/no-access", { replace: true, state: { workspace: tenant.name } });
+          return;
         }
       }
-      if (!nav) {
-        sessionStorage.setItem("active_workspace", workspace);
-        window.dispatchEvent(new Event("workspace-change"));
-        nav = () => navigate(dest, { replace: true });
-      }
-      // Auth + policy checks done — let the overlay accelerate & finish, then navigate.
-      setPendingNav(() => nav!);
-      setAuthComplete(true);
+      sessionStorage.setItem("active_workspace", workspace);
+      window.dispatchEvent(new Event("workspace-change"));
+      navigate(dest, { replace: true });
     } finally {
       setLoading(false);
     }
