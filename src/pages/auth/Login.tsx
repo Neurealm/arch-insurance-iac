@@ -84,25 +84,8 @@ export default function Login() {
     if (result.error) toast.error("Google sign-in failed");
   };
 
-  const workspaceLabel =
-    workspace === "neurealm"
-      ? "NeuRealm"
-      : tenants.find((t) => t.slug === workspace)?.name ?? workspace;
-
   return (
     <>
-    <AuthVerificationOverlay
-      open={verifying}
-      authComplete={authComplete}
-      userEmail={email}
-      workspaceLabel={workspaceLabel}
-      onFinished={() => {
-        const nav = pendingNav;
-        setVerifying(false);
-        setPendingNav(null);
-        nav?.();
-      }}
-    />
     <AuthLayout
       title="Welcome back"
       subtitle="Sign in to your NeuGain workspace"
