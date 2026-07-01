@@ -259,6 +259,7 @@ import UseCaseToDataContractMapper from "./pages/data-orchestration-twin/UseCase
 import SiteResilienceCoworker from "./pages/data-orchestration-twin/SiteResilienceCoworker.tsx";
 import LogSourceInventoryAndScopeRegistry from "./pages/data-orchestration-twin/LogSourceInventoryAndScopeRegistry.tsx";
 import DataDogLogProfile from "./pages/data-orchestration-twin/DataDogLogProfile.tsx";
+import CyberThreatIntelligenceAndIocAnalysis from "./pages/data-orchestration-twin/CyberThreatIntelligenceAndIocAnalysis.tsx";
 import DataPlacementDecisionEngine from "./pages/data-orchestration-twin/DataPlacementDecisionEngine.tsx";
 import PlacementScenarioModeler from "./pages/data-orchestration-twin/PlacementScenarioModeler.tsx";
 import NoDuplicationStrategyAndRetentionPolicy from "./pages/data-orchestration-twin/NoDuplicationStrategyAndRetentionPolicy.tsx";
