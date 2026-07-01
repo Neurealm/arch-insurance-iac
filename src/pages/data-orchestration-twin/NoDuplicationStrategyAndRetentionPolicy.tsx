@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Database, ShieldCheck, Layers, Boxes, Archive, Ban, DollarSign, CheckCircle2,
   Filter, BookOpen, Download, RefreshCw, X, MoreVertical, Info, ArrowRight,
