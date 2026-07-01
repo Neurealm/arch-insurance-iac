@@ -129,6 +129,7 @@ function Donut({ segments, centerTitle, centerSub }: { segments: { label: string
 
 /* ---------------- Page ---------------- */
 export default function ConnectorAccessGovernanceRegistry() {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<Row>(ROWS[0]);
   const [drawer, setDrawer] = useState<{ open: boolean; title: string }>({ open: false, title: "" });
   const [q, setQ] = useState("");
