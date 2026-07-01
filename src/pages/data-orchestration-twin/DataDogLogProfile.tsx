@@ -313,7 +313,7 @@ function Scene({ onHover, hoverId }: { onHover: (id: NodeId | null) => void; hov
 /* ============================== Page ============================== */
 export default function DataDogLogProfile() {
   const [now, setNow] = useState(() => new Date());
-  const [autoRefresh, setAutoRefresh] = useState<"30s" | "1m" | "5m">("1m");
+  const [autoRefresh, setAutoRefresh] = useState<"30s" | "1m" | "5m">("5m");
   const [tick, setTick] = useState(0);
   const [hoverId, setHoverId] = useState<NodeId | null>(null);
   const [drawer, setDrawer] = useState<{ title: string; kind: string } | null>(null);
