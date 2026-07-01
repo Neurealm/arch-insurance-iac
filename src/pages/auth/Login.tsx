@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { AuthLayout } from "./AuthLayout";
 import { Eye, EyeOff } from "lucide-react";
+import { AuthVerificationOverlay } from "@/components/auth/AuthVerificationOverlay";
 
 export default function Login() {
   const navigate = useNavigate();
