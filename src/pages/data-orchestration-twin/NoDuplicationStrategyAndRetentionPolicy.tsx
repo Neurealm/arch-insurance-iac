@@ -148,6 +148,8 @@ export default function NoDuplicationStrategyAndRetentionPolicy() {
   const [drawer, setDrawer] = useState<null | { title: string; subtitle?: string; kind: string }>(null);
   const openDrawer = (title: string, kind: string, subtitle?: string) => setDrawer({ title, kind, subtitle });
   const selected = ROWS[selectedIdx];
+  const navigate = useNavigate();
+  const slugify = (n: string) => n.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 
   const donutCircum = 2 * Math.PI * 52;
   const donutOffsets = useMemo(() => {
