@@ -253,6 +253,7 @@ import AocpPlaceholder from "./pages/aocp/AocpPlaceholder.tsx";
 import ProdResilienceTwin from "./pages/prod-twin/ProdResilienceTwin.tsx";
 import DataOrchLayout from "./pages/data-orchestration-twin/DataOrchLayout.tsx";
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
+import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
 import MeasuringSuccess from "./pages/prod-twin/MeasuringSuccess.tsx";
 
 import ProductLineMap from "./pages/prod-twin/ProductLineMap.tsx";
@@ -435,7 +436,8 @@ const App = () => (
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
           <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
           <Route path="/data-orchestration-twin" element={<DataOrchLayout />}>
-            <Route index element={<DataOrchPage />} />
+            <Route index element={<DataOrchExecutiveControlPlane />} />
+            <Route path="executive-control-plane" element={<DataOrchExecutiveControlPlane />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
