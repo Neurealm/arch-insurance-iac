@@ -453,6 +453,7 @@ const App = () => (
             <Route path="options-and-tradeoff-matrix" element={<OptionsAndTradeoffMatrix />} />
             <Route path="connector-access-and-governance-registry" element={<ConnectorAccessGovernanceRegistry />} />
             <Route path="fetch-orchestration-scheduler" element={<FetchOrchestrationScheduler />} />
+            <Route path="source-onboarding-factory" element={<SourceOnboardingFactory />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
