@@ -194,6 +194,8 @@ const tree: Node[] = [
     label: "SRE Data Orchestration",
     icon: Database,
     to: "/data-orchestration-twin",
+    pill: "LIVE",
+    statusDot: "green",
   },
   {
     key: "runops",
