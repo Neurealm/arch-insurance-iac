@@ -359,12 +359,12 @@ export default function DataDogLogProfile() {
   ] as const;
 
   const toneMap: Record<string, string> = {
-    violet: "from-violet-500/20 to-violet-500/5 text-violet-300 ring-violet-500/30",
-    blue: "from-blue-500/20 to-blue-500/5 text-blue-300 ring-blue-500/30",
-    emerald: "from-emerald-500/20 to-emerald-500/5 text-emerald-300 ring-emerald-500/30",
-    amber: "from-amber-500/20 to-amber-500/5 text-amber-300 ring-amber-500/30",
-    indigo: "from-indigo-500/20 to-indigo-500/5 text-indigo-300 ring-indigo-500/30",
-    rose: "from-rose-500/20 to-rose-500/5 text-rose-300 ring-rose-500/30",
+    violet: "from-violet-50 to-white text-violet-700 ring-violet-200",
+    blue: "from-sky-50 to-white text-sky-700 ring-sky-200",
+    emerald: "from-emerald-50 to-white text-emerald-700 ring-emerald-200",
+    amber: "from-amber-50 to-white text-amber-700 ring-amber-200",
+    indigo: "from-indigo-50 to-white text-indigo-700 ring-indigo-200",
+    rose: "from-rose-50 to-white text-rose-700 ring-rose-200",
   };
 
   const QUALITY = [
