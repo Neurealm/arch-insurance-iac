@@ -333,7 +333,8 @@ export default function SourceOnboardingFactory() {
                                     ))}
                                   </div>
                                   <div className="mt-2 h-1 rounded-full bg-slate-200 overflow-hidden relative">
-                                    {[0,1,2].map(i => <div key={i} className="absolute top-0 h-1 w-8 rounded-full bg-indigo-400/70" style={{ left: `${((tick * 7 + i * 30) % 100)}%`, transition: "left 1.4s linear" }}/>)}
+                                    <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full origin-left" style={{ animation: "sof-bar-grow 4.2s ease-in-out infinite" }}/>
+                                    {[0,1,2].map(i => <div key={i} className="absolute top-0 h-1 w-10 rounded-full bg-white/70 shadow" style={{ left: 0, animation: `sof-packet 3.6s linear ${i * 1.2}s infinite` }}/>)}
                                   </div>
                                 </TabsContent>
                                 <TabsContent value="overview"    className="text-xs text-slate-600 mt-3">{r.name} — {r.platform} · {r.dataType}. Purpose: onboard {r.template} through the factory. Consumers: SRE, SecOps, FinOps.</TabsContent>
