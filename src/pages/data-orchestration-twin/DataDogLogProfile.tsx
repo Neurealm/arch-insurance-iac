@@ -528,27 +528,37 @@ export default function DataDogLogProfile() {
 
       <div className="p-6 grid grid-cols-12 gap-5">
         {/* Hero 3D + Right column */}
-        <section className="col-span-8 relative rounded-2xl overflow-hidden ring-1 ring-slate-900/10 shadow-xl" style={{ height: 620 }}>
+        <section className="col-span-8 relative rounded-2xl overflow-hidden ring-1 ring-slate-200 shadow-xl bg-gradient-to-br from-white via-slate-50 to-violet-50/60" style={{ height: 620 }}>
           <div className="absolute inset-0">
-            <Canvas camera={{ position: [0, 1.5, 7], fov: 55 }} dpr={[1, 1.5]}>
+            <Canvas camera={{ position: [2, 6, 11], fov: 45 }} dpr={[1, 1.6]}>
               <Suspense fallback={null}>
                 <Scene onHover={setHoverId} hoverId={hoverId} />
+                <OrbitControls enablePan enableRotate enableZoom maxPolarAngle={Math.PI / 2.1} minDistance={6} maxDistance={22} />
               </Suspense>
             </Canvas>
           </div>
           {/* Overlay - header chip */}
           <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-            <div className="pointer-events-auto rounded-lg bg-slate-950/70 backdrop-blur ring-1 ring-white/10 px-3 py-1.5">
-              <div className="text-[10px] text-slate-300 uppercase tracking-wider">DataDog Schema & Orchestration Engine</div>
-              <div className="text-[13px] font-semibold text-white">Living Digital Twin · 20-layer Log Pipeline</div>
+            <div className="pointer-events-auto rounded-lg bg-white/90 backdrop-blur ring-1 ring-slate-200 px-3 py-1.5 shadow-sm">
+              <div className="text-[10px] text-slate-500 uppercase tracking-wider">Datadog Schema & Orchestration Engine</div>
+              <div className="text-[13px] font-semibold text-slate-900">Living Digital Twin · Source → Intake → Destination</div>
             </div>
-            <div className="pointer-events-auto rounded-lg bg-slate-950/70 backdrop-blur ring-1 ring-white/10 px-3 py-1.5 flex items-center gap-3 text-[11px] text-slate-200">
-              <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> {tele.eventsPerSec.toLocaleString()} events/s</span>
-              <span className="text-slate-500">•</span>
-              <span>Latency <span className="text-white font-semibold">{tele.latencyMs}ms</span></span>
-              <span className="text-slate-500">•</span>
-              <span>Compress <span className="text-white font-semibold">{tele.compression}%</span></span>
+            <div className="pointer-events-auto rounded-lg bg-white/90 backdrop-blur ring-1 ring-slate-200 px-3 py-1.5 flex items-center gap-3 text-[11px] text-slate-700 shadow-sm">
+              <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> {tele.eventsPerSec.toLocaleString()} events/s</span>
+              <span className="text-slate-300">•</span>
+              <span>Latency <span className="text-slate-900 font-semibold">{tele.latencyMs}ms</span></span>
+              <span className="text-slate-300">•</span>
+              <span>Compress <span className="text-slate-900 font-semibold">{tele.compression}%</span></span>
             </div>
+          </div>
+          {/* Legend */}
+          <div className="absolute bottom-3 left-3 flex gap-1.5 text-[10px] z-10 pointer-events-none">
+            {(["healthy", "warning", "remediating"] as Status[]).map((s) => (
+              <div key={s} className="flex items-center gap-1 bg-white/85 px-2 py-1 rounded border border-slate-200 shadow-sm">
+                <span className="w-2 h-2 rounded-full" style={{ background: statusColor[s] }} />
+                <span className="text-slate-700 capitalize">{s}</span>
+              </div>
+            ))}
           </div>
           {/* Hover panel */}
           <AnimatePresence>
