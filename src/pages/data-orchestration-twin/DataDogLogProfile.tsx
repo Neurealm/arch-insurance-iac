@@ -565,26 +565,26 @@ export default function DataDogLogProfile() {
             {hoverNode && hoverDet && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
-                className="absolute bottom-3 left-3 w-[340px] rounded-xl bg-slate-950/85 backdrop-blur-lg ring-1 ring-white/10 p-4 text-slate-100 shadow-2xl"
+                className="absolute bottom-3 left-32 w-[340px] rounded-xl bg-white/95 backdrop-blur-lg ring-1 ring-slate-200 p-4 text-slate-800 shadow-2xl"
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <hoverNode.icon className="h-4 w-4 text-violet-300" />
-                  <div className="text-[13px] font-semibold">{hoverNode.name}</div>
-                  <span className={`ml-auto text-[9.5px] px-1.5 py-0.5 rounded-full ring-1 ${hoverNode.health === "green" ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30" : "bg-amber-500/15 text-amber-300 ring-amber-500/30"}`}>
+                  <hoverNode.icon className="h-4 w-4 text-violet-600" />
+                  <div className="text-[13px] font-semibold text-slate-900">{hoverNode.name}</div>
+                  <span className={`ml-auto text-[9.5px] px-1.5 py-0.5 rounded-full ring-1 ${hoverNode.health === "green" ? "bg-emerald-50 text-emerald-700 ring-emerald-200" : "bg-amber-50 text-amber-700 ring-amber-200"}`}>
                     {hoverNode.health === "green" ? "Healthy" : "Warning"}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-300 leading-relaxed">{hoverDet.business}</p>
+                <p className="text-[11px] text-slate-600 leading-relaxed">{hoverDet.business}</p>
                 <div className="mt-2 grid grid-cols-2 gap-1.5 text-[10.5px]">
-                  <Mini l="Records Today" v={abbr(rand(1e9, 15e9))} />
-                  <Mini l="Success Rate" v={`${rand(96, 100, 1)}%`} />
-                  <Mini l="Avg Latency" v={`${rand(30, 250)}ms`} />
-                  <Mini l="Queue Depth" v={String(rand(0, 200))} />
-                  <Mini l="AI Confidence" v={`${rand(94, 99, 1)}%`} />
-                  <Mini l="Owner" v={hoverDet.owner} />
+                  <Mini2 l="Records Today" v={abbr(rand(1e9, 15e9))} />
+                  <Mini2 l="Success Rate" v={`${rand(96, 100, 1)}%`} />
+                  <Mini2 l="Avg Latency" v={`${rand(30, 250)}ms`} />
+                  <Mini2 l="Queue Depth" v={String(rand(0, 200))} />
+                  <Mini2 l="AI Confidence" v={`${rand(94, 99, 1)}%`} />
+                  <Mini2 l="Owner" v={hoverDet.owner} />
                 </div>
                 <button onClick={() => setDrawer({ title: hoverNode.name, kind: "node" })}
-                  className="mt-3 w-full text-[11px] font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-md py-1.5 inline-flex items-center justify-center gap-1">
+                  className="mt-3 w-full text-[11px] font-semibold text-white bg-violet-600 hover:bg-violet-500 rounded-md py-1.5 inline-flex items-center justify-center gap-1">
                   Open Engineering Details <ArrowRight className="h-3 w-3" />
                 </button>
               </motion.div>
