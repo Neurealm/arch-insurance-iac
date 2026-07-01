@@ -39,29 +39,32 @@ export default function Login() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    // Kick off the cinematic verification experience immediately so the user
+    // sees the security controls animate while the network calls run in parallel.
+    setVerifying(true);
+    setAuthComplete(false);
+
     const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      setVerifying(false);
       setLoading(false);
       return toast.error(error.message);
     }
     const uid = signInData.user?.id;
     try {
+      let nav: (() => void) | null = null;
       if (workspace === "neurealm") {
-        // Any platform role (admin OR read-only support) can enter NeuRealm.
         const { data: roles } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", uid!);
         if (!roles || roles.length === 0) {
-          // Keep the session alive and route to a clear explanation page
-          // instead of signing them out — signing out makes users think
-          // their password is wrong and triggers a reset loop.
-          navigate("/no-access", { replace: true, state: { workspace: "NeuRealm" } });
-          return;
+          nav = () => navigate("/no-access", { replace: true, state: { workspace: "NeuRealm" } });
         }
       } else {
         const tenant = tenants.find((t) => t.slug === workspace);
         if (!tenant) {
+          setVerifying(false);
           await supabase.auth.signOut();
           toast.error("Selected workspace not found.");
           return;
@@ -73,13 +76,17 @@ export default function Login() {
           .eq("tenant_id", tenant.id)
           .maybeSingle();
         if (!m) {
-          navigate("/no-access", { replace: true, state: { workspace: tenant.name } });
-          return;
+          nav = () => navigate("/no-access", { replace: true, state: { workspace: tenant.name } });
         }
       }
-      sessionStorage.setItem("active_workspace", workspace);
-      window.dispatchEvent(new Event("workspace-change"));
-      navigate(dest, { replace: true });
+      if (!nav) {
+        sessionStorage.setItem("active_workspace", workspace);
+        window.dispatchEvent(new Event("workspace-change"));
+        nav = () => navigate(dest, { replace: true });
+      }
+      // Auth + policy checks done — let the overlay accelerate & finish, then navigate.
+      setPendingNav(() => nav!);
+      setAuthComplete(true);
     } finally {
       setLoading(false);
     }
