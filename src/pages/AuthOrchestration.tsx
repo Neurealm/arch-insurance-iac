@@ -5,6 +5,7 @@ import {
   Radar, Lock, FileText, Activity, Users, Brain, Gauge, X, Sparkles,
   Copy, Clock, Server, MapPin, Wifi, ChevronRight,
 } from "lucide-react";
+import { AppShell } from "@/components/eoc/AppShell";
 
 /* ============================================================
    TELEMETRY ENGINE — everything randomized on each mount
