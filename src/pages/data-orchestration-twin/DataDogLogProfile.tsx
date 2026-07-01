@@ -66,168 +66,251 @@ const NODE_DETAILS: Record<NodeId, {
   frameworks: ["SOC 2", "ISO 27001", "HIPAA", "PCI-DSS"].slice(0, rand(1,3)),
 }])) as any;
 
-/* ============================== 3D Scene ============================== */
-function OrbitingNodes({ onHover, hoverId }: { onHover: (id: NodeId | null) => void; hoverId: NodeId | null }) {
-  const grpRef = useRef<THREE.Group>(null);
-  useFrame((_, dt) => { if (grpRef.current) grpRef.current.rotation.y += dt * 0.05; });
+/* ============================== 3D Scene (AWS-style architecture) ============================== */
+
+type Status = "healthy" | "warning" | "degraded" | "critical" | "remediating";
+const statusColor: Record<Status, string> = {
+  healthy: "#10b981",
+  warning: "#f59e0b",
+  degraded: "#f97316",
+  critical: "#ef4444",
+  remediating: "#632CA6",
+};
+
+function HealthRing({ status, radius = 0.9 }: { status: Status; radius?: number }) {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame((_, dt) => {
+    if (ref.current) ref.current.rotation.z += dt * 0.35;
+  });
   return (
-    <group ref={grpRef}>
-      {NODES.map((n, i) => {
-        const r = 3.6;
-        const a = (n.angle * Math.PI) / 180;
-        const x = Math.cos(a) * r;
-        const z = Math.sin(a) * r;
-        const y = Math.sin(i * 0.9) * 0.35;
-        const color = n.health === "green" ? "#10b981" : n.health === "amber" ? "#f59e0b" : "#ef4444";
-        const active = hoverId === n.id;
-        return (
-          <group key={n.id} position={[x, y, z]}>
-            <mesh onPointerOver={() => onHover(n.id)} onPointerOut={() => onHover(null)}>
-              <sphereGeometry args={[active ? 0.22 : 0.16, 24, 24]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={active ? 1.6 : 0.8} />
-            </mesh>
-            {/* Beam to center */}
-            <mesh position={[-x/2, -y/2, -z/2]} rotation={[0, Math.atan2(x, z), 0]}>
-              <boxGeometry args={[0.02, 0.02, r]} />
-              <meshBasicMaterial color={color} transparent opacity={active ? 0.7 : 0.22} />
-            </mesh>
-          </group>
-        );
-      })}
-    </group>
+    <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+      <ringGeometry args={[radius, radius + 0.06, 48]} />
+      <meshBasicMaterial color={statusColor[status]} transparent opacity={0.85} />
+    </mesh>
   );
 }
 
-function DataPackets() {
-  const ref = useRef<THREE.Points>(null);
-  const count = 500;
-  const positions = useMemo(() => {
-    const arr = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const r = 1.2 + Math.random() * 2.4;
-      const a = Math.random() * Math.PI * 2;
-      arr[i*3] = Math.cos(a)*r;
-      arr[i*3+1] = (Math.random()-0.5)*1.2;
-      arr[i*3+2] = Math.sin(a)*r;
-    }
-    return arr;
-  }, []);
-  useFrame(({ clock }) => {
-    if (!ref.current) return;
-    const t = clock.getElapsedTime();
-    const geom = ref.current.geometry as THREE.BufferGeometry;
-    const pos = geom.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < count; i++) {
-      const ix = i*3, iy = i*3+1, iz = i*3+2;
-      const x = pos.array[ix] as number;
-      const z = pos.array[iz] as number;
-      const r = Math.hypot(x, z);
-      const a = Math.atan2(z, x) + 0.008 + (0.002 * Math.sin(t + i));
-      const nr = Math.max(0.9, r - 0.008);
-      (pos.array as any)[ix] = Math.cos(a) * nr;
-      (pos.array as any)[iz] = Math.sin(a) * nr;
-      if (nr <= 1.0) {
-        const nr2 = 3.4;
-        const a2 = Math.random() * Math.PI * 2;
-        (pos.array as any)[ix] = Math.cos(a2) * nr2;
-        (pos.array as any)[iz] = Math.sin(a2) * nr2;
-      }
-    }
-    pos.needsUpdate = true;
-  });
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} count={count} />
-      </bufferGeometry>
-      <pointsMaterial size={0.05} color="#7c9cff" transparent opacity={0.85} sizeAttenuation />
-    </points>
-  );
-}
-
-function CoreEngine() {
-  const ring1 = useRef<THREE.Mesh>(null);
-  const ring2 = useRef<THREE.Mesh>(null);
-  const core = useRef<THREE.Mesh>(null);
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
-    if (ring1.current) ring1.current.rotation.z = t * 0.4;
-    if (ring2.current) { ring2.current.rotation.x = t * 0.3; ring2.current.rotation.y = t * 0.2; }
-    if (core.current) {
-      const s = 1 + Math.sin(t*1.5)*0.05;
-      core.current.scale.setScalar(s);
+function ArchNode({
+  position, label, sub, status, color = "#ffffff", scale = 1,
+  onHover, hoverId, id,
+}: {
+  position: [number, number, number]; label: string; sub?: string; status: Status;
+  color?: string; scale?: number;
+  onHover: (id: NodeId | null) => void; hoverId: NodeId | null; id: NodeId;
+}) {
+  const grp = useRef<THREE.Group>(null);
+  useFrame((s) => {
+    if (grp.current) {
+      grp.current.position.y = position[1] + Math.sin(s.clock.elapsedTime * 1.2 + position[0]) * 0.03;
     }
   });
+  const active = hoverId === id;
   return (
-    <group>
-      {/* Platform */}
-      <mesh position={[0, -1.1, 0]} rotation={[-Math.PI/2, 0, 0]}>
-        <ringGeometry args={[1.4, 1.9, 64]} />
-        <meshStandardMaterial color="#4f46e5" emissive="#4f46e5" emissiveIntensity={0.7} transparent opacity={0.55} />
-      </mesh>
-      <mesh position={[0, -1.15, 0]} rotation={[-Math.PI/2, 0, 0]}>
-        <circleGeometry args={[1.4, 64]} />
-        <meshStandardMaterial color="#0b1220" transparent opacity={0.75} />
-      </mesh>
-      {/* Rings */}
-      <mesh ref={ring1}>
-        <torusGeometry args={[1.55, 0.02, 16, 128]} />
-        <meshStandardMaterial color="#8b5cf6" emissive="#8b5cf6" emissiveIntensity={1.2} />
-      </mesh>
-      <mesh ref={ring2}>
-        <torusGeometry args={[1.85, 0.015, 16, 128]} />
-        <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={1} />
-      </mesh>
-      {/* Core energy sphere */}
-      <mesh ref={core}>
-        <sphereGeometry args={[0.9, 48, 48]} />
-        <meshPhysicalMaterial
-          color="#6366f1"
-          emissive="#a78bfa"
-          emissiveIntensity={0.9}
-          roughness={0.12}
-          metalness={0.6}
-          transmission={0.5}
-          thickness={0.6}
-          clearcoat={1}
+    <group
+      ref={grp}
+      position={position}
+      onPointerOver={(e) => { e.stopPropagation(); onHover(id); document.body.style.cursor = "pointer"; }}
+      onPointerOut={() => { onHover(null); document.body.style.cursor = "default"; }}
+    >
+      <RoundedBox args={[1.25 * scale, 0.5 * scale, 1.25 * scale]} radius={0.08} smoothness={4}>
+        <meshStandardMaterial
+          color={color}
+          metalness={0.1}
+          roughness={0.35}
+          emissive={active ? statusColor[status] : "#000"}
+          emissiveIntensity={active ? 0.3 : 0}
         />
-      </mesh>
-      {/* Inner glow */}
-      <mesh>
-        <sphereGeometry args={[1.05, 48, 48]} />
-        <meshBasicMaterial color="#7c3aed" transparent opacity={0.08} />
-      </mesh>
-      {/* DataDog silhouette (stylized paw dots) */}
-      <Float speed={2} rotationIntensity={0.3} floatIntensity={0.6}>
-        <group position={[0, 0.05, 0]}>
-          <Html center distanceFactor={6} zIndexRange={[0,0]}>
-            <div className="text-[42px] font-black text-white/90 tracking-tight select-none drop-shadow-[0_0_18px_rgba(139,92,246,0.9)]">
-              🐶
-            </div>
-          </Html>
-        </group>
-      </Float>
+      </RoundedBox>
+      <HealthRing status={status} radius={0.88 * scale} />
+      <Html position={[0, 0.55 * scale, 0]} center distanceFactor={8} occlude={false}>
+        <div className="pointer-events-none whitespace-nowrap text-[11px] font-semibold text-slate-800 bg-white/90 backdrop-blur px-2 py-0.5 rounded border border-slate-200 shadow-sm">
+          {label}
+          {sub && <span className="ml-1 text-[9.5px] font-normal text-slate-500">{sub}</span>}
+        </div>
+      </Html>
     </group>
   );
 }
+
+function Zone({
+  position, size, color, label, opacity = 0.12,
+}: { position: [number, number, number]; size: [number, number]; color: string; label?: string; opacity?: number }) {
+  return (
+    <group position={position}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={size} />
+        <meshBasicMaterial color={color} transparent opacity={opacity} />
+      </mesh>
+      <DreiLine
+        points={[
+          [-size[0] / 2, 0.01, -size[1] / 2], [size[0] / 2, 0.01, -size[1] / 2],
+          [size[0] / 2, 0.01, size[1] / 2], [-size[0] / 2, 0.01, size[1] / 2],
+          [-size[0] / 2, 0.01, -size[1] / 2],
+        ]}
+        color={color} lineWidth={1.2} transparent opacity={0.55}
+      />
+      {label && (
+        <Html position={[-size[0] / 2 + 0.1, 0.05, -size[1] / 2 + 0.1]} distanceFactor={10}>
+          <div className="pointer-events-none text-[10px] uppercase tracking-wider text-slate-500 font-semibold">{label}</div>
+        </Html>
+      )}
+    </group>
+  );
+}
+
+function TrafficFlow({
+  from, to, weight, status,
+}: { from: [number, number, number]; to: [number, number, number]; weight: number; status: Status }) {
+  const ref = useRef<THREE.Mesh>(null);
+  const t = useRef(Math.random());
+  useFrame((_, dt) => {
+    t.current += dt * (0.35 + weight * 0.8);
+    if (t.current > 1) t.current = 0;
+    if (ref.current) {
+      ref.current.position.x = from[0] + (to[0] - from[0]) * t.current;
+      ref.current.position.y = from[1] + (to[1] - from[1]) * t.current + 0.35;
+      ref.current.position.z = from[2] + (to[2] - from[2]) * t.current;
+    }
+  });
+  const opacity = 0.28 + weight * 0.55;
+  return (
+    <>
+      <DreiLine
+        points={[from, [(from[0] + to[0]) / 2, Math.max(from[1], to[1]) + 0.55, (from[2] + to[2]) / 2], to]}
+        color={statusColor[status]} lineWidth={1 + weight * 2} transparent opacity={opacity}
+      />
+      <mesh ref={ref}>
+        <sphereGeometry args={[0.07 + weight * 0.05, 12, 12]} />
+        <meshBasicMaterial color={statusColor[status]} />
+      </mesh>
+    </>
+  );
+}
+
+/** DataDog paw core: floating logo mark on a purple platform */
+function DataDogCore({ position }: { position: [number, number, number] }) {
+  const grp = useRef<THREE.Group>(null);
+  useFrame((s) => {
+    if (grp.current) grp.current.position.y = position[1] + Math.sin(s.clock.elapsedTime * 1.4) * 0.05;
+  });
+  return (
+    <group position={position} ref={grp}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}>
+        <ringGeometry args={[0.95, 1.15, 64]} />
+        <meshBasicMaterial color="#632CA6" transparent opacity={0.55} />
+      </mesh>
+      <RoundedBox args={[1.5, 0.55, 1.5]} radius={0.1} smoothness={4}>
+        <meshStandardMaterial color="#ffffff" metalness={0.15} roughness={0.3} emissive="#632CA6" emissiveIntensity={0.2} />
+      </RoundedBox>
+      <Html position={[0, 0.65, 0]} center distanceFactor={7} occlude={false}>
+        <div className="pointer-events-none flex flex-col items-center gap-1">
+          <DataDogLogo size={44} />
+          <div className="text-[11px] font-bold text-slate-800 bg-white/95 px-2 py-0.5 rounded border border-slate-200 shadow-sm">
+            Datadog Log Intake
+          </div>
+        </div>
+      </Html>
+    </group>
+  );
+}
+
+/* Pipeline nodes: sources → agents → intake → processing → destinations */
+const POS = {
+  // Sources (left column)
+  src_k8s:    [-6.0, 0.3, -2.2] as [number, number, number],
+  src_aws:    [-6.0, 0.3,  0.0] as [number, number, number],
+  src_okta:   [-6.0, 0.3,  2.2] as [number, number, number],
+  // Agents (aggregation)
+  agent:      [-3.2, 0.3,  0.0] as [number, number, number],
+  // DataDog intake core
+  intake:     [ 0.0, 0.3,  0.0] as [number, number, number],
+  // Processing lane
+  parse:      [ 2.8, 0.3, -1.6] as [number, number, number],
+  enrich:     [ 2.8, 0.3,  1.6] as [number, number, number],
+  index:      [ 5.2, 0.3,  0.0] as [number, number, number],
+  // Destinations (right)
+  snowflake:  [ 7.6, 0.3, -2.2] as [number, number, number],
+  splunk:     [ 7.6, 0.3,  0.0] as [number, number, number],
+  s3:         [ 7.6, 0.3,  2.2] as [number, number, number],
+};
+
+type NodeId =
+  | "sources" | "ingest" | "parse" | "norm" | "enrich" | "classify"
+  | "pii" | "dedup" | "schema" | "quality" | "gov" | "index"
+  | "ai" | "ml" | "alert" | "dash" | "siem" | "lake" | "cold" | "retain";
 
 function Scene({ onHover, hoverId }: { onHover: (id: NodeId | null) => void; hoverId: NodeId | null }) {
   return (
     <>
-      <color attach="background" args={["#050818"]} />
-      <fog attach="fog" args={["#050818", 8, 18]} />
-      <ambientLight intensity={0.35} />
-      <pointLight position={[6, 6, 4]} intensity={1.2} color="#7c9cff" />
-      <pointLight position={[-6, -3, -4]} intensity={0.9} color="#8b5cf6" />
-      <Stars radius={30} depth={40} count={800} factor={2} fade speed={0.6} />
-      <Sparkles count={80} scale={8} size={2} speed={0.4} color="#a78bfa" />
-      <CoreEngine />
-      <DataPackets />
-      <OrbitingNodes onHover={onHover} hoverId={hoverId} />
-      <OrbitControls enablePan={false} enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+      <ambientLight intensity={0.9} />
+      <directionalLight position={[5, 10, 5]} intensity={0.55} />
+      <directionalLight position={[-5, 8, -5]} intensity={0.3} />
+
+      {/* Platform */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[1, 0, 0]}>
+        <planeGeometry args={[16, 8]} />
+        <meshBasicMaterial color="#632CA6" transparent opacity={0.04} />
+      </mesh>
+      <DreiLine
+        points={[[-7, 0.005, -3.7], [8.4, 0.005, -3.7], [8.4, 0.005, 3.7], [-7, 0.005, 3.7], [-7, 0.005, -3.7]]}
+        color="#632CA6" lineWidth={1.4} transparent opacity={0.35}
+      />
+      <Html position={[-6.9, 0.05, -3.6]} distanceFactor={10}>
+        <div className="pointer-events-none text-[10px] uppercase tracking-wider font-semibold text-violet-700/80">
+          Datadog Log Pipeline · Multi-Region
+        </div>
+      </Html>
+
+      {/* Zones */}
+      <Zone position={[-6, 0.01, 0]} size={[2.2, 6.6]} color="#0ea5e9" label="Log Sources" />
+      <Zone position={[-3.2, 0.01, 0]} size={[2.2, 3.4]} color="#10b981" label="Agents" />
+      <Zone position={[0, 0.01, 0]} size={[2.4, 3.4]} color="#632CA6" label="Intake" opacity={0.14} />
+      <Zone position={[4.0, 0.01, 0]} size={[5.2, 6.2]} color="#8b5cf6" label="Processing" />
+      <Zone position={[7.6, 0.01, 0]} size={[2.2, 6.6]} color="#f59e0b" label="Destinations" />
+
+      {/* Source nodes */}
+      <ArchNode id="sources" position={POS.src_k8s}  label="Kubernetes"  sub="prod" status="healthy" color="#dbeafe" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="sources" position={POS.src_aws}  label="AWS CloudTrail" status="healthy" color="#dbeafe" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="sources" position={POS.src_okta} label="Okta · M365" status="warning" color="#dbeafe" onHover={onHover} hoverId={hoverId} />
+
+      {/* Agent aggregator */}
+      <ArchNode id="ingest" position={POS.agent} label="Datadog Agent" sub="OTel · Fluent" status="healthy" color="#ecfdf5" onHover={onHover} hoverId={hoverId} />
+
+      {/* Intake core (DataDog logo) */}
+      <DataDogCore position={POS.intake} />
+
+      {/* Processing lane */}
+      <ArchNode id="parse"  position={POS.parse}  label="Parse · Grok"    status="healthy"    color="#f5f3ff" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="enrich" position={POS.enrich} label="Enrich · PII"    status="warning"    color="#f5f3ff" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="index"  position={POS.index}  label="Index · Dedup"   status="remediating" color="#ede9fe" scale={1.05} onHover={onHover} hoverId={hoverId} />
+
+      {/* Destinations */}
+      <ArchNode id="lake"  position={POS.snowflake} label="Snowflake"       status="healthy" color="#fef3c7" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="siem"  position={POS.splunk}    label="Splunk · SIEM"   status="healthy" color="#fef3c7" onHover={onHover} hoverId={hoverId} />
+      <ArchNode id="cold"  position={POS.s3}        label="S3 · Cold"       status="healthy" color="#fef3c7" onHover={onHover} hoverId={hoverId} />
+
+      {/* Traffic: sources → agent */}
+      <TrafficFlow from={POS.src_k8s}  to={POS.agent} weight={0.9} status="healthy" />
+      <TrafficFlow from={POS.src_aws}  to={POS.agent} weight={0.6} status="healthy" />
+      <TrafficFlow from={POS.src_okta} to={POS.agent} weight={0.35} status="warning" />
+
+      {/* Agent → intake */}
+      <TrafficFlow from={POS.agent} to={POS.intake} weight={1} status="healthy" />
+
+      {/* Intake → processing */}
+      <TrafficFlow from={POS.intake} to={POS.parse}  weight={0.7} status="healthy" />
+      <TrafficFlow from={POS.intake} to={POS.enrich} weight={0.7} status="warning" />
+      <TrafficFlow from={POS.parse}  to={POS.index}  weight={0.6} status="healthy" />
+      <TrafficFlow from={POS.enrich} to={POS.index}  weight={0.6} status="remediating" />
+
+      {/* Index → destinations */}
+      <TrafficFlow from={POS.index} to={POS.snowflake} weight={0.55} status="healthy" />
+      <TrafficFlow from={POS.index} to={POS.splunk}    weight={0.75} status="healthy" />
+      <TrafficFlow from={POS.index} to={POS.s3}        weight={0.5}  status="healthy" />
     </>
   );
 }
+
 
 /* ============================== Page ============================== */
 export default function DataDogLogProfile() {
