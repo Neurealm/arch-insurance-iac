@@ -222,78 +222,218 @@ function generate(source: string) {
 }
 
 /* -------------------- 3D pipeline scene -------------------- */
-function Packet({ path, color, speed, offset }: { path: [number, number, number][]; color: string; speed: number; offset: number }) {
+function curvePoint(curve: THREE.CatmullRomCurve3, t: number, lift = 0) {
+  const p = curve.getPointAt(Math.max(0, Math.min(1, t)));
+  p.y += lift;
+  return p;
+}
+
+function Packet({ curve, color, speed, offset, size = 0.09 }: { curve: THREE.CatmullRomCurve3; color: string; speed: number; offset: number; size?: number }) {
   const ref = useRef<THREE.Mesh>(null);
+  const glow = useRef<THREE.Mesh>(null);
   useFrame((s) => {
     const t = ((s.clock.getElapsedTime() * speed + offset) % 1);
-    const idx = Math.min(path.length - 2, Math.floor(t * (path.length - 1)));
-    const frac = t * (path.length - 1) - idx;
-    const a = path[idx], b = path[idx + 1];
-    if (ref.current) ref.current.position.set(a[0] + (b[0] - a[0]) * frac, a[1] + (b[1] - a[1]) * frac + 0.15, a[2] + (b[2] - a[2]) * frac);
+    const p = curvePoint(curve, t, 0.18);
+    if (ref.current) ref.current.position.copy(p);
+    if (glow.current) glow.current.position.copy(p);
   });
   return (
-    <mesh ref={ref}>
-      <sphereGeometry args={[0.08, 12, 12]} />
-      <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1.2} />
-    </mesh>
+    <group>
+      <mesh ref={ref}>
+        <sphereGeometry args={[size, 14, 14]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={2.2} toneMapped={false} />
+      </mesh>
+      <mesh ref={glow}>
+        <sphereGeometry args={[size * 2.4, 14, 14]} />
+        <meshBasicMaterial color={color} transparent opacity={0.18} depthWrite={false} />
+      </mesh>
+    </group>
   );
 }
 
-function StagePlatform({ pos, color, label, active, onHover }: { pos: [number, number, number]; color: string; label: string; active: boolean; onHover: (v: boolean) => void }) {
+function PipeTube({ curve, colorA, colorB }: { curve: THREE.CatmullRomCurve3; colorA: string; colorB: string }) {
+  const geom = useMemo(() => new THREE.TubeGeometry(curve, 220, 0.055, 12, false), [curve]);
+  const glowGeom = useMemo(() => new THREE.TubeGeometry(curve, 220, 0.11, 12, false), [curve]);
+  return (
+    <group>
+      <mesh geometry={glowGeom}>
+        <meshBasicMaterial color={colorA} transparent opacity={0.12} depthWrite={false} />
+      </mesh>
+      <mesh geometry={geom}>
+        <meshStandardMaterial color={colorB} emissive={colorA} emissiveIntensity={0.9} metalness={0.6} roughness={0.25} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
+
+function StagePlatform({ pos, color, label, index, active, onSelect, onHover }: { pos: [number, number, number]; color: string; label: string; index: number; active: boolean; onSelect: () => void; onHover: (v: boolean) => void }) {
   const ref = useRef<THREE.Mesh>(null);
-  useFrame((s) => { if (ref.current) { const scale = active ? 1.08 + Math.sin(s.clock.getElapsedTime() * 3) * 0.04 : 1; ref.current.scale.set(scale, scale, scale); } });
+  const ring = useRef<THREE.Mesh>(null);
+  const beam = useRef<THREE.Mesh>(null);
+  useFrame((s) => {
+    const t = s.clock.getElapsedTime();
+    if (ref.current) {
+      const target = active ? 1.18 + Math.sin(t * 3) * 0.05 : 1;
+      const cur = ref.current.scale.x;
+      const next = cur + (target - cur) * 0.15;
+      ref.current.scale.set(next, next, next);
+    }
+    if (ring.current) ring.current.rotation.z = t * (active ? 1.4 : 0.4);
+    if (beam.current) {
+      const mat = beam.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = active ? 0.55 + Math.sin(t * 4) * 0.15 : 0.0;
+    }
+  });
   return (
     <group position={pos}>
-      <mesh ref={ref} onPointerOver={() => onHover(true)} onPointerOut={() => onHover(false)}>
-        <cylinderGeometry args={[0.55, 0.6, 0.14, 24]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={active ? 0.7 : 0.28} metalness={0.4} roughness={0.35} />
+      {/* light beam when active */}
+      <mesh ref={beam} position={[0, 1.4, 0]}>
+        <cylinderGeometry args={[0.08, 0.35, 2.8, 16, 1, true]} />
+        <meshBasicMaterial color={color} transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
       </mesh>
-      <mesh position={[0, 0.35, 0]}>
-        <cylinderGeometry args={[0.06, 0.06, 0.6, 12]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.6} />
+      {/* base disc */}
+      <mesh position={[0, -0.08, 0]}>
+        <cylinderGeometry args={[0.72, 0.78, 0.06, 32]} />
+        <meshStandardMaterial color="#0f172a" metalness={0.7} roughness={0.4} />
       </mesh>
-      <Html center position={[0, -0.4, 0]} distanceFactor={8}>
-        <div className="text-[9px] font-semibold text-slate-100 bg-slate-900/70 px-1.5 py-0.5 rounded whitespace-nowrap">{label}</div>
+      {/* rotating ring */}
+      <mesh ref={ring} position={[0, -0.045, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.65, 0.72, 48]} />
+        <meshBasicMaterial color={color} transparent opacity={active ? 0.9 : 0.45} side={THREE.DoubleSide} />
+      </mesh>
+      {/* main platform */}
+      <mesh
+        ref={ref}
+        onPointerOver={(e) => { e.stopPropagation(); onHover(true); document.body.style.cursor = "pointer"; }}
+        onPointerOut={() => { onHover(false); document.body.style.cursor = ""; }}
+        onClick={(e) => { e.stopPropagation(); onSelect(); }}
+      >
+        <cylinderGeometry args={[0.5, 0.58, 0.18, 28]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={active ? 0.95 : 0.35} metalness={0.55} roughness={0.3} />
+      </mesh>
+      {/* antenna */}
+      <mesh position={[0, 0.38, 0]}>
+        <cylinderGeometry args={[0.04, 0.04, 0.55, 10]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.9} />
+      </mesh>
+      <mesh position={[0, 0.7, 0]}>
+        <sphereGeometry args={[0.08, 14, 14]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={2} toneMapped={false} />
+      </mesh>
+      <Html center position={[0, -0.55, 0]} distanceFactor={9} style={{ pointerEvents: "none" }}>
+        <div className={`px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap border ${active ? "bg-slate-900 text-white border-white/30 shadow-lg" : "bg-slate-900/70 text-slate-200 border-white/10"}`}>
+          <span className="opacity-60 mr-1">{String(index + 1).padStart(2, "0")}</span>{label}
+        </div>
       </Html>
     </group>
   );
 }
 
+function OrbitDust() {
+  const ref = useRef<THREE.Points>(null);
+  const geom = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    const N = 220;
+    const arr = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const r = 5 + Math.random() * 4;
+      const a = Math.random() * Math.PI * 2;
+      arr[i * 3] = Math.cos(a) * r;
+      arr[i * 3 + 1] = (Math.random() - 0.3) * 3;
+      arr[i * 3 + 2] = Math.sin(a) * r;
+    }
+    g.setAttribute("position", new THREE.BufferAttribute(arr, 3));
+    return g;
+  }, []);
+  useFrame((_, dt) => { if (ref.current) ref.current.rotation.y += dt * 0.05; });
+  return (
+    <points ref={ref} geometry={geom}>
+      <pointsMaterial size={0.03} color="#7dd3fc" transparent opacity={0.6} depthWrite={false} />
+    </points>
+  );
+}
+
 function Pipeline3D({ colors, activeIdx, setActive }: { colors: string[]; activeIdx: number; setActive: (i: number) => void }) {
   const n = STAGES.length;
-  const positions: [number, number, number][] = STAGES.map((_, i) => {
+  const positions = useMemo<[number, number, number][]>(() => STAGES.map((_, i) => {
     const t = i / (n - 1);
-    const x = (t - 0.5) * 10;
-    const z = Math.sin(t * Math.PI * 1.5) * 1.6;
-    return [x, 0, z];
-  });
+    const x = (t - 0.5) * 11;
+    const z = Math.sin(t * Math.PI * 1.5) * 1.9;
+    const y = Math.sin(t * Math.PI * 2.2) * 0.35;
+    return [x, y, z];
+  }), [n]);
+
+  const curve = useMemo(() => {
+    const v3 = positions.map(([x, y, z]) => new THREE.Vector3(x, y, z));
+    return new THREE.CatmullRomCurve3(v3, false, "catmullrom", 0.5);
+  }, [positions]);
+
   return (
-    <Canvas camera={{ position: [0, 4.5, 7], fov: 45 }}>
-      <color attach="background" args={["#0b1220"]} />
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[5, 8, 5]} intensity={1.1} />
-      <pointLight position={[-5, 3, -3]} intensity={0.6} color="#8b5cf6" />
+    <Canvas shadows dpr={[1, 1.75]} camera={{ position: [0, 5, 9.5], fov: 42 }}>
+      <color attach="background" args={["#050914"]} />
+      <fog attach="fog" args={["#050914", 12, 28]} />
+      <ambientLight intensity={0.35} />
+      <hemisphereLight args={["#60a5fa", "#0b1220", 0.4]} />
+      <directionalLight position={[6, 10, 4]} intensity={1.1} castShadow />
+      <pointLight position={[-6, 3, -3]} intensity={0.9} color="#8b5cf6" />
+      <pointLight position={[6, 3, 3]} intensity={0.7} color="#06b6d4" />
+
+      {/* reflective floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.85, 0]} receiveShadow>
+        <planeGeometry args={[40, 40]} />
+        <meshStandardMaterial color="#050914" metalness={0.9} roughness={0.55} />
+      </mesh>
+      <gridHelper args={[30, 30, "#1e40af", "#0f172a"]} position={[0, -0.84, 0]} />
+
+      <OrbitDust />
+
+      {/* tube segments */}
+      {positions.slice(0, -1).map((_, i) => {
+        const seg = new THREE.CatmullRomCurve3(
+          [new THREE.Vector3(...positions[i]), curve.getPointAt((i + 0.5) / (n - 1)), new THREE.Vector3(...positions[i + 1])],
+          false, "catmullrom", 0.5
+        );
+        return <PipeTube key={i} curve={seg} colorA={colors[i % colors.length]} colorB={colors[(i + 1) % colors.length]} />;
+      })}
+
       {/* platforms */}
       {STAGES.map((s, i) => (
-        <StagePlatform key={s.key} pos={positions[i]} color={colors[i % colors.length]} label={s.key} active={i === activeIdx} onHover={(v) => v && setActive(i)} />
+        <StagePlatform
+          key={s.key}
+          pos={positions[i]}
+          color={colors[i % colors.length]}
+          label={s.key}
+          index={i}
+          active={i === activeIdx}
+          onSelect={() => setActive(i)}
+          onHover={(v) => v && setActive(i)}
+        />
       ))}
-      {/* connecting lines */}
-      {positions.slice(0, -1).map((p, i) => (
-        <DreiLine key={i} points={[p, positions[i + 1]] as any} color={colors[i % colors.length]} lineWidth={1.2} transparent opacity={0.55} />
+
+      {/* flowing packets along the whole curve */}
+      {Array.from({ length: 28 }).map((_, i) => (
+        <Packet key={i} curve={curve} color={STAGES[i % STAGES.length].color} speed={0.07 + (i % 6) * 0.012} offset={i / 28} />
       ))}
-      {/* flowing packets */}
-      {Array.from({ length: 22 }).map((_, i) => (
-        <Packet key={i} path={positions} color={STAGES[i % STAGES.length].color} speed={0.08 + (i % 5) * 0.015} offset={i * 0.05} />
-      ))}
-      {/* floor grid */}
-      <gridHelper args={[16, 16, "#1e293b", "#0f172a"]} position={[0, -0.6, 0]} />
-      <Float floatIntensity={0.4} rotationIntensity={0.2}>
-        <mesh position={[0, 2.6, -3]}>
-          <torusGeometry args={[0.6, 0.05, 12, 60]} />
-          <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.9} />
+
+      {/* floating title ring */}
+      <Float floatIntensity={0.6} rotationIntensity={0.3} speed={1.4}>
+        <mesh position={[0, 3.2, -3.5]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.7, 0.04, 14, 80]} />
+          <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={1.4} toneMapped={false} />
         </mesh>
       </Float>
-      <OrbitControls enablePan={false} minDistance={5} maxDistance={14} autoRotate autoRotateSpeed={0.6} />
+
+      <OrbitControls
+        enablePan={false}
+        minDistance={6}
+        maxDistance={16}
+        minPolarAngle={Math.PI / 6}
+        maxPolarAngle={Math.PI / 2.1}
+        autoRotate
+        autoRotateSpeed={0.5}
+        enableDamping
+        dampingFactor={0.08}
+      />
     </Canvas>
   );
 }
