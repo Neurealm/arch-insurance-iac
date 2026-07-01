@@ -7,6 +7,7 @@ export interface DoPage {
   metrics: { label: string; value: string; sub: string; tone: "emerald" | "blue" | "amber" | "rose" | "violet" }[];
   columns: { heading: string; items: string[] }[];
   workflow: string[];
+  nested?: boolean;
 }
 
 const g = (group: string) => group;
@@ -147,6 +148,27 @@ export const doPages: DoPage[] = [
       },
     ],
     workflow: ["Discover", "Classify", "Assign owner", "Score value", "Decide in/out", "Register", "Publish rationale"],
+  },
+  {
+    slug: "log-source-inventory-and-scope-registry/datadog-log-profile",
+    title: "DataDog Log Profile",
+    group: g("Contract & Scope"),
+    nested: true,
+    tagline: "Enterprise DataDog source profile — schema, pipelines, and orchestration health",
+    purpose:
+      "Deep-dive digital twin of the DataDog log source: ingestion volume, parsed fields, pipeline health, and orchestration telemetry powering downstream contracts.",
+    metrics: [
+      { label: "Ingested Logs (24h)", value: "1.42B", sub: "Live stream", tone: "blue" },
+      { label: "Active Pipelines", value: "38", sub: "Healthy 36 · Degraded 2", tone: "emerald" },
+      { label: "Parsed Fields", value: "512", sub: "Across 47 sources", tone: "violet" },
+      { label: "Schema Drift (7d)", value: "3", sub: "Auto-shimmed", tone: "amber" },
+    ],
+    columns: [
+      { heading: "Top Sources", items: ["k8s-prod", "aws-vpc-flow", "auth-service", "payments-api"] },
+      { heading: "Pipelines", items: ["PII Detection", "Deduplication", "Enrichment", "Routing"] },
+      { heading: "Anomalies", items: ["Cost spike — k8s debug", "Schema drift — auth v2", "Latency — us-east ingest"] },
+    ],
+    workflow: ["Ingest", "Parse", "Enrich", "Dedup", "Route", "Certify"],
   },
   {
     slug: "data-placement-and-economics-decision-engine",
