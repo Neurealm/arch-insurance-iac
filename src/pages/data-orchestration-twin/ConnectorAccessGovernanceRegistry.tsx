@@ -231,7 +231,7 @@ export default function ConnectorAccessGovernanceRegistry() {
                   const t = tone[r.iconTone];
                   return (
                     <tr key={r.name}
-                      onClick={()=>setSelected(r)}
+                      onClick={()=>{ setSelected(r); navigate(`/data-orchestration-twin/connector-access-and-governance-registry/method/${r.name}`); }}
                       className={`cursor-pointer border-b border-slate-100 transition
                         ${active ? "bg-blue-50/60" : "hover:bg-slate-50"}`}>
                       <td className="px-3 py-2.5">
