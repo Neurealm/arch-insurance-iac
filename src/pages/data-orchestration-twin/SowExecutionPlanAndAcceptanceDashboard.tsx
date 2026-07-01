@@ -140,17 +140,18 @@ const Donut = ({slices, center}:{slices:{n:number;tone:Tone}[]; center:string}) 
 };
 
 const Gauge = ({v,label}:{v:number;label:string}) => {
-  const cx=90,cy=90,r=68;
-  const a=Math.PI*(1-v/100);
+  const cx=90,cy=95,r=64;
+  const pct = Math.min(100, Math.max(0, v));
+  const a=Math.PI*(1-pct/100);
   const x=cx+r*Math.cos(a), y=cy-r*Math.sin(a);
-  const large=v>50?1:0;
+  const large=pct>50?1:0;
   return (
-    <svg width={180} height={110} viewBox="0 0 180 110">
+    <svg width={180} height={130} viewBox="0 0 180 130">
+      <defs><linearGradient id="gGrad" x1="0" x2="1"><stop offset="0%" stopColor="#f43f5e"/><stop offset="55%" stopColor="#f59e0b"/><stop offset="100%" stopColor="#10b981"/></linearGradient></defs>
       <path d={`M ${cx-r},${cy} A ${r},${r} 0 0,1 ${cx+r},${cy}`} stroke="#e2e8f0" strokeWidth={14} fill="none" strokeLinecap="round"/>
       <path d={`M ${cx-r},${cy} A ${r},${r} 0 ${large},1 ${x},${y}`} stroke="url(#gGrad)" strokeWidth={14} fill="none" strokeLinecap="round"/>
-      <defs><linearGradient id="gGrad" x1="0" x2="1"><stop offset="0%" stopColor="#f43f5e"/><stop offset="55%" stopColor="#f59e0b"/><stop offset="100%" stopColor="#10b981"/></linearGradient></defs>
-      <text x={cx} y={cy-4} textAnchor="middle" className="fill-slate-900" style={{fontSize:26,fontWeight:700}}>{v}%</text>
-      <text x={cx} y={cy+12} textAnchor="middle" className="fill-slate-500" style={{fontSize:10}}>{label}</text>
+      <text x={cx} y={cy-14} textAnchor="middle" className="fill-slate-900" style={{fontSize:26,fontWeight:700}}>{pct}%</text>
+      <text x={cx} y={cy+22} textAnchor="middle" className="fill-slate-500" style={{fontSize:11,fontWeight:500}}>{label}</text>
     </svg>
   );
 };
