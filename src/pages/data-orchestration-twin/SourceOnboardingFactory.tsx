@@ -139,6 +139,25 @@ export default function SourceOnboardingFactory() {
 
   return (
     <div className="min-h-full bg-white text-slate-900">
+      {/* L→R progress animation keyframes (packet shuttle + fill sweep) */}
+      <style>{`
+        @keyframes sof-packet {
+          0%   { transform: translateX(-20%); opacity: 0; }
+          8%   { opacity: 1; }
+          92%  { opacity: 1; }
+          100% { transform: translateX(120%); opacity: 0; }
+        }
+        @keyframes sof-fill {
+          0%   { transform: scaleX(0); }
+          85%  { transform: scaleX(1); }
+          100% { transform: scaleX(1); opacity: 0.15; }
+        }
+        @keyframes sof-bar-grow {
+          0%   { width: 15%; }
+          85%  { width: 100%; }
+          100% { width: 100%; opacity: 0.85; }
+        }
+      `}</style>
       {/* Header */}
       <div className="px-8 pt-6 pb-4 border-b border-slate-100">
         <div className="flex items-start justify-between gap-6">
@@ -314,7 +333,8 @@ export default function SourceOnboardingFactory() {
                                     ))}
                                   </div>
                                   <div className="mt-2 h-1 rounded-full bg-slate-200 overflow-hidden relative">
-                                    {[0,1,2].map(i => <div key={i} className="absolute top-0 h-1 w-8 rounded-full bg-indigo-400/70" style={{ left: `${((tick * 7 + i * 30) % 100)}%`, transition: "left 1.4s linear" }}/>)}
+                                    <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full origin-left" style={{ animation: "sof-bar-grow 4.2s ease-in-out infinite" }}/>
+                                    {[0,1,2].map(i => <div key={i} className="absolute top-0 h-1 w-10 rounded-full bg-white/70 shadow" style={{ left: 0, animation: `sof-packet 3.6s linear ${i * 1.2}s infinite` }}/>)}
                                   </div>
                                 </TabsContent>
                                 <TabsContent value="overview"    className="text-xs text-slate-600 mt-3">{r.name} — {r.platform} · {r.dataType}. Purpose: onboard {r.template} through the factory. Consumers: SRE, SecOps, FinOps.</TabsContent>
@@ -419,7 +439,8 @@ export default function SourceOnboardingFactory() {
                 ))}
               </div>
               <div className="mt-3 relative h-1.5 rounded-full bg-slate-800 overflow-hidden">
-                {[0,1,2,3,4].map(i => <div key={i} className="absolute top-0 h-1.5 w-8 rounded-full bg-indigo-400/70" style={{ left: `${((tick * 6 + i * 20) % 100)}%`, transition: "left 1.4s linear" }}/>)}
+                <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 via-indigo-400 to-emerald-400 rounded-full origin-left" style={{ animation: "sof-bar-grow 5s ease-in-out infinite" }}/>
+                {[0,1,2,3,4].map(i => <div key={i} className="absolute top-0 h-1.5 w-10 rounded-full bg-white/60" style={{ left: 0, animation: `sof-packet 4s linear ${i * 0.8}s infinite` }}/>)}
               </div>
             </div>
           </div>
@@ -446,7 +467,7 @@ export default function SourceOnboardingFactory() {
                       <div className="text-[11px] text-slate-200">{r.l}</div>
                     </div>
                     <div className="mt-1 h-1 bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-indigo-400/70" style={{ width: `${60 + ((tick * 7 + i * 9) % 40)}%`, transition: "width 1.4s linear" }}/>
+                      <div className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full origin-left" style={{ width: "100%", transform: "scaleX(0)", animation: `sof-fill 3.6s ease-in-out ${i * 0.35}s infinite` }}/>
                     </div>
                   </div>
                 );
@@ -469,8 +490,9 @@ export default function SourceOnboardingFactory() {
               ))}
             </div>
             <div className="mt-3 relative h-16 rounded-md bg-slate-950 overflow-hidden border border-slate-800">
+              <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500/10 via-indigo-500/15 to-emerald-500/25 origin-left" style={{ width: "100%", transform: "scaleX(0)", animation: "sof-fill 6s ease-in-out infinite" }}/>
               {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="absolute top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-indigo-400" style={{ left: `${((tick * 8 + i * 14) % 100)}%`, transition: "left 1.4s linear", opacity: 0.7 }}/>
+                <div key={i} className="absolute top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.8)]" style={{ left: 0, animation: `sof-packet 4.5s linear ${i * 0.45}s infinite` }}/>
               ))}
               <div className="absolute inset-y-0 left-0 w-14 bg-gradient-to-r from-blue-500/20 to-transparent border-r border-slate-800 flex items-center justify-center text-[10px] text-blue-300">Discover</div>
               <div className="absolute inset-y-0 right-0 w-14 bg-gradient-to-l from-emerald-500/20 to-transparent border-l border-slate-800 flex items-center justify-center text-[10px] text-emerald-300">Live</div>
