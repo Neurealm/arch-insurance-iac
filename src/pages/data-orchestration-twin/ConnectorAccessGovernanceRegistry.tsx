@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Plug, CheckCircle2, Lock, Users, Key, ShieldCheck, AlertTriangle, RefreshCw,
   Filter, Download, Search, Settings2, ChevronRight, Info,
