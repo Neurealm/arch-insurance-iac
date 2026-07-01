@@ -69,14 +69,14 @@ All colors MUST be HSL.
     --shadow-lg: 0 12px 32px -12px hsl(222 47% 11% / 0.12);
 
     /* Sidebar - Neurealm navy */
-    --sidebar-background: 232 85% 14%;
-    --sidebar-foreground: 220 25% 90%;
-    /* Active nav state — light red */
-    --sidebar-primary: 352 90% 66%;
+    --sidebar-background: 230 68% 11%;
+    --sidebar-foreground: 220 25% 92%;
+    /* Active nav state — coral */
+    --sidebar-primary: 352 88% 64%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 232 60% 22%;
+    --sidebar-accent: 232 45% 20%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 232 50% 24%;
+    --sidebar-border: 232 42% 22%;
     --sidebar-ring: 352 90% 66%;
   }
 
