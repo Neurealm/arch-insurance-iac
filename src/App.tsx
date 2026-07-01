@@ -262,6 +262,7 @@ import DataDogLogProfile from "./pages/data-orchestration-twin/DataDogLogProfile
 import DataPlacementDecisionEngine from "./pages/data-orchestration-twin/DataPlacementDecisionEngine.tsx";
 import PlacementScenarioModeler from "./pages/data-orchestration-twin/PlacementScenarioModeler.tsx";
 import NoDuplicationStrategyAndRetentionPolicy from "./pages/data-orchestration-twin/NoDuplicationStrategyAndRetentionPolicy.tsx";
+import NoDuplicationScenarioModeler from "./pages/data-orchestration-twin/NoDuplicationScenarioModeler.tsx";
 import OptionsAndTradeoffMatrix from "./pages/data-orchestration-twin/OptionsAndTradeoffMatrix.tsx";
 import ConnectorAccessGovernanceRegistry from "./pages/data-orchestration-twin/ConnectorAccessGovernanceRegistry.tsx";
 import FetchOrchestrationScheduler from "./pages/data-orchestration-twin/FetchOrchestrationScheduler.tsx";
