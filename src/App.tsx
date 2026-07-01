@@ -204,6 +204,7 @@ import RiskExposure from "./pages/itsm/RiskExposure.tsx";
 import BusinessServices from "./pages/itsm/BusinessServices.tsx";
 import StakeholderRegister from "./pages/settings/StakeholderRegister.tsx";
 import Settings from "./pages/Settings.tsx";
+import AuthOrchestration from "./pages/AuthOrchestration.tsx";
 import Questionnaires from "./pages/Questionnaires.tsx";
 import UserApprovals from "./pages/settings/UserApprovals.tsx";
 import PendingApproval from "./pages/auth/PendingApproval.tsx";
@@ -626,6 +627,7 @@ const App = () => (
           <Route path="/practice-library/cyber-security/devsecops" element={<DevSecOpsDashboard />} />
           <Route path="/practice-library/cyber-security/resilience-ir" element={<ResilienceDashboard />} />
           <Route path="/settings" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
+          <Route path="/auth-orchestration" element={<AuthOrchestration />} />
           <Route path="/questionnaires" element={<ProtectedRoute><Questionnaires /></ProtectedRoute>} />
           <Route path="/settings/approvals" element={<ProtectedRoute requireAdmin><UserApprovals /></ProtectedRoute>} />
           <Route path="/settings/organization" element={<ProtectedRoute requireAdmin><OrganizationLayout /></ProtectedRoute>}>
