@@ -434,20 +434,22 @@ export default function DataDogLogProfile() {
   const hoverDet = hoverId ? NODE_DETAILS[hoverId] : null;
 
   return (
-    <div className="min-h-full bg-slate-50">
+    <div className="min-h-full bg-gradient-to-br from-slate-50 via-white to-violet-50/40 text-slate-900">
       {/* Header */}
-      <header className="px-6 pt-5 pb-4 border-b border-slate-200 bg-white sticky top-0 z-20">
+      <header className="px-6 pt-5 pb-4 border-b border-slate-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-20">
         <div className="flex items-start justify-between gap-6">
           <div className="min-w-0">
             <nav className="text-[11px] text-slate-500 flex items-center gap-1.5 mb-1.5">
-              <Link to="/data-orchestration-twin" className="hover:text-indigo-600">Orchestration Hub</Link>
+              <Link to="/data-orchestration-twin" className="hover:text-violet-700">Orchestration Hub</Link>
               <ChevronRight className="h-3 w-3" />
-              <Link to="/data-orchestration-twin/log-source-inventory-and-scope-registry" className="hover:text-indigo-600">Log Profiles</Link>
+              <Link to="/data-orchestration-twin/log-source-inventory-and-scope-registry" className="hover:text-violet-700">Log Profiles</Link>
               <ChevronRight className="h-3 w-3" />
-              <span className="text-slate-800 font-medium">DataDog Log Profile</span>
+              <span className="text-slate-800 font-medium">Datadog Log Profile</span>
             </nav>
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 grid place-items-center shadow-lg shadow-violet-500/30 text-white text-xl">🐶</div>
+              <div className="h-12 w-12 rounded-xl bg-white ring-1 ring-violet-200 grid place-items-center shadow-sm shadow-violet-500/10">
+                <DataDogLogo size={28} />
+              </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-[26px] font-black text-slate-900 tracking-tight leading-none">DataDog Log Profile</h1>
