@@ -265,6 +265,7 @@ import NoDuplicationStrategyAndRetentionPolicy from "./pages/data-orchestration-
 import NoDuplicationScenarioModeler from "./pages/data-orchestration-twin/NoDuplicationScenarioModeler.tsx";
 import OptionsAndTradeoffMatrix from "./pages/data-orchestration-twin/OptionsAndTradeoffMatrix.tsx";
 import ConnectorAccessGovernanceRegistry from "./pages/data-orchestration-twin/ConnectorAccessGovernanceRegistry.tsx";
+import ConnectionMethodProfile from "./pages/data-orchestration-twin/ConnectionMethodProfile.tsx";
 import FetchOrchestrationScheduler from "./pages/data-orchestration-twin/FetchOrchestrationScheduler.tsx";
 import SourceOnboardingFactory from "./pages/data-orchestration-twin/SourceOnboardingFactory.tsx";
 import AssistedSchemaDiscoveryAndFieldMapping from "./pages/data-orchestration-twin/AssistedSchemaDiscoveryAndFieldMapping.tsx";
