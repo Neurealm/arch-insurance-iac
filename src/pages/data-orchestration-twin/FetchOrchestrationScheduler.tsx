@@ -288,6 +288,15 @@ export default function FetchOrchestrationScheduler() {
                           <span className="text-[10px] text-slate-500">{Math.round(r.confidence * 100)}%</span>
                         </div>
                       </td>
+                      <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
+                        <Link
+                          to={`/data-orchestration-twin/fetch-orchestration-scheduler/schedule-builder/${encodeURIComponent(r.name)}`}
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100 hover:bg-indigo-100 transition"
+                        >
+                          <CalendarClock className="h-3 w-3" />
+                          Schedule Builder
+                        </Link>
+                      </td>
                       <td className="px-3 py-2.5 text-slate-400"><ChevronRight className="h-3.5 w-3.5"/></td>
                     </tr>
                   );
