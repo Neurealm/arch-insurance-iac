@@ -466,11 +466,7 @@ function Header() {
           <button className="h-9 w-9 grid place-items-center text-slate-500 hover:bg-slate-100 rounded-lg"><HelpCircle className="h-4 w-4" /></button>
           <button className="h-9 w-9 grid place-items-center text-slate-500 hover:bg-slate-100 rounded-lg"><Settings className="h-4 w-4" /></button>
           <div className="ml-2 flex items-center gap-2 pl-2 border-l border-slate-200">
-            <div className="text-right leading-tight">
-              <div className="text-[13px] font-semibold text-slate-900">Sarah Mitchell</div>
-              <div className="text-[10px] text-slate-500">VP Infrastructure</div>
-            </div>
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 text-white text-xs font-bold grid place-items-center">SM</div>
+            <UserMenu />
           </div>
         </div>
       </div>
