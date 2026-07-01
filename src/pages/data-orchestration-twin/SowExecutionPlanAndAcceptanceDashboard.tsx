@@ -146,7 +146,7 @@ const Gauge = ({v,label}:{v:number;label:string}) => {
   const pct = Math.min(100, Math.max(0, v));
   const a = Math.PI * (1 - pct / 100);
   const x = cx + r * Math.cos(a), y = cy - r * Math.sin(a);
-  const large = pct > 50 ? 1 : 0;
+  const large = 0; // arc is always ≤180° for 0–100%; long-arc flag must stay 0
   const color = pct >= 67 ? "#10b981" : pct >= 34 ? "#f59e0b" : "#f43f5e";
   return (
     <svg width={200} height={140} viewBox="0 0 200 140" className="block">
