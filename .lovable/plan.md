@@ -1,173 +1,76 @@
-# Demo Scenario Controller — Plan
+## Goal
 
-Add a scenario-driven operating layer on top of the existing Enterprise Cloud Application Digital Twin page. Existing functionality stays. A new central scenario store becomes the source of truth that every section of the page reads from.
+Refactor `src/components/eoc/Sidebar.tsx` (used app-wide via `AppShell`) into a premium, dark-navy enterprise navigation matching Datadog / ServiceNow / Foundry aesthetics — while preserving today's routes, tree data, pinning, collapse, tenant/auth footer, and mobile drawer behavior.
 
-## What the user will see
+## Scope
 
-- A small glass card pinned upper-right near the top command bar showing: "Demo Mode", current scenario name, status dot, and "Step X of N".
-- Clicking it opens a right-aligned drawer (~480px wide) with: Scenario Library (9 cards), Current Scenario Summary, Impacted Layers, Talking Points, Playback Controls, Impact Summary, and a Before/After comparison.
-- Selecting a scenario smoothly re-skins the entire page: top KPI strip, business / transaction / app service / AWS cards, dependency highlight path, right detail panel, NOVA Copilot text, operational timeline events, and active view.
-- Hero scenario (Payment Latency Incident) is fully wired with 9 playback steps. Other scenarios apply curated overrides at a lighter fidelity.
+- Restyle only the primary app sidebar. Module-level rails (Data Orchestration, SEAD, etc.) are out of scope for this pass.
+- No route changes. Existing `tree` data in `Sidebar.tsx` stays as the single source of truth (JSON-shaped `Node[]`).
+- Reuse `lucide-react` icons already imported.
 
-## Files to add
+## New visual system
 
-```text
-src/data/demoScenarios.ts            -- 9 scenarios + types + helpers
-src/context/ScenarioStateContext.tsx -- provider, reducer, useScenarioState hook
-src/components/scenario/DemoScenarioController.tsx
-src/components/scenario/ScenarioDrawer.tsx
-src/components/scenario/ScenarioCard.tsx
-src/components/scenario/ScenarioPlaybackControls.tsx
-src/components/scenario/ScenarioImpactSummary.tsx
-src/components/scenario/ScenarioStepTimeline.tsx
-src/components/scenario/BeforeAfterPanel.tsx
-```
+- Background: deep navy `#0B1235` with subtle inner shadow and 1px right border.
+- Width: 280px collapsed rail (icon+section), 360px expanded. Smooth 250ms width transition.
+- Typography: Inter, weights 500/600/700. Parent 15px / Child 14px / Section 11px uppercase tracked.
+- Section headers: `PLATFORM`, `AI & DATA`, `DIGITAL TWINS`, `PRACTICES`, `OPERATIONS`, `SETTINGS` — muted slate-400, 32px top spacing.
+- Parent row: rounded-xl capsule, icon 18px, chevron rotates 90° on expand.
+- Selected item: coral/red pill (`bg-rose-500/15`), 3px left accent bar (`bg-rose-400`), white text, soft glow.
+- Hover: `bg-white/5` on parents, `bg-sky-400/10` on children, icon scales 1.05.
+- Children: 28px indent, vertical guide line (`border-l border-white/10`), fade-in.
+- Accordion: CSS grid-rows height animation, 250ms ease.
 
-## Files to edit (surgical, no behavior removed)
+## New features layered on top
 
-- `src/App.tsx` — wrap the `/enterprise-cloud-twin` route in `ScenarioStateProvider`.
-- `src/pages/prod-twin/EnterpriseCloudTwin.tsx` — replace local hard-coded constants (`GLOBAL_KPIS`, `BUSINESS_SERVICES`, `TRANSACTIONS`, `APP_SERVICES`, `AWS_GROUPS`, `HIGHLIGHT_PATH`, NOVA copy, timeline events) with values derived from `useScenarioState()` overlaid on the existing baseline. Mount `<DemoScenarioController />` in the top command bar.
+- **Search bar** pinned at top with ⌘K/Ctrl+K shortcut. Fuzzy match over flattened tree; grouped results (Pages / Twins / Recent / Favorites); Enter navigates.
+- **Favorites**: star icon per row, persisted in `localStorage`. "Pinned" section auto-renders above sections when non-empty.
+- **Recent Pages**: last 5 routes visited, persisted in `localStorage`, auto-updated on route change.
+- **Badges**: extend `Node` with `statusDot?: "green"|"amber"|"red"|"blue"` and `pill?: "LIVE"|"NEW"|"BETA"|"DRAFT"` alongside existing `badge`.
+- **Context awareness**: active route auto-expands its ancestor chain and scrolls the row into view.
+- **Footer** (existing): environment chip (green dot • Production), workspace, avatar, notifications, settings, collapse toggle — restyled to the dark theme.
+- **Responsive**: keep existing mobile drawer; auto-collapse under `lg`.
 
-## Scenario data model
-
-```ts
-type ScenarioStatus = "healthy" | "warning" | "critical" | "simulation" | "resolved";
-
-interface Scenario {
-  id: string;
-  name: string;
-  status: ScenarioStatus;
-  severity: "none" | "low" | "medium" | "high" | "critical";
-  demoPurpose: string;
-  primaryView: ViewId;            // reuses existing ViewId
-  recommendedLens: string;
-  primaryImpactedService: string | null;
-  estimatedDuration: string;      // "7 minutes"
-  talkingPoints: string[];
-  activeSelection: string | null; // node id to auto-select
-  globalMetricOverrides: Partial<Record<KpiId, { value: string; tone: Health }>>;
-  businessServiceOverrides: Record<string, Partial<BusinessService>>;
-  transactionOverrides: Record<string, Partial<Transaction>>;
-  applicationServiceOverrides: Record<string, Partial<AppService>>;
-  awsResourceOverrides: Record<string /*groupId*/, {
-    worst?: Health;
-    resources?: Record<string, Partial<AwsResource>>;
-  }>;
-  securityOverrides?: { findings: number; notes: string[] };
-  finOpsOverrides?: { spend: string; variance: string; notes: string[] };
-  reliabilityOverrides?: { sloBurn: string; errorBudget: string };
-  highlightedDependencyPath: string[];     // ordered node ids
-  criticalEdges: Array<[string, string]>;  // rose-colored edges
-  warningEdges: Array<[string, string]>;   // amber-colored edges
-  timelineEvents: Array<{ t: string; label: string; tone: Health; affects: string[]; evidence?: string }>;
-  novaResponse: {
-    summary: string;
-    evidence: string[];
-    rootCause: string;
-    blastRadius: string[];
-    recommended: { title: string; confidence: number; risk: "Low"|"Medium"|"High"; approval: "Required"|"Auto" };
-    secondary?: string;
-    nextBestAction: string;
-  };
-  recommendedActions: Array<{ title: string; confidence: number; risk: "Low"|"Medium"|"High" }>;
-  playbackSteps: Array<{
-    label: string;
-    focusIds: string[];     // nodes to focus
-    selectId?: string;      // right panel selection
-    openNova?: boolean;
-    view?: ViewId;
-    timelineCursor?: string;
-  }>;
-  beforeAndAfterMetrics?: Array<{ label: string; before: string; after: string; toneBefore: Health; toneAfter: Health }>;
-  impactSummary?: Array<{ label: string; value: string }>;
-  availableReports: string[];
-  acceptanceChecks: string[];
-}
-```
-
-All 9 scenarios are seeded. Normal Operations and Payment Latency Incident are fully populated per spec; the other 7 carry curated overrides for the primary impacted service / AWS group, NOVA copy, timeline events, and 3-5 playback steps.
-
-## State management
-
-`ScenarioStateContext` exposes:
-
-```ts
-const {
-  scenarios,                  // Scenario[]
-  activeScenario,             // Scenario
-  stepIndex,                  // number
-  playback,                   // "idle" | "playing" | "paused"
-  setActiveScenario(id),
-  setStepIndex(n),
-  next(), prev(), play(), pause(), reset(),
-  jumpTo("impact"|"rootCause"|"recommendation"|"approval"|"normal"),
-  selectedId, setSelectedId,
-  derived: {                  // memoized merge of baseline + overrides + current step
-    globalKpis, businessServices, transactions, appServices, awsGroups,
-    highlightedNodes, criticalEdges, warningEdges, novaResponse, timelineEvents,
-    activeView,
-  }
-} = useScenarioState();
-```
-
-A `derive(baseline, scenario, stepIndex)` pure function merges the static baseline (current hard-coded data, moved into `data/demoScenarios.ts` as `BASELINE`) with the active scenario's overrides and the current playback step's focus. The page renders entirely from `derived.*`.
-
-## Page wiring
-
-In `EnterpriseCloudTwin.tsx`:
-
-- Replace `BUSINESS_SERVICES`, `TRANSACTIONS`, `APP_SERVICES`, `AWS_GROUPS`, `GLOBAL_KPIS` reads with `derived` values.
-- Replace the static `HIGHLIGHT_PATH` and `CRIT_EDGES` sets with `derived.highlightedNodes` and `derived.criticalEdges` / `derived.warningEdges`.
-- Replace the static NOVA recommendation block in the right panel with `derived.novaResponse` (typed reveal animation on scenario change).
-- Replace the static `Timeline` events with `derived.timelineEvents`; clicking an event calls `setSelectedId(event.affects[0])` and advances `stepIndex` to the matching step.
-- `view` state becomes `activeScenario.primaryView` on selection (user can still override).
-- Mount `<DemoScenarioController />` inside the top command bar, right side.
-
-Existing components (`DigitalTwinCanvas`, `RightPanel`, `NovaCopilot`, `RCAPreview`, `Timeline`, sub-views) keep their props; we only change what data flows in.
-
-## DemoScenarioController visual
-
-Collapsed (floating, top-right of command bar):
+## Section mapping (from existing tree — no route changes)
 
 ```text
-┌────────────────────────────────────────┐
-│ ● Demo Mode      Step 4 / 9     ▸     │
-│   Payment Latency Incident  Critical   │
-└────────────────────────────────────────┘
+PLATFORM        Command Center, Operations Overview
+AI & DATA       AI Engineering, SRE Data Orchestration
+DIGITAL TWINS   App Ops Control Plane, Site Resilience Engineering,
+                S.E.A.D. RunOps, Semiconductor Ops Command Center
+PRACTICES       RunOps Practice, Cyber Security Practice
+OPERATIONS      IT Carve-Out, ITSM, Business Services,
+                Digital Coworkers, Questionnaires, CRM
+SETTINGS        Settings
 ```
 
-Glass card: `bg-white/85 backdrop-blur border-slate-200/70 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.18)] rounded-xl`. Status dot color from scenario.status. Hover lifts -1px.
+Sections are declared as a small `sections: { label, keys: string[] }[]` array that references the existing `Node.key`s — so future additions keep working with a one-line change.
 
-## ScenarioDrawer
+## Componentization
 
-Uses existing shadcn `Sheet` (`side="right"`, `w-[480px]`). Sections, top to bottom:
+Split the current monolith into `src/components/nav/`:
 
-1. Header: scenario name, status pill, duration, "Apply Scenario" + "Reset" buttons.
-2. Tabs: `Library | Current | Playback | Impact`.
-   - **Library**: vertical list of `ScenarioCard`s with status accent (rose/amber/blue/violet/emerald soft tints, 1px border, active card gets `ring-2 ring-sky-300/60 bg-sky-50/60`).
-   - **Current**: demoPurpose, recommendedLens, primaryImpactedService, impacted layers chips, talking points (bullet list), NOVA recommended action card.
-   - **Playback**: `ScenarioPlaybackControls` (Start, Pause, Prev, Next, Reset, Jump-to chips) + `ScenarioStepTimeline` (vertical numbered steps with current step highlighted, click to jump).
-   - **Impact**: `ScenarioImpactSummary` grid + `BeforeAfterPanel` side-by-side comparison.
+- `PrimaryNav.tsx` — wires state, search, favorites, recents, sections
+- `NavSection.tsx` — uppercase section label + slot
+- `NavGroup.tsx` — parent accordion row (animated chevron, active-trail, guide line)
+- `NavItem.tsx` — leaf row (icon, label, badge, pill, status dot, favorite star)
+- `NavSearch.tsx` — command palette-style search with ⌘K
+- `NavFavorites.tsx` / `NavRecent.tsx`
+- `NavFooter.tsx` — env, workspace, user, actions
+- `useNavPrefs.ts` — localStorage hooks for open groups, pinned favorites, recents, collapsed state
 
-Soft motion via Tailwind utilities (`animate-fade-in`, `transition-all duration-300`).
+`Sidebar.tsx` becomes a thin wrapper that keeps its existing export so `AppShell.tsx` and every consumer keeps working unchanged.
 
-## Canvas / NOVA / timeline behavior
+## Preserved behavior
 
-- Highlighted nodes raise via `-translate-y-1 shadow-lg ring-2`; unrelated nodes drop to `opacity-30`.
-- Critical edges render rose with flowing dash particles (already in place); warning edges render amber.
-- On scenario change, KPI numbers animate via CSS transition on color + `animate-fade-in` on the value text.
-- NOVA copy in the right panel renders with a brief reveal (`animate-fade-in` per line, staggered).
-- Timeline events render from `derived.timelineEvents`; the current playback step's cursor marker is visually emphasized.
+- Existing `Node` tree, routes, hover-cards on collapsed rail, pin-to-open, scroll persistence, tenant scope, auth sign-out.
+- Existing collapse toggle and mobile drawer continue to work.
 
-## Hero scenario fully wired
+## Out of scope
 
-Payment Latency Incident receives the full spec: all KPI overrides, full Payment Services / Process Payment / Payment Service / Aurora / SQS state, dependency path `bs-pay → tx-pay → svc-pay → g-data → g-event → svc-noti → bs-om`, NOVA response verbatim from Section 7, all 12 timeline events, all 9 playback steps, before/after table from Section 11, impact summary from Section 10.
+- Module rails (Data Orchestration Twin `DataOrchLayout`, SEAD rail, etc.) keep their current light styling. A follow-up can align them.
+- No new routes, no data-model changes.
 
-Normal Operations receives the full reset spec from Section 12 (no highlighted path, no critical pulses, NOVA "all healthy" copy).
+## Verification
 
-## Constraints honored
-
-- Light theme only, white/near-white, glass cards, soft borders and shadows.
-- No dark backgrounds, no neon, no cyberpunk, no flashing.
-- Mock data only, no external integrations; data model is extensible for future telemetry / ServiceNow / AWS wiring.
-- No existing functionality removed; the controller is additive and the page reads from a derived view of baseline + scenario.
+- Load `/`, `/prod-resilience-twin`, `/data-orchestration-twin`, `/sead/command-center`, `/semiconductor/command-center`; confirm active route highlights, ancestor expands, search jumps, favorites persist, collapse rail works.
+- Check `tsgo` build clean.
