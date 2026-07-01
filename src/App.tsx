@@ -479,6 +479,7 @@ const App = () => (
             <Route path="performance-latency-and-freshness-lab" element={<PerformanceLatencyAndFreshnessLab />} />
             <Route path="context-graph-and-agentic-query-handoff-layer" element={<ContextGraphAndAgenticQueryHandoffLayer />} />
             <Route path="data-gap-register-and-engineering-backlog" element={<DataGapRegisterAndEngineeringBacklog />} />
+            <Route path="sow-execution-plan-and-acceptance-dashboard" element={<SowExecutionPlanAndAcceptanceDashboard />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
