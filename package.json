@@ -72,7 +72,7 @@
     "react-router-dom": "^7.9.5",
     "react-simple-maps": "^3.0.0",
     "reactflow": "^11.11.4",
-    "recharts": "^3.2.1",
+    "recharts": "^2.15.4",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
