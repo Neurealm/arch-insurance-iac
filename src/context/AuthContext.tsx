@@ -110,12 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-
-  // Platform-admin privileges only apply when the user is acting in the
-  // NeuRealm workspace. The same identity used inside a tenant workspace is
-  // treated as a regular tenant member so dashboards, data, and routes stay
-  // isolated to that tenant.
-  const isAdmin = hasPlatformAdminRole && (activeWorkspace === null || activeWorkspace === "neurealm");
+  const isAdmin = hasPlatformAdminRole;
 
   return (
     <Ctx.Provider
