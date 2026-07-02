@@ -207,6 +207,8 @@ import Settings from "./pages/Settings.tsx";
 import AuthOrchestration from "./pages/AuthOrchestration.tsx";
 import Questionnaires from "./pages/Questionnaires.tsx";
 import UserApprovals from "./pages/settings/UserApprovals.tsx";
+import UserManagement from "./pages/settings/UserManagement.tsx";
+import ChangePassword from "./pages/settings/ChangePassword.tsx";
 import PendingApproval from "./pages/auth/PendingApproval.tsx";
 import UpdateProfile from "./pages/auth/UpdateProfile.tsx";
 import OrganizationLayout from "./pages/settings/organization/OrganizationLayout.tsx";
