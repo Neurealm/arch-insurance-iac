@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.record_user_login_event(uuid, text, text, text, text, text, text, jsonb) FROM authenticated, anon, PUBLIC;
