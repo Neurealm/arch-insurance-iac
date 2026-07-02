@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.admin_user_page_activity(uuid, integer, integer) TO authenticated;
