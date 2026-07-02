@@ -639,7 +639,7 @@ export function EocSidebar({
 
     if (!scoped) return base;
     // Always-visible top-level keys for tenant members
-    const ALWAYS_KEYS = new Set(["home"]);
+    const ALWAYS_KEYS = new Set(["home", "settings"]);
     const filterNode = (n: Node): Node | null => {
       const selfMatches = !!n.to && routes.has(n.to);
       const alwaysOn = ALWAYS_KEYS.has(n.key);
