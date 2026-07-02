@@ -16,6 +16,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <PersonaProvider>
+      <PageActivityTracker />
       {/*
         Flexbox shell — no margin-left / width:calc hacks.
         Sidebar is an in-flow sticky column on desktop (reserves exactly its own
