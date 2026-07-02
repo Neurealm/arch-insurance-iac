@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/eoc/AppShell";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings as SettingsIcon, Network, ArrowRight, ShieldCheck, UserCog, KeyRound } from "lucide-react";
+import { Settings as SettingsIcon, Network, ArrowRight, UserCog, KeyRound } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
