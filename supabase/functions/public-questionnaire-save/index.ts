@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
 
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
-    console.error(e);
-    return json({ error: (e as Error).message }, 500);
+    console.error("public-questionnaire-save error", e);
+    return json({ error: "An internal error occurred" }, 500);
   }
 });
