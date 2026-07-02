@@ -74,7 +74,6 @@ import ResetPassword from "./pages/auth/ResetPassword.tsx";
 import NoAccess from "./pages/auth/NoAccess.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
-import { TenantAccessGuard } from "./components/auth/TenantAccessGuard.tsx";
 import Coworkers from "./pages/Coworkers.tsx";
 import CoworkersNetwork from "./pages/CoworkersNetwork.tsx";
 import CoworkersSRE from "./pages/CoworkersSRE.tsx";
@@ -338,7 +337,6 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-        <TenantAccessGuard>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/q/:token" element={<PublicQuestionnaire />} />
@@ -695,7 +693,6 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        </TenantAccessGuard>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
