@@ -43,8 +43,18 @@ Deno.serve(async (req) => {
 
     if (mode === "set") {
       const newPassword = String(body.password ?? "");
-      if (newPassword.length < 8) {
-        return json({ error: "Password must be at least 8 characters" }, 400);
+      const strong =
+        newPassword.length >= 12 &&
+        newPassword.length <= 72 &&
+        /[a-z]/.test(newPassword) &&
+        /[A-Z]/.test(newPassword) &&
+        /[0-9]/.test(newPassword) &&
+        /[^A-Za-z0-9]/.test(newPassword);
+      if (!strong) {
+        return json({
+          error:
+            "Password must be 12-72 characters and include uppercase, lowercase, number, and symbol",
+        }, 400);
       }
       const { error } = await admin.auth.admin.updateUserById(userId, { password: newPassword });
       if (error) return json({ error: error.message }, 400);

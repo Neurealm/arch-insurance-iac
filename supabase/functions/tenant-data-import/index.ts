@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
     );
   } catch (e) {
     console.error("tenant-data-import error:", e);
-    return json({ error: e instanceof Error ? e.message : "Unknown error", stack: e instanceof Error ? e.stack : undefined }, 500);
+    return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });
 
