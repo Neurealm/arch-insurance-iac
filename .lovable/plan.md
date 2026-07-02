@@ -1,76 +1,53 @@
-## Goal
+This is a diagnostic report on the full account creation and login flow for `jdoucette@archgroup.com` and `tflock@archgroup.com`, plus the fixes I recommend. Nothing has been changed yet — approve the fix list at the bottom and I'll implement.
 
-Refactor `src/components/eoc/Sidebar.tsx` (used app-wide via `AppShell`) into a premium, dark-navy enterprise navigation matching Datadog / ServiceNow / Foundry aesthetics — while preserving today's routes, tree data, pinning, collapse, tenant/auth footer, and mobile drawer behavior.
+## 1. Account creation (both users)
 
-## Scope
+Both accounts were created identically, via admin invite from `neugain.io`:
 
-- Restyle only the primary app sidebar. Module-level rails (Data Orchestration, SEAD, etc.) are out of scope for this pass.
-- No route changes. Existing `tree` data in `Sidebar.tsx` stays as the single source of truth (JSON-shaped `Node[]`).
-- Reuse `lucide-react` icons already imported.
+| Field | jdoucette | tflock |
+|---|---|---|
+| `auth.users.created_at` | 2026-07-02 18:37:15 | 2026-07-02 18:42:29 |
+| `invited_at` | 2026-07-02 18:37:15 | 2026-07-02 18:42:29 |
+| `raw_user_meta_data.invited_to_tenant` | true | true |
+| `profiles.approval_status` | approved (auto) | approved (auto) |
+| `user_roles` | platform_support | platform_support |
+| `user_category` | customer | customer |
+| `email_confirmed_at` | 2026-07-02 18:56:27 | 2026-07-02 19:03:43 |
 
-## New visual system
+Creation flow works as designed: `admin-users.invite_user` → `auth.admin.inviteUserByEmail` → `handle_new_user` trigger auto-approves and assigns `platform_support`. Both users got the invite mail and confirmed within ~15–20 min. No errors.
 
-- Background: deep navy `#0B1235` with subtle inner shadow and 1px right border.
-- Width: 280px collapsed rail (icon+section), 360px expanded. Smooth 250ms width transition.
-- Typography: Inter, weights 500/600/700. Parent 15px / Child 14px / Section 11px uppercase tracked.
-- Section headers: `PLATFORM`, `AI & DATA`, `DIGITAL TWINS`, `PRACTICES`, `OPERATIONS`, `SETTINGS` — muted slate-400, 32px top spacing.
-- Parent row: rounded-xl capsule, icon 18px, chevron rotates 90° on expand.
-- Selected item: coral/red pill (`bg-rose-500/15`), 3px left accent bar (`bg-rose-400`), white text, soft glow.
-- Hover: `bg-white/5` on parents, `bg-sky-400/10` on children, icon scales 1.05.
-- Children: 28px indent, vertical guide line (`border-l border-white/10`), fade-in.
-- Accordion: CSS grid-rows height animation, 250ms ease.
+## 2. First sign-in (recovery / invite link)
 
-## New features layered on top
+Both users completed the invite by clicking the emailed link, which routes through `/verify` → `/reset-password`. Auth-log evidence:
 
-- **Search bar** pinned at top with ⌘K/Ctrl+K shortcut. Fuzzy match over flattened tree; grouped results (Pages / Twins / Recent / Favorites); Enter navigates.
-- **Favorites**: star icon per row, persisted in `localStorage`. "Pinned" section auto-renders above sections when non-empty.
-- **Recent Pages**: last 5 routes visited, persisted in `localStorage`, auto-updated on route change.
-- **Badges**: extend `Node` with `statusDot?: "green"|"amber"|"red"|"blue"` and `pill?: "LIVE"|"NEW"|"BETA"|"DRAFT"` alongside existing `badge`.
-- **Context awareness**: active route auto-expands its ancestor chain and scrolls the row into view.
-- **Footer** (existing): environment chip (green dot • Production), workspace, avatar, notifications, settings, collapse toggle — restyled to the dark theme.
-- **Responsive**: keep existing mobile drawer; auto-collapse under `lg`.
+- **jdoucette** — single successful `login` (implicit) at 19:19:19 from IP `206.204.42.105`. Clean.
+- **tflock** — first successful implicit login at 19:18:05 from IP `104.223.88.175`, followed by:
+  - `GET /verify` → `403 email link expired` at 19:18:14, 19:19:14, 19:20:07 (same one-time recovery token re-clicked)
+  - `PUT /user` → `403 session_not_found` at 19:19:45 and 19:20:58 (client held the pre-rotation session id)
 
-## Section mapping (from existing tree — no route changes)
+## 3. Durable `user_login_events` (recorded by `record-login` edge function)
 
-```text
-PLATFORM        Command Center, Operations Overview
-AI & DATA       AI Engineering, SRE Data Orchestration
-DIGITAL TWINS   App Ops Control Plane, Site Resilience Engineering,
-                S.E.A.D. RunOps, Semiconductor Ops Command Center
-PRACTICES       RunOps Practice, Cyber Security Practice
-OPERATIONS      IT Carve-Out, ITSM, Business Services,
-                Digital Coworkers, Questionnaires, CRM
-SETTINGS        Settings
-```
+- **tflock**: 5 rows, all `login` / method=`email` / IP `199.254.79.44` / source=`portal`, from 19:03:47 through 19:31:50 → the `record-login` invoke fires reliably for tflock.
+- **jdoucette**: **0 rows** → `record-login` never fired for this account, even though he successfully signed in.
 
-Sections are declared as a small `sections: { label, keys: string[] }[]` array that references the existing `Node.key`s — so future additions keep working with a one-line change.
+Root cause: in `AuthContext.tsx` we only invoke `record-login` inside `onAuthStateChange` when `event === "SIGNED_IN"`. A recovery-link sign-in emits `PASSWORD_RECOVERY` (and later `USER_UPDATED` after the password is set) but frequently no explicit `SIGNED_IN` on the same page load, so the durable event is missed. This also explains why the login-history UI looks empty for anyone who set their password via the invite/recovery flow and hasn't signed out and back in with password since.
 
-## Componentization
+## 4. `user_page_activity`
 
-Split the current monolith into `src/components/nav/`:
+Neither user has any rows — so the page-activity tracker did not record for either session. Either they closed the tab before the first tracked route mounted, or the `usePageActivityTracker` hook doesn't run on the reset-password / verify path. Not blocking, but worth verifying.
 
-- `PrimaryNav.tsx` — wires state, search, favorites, recents, sections
-- `NavSection.tsx` — uppercase section label + slot
-- `NavGroup.tsx` — parent accordion row (animated chevron, active-trail, guide line)
-- `NavItem.tsx` — leaf row (icon, label, badge, pill, status dot, favorite star)
-- `NavSearch.tsx` — command palette-style search with ⌘K
-- `NavFavorites.tsx` / `NavRecent.tsx`
-- `NavFooter.tsx` — env, workspace, user, actions
-- `useNavPrefs.ts` — localStorage hooks for open groups, pinned favorites, recents, collapsed state
+## 5. Recommended fixes
 
-`Sidebar.tsx` becomes a thin wrapper that keeps its existing export so `AppShell.tsx` and every consumer keeps working unchanged.
+- **Fix A — Record login events for recovery/invite completions.** In `src/context/AuthContext.tsx`, also invoke `record-login` on `PASSWORD_RECOVERY` and on the first `USER_UPDATED` following recovery, guarded by a session-scoped dedupe flag so we don't double-count on the same tab.
+- **Fix B — Stop the noisy 403 loop after recovery.** In `src/pages/auth/ResetPassword.tsx`, after `updateUser({ password })` succeeds, immediately `navigate("/app", { replace: true })` and clear the URL hash so a browser back/refresh can't re-hit `/verify` with the already-consumed token, and add a one-time guard so the page won't re-attempt `getUser()` / `updateUser()` after a `session_not_found` — instead surface "Your reset link was already used, please sign in" and redirect to `/login`.
+- **Fix C — Suppress the `AuthSessionMissingError` toast.** Detect that specific error class in the reset-password page's catch block and show a friendly "session expired, please sign in again" instead of the raw string that reads like a bug.
+- **Fix D (optional) — Track page activity on auth routes.** Verify `usePageActivityTracker` mounts on `/verify` and `/reset-password`, or explicitly log a synthetic `auth_flow` entry on completion so we can see recovery-link usage in the admin activity tab.
 
-## Preserved behavior
+## Technical notes
 
-- Existing `Node` tree, routes, hover-cards on collapsed rail, pin-to-open, scroll persistence, tenant scope, auth sign-out.
-- Existing collapse toggle and mobile drawer continue to work.
+- `admin-users` edge function is fine; no change needed.
+- `record-login` edge function is fine; no change needed — only the client-side trigger conditions in `AuthContext` need widening.
+- `ResetPassword.tsx` and `AuthContext.tsx` are the only files touched by fixes A–C.
+- No database migration required.
 
-## Out of scope
-
-- Module rails (Data Orchestration Twin `DataOrchLayout`, SEAD rail, etc.) keep their current light styling. A follow-up can align them.
-- No new routes, no data-model changes.
-
-## Verification
-
-- Load `/`, `/prod-resilience-twin`, `/data-orchestration-twin`, `/sead/command-center`, `/semiconductor/command-center`; confirm active route highlights, ancestor expands, search jumps, favorites persist, collapse rail works.
-- Check `tsgo` build clean.
+Reply "go" (or point to which fixes to apply) and I'll implement.
