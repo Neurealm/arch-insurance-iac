@@ -5,7 +5,6 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { AuthLayout } from "./AuthLayout";
 import { Eye, EyeOff } from "lucide-react";
@@ -18,65 +17,25 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [workspace, setWorkspace] = useState("neurealm");
   const [showPassword, setShowPassword] = useState(false);
-  const [tenants, setTenants] = useState<{ id: string; name: string; slug: string }[]>([]);
 
   useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("tenants")
-        .select("id,name,slug")
-        .eq("status", true)
-        .order("name");
-      setTenants(data ?? []);
-    })();
+    sessionStorage.removeItem("active_workspace");
   }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setLoading(false);
       return toast.error(error.message);
     }
-    const uid = signInData.user?.id;
-    try {
-      if (workspace === "neurealm") {
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", uid!);
-        if (!roles || roles.length === 0) {
-          navigate("/no-access", { replace: true, state: { workspace: "NeuRealm" } });
-          return;
-        }
-      } else {
-        const tenant = tenants.find((t) => t.slug === workspace);
-        if (!tenant) {
-          await supabase.auth.signOut();
-          toast.error("Selected workspace not found.");
-          return;
-        }
-        const { data: m } = await supabase
-          .from("tenant_memberships")
-          .select("id")
-          .eq("user_id", uid!)
-          .eq("tenant_id", tenant.id)
-          .maybeSingle();
-        if (!m) {
-          navigate("/no-access", { replace: true, state: { workspace: tenant.name } });
-          return;
-        }
-      }
-      sessionStorage.setItem("active_workspace", workspace);
-      window.dispatchEvent(new Event("workspace-change"));
-      navigate(dest, { replace: true });
-    } finally {
-      setLoading(false);
-    }
+    sessionStorage.removeItem("active_workspace");
+    window.dispatchEvent(new Event("workspace-change"));
+    navigate(dest, { replace: true });
+    setLoading(false);
   };
 
   const onGoogle = async () => {
@@ -96,20 +55,6 @@ export default function Login() {
       </Button>
       <div className="relative my-2"><div className="h-px bg-border" /><span className="absolute inset-0 -top-2.5 text-center text-xs text-muted-foreground"><span className="bg-background px-2">or</span></span></div>
       <form onSubmit={onSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="workspace">Workspace</Label>
-          <Select value={workspace} onValueChange={setWorkspace}>
-            <SelectTrigger id="workspace" className="h-11">
-              <SelectValue placeholder="Select workspace" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="neurealm">NeuRealm</SelectItem>
-              {tenants.map((t) => (
-                <SelectItem key={t.id} value={t.slug}>{t.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="h-11" />
