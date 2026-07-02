@@ -91,9 +91,24 @@ Deno.serve(async (req) => {
     const path = `questionnaire-public/${resp.id}/${crypto.randomUUID()}-${safeName}`;
     const bytes = new Uint8Array(await file.arrayBuffer());
 
+    // Verify magic bytes for types we can sniff. If sniffable and mismatched, reject.
+    const sniffed = sniff(bytes.slice(0, 16));
+    if (sniffed && sniffed !== declaredType) {
+      // Allow zip-based Office docs (docx/xlsx/pptx) which sniff as application/zip
+      const zipOffice = sniffed === "application/zip" && (
+        declaredType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        declaredType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        declaredType === "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
+        declaredType === "application/zip"
+      );
+      if (!zipOffice) {
+        return json({ error: "File contents do not match declared type" }, 415);
+      }
+    }
+
     const { error: upErr } = await admin.storage
       .from("evidence")
-      .upload(path, bytes, { contentType: file.type || "application/octet-stream", upsert: false });
+      .upload(path, bytes, { contentType: declaredType, upsert: false });
     if (upErr) throw upErr;
 
     const { data: row, error } = await admin
@@ -104,7 +119,7 @@ Deno.serve(async (req) => {
         storage_bucket: "evidence",
         storage_path: path,
         file_name: safeName,
-        content_type: file.type || null,
+        content_type: declaredType,
         size_bytes: file.size,
       })
       .select("id, file_name, content_type, size_bytes, created_at")
@@ -113,7 +128,7 @@ Deno.serve(async (req) => {
 
     return json({ ok: true, file: row });
   } catch (e) {
-    console.error(e);
-    return json({ error: (e as Error).message }, 500);
+    console.error("public-questionnaire-upload error", e);
+    return json({ error: "An internal error occurred" }, 500);
   }
 });
