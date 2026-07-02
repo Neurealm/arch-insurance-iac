@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/eoc/AppShell";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings as SettingsIcon, Network, ArrowRight, ShieldCheck, UserCog, KeyRound } from "lucide-react";
+import { Settings as SettingsIcon, Network, ArrowRight, UserCog, KeyRound } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
@@ -30,12 +30,7 @@ export default function Settings() {
 
           {isAdmin && (
             <SettingsCard to="/settings/user-management" icon={UserCog} title="User Management"
-              description="Invite users, reset passwords, manage NeuRealm Employee vs Customer categories, roles, approvals, and review activity." />
-          )}
-
-          {isAdmin && (
-            <SettingsCard to="/settings/approvals" icon={ShieldCheck} title="User Approvals"
-              description="Review and approve new account requests. Pending users cannot access the platform." />
+              description="Invite users, reset passwords, manage NeuRealm Employee vs Customer categories, platform roles, and review activity." />
           )}
         </div>
       </main>
