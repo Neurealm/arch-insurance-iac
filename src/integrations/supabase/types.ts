@@ -1441,6 +1441,7 @@ export type Database = {
           preferred_language: string | null
           time_zone: string | null
           updated_at: string
+          user_category: Database["public"]["Enums"]["user_category"] | null
           user_id: string
         }
         Insert: {
@@ -1461,6 +1462,7 @@ export type Database = {
           preferred_language?: string | null
           time_zone?: string | null
           updated_at?: string
+          user_category?: Database["public"]["Enums"]["user_category"] | null
           user_id: string
         }
         Update: {
@@ -1481,6 +1483,7 @@ export type Database = {
           preferred_language?: string | null
           time_zone?: string | null
           updated_at?: string
+          user_category?: Database["public"]["Enums"]["user_category"] | null
           user_id?: string
         }
         Relationships: []
@@ -2287,6 +2290,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_page_activity: {
+        Row: {
+          entered_at: string
+          id: string
+          page_title: string | null
+          path: string
+          user_id: string
+        }
+        Insert: {
+          entered_at?: string
+          id?: string
+          page_title?: string | null
+          path: string
+          user_id: string
+        }
+        Update: {
+          entered_at?: string
+          id?: string
+          page_title?: string | null
+          path?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2401,6 +2428,20 @@ export type Database = {
           traits: Json
         }[]
       }
+      admin_user_page_activity: {
+        Args: { _days?: number; _limit?: number; _user_id: string }
+        Returns: {
+          duration_ms: number
+          entered_at: string
+          id: string
+          left_at: string
+          page_title: string
+          path: string
+          referrer_path: string
+          session_id: string
+          user_agent: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2448,6 +2489,7 @@ export type Database = {
         | "Not Applicable"
       app_role: "platform_admin" | "platform_support"
       tenant_role: "tenant_admin" | "tenant_manager" | "tenant_member"
+      user_category: "neurealm_employee" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2587,6 +2629,7 @@ export const Constants = {
       ],
       app_role: ["platform_admin", "platform_support"],
       tenant_role: ["tenant_admin", "tenant_manager", "tenant_member"],
+      user_category: ["neurealm_employee", "customer"],
     },
   },
 } as const
