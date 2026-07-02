@@ -207,6 +207,8 @@ import Settings from "./pages/Settings.tsx";
 import AuthOrchestration from "./pages/AuthOrchestration.tsx";
 import Questionnaires from "./pages/Questionnaires.tsx";
 import UserApprovals from "./pages/settings/UserApprovals.tsx";
+import UserManagement from "./pages/settings/UserManagement.tsx";
+import ChangePassword from "./pages/settings/ChangePassword.tsx";
 import PendingApproval from "./pages/auth/PendingApproval.tsx";
 import UpdateProfile from "./pages/auth/UpdateProfile.tsx";
 import OrganizationLayout from "./pages/settings/organization/OrganizationLayout.tsx";
@@ -644,6 +646,8 @@ const App = () => (
           <Route path="/data-orchestration-twin/site-resilience-detect-and-isolate-network-issue" element={<SiteResilienceCoworker />} />
           <Route path="/questionnaires" element={<ProtectedRoute><Questionnaires /></ProtectedRoute>} />
           <Route path="/settings/approvals" element={<ProtectedRoute requireAdmin><UserApprovals /></ProtectedRoute>} />
+          <Route path="/settings/user-management" element={<ProtectedRoute requireAdmin><UserManagement /></ProtectedRoute>} />
+          <Route path="/settings/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
           <Route path="/settings/organization" element={<ProtectedRoute requireAdmin><OrganizationLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="business-units" replace />} />
             <Route path="hierarchy" element={<HierarchyView />} />

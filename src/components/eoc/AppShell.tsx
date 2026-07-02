@@ -2,6 +2,12 @@ import { ReactNode, useState } from "react";
 import { Menu, ShieldAlert } from "lucide-react";
 import { EocSidebar } from "./Sidebar";
 import { PersonaProvider } from "@/context/PersonaContext";
+import { usePageActivityTracker } from "@/hooks/usePageActivityTracker";
+
+function PageActivityTracker() {
+  usePageActivityTracker();
+  return null;
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   // Mobile drawer open state. AppShell remounts per route, so this naturally
@@ -10,6 +16,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <PersonaProvider>
+      <PageActivityTracker />
       {/*
         Flexbox shell — no margin-left / width:calc hacks.
         Sidebar is an in-flow sticky column on desktop (reserves exactly its own
