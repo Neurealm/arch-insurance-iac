@@ -637,7 +637,7 @@ const App = () => (
           <Route path="/practice-library/cyber-security/data-privacy-dlp" element={<DlpDashboard />} />
           <Route path="/practice-library/cyber-security/devsecops" element={<DevSecOpsDashboard />} />
           <Route path="/practice-library/cyber-security/resilience-ir" element={<ResilienceDashboard />} />
-          <Route path="/settings" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/auth-orchestration" element={<AuthOrchestration />} />
           <Route path="/data-orchestration-twin/site-resilience-detect-and-isolate-network-issue" element={<SiteResilienceCoworker />} />
           <Route path="/questionnaires" element={<ProtectedRoute><Questionnaires /></ProtectedRoute>} />

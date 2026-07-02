@@ -22,15 +22,16 @@ export default function Settings() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <SettingsCard to="/settings/organization/business-units" icon={Network} title="Organization Model"
-            description="Manage Business Units → Practices → Capability Areas → Service Functions → Workflows → Activities → Tasks." />
-
           <SettingsCard to="/settings/change-password" icon={KeyRound} title="Change Password"
             description="Update your account password. Strong-password rules and instant confirmation." />
 
           {isAdmin && (
-            <SettingsCard to="/settings/user-management" icon={UserCog} title="User Management"
-              description="Invite users, reset passwords, manage NeuRealm Employee vs Customer categories, platform roles, and review activity." />
+            <>
+              <SettingsCard to="/settings/organization/business-units" icon={Network} title="Organization Model"
+                description="Manage Business Units → Practices → Capability Areas → Service Functions → Workflows → Activities → Tasks." />
+              <SettingsCard to="/settings/user-management" icon={UserCog} title="User Management"
+                description="Invite users, reset passwords, manage NeuRealm Employee vs Customer categories, platform roles, and review activity." />
+            </>
           )}
         </div>
       </main>
