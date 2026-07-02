@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
       files,
     });
   } catch (e) {
-    console.error(e);
-    return json({ error: (e as Error).message }, 500);
+    console.error("public-questionnaire-get error", e);
+    return json({ error: "An internal error occurred" }, 500);
   }
 });
