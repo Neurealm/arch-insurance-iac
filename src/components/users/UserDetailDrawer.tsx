@@ -176,7 +176,7 @@ export function UserDetailDrawer({
             <Separator className="my-5" />
 
             <section className="space-y-2">
-              <h3 className="text-sm font-semibold">Roles & workspace access</h3>
+              <h3 className="text-sm font-semibold">Platform role</h3>
               <AccessEditor userId={row.user_id} onChanged={onChanged} />
             </section>
 
