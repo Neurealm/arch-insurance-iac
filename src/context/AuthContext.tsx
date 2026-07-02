@@ -82,24 +82,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setLoading(false);
       setTimeout(() => loadRole(s?.user?.id), 0);
-      if (event === "SIGNED_IN" && s?.user) {
-        setTimeout(() => {
-          supabase.functions
-            .invoke("record-login", {
-              body: {
-                action: "login",
-                login_method:
-                  ((s.user.app_metadata as any)?.provider as string) ?? null,
-                user_agent:
-                  typeof navigator !== "undefined" ? navigator.userAgent : null,
-                source: "portal",
-                traits: {},
-              },
-            })
-            .then(({ error }) => {
-              if (error) console.warn("login event not recorded", error.message);
-            });
-        }, 0);
+
+      // Record a durable login event for any first-time session establishment
+      // in this tab — covers password sign-in (SIGNED_IN), invite/recovery
+      // link completion (PASSWORD_RECOVERY, USER_UPDATED, TOKEN_REFRESHED
+      // following a recovery), and magic-link callbacks.
+      const LOGIN_EVENTS = new Set([
+        "SIGNED_IN",
+        "PASSWORD_RECOVERY",
+        "USER_UPDATED",
+      ]);
+      if (LOGIN_EVENTS.has(event) && s?.user) {
+        const dedupeKey = `login-recorded:${s.user.id}:${s.access_token?.slice(-16) ?? ""}`;
+        const already =
+          typeof sessionStorage !== "undefined" && sessionStorage.getItem(dedupeKey);
+        if (!already) {
+          try { sessionStorage?.setItem(dedupeKey, "1"); } catch {}
+          setTimeout(() => {
+            supabase.functions
+              .invoke("record-login", {
+                body: {
+                  action: "login",
+                  login_method:
+                    event === "PASSWORD_RECOVERY" || event === "USER_UPDATED"
+                      ? "recovery"
+                      : ((s.user.app_metadata as any)?.provider as string) ?? null,
+                  user_agent:
+                    typeof navigator !== "undefined" ? navigator.userAgent : null,
+                  source: "portal",
+                  traits: { auth_event: event },
+                },
+              })
+              .then(({ error }) => {
+                if (error) console.warn("login event not recorded", error.message);
+              });
+          }, 0);
+        }
       }
     });
     supabase.auth.getSession().then(({ data }) => {
