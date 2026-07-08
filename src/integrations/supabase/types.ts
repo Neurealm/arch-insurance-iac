@@ -135,7 +135,7 @@ export type Database = {
           id: string
           question_id: string
           status: Database["public"]["Enums"]["answer_status"]
-          tenant_id: string
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
@@ -146,7 +146,7 @@ export type Database = {
           id?: string
           question_id: string
           status?: Database["public"]["Enums"]["answer_status"]
-          tenant_id: string
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -157,7 +157,7 @@ export type Database = {
           id?: string
           question_id?: string
           status?: Database["public"]["Enums"]["answer_status"]
-          tenant_id?: string
+          tenant_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -166,13 +166,6 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "answers_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -286,15 +279,7 @@ export type Database = {
           updated_at?: string
           website?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "crm_companies_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       crm_departments: {
         Row: {
@@ -1437,11 +1422,11 @@ export type Database = {
           id: string
           job_title: string | null
           location: string | null
+          must_change_password: boolean
           phone: string | null
           preferred_language: string | null
           time_zone: string | null
           updated_at: string
-          must_change_password: boolean
           user_category: Database["public"]["Enums"]["user_category"] | null
           user_id: string
         }
@@ -1459,11 +1444,11 @@ export type Database = {
           id?: string
           job_title?: string | null
           location?: string | null
+          must_change_password?: boolean
           phone?: string | null
           preferred_language?: string | null
           time_zone?: string | null
           updated_at?: string
-          must_change_password?: boolean
           user_category?: Database["public"]["Enums"]["user_category"] | null
           user_id: string
         }
@@ -1481,11 +1466,11 @@ export type Database = {
           id?: string
           job_title?: string | null
           location?: string | null
+          must_change_password?: boolean
           phone?: string | null
           preferred_language?: string | null
           time_zone?: string | null
           updated_at?: string
-          must_change_password?: boolean
           user_category?: Database["public"]["Enums"]["user_category"] | null
           user_id?: string
         }
@@ -1792,13 +1777,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "questionnaires_assigned_to_tenant_id_fkey"
-            columns: ["assigned_to_tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "questionnaires_workstream_id_fkey"
             columns: ["workstream_id"]
             isOneToOne: false
@@ -1920,262 +1898,6 @@ export type Database = {
         }
         Relationships: []
       }
-      tenant_agent_assignments: {
-        Row: {
-          agent_id: string
-          created_at: string
-          enabled: boolean
-          id: string
-          tenant_id: string
-        }
-        Insert: {
-          agent_id: string
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          tenant_id: string
-        }
-        Update: {
-          agent_id?: string
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tenant_agent_assignments_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents_catalog"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tenant_agent_assignments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tenant_incidents: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          external_id: string
-          id: string
-          incident_number: string | null
-          mttr_minutes: number | null
-          opened_at: string
-          owner: string | null
-          raw: Json
-          resolved_at: string | null
-          service: string | null
-          severity: string
-          source: string
-          status: string
-          tenant_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          external_id: string
-          id?: string
-          incident_number?: string | null
-          mttr_minutes?: number | null
-          opened_at?: string
-          owner?: string | null
-          raw?: Json
-          resolved_at?: string | null
-          service?: string | null
-          severity?: string
-          source?: string
-          status?: string
-          tenant_id: string
-          title?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          external_id?: string
-          id?: string
-          incident_number?: string | null
-          mttr_minutes?: number | null
-          opened_at?: string
-          owner?: string | null
-          raw?: Json
-          resolved_at?: string | null
-          service?: string | null
-          severity?: string
-          source?: string
-          status?: string
-          tenant_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      tenant_integrations: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          enabled: boolean
-          id: string
-          integration_id: string
-          settings: Json
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          enabled?: boolean
-          id?: string
-          integration_id: string
-          settings?: Json
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          enabled?: boolean
-          id?: string
-          integration_id?: string
-          settings?: Json
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      tenant_memberships: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["tenant_role"]
-          tenant_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["tenant_role"]
-          tenant_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["tenant_role"]
-          tenant_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tenant_memberships_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tenant_tool_assignments: {
-        Row: {
-          created_at: string
-          enabled: boolean
-          id: string
-          tenant_id: string
-          tool_id: string
-        }
-        Insert: {
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          tenant_id: string
-          tool_id: string
-        }
-        Update: {
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          tenant_id?: string
-          tool_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tenant_tool_assignments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tenant_tool_assignments_tool_id_fkey"
-            columns: ["tool_id"]
-            isOneToOne: false
-            referencedRelation: "tools_catalog"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tenants: {
-        Row: {
-          created_at: string
-          data_mode: string
-          db_connection_id: string | null
-          id: string
-          logo_url: string | null
-          name: string
-          primary_admin_email: string | null
-          slug: string
-          source_company_id: string | null
-          status: boolean
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          data_mode?: string
-          db_connection_id?: string | null
-          id?: string
-          logo_url?: string | null
-          name: string
-          primary_admin_email?: string | null
-          slug: string
-          source_company_id?: string | null
-          status?: boolean
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          data_mode?: string
-          db_connection_id?: string | null
-          id?: string
-          logo_url?: string | null
-          name?: string
-          primary_admin_email?: string | null
-          slug?: string
-          source_company_id?: string | null
-          status?: boolean
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tenants_source_company_id_fkey"
-            columns: ["source_company_id"]
-            isOneToOne: false
-            referencedRelation: "crm_companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       tools_catalog: {
         Row: {
           category: string | null
@@ -2214,45 +1936,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      user_agent_assignments: {
-        Row: {
-          agent_id: string
-          created_at: string
-          id: string
-          tenant_id: string
-          user_id: string
-        }
-        Insert: {
-          agent_id: string
-          created_at?: string
-          id?: string
-          tenant_id: string
-          user_id: string
-        }
-        Update: {
-          agent_id?: string
-          created_at?: string
-          id?: string
-          tenant_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_agent_assignments_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents_catalog"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_agent_assignments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_login_events: {
         Row: {
@@ -2338,45 +2021,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_tool_assignments: {
-        Row: {
-          created_at: string
-          id: string
-          tenant_id: string
-          tool_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          tenant_id: string
-          tool_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          tenant_id?: string
-          tool_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_tool_assignments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_tool_assignments_tool_id_fkey"
-            columns: ["tool_id"]
-            isOneToOne: false
-            referencedRelation: "tools_catalog"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       workstreams: {
         Row: {
           created_at: string
@@ -2452,19 +2096,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      has_tenant_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["tenant_role"]
-          _tenant_id: string
-          _user_id: string
-        }
-        Returns: boolean
-      }
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
-      is_tenant_member: {
-        Args: { _tenant_id: string; _user_id: string }
-        Returns: boolean
-      }
       is_user_approved: { Args: { _user_id: string }; Returns: boolean }
       record_user_login_event: {
         Args: {
@@ -2491,7 +2123,6 @@ export type Database = {
         | "Deferred"
         | "Not Applicable"
       app_role: "platform_admin" | "platform_support"
-      tenant_role: "tenant_admin" | "tenant_manager" | "tenant_member"
       user_category: "neurealm_employee" | "customer"
     }
     CompositeTypes: {
@@ -2631,7 +2262,6 @@ export const Constants = {
         "Not Applicable",
       ],
       app_role: ["platform_admin", "platform_support"],
-      tenant_role: ["tenant_admin", "tenant_manager", "tenant_member"],
       user_category: ["neurealm_employee", "customer"],
     },
   },
