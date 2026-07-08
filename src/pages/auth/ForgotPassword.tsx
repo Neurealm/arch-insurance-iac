@@ -15,12 +15,12 @@ export default function ForgotPassword() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password?email=${encodeURIComponent(email.trim())}`,
+    const { error } = await supabase.functions.invoke("forgot-password", {
+      body: { email: email.trim() },
     });
     setLoading(false);
     if (error) return toast.error(friendlyAuthError(error.message));
-    toast.success("Check your email for a reset link and a code.");
+    toast.success("If an account exists for that email, we've sent a reset link and code.");
   };
 
   return (
