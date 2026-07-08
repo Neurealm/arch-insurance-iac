@@ -40,7 +40,7 @@ export function PromoteToTenantDialog({
     }
     setSubmitting(true);
     try {
-      const { data: tenant, error: tErr } = await supabase
+      const { data: tenant, error: tErr } = await (supabase as any)
         .from("tenants")
         .insert({
           name: name.trim(),

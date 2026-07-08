@@ -42,7 +42,7 @@ export default function TenantWorkspacePage() {
     queryKey: ["tenant-by-slug", slug],
     enabled: !!slug,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("tenants").select("id,name,slug,logo_url,status").eq("slug", slug).maybeSingle();
       if (error) throw error;
       return data as Tenant | null;
@@ -53,7 +53,7 @@ export default function TenantWorkspacePage() {
     queryKey: ["tenant-membership", tenant?.id, user?.id],
     enabled: !!tenant?.id && !!user?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("tenant_memberships")
         .select("id")
         .eq("tenant_id", tenant!.id)
@@ -75,7 +75,7 @@ export default function TenantWorkspacePage() {
     queryKey: ["tenant-workspace-tools", tenant?.id],
     enabled: !!tenant?.id && !!membership,
     queryFn: async () => {
-      const { data: assigns, error: e1 } = await supabase
+      const { data: assigns, error: e1 } = await (supabase as any)
         .from("tenant_tool_assignments")
         .select("tool_id,enabled")
         .eq("tenant_id", tenant!.id)

@@ -39,7 +39,7 @@ export default function TenantPreviewPage() {
     enabled: !!tenantId,
     queryFn: async () => {
       const col = isUuid ? "id" : "slug";
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("tenants").select("id,name,slug").eq(col, tenantId!).maybeSingle();
       if (error) throw error;
       return data;
@@ -51,7 +51,7 @@ export default function TenantPreviewPage() {
     queryKey: ["tenant-enabled-tools", realTenantId],
     enabled: !!realTenantId,
     queryFn: async () => {
-      const { data: assigns, error: e1 } = await supabase
+      const { data: assigns, error: e1 } = await (supabase as any)
         .from("tenant_tool_assignments")
         .select("tool_id,enabled")
         .eq("tenant_id", realTenantId!)

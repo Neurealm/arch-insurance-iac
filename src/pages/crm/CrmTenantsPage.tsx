@@ -41,7 +41,7 @@ export default function CrmTenantsPage() {
   const { data: tenants = [], isLoading } = useQuery({
     queryKey: ["crm-tenants"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("tenants")
         .select("id,name,slug,status,logo_url,primary_admin_email,source_company_id,created_at")
         .order("created_at", { ascending: false });
@@ -52,7 +52,7 @@ export default function CrmTenantsPage() {
 
   const update = useMutation({
     mutationFn: async (t: Tenant) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("tenants")
         .update({
           name: t.name,

@@ -39,7 +39,7 @@ export function useIncidents(tenantIdOverride?: string | null) {
     queryKey: ["incidents-live", tenantId],
     enabled: mode === "live" && !!tenantId,
     queryFn: async (): Promise<Incident[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("tenant_incidents")
         .select("id,incident_number,title,severity,opened_at,status")
         .eq("tenant_id", tenantId!)
