@@ -47,7 +47,7 @@ export default function ForgotPassword() {
     });
     setLoading(false);
     if (error) return toast.error(friendlyAuthError(error.message));
-    toast.success("If an account exists for that email, we've sent a 6-digit code.");
+    toast.success("If an account exists for that email, we've sent a code.");
     setStep("verify");
   };
 
