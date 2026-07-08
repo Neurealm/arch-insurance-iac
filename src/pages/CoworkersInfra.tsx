@@ -461,7 +461,7 @@ export default function CoworkersInfra() {
                             nav("/coworkers/infrastructure-automation/vmware-capacity-contention");
                           }
                         }}
-                        className="flex-1 text-xs font-semibold border border-slate-200 text-slate-700 rounded-lg py-1.5 hover:bg-slate-50"
+                        className="flex-1 text-xs font-semibold border border-yellow-400 bg-yellow-300 text-slate-900 rounded-lg py-1.5 hover:bg-yellow-400"
                       >
                         View Details
                       </button>
