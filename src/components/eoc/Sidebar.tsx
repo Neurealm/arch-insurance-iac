@@ -258,6 +258,14 @@ const tree: Node[] = [
       { key: "semi-pov",  label: "Proof of Value",           icon: Target,     to: "/semiconductor/proof-of-value" },
     ],
   },
+  {
+    key: "factory-ops-intel",
+    label: "Factory Operations Intelligence",
+    icon: Boxes,
+    children: [
+      { key: "factory-maint-copilot", label: "Factory Maintenance Copilot", icon: Bot, to: "/factory-ops-intelligence/maintenance-copilot" },
+    ],
+  },
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
   { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers", children: coworkerChildren },
