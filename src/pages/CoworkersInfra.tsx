@@ -455,7 +455,16 @@ export default function CoworkersInfra() {
                     </div>
 
                     <div className="flex items-center gap-2 pt-3 mt-3 border-t border-slate-100">
-                      <button className="flex-1 text-xs font-semibold border border-slate-200 text-slate-700 rounded-lg py-1.5 hover:bg-slate-50">View Details</button>
+                      <button
+                        onClick={() => {
+                          if (a.name === "VMware Capacity & Contention") {
+                            nav("/coworkers/infrastructure-automation/vmware-capacity-contention");
+                          }
+                        }}
+                        className="flex-1 text-xs font-semibold border border-slate-200 text-slate-700 rounded-lg py-1.5 hover:bg-slate-50"
+                      >
+                        View Details
+                      </button>
                       <button onClick={() => nav("/coworkers/deploy")} className="flex-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-1.5">
                         Deploy
                       </button>
