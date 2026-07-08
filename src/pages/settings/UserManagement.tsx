@@ -122,7 +122,7 @@ export default function UserManagement() {
   const [activityDays, setActivityDays] = useState<number>(7);
   const [actionBusy, setActionBusy] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteResult, setInviteResult] = useState<{ email: string; tempPassword: string } | null>(null);
+  const [inviteResult, setInviteResult] = useState<{ email: string; tempPassword: string; emailSent: boolean } | null>(null);
 
   const invoke = async (action: string, payload: Record<string, unknown> = {}) => {
     const { data, error } = await supabase.functions.invoke("admin-users", {
