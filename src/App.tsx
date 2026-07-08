@@ -91,6 +91,7 @@ import PatchComplianceFailureRemediation from "./pages/coworkers/infra/PatchComp
 import TimeDriftKerberosIntegrity from "./pages/coworkers/infra/TimeDriftKerberosIntegrity.tsx";
 import TransactionLogDiskPressure from "./pages/coworkers/infra/TransactionLogDiskPressure.tsx";
 import ThirdPartyDependencyHealth from "./pages/coworkers/infra/ThirdPartyDependencyHealth.tsx";
+import FirewallRuleOptimizer from "./pages/coworkers/network/FirewallRuleOptimizer.tsx";
 import CoworkersCarveOut from "./pages/CoworkersCarveOut.tsx";
 import HealthcarePayer from "./pages/coworkers/HealthcarePayer.tsx";
 import PriorAuthorization from "./pages/coworkers/healthcare/PriorAuthorization.tsx";
