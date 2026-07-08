@@ -394,6 +394,7 @@ const App = () => (
           <Route path="/coworkers/site-reliability-engineering/slo-sla-sli-monitoring" element={<SloSlaSliMonitoring />} />
           <Route path="/coworkers/infrastructure-automation" element={<CoworkersInfra />} />
           <Route path="/coworkers/infrastructure-automation/vmware-capacity-contention" element={<VmwareCapacityContention />} />
+          <Route path="/coworkers/infrastructure-automation/server-provisioning-deprovisioning" element={<ServerProvisioningDeprovisioning />} />
           <Route path="/coworkers/it-carve-out-and-separation" element={<CoworkersCarveOut />} />
           <Route path="/coworkers/healthcare-payer" element={<HealthcarePayer />} />
           <Route path="/coworkers/healthcare-payer/prior-authorization" element={<PriorAuthorization />} />
