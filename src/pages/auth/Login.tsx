@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AuthLayout } from "./AuthLayout";
 import { Eye, EyeOff } from "lucide-react";
+import { friendlyAuthError } from "@/lib/authErrors";
 // AuthVerificationOverlay archived — see src/components/auth/AuthVerificationOverlay.tsx (unused).
 
 export default function Login() {
@@ -30,7 +31,7 @@ export default function Login() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setLoading(false);
-      return toast.error(error.message);
+      return toast.error(friendlyAuthError(error.message));
     }
     sessionStorage.removeItem("active_workspace");
     window.dispatchEvent(new Event("workspace-change"));

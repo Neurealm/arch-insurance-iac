@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AuthLayout } from "./AuthLayout";
 import { z } from "zod";
+import { friendlyAuthError } from "@/lib/authErrors";
 
 const PUBLIC_DOMAINS = new Set([
   "gmail.com","googlemail.com","yahoo.com","yahoo.co.uk","yahoo.co.in","ymail.com","rocketmail.com",
@@ -53,8 +54,8 @@ export default function Signup() {
       options: { emailRedirectTo: window.location.origin + "/app" },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Check your email to verify your account.");
+    if (error) return toast.error(friendlyAuthError(error.message));
+    toast.success("Check your email to verify your account. An administrator will approve your access.");
     navigate("/login");
   };
 

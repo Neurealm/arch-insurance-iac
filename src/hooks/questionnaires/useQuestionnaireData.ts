@@ -10,7 +10,6 @@ export type Questionnaire = {
   title: string;
   description: string | null;
   status: string;
-  assigned_to_tenant_id: string | null;
   due_date: string | null;
 };
 export type Section = {
@@ -72,7 +71,7 @@ export function useQuestionnaires(workstreamId: string | null) {
     queryFn: async (): Promise<Questionnaire[]> => {
       const { data, error } = await supabase
         .from("questionnaires")
-        .select("id,workstream_id,title,description,status,assigned_to_tenant_id,due_date")
+        .select("id,workstream_id,title,description,status,due_date")
         .eq("workstream_id", workstreamId!)
         .order("created_at");
       if (error) throw error;

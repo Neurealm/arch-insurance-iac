@@ -122,6 +122,7 @@ export default function UserManagement() {
   const [activityDays, setActivityDays] = useState<number>(7);
   const [actionBusy, setActionBusy] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteResult, setInviteResult] = useState<{ email: string; tempPassword: string } | null>(null);
 
   const invoke = async (action: string, payload: Record<string, unknown> = {}) => {
     const { data, error } = await supabase.functions.invoke("admin-users", {
@@ -240,8 +241,9 @@ export default function UserManagement() {
     if (!email) return;
     setActionBusy(true);
     try {
-      await invoke("invite_user", { email, redirect_to: `${window.location.origin}/reset-password` });
-      toast.success(`Invitation sent to ${email}`);
+      const res = await invoke("invite_user", { email });
+      setInviteResult({ email: res.email ?? email, tempPassword: res.temp_password });
+      toast.success(`Account created for ${email}`);
       setInviteEmail("");
       await load();
     } catch (e: any) {
@@ -284,16 +286,35 @@ export default function UserManagement() {
 
         <Card className="mb-4">
           <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Mail className="h-4 w-4" /> Invite a user</CardTitle></CardHeader>
-          <CardContent className="flex gap-2">
-            <Input
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              placeholder="user@company.com"
-              type="email"
-              className="h-10 flex-1 max-w-md"
-              disabled={actionBusy}
-            />
-            <Button onClick={sendInvite} disabled={actionBusy || !inviteEmail.trim()}>Send invitation</Button>
+          <CardContent className="space-y-3">
+            <div className="flex gap-2">
+              <Input
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="user@company.com"
+                type="email"
+                className="h-10 flex-1 max-w-md"
+                disabled={actionBusy}
+              />
+              <Button onClick={sendInvite} disabled={actionBusy || !inviteEmail.trim()}>Create invite</Button>
+            </div>
+            {inviteResult && (
+              <div className="rounded-md border border-emerald-300 bg-emerald-50 p-3 space-y-2 max-w-xl">
+                <div className="text-[13px] font-medium text-emerald-900">
+                  Account created for {inviteResult.email}. Share this temporary password securely — they'll set their own on first sign-in.
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-sm font-mono bg-white border rounded px-2 py-1.5 truncate select-all">{inviteResult.tempPassword}</code>
+                  <Button size="sm" variant="outline" className="gap-1" onClick={async () => { await navigator.clipboard.writeText(inviteResult.tempPassword); toast.success("Password copied"); }}>
+                    <Copy className="h-3.5 w-3.5" /> Copy
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setInviteResult(null)}>Done</Button>
+                </div>
+                <div className="text-[11px] text-emerald-800/80">
+                  They sign in at {window.location.origin}/login with this password and are prompted to change it.
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

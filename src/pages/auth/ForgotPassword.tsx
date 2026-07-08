@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AuthLayout } from "./AuthLayout";
+import { friendlyAuthError } from "@/lib/authErrors";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -15,17 +16,17 @@ export default function ForgotPassword() {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/reset-password",
+      redirectTo: `${window.location.origin}/reset-password?email=${encodeURIComponent(email.trim())}`,
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Reset link sent. Check your email.");
+    if (error) return toast.error(friendlyAuthError(error.message));
+    toast.success("Check your email for a reset link and a code.");
   };
 
   return (
     <AuthLayout
       title="Reset password"
-      subtitle="We'll email you a reset link"
+      subtitle="We'll email you a reset link and a code"
       footer={<Link to="/login" className="text-indigo font-semibold hover:underline">Back to sign in</Link>}
     >
       <form onSubmit={onSubmit} className="space-y-4">

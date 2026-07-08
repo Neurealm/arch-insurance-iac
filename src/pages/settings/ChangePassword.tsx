@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { friendlyAuthError } from "@/lib/authErrors";
 
 const schema = z
   .object({
@@ -52,7 +53,7 @@ export default function ChangePassword() {
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyAuthError(error.message));
     toast.success("Password updated.");
     setPassword("");
     setConfirm("");

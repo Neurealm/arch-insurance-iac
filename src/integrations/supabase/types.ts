@@ -1441,6 +1441,7 @@ export type Database = {
           preferred_language: string | null
           time_zone: string | null
           updated_at: string
+          must_change_password: boolean
           user_category: Database["public"]["Enums"]["user_category"] | null
           user_id: string
         }
@@ -1462,6 +1463,7 @@ export type Database = {
           preferred_language?: string | null
           time_zone?: string | null
           updated_at?: string
+          must_change_password?: boolean
           user_category?: Database["public"]["Enums"]["user_category"] | null
           user_id: string
         }
@@ -1483,6 +1485,7 @@ export type Database = {
           preferred_language?: string | null
           time_zone?: string | null
           updated_at?: string
+          must_change_password?: boolean
           user_category?: Database["public"]["Enums"]["user_category"] | null
           user_id?: string
         }

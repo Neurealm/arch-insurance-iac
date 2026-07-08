@@ -68,14 +68,18 @@ const EMPTY: FormState = {
 
 export default function UpdateProfile() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [form, setForm] = useState<FormState>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!authLoading && !user) navigate("/login", { replace: true });
+  }, [authLoading, user, navigate]);
+
+  useEffect(() => {
+    if (!user) { setLoading(false); return; }
     (async () => {
       const { data } = await supabase
         .from("profiles")
@@ -151,6 +155,10 @@ export default function UpdateProfile() {
         display_name: form.full_name || null,
       } as any)
       .eq("user_id", user.id);
+    if (!error) {
+      // Keep the JWT user_metadata in sync so the header/menu name updates immediately.
+      await supabase.auth.updateUser({ data: { full_name: form.full_name || null } });
+    }
     setSaving(false);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });

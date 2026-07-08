@@ -11,6 +11,7 @@ type AuthCtx = {
   activeWorkspace: string | null;
   setActiveWorkspace: (slug: string | null) => void;
   approvalStatus: "pending" | "approved" | "rejected" | null;
+  mustChangePassword: boolean;
   roleLoading: boolean;
   refreshRole: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -25,6 +26,7 @@ const Ctx = createContext<AuthCtx>({
   activeWorkspace: null,
   setActiveWorkspace: () => {},
   approvalStatus: null,
+  mustChangePassword: false,
   roleLoading: true,
   refreshRole: async () => {},
   signOut: async () => {},
@@ -38,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [hasPlatformAdminRole, setHasPlatformAdminRole] = useState(false);
   const [approvalStatus, setApprovalStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
   const [roleLoading, setRoleLoading] = useState(true);
   const [activeWorkspace, setActiveWorkspaceState] = useState<string | null>(readWorkspace());
 
@@ -64,16 +67,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!userId) {
       setHasPlatformAdminRole(false);
       setApprovalStatus(null);
+      setMustChangePassword(false);
       setRoleLoading(false);
       return;
     }
     setRoleLoading(true);
     const [{ data: roles }, { data: profile }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("profiles").select("approval_status").eq("user_id", userId).maybeSingle(),
+      supabase.from("profiles").select("approval_status, must_change_password").eq("user_id", userId).maybeSingle(),
     ]);
     setHasPlatformAdminRole(!!roles?.some((r: any) => r.role === "platform_admin"));
     setApprovalStatus(((profile as any)?.approval_status as any) ?? "pending");
+    setMustChangePassword(!!(profile as any)?.must_change_password);
     setRoleLoading(false);
   };
 
@@ -141,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         activeWorkspace,
         setActiveWorkspace,
         approvalStatus,
+        mustChangePassword,
         roleLoading,
         refreshRole: () => loadRole(session?.user?.id),
         signOut: async () => {

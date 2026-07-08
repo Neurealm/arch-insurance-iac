@@ -360,19 +360,7 @@ function SortableSection({
 }
 
 /* ---------- main page ---------- */
-import { useTenantScope } from "@/hooks/useTenantScope";
-import CustomerExperience from "@/components/questionnaires/CustomerExperience";
-
 export default function Questionnaires() {
-  const { scoped, loading: tenantLoading } = useTenantScope();
-  if (tenantLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        <div className="h-6 w-6 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
-      </div>
-    );
-  }
-  if (scoped) return <CustomerExperience />;
   return <QuestionnaireStudio />;
 }
 

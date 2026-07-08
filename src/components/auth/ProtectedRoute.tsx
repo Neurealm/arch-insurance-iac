@@ -2,7 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 export function ProtectedRoute({ children, requireAdmin = false }: { children: JSX.Element; requireAdmin?: boolean }) {
-  const { user, loading, isAdmin, approvalStatus, roleLoading } = useAuth();
+  const { user, loading, isAdmin, approvalStatus, mustChangePassword, roleLoading } = useAuth();
   const location = useLocation();
   if (loading || roleLoading) {
     return (
@@ -17,6 +17,9 @@ export function ProtectedRoute({ children, requireAdmin = false }: { children: J
   }
   if (!isAdmin && approvalStatus !== "approved") {
     return <Navigate to="/pending-approval" replace />;
+  }
+  if (mustChangePassword && location.pathname !== "/set-password") {
+    return <Navigate to="/set-password" replace />;
   }
   return children;
 }

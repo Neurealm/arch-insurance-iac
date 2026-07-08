@@ -208,6 +208,7 @@ import UserManagement from "./pages/settings/UserManagement.tsx";
 import ChangePassword from "./pages/settings/ChangePassword.tsx";
 import PendingApproval from "./pages/auth/PendingApproval.tsx";
 import UpdateProfile from "./pages/auth/UpdateProfile.tsx";
+import SetInitialPassword from "./pages/auth/SetInitialPassword.tsx";
 import OrganizationLayout from "./pages/settings/organization/OrganizationLayout.tsx";
 import EntityListPage from "./pages/settings/organization/EntityListPage.tsx";
 import EntityDetailPage from "./pages/settings/organization/EntityDetailPage.tsx";
@@ -215,11 +216,6 @@ import HierarchyView from "./pages/settings/organization/HierarchyView.tsx";
 import CompaniesList from "./pages/crm/CompaniesList.tsx";
 import CompanyWorkspace from "./pages/crm/CompanyWorkspace.tsx";
 import StakeholderFormPage from "./pages/crm/StakeholderFormPage.tsx";
-import CrmTenantsPage from "./pages/crm/CrmTenantsPage.tsx";
-import TenantSettingsPage from "./pages/crm/TenantSettingsPage.tsx";
-import TenantPreviewPage from "./pages/crm/TenantPreviewPage.tsx";
-import TenantAuthPage from "./pages/TenantAuthPage.tsx";
-import TenantWorkspacePage from "./pages/TenantWorkspacePage.tsx";
 import PracticeLibrary from "./pages/PracticeLibrary.tsx";
 import TableOfContents from "./pages/practice-library/TableOfContents.tsx";
 import PracticePlaceholder from "./pages/practice-library/PracticePlaceholder.tsx";
@@ -346,6 +342,7 @@ const App = () => (
           <Route path="/pending-approval" element={<PendingApproval />} />
           <Route path="/no-access" element={<Navigate to="/app" replace />} />
           <Route path="/profile" element={<UpdateProfile />} />
+          <Route path="/set-password" element={<ProtectedRoute><SetInitialPassword /></ProtectedRoute>} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/sead/command-center" element={<ProtectedRoute><SeadCommandCenter /></ProtectedRoute>} />
           <Route path="/sead/equipment-health-intelligence" element={<ProtectedRoute><SeadEquipmentHealth /></ProtectedRoute>} />
@@ -582,14 +579,9 @@ const App = () => (
           <Route path="/itsm/exec-biz-ops/sla-slo-error-budget" element={<SlaSloErrorBudget />} />
           <Route path="/itsm/exec-biz-ops/risk-exposure" element={<RiskExposure />} />
           <Route path="/crm" element={<ProtectedRoute><CompaniesList /></ProtectedRoute>} />
-          <Route path="/crm/tenants" element={<ProtectedRoute><CrmTenantsPage /></ProtectedRoute>} />
-          <Route path="/crm/tenants/:tenantId/settings" element={<ProtectedRoute requireAdmin><TenantSettingsPage /></ProtectedRoute>} />
-          <Route path="/crm/tenants/:tenantId/preview" element={<ProtectedRoute requireAdmin><TenantPreviewPage /></ProtectedRoute>} />
           <Route path="/crm/companies/:companyId" element={<ProtectedRoute><CompanyWorkspace /></ProtectedRoute>} />
           <Route path="/crm/companies/:companyId/stakeholders/new" element={<ProtectedRoute><StakeholderFormPage /></ProtectedRoute>} />
           <Route path="/crm/companies/:companyId/stakeholders/:stakeholderId" element={<ProtectedRoute><StakeholderFormPage /></ProtectedRoute>} />
-          <Route path="/t/:slug/auth" element={<TenantAuthPage />} />
-          <Route path="/t/:slug" element={<TenantWorkspacePage />} />
           <Route path="/practice-library" element={<PracticeLibrary />} />
           <Route path="/practice-library/table-of-contents" element={<TableOfContents />} />
           <Route path="/practice-library/it-service-desk-itsm" element={<ItsmDashboard />} />

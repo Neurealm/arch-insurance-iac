@@ -16,6 +16,29 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
+// Strong 16-char temp password, guaranteed to satisfy the upper/lower/number/symbol policy.
+function generateTempPassword(): string {
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lower = "abcdefghijkmnpqrstuvwxyz";
+  const nums = "23456789";
+  const syms = "!@#$%^&*?";
+  const all = upper + lower + nums + syms;
+  const b = new Uint32Array(16);
+  crypto.getRandomValues(b);
+  const out = [
+    upper[b[0] % upper.length],
+    lower[b[1] % lower.length],
+    nums[b[2] % nums.length],
+    syms[b[3] % syms.length],
+  ];
+  for (let i = 4; i < 16; i++) out.push(all[b[i] % all.length]);
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor((crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32) * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out.join("");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -173,27 +196,63 @@ Deno.serve(async (req) => {
       }
 
       case "invite_user": {
-        const email = String(body.email ?? "").trim();
-        const redirectTo = String(body.redirect_to ?? "");
-        if (!email) return json({ error: "email required" }, 400);
-        const safe = safeRedirect(redirectTo);
-        if (redirectTo && !safe) return json({ error: "redirect_to must match caller origin" }, 400);
-        const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-          redirectTo: safe,
-          data: { invited_to_tenant: true },
-        });
-        if (error) throw error;
-        if (data?.user?.id) {
-          await admin
-            .from("profiles")
-            .update({
-              approval_status: "approved",
-              approved_at: new Date().toISOString(),
-              approved_by: caller.id,
-            })
-            .eq("user_id", data.user.id);
+        // Temp-password onboarding (Alt 1): create the account with a generated
+        // temporary password, pre-confirm the email, and force a password change
+        // on first login. No magic link — immune to email-scanner link consumption.
+        const email = String(body.email ?? "").trim().toLowerCase();
+        const full_name = String(body.full_name ?? "").trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          return json({ error: "A valid email is required" }, 400);
         }
-        return json({ ok: true });
+
+        const tempPassword = generateTempPassword();
+
+        let userId: string | null = null;
+        const { data: created, error: cErr } = await admin.auth.admin.createUser({
+          email,
+          password: tempPassword,
+          email_confirm: true,
+          user_metadata: { full_name, invited: true },
+        });
+        if (created?.user?.id) {
+          userId = created.user.id;
+        } else if (cErr && /already|registered|exists/i.test(cErr.message)) {
+          // Existing account — reset it to a fresh temp password and re-force change.
+          const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
+          const match = list?.users?.find((u) => u.email?.toLowerCase() === email);
+          if (!match) return json({ error: "User already exists but could not be located." }, 500);
+          userId = match.id;
+          const { error: upErr } = await admin.auth.admin.updateUserById(userId, {
+            password: tempPassword,
+            email_confirm: true,
+          });
+          if (upErr) return json({ error: upErr.message }, 400);
+        } else if (cErr) {
+          const msg = cErr.message?.includes("work email")
+            ? "Please use the user's work email — personal email domains are blocked."
+            : cErr.message || "Could not create user";
+          return json({ error: msg }, 400);
+        }
+        if (!userId) return json({ error: "Could not create user" }, 500);
+
+        // Approve + require a password change on first login.
+        await admin
+          .from("profiles")
+          .update({
+            approval_status: "approved",
+            approved_at: new Date().toISOString(),
+            approved_by: caller.id,
+            must_change_password: true,
+            full_name: full_name || null,
+          })
+          .eq("user_id", userId);
+
+        // Ensure a read-only role exists (handle_new_user already grants it for invited users).
+        await admin
+          .from("user_roles")
+          .upsert({ user_id: userId, role: "platform_support" }, { onConflict: "user_id,role" });
+
+        return json({ ok: true, email, temp_password: tempPassword });
       }
 
       case "send_password_reset": {

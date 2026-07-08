@@ -21,8 +21,6 @@ import { CompanySheet } from "@/components/crm/CompanySheet";
 import { toast } from "@/hooks/use-toast";
 import type { Company } from "./types";
 import { CrmTabs } from "./CrmTabs";
-import { PromoteToTenantDialog } from "@/components/crm/PromoteToTenantDialog";
-import { Rocket } from "lucide-react";
 
 export default function CompaniesList() {
   const navigate = useNavigate();
@@ -33,7 +31,6 @@ export default function CompaniesList() {
   const [editing, setEditing] = useState<Company | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [confirmDel, setConfirmDel] = useState<Company | null>(null);
-  const [promoting, setPromoting] = useState<Company | null>(null);
 
   const [typeFilter, setTypeFilter] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
@@ -206,11 +203,6 @@ export default function CompaniesList() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEdit(c)}><Pencil className="h-4 w-4 mr-2" />Edit</DropdownMenuItem>
-                          {!c.tenant_id && (
-                            <DropdownMenuItem onClick={() => setPromoting(c)}>
-                              <Rocket className="h-4 w-4 mr-2" />Promote to Tenant
-                            </DropdownMenuItem>
-                          )}
                           <DropdownMenuItem className="text-destructive" onClick={() => setConfirmDel(c)}><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -224,12 +216,6 @@ export default function CompaniesList() {
       </div>
 
       <CompanySheet open={sheetOpen} onOpenChange={setSheetOpen} company={editing} />
-
-      <PromoteToTenantDialog
-        company={promoting}
-        open={!!promoting}
-        onOpenChange={(o) => !o && setPromoting(null)}
-      />
 
       <AlertDialog open={!!confirmDel} onOpenChange={(o) => !o && setConfirmDel(null)}>
         <AlertDialogContent>

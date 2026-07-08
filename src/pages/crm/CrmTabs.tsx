@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Building2, Users2 } from "lucide-react";
+import { Building2 } from "lucide-react";
 
 export function CrmTabs() {
   const base = "px-3 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2";
@@ -9,9 +9,6 @@ export function CrmTabs() {
     <nav className="flex items-center gap-2 border-b mb-6">
       <NavLink to="/crm" end className={({ isActive }) => `${base} ${isActive ? active : idle}`}>
         <Building2 className="h-4 w-4" /> Companies
-      </NavLink>
-      <NavLink to="/crm/tenants" className={({ isActive }) => `${base} ${isActive ? active : idle}`}>
-        <Users2 className="h-4 w-4" /> Tenants
       </NavLink>
     </nav>
   );
