@@ -83,6 +83,7 @@ import PrivilegedAccessDashboard from "./pages/coworkers/iam/PrivilegedAccessDas
 import ReleaseDeploymentRollout from "./pages/coworkers/sre/ReleaseDeploymentRollout.tsx";
 import SloSlaSliMonitoring from "./pages/coworkers/sre/SloSlaSliMonitoring.tsx";
 import CoworkersInfra from "./pages/CoworkersInfra.tsx";
+import FactoryMaintenanceCopilot from "./pages/factory-ops/FactoryMaintenanceCopilot.tsx";
 import VmwareCapacityContention from "./pages/coworkers/infra/VmwareCapacityContention.tsx";
 import ServerProvisioningDeprovisioning from "./pages/coworkers/infra/ServerProvisioningDeprovisioning.tsx";
 import HostFailureEarlyWarning from "./pages/coworkers/infra/HostFailureEarlyWarning.tsx";
