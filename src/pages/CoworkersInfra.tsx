@@ -463,9 +463,11 @@ export default function CoworkersInfra() {
                             nav("/coworkers/infrastructure-automation/server-provisioning-deprovisioning");
                           } else if (a.name === "Host Failure Early Warning") {
                             nav("/coworkers/infrastructure-automation/host-failure-early-warning");
+                          } else if (a.name === "Active Directory Health & Replication") {
+                            nav("/coworkers/infrastructure-automation/active-directory-health-replication");
                           }
                         }}
-                        className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${a.name === "VMware Capacity & Contention" || a.name === "Server Provisioning & Deprovisioning" || a.name === "Host Failure Early Warning" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                        className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${a.name === "VMware Capacity & Contention" || a.name === "Server Provisioning & Deprovisioning" || a.name === "Host Failure Early Warning" || a.name === "Active Directory Health & Replication" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
                       >
                         View Details
                       </button>

@@ -86,6 +86,7 @@ import CoworkersInfra from "./pages/CoworkersInfra.tsx";
 import VmwareCapacityContention from "./pages/coworkers/infra/VmwareCapacityContention.tsx";
 import ServerProvisioningDeprovisioning from "./pages/coworkers/infra/ServerProvisioningDeprovisioning.tsx";
 import HostFailureEarlyWarning from "./pages/coworkers/infra/HostFailureEarlyWarning.tsx";
+import ActiveDirectoryHealthReplication from "./pages/coworkers/infra/ActiveDirectoryHealthReplication.tsx";
 import CoworkersCarveOut from "./pages/CoworkersCarveOut.tsx";
 import HealthcarePayer from "./pages/coworkers/HealthcarePayer.tsx";
 import PriorAuthorization from "./pages/coworkers/healthcare/PriorAuthorization.tsx";
@@ -397,6 +398,7 @@ const App = () => (
           <Route path="/coworkers/infrastructure-automation/vmware-capacity-contention" element={<VmwareCapacityContention />} />
           <Route path="/coworkers/infrastructure-automation/server-provisioning-deprovisioning" element={<ServerProvisioningDeprovisioning />} />
           <Route path="/coworkers/infrastructure-automation/host-failure-early-warning" element={<HostFailureEarlyWarning />} />
+          <Route path="/coworkers/infrastructure-automation/active-directory-health-replication" element={<ActiveDirectoryHealthReplication />} />
           <Route path="/coworkers/it-carve-out-and-separation" element={<CoworkersCarveOut />} />
           <Route path="/coworkers/healthcare-payer" element={<HealthcarePayer />} />
           <Route path="/coworkers/healthcare-payer/prior-authorization" element={<PriorAuthorization />} />
