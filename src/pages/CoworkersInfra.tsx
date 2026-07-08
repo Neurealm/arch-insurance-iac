@@ -459,6 +459,8 @@ export default function CoworkersInfra() {
                         onClick={() => {
                           if (a.name === "VMware Capacity & Contention") {
                             nav("/coworkers/infrastructure-automation/vmware-capacity-contention");
+                          } else if (a.name === "Server Provisioning & Deprovisioning") {
+                            nav("/coworkers/infrastructure-automation/server-provisioning-deprovisioning");
                           }
                         }}
                         className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${a.name === "VMware Capacity & Contention" || a.name === "Server Provisioning & Deprovisioning" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
