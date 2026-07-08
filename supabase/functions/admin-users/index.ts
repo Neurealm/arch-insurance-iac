@@ -252,13 +252,11 @@ Deno.serve(async (req) => {
           .from("user_roles")
           .upsert({ user_id: userId, role: "platform_support" }, { onConflict: "user_id,role" });
 
-        // Email the invitee their temp password + a link to the login page.
-        // Uses the same email queue the auth-email-hook writes to, so it goes
-        // through the project's verified sender domain.
+        // Email the invitee their temp password + a link to the login page via Resend.
         const loginUrl = callerOrigin ? `${callerOrigin}/login` : "";
-        const SITE_NAME = "neugain-landing-zone";
-        const SENDER_DOMAIN = "notify.waterscorp-neugain.com";
-        const FROM_DOMAIN = "waterscorp-neugain.com";
+        const SITE_NAME = "NeuGain";
+        const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+        const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") ?? "onboarding@resend.dev";
         const greetingName = full_name ? full_name.split(" ")[0] : "there";
         const escapeHtml = (s: string) =>
           s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
@@ -277,43 +275,35 @@ Deno.serve(async (req) => {
         </body></html>`;
         const text = `You've been invited to ${SITE_NAME}\n\nHi ${greetingName},\n\nYour account has been created. Use the temporary password below to sign in — you'll be prompted to set your own password on first login.\n\nTemporary password: ${tempPassword}\n\n${loginUrl ? `Sign in: ${loginUrl}\n\n` : ""}If you weren't expecting this, you can safely ignore this email.`;
 
-        const messageId = crypto.randomUUID();
-        await admin.from("email_send_log").insert({
-          message_id: messageId,
-          template_name: "invite_temp_password",
-          recipient_email: email,
-          status: "pending",
-        });
-        const { error: enqErr } = await admin.rpc("enqueue_email", {
-          queue_name: "auth_emails",
-          payload: {
-            run_id: messageId,
-            message_id: messageId,
-            to: email,
-            from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-            sender_domain: SENDER_DOMAIN,
-            subject: `You've been invited to ${SITE_NAME}`,
-            html,
-            text,
-            purpose: "transactional",
-            label: "invite_temp_password",
-            queued_at: new Date().toISOString(),
-          },
-        });
-        if (enqErr) {
-          console.error("invite email enqueue failed", enqErr);
-          await admin.from("email_send_log").insert({
-            message_id: messageId,
-            template_name: "invite_temp_password",
-            recipient_email: email,
-            status: "failed",
-            error_message: enqErr.message ?? "enqueue failed",
-          });
-          // Don't block admin — return the temp password so they can share it manually.
-          return json({ ok: true, email, temp_password: tempPassword, email_sent: false, email_error: enqErr.message });
+        if (!RESEND_API_KEY) {
+          return json({ ok: true, email, temp_password: tempPassword, email_sent: false, email_error: "RESEND_API_KEY not configured" });
         }
 
-        return json({ ok: true, email, temp_password: tempPassword, email_sent: true });
+        try {
+          const res = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${RESEND_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from: RESEND_FROM_EMAIL,
+              to: [email],
+              subject: `You've been invited to ${SITE_NAME}`,
+              html,
+              text,
+            }),
+          });
+          if (!res.ok) {
+            const errBody = await res.text();
+            console.error("Resend send failed", res.status, errBody);
+            return json({ ok: true, email, temp_password: tempPassword, email_sent: false, email_error: `Resend ${res.status}: ${errBody}` });
+          }
+          return json({ ok: true, email, temp_password: tempPassword, email_sent: true });
+        } catch (e) {
+          console.error("Resend send exception", e);
+          return json({ ok: true, email, temp_password: tempPassword, email_sent: false, email_error: (e as Error).message });
+        }
       }
 
       case "send_password_reset": {
