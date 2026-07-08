@@ -254,9 +254,9 @@ function OverviewPanel({ tenantId }: { tenantId: string }) {
     queryKey: ["tenant-overview", tenantId],
     queryFn: async () => {
       const [agents, tools, integrations, members] = await Promise.all([
-        supabase.from("tenant_agent_assignments").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("enabled", true),
+        (supabase as any).from("tenant_agent_assignments").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("enabled", true),
         (supabase as any).from("tenant_tool_assignments").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("enabled", true),
-        supabase.from("tenant_integrations").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("status", "installed"),
+        (supabase as any).from("tenant_integrations").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("status", "installed"),
         (supabase as any).from("tenant_memberships").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
       ]);
       return {
@@ -361,7 +361,7 @@ function AgentsPanel({ tenantId }: { tenantId: string }) {
     queryFn: async () => {
       const [{ data: catalog, error: e1 }, { data: assigns, error: e2 }] = await Promise.all([
         supabase.from("agents_catalog").select("id,name,description,capability").eq("is_active", true).order("name"),
-        supabase.from("tenant_agent_assignments").select("agent_id,enabled").eq("tenant_id", tenantId),
+        (supabase as any).from("tenant_agent_assignments").select("agent_id,enabled").eq("tenant_id", tenantId),
       ]);
       if (e1) throw e1; if (e2) throw e2;
       const map = new Map((assigns ?? []).map((a) => [a.agent_id, a.enabled]));
@@ -374,13 +374,13 @@ function AgentsPanel({ tenantId }: { tenantId: string }) {
 
   const toggle = useMutation({
     mutationFn: async ({ agentId, enabled }: { agentId: string; enabled: boolean }) => {
-      const { data: existing } = await supabase
+      const { data: existing } = await (supabase as any)
         .from("tenant_agent_assignments").select("id").eq("tenant_id", tenantId).eq("agent_id", agentId).maybeSingle();
       if (existing) {
-        const { error } = await supabase.from("tenant_agent_assignments").update({ enabled }).eq("id", existing.id);
+        const { error } = await (supabase as any).from("tenant_agent_assignments").update({ enabled }).eq("id", existing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("tenant_agent_assignments").insert({ tenant_id: tenantId, agent_id: agentId, enabled });
+        const { error } = await (supabase as any).from("tenant_agent_assignments").insert({ tenant_id: tenantId, agent_id: agentId, enabled });
         if (error) throw error;
       }
     },
@@ -435,7 +435,7 @@ function ConnectorsPanel({ tenantId }: { tenantId: string }) {
     queryFn: async () => {
       const [{ data: catalog, error: e1 }, { data: assigns, error: e2 }] = await Promise.all([
         supabase.from("integrations_catalog").select("id,name,description,category").eq("is_active", true).order("name"),
-        supabase.from("tenant_integrations").select("integration_id,status").eq("tenant_id", tenantId),
+        (supabase as any).from("tenant_integrations").select("integration_id,status").eq("tenant_id", tenantId),
       ]);
       if (e1) throw e1; if (e2) throw e2;
       const map = new Map((assigns ?? []).map((a) => [a.integration_id, a.status]));
@@ -449,13 +449,13 @@ function ConnectorsPanel({ tenantId }: { tenantId: string }) {
   const toggle = useMutation({
     mutationFn: async ({ integrationId, enabled }: { integrationId: string; enabled: boolean }) => {
       const status = enabled ? "installed" : "not_installed";
-      const { data: existing } = await supabase
+      const { data: existing } = await (supabase as any)
         .from("tenant_integrations").select("id").eq("tenant_id", tenantId).eq("integration_id", integrationId).maybeSingle();
       if (existing) {
-        const { error } = await supabase.from("tenant_integrations").update({ status, enabled }).eq("id", existing.id);
+        const { error } = await (supabase as any).from("tenant_integrations").update({ status, enabled }).eq("id", existing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("tenant_integrations").insert({ tenant_id: tenantId, integration_id: integrationId, status, enabled });
+        const { error } = await (supabase as any).from("tenant_integrations").insert({ tenant_id: tenantId, integration_id: integrationId, status, enabled });
         if (error) throw error;
       }
     },
