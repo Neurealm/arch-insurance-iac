@@ -400,6 +400,7 @@ const App = () => (
           <Route path="/coworkers/infrastructure-automation/server-provisioning-deprovisioning" element={<ServerProvisioningDeprovisioning />} />
           <Route path="/coworkers/infrastructure-automation/host-failure-early-warning" element={<HostFailureEarlyWarning />} />
           <Route path="/coworkers/infrastructure-automation/active-directory-health-replication" element={<ActiveDirectoryHealthReplication />} />
+          <Route path="/coworkers/infrastructure-automation/patch-compliance-failure-remediation" element={<PatchComplianceFailureRemediation />} />
           <Route path="/coworkers/it-carve-out-and-separation" element={<CoworkersCarveOut />} />
           <Route path="/coworkers/healthcare-payer" element={<HealthcarePayer />} />
           <Route path="/coworkers/healthcare-payer/prior-authorization" element={<PriorAuthorization />} />
