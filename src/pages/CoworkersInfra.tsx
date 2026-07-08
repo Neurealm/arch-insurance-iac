@@ -223,7 +223,7 @@ const categories: { name: Cat; icon: any; color: string }[] = [
 ];
 
 const kpis = [
-  { icon: Bot,         label: "Total Digital Coworkers", value: "11",    sub: "Active Agents",          color: "text-blue-600",    bg: "bg-blue-50" },
+  { icon: Bot,         label: "Total Digital Coworkers", value: "19",    sub: "Active Agents",          color: "text-blue-600",    bg: "bg-blue-50" },
   { icon: PlayCircle,  label: "Automations Executed (7D)", value: "4,892",sub: "+18.7% vs last 7 days",  color: "text-violet-600",  bg: "bg-violet-50",   subCls: "text-emerald-600" },
   { icon: CheckCircle2,label: "Success Rate (7D)",       value: "98.6%", sub: "+1.2% vs last 7 days",   color: "text-emerald-600", bg: "bg-emerald-50",  subCls: "text-emerald-600" },
   { icon: Activity,    label: "Issues Resolved (7D)",    value: "1,248", sub: "+14.3% vs last 7 days",  color: "text-amber-600",   bg: "bg-amber-50",    subCls: "text-emerald-600" },
