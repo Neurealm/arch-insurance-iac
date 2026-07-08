@@ -134,14 +134,14 @@ export default function ForgotPassword() {
       {step === "verify" && (
         <form onSubmit={verifyOtp} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="code">6-digit code</Label>
+            <Label htmlFor="code">Verification code</Label>
             <Input
               id="code"
               inputMode="numeric"
               required
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              placeholder="123456"
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
+              placeholder="Enter code"
               className="h-11 font-mono tracking-[0.3em] text-center text-lg"
             />
           </div>
