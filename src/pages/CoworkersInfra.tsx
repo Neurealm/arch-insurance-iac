@@ -5,6 +5,7 @@ import {
   Bot, PlayCircle, CheckCircle2, Activity, Clock, DollarSign, Search, Sparkles,
   ServerCog, Database, ScanSearch, Wrench, ShieldCheck, Network, HardDrive, PiggyBank,
   CloudUpload, Lock, FileEdit, ListChecks, Layers, Cog, ShieldAlert,
+  Boxes, PowerOff, AlertTriangle, Users, KeyRound, Timer, FileText, Plug,
 } from "lucide-react";
 
 type Cat = "All Agents" | "Provisioning & Build" | "Operations & Monitoring" | "Optimization" | "Compliance & Governance" | "Security & Risk";
