@@ -299,9 +299,11 @@ export default function UserManagement() {
               <Button onClick={sendInvite} disabled={actionBusy || !inviteEmail.trim()}>Create invite</Button>
             </div>
             {inviteResult && (
-              <div className="rounded-md border border-emerald-300 bg-emerald-50 p-3 space-y-2 max-w-xl">
-                <div className="text-[13px] font-medium text-emerald-900">
-                  Account created for {inviteResult.email}. Share this temporary password securely — they'll set their own on first sign-in.
+              <div className={`rounded-md border p-3 space-y-2 max-w-xl ${inviteResult.emailSent ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
+                <div className={`text-[13px] font-medium ${inviteResult.emailSent ? "text-emerald-900" : "text-amber-900"}`}>
+                  {inviteResult.emailSent
+                    ? `Invite email sent to ${inviteResult.email}. It contains the temp password and a link to sign in.`
+                    : `Account created for ${inviteResult.email} but the email couldn't be sent. Share this temp password with them manually — they'll set their own on first sign-in.`}
                 </div>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 text-sm font-mono bg-white border rounded px-2 py-1.5 truncate select-all">{inviteResult.tempPassword}</code>
@@ -310,7 +312,7 @@ export default function UserManagement() {
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => setInviteResult(null)}>Done</Button>
                 </div>
-                <div className="text-[11px] text-emerald-800/80">
+                <div className={`text-[11px] ${inviteResult.emailSent ? "text-emerald-800/80" : "text-amber-800/80"}`}>
                   They sign in at {window.location.origin}/login with this password and are prompted to change it.
                 </div>
               </div>
