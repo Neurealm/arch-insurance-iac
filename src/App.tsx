@@ -87,6 +87,7 @@ import VmwareCapacityContention from "./pages/coworkers/infra/VmwareCapacityCont
 import ServerProvisioningDeprovisioning from "./pages/coworkers/infra/ServerProvisioningDeprovisioning.tsx";
 import HostFailureEarlyWarning from "./pages/coworkers/infra/HostFailureEarlyWarning.tsx";
 import ActiveDirectoryHealthReplication from "./pages/coworkers/infra/ActiveDirectoryHealthReplication.tsx";
+import PatchComplianceFailureRemediation from "./pages/coworkers/infra/PatchComplianceFailureRemediation.tsx";
 import CoworkersCarveOut from "./pages/CoworkersCarveOut.tsx";
 import HealthcarePayer from "./pages/coworkers/HealthcarePayer.tsx";
 import PriorAuthorization from "./pages/coworkers/healthcare/PriorAuthorization.tsx";
