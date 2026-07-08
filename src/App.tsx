@@ -83,6 +83,7 @@ import PrivilegedAccessDashboard from "./pages/coworkers/iam/PrivilegedAccessDas
 import ReleaseDeploymentRollout from "./pages/coworkers/sre/ReleaseDeploymentRollout.tsx";
 import SloSlaSliMonitoring from "./pages/coworkers/sre/SloSlaSliMonitoring.tsx";
 import CoworkersInfra from "./pages/CoworkersInfra.tsx";
+import VmwareCapacityContention from "./pages/coworkers/infra/VmwareCapacityContention.tsx";
 import CoworkersCarveOut from "./pages/CoworkersCarveOut.tsx";
 import HealthcarePayer from "./pages/coworkers/HealthcarePayer.tsx";
 import PriorAuthorization from "./pages/coworkers/healthcare/PriorAuthorization.tsx";
@@ -391,6 +392,7 @@ const App = () => (
           <Route path="/coworkers/site-reliability-engineering/release-deployment-rollout" element={<ReleaseDeploymentRollout />} />
           <Route path="/coworkers/site-reliability-engineering/slo-sla-sli-monitoring" element={<SloSlaSliMonitoring />} />
           <Route path="/coworkers/infrastructure-automation" element={<CoworkersInfra />} />
+          <Route path="/coworkers/infrastructure-automation/vmware-capacity-contention" element={<VmwareCapacityContention />} />
           <Route path="/coworkers/it-carve-out-and-separation" element={<CoworkersCarveOut />} />
           <Route path="/coworkers/healthcare-payer" element={<HealthcarePayer />} />
           <Route path="/coworkers/healthcare-payer/prior-authorization" element={<PriorAuthorization />} />
