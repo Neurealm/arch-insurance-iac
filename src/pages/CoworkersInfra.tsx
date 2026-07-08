@@ -467,9 +467,11 @@ export default function CoworkersInfra() {
                             nav("/coworkers/infrastructure-automation/active-directory-health-replication");
                           } else if (a.name === "Patch Compliance & Failure Remediation") {
                             nav("/coworkers/infrastructure-automation/patch-compliance-failure-remediation");
+                          } else if (a.name === "Time Drift & Kerberos Integrity") {
+                            nav("/coworkers/infrastructure-automation/time-drift-kerberos-integrity");
                           }
                         }}
-                        className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${a.name === "VMware Capacity & Contention" || a.name === "Server Provisioning & Deprovisioning" || a.name === "Host Failure Early Warning" || a.name === "Active Directory Health & Replication" || a.name === "Patch Compliance & Failure Remediation" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                        className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${a.name === "VMware Capacity & Contention" || a.name === "Server Provisioning & Deprovisioning" || a.name === "Host Failure Early Warning" || a.name === "Active Directory Health & Replication" || a.name === "Patch Compliance & Failure Remediation" || a.name === "Time Drift & Kerberos Integrity" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
                       >
                         View Details
                       </button>
