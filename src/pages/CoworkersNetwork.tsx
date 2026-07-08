@@ -148,6 +148,7 @@ const kpis = [
 ];
 
 export default function CoworkersNetwork() {
+  const nav = useNavigate();
   const [activeCat, setActiveCat] = useState("All Categories");
   const filtered = activeCat === "All Categories" ? coworkers : coworkers.filter((c) => c.tag === activeCat);
 
