@@ -252,7 +252,68 @@ Deno.serve(async (req) => {
           .from("user_roles")
           .upsert({ user_id: userId, role: "platform_support" }, { onConflict: "user_id,role" });
 
-        return json({ ok: true, email, temp_password: tempPassword });
+        // Email the invitee their temp password + a link to the login page.
+        // Uses the same email queue the auth-email-hook writes to, so it goes
+        // through the project's verified sender domain.
+        const loginUrl = callerOrigin ? `${callerOrigin}/login` : "";
+        const SITE_NAME = "neugain-landing-zone";
+        const SENDER_DOMAIN = "notify.waterscorp-neugain.com";
+        const FROM_DOMAIN = "waterscorp-neugain.com";
+        const greetingName = full_name ? full_name.split(" ")[0] : "there";
+        const escapeHtml = (s: string) =>
+          s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+        const html = `<!doctype html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#ffffff;color:hsl(222,47%,11%);margin:0;padding:32px;">
+          <div style="max-width:560px;margin:0 auto;">
+            <h1 style="font-size:22px;margin:0 0 20px;">You've been invited to ${SITE_NAME}</h1>
+            <p style="font-size:15px;line-height:1.6;color:hsl(220,12%,35%);margin:0 0 16px;">Hi ${escapeHtml(greetingName)},</p>
+            <p style="font-size:15px;line-height:1.6;color:hsl(220,12%,35%);margin:0 0 20px;">Your account has been created. Use the temporary password below to sign in — you'll be prompted to set your own password on first login.</p>
+            <p style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:hsl(220,12%,45%);margin:0 0 6px;">Temporary password</p>
+            <p style="font-family:monospace;font-size:20px;font-weight:700;letter-spacing:0.12em;background:hsl(232,82%,96%);color:hsl(232,82%,22%);border-radius:10px;padding:14px 18px;margin:0 0 24px;">${escapeHtml(tempPassword)}</p>
+            ${loginUrl ? `<p style="margin:0 0 24px;"><a href="${escapeHtml(loginUrl)}" style="display:inline-block;background:hsl(232,82%,22%);color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:12px;font-weight:600;font-size:15px;">Sign in</a></p>
+            <p style="font-size:12px;color:hsl(220,12%,55%);margin:0 0 4px;">Or open this link:</p>
+            <p style="font-size:12px;color:hsl(220,12%,45%);word-break:break-all;margin:0 0 24px;"><a href="${escapeHtml(loginUrl)}" style="color:hsl(232,82%,32%);">${escapeHtml(loginUrl)}</a></p>` : ""}
+            <p style="font-size:12px;color:hsl(220,12%,55%);margin:20px 0 0;">If you weren't expecting this, you can safely ignore this email.</p>
+          </div>
+        </body></html>`;
+        const text = `You've been invited to ${SITE_NAME}\n\nHi ${greetingName},\n\nYour account has been created. Use the temporary password below to sign in — you'll be prompted to set your own password on first login.\n\nTemporary password: ${tempPassword}\n\n${loginUrl ? `Sign in: ${loginUrl}\n\n` : ""}If you weren't expecting this, you can safely ignore this email.`;
+
+        const messageId = crypto.randomUUID();
+        await admin.from("email_send_log").insert({
+          message_id: messageId,
+          template_name: "invite_temp_password",
+          recipient_email: email,
+          status: "pending",
+        });
+        const { error: enqErr } = await admin.rpc("enqueue_email", {
+          queue_name: "auth_emails",
+          payload: {
+            run_id: messageId,
+            message_id: messageId,
+            to: email,
+            from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+            sender_domain: SENDER_DOMAIN,
+            subject: `You've been invited to ${SITE_NAME}`,
+            html,
+            text,
+            purpose: "transactional",
+            label: "invite_temp_password",
+            queued_at: new Date().toISOString(),
+          },
+        });
+        if (enqErr) {
+          console.error("invite email enqueue failed", enqErr);
+          await admin.from("email_send_log").insert({
+            message_id: messageId,
+            template_name: "invite_temp_password",
+            recipient_email: email,
+            status: "failed",
+            error_message: enqErr.message ?? "enqueue failed",
+          });
+          // Don't block admin — return the temp password so they can share it manually.
+          return json({ ok: true, email, temp_password: tempPassword, email_sent: false, email_error: enqErr.message });
+        }
+
+        return json({ ok: true, email, temp_password: tempPassword, email_sent: true });
       }
 
       case "send_password_reset": {
