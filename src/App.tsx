@@ -408,6 +408,7 @@ const App = () => (
           <Route path="/coworkers/infrastructure-automation/time-drift-kerberos-integrity" element={<TimeDriftKerberosIntegrity />} />
           <Route path="/coworkers/infrastructure-automation/transaction-log-disk-pressure" element={<TransactionLogDiskPressure />} />
           <Route path="/coworkers/infrastructure-automation/third-party-dependency-health" element={<ThirdPartyDependencyHealth />} />
+          <Route path="/coworkers/network-connectivity-engineering/firewall-rule-optimizer" element={<FirewallRuleOptimizer />} />
           <Route path="/coworkers/it-carve-out-and-separation" element={<CoworkersCarveOut />} />
           <Route path="/coworkers/healthcare-payer" element={<HealthcarePayer />} />
           <Route path="/coworkers/healthcare-payer/prior-authorization" element={<PriorAuthorization />} />
