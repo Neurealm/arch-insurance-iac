@@ -32,20 +32,22 @@ export const RecoveryEmail = ({
       <Container style={container}>
         <Heading style={h1}>Reset your password</Heading>
         <Text style={text}>
-          We received a request to reset your password for {siteName}. Enter the
-          code below on the reset page, or click the button.
+          We received a request to reset your password for {siteName}. Click the
+          button below, or enter the code on the reset page.
         </Text>
-
-        {token ? (
-          <Section style={codeBox}>
-            <Text style={codeLabel}>Your reset code</Text>
-            <Text style={codeStyle}>{token}</Text>
-          </Section>
-        ) : null}
 
         <Button style={button} href={confirmationUrl}>
           Reset Password
         </Button>
+
+        {token ? (
+          <>
+            <Text style={{ ...text, margin: '24px 0 8px' }}>
+              Or enter this code on the reset page:
+            </Text>
+            <Text style={codeStyle}>{token}</Text>
+          </>
+        ) : null}
 
         <Text style={footer}>
           If the button doesn't work — some corporate email systems open links
