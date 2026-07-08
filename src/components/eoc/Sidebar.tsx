@@ -585,8 +585,8 @@ const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "DIGITAL TWINS",  keys: ["aocp", "sre-practice", "sead", "semi"] },
   { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
-  { label: "OPERATIONS",     keys: ["carve-op", "itsm", "services", "coworkers", "crm"] },
-  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "settings", "auth-orch"] },
+  { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
+  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "services", "crm", "settings", "auth-orch"] },
 ];
 
 const ADMIN_ONLY_KEYS = new Set(["questionnaires", "crm"]);
