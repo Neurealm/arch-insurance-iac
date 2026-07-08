@@ -81,9 +81,9 @@ export default function ForgotPassword() {
 
   const subtitle =
     step === "request"
-      ? "We'll email you a 6-digit code"
+      ? "We'll email you a verification code"
       : step === "verify"
-        ? `Enter the 6-digit code sent to ${email}`
+        ? `Enter the code sent to ${email}`
         : "Choose a new secure password";
 
   return (
