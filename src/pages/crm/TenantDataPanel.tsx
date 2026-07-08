@@ -32,7 +32,7 @@ export function TenantDataPanel({ tenantId }: { tenantId: string }) {
   const { data: tenant } = useQuery({
     queryKey: ["tenant-data-mode-detail", tenantId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("tenants").select("id,name,data_mode").eq("id", tenantId).maybeSingle();
       if (error) throw error;
       return data;
@@ -42,7 +42,7 @@ export function TenantDataPanel({ tenantId }: { tenantId: string }) {
   const { data: counts } = useQuery({
     queryKey: ["tenant-data-counts", tenantId],
     queryFn: async () => {
-      const inc = await supabase
+      const inc = await (supabase as any)
         .from("tenant_incidents")
         .select("id", { count: "exact", head: true })
         .eq("tenant_id", tenantId);
@@ -52,7 +52,7 @@ export function TenantDataPanel({ tenantId }: { tenantId: string }) {
 
   const setMode = useMutation({
     mutationFn: async (mode: "demo" | "live") => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("tenants").update({ data_mode: mode }).eq("id", tenantId);
       if (error) throw error;
     },
@@ -106,7 +106,7 @@ export function TenantDataPanel({ tenantId }: { tenantId: string }) {
 
   const clearIncidents = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("tenant_incidents").delete().eq("tenant_id", tenantId);
       if (error) throw error;
     },

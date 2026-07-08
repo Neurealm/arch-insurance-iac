@@ -160,7 +160,7 @@ export default function TenantSettingsPage() {
     queryKey: ["tenant", tenantId],
     queryFn: async () => {
       const col = isUuid ? "id" : "slug";
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("tenants").select("*").eq(col, tenantId!).maybeSingle();
       if (error) throw error;
       return data as Tenant | null;
@@ -255,9 +255,9 @@ function OverviewPanel({ tenantId }: { tenantId: string }) {
     queryFn: async () => {
       const [agents, tools, integrations, members] = await Promise.all([
         supabase.from("tenant_agent_assignments").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("enabled", true),
-        supabase.from("tenant_tool_assignments").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("enabled", true),
+        (supabase as any).from("tenant_tool_assignments").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("enabled", true),
         supabase.from("tenant_integrations").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("status", "installed"),
-        supabase.from("tenant_memberships").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
+        (supabase as any).from("tenant_memberships").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
       ]);
       return {
         agents: agents.count ?? 0,
@@ -398,7 +398,7 @@ function ToolsPanel({ tenantId }: { tenantId: string }) {
     queryFn: async () => {
       const [{ data: catalog, error: e1 }, { data: assigns, error: e2 }] = await Promise.all([
         supabase.from("tools_catalog").select("id,name,description,category").eq("is_active", true).order("name"),
-        supabase.from("tenant_tool_assignments").select("tool_id,enabled").eq("tenant_id", tenantId),
+        (supabase as any).from("tenant_tool_assignments").select("tool_id,enabled").eq("tenant_id", tenantId),
       ]);
       if (e1) throw e1; if (e2) throw e2;
       const map = new Map((assigns ?? []).map((a) => [a.tool_id, a.enabled]));
@@ -411,13 +411,13 @@ function ToolsPanel({ tenantId }: { tenantId: string }) {
 
   const toggle = useMutation({
     mutationFn: async ({ toolId, enabled }: { toolId: string; enabled: boolean }) => {
-      const { data: existing } = await supabase
+      const { data: existing } = await (supabase as any)
         .from("tenant_tool_assignments").select("id").eq("tenant_id", tenantId).eq("tool_id", toolId).maybeSingle();
       if (existing) {
-        const { error } = await supabase.from("tenant_tool_assignments").update({ enabled }).eq("id", existing.id);
+        const { error } = await (supabase as any).from("tenant_tool_assignments").update({ enabled }).eq("id", existing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("tenant_tool_assignments").insert({ tenant_id: tenantId, tool_id: toolId, enabled });
+        const { error } = await (supabase as any).from("tenant_tool_assignments").insert({ tenant_id: tenantId, tool_id: toolId, enabled });
         if (error) throw error;
       }
     },
@@ -472,7 +472,7 @@ function MembersPanel({ tenantId, tenantName }: { tenantId: string; tenantName: 
   const { data: members = [] } = useQuery({
     queryKey: ["tenant-members", tenantId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("tenant_memberships")
         .select("id,user_id,role,created_at")
         .eq("tenant_id", tenantId)
@@ -509,7 +509,7 @@ function MembersPanel({ tenantId, tenantName }: { tenantId: string; tenantName: 
 
   const removeMember = useMutation({
     mutationFn: async (membershipId: string) => {
-      const { error } = await supabase.from("tenant_memberships").delete().eq("id", membershipId);
+      const { error } = await (supabase as any).from("tenant_memberships").delete().eq("id", membershipId);
       if (error) throw error;
     },
     onSuccess: () => {

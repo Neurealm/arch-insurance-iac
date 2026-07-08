@@ -28,7 +28,7 @@ export function useDataSource(tenantIdOverride?: string | null): {
     enabled,
     staleTime: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("tenants")
         .select("data_mode")
         .eq("id", tenantId!)

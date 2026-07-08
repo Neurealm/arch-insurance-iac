@@ -24,7 +24,7 @@ export default function TenantAuthPage() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("tenants")
         .select("id,name,slug,logo_url,status")
         .eq("slug", slug)
@@ -37,7 +37,7 @@ export default function TenantAuthPage() {
           const { data: sess } = await supabase.auth.getSession();
           const uid = sess.session?.user?.id;
           if (uid) {
-            const { data: m } = await supabase
+            const { data: m } = await (supabase as any)
               .from("tenant_memberships")
               .select("id")
               .eq("user_id", uid)
@@ -59,7 +59,7 @@ export default function TenantAuthPage() {
       const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       const uid = signInData.user?.id;
-      const { data: m } = await supabase
+      const { data: m } = await (supabase as any)
         .from("tenant_memberships")
         .select("id")
         .eq("user_id", uid!)
