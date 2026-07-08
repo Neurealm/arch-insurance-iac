@@ -131,6 +131,86 @@ const agents: Agent[] = [
       { l: "Success Rate (7D)",     v: "100%", cls: "text-emerald-600" },
     ],
   },
+  {
+    name: "VMware Capacity & Contention", cat: "Optimization",
+    icon: Boxes, color: "text-violet-600", bg: "bg-violet-50",
+    desc: "Monitors vCPU ready time, memory ballooning, and cluster contention; recommends rebalancing and rightsizing.",
+    metrics: [
+      { l: "Clusters Analyzed (7D)",  v: "58" },
+      { l: "Contention Events (7D)",  v: "142" },
+      { l: "VMs Rebalanced (7D)",     v: "96" },
+    ],
+  },
+  {
+    name: "Server Provisioning & Deprovisioning", cat: "Provisioning & Build",
+    icon: PowerOff, color: "text-blue-600", bg: "bg-blue-50",
+    desc: "Automates end-to-end server lifecycle: build, configure, retire, and reclaim capacity safely.",
+    metrics: [
+      { l: "Provisioned (7D)",   v: "184" },
+      { l: "Deprovisioned (7D)", v: "112" },
+      { l: "Capacity Reclaimed", v: "38 TB" },
+    ],
+  },
+  {
+    name: "Host Failure Early Warning", cat: "Operations & Monitoring",
+    icon: AlertTriangle, color: "text-amber-600", bg: "bg-amber-50",
+    desc: "Predicts hardware and hypervisor host failures from telemetry patterns; triggers proactive workload evacuation.",
+    metrics: [
+      { l: "Hosts Monitored",       v: "1,246" },
+      { l: "Early Warnings (7D)",   v: "27" },
+      { l: "Outages Prevented (7D)",v: "19", cls: "text-emerald-600" },
+    ],
+  },
+  {
+    name: "Active Directory Health & Replication", cat: "Operations & Monitoring",
+    icon: Users, color: "text-blue-600", bg: "bg-blue-50",
+    desc: "Monitors AD domain controllers, replication topology, FSMO roles, and DNS health; auto-remediates common issues.",
+    metrics: [
+      { l: "DCs Monitored",          v: "48" },
+      { l: "Replication Checks (7D)",v: "3,214" },
+      { l: "Issues Auto-Fixed (7D)", v: "37" },
+    ],
+  },
+  {
+    name: "Patch Compliance & Failure Remediation", cat: "Compliance & Governance",
+    icon: FileText, color: "text-amber-600", bg: "bg-amber-50",
+    desc: "Tracks patch compliance across fleets, retries failed deployments, and enforces remediation SLAs.",
+    metrics: [
+      { l: "Systems Tracked",       v: "8,942" },
+      { l: "Compliance Rate",       v: "97.4%", cls: "text-emerald-600" },
+      { l: "Failures Remediated (7D)", v: "218" },
+    ],
+  },
+  {
+    name: "Time Drift & Kerberos Integrity", cat: "Security & Risk",
+    icon: KeyRound, color: "text-red-600", bg: "bg-red-50",
+    desc: "Detects NTP time drift and Kerberos authentication failures before they cause auth outages.",
+    metrics: [
+      { l: "Endpoints Monitored",   v: "12,480" },
+      { l: "Drift Events (7D)",     v: "63" },
+      { l: "Auto-Corrected (7D)",   v: "58", cls: "text-emerald-600" },
+    ],
+  },
+  {
+    name: "Transaction Log & Disk Pressure", cat: "Operations & Monitoring",
+    icon: Timer, color: "text-emerald-600", bg: "bg-emerald-50",
+    desc: "Watches transaction log growth and disk pressure on DB and app tiers; auto-truncates, expands, or alerts.",
+    metrics: [
+      { l: "Volumes Watched",       v: "1,872" },
+      { l: "Pressure Events (7D)",  v: "94" },
+      { l: "Auto-Mitigated (7D)",   v: "81" },
+    ],
+  },
+  {
+    name: "Third-Party Dependency Health", cat: "Operations & Monitoring",
+    icon: Plug, color: "text-violet-600", bg: "bg-violet-50",
+    desc: "Monitors availability and latency of third-party APIs, SaaS, and vendor services powering internal workflows.",
+    metrics: [
+      { l: "Dependencies Tracked", v: "138" },
+      { l: "Incidents Detected (7D)", v: "22" },
+      { l: "Auto-Failovers (7D)",  v: "9" },
+    ],
+  },
 ];
 
 const categories: { name: Cat; icon: any; color: string }[] = [
