@@ -22,7 +22,7 @@ type Agent = {
 
 const agents: Agent[] = [
   {
-    name: "Provisioning Validator", cat: "Provisioning & Build",
+    name: "Server Provisioning & Deprovisioning", cat: "Provisioning & Build",
     icon: ServerCog, color: "text-blue-600", bg: "bg-blue-50",
     desc: "Validates server, network, and storage provisioning against standards and policies before activation.",
     metrics: [
