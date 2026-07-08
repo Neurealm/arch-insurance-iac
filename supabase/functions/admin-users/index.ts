@@ -253,7 +253,7 @@ Deno.serve(async (req) => {
           .upsert({ user_id: userId, role: "platform_support" }, { onConflict: "user_id,role" });
 
         // Email the invitee their temp password + a link to the login page via Resend.
-        const loginUrl = callerOrigin ? `${callerOrigin}/login` : "";
+        const loginUrl = `${callerOrigin ?? "https://neugain.io"}/login`;
         const SITE_NAME = "NeuGain";
         const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
         const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") ?? "onboarding@resend.dev";
@@ -266,14 +266,16 @@ Deno.serve(async (req) => {
             <p style="font-size:15px;line-height:1.6;color:hsl(220,12%,35%);margin:0 0 16px;">Hi ${escapeHtml(greetingName)},</p>
             <p style="font-size:15px;line-height:1.6;color:hsl(220,12%,35%);margin:0 0 20px;">Your account has been created. Use the temporary password below to sign in — you'll be prompted to set your own password on first login.</p>
             <p style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:hsl(220,12%,45%);margin:0 0 6px;">Temporary password</p>
-            <p style="font-family:monospace;font-size:20px;font-weight:700;letter-spacing:0.12em;background:hsl(232,82%,96%);color:hsl(232,82%,22%);border-radius:10px;padding:14px 18px;margin:0 0 24px;">${escapeHtml(tempPassword)}</p>
-            ${loginUrl ? `<p style="margin:0 0 24px;"><a href="${escapeHtml(loginUrl)}" style="display:inline-block;background:hsl(232,82%,22%);color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:12px;font-weight:600;font-size:15px;">Sign in</a></p>
-            <p style="font-size:12px;color:hsl(220,12%,55%);margin:0 0 4px;">Or open this link:</p>
-            <p style="font-size:12px;color:hsl(220,12%,45%);word-break:break-all;margin:0 0 24px;"><a href="${escapeHtml(loginUrl)}" style="color:hsl(232,82%,32%);">${escapeHtml(loginUrl)}</a></p>` : ""}
+            <p style="font-family:monospace;font-size:20px;font-weight:700;letter-spacing:0.12em;background:hsl(232,82%,96%);color:hsl(232,82%,22%);border-radius:10px;padding:14px 18px;margin:0 0 8px;">${escapeHtml(tempPassword)}</p>
+            <p style="font-size:12px;color:hsl(220,12%,55%);margin:0 0 24px;">Tip: tap and hold (or double-click) the password above to copy it.</p>
+            <p style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:hsl(220,12%,45%);margin:0 0 6px;">Login URL</p>
+            <p style="margin:0 0 16px;"><a href="${escapeHtml(loginUrl)}" style="display:inline-block;background:hsl(232,82%,22%);color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:12px;font-weight:600;font-size:15px;">Sign in to ${SITE_NAME}</a></p>
+            <p style="font-size:12px;color:hsl(220,12%,55%);margin:0 0 4px;">Or open this link in your browser:</p>
+            <p style="font-size:13px;color:hsl(220,12%,35%);word-break:break-all;margin:0 0 24px;"><a href="${escapeHtml(loginUrl)}" style="color:hsl(232,82%,32%);">${escapeHtml(loginUrl)}</a></p>
             <p style="font-size:12px;color:hsl(220,12%,55%);margin:20px 0 0;">If you weren't expecting this, you can safely ignore this email.</p>
           </div>
         </body></html>`;
-        const text = `You've been invited to ${SITE_NAME}\n\nHi ${greetingName},\n\nYour account has been created. Use the temporary password below to sign in — you'll be prompted to set your own password on first login.\n\nTemporary password: ${tempPassword}\n\n${loginUrl ? `Sign in: ${loginUrl}\n\n` : ""}If you weren't expecting this, you can safely ignore this email.`;
+        const text = `You've been invited to ${SITE_NAME}\n\nHi ${greetingName},\n\nYour account has been created. Use the temporary password below to sign in — you'll be prompted to set your own password on first login.\n\nTemporary password: ${tempPassword}\n\nLogin URL: ${loginUrl}\n\nIf you weren't expecting this, you can safely ignore this email.`;
 
         if (!RESEND_API_KEY) {
           return json({ ok: true, email, temp_password: tempPassword, email_sent: false, email_error: "RESEND_API_KEY not configured" });
