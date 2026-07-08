@@ -47,13 +47,13 @@ export default function ForgotPassword() {
     });
     setLoading(false);
     if (error) return toast.error(friendlyAuthError(error.message));
-    toast.success("If an account exists for that email, we've sent a 6-digit code.");
+    toast.success("If an account exists for that email, we've sent a code.");
     setStep("verify");
   };
 
   const verifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (code.trim().length < 6) return toast.error("Enter the 6-digit code from the email.");
+    if (code.trim().length < 6) return toast.error("Enter the code from the email.");
     setLoading(true);
     const { error } = await supabase.auth.verifyOtp({
       email: email.trim(),
@@ -81,9 +81,9 @@ export default function ForgotPassword() {
 
   const subtitle =
     step === "request"
-      ? "We'll email you a 6-digit code"
+      ? "We'll email you a verification code"
       : step === "verify"
-        ? `Enter the 6-digit code sent to ${email}`
+        ? `Enter the code sent to ${email}`
         : "Choose a new secure password";
 
   return (
@@ -134,14 +134,14 @@ export default function ForgotPassword() {
       {step === "verify" && (
         <form onSubmit={verifyOtp} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="code">6-digit code</Label>
+            <Label htmlFor="code">Verification code</Label>
             <Input
               id="code"
               inputMode="numeric"
               required
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              placeholder="123456"
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
+              placeholder="Enter code"
               className="h-11 font-mono tracking-[0.3em] text-center text-lg"
             />
           </div>
