@@ -90,6 +90,7 @@ import ActiveDirectoryHealthReplication from "./pages/coworkers/infra/ActiveDire
 import PatchComplianceFailureRemediation from "./pages/coworkers/infra/PatchComplianceFailureRemediation.tsx";
 import TimeDriftKerberosIntegrity from "./pages/coworkers/infra/TimeDriftKerberosIntegrity.tsx";
 import TransactionLogDiskPressure from "./pages/coworkers/infra/TransactionLogDiskPressure.tsx";
+import ThirdPartyDependencyHealth from "./pages/coworkers/infra/ThirdPartyDependencyHealth.tsx";
 import CoworkersCarveOut from "./pages/CoworkersCarveOut.tsx";
 import HealthcarePayer from "./pages/coworkers/HealthcarePayer.tsx";
 import PriorAuthorization from "./pages/coworkers/healthcare/PriorAuthorization.tsx";
