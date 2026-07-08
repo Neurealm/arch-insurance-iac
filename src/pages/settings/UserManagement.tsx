@@ -242,8 +242,8 @@ export default function UserManagement() {
     setActionBusy(true);
     try {
       const res = await invoke("invite_user", { email });
-      setInviteResult({ email: res.email ?? email, tempPassword: res.temp_password });
-      toast.success(`Account created for ${email}`);
+      setInviteResult({ email: res.email ?? email, tempPassword: res.temp_password, emailSent: !!res.email_sent });
+      toast.success(res.email_sent ? `Invite email sent to ${email}` : `Account created for ${email} — email failed, share the password manually`);
       setInviteEmail("");
       await load();
     } catch (e: any) {
