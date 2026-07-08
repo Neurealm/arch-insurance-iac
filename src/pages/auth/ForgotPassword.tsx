@@ -53,7 +53,7 @@ export default function ForgotPassword() {
 
   const verifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (code.trim().length < 6) return toast.error("Enter the 6-digit code from the email.");
+    if (code.trim().length < 6) return toast.error("Enter the code from the email.");
     setLoading(true);
     const { error } = await supabase.auth.verifyOtp({
       email: email.trim(),
