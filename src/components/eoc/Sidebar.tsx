@@ -263,9 +263,9 @@ const tree: Node[] = [
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers", children: coworkerChildren },
   { key: "questionnaires", label: "Questionnaires", icon: ClipboardList, to: "/questionnaires" },
   { key: "services",   label: "Business Services",   icon: Boxes,         to: "/itsm/exec-biz-ops/business-services" },
+  { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
   { key: "settings",   label: "Settings",            icon: Settings,      to: "/settings", exact: true },
   { key: "auth-orch",  label: "Auth Orchestration",  icon: ShieldCheck,   to: "/auth-orchestration" },
-  { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
 ];
 
 /* ---------- Quick actions ---------- */
