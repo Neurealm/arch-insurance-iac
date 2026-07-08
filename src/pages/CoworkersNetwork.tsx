@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/eoc/AppShell";
 import {
   Bot, CheckCircle, Rocket, Activity, Clock, Award, DollarSign, Star, Search,
@@ -147,6 +148,7 @@ const kpis = [
 ];
 
 export default function CoworkersNetwork() {
+  const nav = useNavigate();
   const [activeCat, setActiveCat] = useState("All Categories");
   const filtered = activeCat === "All Categories" ? coworkers : coworkers.filter((c) => c.tag === activeCat);
 
@@ -322,7 +324,16 @@ export default function CoworkersNetwork() {
                     </div>
 
                     <div className="flex items-center gap-2 pt-3 mt-3 border-t border-slate-100">
-                      <button className="flex-1 text-xs font-semibold border border-slate-200 text-slate-700 rounded-lg py-1.5 hover:bg-slate-50">View Details</button>
+                      <button
+                        onClick={() => {
+                          if (c.name === "Firewall Rule Optimizer") {
+                            nav("/coworkers/network-connectivity-engineering/firewall-rule-optimizer");
+                          }
+                        }}
+                        className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${c.name === "Firewall Rule Optimizer" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                      >
+                        View Details
+                      </button>
                       <button className="flex-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-1.5">Deploy</button>
                     </div>
                   </article>
