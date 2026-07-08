@@ -76,17 +76,14 @@ Deno.serve(async (req) => {
   const html = `<!doctype html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#ffffff;color:hsl(222,47%,11%);margin:0;padding:32px;">
     <div style="max-width:560px;margin:0 auto;">
       <h1 style="font-size:22px;margin:0 0 20px;">Reset your ${SITE_NAME} password</h1>
-      <p style="font-size:15px;line-height:1.6;color:hsl(220,12%,35%);margin:0 0 20px;">We received a request to reset your password. Click the button below to choose a new one.</p>
-      <p style="margin:0 0 24px;"><a href="${escapeHtml(actionLink)}" style="display:inline-block;background:hsl(232,82%,22%);color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:12px;font-weight:600;font-size:15px;">Reset password</a></p>
-      <p style="font-size:12px;color:hsl(220,12%,55%);margin:0 0 4px;">Or open this link:</p>
-      <p style="font-size:12px;color:hsl(220,12%,45%);word-break:break-all;margin:0 0 24px;"><a href="${escapeHtml(actionLink)}" style="color:hsl(232,82%,32%);">${escapeHtml(actionLink)}</a></p>
-      <p style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:hsl(220,12%,45%);margin:24px 0 6px;">Or use this 6-digit code</p>
-      <p style="font-family:monospace;font-size:22px;font-weight:700;letter-spacing:0.24em;background:hsl(232,82%,96%);color:hsl(232,82%,22%);border-radius:10px;padding:14px 18px;margin:0 0 24px;">${escapeHtml(otp ?? "")}</p>
-      <p style="font-size:12px;color:hsl(220,12%,55%);margin:20px 0 0;">If you didn't request this, you can safely ignore this email — your password won't change.</p>
+      <p style="font-size:15px;line-height:1.6;color:hsl(220,12%,35%);margin:0 0 20px;">We received a request to reset your password. Enter the code below on the reset page to continue.</p>
+      <p style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:hsl(220,12%,45%);margin:24px 0 6px;">Your verification code</p>
+      <p style="font-family:monospace;font-size:26px;font-weight:700;letter-spacing:0.28em;background:hsl(232,82%,96%);color:hsl(232,82%,22%);border-radius:10px;padding:16px 20px;margin:0 0 24px;text-align:center;">${escapeHtml(otp ?? "")}</p>
+      <p style="font-size:12px;color:hsl(220,12%,55%);margin:20px 0 0;">This code expires shortly. If you didn't request this, you can safely ignore this email — your password won't change.</p>
     </div>
   </body></html>`;
 
-  const text = `Reset your ${SITE_NAME} password\n\nOpen this link to choose a new password:\n${actionLink}\n\nOr enter this 6-digit code on the reset page: ${otp ?? ""}\n\nIf you didn't request this, you can safely ignore this email.`;
+  const text = `Reset your ${SITE_NAME} password\n\nYour verification code: ${otp ?? ""}\n\nEnter this code on the reset page to choose a new password.\n\nIf you didn't request this, you can safely ignore this email.`;
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
