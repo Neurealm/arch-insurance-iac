@@ -461,9 +461,11 @@ export default function CoworkersInfra() {
                             nav("/coworkers/infrastructure-automation/vmware-capacity-contention");
                           } else if (a.name === "Server Provisioning & Deprovisioning") {
                             nav("/coworkers/infrastructure-automation/server-provisioning-deprovisioning");
+                          } else if (a.name === "Host Failure Early Warning") {
+                            nav("/coworkers/infrastructure-automation/host-failure-early-warning");
                           }
                         }}
-                        className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${a.name === "VMware Capacity & Contention" || a.name === "Server Provisioning & Deprovisioning" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                        className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${a.name === "VMware Capacity & Contention" || a.name === "Server Provisioning & Deprovisioning" || a.name === "Host Failure Early Warning" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
                       >
                         View Details
                       </button>
