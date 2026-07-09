@@ -1,7 +1,7 @@
 import DashboardLayout from "./_layout";
 import { PageHeader, Section, Donut, Sparkline, MiniBars, Progress, Row } from "@/components/practice-library/widgets";
 import { ExecKpiCard, BottomCallout } from "@/components/practice-library/exec";
-import { Database, Target, Clock, AlertTriangle, Share2, ShieldCheck, Settings, DollarSign } from "lucide-react";
+import { Database, Target, Clock, AlertTriangle, Share2, ShieldCheck, Settings, DollarSign, Server } from "lucide-react";
 
 const up = [10,11,12,13,14,15,16];
 const down = [20,19,18,17,16,15,14];
