@@ -274,16 +274,21 @@ export default function CoworkersApplicationSupport() {
                     </div>
 
                     <div className="flex items-center gap-2 pt-3 mt-3 border-t border-slate-100">
-                      <button
-                        onClick={() => {
-                          if (c.name === "Hadoop Health Precheck Agent") {
-                            nav("/coworkers/application-support/hadoop-health-precheck-agent");
-                          }
-                        }}
-                        className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${c.name === "Hadoop Health Precheck Agent" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
-                      >
-                        View Details
-                      </button>
+                      {(() => {
+                        const routes: Record<string, string> = {
+                          "Hadoop Health Precheck Agent": "/coworkers/application-support/hadoop-health-precheck-agent",
+                          "Integration Monitoring Agent": "/coworkers/application-support/integration-monitoring-agent",
+                        };
+                        const highlight = c.name in routes;
+                        return (
+                          <button
+                            onClick={() => { if (routes[c.name]) nav(routes[c.name]); }}
+                            className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${highlight ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                          >
+                            View Details
+                          </button>
+                        );
+                      })()}
                       <button className="flex-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-1.5">Deploy</button>
                     </div>
                   </article>
