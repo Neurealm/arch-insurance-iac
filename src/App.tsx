@@ -649,6 +649,7 @@ const App = () => (
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />
           <Route path="/practice-library/data-integration-interoperability" element={<DataDashboard />} />
+          <Route path="/practice-library/data-integration-interoperability/sql-transaction-log-job-reliability" element={<SqlTransactionLogJobReliability />} />
           <Route path="/practice-library/observability-resilience-sre" element={<SreDashboard />} />
           <Route path="/practice-library/ehr-clinical-application" element={<EhrDashboard />} />
           <Route path="/practice-library/digital-workforce" element={<WorkforceDashboard />} />
