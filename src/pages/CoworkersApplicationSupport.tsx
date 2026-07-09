@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/eoc/AppShell";
 import {
   Bot, CheckCircle, Rocket, Activity, Clock, Award, DollarSign, Star, Search,
