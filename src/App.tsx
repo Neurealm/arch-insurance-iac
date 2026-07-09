@@ -252,6 +252,7 @@ import NetworkDashboard from "./pages/practice-library/dashboards/NetworkDashboa
 import CloudDashboard from "./pages/practice-library/dashboards/CloudDashboard.tsx";
 import ApplicationDashboard from "./pages/practice-library/dashboards/ApplicationDashboard.tsx";
 import DataDashboard from "./pages/practice-library/dashboards/DataDashboard.tsx";
+import SqlTransactionLogJobReliability from "./pages/practice-library/dashboards/data/SqlTransactionLogJobReliability.tsx";
 import SreDashboard from "./pages/practice-library/dashboards/SreDashboard.tsx";
 import EhrDashboard from "./pages/practice-library/dashboards/EhrDashboard.tsx";
 import WorkforceDashboard from "./pages/practice-library/dashboards/WorkforceDashboard.tsx";
