@@ -410,6 +410,7 @@ const App = () => (
           <Route path="/coworkers/application-support" element={<CoworkersApplicationSupport />} />
           <Route path="/coworkers/application-support/hadoop-health-precheck-agent" element={<HadoopHealthPrecheckAgent />} />
           <Route path="/coworkers/application-support/integration-monitoring-agent" element={<IntegrationMonitoringAgent />} />
+          <Route path="/coworkers/application-support/etl-pipeline-trace-coworker" element={<EtlPipelineTraceCoworker />} />
           <Route path="/coworkers/infrastructure-automation/vmware-capacity-contention" element={<VmwareCapacityContention />} />
           <Route path="/coworkers/infrastructure-automation/server-provisioning-deprovisioning" element={<ServerProvisioningDeprovisioning />} />
           <Route path="/coworkers/infrastructure-automation/host-failure-early-warning" element={<HostFailureEarlyWarning />} />
