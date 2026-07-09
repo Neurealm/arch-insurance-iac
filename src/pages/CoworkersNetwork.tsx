@@ -119,6 +119,14 @@ const coworkers: Coworker[] = [
     impact: [{ l: "Performance", v: "↑ 42%", up: true }, { l: "Productivity", v: "↑ 25%", up: true }],
     integrations: ["AWS", "Azure", "Datadog"],
   },
+  {
+    name: "Zero Touch Policy Implementation", tag: "Automation & Remediation", badge: "New",
+    icon: Sparkles, color: "text-amber-600", bg: "bg-amber-50",
+    desc: "Automates end-to-end policy rollout across network devices with zero manual touch.",
+    caps: ["Intent-based policy translation", "Automated staging & validation", "Zero-touch deployment with guardrails", "Continuous drift enforcement"],
+    impact: [{ l: "Deploy Time", v: "↓ 78%" }, { l: "Success Rate", v: "↑ 99.4%", up: true }],
+    integrations: ["Ansible", "Terraform", "Cisco DNA"],
+  },
 ];
 
 const categories = [
