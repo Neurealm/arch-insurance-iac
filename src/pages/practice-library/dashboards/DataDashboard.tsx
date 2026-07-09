@@ -121,7 +121,7 @@ export default function DataDashboard() {
           <div className="mt-2 text-[11px] text-emerald-600">✓ 3 failed jobs auto-remediated in last 24h</div>
         </Section>
 
-        <Section title="Transaction Log Truncation" action={<a className="text-xs text-blue-600">View details</a>}>
+        <Section title="Transaction Log Truncation" action={<a href="/practice-library/data-integration-interoperability/sql-transaction-log-job-reliability" className="text-xs text-yellow-500 font-semibold hover:text-yellow-600">View details</a>}>
           <div className="flex items-center gap-3 mb-3">
             <Donut value={94} size={70} stroke={10} color="hsl(217 91% 60%)" label="94%" />
             <div className="text-[10px] text-muted-foreground">T-Log Backups / Truncations on schedule<br/>Target: ≥ 98%</div>

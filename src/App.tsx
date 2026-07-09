@@ -252,6 +252,7 @@ import NetworkDashboard from "./pages/practice-library/dashboards/NetworkDashboa
 import CloudDashboard from "./pages/practice-library/dashboards/CloudDashboard.tsx";
 import ApplicationDashboard from "./pages/practice-library/dashboards/ApplicationDashboard.tsx";
 import DataDashboard from "./pages/practice-library/dashboards/DataDashboard.tsx";
+import SqlTransactionLogJobReliability from "./pages/practice-library/dashboards/data/SqlTransactionLogJobReliability.tsx";
 import SreDashboard from "./pages/practice-library/dashboards/SreDashboard.tsx";
 import EhrDashboard from "./pages/practice-library/dashboards/EhrDashboard.tsx";
 import WorkforceDashboard from "./pages/practice-library/dashboards/WorkforceDashboard.tsx";
@@ -648,6 +649,7 @@ const App = () => (
           <Route path="/practice-library/cloud-multicloud" element={<CloudDashboard />} />
           <Route path="/practice-library/application-product-support" element={<ApplicationDashboard />} />
           <Route path="/practice-library/data-integration-interoperability" element={<DataDashboard />} />
+          <Route path="/practice-library/data-integration-interoperability/sql-transaction-log-job-reliability" element={<SqlTransactionLogJobReliability />} />
           <Route path="/practice-library/observability-resilience-sre" element={<SreDashboard />} />
           <Route path="/practice-library/ehr-clinical-application" element={<EhrDashboard />} />
           <Route path="/practice-library/digital-workforce" element={<WorkforceDashboard />} />
