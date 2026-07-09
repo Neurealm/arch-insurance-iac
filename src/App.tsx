@@ -411,6 +411,7 @@ const App = () => (
           <Route path="/coworkers/infrastructure-automation/transaction-log-disk-pressure" element={<TransactionLogDiskPressure />} />
           <Route path="/coworkers/infrastructure-automation/third-party-dependency-health" element={<ThirdPartyDependencyHealth />} />
           <Route path="/coworkers/network-connectivity-engineering/firewall-rule-optimizer" element={<FirewallRuleOptimizer />} />
+          <Route path="/coworkers/network-connectivity-engineering/zero-touch-policy-implementation" element={<ZeroTouchPolicyImplementation />} />
           <Route path="/factory-ops-intelligence/maintenance-copilot" element={<FactoryMaintenanceCopilot />} />
           <Route path="/coworkers/it-carve-out-and-separation" element={<CoworkersCarveOut />} />
           <Route path="/coworkers/healthcare-payer" element={<HealthcarePayer />} />
