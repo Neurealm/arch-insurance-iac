@@ -94,6 +94,7 @@ import TransactionLogDiskPressure from "./pages/coworkers/infra/TransactionLogDi
 import ThirdPartyDependencyHealth from "./pages/coworkers/infra/ThirdPartyDependencyHealth.tsx";
 import FirewallRuleOptimizer from "./pages/coworkers/network/FirewallRuleOptimizer.tsx";
 import ZeroTouchPolicyImplementation from "./pages/coworkers/network/ZeroTouchPolicyImplementation.tsx";
+import ZeroTouchS2SVPNImplementation from "./pages/coworkers/network/ZeroTouchS2SVPNImplementation.tsx";
 import CoworkersCarveOut from "./pages/CoworkersCarveOut.tsx";
 import HealthcarePayer from "./pages/coworkers/HealthcarePayer.tsx";
 import PriorAuthorization from "./pages/coworkers/healthcare/PriorAuthorization.tsx";
@@ -412,6 +413,7 @@ const App = () => (
           <Route path="/coworkers/infrastructure-automation/third-party-dependency-health" element={<ThirdPartyDependencyHealth />} />
           <Route path="/coworkers/network-connectivity-engineering/firewall-rule-optimizer" element={<FirewallRuleOptimizer />} />
           <Route path="/coworkers/network-connectivity-engineering/zero-touch-policy-implementation" element={<ZeroTouchPolicyImplementation />} />
+          <Route path="/coworkers/network-connectivity-engineering/zero-touch-s2s-vpn-implementation" element={<ZeroTouchS2SVPNImplementation />} />
           <Route path="/factory-ops-intelligence/maintenance-copilot" element={<FactoryMaintenanceCopilot />} />
           <Route path="/coworkers/it-carve-out-and-separation" element={<CoworkersCarveOut />} />
           <Route path="/coworkers/healthcare-payer" element={<HealthcarePayer />} />

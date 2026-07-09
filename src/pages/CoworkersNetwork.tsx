@@ -346,9 +346,11 @@ export default function CoworkersNetwork() {
                             nav("/coworkers/network-connectivity-engineering/firewall-rule-optimizer");
                           } else if (c.name === "Zero Touch Policy Implementation") {
                             nav("/coworkers/network-connectivity-engineering/zero-touch-policy-implementation");
+                          } else if (c.name === "Zero Touch S2S VPN Implementation") {
+                            nav("/coworkers/network-connectivity-engineering/zero-touch-s2s-vpn-implementation");
                           }
                         }}
-                        className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${c.name === "Firewall Rule Optimizer" || c.name === "Zero Touch Policy Implementation" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                        className={`flex-1 text-xs font-semibold rounded-lg py-1.5 border ${c.name === "Firewall Rule Optimizer" || c.name === "Zero Touch Policy Implementation" || c.name === "Zero Touch S2S VPN Implementation" ? "border-yellow-400 bg-yellow-300 text-slate-900 hover:bg-yellow-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
                       >
                         View Details
                       </button>
