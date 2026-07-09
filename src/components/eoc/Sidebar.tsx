@@ -47,6 +47,7 @@ const coworkerChildren: Node[] = [
   { key: "vuln",   label: "Vulnerability Management",                to: "/coworkers/vulnerability-management",            icon: ShieldX  },
   { key: "net",    label: "Network & Connectivity Engineering",      to: "/coworkers/network-connectivity-engineering",    icon: NetIcon  },
   { key: "infra",  label: "Infrastructure Automation",               to: "/coworkers/infrastructure-automation",           icon: Server   },
+  { key: "appsup", label: "Application Support",                     to: "/coworkers/application-support",                 icon: Headphones },
   { key: "carve",  label: "IT Carve-Out & Separation",               to: "/coworkers/it-carve-out-and-separation",         icon: Scissors },
   { key: "hcpayer",label: "Healthcare Payer",                        to: "/coworkers/healthcare-payer",                    icon: Activity },
 ];
