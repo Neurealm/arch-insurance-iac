@@ -127,6 +127,14 @@ const coworkers: Coworker[] = [
     impact: [{ l: "Deploy Time", v: "↓ 78%" }, { l: "Success Rate", v: "↑ 99.4%", up: true }],
     integrations: ["Ansible", "Terraform", "Cisco DNA"],
   },
+  {
+    name: "Zero Touch S2S VPN Implementation", tag: "Security & Firewall", badge: "New",
+    icon: Shield, color: "text-blue-600", bg: "bg-blue-50",
+    desc: "Automates site-to-site VPN provisioning, tunnel validation, and key rotation across multi-vendor gateways.",
+    caps: ["Auto-provisions IPsec/IKEv2 tunnels", "Validates crypto & routing policies", "Automates PSK/certificate rotation", "Self-heals tunnel outages"],
+    impact: [{ l: "Provision Time", v: "↓ 85%" }, { l: "Tunnel Uptime", v: "↑ 99.98%", up: true }],
+    integrations: ["Cisco ASA", "Palo Alto", "Fortinet"],
+  },
 ];
 
 const categories = [
