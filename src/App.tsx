@@ -94,6 +94,7 @@ import TransactionLogDiskPressure from "./pages/coworkers/infra/TransactionLogDi
 import ThirdPartyDependencyHealth from "./pages/coworkers/infra/ThirdPartyDependencyHealth.tsx";
 import FirewallRuleOptimizer from "./pages/coworkers/network/FirewallRuleOptimizer.tsx";
 import ZeroTouchPolicyImplementation from "./pages/coworkers/network/ZeroTouchPolicyImplementation.tsx";
+import ZeroTouchS2SVPNImplementation from "./pages/coworkers/network/ZeroTouchS2SVPNImplementation.tsx";
 import CoworkersCarveOut from "./pages/CoworkersCarveOut.tsx";
 import HealthcarePayer from "./pages/coworkers/HealthcarePayer.tsx";
 import PriorAuthorization from "./pages/coworkers/healthcare/PriorAuthorization.tsx";
