@@ -86,6 +86,7 @@ import CoworkersInfra from "./pages/CoworkersInfra.tsx";
 import CoworkersApplicationSupport from "./pages/CoworkersApplicationSupport.tsx";
 import HadoopHealthPrecheckAgent from "./pages/coworkers/appsupport/HadoopHealthPrecheckAgent.tsx";
 import IntegrationMonitoringAgent from "./pages/coworkers/appsupport/IntegrationMonitoringAgent.tsx";
+import EtlPipelineTraceCoworker from "./pages/coworkers/appsupport/EtlPipelineTraceCoworker.tsx";
 import FactoryMaintenanceCopilot from "./pages/factory-ops/FactoryMaintenanceCopilot.tsx";
 import VmwareCapacityContention from "./pages/coworkers/infra/VmwareCapacityContention.tsx";
 import ServerProvisioningDeprovisioning from "./pages/coworkers/infra/ServerProvisioningDeprovisioning.tsx";
