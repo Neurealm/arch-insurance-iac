@@ -104,6 +104,49 @@ export default function DataDashboard() {
         </Section>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+        <Section title="SQL Instance Scheduled Jobs" action={<a className="text-xs text-blue-600">View details</a>}>
+          <div className="flex items-center gap-3 mb-3">
+            <Server className="h-5 w-5 text-blue-600" />
+            <div className="text-[10px] text-muted-foreground">Across 148 SQL Server / Azure SQL / Managed Instances</div>
+          </div>
+          <div className="grid grid-cols-4 gap-1 text-center mb-3">
+            <div><div className="text-[9px] text-muted-foreground">Jobs</div><div className="text-base font-bold">1,284</div></div>
+            <div><div className="text-[9px] text-muted-foreground">Succeeded</div><div className="text-base font-bold text-emerald-600">1,241</div><div className="text-[9px]">96.6%</div></div>
+            <div><div className="text-[9px] text-muted-foreground">Failed</div><div className="text-base font-bold text-rose-600">18</div><div className="text-[9px]">1.4%</div></div>
+            <div><div className="text-[9px] text-muted-foreground">Running</div><div className="text-base font-bold text-amber-600">25</div><div className="text-[9px]">1.9%</div></div>
+          </div>
+          <div className="text-[10px] text-muted-foreground mb-1">24h Job Success Rate</div>
+          <Sparkline data={[95,96,97,96,98,97,98,99]} width={220} height={36} color="hsl(142 71% 45%)" fill />
+          <div className="mt-2 text-[11px] text-emerald-600">✓ 3 failed jobs auto-remediated in last 24h</div>
+        </Section>
+
+        <Section title="Transaction Log Truncation" action={<a className="text-xs text-blue-600">View details</a>}>
+          <div className="flex items-center gap-3 mb-3">
+            <Donut value={94} size={70} stroke={10} color="hsl(217 91% 60%)" label="94%" />
+            <div className="text-[10px] text-muted-foreground">T-Log Backups / Truncations on schedule<br/>Target: ≥ 98%</div>
+          </div>
+          {[["FULL Backups","every 24h","100%"],["DIFF Backups","every 6h","99.2%"],["T-LOG Backups","every 15m","98.7%"],["Log Truncation","after t-log bkp","94.0%"],["Shrink / Reclaim","weekly","96.4%"]].map(([l,f,v])=>(
+            <Row key={l} label={<span><span className="font-medium">{l}</span> <span className="text-[9px] text-muted-foreground">· {f}</span></span>} right={<span className="font-semibold text-xs">{v}</span>} />
+          ))}
+          <div className="mt-2 text-[11px] text-amber-600">⚠ 4 instances with log usage &gt; 85% — auto-remediation queued</div>
+        </Section>
+
+        <Section title="Maintenance & Housekeeping" action={<a className="text-xs text-blue-600">View details</a>}>
+          <div className="grid grid-cols-2 gap-2 mb-2">
+            <div className="rounded bg-muted/40 p-2"><div className="text-[10px] text-muted-foreground">Index Rebuild / Reorg</div><div className="text-lg font-bold">312</div><div className="text-[9px] text-emerald-600">99.1% success</div></div>
+            <div className="rounded bg-muted/40 p-2"><div className="text-[10px] text-muted-foreground">Statistics Update</div><div className="text-lg font-bold">486</div><div className="text-[9px] text-emerald-600">99.8% success</div></div>
+            <div className="rounded bg-muted/40 p-2"><div className="text-[10px] text-muted-foreground">DBCC CHECKDB</div><div className="text-lg font-bold">148</div><div className="text-[9px] text-emerald-600">0 corruption</div></div>
+            <div className="rounded bg-muted/40 p-2"><div className="text-[10px] text-muted-foreground">Cleanup / Purge</div><div className="text-lg font-bold">96</div><div className="text-[9px] text-emerald-600">98.9% success</div></div>
+          </div>
+          <div className="text-[10px] text-muted-foreground mb-1">Top Failing Job Categories (7d)</div>
+          {[["T-Log Backup",6],["Index Rebuild",4],["ETL Load",3],["Replication",2]].map(([n,v]:any)=>(
+            <div key={n} className="flex items-center gap-2 text-xs mb-1"><span className="w-24">{n}</span><Progress value={v*10} color="hsl(0 84% 60%)" /><span className="w-6 text-right font-semibold">{v}</span></div>
+          ))}
+        </Section>
+      </div>
+
+
       <BottomCallout
         insight="AI / AIOps Insights"
         insightBody="34 anomalies detected, 27 auto-resolved issues, 93% volume forecast accuracy, 186 hrs time saved MTD."
