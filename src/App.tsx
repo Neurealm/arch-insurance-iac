@@ -85,6 +85,7 @@ import SloSlaSliMonitoring from "./pages/coworkers/sre/SloSlaSliMonitoring.tsx";
 import CoworkersInfra from "./pages/CoworkersInfra.tsx";
 import CoworkersApplicationSupport from "./pages/CoworkersApplicationSupport.tsx";
 import HadoopHealthPrecheckAgent from "./pages/coworkers/appsupport/HadoopHealthPrecheckAgent.tsx";
+import IntegrationMonitoringAgent from "./pages/coworkers/appsupport/IntegrationMonitoringAgent.tsx";
 import FactoryMaintenanceCopilot from "./pages/factory-ops/FactoryMaintenanceCopilot.tsx";
 import VmwareCapacityContention from "./pages/coworkers/infra/VmwareCapacityContention.tsx";
 import ServerProvisioningDeprovisioning from "./pages/coworkers/infra/ServerProvisioningDeprovisioning.tsx";
@@ -407,6 +408,7 @@ const App = () => (
           <Route path="/coworkers/infrastructure-automation" element={<CoworkersInfra />} />
           <Route path="/coworkers/application-support" element={<CoworkersApplicationSupport />} />
           <Route path="/coworkers/application-support/hadoop-health-precheck-agent" element={<HadoopHealthPrecheckAgent />} />
+          <Route path="/coworkers/application-support/integration-monitoring-agent" element={<IntegrationMonitoringAgent />} />
           <Route path="/coworkers/infrastructure-automation/vmware-capacity-contention" element={<VmwareCapacityContention />} />
           <Route path="/coworkers/infrastructure-automation/server-provisioning-deprovisioning" element={<ServerProvisioningDeprovisioning />} />
           <Route path="/coworkers/infrastructure-automation/host-failure-early-warning" element={<HostFailureEarlyWarning />} />
