@@ -127,7 +127,7 @@ export default function DataDashboard() {
             <div className="text-[10px] text-muted-foreground">T-Log Backups / Truncations on schedule<br/>Target: ≥ 98%</div>
           </div>
           {[["FULL Backups","every 24h","100%"],["DIFF Backups","every 6h","99.2%"],["T-LOG Backups","every 15m","98.7%"],["Log Truncation","after t-log bkp","94.0%"],["Shrink / Reclaim","weekly","96.4%"]].map(([l,f,v])=>(
-            <Row key={l} label={<span><span className="font-medium">{l}</span> <span className="text-[9px] text-muted-foreground">· {f}</span></span>} right={<span className="font-semibold text-xs">{v}</span>} />
+            <Row key={l} label={`${l} · ${f}`} right={<span className="font-semibold text-xs">{v}</span>} />
           ))}
           <div className="mt-2 text-[11px] text-amber-600">⚠ 4 instances with log usage &gt; 85% — auto-remediation queued</div>
         </Section>
