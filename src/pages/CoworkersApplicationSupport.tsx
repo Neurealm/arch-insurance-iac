@@ -278,6 +278,7 @@ export default function CoworkersApplicationSupport() {
                         const routes: Record<string, string> = {
                           "Hadoop Health Precheck Agent": "/coworkers/application-support/hadoop-health-precheck-agent",
                           "Integration Monitoring Agent": "/coworkers/application-support/integration-monitoring-agent",
+                          "ETL Pipeline Trace Co-worker": "/coworkers/application-support/etl-pipeline-trace-coworker",
                         };
                         const highlight = c.name in routes;
                         return (
