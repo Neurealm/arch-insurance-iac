@@ -349,6 +349,7 @@ import RunOpsOperationsQueue from "./runops/pages/OperationsQueue.tsx";
 import RunOpsServicePortfolio from "./runops/pages/ServicePortfolio.tsx";
 import RunOpsServiceDigitalTwin from "./runops/pages/ServiceDigitalTwin.tsx";
 import RunOpsTopologyExplorer from "./runops/pages/TopologyExplorer.tsx";
+import RunOpsObservabilityExplorer from "./runops/pages/ObservabilityExplorer.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
