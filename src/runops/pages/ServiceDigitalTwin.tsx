@@ -314,16 +314,16 @@ export default function ServiceDigitalTwin() {
             missingOwner={missingOwner}
             missingSlo={missingSlo}
             onSelectComponent={(c) => openDrawer({
-              kind: "component",
-              id: c.id,
+              
+              
               title: c.name,
               subtitle: `${c.kind} · ${c.health}`,
               body: <ComponentDrawerBody component={c} />,
             })}
             onSelectChange={() => navigate(`/runops/changes`)}
             onSelectJourney={(j) => openDrawer({
-              kind: "journey",
-              id: j,
+              
+              
               title: j,
               subtitle: "Customer journey",
               body: <JourneyDrawerBody name={j} service={service} />,
@@ -335,8 +335,8 @@ export default function ServiceDigitalTwin() {
           <JourneysTab
             service={service}
             onSelect={(j) => openDrawer({
-              kind: "journey",
-              id: j,
+              
+              
               title: j,
               subtitle: "Customer journey",
               body: <JourneyDrawerBody name={j} service={service} />,
@@ -348,8 +348,8 @@ export default function ServiceDigitalTwin() {
           <ComponentsTab
             components={serviceComponents}
             onSelect={(c) => openDrawer({
-              kind: "component",
-              id: c.id,
+              
+              
               title: c.name,
               subtitle: `${c.kind} · ${c.health}`,
               body: <ComponentDrawerBody component={c} />,
