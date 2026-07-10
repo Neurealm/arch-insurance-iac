@@ -198,6 +198,30 @@ export const services: BusinessService[] = [
     errorBudgetRemaining: 42,
     componentIds: components.map((c) => c.id),
   },
+  {
+    id: "svc-payments",
+    name: "Payments Platform",
+    tier: "Tier 1",
+    environment: "Production",
+    region: "US Central",
+    health: "Healthy",
+    sloAvailability: 99.99,
+    sloLatencyMs: 400,
+    errorBudgetRemaining: 78,
+    componentIds: ["cmp-payment-provider", "cmp-identity-provider", "cmp-network-ingress"],
+  },
+  {
+    id: "svc-identity",
+    name: "Identity Services",
+    tier: "Tier 1",
+    environment: "Production",
+    region: "US Central",
+    health: "At Risk",
+    sloAvailability: 99.95,
+    sloLatencyMs: 250,
+    errorBudgetRemaining: 61,
+    componentIds: ["cmp-identity-provider", "cmp-network-ingress"],
+  },
 ];
 
 export const digitalWorkers: DigitalWorker[] = [
@@ -283,3 +307,36 @@ export const primaryApproval: Approval = {
 
 export const primaryProblemId = "PRB-1082";
 export const primaryPostmortemId = "PM-10482";
+
+/* -------------------------- Context selectors -------------------------- */
+
+export const tenants: Tenant[] = [
+  { id: "tenant-contoso",  name: "Contoso Global" },
+  { id: "tenant-fabrikam", name: "Fabrikam Industries" },
+  { id: "tenant-northwind", name: "Northwind Retail" },
+];
+
+export const environments = ["Production", "Staging", "Development"] as const;
+export type Environment = typeof environments[number];
+
+export const regions = ["US Central", "US East", "EU West", "APAC"] as const;
+export type Region = typeof regions[number];
+
+export const timeRanges = ["15m", "1h", "6h", "24h", "7d", "30d"] as const;
+export type TimeRange = typeof timeRanges[number];
+
+export const demoRoles = [
+  "SRE Engineer",
+  "NOC Operator",
+  "Incident Commander",
+  "Service Owner",
+  "Runbook Author",
+  "Change Manager",
+  "Digital Worker Administrator",
+  "Platform Engineer",
+  "Auditor",
+  "Executive",
+  "Read Only User",
+  "Demo Controller",
+] as const;
+export type DemoRole = typeof demoRoles[number];
