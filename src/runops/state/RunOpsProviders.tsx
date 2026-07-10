@@ -1,9 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
+  changesList as canonicalChangesList,
   components as canonicalComponents,
+  connectors as canonicalConnectors,
   demoRoles,
   digitalWorkers as canonicalWorkers,
   environments as envList,
+  executionsList as canonicalExecutionsList,
   primaryApproval,
   primaryChange,
   primaryExecution,
@@ -14,6 +17,7 @@ import {
   regions as regionList,
   scenarioStages,
   services as canonicalServices,
+  slos as canonicalSlos,
   tenant as canonicalTenant,
   tenants as canonicalTenants,
   timeRanges as timeRangeList,
@@ -21,6 +25,7 @@ import {
   type BusinessService,
   type Change,
   type Component,
+  type Connector,
   type DemoRole,
   type DigitalWorker,
   type Environment,
@@ -29,6 +34,7 @@ import {
   type Region,
   type Runbook,
   type ScenarioStage,
+  type Slo,
   type Tenant,
   type TimeRange,
 } from "@/runops/data/scenario";
@@ -98,6 +104,15 @@ export interface OperationsState {
   stageIndex: number;
   stages: ScenarioStage[];
   auditLog: AuditEvent[];
+
+  /* Canonical read-only collections (surface fixtures through the provider) */
+  slos: readonly Slo[];
+  connectors: readonly Connector[];
+  executions: readonly (Execution & { title: string })[];
+  changes: readonly Change[];
+  environmentOptions: readonly Environment[];
+  regionOptions: readonly Region[];
+  timeRangeOptions: readonly TimeRange[];
 
   /* Persistent context selectors */
   selectedServiceId: string;
@@ -299,6 +314,13 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     stageIndex,
     stages: scenarioStages,
     auditLog,
+    slos: canonicalSlos,
+    connectors: canonicalConnectors,
+    executions: canonicalExecutionsList,
+    changes: canonicalChangesList,
+    environmentOptions: envList,
+    regionOptions: regionList,
+    timeRangeOptions: timeRangeList,
     selectedServiceId,
     selectedService,
     environment,
