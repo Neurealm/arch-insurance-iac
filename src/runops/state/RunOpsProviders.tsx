@@ -73,7 +73,12 @@ export interface AppNotification {
   title: string;
   detail?: string;
   read: boolean;
+  acknowledged?: boolean;
+  snoozedUntil?: string;
+  entityRef?: string;
+  route?: string;
 }
+
 
 export interface OperationsState {
   mode: Mode;
