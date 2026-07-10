@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Search, Sparkles, Play, PlusCircle, ShieldCheck, Bell, RefreshCw,
-  ChevronRight, User, Circle,
+  Search, Sparkles, Play, ShieldCheck,
+  ChevronRight, User, Circle, RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  demoRoles, environments, regions, timeRanges, useOperations, useRightDrawer,
+  demoRoles, environments, regions, timeRanges, useOperations,
   type DemoRole, type Environment, type Region, type TimeRange,
 } from "@/runops/state/RunOpsProviders";
 import {
@@ -23,6 +23,11 @@ import {
 } from "@/runops/tokens";
 import { activeSectionForPath } from "@/runops/shell/RunOpsSidebar";
 import { routes as routeTable } from "@/runops/shell/routes";
+import { useCommandPalette } from "@/runops/shell/CommandPalette";
+import { useAskNova } from "@/runops/shell/AskNovaPanel";
+import { NotificationCenter } from "@/runops/shell/NotificationCenter";
+import { CreateMenu } from "@/runops/shell/CreateMenu";
+
 
 /* -------------------------------- Utils -------------------------------- */
 
