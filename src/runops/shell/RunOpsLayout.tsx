@@ -3,10 +3,12 @@ import { Outlet } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DemoAiProvider, DemoOperationsProvider, RightDrawerProvider } from "@/runops/state/RunOpsProviders";
+import { ScenarioStoreProvider } from "@/runops/scenario/ScenarioStore";
 import { RunOpsSidebar } from "@/runops/shell/RunOpsSidebar";
 import { RunOpsTopBar } from "@/runops/shell/RunOpsTopBar";
 import { RunOpsRightDrawer } from "@/runops/shell/RunOpsRightDrawer";
 import { RunOpsErrorBoundary } from "@/runops/shell/RunOpsErrorBoundary";
+import { DemoControllerDrawer } from "@/runops/shell/DemoControllerDrawer";
 
 function Shell() {
   const [collapsed, setCollapsed] = useState(false);
@@ -69,6 +71,7 @@ function Shell() {
       </main>
 
       <RunOpsRightDrawer />
+      <DemoControllerDrawer />
     </div>
   );
 }
@@ -78,7 +81,9 @@ export default function RunOpsLayout() {
     <DemoOperationsProvider>
       <DemoAiProvider>
         <RightDrawerProvider>
-          <Shell />
+          <ScenarioStoreProvider>
+            <Shell />
+          </ScenarioStoreProvider>
         </RightDrawerProvider>
       </DemoAiProvider>
     </DemoOperationsProvider>
