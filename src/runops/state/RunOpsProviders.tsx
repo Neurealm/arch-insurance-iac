@@ -32,6 +32,24 @@ import {
   type Tenant,
   type TimeRange,
 } from "@/runops/data/scenario";
+import {
+  OperationsProviderContext,
+  type OperationsProvider,
+  type OperationsContext as OpsSelectionContext,
+} from "@/runops/providers/OperationsProvider";
+import {
+  AiProviderContext,
+  type AiProvider,
+  type AiAnswer,
+  type AiRecommendation as FormalAiRecommendation,
+} from "@/runops/providers/AiProvider";
+import { createDomainEventBus, type DomainEvent } from "@/runops/domain/events";
+import { defaultFeatureFlags, type FeatureFlags } from "@/runops/domain/featureFlags";
+import type { MutationResult, Provenance, ProviderResponse } from "@/runops/domain/results";
+import type {
+  ApprovalId, ExecutionId, IncidentId, RunbookId, ServiceId, TenantId,
+  AuditEvent as DomainAuditEvent, DomainEventId, IsoTimestamp, ScenarioStageId,
+} from "@/runops/domain/models";
 
 /* -------------------------------- Types -------------------------------- */
 
