@@ -1,7 +1,9 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   components as canonicalComponents,
+  demoRoles,
   digitalWorkers as canonicalWorkers,
+  environments as envList,
   primaryApproval,
   primaryChange,
   primaryExecution,
@@ -9,19 +11,26 @@ import {
   primaryPostmortemId,
   primaryProblemId,
   primaryRunbook,
+  regions as regionList,
   scenarioStages,
   services as canonicalServices,
   tenant as canonicalTenant,
+  tenants as canonicalTenants,
+  timeRanges as timeRangeList,
   type Approval,
   type BusinessService,
   type Change,
   type Component,
+  type DemoRole,
   type DigitalWorker,
+  type Environment,
   type Execution,
   type Incident,
+  type Region,
   type Runbook,
   type ScenarioStage,
   type Tenant,
+  type TimeRange,
 } from "@/runops/data/scenario";
 
 /* -------------------------------- Types -------------------------------- */
@@ -37,8 +46,19 @@ export interface AuditEvent {
   detail?: string;
 }
 
+export interface AppNotification {
+  id: string;
+  at: string;
+  kind: "info" | "warning" | "critical";
+  title: string;
+  detail?: string;
+  read: boolean;
+}
+
 export interface OperationsState {
   mode: Mode;
+  /** Available tenants for the selector. */
+  tenants: Tenant[];
   tenant: Tenant;
   services: BusinessService[];
   components: Component[];
@@ -53,22 +73,89 @@ export interface OperationsState {
   stageIndex: number;
   stages: ScenarioStage[];
   auditLog: AuditEvent[];
+
+  /* Persistent context selectors */
+  selectedServiceId: string;
+  selectedService: BusinessService;
+  environment: Environment;
+  region: Region;
+  timeRange: TimeRange;
+  /** ISO timestamp string for "data as of". */
+  dataFreshnessAt: string;
+
+  /* Demo mode role + notifications */
+  role: DemoRole;
+  notifications: AppNotification[];
+  unreadNotifications: number;
 }
 
 export interface OperationsActions {
+  setMode: (m: Mode) => void;
+  setTenant: (id: string) => void;
+  setSelectedService: (id: string) => void;
+  setEnvironment: (e: Environment) => void;
+  setRegion: (r: Region) => void;
+  setTimeRange: (t: TimeRange) => void;
+  refreshData: () => void;
+  setRole: (r: DemoRole) => void;
+
   advanceStage: () => void;
   resetScenario: () => void;
   setStage: (index: number) => void;
   approveExecution: (actor?: string) => void;
   denyExecution: (actor?: string, reason?: string) => void;
   resolveIncident: (actor?: string) => void;
+
+  markAllNotificationsRead: () => void;
+  pushNotification: (n: Omit<AppNotification, "id" | "at" | "read">) => void;
 }
 
 const OperationsContext = createContext<(OperationsState & OperationsActions) | null>(null);
 
+/* ---------------------------- Persistence ------------------------------ */
+
+const LS_KEY = "runops.context.v1";
+interface Persisted {
+  tenantId?: string;
+  selectedServiceId?: string;
+  environment?: Environment;
+  region?: Region;
+  timeRange?: TimeRange;
+  role?: DemoRole;
+  mode?: Mode;
+}
+function loadPersisted(): Persisted {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(LS_KEY);
+    return raw ? (JSON.parse(raw) as Persisted) : {};
+  } catch { return {}; }
+}
+function savePersisted(p: Persisted): void {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(LS_KEY, JSON.stringify(p)); } catch { /* ignore */ }
+}
+
 /* -------------------------- Operations Provider ------------------------ */
 
 export function DemoOperationsProvider({ children }: { children: React.ReactNode }) {
+  const persisted = useMemo(loadPersisted, []);
+
+  const [mode, setModeState] = useState<Mode>(persisted.mode ?? "demo");
+  const [tenant, setTenantState] = useState<Tenant>(() => {
+    const t = canonicalTenants.find((x) => x.id === persisted.tenantId);
+    return t ?? canonicalTenant;
+  });
+  const [selectedServiceId, setSelectedServiceIdState] = useState<string>(() => {
+    const id = persisted.selectedServiceId;
+    return id && canonicalServices.some((s) => s.id === id) ? id : canonicalServices[0].id;
+  });
+  const [environment, setEnvironmentState] = useState<Environment>(persisted.environment ?? "Production");
+  const [region, setRegionState] = useState<Region>(persisted.region ?? "US Central");
+  const [timeRange, setTimeRangeState] = useState<TimeRange>(persisted.timeRange ?? "1h");
+  const [dataFreshnessAt, setDataFreshnessAt] = useState<string>(() => new Date().toISOString());
+  const [role, setRoleState] = useState<DemoRole>(persisted.role ?? "SRE Engineer");
+
   const [stageIndex, setStageIndex] = useState<number>(5);
   const [incident, setIncident] = useState<Incident>(primaryIncident);
   const [execution, setExecution] = useState<Execution>(primaryExecution);
@@ -78,6 +165,30 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     { id: "AUD-2", at: "10:19 CT", actor: "DW-DB-03", action: "hypothesis.raised", target: primaryIncident.id, detail: "Database wait time dominant" },
     { id: "AUD-3", at: "10:23 CT", actor: "DW-IC-01", action: "approval.requested", target: primaryApproval.id, detail: "Revert CHG-20391" },
   ]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([
+    { id: "N-1", at: "10:14 CT", kind: "critical", title: "SEV 1 declared", detail: "INC-10482 · Global Order Processing", read: false },
+    { id: "N-2", at: "10:19 CT", kind: "warning",  title: "SLO burn accelerated", detail: "Availability window · US Central", read: false },
+    { id: "N-3", at: "10:23 CT", kind: "info",     title: "Approval requested", detail: "APR-4471 · RB-0042", read: false },
+  ]);
+
+  // Persist selected context
+  useEffect(() => {
+    savePersisted({ tenantId: tenant.id, selectedServiceId, environment, region, timeRange, role, mode });
+  }, [tenant.id, selectedServiceId, environment, region, timeRange, role, mode]);
+
+  const setMode = useCallback((m: Mode) => setModeState(m), []);
+  const setTenant = useCallback((id: string) => {
+    const t = canonicalTenants.find((x) => x.id === id);
+    if (t) setTenantState(t);
+  }, []);
+  const setSelectedService = useCallback((id: string) => {
+    if (canonicalServices.some((s) => s.id === id)) setSelectedServiceIdState(id);
+  }, []);
+  const setEnvironment = useCallback((e: Environment) => setEnvironmentState(e), []);
+  const setRegion = useCallback((r: Region) => setRegionState(r), []);
+  const setTimeRange = useCallback((t: TimeRange) => setTimeRangeState(t), []);
+  const refreshData = useCallback(() => setDataFreshnessAt(new Date().toISOString()), []);
+  const setRole = useCallback((r: DemoRole) => setRoleState(r), []);
 
   const appendAudit = useCallback((ev: Omit<AuditEvent, "id">) => {
     setAuditLog((prev) => [...prev, { ...ev, id: `AUD-${prev.length + 1}` }]);
@@ -86,7 +197,6 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
   const advanceStage = useCallback(() => {
     setStageIndex((i) => Math.min(i + 1, scenarioStages.length - 1));
   }, []);
-
   const resetScenario = useCallback(() => {
     setStageIndex(5);
     setIncident(primaryIncident);
@@ -94,11 +204,9 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     setApproval(primaryApproval);
     appendAudit({ at: "now", actor: "demo.controller", action: "scenario.reset", target: "scenario", detail: "Reset to stage 5" });
   }, [appendAudit]);
-
   const setStage = useCallback((index: number) => {
     setStageIndex(Math.max(0, Math.min(scenarioStages.length - 1, index)));
   }, []);
-
   const approveExecution = useCallback((actor = "human.operator") => {
     setApproval((prev) => ({ ...prev, state: "Approved" }));
     setExecution((prev) => ({ ...prev, state: "Running", startedAt: "10:26 CT" }));
@@ -106,13 +214,11 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     appendAudit({ at: "10:26 CT", actor, action: "approval.approved", target: primaryApproval.id });
     appendAudit({ at: "10:26 CT", actor: "system", action: "execution.started", target: primaryExecution.id });
   }, [appendAudit]);
-
   const denyExecution = useCallback((actor = "human.operator", reason = "Insufficient evidence") => {
     setApproval((prev) => ({ ...prev, state: "Denied" }));
     setExecution((prev) => ({ ...prev, state: "Cancelled" }));
     appendAudit({ at: "now", actor, action: "approval.denied", target: primaryApproval.id, detail: reason });
   }, [appendAudit]);
-
   const resolveIncident = useCallback((actor = "DW-IC-01") => {
     setIncident((prev) => ({ ...prev, state: "Resolved" }));
     setExecution((prev) => ({ ...prev, state: "Completed" }));
@@ -120,9 +226,29 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     appendAudit({ at: "now", actor, action: "incident.resolved", target: primaryIncident.id });
   }, [appendAudit]);
 
+  const markAllNotificationsRead = useCallback(() => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  }, []);
+  const pushNotification = useCallback((n: Omit<AppNotification, "id" | "at" | "read">) => {
+    setNotifications((prev) => [
+      { ...n, id: `N-${prev.length + 1}`, at: "now", read: false },
+      ...prev,
+    ]);
+  }, []);
+
+  const selectedService = useMemo<BusinessService>(() => {
+    return canonicalServices.find((s) => s.id === selectedServiceId) ?? canonicalServices[0];
+  }, [selectedServiceId]);
+
+  const unreadNotifications = useMemo(
+    () => notifications.reduce((n, x) => n + (x.read ? 0 : 1), 0),
+    [notifications],
+  );
+
   const value = useMemo<OperationsState & OperationsActions>(() => ({
-    mode: "demo",
-    tenant: canonicalTenant,
+    mode,
+    tenants: canonicalTenants,
+    tenant,
     services: canonicalServices,
     components: canonicalComponents,
     digitalWorkers: canonicalWorkers,
@@ -136,13 +262,31 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     stageIndex,
     stages: scenarioStages,
     auditLog,
-    advanceStage,
-    resetScenario,
-    setStage,
-    approveExecution,
-    denyExecution,
-    resolveIncident,
-  }), [incident, execution, approval, stageIndex, auditLog, advanceStage, resetScenario, setStage, approveExecution, denyExecution, resolveIncident]);
+    selectedServiceId,
+    selectedService,
+    environment,
+    region,
+    timeRange,
+    dataFreshnessAt,
+    role,
+    notifications,
+    unreadNotifications,
+
+    setMode, setTenant, setSelectedService, setEnvironment, setRegion, setTimeRange,
+    refreshData, setRole,
+    advanceStage, resetScenario, setStage,
+    approveExecution, denyExecution, resolveIncident,
+    markAllNotificationsRead, pushNotification,
+  }), [
+    mode, tenant, incident, execution, approval, stageIndex, auditLog,
+    selectedServiceId, selectedService, environment, region, timeRange,
+    dataFreshnessAt, role, notifications, unreadNotifications,
+    setMode, setTenant, setSelectedService, setEnvironment, setRegion, setTimeRange,
+    refreshData, setRole,
+    advanceStage, resetScenario, setStage,
+    approveExecution, denyExecution, resolveIncident,
+    markAllNotificationsRead, pushNotification,
+  ]);
 
   return <OperationsContext.Provider value={value}>{children}</OperationsContext.Provider>;
 }
@@ -236,3 +380,48 @@ export function useAi(): AiState {
   if (!ctx) throw new Error("useAi must be used within DemoAiProvider");
   return ctx;
 }
+
+/* ---------------------- Right Context Drawer state --------------------- */
+
+export interface DrawerPayload {
+  title: string;
+  subtitle?: string;
+  body: React.ReactNode;
+}
+
+interface DrawerState {
+  open: boolean;
+  payload: DrawerPayload | null;
+  openDrawer: (p: DrawerPayload) => void;
+  closeDrawer: () => void;
+}
+
+const DrawerContext = createContext<DrawerState | null>(null);
+
+export function RightDrawerProvider({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [payload, setPayload] = useState<DrawerPayload | null>(null);
+  const value = useMemo<DrawerState>(() => ({
+    open,
+    payload,
+    openDrawer: (p) => { setPayload(p); setOpen(true); },
+    closeDrawer: () => setOpen(false),
+  }), [open, payload]);
+  return <DrawerContext.Provider value={value}>{children}</DrawerContext.Provider>;
+}
+
+export function useRightDrawer(): DrawerState {
+  const ctx = useContext(DrawerContext);
+  if (!ctx) throw new Error("useRightDrawer must be used within RightDrawerProvider");
+  return ctx;
+}
+
+/* ------------------ Re-exports for convenience ------------------------- */
+
+export {
+  demoRoles,
+  envList as environments,
+  regionList as regions,
+  timeRangeList as timeRanges,
+};
+export type { Environment, Region, TimeRange, DemoRole } from "@/runops/data/scenario";
