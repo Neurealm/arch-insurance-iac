@@ -373,8 +373,9 @@ const App = () => (
             <Route index element={<RunOpsExperienceEntry />} />
             <Route path="command" element={<RunOpsCommand />} />
             <Route path="design-system" element={<RunOpsDesignSystem />} />
+            <Route path="operations/queue" element={<RunOpsOperationsQueue />} />
             {runopsRoutes
-              .filter((r) => r.path !== "" && r.path !== "command")
+              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue")
               .map((r) => (
                 <Route key={r.path} path={r.path} element={<RunOpsPlaceholder />} />
               ))}
