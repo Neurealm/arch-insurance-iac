@@ -345,6 +345,7 @@ import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
 import RunOpsNotFound from "./runops/pages/RunOpsNotFound.tsx";
 import RunOpsDesignSystem from "./runops/pages/DesignSystem.tsx";
+import RunOpsOperationsQueue from "./runops/pages/OperationsQueue.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
