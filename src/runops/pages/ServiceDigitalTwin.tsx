@@ -390,7 +390,7 @@ export default function ServiceDigitalTwin() {
         )}
 
         {tab === "evidence" && (
-          <EvidenceTab activeIncidentId={activeIncident?.id} scenarioLabel={scenario.getStage().label} />
+          <EvidenceTab activeIncidentId={activeIncident?.id} scenarioLabel={scenario.stage.label} />
         )}
       </main>
 
