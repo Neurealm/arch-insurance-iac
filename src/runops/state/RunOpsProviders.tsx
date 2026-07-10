@@ -105,6 +105,15 @@ export interface OperationsState {
   stages: ScenarioStage[];
   auditLog: AuditEvent[];
 
+  /* Canonical read-only collections (surface fixtures through the provider) */
+  slos: readonly Slo[];
+  connectors: readonly Connector[];
+  executions: readonly (Execution & { title: string })[];
+  changes: readonly Change[];
+  environmentOptions: readonly Environment[];
+  regionOptions: readonly Region[];
+  timeRangeOptions: readonly TimeRange[];
+
   /* Persistent context selectors */
   selectedServiceId: string;
   selectedService: BusinessService;
