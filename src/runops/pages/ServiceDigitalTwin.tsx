@@ -883,9 +883,9 @@ function EvidenceTab({ activeIncidentId, scenarioLabel }: { activeIncidentId?: s
             <div className="mt-1 text-slate-500">Confidence 0.82 · Uncertainty ±0.06 · Scenario: {scenarioLabel}</div>
             <div className="mt-2 space-y-1">
               <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Evidence</div>
-              <EvidenceCitation title="Checkout API trace p95 spans" source="OpenTelemetry" at="10:18 CT" kind="trace"  />
-              <EvidenceCitation title="SQL primary conn util 98%"    source="Prometheus"    at="10:12 CT" kind="metric" />
-              <EvidenceCitation title="CHG-20391 deployment record"   source="Azure DevOps"  at="09:58 CT" kind="change" />
+              <EvidenceCitation evidence={{ id: "EV-101", title: "Checkout API trace p95 spans", source: "OpenTelemetry", snippet: "p95 span duration at 1.4s, dominated by SQL waits (captured 10:18 CT).", supports: "supports" }} />
+              <EvidenceCitation evidence={{ id: "EV-102", title: "SQL primary conn util 98%",    source: "Prometheus",    snippet: "Connection pool saturation for 8 minutes prior to alert (captured 10:12 CT).", supports: "supports" }} />
+              <EvidenceCitation evidence={{ id: "EV-103", title: "CHG-20391 deployment record",   source: "Azure DevOps",  snippet: "Index change deployed 09:58 CT — precedes SLO burn by 12 minutes.", supports: "supports" }} />
             </div>
             <div className="mt-2 text-[10px] text-slate-500">
               Sources: OpenTelemetry, Prometheus, Azure DevOps · linked incident {activeIncidentId ?? "none"}
