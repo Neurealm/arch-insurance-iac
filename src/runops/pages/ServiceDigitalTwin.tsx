@@ -249,7 +249,7 @@ export default function ServiceDigitalTwin() {
             <MetaChip label="SLO"            value={missingSlo ? "not defined" : `${serviceSlos[0].current.toFixed(2)}% / ${serviceSlos[0].target}%`} warn={missingSlo} />
             <MetaChip label="Error budget"   value={`${service.errorBudgetRemaining}% remaining`} />
             <MetaChip label="Active incident" value={activeIncident ? activeIncident.id : "none"} warn={!!activeIncident} />
-            <FreshnessIndicator at={ops.dataFreshnessAt} thresholdMs={STALE_THRESHOLD_MS} />
+            <FreshnessIndicator capturedAt={ops.dataFreshnessAt} ttlSeconds={STALE_THRESHOLD_MS / 1000} />
           </>
         }
         actions={
