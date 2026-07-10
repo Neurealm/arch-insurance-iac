@@ -314,6 +314,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     advanceStage, resetScenario, setStage,
     approveExecution, denyExecution, resolveIncident,
     markAllNotificationsRead, pushNotification,
+    acknowledgeNotification, snoozeNotification,
   }), [
     mode, tenant, incident, execution, approval, stageIndex, auditLog,
     selectedServiceId, selectedService, environment, region, timeRange,
@@ -323,7 +324,9 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     advanceStage, resetScenario, setStage,
     approveExecution, denyExecution, resolveIncident,
     markAllNotificationsRead, pushNotification,
+    acknowledgeNotification, snoozeNotification,
   ]);
+
 
   /* ------------------ Formal OperationsProvider adapter ------------------ */
 
