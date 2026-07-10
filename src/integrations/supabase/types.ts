@@ -1844,6 +1844,3304 @@ export type Database = {
           },
         ]
       }
+      runops_alerts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          fired_at: string
+          id: string
+          metadata: Json
+          service_id: string | null
+          severity: Database["public"]["Enums"]["runops_severity"]
+          slo_id: string | null
+          source_system: string
+          state: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          fired_at: string
+          id?: string
+          metadata?: Json
+          service_id?: string | null
+          severity: Database["public"]["Enums"]["runops_severity"]
+          slo_id?: string | null
+          source_system?: string
+          state?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          fired_at?: string
+          id?: string
+          metadata?: Json
+          service_id?: string | null
+          severity?: Database["public"]["Enums"]["runops_severity"]
+          slo_id?: string | null
+          source_system?: string
+          state?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_alerts_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_alerts_slo_id_fkey"
+            columns: ["slo_id"]
+            isOneToOne: false
+            referencedRelation: "runops_slos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_alerts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_approvals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          decided_at: string | null
+          decided_by: string | null
+          execution_id: string | null
+          external_id: string
+          id: string
+          metadata: Json
+          reason: string | null
+          requested_at: string
+          requested_by_user_id: string | null
+          requested_by_worker_id: string | null
+          runbook_id: string | null
+          source_system: string
+          state: Database["public"]["Enums"]["runops_approval_state"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          execution_id?: string | null
+          external_id: string
+          id?: string
+          metadata?: Json
+          reason?: string | null
+          requested_at?: string
+          requested_by_user_id?: string | null
+          requested_by_worker_id?: string | null
+          runbook_id?: string | null
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_approval_state"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          execution_id?: string | null
+          external_id?: string
+          id?: string
+          metadata?: Json
+          reason?: string | null
+          requested_at?: string
+          requested_by_user_id?: string | null
+          requested_by_worker_id?: string | null
+          runbook_id?: string | null
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_approval_state"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_approvals_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "runops_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_approvals_requested_by_worker_id_fkey"
+            columns: ["requested_by_worker_id"]
+            isOneToOne: false
+            referencedRelation: "runops_digital_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_approvals_runbook_id_fkey"
+            columns: ["runbook_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_approvals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_audit_events: {
+        Row: {
+          action: string
+          actor_ref: string
+          at: string
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          detail: string | null
+          id: string
+          metadata: Json
+          source_system: string
+          target_ref: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          actor_ref: string
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          detail?: string | null
+          id?: string
+          metadata?: Json
+          source_system?: string
+          target_ref: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          actor_ref?: string
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          detail?: string | null
+          id?: string
+          metadata?: Json
+          source_system?: string
+          target_ref?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_audit_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_changes: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          deployed_at: string
+          external_id: string
+          id: string
+          linked_incident_id: string | null
+          metadata: Json
+          requested_by: string | null
+          risk: Database["public"]["Enums"]["runops_risk"]
+          service_id: string | null
+          source_system: string
+          state: Database["public"]["Enums"]["runops_change_state"]
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          deployed_at: string
+          external_id: string
+          id?: string
+          linked_incident_id?: string | null
+          metadata?: Json
+          requested_by?: string | null
+          risk?: Database["public"]["Enums"]["runops_risk"]
+          service_id?: string | null
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_change_state"]
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          deployed_at?: string
+          external_id?: string
+          id?: string
+          linked_incident_id?: string | null
+          metadata?: Json
+          requested_by?: string | null
+          risk?: Database["public"]["Enums"]["runops_risk"]
+          service_id?: string | null
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_change_state"]
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_changes_linked_incident_id_fkey"
+            columns: ["linked_incident_id"]
+            isOneToOne: false
+            referencedRelation: "runops_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_changes_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_changes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_communications: {
+        Row: {
+          audience: string
+          channel: Database["public"]["Enums"]["runops_channel"]
+          content: string
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          incident_id: string
+          metadata: Json
+          sent_at: string | null
+          source_system: string
+          state: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          audience: string
+          channel: Database["public"]["Enums"]["runops_channel"]
+          content: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          incident_id: string
+          metadata?: Json
+          sent_at?: string | null
+          source_system?: string
+          state?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          channel?: Database["public"]["Enums"]["runops_channel"]
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          incident_id?: string
+          metadata?: Json
+          sent_at?: string | null
+          source_system?: string
+          state?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_communications_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "runops_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_communications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_components: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          health: Database["public"]["Enums"]["runops_health"]
+          id: string
+          kind: Database["public"]["Enums"]["runops_component_kind"]
+          metadata: Json
+          name: string
+          service_id: string | null
+          source_system: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          health?: Database["public"]["Enums"]["runops_health"]
+          id?: string
+          kind: Database["public"]["Enums"]["runops_component_kind"]
+          metadata?: Json
+          name: string
+          service_id?: string | null
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          health?: Database["public"]["Enums"]["runops_health"]
+          id?: string
+          kind?: Database["public"]["Enums"]["runops_component_kind"]
+          metadata?: Json
+          name?: string
+          service_id?: string | null
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_components_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_components_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_connectors: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          id: string
+          kind: string
+          metadata: Json
+          name: string
+          source_system: string
+          state: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          id?: string
+          kind: string
+          metadata?: Json
+          name: string
+          source_system?: string
+          state?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          name?: string
+          source_system?: string
+          state?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_connectors_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_corrective_actions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          due_at: string | null
+          external_id: string
+          id: string
+          metadata: Json
+          owner_team_id: string | null
+          postmortem_id: string | null
+          source_system: string
+          state: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          due_at?: string | null
+          external_id: string
+          id?: string
+          metadata?: Json
+          owner_team_id?: string | null
+          postmortem_id?: string | null
+          source_system?: string
+          state?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          due_at?: string | null
+          external_id?: string
+          id?: string
+          metadata?: Json
+          owner_team_id?: string | null
+          postmortem_id?: string | null
+          source_system?: string
+          state?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_corrective_actions_owner_team_id_fkey"
+            columns: ["owner_team_id"]
+            isOneToOne: false
+            referencedRelation: "runops_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_corrective_actions_postmortem_id_fkey"
+            columns: ["postmortem_id"]
+            isOneToOne: false
+            referencedRelation: "runops_postmortems"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_corrective_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_customer_journeys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          description: string | null
+          external_id: string
+          id: string
+          metadata: Json
+          name: string
+          service_id: string | null
+          source_system: string
+          steps: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          external_id: string
+          id?: string
+          metadata?: Json
+          name: string
+          service_id?: string | null
+          source_system?: string
+          steps?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          external_id?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          service_id?: string | null
+          source_system?: string
+          steps?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_customer_journeys_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_customer_journeys_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_dependencies: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          criticality: string
+          data_freshness: string
+          description: string | null
+          from_service_id: string
+          id: string
+          metadata: Json
+          source_system: string
+          tenant_id: string
+          to_service_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          criticality?: string
+          data_freshness?: string
+          description?: string | null
+          from_service_id: string
+          id?: string
+          metadata?: Json
+          source_system?: string
+          tenant_id: string
+          to_service_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          criticality?: string
+          data_freshness?: string
+          description?: string | null
+          from_service_id?: string
+          id?: string
+          metadata?: Json
+          source_system?: string
+          tenant_id?: string
+          to_service_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_dependencies_from_service_id_fkey"
+            columns: ["from_service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_dependencies_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_dependencies_to_service_id_fkey"
+            columns: ["to_service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_digital_workers: {
+        Row: {
+          autonomy: Database["public"]["Enums"]["runops_autonomy"]
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          id: string
+          metadata: Json
+          name: string
+          role: string
+          source_system: string
+          status: Database["public"]["Enums"]["runops_worker_status"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          autonomy?: Database["public"]["Enums"]["runops_autonomy"]
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          id?: string
+          metadata?: Json
+          name: string
+          role: string
+          source_system?: string
+          status?: Database["public"]["Enums"]["runops_worker_status"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          autonomy?: Database["public"]["Enums"]["runops_autonomy"]
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          role?: string
+          source_system?: string
+          status?: Database["public"]["Enums"]["runops_worker_status"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_digital_workers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_domain_events: {
+        Row: {
+          at: string
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          kind: string
+          metadata: Json
+          payload: Json
+          source_system: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          kind: string
+          metadata?: Json
+          payload?: Json
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          payload?: Json
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_domain_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_error_budgets: {
+        Row: {
+          burn_rate: number | null
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          metadata: Json
+          remaining_percent: number
+          slo_id: string
+          source_system: string
+          tenant_id: string
+          time_to_exhaustion_hours: number | null
+          updated_at: string
+          window: string
+        }
+        Insert: {
+          burn_rate?: number | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          remaining_percent: number
+          slo_id: string
+          source_system?: string
+          tenant_id: string
+          time_to_exhaustion_hours?: number | null
+          updated_at?: string
+          window: string
+        }
+        Update: {
+          burn_rate?: number | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          remaining_percent?: number
+          slo_id?: string
+          source_system?: string
+          tenant_id?: string
+          time_to_exhaustion_hours?: number | null
+          updated_at?: string
+          window?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_error_budgets_slo_id_fkey"
+            columns: ["slo_id"]
+            isOneToOne: false
+            referencedRelation: "runops_slos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_error_budgets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_evidence_items: {
+        Row: {
+          captured_at: string
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string | null
+          hash: string | null
+          id: string
+          incident_id: string | null
+          kind: string
+          label: string
+          metadata: Json
+          reference: string | null
+          source_system: string
+          step_execution_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          captured_at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string | null
+          hash?: string | null
+          id?: string
+          incident_id?: string | null
+          kind: string
+          label: string
+          metadata?: Json
+          reference?: string | null
+          source_system?: string
+          step_execution_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          captured_at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string | null
+          hash?: string | null
+          id?: string
+          incident_id?: string | null
+          kind?: string
+          label?: string
+          metadata?: Json
+          reference?: string | null
+          source_system?: string
+          step_execution_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_evidence_items_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "runops_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_evidence_items_step_execution_id_fkey"
+            columns: ["step_execution_id"]
+            isOneToOne: false
+            referencedRelation: "runops_step_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_evidence_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_executions: {
+        Row: {
+          approval_id: string | null
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          ended_at: string | null
+          external_id: string
+          id: string
+          incident_id: string | null
+          initiated_by_user_id: string | null
+          initiated_by_worker_id: string | null
+          metadata: Json
+          runbook_id: string
+          runbook_version_id: string | null
+          source_system: string
+          started_at: string | null
+          state: Database["public"]["Enums"]["runops_execution_state"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          approval_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          ended_at?: string | null
+          external_id: string
+          id?: string
+          incident_id?: string | null
+          initiated_by_user_id?: string | null
+          initiated_by_worker_id?: string | null
+          metadata?: Json
+          runbook_id: string
+          runbook_version_id?: string | null
+          source_system?: string
+          started_at?: string | null
+          state?: Database["public"]["Enums"]["runops_execution_state"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          approval_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          ended_at?: string | null
+          external_id?: string
+          id?: string
+          incident_id?: string | null
+          initiated_by_user_id?: string | null
+          initiated_by_worker_id?: string | null
+          metadata?: Json
+          runbook_id?: string
+          runbook_version_id?: string | null
+          source_system?: string
+          started_at?: string | null
+          state?: Database["public"]["Enums"]["runops_execution_state"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_executions_approval_fk"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "runops_approvals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_executions_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "runops_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_executions_initiated_by_worker_id_fkey"
+            columns: ["initiated_by_worker_id"]
+            isOneToOne: false
+            referencedRelation: "runops_digital_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_executions_runbook_id_fkey"
+            columns: ["runbook_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_executions_runbook_version_id_fkey"
+            columns: ["runbook_version_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbook_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_executions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_hypotheses: {
+        Row: {
+          confidence: number
+          contradictory: Json
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          incident_id: string
+          metadata: Json
+          source_system: string
+          state: string
+          statement: string
+          supporting: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          confidence?: number
+          contradictory?: Json
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          incident_id: string
+          metadata?: Json
+          source_system?: string
+          state?: string
+          statement: string
+          supporting?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          confidence?: number
+          contradictory?: Json
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          incident_id?: string
+          metadata?: Json
+          source_system?: string
+          state?: string
+          statement?: string
+          supporting?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_hypotheses_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "runops_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_hypotheses_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_incident_events: {
+        Row: {
+          actor_ref: string
+          at: string
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          incident_id: string
+          kind: string
+          message: string
+          metadata: Json
+          source_system: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          actor_ref: string
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          incident_id: string
+          kind: string
+          message: string
+          metadata?: Json
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          actor_ref?: string
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          incident_id?: string
+          kind?: string
+          message?: string
+          metadata?: Json
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_incident_events_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "runops_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_incident_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_incidents: {
+        Row: {
+          closed_at: string | null
+          commander_user_id: string | null
+          commander_worker_id: string | null
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          findings: Json
+          id: string
+          metadata: Json
+          opened_at: string
+          service_id: string | null
+          severity: Database["public"]["Enums"]["runops_severity"]
+          source_system: string
+          state: Database["public"]["Enums"]["runops_incident_state"]
+          summary: string | null
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          commander_user_id?: string | null
+          commander_worker_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          findings?: Json
+          id?: string
+          metadata?: Json
+          opened_at?: string
+          service_id?: string | null
+          severity: Database["public"]["Enums"]["runops_severity"]
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_incident_state"]
+          summary?: string | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          commander_user_id?: string | null
+          commander_worker_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          findings?: Json
+          id?: string
+          metadata?: Json
+          opened_at?: string
+          service_id?: string | null
+          severity?: Database["public"]["Enums"]["runops_severity"]
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_incident_state"]
+          summary?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_incidents_commander_worker_id_fkey"
+            columns: ["commander_worker_id"]
+            isOneToOne: false
+            referencedRelation: "runops_digital_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_incidents_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_incidents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_knowledge_items: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          id: string
+          kind: string
+          metadata: Json
+          ref: string | null
+          service_id: string | null
+          source_system: string
+          summary: string | null
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          id?: string
+          kind: string
+          metadata?: Json
+          ref?: string | null
+          service_id?: string | null
+          source_system?: string
+          summary?: string | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          ref?: string | null
+          service_id?: string | null
+          source_system?: string
+          summary?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_knowledge_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_knowledge_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_known_errors: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          id: string
+          metadata: Json
+          problem_id: string | null
+          source_system: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          workaround: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          id?: string
+          metadata?: Json
+          problem_id?: string | null
+          source_system?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          workaround?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          id?: string
+          metadata?: Json
+          problem_id?: string | null
+          source_system?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          workaround?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_known_errors_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "runops_problems"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_known_errors_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_notifications: {
+        Row: {
+          at: string
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          detail: string | null
+          id: string
+          kind: string
+          metadata: Json
+          read: boolean
+          source_system: string
+          target_user_id: string | null
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          detail?: string | null
+          id?: string
+          kind: string
+          metadata?: Json
+          read?: boolean
+          source_system?: string
+          target_user_id?: string | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          detail?: string | null
+          id?: string
+          kind?: string
+          metadata?: Json
+          read?: boolean
+          source_system?: string
+          target_user_id?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_notifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_operations_tasks: {
+        Row: {
+          assigned_team_id: string | null
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          due_at: string | null
+          external_id: string
+          id: string
+          metadata: Json
+          related_incident_id: string | null
+          source_system: string
+          state: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_team_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          due_at?: string | null
+          external_id: string
+          id?: string
+          metadata?: Json
+          related_incident_id?: string | null
+          source_system?: string
+          state?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_team_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          due_at?: string | null
+          external_id?: string
+          id?: string
+          metadata?: Json
+          related_incident_id?: string | null
+          source_system?: string
+          state?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_operations_tasks_assigned_team_id_fkey"
+            columns: ["assigned_team_id"]
+            isOneToOne: false
+            referencedRelation: "runops_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_operations_tasks_related_incident_id_fkey"
+            columns: ["related_incident_id"]
+            isOneToOne: false
+            referencedRelation: "runops_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_operations_tasks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_policies: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          description: string | null
+          external_id: string
+          id: string
+          metadata: Json
+          name: string
+          requires_approval: boolean
+          rule_expression: string | null
+          scope: string
+          source_system: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          external_id: string
+          id?: string
+          metadata?: Json
+          name: string
+          requires_approval?: boolean
+          rule_expression?: string | null
+          scope?: string
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          external_id?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          requires_approval?: boolean
+          rule_expression?: string | null
+          scope?: string
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_policies_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_policy_decisions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          decided_at: string
+          id: string
+          metadata: Json
+          outcome: Database["public"]["Enums"]["runops_policy_outcome"]
+          policy_id: string
+          rationale: string | null
+          source_system: string
+          subject_ref: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          decided_at?: string
+          id?: string
+          metadata?: Json
+          outcome: Database["public"]["Enums"]["runops_policy_outcome"]
+          policy_id: string
+          rationale?: string | null
+          source_system?: string
+          subject_ref: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          decided_at?: string
+          id?: string
+          metadata?: Json
+          outcome?: Database["public"]["Enums"]["runops_policy_outcome"]
+          policy_id?: string
+          rationale?: string | null
+          source_system?: string
+          subject_ref?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_policy_decisions_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "runops_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_policy_decisions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_postmortems: {
+        Row: {
+          author_user_id: string | null
+          contributing_factors: Json
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          id: string
+          incident_id: string | null
+          metadata: Json
+          published_at: string | null
+          source_system: string
+          state: Database["public"]["Enums"]["runops_postmortem_state"]
+          summary: string | null
+          tenant_id: string
+          updated_at: string
+          what_did_not: Json
+          what_worked: Json
+        }
+        Insert: {
+          author_user_id?: string | null
+          contributing_factors?: Json
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          id?: string
+          incident_id?: string | null
+          metadata?: Json
+          published_at?: string | null
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_postmortem_state"]
+          summary?: string | null
+          tenant_id: string
+          updated_at?: string
+          what_did_not?: Json
+          what_worked?: Json
+        }
+        Update: {
+          author_user_id?: string | null
+          contributing_factors?: Json
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          id?: string
+          incident_id?: string | null
+          metadata?: Json
+          published_at?: string | null
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_postmortem_state"]
+          summary?: string | null
+          tenant_id?: string
+          updated_at?: string
+          what_did_not?: Json
+          what_worked?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_postmortems_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "runops_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_postmortems_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_problems: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          id: string
+          metadata: Json
+          opened_at: string
+          service_id: string | null
+          source_system: string
+          state: Database["public"]["Enums"]["runops_problem_state"]
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          id?: string
+          metadata?: Json
+          opened_at?: string
+          service_id?: string | null
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_problem_state"]
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          id?: string
+          metadata?: Json
+          opened_at?: string
+          service_id?: string | null
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_problem_state"]
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_problems_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_problems_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          metadata: Json
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          metadata?: Json
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          metadata?: Json
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_remediation_options: {
+        Row: {
+          confidence: number
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          description: string | null
+          id: string
+          incident_id: string
+          metadata: Json
+          risk: Database["public"]["Enums"]["runops_risk"]
+          runbook_id: string | null
+          selected: boolean
+          source_system: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          id?: string
+          incident_id: string
+          metadata?: Json
+          risk?: Database["public"]["Enums"]["runops_risk"]
+          runbook_id?: string | null
+          selected?: boolean
+          source_system?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          id?: string
+          incident_id?: string
+          metadata?: Json
+          risk?: Database["public"]["Enums"]["runops_risk"]
+          runbook_id?: string | null
+          selected?: boolean
+          source_system?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_remediation_options_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "runops_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_remediation_options_runbook_id_fkey"
+            columns: ["runbook_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_remediation_options_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_role_assignments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          metadata: Json
+          role: Database["public"]["Enums"]["runops_role"]
+          source_system: string
+          team_id: string | null
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          role: Database["public"]["Enums"]["runops_role"]
+          source_system?: string
+          team_id?: string | null
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          role?: Database["public"]["Enums"]["runops_role"]
+          source_system?: string
+          team_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_role_assignments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "runops_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_role_assignments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_runbook_certifications: {
+        Row: {
+          certified_at: string
+          certified_by: string | null
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          expires_at: string | null
+          fitness_score: number | null
+          id: string
+          metadata: Json
+          runbook_id: string
+          source_system: string
+          tenant_id: string
+          updated_at: string
+          version_id: string
+        }
+        Insert: {
+          certified_at?: string
+          certified_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          expires_at?: string | null
+          fitness_score?: number | null
+          id?: string
+          metadata?: Json
+          runbook_id: string
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+          version_id: string
+        }
+        Update: {
+          certified_at?: string
+          certified_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          expires_at?: string | null
+          fitness_score?: number | null
+          id?: string
+          metadata?: Json
+          runbook_id?: string
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_runbook_certifications_runbook_id_fkey"
+            columns: ["runbook_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_runbook_certifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_runbook_certifications_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbook_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_runbook_steps: {
+        Row: {
+          autonomy: Database["public"]["Enums"]["runops_autonomy"]
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          description: string | null
+          id: string
+          key: string
+          kind: string
+          label: string
+          metadata: Json
+          position: number
+          required_approval: boolean
+          runbook_version_id: string
+          source_system: string
+          tenant_id: string
+          tool_grants: Json
+          updated_at: string
+        }
+        Insert: {
+          autonomy?: Database["public"]["Enums"]["runops_autonomy"]
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          id?: string
+          key: string
+          kind: string
+          label: string
+          metadata?: Json
+          position: number
+          required_approval?: boolean
+          runbook_version_id: string
+          source_system?: string
+          tenant_id: string
+          tool_grants?: Json
+          updated_at?: string
+        }
+        Update: {
+          autonomy?: Database["public"]["Enums"]["runops_autonomy"]
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          id?: string
+          key?: string
+          kind?: string
+          label?: string
+          metadata?: Json
+          position?: number
+          required_approval?: boolean
+          runbook_version_id?: string
+          source_system?: string
+          tenant_id?: string
+          tool_grants?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_runbook_steps_runbook_version_id_fkey"
+            columns: ["runbook_version_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbook_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_runbook_steps_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_runbook_tests: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          expected_outcome: string | null
+          id: string
+          metadata: Json
+          name: string
+          runbook_id: string
+          scenario_ref: string | null
+          source_system: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          expected_outcome?: string | null
+          id?: string
+          metadata?: Json
+          name: string
+          runbook_id: string
+          scenario_ref?: string | null
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          expected_outcome?: string | null
+          id?: string
+          metadata?: Json
+          name?: string
+          runbook_id?: string
+          scenario_ref?: string | null
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_runbook_tests_runbook_id_fkey"
+            columns: ["runbook_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_runbook_tests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_runbook_triggers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          expression: string
+          id: string
+          kind: string
+          metadata: Json
+          runbook_id: string
+          source_system: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          expression: string
+          id?: string
+          kind: string
+          metadata?: Json
+          runbook_id: string
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          expression?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          runbook_id?: string
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_runbook_triggers_runbook_id_fkey"
+            columns: ["runbook_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_runbook_triggers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_runbook_versions: {
+        Row: {
+          changelog: string | null
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          metadata: Json
+          runbook_id: string
+          source_system: string
+          state: Database["public"]["Enums"]["runops_runbook_state"]
+          tenant_id: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          changelog?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          runbook_id: string
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_runbook_state"]
+          tenant_id: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          changelog?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          runbook_id?: string
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_runbook_state"]
+          tenant_id?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_runbook_versions_runbook_id_fkey"
+            columns: ["runbook_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_runbook_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_runbooks: {
+        Row: {
+          autonomy: Database["public"]["Enums"]["runops_autonomy"]
+          created_at: string
+          created_by: string | null
+          current_version_id: string | null
+          data_freshness: string
+          external_id: string
+          fitness_score: number
+          id: string
+          metadata: Json
+          owner_team_id: string | null
+          service_id: string | null
+          source_system: string
+          state: Database["public"]["Enums"]["runops_runbook_state"]
+          tags: string[]
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          autonomy?: Database["public"]["Enums"]["runops_autonomy"]
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          data_freshness?: string
+          external_id: string
+          fitness_score?: number
+          id?: string
+          metadata?: Json
+          owner_team_id?: string | null
+          service_id?: string | null
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_runbook_state"]
+          tags?: string[]
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          autonomy?: Database["public"]["Enums"]["runops_autonomy"]
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          data_freshness?: string
+          external_id?: string
+          fitness_score?: number
+          id?: string
+          metadata?: Json
+          owner_team_id?: string | null
+          service_id?: string | null
+          source_system?: string
+          state?: Database["public"]["Enums"]["runops_runbook_state"]
+          tags?: string[]
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_runbooks_current_version_fk"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbook_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_runbooks_owner_team_id_fkey"
+            columns: ["owner_team_id"]
+            isOneToOne: false
+            referencedRelation: "runops_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_runbooks_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_runbooks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_scenario_events: {
+        Row: {
+          actor: string | null
+          at: string
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          index: number
+          label: string
+          metadata: Json
+          scenario_instance_id: string
+          source_system: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          actor?: string | null
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          index: number
+          label: string
+          metadata?: Json
+          scenario_instance_id: string
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          actor?: string | null
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          index?: number
+          label?: string
+          metadata?: Json
+          scenario_instance_id?: string
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_scenario_events_scenario_instance_id_fkey"
+            columns: ["scenario_instance_id"]
+            isOneToOne: false
+            referencedRelation: "runops_scenario_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_scenario_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_scenario_instances: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          description: string | null
+          external_id: string
+          id: string
+          metadata: Json
+          name: string
+          source_system: string
+          stage_index: number
+          stages: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          external_id: string
+          id?: string
+          metadata?: Json
+          name: string
+          source_system?: string
+          stage_index?: number
+          stages?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          external_id?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          source_system?: string
+          stage_index?: number
+          stages?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_scenario_instances_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_service_owners: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          metadata: Json
+          primary_user_id: string | null
+          secondary_user_id: string | null
+          service_id: string
+          source_system: string
+          team_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          primary_user_id?: string | null
+          secondary_user_id?: string | null
+          service_id: string
+          source_system?: string
+          team_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          primary_user_id?: string | null
+          secondary_user_id?: string | null
+          service_id?: string
+          source_system?: string
+          team_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_service_owners_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_service_owners_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "runops_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_service_owners_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_services: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          environment: Database["public"]["Enums"]["runops_env"]
+          error_budget_remaining: number | null
+          external_id: string
+          health: Database["public"]["Enums"]["runops_health"]
+          id: string
+          metadata: Json
+          name: string
+          owner_team_id: string | null
+          region: string
+          slo_availability: number | null
+          slo_latency_ms: number | null
+          source_system: string
+          tenant_id: string
+          tier: Database["public"]["Enums"]["runops_tier"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          environment?: Database["public"]["Enums"]["runops_env"]
+          error_budget_remaining?: number | null
+          external_id: string
+          health?: Database["public"]["Enums"]["runops_health"]
+          id?: string
+          metadata?: Json
+          name: string
+          owner_team_id?: string | null
+          region: string
+          slo_availability?: number | null
+          slo_latency_ms?: number | null
+          source_system?: string
+          tenant_id: string
+          tier: Database["public"]["Enums"]["runops_tier"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          environment?: Database["public"]["Enums"]["runops_env"]
+          error_budget_remaining?: number | null
+          external_id?: string
+          health?: Database["public"]["Enums"]["runops_health"]
+          id?: string
+          metadata?: Json
+          name?: string
+          owner_team_id?: string | null
+          region?: string
+          slo_availability?: number | null
+          slo_latency_ms?: number | null
+          source_system?: string
+          tenant_id?: string
+          tier?: Database["public"]["Enums"]["runops_tier"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_services_owner_team_id_fkey"
+            columns: ["owner_team_id"]
+            isOneToOne: false
+            referencedRelation: "runops_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_services_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_slis: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          id: string
+          metadata: Json
+          name: string
+          query_ref: string | null
+          service_id: string
+          source_system: string
+          tenant_id: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          id?: string
+          metadata?: Json
+          name: string
+          query_ref?: string | null
+          service_id: string
+          source_system?: string
+          tenant_id: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          query_ref?: string | null
+          service_id?: string
+          source_system?: string
+          tenant_id?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_slis_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_slis_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_slos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          description: string | null
+          external_id: string
+          id: string
+          metadata: Json
+          service_id: string
+          sli_id: string
+          source_system: string
+          target: number
+          tenant_id: string
+          updated_at: string
+          window: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          external_id: string
+          id?: string
+          metadata?: Json
+          service_id: string
+          sli_id: string
+          source_system?: string
+          target: number
+          tenant_id: string
+          updated_at?: string
+          window: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          external_id?: string
+          id?: string
+          metadata?: Json
+          service_id?: string
+          sli_id?: string
+          source_system?: string
+          target?: number
+          tenant_id?: string
+          updated_at?: string
+          window?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_slos_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_slos_sli_id_fkey"
+            columns: ["sli_id"]
+            isOneToOne: false
+            referencedRelation: "runops_slis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_slos_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_step_executions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          ended_at: string | null
+          execution_id: string
+          id: string
+          message: string | null
+          metadata: Json
+          source_system: string
+          started_at: string | null
+          state: Database["public"]["Enums"]["runops_step_state"]
+          step_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          ended_at?: string | null
+          execution_id: string
+          id?: string
+          message?: string | null
+          metadata?: Json
+          source_system?: string
+          started_at?: string | null
+          state?: Database["public"]["Enums"]["runops_step_state"]
+          step_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          ended_at?: string | null
+          execution_id?: string
+          id?: string
+          message?: string | null
+          metadata?: Json
+          source_system?: string
+          started_at?: string | null
+          state?: Database["public"]["Enums"]["runops_step_state"]
+          step_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_step_executions_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "runops_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_step_executions_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "runops_runbook_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_step_executions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_teams: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          id: string
+          metadata: Json
+          name: string
+          source_system: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id: string
+          id?: string
+          metadata?: Json
+          name: string
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          external_id?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_teams_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_telemetry_snapshots: {
+        Row: {
+          captured_at: string
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          metadata: Json
+          name: string
+          points: Json
+          service_id: string
+          source_system: string
+          tenant_id: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          captured_at: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          name: string
+          points?: Json
+          service_id: string
+          source_system?: string
+          tenant_id: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          captured_at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          points?: Json
+          service_id?: string
+          source_system?: string
+          tenant_id?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_telemetry_snapshots_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "runops_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_telemetry_snapshots_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_tenants: {
+        Row: {
+          created_at: string
+          external_id: string
+          id: string
+          metadata: Json
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          external_id: string
+          id?: string
+          metadata?: Json
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          external_id?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      runops_worker_capabilities: {
+        Row: {
+          autonomy: Database["public"]["Enums"]["runops_autonomy"]
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          description: string | null
+          id: string
+          metadata: Json
+          name: string
+          source_system: string
+          tenant_id: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          autonomy?: Database["public"]["Enums"]["runops_autonomy"]
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          name: string
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          autonomy?: Database["public"]["Enums"]["runops_autonomy"]
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          name?: string
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_worker_capabilities_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_worker_capabilities_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "runops_digital_workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_worker_evaluations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          metadata: Json
+          notes: string | null
+          outcome: string
+          score: number | null
+          source_system: string
+          tenant_id: string
+          updated_at: string
+          window: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          outcome: string
+          score?: number | null
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+          window: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          outcome?: string
+          score?: number | null
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+          window?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_worker_evaluations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_worker_evaluations_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "runops_digital_workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_worker_events: {
+        Row: {
+          at: string
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          kind: string
+          message: string
+          metadata: Json
+          session_id: string | null
+          source_system: string
+          tenant_id: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          kind: string
+          message: string
+          metadata?: Json
+          session_id?: string | null
+          source_system?: string
+          tenant_id: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          at?: string
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          kind?: string
+          message?: string
+          metadata?: Json
+          session_id?: string | null
+          source_system?: string
+          tenant_id?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_worker_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "runops_worker_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_worker_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_worker_events_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "runops_digital_workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_worker_sessions: {
+        Row: {
+          context_incident_id: string | null
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          ended_at: string | null
+          id: string
+          metadata: Json
+          source_system: string
+          started_at: string
+          tenant_id: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          context_incident_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          ended_at?: string | null
+          id?: string
+          metadata?: Json
+          source_system?: string
+          started_at?: string
+          tenant_id: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          context_incident_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          ended_at?: string | null
+          id?: string
+          metadata?: Json
+          source_system?: string
+          started_at?: string
+          tenant_id?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_worker_sessions_context_incident_id_fkey"
+            columns: ["context_incident_id"]
+            isOneToOne: false
+            referencedRelation: "runops_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_worker_sessions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_worker_sessions_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "runops_digital_workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      runops_worker_tool_grants: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          id: string
+          metadata: Json
+          requires_approval: boolean
+          scope: string
+          source_system: string
+          tenant_id: string
+          tool_name: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          requires_approval?: boolean
+          scope?: string
+          source_system?: string
+          tenant_id: string
+          tool_name: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_freshness?: string
+          id?: string
+          metadata?: Json
+          requires_approval?: boolean
+          scope?: string
+          source_system?: string
+          tenant_id?: string
+          tool_name?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "runops_worker_tool_grants_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "runops_tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "runops_worker_tool_grants_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "runops_digital_workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stakeholder_registers: {
         Row: {
           company: string | null
@@ -2111,6 +5409,144 @@ export type Database = {
         }
         Returns: string
       }
+      runops_advance_scenario: {
+        Args: { _actor: string; _scenario_id: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          description: string | null
+          external_id: string
+          id: string
+          metadata: Json
+          name: string
+          source_system: string
+          stage_index: number
+          stages: Json
+          tenant_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "runops_scenario_instances"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      runops_approve_change: {
+        Args: { _actor: string; _change_id: string }
+        Returns: {
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          deployed_at: string
+          external_id: string
+          id: string
+          linked_incident_id: string | null
+          metadata: Json
+          requested_by: string | null
+          risk: Database["public"]["Enums"]["runops_risk"]
+          service_id: string | null
+          source_system: string
+          state: Database["public"]["Enums"]["runops_change_state"]
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "runops_changes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      runops_approve_execution: {
+        Args: { _actor: string; _approval_id: string }
+        Returns: Json
+      }
+      runops_bootstrap_current_user: { Args: never; Returns: Json }
+      runops_can_write: { Args: { _tenant_id: string }; Returns: boolean }
+      runops_certify_runbook_version: {
+        Args: { _actor: string; _version_id: string }
+        Returns: Json
+      }
+      runops_deny_execution: {
+        Args: { _actor: string; _approval_id: string; _reason: string }
+        Returns: Json
+      }
+      runops_has_any_role: {
+        Args: {
+          _roles: Database["public"]["Enums"]["runops_role"][]
+          _tenant_id: string
+        }
+        Returns: boolean
+      }
+      runops_has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["runops_role"]
+          _tenant_id: string
+        }
+        Returns: boolean
+      }
+      runops_has_tenant_access: {
+        Args: { _tenant_id: string }
+        Returns: boolean
+      }
+      runops_reset_scenario: {
+        Args: { _actor: string; _scenario_id: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          description: string | null
+          external_id: string
+          id: string
+          metadata: Json
+          name: string
+          source_system: string
+          stage_index: number
+          stages: Json
+          tenant_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "runops_scenario_instances"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      runops_resolve_incident: {
+        Args: { _actor: string; _incident_id: string }
+        Returns: {
+          closed_at: string | null
+          commander_user_id: string | null
+          commander_worker_id: string | null
+          created_at: string
+          created_by: string | null
+          data_freshness: string
+          external_id: string
+          findings: Json
+          id: string
+          metadata: Json
+          opened_at: string
+          service_id: string | null
+          severity: Database["public"]["Enums"]["runops_severity"]
+          source_system: string
+          state: Database["public"]["Enums"]["runops_incident_state"]
+          summary: string | null
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "runops_incidents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       answer_status:
@@ -2123,6 +5559,119 @@ export type Database = {
         | "Deferred"
         | "Not Applicable"
       app_role: "platform_admin" | "platform_support"
+      runops_approval_state:
+        | "Pending"
+        | "Approved"
+        | "Denied"
+        | "Expired"
+        | "Revoked"
+      runops_autonomy:
+        | "Documentation Only"
+        | "Human Guided"
+        | "AI Recommended"
+        | "Human Initiated Automation"
+        | "Approval Gated Automation"
+        | "Supervised Autonomous"
+        | "Policy Bounded Autonomous"
+      runops_change_state:
+        | "Planned"
+        | "Approved"
+        | "Deploying"
+        | "Deployed"
+        | "Reverted"
+        | "Failed"
+      runops_channel:
+        | "Status Page"
+        | "Email"
+        | "Chat"
+        | "Executive Brief"
+        | "Customer Notice"
+      runops_component_kind:
+        | "api"
+        | "compute"
+        | "database"
+        | "cache"
+        | "queue"
+        | "network"
+        | "identity"
+        | "vendor"
+        | "storage"
+        | "function"
+      runops_env: "Production" | "Staging" | "Development"
+      runops_execution_state:
+        | "Pending"
+        | "Awaiting Approval"
+        | "Queued"
+        | "Running"
+        | "Paused"
+        | "Validating"
+        | "Rolling Back"
+        | "Completed"
+        | "Failed"
+        | "Cancelled"
+      runops_health:
+        | "Healthy"
+        | "At Risk"
+        | "Degraded"
+        | "Severely Degraded"
+        | "Unavailable"
+        | "Recovering"
+      runops_incident_state:
+        | "Detected"
+        | "Triaged"
+        | "Declared"
+        | "Investigating"
+        | "Mitigating"
+        | "Monitoring"
+        | "Resolved"
+        | "Closed"
+      runops_policy_outcome: "Allow" | "Require Approval" | "Deny"
+      runops_postmortem_state: "Drafting" | "Review" | "Published" | "Archived"
+      runops_problem_state:
+        | "Open"
+        | "Investigating"
+        | "Known Error"
+        | "Resolved"
+        | "Closed"
+      runops_risk: "Low" | "Medium" | "High" | "Critical"
+      runops_role:
+        | "sre_engineer"
+        | "noc_operator"
+        | "incident_commander"
+        | "service_owner"
+        | "runbook_author"
+        | "change_manager"
+        | "digital_worker_administrator"
+        | "platform_engineer"
+        | "auditor"
+        | "executive"
+        | "read_only_user"
+        | "demo_controller"
+      runops_runbook_state:
+        | "Draft"
+        | "In Review"
+        | "Approved"
+        | "Certified"
+        | "Published"
+        | "Deprecated"
+        | "Retired"
+      runops_severity: "SEV 1" | "SEV 2" | "SEV 3" | "SEV 4"
+      runops_step_state:
+        | "Pending"
+        | "Running"
+        | "Skipped"
+        | "Succeeded"
+        | "Failed"
+        | "Compensated"
+      runops_tier: "Tier 1" | "Tier 2" | "Tier 3"
+      runops_worker_status:
+        | "Idle"
+        | "Investigating"
+        | "Recommending"
+        | "Executing"
+        | "Validating"
+        | "Paused"
+        | "Disabled"
       user_category: "neurealm_employee" | "customer"
     }
     CompositeTypes: {
@@ -2262,6 +5811,132 @@ export const Constants = {
         "Not Applicable",
       ],
       app_role: ["platform_admin", "platform_support"],
+      runops_approval_state: [
+        "Pending",
+        "Approved",
+        "Denied",
+        "Expired",
+        "Revoked",
+      ],
+      runops_autonomy: [
+        "Documentation Only",
+        "Human Guided",
+        "AI Recommended",
+        "Human Initiated Automation",
+        "Approval Gated Automation",
+        "Supervised Autonomous",
+        "Policy Bounded Autonomous",
+      ],
+      runops_change_state: [
+        "Planned",
+        "Approved",
+        "Deploying",
+        "Deployed",
+        "Reverted",
+        "Failed",
+      ],
+      runops_channel: [
+        "Status Page",
+        "Email",
+        "Chat",
+        "Executive Brief",
+        "Customer Notice",
+      ],
+      runops_component_kind: [
+        "api",
+        "compute",
+        "database",
+        "cache",
+        "queue",
+        "network",
+        "identity",
+        "vendor",
+        "storage",
+        "function",
+      ],
+      runops_env: ["Production", "Staging", "Development"],
+      runops_execution_state: [
+        "Pending",
+        "Awaiting Approval",
+        "Queued",
+        "Running",
+        "Paused",
+        "Validating",
+        "Rolling Back",
+        "Completed",
+        "Failed",
+        "Cancelled",
+      ],
+      runops_health: [
+        "Healthy",
+        "At Risk",
+        "Degraded",
+        "Severely Degraded",
+        "Unavailable",
+        "Recovering",
+      ],
+      runops_incident_state: [
+        "Detected",
+        "Triaged",
+        "Declared",
+        "Investigating",
+        "Mitigating",
+        "Monitoring",
+        "Resolved",
+        "Closed",
+      ],
+      runops_policy_outcome: ["Allow", "Require Approval", "Deny"],
+      runops_postmortem_state: ["Drafting", "Review", "Published", "Archived"],
+      runops_problem_state: [
+        "Open",
+        "Investigating",
+        "Known Error",
+        "Resolved",
+        "Closed",
+      ],
+      runops_risk: ["Low", "Medium", "High", "Critical"],
+      runops_role: [
+        "sre_engineer",
+        "noc_operator",
+        "incident_commander",
+        "service_owner",
+        "runbook_author",
+        "change_manager",
+        "digital_worker_administrator",
+        "platform_engineer",
+        "auditor",
+        "executive",
+        "read_only_user",
+        "demo_controller",
+      ],
+      runops_runbook_state: [
+        "Draft",
+        "In Review",
+        "Approved",
+        "Certified",
+        "Published",
+        "Deprecated",
+        "Retired",
+      ],
+      runops_severity: ["SEV 1", "SEV 2", "SEV 3", "SEV 4"],
+      runops_step_state: [
+        "Pending",
+        "Running",
+        "Skipped",
+        "Succeeded",
+        "Failed",
+        "Compensated",
+      ],
+      runops_tier: ["Tier 1", "Tier 2", "Tier 3"],
+      runops_worker_status: [
+        "Idle",
+        "Investigating",
+        "Recommending",
+        "Executing",
+        "Validating",
+        "Paused",
+        "Disabled",
+      ],
       user_category: ["neurealm_employee", "customer"],
     },
   },
