@@ -1,6 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 import {
-  approval as _unused,
   components as canonicalComponents,
   digitalWorkers as canonicalWorkers,
   primaryApproval,
@@ -24,9 +23,6 @@ import {
   type ScenarioStage,
   type Tenant,
 } from "@/runops/data/scenario";
-
-// The unused re-export above keeps TS happy when tree-shaking a single symbol.
-void _unused;
 
 /* -------------------------------- Types -------------------------------- */
 
