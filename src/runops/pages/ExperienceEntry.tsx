@@ -286,10 +286,10 @@ export default function ExperienceEntry() {
   });
 
   const openRunbookDrawer = (rb: typeof recentRunbooks[number]) => openDrawer({
-    title: rb.name, subtitle: rb.id,
+    title: rb.title, subtitle: rb.id,
     body: <EntityQuickView
-      eyebrow="Runbook" title={rb.name} subtitle={rb.id}
-      status={{ tone: rb.state === "Certified" ? "ok" : "info", label: rb.state }}
+      eyebrow="Runbook" title={rb.title} subtitle={rb.id}
+      status={{ tone: rb.state === "Certified" ? "healthy" : "connected", label: rb.state }}
       fields={[
         { label: "Autonomy", value: rb.autonomy },
         { label: "Steps",    value: String(rb.steps.length) },
@@ -301,10 +301,10 @@ export default function ExperienceEntry() {
   const openConnectorDrawer = (c: typeof connectorHealth[number]) => openDrawer({
     title: c.name, subtitle: c.id,
     body: <EntityQuickView
-      eyebrow="Connector" title={c.name} subtitle={c.type}
-      status={{ tone: c.status === "Healthy" ? "ok" : c.status === "Degraded" ? "warning" : "critical", label: c.status }}
+      eyebrow="Connector" title={c.name} subtitle={c.kind}
+      status={{ tone: c.status === "Healthy" ? "healthy" : c.status === "Degraded" ? "warning" : "critical", label: c.status }}
       fields={[
-        { label: "Type",   value: c.type },
+        { label: "Type",   value: c.kind },
         { label: "Status", value: c.status },
       ]}
       footer={<Link to="/runops/integrations" className="text-sky-700 underline">Open integrations</Link>}
@@ -402,7 +402,7 @@ export default function ExperienceEntry() {
             <MetricCard label="Active incidents"    value={String(summary.activeIncidents)}   tone={summary.activeIncidents ? "critical" : "healthy"} />
             <MetricCard label="Pending approvals"   value={String(summary.pendingApprovals)}  tone={summary.pendingApprovals ? "warning" : "neutral"} />
             <MetricCard label="Active executions"   value={String(summary.activeExecutions)}  tone={summary.activeExecutions ? "connected" : "neutral"} />
-            <MetricCard label="Error budgets at risk" value={String(summary.errorBudgetsAtRisk)} tone={summary.errorBudgetsAtRisk ? "warning" : "ok"} />
+            <MetricCard label="Error budgets at risk" value={String(summary.errorBudgetsAtRisk)} tone={summary.errorBudgetsAtRisk ? "warning" : "healthy"} />
           </div>
         )}
       </section>
@@ -514,7 +514,7 @@ export default function ExperienceEntry() {
                         <Workflow className="h-3.5 w-3.5 text-sky-700" />
                         <span className="font-medium text-slate-900">{ops.execution.id}</span>
                       </div>
-                      <StatusIndicator tone="info" label={ops.execution.state} />
+                      <StatusIndicator tone="connected" label={ops.execution.state} />
                     </div>
                     <div className="mt-0.5 truncate text-[12px] text-slate-600">Runbook {ops.execution.runbookId}</div>
                   </Link>
@@ -630,11 +630,11 @@ export default function ExperienceEntry() {
                     <div className="flex min-w-0 items-center gap-2">
                       <GitBranch className="h-3.5 w-3.5 text-slate-600" />
                       <div className="min-w-0">
-                        <div className="truncate font-medium text-slate-900">{rb.name}</div>
+                        <div className="truncate font-medium text-slate-900">{rb.title}</div>
                         <div className="truncate text-[11.5px] text-slate-600">{rb.id} · {rb.autonomy}</div>
                       </div>
                     </div>
-                    <StatusIndicator tone={rb.state === "Certified" ? "ok" : "info"} label={rb.state} />
+                    <StatusIndicator tone={rb.state === "Certified" ? "healthy" : "connected"} label={rb.state} />
                   </button>
                 </li>
               ))}
@@ -657,11 +657,11 @@ export default function ExperienceEntry() {
                       <Wrench className="h-3.5 w-3.5 text-slate-600" />
                       <div className="min-w-0">
                         <div className="truncate font-medium text-slate-900">{c.name}</div>
-                        <div className="truncate text-[11.5px] text-slate-600">{c.type}</div>
+                        <div className="truncate text-[11.5px] text-slate-600">{c.kind}</div>
                       </div>
                     </div>
                     <StatusIndicator
-                      tone={c.status === "Healthy" ? "ok" : c.status === "Degraded" ? "warning" : "critical"}
+                      tone={c.status === "Healthy" ? "healthy" : c.status === "Degraded" ? "warning" : "critical"}
                       label={c.status}
                     />
                   </button>
