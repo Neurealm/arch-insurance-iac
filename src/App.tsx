@@ -369,7 +369,7 @@ const App = () => (
           <Route path="/set-password" element={<ProtectedRoute><SetInitialPassword /></ProtectedRoute>} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/runops" element={<ProtectedRoute><RunOpsLayout /></ProtectedRoute>}>
-            <Route index element={<RunOpsCommand />} />
+            <Route index element={<RunOpsExperienceEntry />} />
             <Route path="command" element={<RunOpsCommand />} />
             <Route path="design-system" element={<RunOpsDesignSystem />} />
             {runopsRoutes
