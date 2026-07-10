@@ -89,6 +89,17 @@ export function RunOpsSidebar({ collapsed, onToggle, onNavigate }: Props) {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-2">
+        <NavLink
+          to="/"
+          onClick={onNavigate}
+          className="mx-2 my-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[12.5px] text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+          title={collapsed ? "Home" : undefined}
+        >
+          <Home className="h-4 w-4 shrink-0 text-slate-500" />
+          {!collapsed && <span className="truncate">Home</span>}
+        </NavLink>
+        <div className="mx-2 my-1 h-px bg-slate-200" aria-hidden />
+
         {navSections.map((section) => {
           const landing = sectionLanding(section);
           const Icon = iconFor[section];
