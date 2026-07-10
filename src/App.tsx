@@ -341,6 +341,7 @@ import DiscoveryConfidenceDemo from "./pages/crm-demo/DiscoveryConfidenceDemo.ts
 import PublicQuestionnaire from "./pages/PublicQuestionnaire.tsx";
 import RunOpsLayout from "./runops/shell/RunOpsLayout.tsx";
 import RunOpsCommand from "./runops/pages/Command.tsx";
+import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
 import RunOpsNotFound from "./runops/pages/RunOpsNotFound.tsx";
 import RunOpsDesignSystem from "./runops/pages/DesignSystem.tsx";
