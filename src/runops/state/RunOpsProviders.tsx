@@ -310,6 +310,14 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
 
   const eventBus = useMemo(() => createDomainEventBus(), []);
   const [flags] = useState<FeatureFlags>(defaultFeatureFlags);
+  const seqRef = React.useRef(0);
+
+  // Alias current-state action callbacks to avoid shadowing inside the adapter.
+  const approveExecutionAction = approveExecution;
+  const denyExecutionAction = denyExecution;
+  const resolveIncidentAction = resolveIncident;
+  const resetScenarioAction = resetScenario;
+  const markAllReadAction = markAllNotificationsRead;
 
   const formalProvider = useMemo<OperationsProvider>(() => {
     const now = (): IsoTimestamp => new Date().toISOString();
@@ -320,9 +328,14 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
       ttlSeconds: 60,
     });
     const respond = <T,>(data: T): ProviderResponse<T> => ({ data, provenance: provenance() });
-    const nextEventId = (): DomainEventId =>
-      (`DE-${Date.now().toString(36)}-${Math.floor((Date.now() % 1000)).toString(36)}`) as DomainEventId;
-    const nextAuditId = (): string => `AUD-${Date.now().toString(36)}`;
+    const nextEventId = (): DomainEventId => {
+      seqRef.current += 1;
+      return (`DE-${seqRef.current}`) as unknown as DomainEventId;
+    };
+    const nextAuditId = (): string => {
+      seqRef.current += 1;
+      return `AUD-${seqRef.current}`;
+    };
     const notFound = (label: string, id: string): Error =>
       new Error(`[OperationsProvider] ${label} not found: ${id}`);
 
