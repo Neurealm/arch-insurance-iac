@@ -49,6 +49,8 @@ import type { MutationResult, Provenance, ProviderResponse } from "@/runops/doma
 import type {
   ApprovalId, ExecutionId, IncidentId, RunbookId, ServiceId, TenantId,
   AuditEvent as DomainAuditEvent, DomainEventId, IsoTimestamp, ScenarioStageId,
+  Approval as DomainApproval, Execution as DomainExecution, Incident as DomainIncident,
+  ScenarioStage as DomainScenarioStage, Notification as DomainNotification,
 } from "@/runops/domain/models";
 
 /* -------------------------------- Types -------------------------------- */
