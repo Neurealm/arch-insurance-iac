@@ -67,7 +67,7 @@ export const routes: RouteMeta[] = [
   R("services",                              "Services", "Service Portfolio",            "Reliability + readiness view of the catalog", "Built", { isSectionLanding: true, navPrimary: true }),
   R("services/:serviceId",                   "Services", "Service Detail",               "Selected service",                       "Built"),
   R("services/:serviceId/topology",          "Services", "Service Topology",             "Selected service + components + dependencies", "Built"),
-  R("services/:serviceId/observability",     "Services", "Service Observability",        "Selected service + telemetry sources",   "Planned"),
+  R("services/:serviceId/observability",     "Services", "Service Observability",        "Selected service + telemetry sources",   "Built"),
   R("services/:serviceId/readiness",         "Services", "Service Readiness",            "Selected service + runbook coverage",    "Planned"),
 
   // Runbooks
