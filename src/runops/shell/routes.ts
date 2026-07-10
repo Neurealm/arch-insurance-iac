@@ -85,7 +85,7 @@ export const routes: RouteMeta[] = [
   R("runbooks/:runbookId/launch",            "Runbooks", "Launch Runbook",               "Selected runbook + execution parameters", "Planned"),
 
   // Operations
-  R("operations/queue",                      "Operations", "Operations Queue",           "All active executions and approvals",    "Scaffolded", { isSectionLanding: true, navPrimary: true }),
+  R("operations/queue",                      "Operations", "Operations Queue",           "All active executions and approvals",    "Built",     { isSectionLanding: true, navPrimary: true }),
   R("operations/handoff",                    "Operations", "Shift Handoff",              "Active shift + outstanding work",        "Planned"),
   R("operations/alerts",                     "Operations", "Alerts",                     "All active alerts and correlations",     "Planned"),
   R("approvals",                             "Operations", "Approvals",                  "Pending approvals across executions",    "Planned"),

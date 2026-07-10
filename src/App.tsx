@@ -345,6 +345,7 @@ import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
 import RunOpsNotFound from "./runops/pages/RunOpsNotFound.tsx";
 import RunOpsDesignSystem from "./runops/pages/DesignSystem.tsx";
+import RunOpsOperationsQueue from "./runops/pages/OperationsQueue.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
@@ -372,8 +373,9 @@ const App = () => (
             <Route index element={<RunOpsExperienceEntry />} />
             <Route path="command" element={<RunOpsCommand />} />
             <Route path="design-system" element={<RunOpsDesignSystem />} />
+            <Route path="operations/queue" element={<RunOpsOperationsQueue />} />
             {runopsRoutes
-              .filter((r) => r.path !== "" && r.path !== "command")
+              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue")
               .map((r) => (
                 <Route key={r.path} path={r.path} element={<RunOpsPlaceholder />} />
               ))}
