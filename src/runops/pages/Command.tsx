@@ -31,14 +31,7 @@ import {
   StaleDataState, ConnectorUnavailableState, EmptyState,
 } from "@/runops/components";
 import { SimulationBadge } from "@/runops/shell/SimulationBadge";
-import {
-  slos as canonicalSlos,
-  connectors as canonicalConnectors,
-  executionsList,
-  changesList,
-  environments, regions, timeRanges,
-  type BusinessService, type DigitalWorker,
-} from "@/runops/data/scenario";
+import type { BusinessService, DigitalWorker } from "@/runops/data/scenario";
 
 const HEALTH_ORDER = ["Severely Degraded", "Unavailable", "Degraded", "At Risk", "Recovering", "Healthy"] as const;
 const TIERS = ["All", "Tier 1", "Tier 2", "Tier 3"] as const;
