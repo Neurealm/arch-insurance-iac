@@ -641,11 +641,114 @@ const demoAlternatives: AiRecommendation[] = [
 ];
 
 export function DemoAiProvider({ children }: { children: React.ReactNode }) {
+  const [flags] = useState<FeatureFlags>(defaultFeatureFlags);
   const value = useMemo<AiState>(() => ({
     primaryRecommendation: demoRecommendation,
     alternatives: demoAlternatives,
   }), []);
-  return <AiContext.Provider value={value}>{children}</AiContext.Provider>;
+
+  const formalAi = useMemo((): AiProvider => {
+    const provenance = (): Provenance => ({
+      source: "demo",
+      capturedAt: new Date().toISOString(),
+      stale: false,
+      ttlSeconds: 60,
+    });
+    const respond = <T,>(data: T): ProviderResponse<T> => ({ data, provenance: provenance() });
+    const toFormal = (r: AiRecommendation): FormalAiRecommendation => ({
+      id: r.id,
+      title: r.title,
+      conclusion: r.conclusion,
+      supportingEvidence: r.supportingEvidence,
+      contradictoryEvidence: r.contradictoryEvidence,
+      confidence: r.confidence,
+      uncertainty: r.uncertainty,
+      sources: r.sources,
+      nextActions: r.nextActions,
+    });
+    const answer = (question: string): AiAnswer => ({
+      question,
+      answer: "Demo AI answer. Connect the live gateway to enable model-generated responses.",
+      citations: ["RB-0042 v3.2", "INC-10482 timeline"],
+      confidence: 75,
+    });
+
+    return {
+      kind: "demo",
+      flags,
+      answerOperationalQuestion: async ({ question }) => respond(answer(question)),
+      summarizeIncident: async ({ incidentId }) => respond({
+        incidentId,
+        headline: "Checkout latency degradation driven by post-deploy query plan regression.",
+        narrative:
+          "Checkout p95 rose from 420ms to 2.8s starting at 10:07 CT, correlating with CHG-20391 completion at 09:58 CT. SQL primary pool utilization saturated at 98% while application CPU stayed nominal, indicating database-side saturation.",
+        keyFacts: [
+          "Onset 10:07 CT",
+          "SQL primary utilization 98%",
+          "Transaction success 91.4% (baseline 99.7%)",
+          "Change CHG-20391 deployed 09:58 CT",
+        ],
+        openQuestions: [
+          "Does index revert fully restore plan cache within SLO window?",
+          "Are downstream Kafka Orders consumers backlogged?",
+        ],
+      }),
+      draftRunbook: async ({ serviceId, goal }) => respond({
+        title: `Draft runbook: ${goal}`,
+        serviceId,
+        steps: [
+          { key: "d1", label: "Confirm signature",  description: "Correlate SLIs and recent changes.", kind: "diagnose" },
+          { key: "m1", label: "Apply mitigation",   description: "Execute the least-risk mitigation for the confirmed hypothesis.", kind: "mitigate" },
+          { key: "v1", label: "Validate journey",   description: "Run synthetic journey and confirm SLI recovery.", kind: "validate" },
+          { key: "r1", label: "Rollback if needed", description: "Revert mitigation if validation fails.", kind: "rollback" },
+        ],
+        rationale: "Deterministic scaffold — refine with service-specific diagnostics and validation checks.",
+      }),
+      draftPostmortem: async ({ incidentId }) => respond({
+        incidentId,
+        summary:
+          "A database index optimization altered the query plan of a high-volume checkout query, causing SQL connection pool saturation and elevated checkout latency until the change was reverted.",
+        contributingFactors: [
+          "Absence of plan-regression detection in the change validation gate.",
+          "Insufficient connection pool headroom for plan-cache warmup.",
+          "Runbook fallback step was proven but not pre-staged.",
+        ],
+        whatWorked: [
+          "SLO burn alerting fired within 4 minutes of onset.",
+          "Approval-gated automation kept human control on the revert.",
+        ],
+        whatDidNot: [
+          "Change canary window did not observe long enough for plan-cache effects.",
+        ],
+        correctiveActions: [
+          { title: "Add query plan diff to change validation gate", owner: "Platform Data" },
+          { title: "Pre-stage connection pool fallback on high-risk changes", owner: "Order Platform SRE" },
+        ],
+      }),
+      explainRecommendation: async ({ recommendationId }) => respond(answer(`Explain ${recommendationId}`)),
+      draftCommunication: async ({ audience, channel }) => respond({
+        channel,
+        audience,
+        subject: "Service degradation update: Global Order Processing",
+        body:
+          "We identified elevated latency in checkout beginning at 10:07 CT and are executing the approved runbook to restore service. Next update in 15 minutes.",
+      }),
+      searchKnowledge: async ({ query }) => respond([
+        { id: "K-1", title: "RB-0042 Checkout Latency Runbook", snippet: "Approval-gated automation for query-plan regressions.", ref: "runbooks/RB-0042", score: 92 },
+        { id: "K-2", title: "PM-10482 Postmortem", snippet: `Related to query "${query}"`, ref: "postmortems/PM-10482", score: 71 },
+      ]),
+      getPrimaryRecommendation: async () => respond(toFormal(demoRecommendation)),
+      getAlternativeRecommendations: async () => respond(demoAlternatives.map(toFormal)),
+    };
+  }, [flags]);
+
+  return (
+    <AiContext.Provider value={value}>
+      <AiProviderContext.Provider value={formalAi}>
+        {children}
+      </AiProviderContext.Provider>
+    </AiContext.Provider>
+  );
 }
 
 export function useAi(): AiState {
