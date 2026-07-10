@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RTooltip,
-  LineChart, Line, CartesianGrid,
+  LineChart, Line, CartesianGrid, Cell,
 } from "recharts";
 import { useOperations, useRightDrawer } from "@/runops/state/RunOpsProviders";
 import { useScenarioStore } from "@/runops/scenario/ScenarioStore";
@@ -371,7 +371,7 @@ export default function Command() {
                   <RTooltip cursor={{ fill: "#f1f5f9" }} contentStyle={{ fontSize: 11 }} />
                   <Bar dataKey="remaining" radius={[3,3,0,0]}>
                     {budgetChart.map((d, i) => (
-                      <cell key={i} fill={d.at === "risk" ? "#f59e0b" : "#10b981"} />
+                      <Cell key={i} fill={d.at === "risk" ? "#f59e0b" : "#10b981"} />
                     ))}
                   </Bar>
                 </BarChart>
