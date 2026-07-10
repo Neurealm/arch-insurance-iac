@@ -319,7 +319,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
   const resetScenarioAction = resetScenario;
   const markAllReadAction = markAllNotificationsRead;
 
-  const formalProvider = useMemo<OperationsProvider>(() => {
+  const formalProvider = useMemo((): OperationsProvider => {
     const now = (): IsoTimestamp => new Date().toISOString();
     const provenance = (): Provenance => ({
       source: "demo",
