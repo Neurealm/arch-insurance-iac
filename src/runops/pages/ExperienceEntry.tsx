@@ -340,7 +340,7 @@ export default function ExperienceEntry() {
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <FreshnessIndicator capturedAt={ops.dataFreshnessAt} ttlSeconds={300} />
               <span className="text-[11px] text-slate-500">
-                Scenario stage <span className="font-medium text-slate-700">{scenario.stageIndex + 1}/{scenario.stages.length}</span> · {scenario.stage.title}
+                Scenario stage <span className="font-medium text-slate-700">{scenario.stageIndex + 1}/{scenario.stages.length}</span> · {scenario.stage.label}
               </span>
             </div>
           </div>
