@@ -236,6 +236,12 @@ const tree: Node[] = [
     ],
   },
   {
+    key: "runops",
+    label: "RunOps Runbooks",
+    icon: Sparkles2,
+    to: "/runops",
+  },
+  {
     key: "sead",
     label: "S.E.A.D. RunOps",
     icon: Sparkles2,
