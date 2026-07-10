@@ -100,7 +100,7 @@ export default function Command() {
     const services = ops.services;
     const healthy = services.filter((s) => s.health === "Healthy").length;
     const degraded = services.filter((s) => s.health === "Degraded" || s.health === "Severely Degraded" || s.health === "At Risk").length;
-    const slosAtRisk = canonicalSlos.filter((s) => s.current < s.target).length;
+    const slosAtRisk = ops.slos.filter((s) => s.current < s.target).length;
     const errorBudgetAvg = Math.round(services.reduce((a, s) => a + s.errorBudgetRemaining, 0) / services.length);
     const activeIncidents = ops.incident.state !== "Resolved" ? 1 : 0;
     const runbooksExecuting = ops.execution.state === "Running" ? 1 : 0;
@@ -116,11 +116,11 @@ export default function Command() {
   }, [ops.dataFreshnessAt]);
 
   const backendUnavailable = ops.mode === "connected";
-  const partialConnectorFailure = canonicalConnectors.some((c) => c.status !== "Healthy");
+  const partialConnectorFailure = ops.connectors.some((c) => c.status !== "Healthy");
 
   /* -------------------------- Chart datasets ------------------------------ */
 
-  const budgetChart = canonicalSlos.map((s) => ({
+  const budgetChart = ops.slos.map((s) => ({
     name: s.name.replace(/ availability| latency.*/i, ""),
     remaining: s.errorBudgetRemaining,
     at: s.current < s.target ? "risk" : "ok",
@@ -235,9 +235,9 @@ export default function Command() {
         <div className="flex flex-wrap items-center gap-2">
           <FilterSelect label="Tenant" value={ops.tenant.id} onChange={ops.setTenant} options={ops.tenants.map((t) => ({ value: t.id, label: t.name }))} />
           <FilterSelect label="Tier"   value={tier}          onChange={(v) => setTier(v as typeof tier)}     options={TIERS.map((t) => ({ value: t, label: t }))} />
-          <FilterSelect label="Env"    value={ops.environment} onChange={(v) => ops.setEnvironment(v as typeof ops.environment)} options={environments.map((e) => ({ value: e, label: e }))} />
-          <FilterSelect label="Region" value={ops.region}      onChange={(v) => ops.setRegion(v as typeof ops.region)}           options={regions.map((r) => ({ value: r, label: r }))} />
-          <FilterSelect label="Time"   value={ops.timeRange}   onChange={(v) => ops.setTimeRange(v as typeof ops.timeRange)}     options={timeRanges.map((t) => ({ value: t, label: t }))} />
+          <FilterSelect label="Env"    value={ops.environment} onChange={(v) => ops.setEnvironment(v as typeof ops.environment)} options={ops.environmentOptions.map((e) => ({ value: e, label: e }))} />
+          <FilterSelect label="Region" value={ops.region}      onChange={(v) => ops.setRegion(v as typeof ops.region)}           options={ops.regionOptions.map((r) => ({ value: r, label: r }))} />
+          <FilterSelect label="Time"   value={ops.timeRange}   onChange={(v) => ops.setTimeRange(v as typeof ops.timeRange)}     options={ops.timeRangeOptions.map((t) => ({ value: t, label: t }))} />
           <FilterSelect label="Owner"  value={owner}          onChange={(v) => setOwner(v as typeof owner)}   options={OWNERS.map((o) => ({ value: o, label: o }))} />
           <FilterSelect label="Health" value={health}         onChange={(v) => setHealth(v as typeof health)} options={HEALTHS.map((h) => ({ value: h, label: h }))} />
           <Button size="sm" className="h-8 bg-slate-900 text-[12px] hover:bg-slate-800" onClick={requestDailyBriefing}>
@@ -256,7 +256,7 @@ export default function Command() {
       {!backendUnavailable && partialConnectorFailure && (
         <div className="mb-3 flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-[12px] text-amber-900">
           <ShieldCheck className="h-3.5 w-3.5 text-amber-700" />
-          Partial connector failure: {canonicalConnectors.filter((c) => c.status !== "Healthy").map((c) => c.name).join(", ")}.
+          Partial connector failure: {ops.connectors.filter((c) => c.status !== "Healthy").map((c) => c.name).join(", ")}.
           <Link to="/runops/integrations" className="ml-auto underline">Open integrations</Link>
         </div>
       )}
@@ -371,7 +371,7 @@ export default function Command() {
               </ResponsiveContainer>
             </div>
             <ul className="mt-2 space-y-1 text-[12px]">
-              {canonicalSlos.map((s) => (
+              {ops.slos.map((s) => (
                 <li key={s.id}>
                   <button
                     onClick={() => navigate(`/runops/reliability/slos?service=${s.serviceId}`)}
@@ -407,7 +407,7 @@ export default function Command() {
                   <StatusIndicator tone={ops.execution.state === "Running" ? "connected" : ops.execution.state === "Completed" ? "healthy" : "warning"} label={ops.execution.state} />
                 </Link>
               </li>
-              {executionsList.slice(1).map((e) => (
+              {ops.executions.slice(1).map((e) => (
                 <li key={e.id}>
                   <Link to={`/runops/executions/${e.id}`} className="flex items-center justify-between rounded-md border border-slate-200 p-2 hover:bg-slate-50">
                     <div className="flex items-center gap-2 truncate">
@@ -427,7 +427,7 @@ export default function Command() {
           <CardHeader className="pb-2"><CardTitle className="text-[14px]">Recent Change Risk</CardTitle></CardHeader>
           <CardContent>
             <ul className="space-y-1.5 text-[12px]">
-              {[ops.change, ...changesList.filter((c) => c.id !== ops.change.id)].slice(0, 4).map((c) => (
+              {[ops.change, ...ops.changes.filter((c) => c.id !== ops.change.id)].slice(0, 4).map((c) => (
                 <li key={c.id} className="flex items-center justify-between rounded-md border border-slate-200 p-2">
                   <div className="min-w-0">
                     <div className="truncate font-medium text-slate-900">{c.id}</div>
