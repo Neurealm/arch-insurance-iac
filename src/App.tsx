@@ -347,6 +347,7 @@ import RunOpsNotFound from "./runops/pages/RunOpsNotFound.tsx";
 import RunOpsDesignSystem from "./runops/pages/DesignSystem.tsx";
 import RunOpsOperationsQueue from "./runops/pages/OperationsQueue.tsx";
 import RunOpsServicePortfolio from "./runops/pages/ServicePortfolio.tsx";
+import RunOpsServiceDigitalTwin from "./runops/pages/ServiceDigitalTwin.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
