@@ -60,8 +60,8 @@ const R = (
 
 export const routes: RouteMeta[] = [
   // Command
-  R("",         "Command", "Command Center", "Tenant + primary business service", "Built",      { isSectionLanding: true, navPrimary: true }),
-  R("command",  "Command", "Command Center", "Tenant + primary business service", "Built"),
+  R("",         "Command", "Experience Entry", "Tenant + persona journeys",         "Built"),
+  R("command",  "Command", "Command Center",   "Tenant + primary business service", "Built", { isSectionLanding: true, navPrimary: true }),
 
   // Services
   R("services",                              "Services", "Service Catalog",              "All services in tenant",                "Scaffolded", { isSectionLanding: true, navPrimary: true }),

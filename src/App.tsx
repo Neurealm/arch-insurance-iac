@@ -341,6 +341,7 @@ import DiscoveryConfidenceDemo from "./pages/crm-demo/DiscoveryConfidenceDemo.ts
 import PublicQuestionnaire from "./pages/PublicQuestionnaire.tsx";
 import RunOpsLayout from "./runops/shell/RunOpsLayout.tsx";
 import RunOpsCommand from "./runops/pages/Command.tsx";
+import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
 import RunOpsNotFound from "./runops/pages/RunOpsNotFound.tsx";
 import RunOpsDesignSystem from "./runops/pages/DesignSystem.tsx";
@@ -368,7 +369,7 @@ const App = () => (
           <Route path="/set-password" element={<ProtectedRoute><SetInitialPassword /></ProtectedRoute>} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/runops" element={<ProtectedRoute><RunOpsLayout /></ProtectedRoute>}>
-            <Route index element={<RunOpsCommand />} />
+            <Route index element={<RunOpsExperienceEntry />} />
             <Route path="command" element={<RunOpsCommand />} />
             <Route path="design-system" element={<RunOpsDesignSystem />} />
             {runopsRoutes
