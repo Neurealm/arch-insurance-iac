@@ -456,7 +456,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
           related: [nextExecution] as unknown as ReadonlyArray<Execution | Incident>,
           message: `Approval ${approval.id} approved; execution ${execution.id} started.`,
           provenance: provenance(),
-        } as MutationResult<Approval, Execution | Incident>;
+        } as unknown as MutationResult<DomainApproval, DomainExecution | DomainIncident>;
       },
 
       denyExecution: async ({ approvalId, actor, reason }) => {
@@ -474,7 +474,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
           related: [nextExecution] as unknown as readonly Execution[],
           message: `Approval ${approval.id} denied: ${reason}.`,
           provenance: provenance(),
-        } as MutationResult<Approval, Execution>;
+        } as unknown as MutationResult<DomainApproval, DomainExecution>;
       },
 
       resolveIncident: async ({ incidentId, actor }) => {
@@ -490,7 +490,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
           related: [nextExecution] as unknown as readonly Execution[],
           message: `Incident ${incident.id} resolved.`,
           provenance: provenance(),
-        } as MutationResult<Incident, Execution>;
+        } as unknown as MutationResult<DomainIncident, DomainExecution>;
       },
 
       advanceScenario: async () => {
@@ -509,7 +509,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
           related: [] as unknown as readonly ScenarioStage[],
           message: `Advanced to stage ${stage.index}: ${stage.label}.`,
           provenance: provenance(),
-        } as MutationResult<ScenarioStage, ScenarioStage>;
+        } as unknown as MutationResult<DomainScenarioStage, DomainScenarioStage>;
       },
 
       resetScenario: async () => {
@@ -527,7 +527,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
           related: [] as unknown as readonly ScenarioStage[],
           message: `Scenario reset to stage ${stage.index}.`,
           provenance: provenance(),
-        } as MutationResult<ScenarioStage, ScenarioStage>;
+        } as unknown as MutationResult<DomainScenarioStage, DomainScenarioStage>;
       },
 
       markAllNotificationsRead: async () => {
