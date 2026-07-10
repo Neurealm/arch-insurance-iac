@@ -264,6 +264,14 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
       ...prev,
     ]);
   }, []);
+  const acknowledgeNotification = useCallback((id: string) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, acknowledged: true, read: true } : n)));
+  }, []);
+  const snoozeNotification = useCallback((id: string, minutes: number) => {
+    const until = new Date(Date.now() + minutes * 60_000).toISOString();
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, snoozedUntil: until, read: true } : n)));
+  }, []);
+
 
   const selectedService = useMemo<BusinessService>(() => {
     return canonicalServices.find((s) => s.id === selectedServiceId) ?? canonicalServices[0];
