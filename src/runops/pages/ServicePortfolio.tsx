@@ -142,7 +142,7 @@ function synthesizePurpose(name: string): string {
 
 const TIER_OPTIONS: Tier[] = ["Tier 1", "Tier 2", "Tier 3"];
 const ENV_OPTIONS: Env[] = ["Production", "Staging", "Development"];
-const HEALTH_OPTIONS: Health[] = ["Healthy", "At Risk", "Degraded", "Severely Degraded", "Offline"];
+const HEALTH_OPTIONS: Health[] = ["Healthy", "At Risk", "Degraded", "Severely Degraded", "Unavailable"];
 
 export default function ServicePortfolio() {
   const ops = useOperations();
@@ -173,7 +173,7 @@ export default function ServicePortfolio() {
   const readOnly = ops.role === "Read Only User" || ops.role === "Auditor";
 
   const connectorsDown = useMemo(
-    () => ops.connectors.filter((c) => c.status !== "Connected" && c.status !== "Healthy").length,
+    () => ops.connectors.filter((c) => c.status !== "Healthy").length,
     [ops.connectors],
   );
   const stale = useMemo(
@@ -412,7 +412,7 @@ export default function ServicePortfolio() {
     { key: "workers", header: "Workers", width: "90px", sort: (r) => r.workerCoverage,
       accessor: (r) => <CoverageBar pct={Math.round(r.workerCoverage * 100)} /> },
     { key: "readiness", header: "Readiness", width: "90px", sort: (r) => r.readinessScore,
-      accessor: (r) => <ReadinessScore value={r.readinessScore} label="" /> },
+      accessor: (r) => <ReadinessScore score={r.readinessScore} label="" /> },
     { key: "fresh", header: "Fresh", width: "90px", sort: (r) => r.dataFreshnessAt,
       accessor: (r) => <span className="text-[11px] text-slate-500">{formatRel(r.dataFreshnessAt)}</span> },
   ];
@@ -649,7 +649,7 @@ function HealthChip({ value }: { value: Health }) {
     : value === "At Risk" ? "at-risk"
     : value === "Degraded" ? "warning"
     : value === "Severely Degraded" ? "critical"
-    : value === "Offline" ? "critical" : "neutral";
+    : value === "Unavailable" ? "critical" : "neutral";
   return <StatusIndicator tone={tone} label={value} />;
 }
 
@@ -727,7 +727,7 @@ function ServiceCard({ row, selected, onSelect, onOpen, onOwner, onAssign, disab
           <KV k="Workers" v={<CoverageBar pct={Math.round(row.workerCoverage * 100)} />} />
         </div>
         <div className="flex items-center justify-between pt-1">
-          <ReadinessScore value={row.readinessScore} label="Readiness" />
+          <ReadinessScore score={row.readinessScore} label="Readiness" />
           <div className="flex gap-1">
             <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={onAssign} disabled={disabled}>
               <UserRound className="mr-1 h-3 w-3" /> Assign
@@ -766,7 +766,7 @@ function CompareTable({ rows }: { rows: PortfolioRow[] }) {
     ["Recent change risk", (r) => r.recentChangeRisk],
     ["Runbook coverage", (r) => <CoverageBar pct={Math.round(r.runbookCoverage * 100)} />],
     ["Worker coverage", (r) => <CoverageBar pct={Math.round(r.workerCoverage * 100)} />],
-    ["Readiness", (r) => <ReadinessScore value={r.readinessScore} label="" />],
+    ["Readiness", (r) => <ReadinessScore score={r.readinessScore} label="" />],
   ];
   return (
     <div className="mt-4 overflow-x-auto">
