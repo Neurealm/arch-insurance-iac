@@ -85,7 +85,7 @@ function healthTone(h: string): GraphNode["tone"] {
     case "Degraded":          return "warning";
     case "Severely Degraded":
     case "Unavailable":       return "failure";
-    case "Recovering":        return "info";
+    case "Recovering":        return "connected";
     default:                  return "neutral";
   }
 }
@@ -262,7 +262,7 @@ export default function TopologyExplorer() {
       } else if (overlay === "incident" && m?.incidentIds && m.incidentIds.length > 0) {
         tone = "failure";
       } else if (overlay === "ownership") {
-        tone = m?.owner ? "info" : "neutral";
+        tone = m?.owner ? "connected" : "neutral";
       }
       return { ...n, tone };
     });
