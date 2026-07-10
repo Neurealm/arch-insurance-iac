@@ -9,6 +9,9 @@ import { RunOpsTopBar } from "@/runops/shell/RunOpsTopBar";
 import { RunOpsRightDrawer } from "@/runops/shell/RunOpsRightDrawer";
 import { RunOpsErrorBoundary } from "@/runops/shell/RunOpsErrorBoundary";
 import { DemoControllerDrawer } from "@/runops/shell/DemoControllerDrawer";
+import { CommandPalette, CommandPaletteProvider } from "@/runops/shell/CommandPalette";
+import { AskNovaPanel, AskNovaProvider } from "@/runops/shell/AskNovaPanel";
+
 
 function Shell() {
   const [collapsed, setCollapsed] = useState(false);
@@ -72,6 +75,8 @@ function Shell() {
 
       <RunOpsRightDrawer />
       <DemoControllerDrawer />
+      <AskNovaPanel />
+      <CommandPalette />
     </div>
   );
 }
@@ -82,10 +87,15 @@ export default function RunOpsLayout() {
       <DemoAiProvider>
         <RightDrawerProvider>
           <ScenarioStoreProvider>
-            <Shell />
+            <AskNovaProvider>
+              <CommandPaletteProvider>
+                <Shell />
+              </CommandPaletteProvider>
+            </AskNovaProvider>
           </ScenarioStoreProvider>
         </RightDrawerProvider>
       </DemoAiProvider>
     </DemoOperationsProvider>
   );
 }
+

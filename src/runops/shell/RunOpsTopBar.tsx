@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Search, Sparkles, Play, PlusCircle, ShieldCheck, Bell, RefreshCw,
-  ChevronRight, User, Circle,
+  Search, Sparkles, Play, ShieldCheck,
+  ChevronRight, User, Circle, RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  demoRoles, environments, regions, timeRanges, useOperations, useRightDrawer,
+  demoRoles, environments, regions, timeRanges, useOperations,
   type DemoRole, type Environment, type Region, type TimeRange,
 } from "@/runops/state/RunOpsProviders";
 import {
@@ -23,6 +23,11 @@ import {
 } from "@/runops/tokens";
 import { activeSectionForPath } from "@/runops/shell/RunOpsSidebar";
 import { routes as routeTable } from "@/runops/shell/routes";
+import { useCommandPalette } from "@/runops/shell/CommandPalette";
+import { useAskNova } from "@/runops/shell/AskNovaPanel";
+import { NotificationCenter } from "@/runops/shell/NotificationCenter";
+import { CreateMenu } from "@/runops/shell/CreateMenu";
+
 
 /* -------------------------------- Utils -------------------------------- */
 
@@ -216,91 +221,40 @@ function ContextBar() {
 /* --------------------------- Global Actions --------------------------- */
 
 function GlobalActions() {
-  const {
-    approval, unreadNotifications, notifications, markAllNotificationsRead,
-    role, setRole, mode,
-  } = useOperations();
-  const { openDrawer } = useRightDrawer();
-
-  const openSearch = () => openDrawer({
-    title: "Search",
-    subtitle: "Services · runbooks · incidents · workers",
-    body: (
-      <div className="space-y-3">
-        <input
-          type="search"
-          placeholder="Type to search…"
-          className="w-full rounded border border-slate-200 bg-white px-2.5 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-        />
-        <div className="text-[11.5px] text-slate-500">
-          Global search is a foundation placeholder. Wire to OperationsProvider queries when detailed screens land.
-        </div>
-      </div>
-    ),
-  });
-
-  const openNova = () => openDrawer({
-    title: "Ask NOVA",
-    subtitle: "AI operations copilot",
-    body: (
-      <div className="space-y-3">
-        <div className="rounded border border-slate-200 bg-slate-50 p-3 text-[12px] text-slate-700">
-          NOVA is scoped to the current tenant, service, and time range. Foundation shell only — model calls are
-          disabled until AiProvider is connected.
-        </div>
-        <input
-          type="text"
-          placeholder="Ask about the current service, incident, or runbook…"
-          className="w-full rounded border border-slate-200 bg-white px-2.5 py-1.5 text-[12.5px]"
-        />
-      </div>
-    ),
-  });
-
-  const openNotifications = () => {
-    openDrawer({
-      title: "Notifications",
-      subtitle: `${unreadNotifications} unread`,
-      body: (
-        <div className="space-y-2">
-          {notifications.map((n) => (
-            <div key={n.id} className="rounded border border-slate-200 bg-white p-2.5">
-              <div className="flex items-center gap-2">
-                <span className={cn(
-                  "inline-block h-2 w-2 rounded-full",
-                  n.kind === "critical" ? "bg-red-600" : n.kind === "warning" ? "bg-amber-500" : "bg-sky-500",
-                )} />
-                <span className="text-[12px] font-semibold text-slate-900">{n.title}</span>
-                <span className="ml-auto text-[10.5px] text-slate-500">{n.at}</span>
-              </div>
-              {n.detail && <div className="mt-1 text-[11.5px] text-slate-600">{n.detail}</div>}
-            </div>
-          ))}
-        </div>
-      ),
-    });
-    markAllNotificationsRead();
-  };
-
+  const { approval, role, setRole, mode } = useOperations();
+  const { setOpen: setPaletteOpen } = useCommandPalette();
+  const nova = useAskNova();
   const approvalTone = approvalStateTone[approval.state];
+  const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-200 bg-white px-4 py-2">
       <Breadcrumbs />
 
       <div className="ml-auto flex flex-wrap items-center gap-1.5">
-        <Button size="sm" variant="outline" className="h-7 text-[11.5px]" onClick={openSearch}>
-          <Search className="mr-1 h-3 w-3" /> Search
+        <Button
+          size="sm" variant="outline"
+          className="h-7 gap-1 text-[11.5px]"
+          onClick={() => setPaletteOpen(true)}
+          aria-keyshortcuts={isMac ? "Meta+K" : "Control+K"}
+        >
+          <Search className="h-3 w-3" /> Search
+          <kbd className="ml-1 rounded border border-slate-200 bg-slate-50 px-1 text-[9.5px] text-slate-500">
+            {isMac ? "⌘K" : "Ctrl K"}
+          </kbd>
         </Button>
-        <Button size="sm" className="h-7 bg-slate-900 text-[11.5px] hover:bg-slate-800" onClick={openNova}>
+        <Button
+          size="sm"
+          className={cn("h-7 text-[11.5px]", nova.open ? "bg-violet-600 hover:bg-violet-500" : "bg-slate-900 hover:bg-slate-800")}
+          onClick={nova.toggle}
+          aria-pressed={nova.open}
+        >
           <Sparkles className="mr-1 h-3 w-3" /> Ask NOVA
         </Button>
         <Button size="sm" variant="outline" className="h-7 text-[11.5px]" asChild>
           <Link to="/runops/runbooks"><Play className="mr-1 h-3 w-3" /> Launch Runbook</Link>
         </Button>
-        <Button size="sm" variant="outline" className="h-7 text-[11.5px]" asChild>
-          <Link to="/runops/incidents/INC-10482"><PlusCircle className="mr-1 h-3 w-3" /> Create Incident</Link>
-        </Button>
+        <CreateMenu />
         <Button size="sm" variant="outline" className="h-7 text-[11.5px]" asChild>
           <Link to="/runops/approvals">
             <ShieldCheck className="mr-1 h-3 w-3" /> Approvals
@@ -309,19 +263,8 @@ function GlobalActions() {
             </Badge>
           </Link>
         </Button>
-        <button
-          type="button"
-          onClick={openNotifications}
-          className="relative grid h-7 w-7 place-items-center rounded border border-slate-200 text-slate-600 hover:bg-slate-50"
-          aria-label="Notifications"
-        >
-          <Bell className="h-3.5 w-3.5" />
-          {unreadNotifications > 0 && (
-            <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-600 px-1 text-[9px] font-semibold text-white">
-              {unreadNotifications}
-            </span>
-          )}
-        </button>
+        <NotificationCenter />
+
 
         {mode === "demo" && (
           <Select value={role} onValueChange={(v) => setRole(v as DemoRole)}>
