@@ -75,7 +75,7 @@ const JOURNEYS: JourneyCard[] = [
     icon: BookOpen,
     route: "/runops/runbooks",
     cta: "Open Runbook Library",
-    recommendedFor: ["Automation Engineer", "Platform Engineer"],
+    recommendedFor: ["Runbook Author", "Platform Engineer"],
   },
   {
     key: "reliability",
@@ -93,7 +93,7 @@ const JOURNEYS: JourneyCard[] = [
     icon: ShieldCheck,
     route: "/runops/ai-governance",
     cta: "Open AI Governance",
-    recommendedFor: ["Platform Engineer", "Compliance Officer", "Demo Controller"],
+    recommendedFor: ["Platform Engineer", "Auditor", "Demo Controller"],
     restrictedFrom: ["Executive"],
   },
   {
@@ -103,7 +103,7 @@ const JOURNEYS: JourneyCard[] = [
     icon: ClipboardCheck,
     route: "/runops/governance",
     cta: "Open Evidence Vault",
-    recommendedFor: ["Compliance Officer", "Auditor"],
+    recommendedFor: ["Auditor", "Auditor"],
   },
 ];
 
@@ -249,7 +249,7 @@ export default function ExperienceEntry() {
     title: inc.title, subtitle: `${inc.id} · ${inc.severity}`,
     body: <EntityQuickView
       eyebrow="Incident" title={inc.title} subtitle={inc.id}
-      status={{ tone: inc.state === "Resolved" ? "ok" : "critical", label: inc.state }}
+      status={{ tone: inc.state === "Resolved" ? "healthy" : "critical", label: inc.state }}
       fields={[
         { label: "Severity", value: inc.severity },
         { label: "Service", value: inc.service },
@@ -262,7 +262,7 @@ export default function ExperienceEntry() {
     title: a.action, subtitle: `${a.actor} · ${a.at}`,
     body: <EntityQuickView
       eyebrow="Autonomous action" title={a.action} subtitle={a.target}
-      status={{ tone: "info", label: "Recorded" }}
+      status={{ tone: "connected", label: "Recorded" }}
       fields={[
         { label: "Actor", value: a.actor },
         { label: "At",    value: a.at },
@@ -398,10 +398,10 @@ export default function ExperienceEntry() {
         ) : (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
             <MetricCard label="Services monitored"  value={String(summary.servicesMonitored)} tone="neutral" />
-            <MetricCard label="Services degraded"   value={String(summary.degraded)}          tone={summary.degraded ? "critical" : "ok"} />
-            <MetricCard label="Active incidents"    value={String(summary.activeIncidents)}   tone={summary.activeIncidents ? "critical" : "ok"} />
+            <MetricCard label="Services degraded"   value={String(summary.degraded)}          tone={summary.degraded ? "critical" : "healthy"} />
+            <MetricCard label="Active incidents"    value={String(summary.activeIncidents)}   tone={summary.activeIncidents ? "critical" : "healthy"} />
             <MetricCard label="Pending approvals"   value={String(summary.pendingApprovals)}  tone={summary.pendingApprovals ? "warning" : "neutral"} />
-            <MetricCard label="Active executions"   value={String(summary.activeExecutions)}  tone={summary.activeExecutions ? "info" : "neutral"} />
+            <MetricCard label="Active executions"   value={String(summary.activeExecutions)}  tone={summary.activeExecutions ? "connected" : "neutral"} />
             <MetricCard label="Error budgets at risk" value={String(summary.errorBudgetsAtRisk)} tone={summary.errorBudgetsAtRisk ? "warning" : "ok"} />
           </div>
         )}
@@ -581,7 +581,7 @@ export default function ExperienceEntry() {
                       <div className="truncate font-medium text-slate-900">{inc.id}</div>
                       <div className="truncate text-[11.5px] text-slate-600">{inc.title}</div>
                     </div>
-                    <StatusIndicator tone={inc.state === "Resolved" ? "ok" : "critical"} label={inc.state} />
+                    <StatusIndicator tone={inc.state === "Resolved" ? "healthy" : "critical"} label={inc.state} />
                   </button>
                 </li>
               ))}
