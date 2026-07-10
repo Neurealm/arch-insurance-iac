@@ -26,7 +26,7 @@ import {
   tones, type StatusTone,
 } from "@/runops/components";
 import { Button } from "@/components/ui/button";
-import { Layers } from "lucide-react";
+import { Layers, LayoutGrid } from "lucide-react";
 
 /* ------------------------------ Sample data ---------------------------- */
 
@@ -419,9 +419,9 @@ export default function DesignSystem() {
                       <PrimaryNavigation
                         groups={[
                           { label: "Ops", items: [
-                            { label: "Command",    href: "/runops",           icon: Card },
-                            { label: "Services",   href: "/runops/services",   icon: Card },
-                            { label: "Runbooks",   href: "/runops/runbooks",   icon: Card },
+                            { label: "Command",    href: "/runops",           icon: LayoutGrid },
+                            { label: "Services",   href: "/runops/services",   icon: LayoutGrid },
+                            { label: "Runbooks",   href: "/runops/runbooks",   icon: LayoutGrid },
                           ]},
                         ]}
                       />
