@@ -123,10 +123,38 @@ interface CanvasProps {
   height?: number | string;
   className?: string;
   ariaLabel?: string;
+  onNodeClick?: (id: string) => void;
+  onEdgeClick?: (edge: GraphEdge) => void;
+  selectedNodeId?: string;
+  highlightNodeIds?: ReadonlySet<string>;
+  highlightEdgeIds?: ReadonlySet<string>;
 }
 
-function Canvas({ nodes, edges, height = 320, className, ariaLabel, mode }:
-  CanvasProps & { mode: "workflow" | "topology" | "causal" }) {
+function Canvas({
+  nodes, edges, height = 320, className, ariaLabel, mode,
+  onNodeClick, onEdgeClick, selectedNodeId, highlightNodeIds, highlightEdgeIds,
+}: CanvasProps & { mode: "workflow" | "topology" | "causal" }) {
+  const rfNodes = toRFNodes(nodes, mode).map((n) => {
+    const isSelected = n.id === selectedNodeId;
+    const isHighlighted = highlightNodeIds?.has(n.id) ?? false;
+    return {
+      ...n,
+      style: {
+        ...(n.style ?? {}),
+        outline: isSelected ? "2px solid #4f46e5" : isHighlighted ? "2px solid #f59e0b" : undefined,
+        outlineOffset: isSelected || isHighlighted ? "2px" : undefined,
+        opacity: highlightNodeIds && !isHighlighted && !isSelected ? 0.35 : 1,
+      },
+    };
+  });
+  const rfEdges = toRFEdges(edges).map((e) => {
+    const isHi = highlightEdgeIds?.has(e.id) ?? false;
+    return {
+      ...e,
+      animated: isHi,
+      style: { ...(e.style ?? {}), stroke: isHi ? "#4f46e5" : undefined, strokeWidth: isHi ? 2 : undefined },
+    };
+  });
   return (
     <div
       className={cn("rounded border border-slate-200 bg-white", className)}
@@ -135,14 +163,19 @@ function Canvas({ nodes, edges, height = 320, className, ariaLabel, mode }:
       aria-label={ariaLabel ?? `${mode} graph with ${nodes.length} nodes and ${edges.length} connections`}
     >
       <ReactFlow
-        nodes={toRFNodes(nodes, mode)}
-        edges={toRFEdges(edges)}
+        nodes={rfNodes}
+        edges={rfEdges}
         nodeTypes={nodeTypes}
         fitView
         proOptions={{ hideAttribution: true }}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable
+        onNodeClick={onNodeClick ? (_e, node) => onNodeClick(node.id) : undefined}
+        onEdgeClick={onEdgeClick ? (_e, edge) => {
+          const raw = edges.find((x, i) => (x.id ?? `${x.source}->${x.target}-${i}`) === edge.id);
+          if (raw) onEdgeClick(raw);
+        } : undefined}
       >
         <Background gap={16} color="#e2e8f0" />
         <Controls showInteractive={false} className="!border !border-slate-200 !bg-white" />
@@ -155,3 +188,4 @@ function Canvas({ nodes, edges, height = 320, className, ariaLabel, mode }:
 export function WorkflowCanvas(p: CanvasProps) { return <Canvas {...p} mode="workflow" />; }
 export function TopologyCanvas(p: CanvasProps) { return <Canvas {...p} mode="topology" />; }
 export function CausalGraph(p: CanvasProps)    { return <Canvas {...p} mode="causal" />; }
+

@@ -348,6 +348,7 @@ import RunOpsDesignSystem from "./runops/pages/DesignSystem.tsx";
 import RunOpsOperationsQueue from "./runops/pages/OperationsQueue.tsx";
 import RunOpsServicePortfolio from "./runops/pages/ServicePortfolio.tsx";
 import RunOpsServiceDigitalTwin from "./runops/pages/ServiceDigitalTwin.tsx";
+import RunOpsTopologyExplorer from "./runops/pages/TopologyExplorer.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
@@ -378,8 +379,9 @@ const App = () => (
             <Route path="operations/queue" element={<RunOpsOperationsQueue />} />
             <Route path="services" element={<RunOpsServicePortfolio />} />
             <Route path="services/:serviceId" element={<RunOpsServiceDigitalTwin />} />
+            <Route path="services/:serviceId/topology" element={<RunOpsTopologyExplorer />} />
             {runopsRoutes
-              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId")
+              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology")
               .map((r) => (
                 <Route key={r.path} path={r.path} element={<RunOpsPlaceholder />} />
               ))}
