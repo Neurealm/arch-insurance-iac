@@ -340,3 +340,80 @@ export const demoRoles = [
   "Demo Controller",
 ] as const;
 export type DemoRole = typeof demoRoles[number];
+
+/* --------------------- Extended canonical entities --------------------- */
+
+export interface KnowledgeItem {
+  id: string; title: string; kind: "Runbook" | "Postmortem" | "Known Error" | "Playbook";
+  serviceId?: string; source: string; freshness: string; snippet: string;
+}
+export interface Connector {
+  id: string; name: string; kind: "Observability" | "Change" | "ITSM" | "Chat" | "Cloud" | "Data";
+  status: "Healthy" | "Degraded" | "Unavailable"; freshness: string;
+}
+export interface Slo {
+  id: string; serviceId: string; name: string; target: number; current: number;
+  errorBudgetRemaining: number; window: string;
+}
+export interface EvidenceItem {
+  id: string; title: string; source: string; capturedAt: string; incidentId?: string; kind: "trace" | "metric" | "log" | "config" | "change";
+}
+export interface Problem { id: string; title: string; state: "Open" | "Investigating" | "Closed"; serviceId: string; }
+export interface Execution2 extends Execution { title: string; }
+
+export const knowledgeItems: KnowledgeItem[] = [
+  { id: "K-RB-0042", title: "RB-0042 · Checkout Latency and DB Saturation", kind: "Runbook", serviceId: "svc-global-order-processing", source: "runbook-library", freshness: "5m ago", snippet: "Approval-gated automation for query-plan regressions." },
+  { id: "K-PM-10482", title: "PM-10482 · Checkout Latency Postmortem (draft)", kind: "Postmortem", serviceId: "svc-global-order-processing", source: "knowledge-base", freshness: "1h ago", snippet: "Query-plan regression from CHG-20391." },
+  { id: "K-KE-217",  title: "KE-217 · SQL plan-cache warmup on index swap", kind: "Known Error", serviceId: "svc-global-order-processing", source: "knowledge-base", freshness: "12h ago", snippet: "Symptoms and workaround for post-index plan cache warmup." },
+  { id: "K-PB-Checkout", title: "Playbook · Checkout SEV response", kind: "Playbook", serviceId: "svc-global-order-processing", source: "knowledge-base", freshness: "3d ago", snippet: "First-30-minute steps for checkout SEV incidents." },
+];
+
+export const connectors: Connector[] = [
+  { id: "CON-OTEL",   name: "OpenTelemetry Collector", kind: "Observability", status: "Healthy",   freshness: "10s ago" },
+  { id: "CON-PROM",   name: "Prometheus",              kind: "Observability", status: "Healthy",   freshness: "12s ago" },
+  { id: "CON-SNOW",   name: "ServiceNow ITSM",         kind: "ITSM",          status: "Healthy",   freshness: "40s ago" },
+  { id: "CON-SLACK",  name: "Slack",                   kind: "Chat",          status: "Healthy",   freshness: "8s ago"  },
+  { id: "CON-AZDO",   name: "Azure DevOps",            kind: "Change",        status: "Degraded",  freshness: "2m ago"  },
+  { id: "CON-AWS",    name: "AWS Cloud",               kind: "Cloud",         status: "Healthy",   freshness: "30s ago" },
+  { id: "CON-SNOWFL", name: "Snowflake Warehouse",     kind: "Data",          status: "Healthy",   freshness: "5m ago"  },
+];
+
+export const slos: Slo[] = [
+  { id: "SLO-GOP-AV", serviceId: "svc-global-order-processing", name: "Checkout availability", target: 99.95, current: 99.62, errorBudgetRemaining: 42, window: "28d" },
+  { id: "SLO-GOP-LT", serviceId: "svc-global-order-processing", name: "Checkout p95 latency <750ms", target: 99.0,  current: 91.4, errorBudgetRemaining: 18, window: "28d" },
+  { id: "SLO-PAY-AV", serviceId: "svc-payments",                name: "Payments availability",       target: 99.99, current: 99.99, errorBudgetRemaining: 78, window: "28d" },
+  { id: "SLO-IDN-AV", serviceId: "svc-identity",                name: "Identity availability",       target: 99.95, current: 99.90, errorBudgetRemaining: 61, window: "28d" },
+];
+
+export const evidenceItems: EvidenceItem[] = [
+  { id: "EV-101", title: "Checkout API trace p95 spans", source: "OpenTelemetry", capturedAt: "10:18 CT", incidentId: "INC-10482", kind: "trace"  },
+  { id: "EV-102", title: "SQL primary conn util 98%",    source: "Prometheus",    capturedAt: "10:12 CT", incidentId: "INC-10482", kind: "metric" },
+  { id: "EV-103", title: "CHG-20391 deployment record",  source: "Azure DevOps",  capturedAt: "09:58 CT", incidentId: "INC-10482", kind: "change" },
+  { id: "EV-104", title: "Top query plan diff",           source: "SQL analyzer",  capturedAt: "10:20 CT", incidentId: "INC-10482", kind: "config" },
+  { id: "EV-105", title: "Checkout error log burst",      source: "Loki",          capturedAt: "10:11 CT", incidentId: "INC-10482", kind: "log"    },
+];
+
+export const problemsList: Problem[] = [
+  { id: "PRB-1082", title: "Post-deploy plan-cache regressions on SQL primary", state: "Investigating", serviceId: "svc-global-order-processing" },
+  { id: "PRB-1077", title: "Checkout pod restart storms on config reload",       state: "Open",          serviceId: "svc-global-order-processing" },
+];
+
+export const changesList: Change[] = [
+  primaryChange,
+  { id: "CHG-20388", title: "Checkout API HPA tuning",           deployedAt: "yesterday", serviceId: "svc-global-order-processing", risk: "Low" },
+  { id: "CHG-20376", title: "Identity token cache TTL reduction", deployedAt: "2d ago",   serviceId: "svc-identity",                risk: "Low" },
+];
+
+export const runbooksList: Runbook[] = [
+  primaryRunbook,
+  { id: "RB-0039", title: "SQL Primary Failover", version: "v2.1", state: "Published", autonomy: "Human Guided", serviceId: "svc-global-order-processing", fitnessScore: 74, steps: [] },
+  { id: "RB-0051", title: "Payments 3DS Provider Fallback", version: "v1.4", state: "Certified", autonomy: "Approval Gated Automation", serviceId: "svc-payments", fitnessScore: 81, steps: [] },
+  { id: "RB-0060", title: "Identity Token Cache Recycle", version: "v1.0", state: "Approved", autonomy: "Supervised Autonomous", serviceId: "svc-identity", fitnessScore: 69, steps: [] },
+];
+
+export const executionsList: (Execution & { title: string })[] = [
+  { ...primaryExecution, title: "Revert CHG-20391 and recycle checkout pods" },
+  { id: "EXE-8802", runbookId: "RB-0039", incidentId: "INC-10471", state: "Completed", title: "SQL failover rehearsal" },
+  { id: "EXE-8820", runbookId: "RB-0051", incidentId: "INC-10475", state: "Completed", title: "3DS provider fallback rehearsal" },
+];
+
