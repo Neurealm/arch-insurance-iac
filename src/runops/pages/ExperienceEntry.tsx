@@ -338,9 +338,9 @@ export default function ExperienceEntry() {
               shared spine. NOVA turns operational chaos into a deterministic, auditable digital twin.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <FreshnessIndicator freshness="Fresh" asOf={new Date(ops.dataFreshnessAt).toLocaleTimeString()} />
+              <FreshnessIndicator capturedAt={ops.dataFreshnessAt} ttlSeconds={300} />
               <span className="text-[11px] text-slate-500">
-                Scenario stage <span className="font-medium text-slate-700">{scenario.currentStage.index + 1}/{scenario.stages.length}</span> · {scenario.currentStage.title}
+                Scenario stage <span className="font-medium text-slate-700">{scenario.stageIndex + 1}/{scenario.stages.length}</span> · {scenario.stage.title}
               </span>
             </div>
           </div>
