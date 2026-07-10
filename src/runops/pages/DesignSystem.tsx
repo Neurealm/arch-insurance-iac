@@ -26,7 +26,7 @@ import {
   tones, type StatusTone,
 } from "@/runops/components";
 import { Button } from "@/components/ui/button";
-import { Layers } from "lucide-react";
+import { Layers, LayoutGrid } from "lucide-react";
 
 /* ------------------------------ Sample data ---------------------------- */
 
