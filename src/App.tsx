@@ -339,6 +339,9 @@ import StakeholderMapDemo from "./pages/crm-demo/StakeholderMapDemo.tsx";
 import DiscoveryLibraryDemo from "./pages/crm-demo/DiscoveryLibraryDemo.tsx";
 import DiscoveryConfidenceDemo from "./pages/crm-demo/DiscoveryConfidenceDemo.tsx";
 import PublicQuestionnaire from "./pages/PublicQuestionnaire.tsx";
+import RunOpsLayout from "./runops/shell/RunOpsLayout.tsx";
+import RunOpsCommand from "./runops/pages/Command.tsx";
+import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
 
 const queryClient = new QueryClient();
 
@@ -361,6 +364,20 @@ const App = () => (
           <Route path="/profile" element={<UpdateProfile />} />
           <Route path="/set-password" element={<ProtectedRoute><SetInitialPassword /></ProtectedRoute>} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/runops" element={<ProtectedRoute><RunOpsLayout /></ProtectedRoute>}>
+            <Route index element={<RunOpsCommand />} />
+            <Route path="services"        element={<RunOpsPlaceholder title="Services" blurb="Service catalog, ownership, tier, dependencies, and health for every business service under RunOps." />} />
+            <Route path="runbooks"        element={<RunOpsPlaceholder title="Runbooks" blurb="Runbook library, versioning, certification, fitness scoring, and authoring workflows." />} />
+            <Route path="operations"      element={<RunOpsPlaceholder title="Operations" blurb="Operations queue: executions, approvals, validations, and rollbacks across all services." />} />
+            <Route path="incidents"       element={<RunOpsPlaceholder title="Incidents" blurb="Incident command: declaration, timeline, communications, and resolution with linked changes and runbooks." />} />
+            <Route path="digital-workers" element={<RunOpsPlaceholder title="Digital Workers" blurb="Digital worker fleet: roles, autonomy levels, sessions, findings, and audit trails." />} />
+            <Route path="reliability"     element={<RunOpsPlaceholder title="Reliability" blurb="SLIs, SLOs, error budgets, burn rate, and reliability posture across services." />} />
+            <Route path="knowledge"       element={<RunOpsPlaceholder title="Knowledge" blurb="Postmortems, known errors, corrective actions, and knowledge items generated from operational work." />} />
+            <Route path="analytics"       element={<RunOpsPlaceholder title="Analytics" blurb="Toil reduction, MTTR, automation coverage, and reliability trends." />} />
+            <Route path="governance"      element={<RunOpsPlaceholder title="Governance" blurb="Approvals, change restrictions, policy bounds, and audit evidence for regulated operations." />} />
+            <Route path="integrations"    element={<RunOpsPlaceholder title="Integrations" blurb="Connected Mode provider registry. Disabled until real integrations are configured." />} />
+            <Route path="platform"        element={<RunOpsPlaceholder title="Platform" blurb="Tenant, users, roles, feature flags, and platform configuration." />} />
+          </Route>
           <Route path="/sead/command-center" element={<ProtectedRoute><SeadCommandCenter /></ProtectedRoute>} />
           <Route path="/sead/equipment-health-intelligence" element={<ProtectedRoute><SeadEquipmentHealth /></ProtectedRoute>} />
           <Route path="/sead/equipment-health-intelligence/:equipmentId" element={<ProtectedRoute><SeadEquipmentHealth /></ProtectedRoute>} />
