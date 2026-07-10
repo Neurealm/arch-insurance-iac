@@ -236,6 +236,12 @@ const tree: Node[] = [
     ],
   },
   {
+    key: "runops",
+    label: "RunOps Runbooks",
+    icon: Sparkles2,
+    to: "/runops",
+  },
+  {
     key: "sead",
     label: "S.E.A.D. RunOps",
     icon: Sparkles2,
@@ -591,7 +597,7 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
 
 const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "PLATFORM",       keys: ["home", "ops"] },
-  { label: "DIGITAL TWINS",  keys: ["aocp", "sre-practice", "sead", "semi", "factory-ops-intel"] },
+  { label: "DIGITAL TWINS",  keys: ["aocp", "sre-practice", "runops", "sead", "semi", "factory-ops-intel"] },
   { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
