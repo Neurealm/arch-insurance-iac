@@ -75,6 +75,8 @@ function Shell() {
 
       <RunOpsRightDrawer />
       <DemoControllerDrawer />
+      <AskNovaPanel />
+      <CommandPalette />
     </div>
   );
 }
@@ -85,10 +87,15 @@ export default function RunOpsLayout() {
       <DemoAiProvider>
         <RightDrawerProvider>
           <ScenarioStoreProvider>
-            <Shell />
+            <AskNovaProvider>
+              <CommandPaletteProvider>
+                <Shell />
+              </CommandPaletteProvider>
+            </AskNovaProvider>
           </ScenarioStoreProvider>
         </RightDrawerProvider>
       </DemoAiProvider>
     </DemoOperationsProvider>
   );
 }
+
