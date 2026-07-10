@@ -306,7 +306,247 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     markAllNotificationsRead, pushNotification,
   ]);
 
-  return <OperationsContext.Provider value={value}>{children}</OperationsContext.Provider>;
+  /* ------------------ Formal OperationsProvider adapter ------------------ */
+
+  const eventBus = useMemo(() => createDomainEventBus(), []);
+  const [flags] = useState<FeatureFlags>(defaultFeatureFlags);
+
+  const formalProvider = useMemo<OperationsProvider>(() => {
+    const now = (): IsoTimestamp => new Date().toISOString();
+    const provenance = (): Provenance => ({
+      source: "demo",
+      capturedAt: dataFreshnessAt,
+      stale: Date.now() - Date.parse(dataFreshnessAt) > 60_000,
+      ttlSeconds: 60,
+    });
+    const respond = <T,>(data: T): ProviderResponse<T> => ({ data, provenance: provenance() });
+    const nextEventId = (): DomainEventId =>
+      (`DE-${Date.now().toString(36)}-${Math.floor((Date.now() % 1000)).toString(36)}`) as DomainEventId;
+    const nextAuditId = (): string => `AUD-${Date.now().toString(36)}`;
+    const notFound = (label: string, id: string): Error =>
+      new Error(`[OperationsProvider] ${label} not found: ${id}`);
+
+    /* --- adapter typing note ---
+     * The scenario module predates the strict domain model; branded ids are
+     * satisfied at the module boundary via `as unknown as` casts. Downstream
+     * code sees the strict domain types.
+     */
+    /* eslint-disable @typescript-eslint/consistent-type-assertions */
+
+    const getSelectionContext = (): OpsSelectionContext => ({
+      tenant: tenant as unknown as OpsSelectionContext["tenant"],
+      selectedServiceId: selectedServiceId as unknown as ServiceId,
+      environment,
+      region,
+      timeRange,
+      role,
+    });
+
+    const publishAndAudit = (
+      action: string,
+      targetRef: string,
+      detail: string | undefined,
+      event: DomainEvent,
+    ): { audit: DomainAuditEvent; event: DomainEvent } => {
+      const audit: DomainAuditEvent = {
+        id: nextAuditId() as unknown as DomainAuditEvent["id"],
+        at: now(),
+        actorRef: role,
+        action,
+        targetRef,
+        detail,
+      };
+      appendAudit({ at: audit.at, actor: audit.actorRef, action, target: targetRef, detail });
+      eventBus.publish(event);
+      return { audit, event };
+    };
+
+    return {
+      kind: "demo",
+      flags,
+      events: eventBus,
+
+      getContext: getSelectionContext,
+
+      listTenants: () => respond(canonicalTenants as unknown as OperationsProvider["listTenants"] extends () => ProviderResponse<infer U> ? U : never),
+      getTenant: (id) => {
+        const t = canonicalTenants.find((x) => x.id === (id as unknown as string));
+        if (!t) throw notFound("Tenant", id as unknown as string);
+        return respond(t as unknown as ReturnType<OperationsProvider["getTenant"]>["data"]);
+      },
+
+      listServices: () => respond(canonicalServices as unknown as ReturnType<OperationsProvider["listServices"]>["data"]),
+      getService: (id) => {
+        const s = canonicalServices.find((x) => x.id === (id as unknown as string));
+        if (!s) throw notFound("Service", id as unknown as string);
+        return respond(s as unknown as ReturnType<OperationsProvider["getService"]>["data"]);
+      },
+      listComponents: (serviceId) => {
+        const svc = canonicalServices.find((x) => x.id === (serviceId as unknown as string));
+        const ids = new Set(svc?.componentIds ?? []);
+        const list = canonicalComponents.filter((c) => ids.has(c.id));
+        return respond(list as unknown as ReturnType<OperationsProvider["listComponents"]>["data"]);
+      },
+
+      listIncidents: () => respond([incident] as unknown as ReturnType<OperationsProvider["listIncidents"]>["data"]),
+      getIncident: (id) => {
+        if ((id as unknown as string) !== incident.id) throw notFound("Incident", id as unknown as string);
+        return respond(incident as unknown as ReturnType<OperationsProvider["getIncident"]>["data"]);
+      },
+
+      listRunbooks: () => respond([primaryRunbook] as unknown as ReturnType<OperationsProvider["listRunbooks"]>["data"]),
+      getRunbook: (id) => {
+        if ((id as unknown as string) !== primaryRunbook.id) throw notFound("Runbook", id as unknown as string);
+        return respond(primaryRunbook as unknown as ReturnType<OperationsProvider["getRunbook"]>["data"]);
+      },
+
+      getExecution: (id) => {
+        if ((id as unknown as string) !== execution.id) throw notFound("Execution", id as unknown as string);
+        return respond(execution as unknown as ReturnType<OperationsProvider["getExecution"]>["data"]);
+      },
+      getApproval: (id) => {
+        if ((id as unknown as string) !== approval.id) throw notFound("Approval", id as unknown as string);
+        return respond(approval as unknown as ReturnType<OperationsProvider["getApproval"]>["data"]);
+      },
+
+      listChanges: () => respond([primaryChange] as unknown as ReturnType<OperationsProvider["listChanges"]>["data"]),
+      listDigitalWorkers: () => respond(canonicalWorkers as unknown as ReturnType<OperationsProvider["listDigitalWorkers"]>["data"]),
+      listAuditLog: () => respond(auditLog as unknown as ReturnType<OperationsProvider["listAuditLog"]>["data"]),
+      listNotifications: () => respond(notifications as unknown as ReturnType<OperationsProvider["listNotifications"]>["data"]),
+      listScenarioStages: () => respond(scenarioStages as unknown as ReturnType<OperationsProvider["listScenarioStages"]>["data"]),
+
+      setSelectedService: (id) => setSelectedService(id as unknown as string),
+      setEnvironment,
+      setRegion,
+      setTimeRange: (r) => setTimeRange(r as TimeRange),
+      setRole: (r) => setRole(r as DemoRole),
+      setTenant: (id) => setTenant(id as unknown as string),
+
+      approveExecution: async ({ approvalId, actor }) => {
+        if ((approvalId as unknown as string) !== approval.id) throw notFound("Approval", approvalId as unknown as string);
+        approveExecutionAction(actor);
+        const nextApproval: Approval = { ...approval, state: "Approved" };
+        const nextExecution: Execution = { ...execution, state: "Running", startedAt: "10:26 CT" };
+        const ev: DomainEvent = {
+          id: nextEventId(),
+          at: now(),
+          kind: "ApprovalApproved",
+          approvalId: approvalId,
+        };
+        const { audit, event } = publishAndAudit("approval.approved", approval.id, `by ${actor}`, ev);
+        return {
+          entity: nextApproval as unknown as MutationResult<Approval>["entity"],
+          audit,
+          event,
+          related: [nextExecution] as unknown as ReadonlyArray<Execution | Incident>,
+          message: `Approval ${approval.id} approved; execution ${execution.id} started.`,
+          provenance: provenance(),
+        } as MutationResult<Approval, Execution | Incident>;
+      },
+
+      denyExecution: async ({ approvalId, actor, reason }) => {
+        if ((approvalId as unknown as string) !== approval.id) throw notFound("Approval", approvalId as unknown as string);
+        denyExecutionAction(actor, reason);
+        const nextApproval: Approval = { ...approval, state: "Denied" };
+        const nextExecution: Execution = { ...execution, state: "Cancelled" };
+        const ev: DomainEvent = {
+          id: nextEventId(), at: now(), kind: "ApprovalDenied", approvalId, reason,
+        };
+        const { audit, event } = publishAndAudit("approval.denied", approval.id, reason, ev);
+        return {
+          entity: nextApproval as unknown as MutationResult<Approval>["entity"],
+          audit, event,
+          related: [nextExecution] as unknown as readonly Execution[],
+          message: `Approval ${approval.id} denied: ${reason}.`,
+          provenance: provenance(),
+        } as MutationResult<Approval, Execution>;
+      },
+
+      resolveIncident: async ({ incidentId, actor }) => {
+        if ((incidentId as unknown as string) !== incident.id) throw notFound("Incident", incidentId as unknown as string);
+        resolveIncidentAction(actor);
+        const nextIncident: Incident = { ...incident, state: "Resolved" };
+        const nextExecution: Execution = { ...execution, state: "Completed" };
+        const ev: DomainEvent = { id: nextEventId(), at: now(), kind: "IncidentResolved", incidentId };
+        const { audit, event } = publishAndAudit("incident.resolved", incident.id, `by ${actor}`, ev);
+        return {
+          entity: nextIncident as unknown as MutationResult<Incident>["entity"],
+          audit, event,
+          related: [nextExecution] as unknown as readonly Execution[],
+          message: `Incident ${incident.id} resolved.`,
+          provenance: provenance(),
+        } as MutationResult<Incident, Execution>;
+      },
+
+      advanceScenario: async () => {
+        advanceStage();
+        const nextIndex = Math.min(stageIndex + 1, scenarioStages.length - 1);
+        const stage = scenarioStages[nextIndex];
+        const stageId = `stage-${stage.index}` as unknown as ScenarioStageId;
+        const ev: DomainEvent = {
+          id: nextEventId(), at: now(), kind: "ScenarioStageAdvanced",
+          stageId, index: stage.index,
+        };
+        const { audit, event } = publishAndAudit("scenario.advanced", `stage-${stage.index}`, stage.label, ev);
+        return {
+          entity: stage as unknown as MutationResult<ScenarioStage>["entity"],
+          audit, event,
+          related: [] as unknown as readonly ScenarioStage[],
+          message: `Advanced to stage ${stage.index}: ${stage.label}.`,
+          provenance: provenance(),
+        } as MutationResult<ScenarioStage, ScenarioStage>;
+      },
+
+      resetScenario: async () => {
+        resetScenarioAction();
+        const stage = scenarioStages[5];
+        const stageId = `stage-${stage.index}` as unknown as ScenarioStageId;
+        const ev: DomainEvent = {
+          id: nextEventId(), at: now(), kind: "ScenarioStageAdvanced",
+          stageId, index: stage.index,
+        };
+        const { audit, event } = publishAndAudit("scenario.reset", `stage-${stage.index}`, stage.label, ev);
+        return {
+          entity: stage as unknown as MutationResult<ScenarioStage>["entity"],
+          audit, event,
+          related: [] as unknown as readonly ScenarioStage[],
+          message: `Scenario reset to stage ${stage.index}.`,
+          provenance: provenance(),
+        } as MutationResult<ScenarioStage, ScenarioStage>;
+      },
+
+      markAllNotificationsRead: async () => {
+        markAllNotificationsRead();
+        const updated = notifications.map((n) => ({ ...n, read: true }));
+        const first = updated[0];
+        const notificationId = (first?.id ?? "N-0") as unknown as import("@/runops/domain/models").NotificationId;
+        const ev: DomainEvent = {
+          id: nextEventId(), at: now(), kind: "NotificationPushed", notificationId,
+        };
+        const { audit, event } = publishAndAudit("notifications.read_all", "notifications", undefined, ev);
+        return {
+          entity: updated as unknown as MutationResult<readonly import("@/runops/domain/models").Notification[]>["entity"],
+          audit, event,
+          related: [] as unknown as readonly never[],
+          message: "All notifications marked read.",
+          provenance: provenance(),
+        };
+      },
+    };
+    /* eslint-enable @typescript-eslint/consistent-type-assertions */
+  }, [
+    tenant, selectedServiceId, environment, region, timeRange, role, dataFreshnessAt,
+    incident, execution, approval, notifications, auditLog, stageIndex,
+    flags, eventBus,
+  ]);
+
+  return (
+    <OperationsContext.Provider value={value}>
+      <OperationsProviderContext.Provider value={formalProvider}>
+        {children}
+      </OperationsProviderContext.Provider>
+    </OperationsContext.Provider>
+  );
 }
 
 export function useOperations(): OperationsState & OperationsActions {
