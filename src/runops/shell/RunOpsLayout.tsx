@@ -71,6 +71,7 @@ function Shell() {
       </main>
 
       <RunOpsRightDrawer />
+      <DemoControllerDrawer />
     </div>
   );
 }
@@ -80,7 +81,9 @@ export default function RunOpsLayout() {
     <DemoOperationsProvider>
       <DemoAiProvider>
         <RightDrawerProvider>
-          <Shell />
+          <ScenarioStoreProvider>
+            <Shell />
+          </ScenarioStoreProvider>
         </RightDrawerProvider>
       </DemoAiProvider>
     </DemoOperationsProvider>
