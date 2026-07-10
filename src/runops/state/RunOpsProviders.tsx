@@ -194,10 +194,11 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     { id: "AUD-3", at: "10:23 CT", actor: "DW-IC-01", action: "approval.requested", target: primaryApproval.id, detail: "Revert CHG-20391" },
   ]);
   const [notifications, setNotifications] = useState<AppNotification[]>([
-    { id: "N-1", at: "10:14 CT", kind: "critical", title: "SEV 1 declared", detail: "INC-10482 · Global Order Processing", read: false },
-    { id: "N-2", at: "10:19 CT", kind: "warning",  title: "SLO burn accelerated", detail: "Availability window · US Central", read: false },
-    { id: "N-3", at: "10:23 CT", kind: "info",     title: "Approval requested", detail: "APR-4471 · RB-0042", read: false },
+    { id: "N-1", at: "10:14 CT", kind: "critical", title: "SEV 1 declared", detail: "INC-10482 · Global Order Processing", read: false, entityRef: "INC-10482", route: "/runops/incidents/INC-10482" },
+    { id: "N-2", at: "10:19 CT", kind: "warning",  title: "SLO burn accelerated", detail: "Availability window · US Central", read: false, entityRef: "SLO-GOP-AV", route: "/runops/reliability/slos" },
+    { id: "N-3", at: "10:23 CT", kind: "info",     title: "Approval requested", detail: "APR-4471 · RB-0042", read: false, entityRef: "APR-4471", route: "/runops/approvals" },
   ]);
+
 
   // Persist selected context
   useEffect(() => {
