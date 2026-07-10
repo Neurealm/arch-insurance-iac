@@ -133,7 +133,10 @@ export interface OperationsActions {
 
   markAllNotificationsRead: () => void;
   pushNotification: (n: Omit<AppNotification, "id" | "at" | "read">) => void;
+  acknowledgeNotification: (id: string) => void;
+  snoozeNotification: (id: string, minutes: number) => void;
 }
+
 
 const OperationsContext = createContext<(OperationsState & OperationsActions) | null>(null);
 
