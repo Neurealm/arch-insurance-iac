@@ -59,6 +59,7 @@ function useTenantRouteEqualizer() {
 
 
 function Shell() {
+  useTenantRouteEqualizer();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
