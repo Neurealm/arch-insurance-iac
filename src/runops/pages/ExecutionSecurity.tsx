@@ -397,15 +397,23 @@ export default function ExecutionSecurity() {
     setBreakglass(ensureSeed<BreakGlassRequest>(BG_KEY, seedBreakGlass));
   }, []);
 
+  // Scope all identities to the currently selected tenant so no cross-tenant
+  // records ever surface. Seed data is Contoso-only; other tenants show an
+  // empty registry until identities are provisioned for their profile.
+  const tenantIdentities = useMemo(
+    () => identities.filter((i) => i.tenantRef === ops.tenant.id),
+    [identities, ops.tenant.id],
+  );
+
   const filteredIdentities = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return identities.filter((i) => {
+    return tenantIdentities.filter((i) => {
       if (statusFilter !== "all" && i.status !== statusFilter) return false;
       if (!q) return true;
       const hay = [i.id, i.displayName, i.role, i.type, ...i.serviceScope, ...i.envScope].join(" ").toLowerCase();
       return hay.includes(q);
     });
-  }, [identities, search, statusFilter]);
+  }, [tenantIdentities, search, statusFilter]);
 
   /* --------------------------- Mutations -------------------------------- */
 
