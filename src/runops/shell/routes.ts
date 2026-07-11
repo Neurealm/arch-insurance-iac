@@ -82,7 +82,7 @@ export const routes: RouteMeta[] = [
   R("runbooks/:runbookId/test",              "Runbooks", "Runbook Test Harness",         "Selected runbook + test fixtures",       "Built"),
   R("runbooks/:runbookId/release",           "Runbooks", "Runbook Release",              "Selected runbook + version history",     "Built"),
   R("runbooks/:runbookId/triggers",          "Runbooks", "Runbook Triggers",             "Selected runbook + trigger bindings",    "Built"),
-  R("runbooks/:runbookId/launch",            "Runbooks", "Launch Runbook",               "Selected runbook + execution parameters", "Planned"),
+  R("runbooks/:runbookId/launch",            "Runbooks", "Launch Runbook",               "Selected runbook + execution parameters", "Built"),
 
   // Operations
   R("operations/queue",                      "Operations", "Operations Queue",           "All active executions and approvals",    "Built",     { isSectionLanding: true, navPrimary: true }),
