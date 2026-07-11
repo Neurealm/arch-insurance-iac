@@ -482,7 +482,7 @@ export default function RunbookPolicyDesigner() {
     setPublished(next);
     setDirty(false);
     ops.pushNotification({
-      kind: "success", title: "Policy published",
+      kind: "info", title: "Policy published",
       detail: `${runbookId} · ${nextVersion} — affects Launch Center and Approval Center`,
       entityRef: runbookId,
     });
