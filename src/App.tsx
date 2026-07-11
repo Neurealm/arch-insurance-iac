@@ -372,6 +372,7 @@ import RunOpsIncidentCommand from "./runops/pages/IncidentCommand.tsx";
 import RunOpsInvestigationWorkspace from "./runops/pages/InvestigationWorkspace.tsx";
 import RunOpsHypothesisGraph from "./runops/pages/HypothesisGraph.tsx";
 import RunOpsRemediationComparison from "./runops/pages/RemediationComparison.tsx";
+import RunOpsStakeholderCommunications from "./runops/pages/StakeholderCommunications.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
@@ -426,8 +427,9 @@ const App = () => (
             <Route path="incidents/:incidentId/investigate" element={<RunOpsInvestigationWorkspace />} />
             <Route path="incidents/:incidentId/hypotheses" element={<RunOpsHypothesisGraph />} />
             <Route path="incidents/:incidentId/remediations" element={<RunOpsRemediationComparison />} />
+            <Route path="incidents/:incidentId/communications" element={<RunOpsStakeholderCommunications />} />
             {runopsRoutes
-              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology" && r.path !== "services/:serviceId/observability" && r.path !== "services/:serviceId/readiness" && r.path !== "runbooks" && r.path !== "runbooks/new" && r.path !== "runbooks/:runbookId" && r.path !== "runbooks/:runbookId/designer" && r.path !== "runbooks/:runbookId/steps/:stepId" && r.path !== "runbooks/:runbookId/policy" && r.path !== "runbooks/:runbookId/recovery" && r.path !== "runbooks/:runbookId/test" && r.path !== "runbooks/:runbookId/release" && r.path !== "runbooks/:runbookId/triggers" && r.path !== "runbooks/:runbookId/launch" && r.path !== "executions/:executionId/guided" && r.path !== "executions/:executionId/evidence" && r.path !== "executions/:executionId" && r.path !== "approvals" && r.path !== "operations/handoff" && r.path !== "operations/alerts" && r.path !== "incidents/:incidentId" && r.path !== "incidents/:incidentId/investigate" && r.path !== "incidents/:incidentId/hypotheses" && r.path !== "incidents/:incidentId/remediations")
+              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology" && r.path !== "services/:serviceId/observability" && r.path !== "services/:serviceId/readiness" && r.path !== "runbooks" && r.path !== "runbooks/new" && r.path !== "runbooks/:runbookId" && r.path !== "runbooks/:runbookId/designer" && r.path !== "runbooks/:runbookId/steps/:stepId" && r.path !== "runbooks/:runbookId/policy" && r.path !== "runbooks/:runbookId/recovery" && r.path !== "runbooks/:runbookId/test" && r.path !== "runbooks/:runbookId/release" && r.path !== "runbooks/:runbookId/triggers" && r.path !== "runbooks/:runbookId/launch" && r.path !== "executions/:executionId/guided" && r.path !== "executions/:executionId/evidence" && r.path !== "executions/:executionId" && r.path !== "approvals" && r.path !== "operations/handoff" && r.path !== "operations/alerts" && r.path !== "incidents/:incidentId" && r.path !== "incidents/:incidentId/investigate" && r.path !== "incidents/:incidentId/hypotheses" && r.path !== "incidents/:incidentId/remediations" && r.path !== "incidents/:incidentId/communications")
               .map((r) => (
                 <Route key={r.path} path={r.path} element={<RunOpsPlaceholder />} />
               ))}
