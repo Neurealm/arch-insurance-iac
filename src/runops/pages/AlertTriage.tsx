@@ -531,7 +531,7 @@ export default function AlertTriage() {
         eyebrow="Operations"
         title="Alert Triage & Event Correlation"
         subtitle={`Tenant ${ops.tenant.name} · Service ${ops.selectedService.name} · ${ops.environment} · ${ops.region} · Role ${ops.role}`}
-        status={{ label: stormLevel, tone: stormLevel === "Alert storm active" || stormLevel === "Single critical alert" ? "danger" : "neutral" }}
+        status={{ label: stormLevel, tone: stormLevel === "Alert storm active" || stormLevel === "Single critical alert" ? "failure" : "healthy" }}
         actions={
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={refresh} aria-label="Refresh alert streams">
