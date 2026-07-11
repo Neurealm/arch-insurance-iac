@@ -663,7 +663,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     };
     /* eslint-enable @typescript-eslint/consistent-type-assertions */
   }, [
-    tenant, selectedServiceId, environment, region, timeRange, role, dataFreshnessAt,
+    tenant, bundle, selectedServiceId, environment, region, timeRange, role, dataFreshnessAt,
     incident, execution, approval, notifications, auditLog, stageIndex,
     flags, eventBus,
   ]);
