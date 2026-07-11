@@ -375,6 +375,7 @@ import RunOpsRemediationComparison from "./runops/pages/RemediationComparison.ts
 import RunOpsStakeholderCommunications from "./runops/pages/StakeholderCommunications.tsx";
 import RunOpsRecoveryValidation from "./runops/pages/RecoveryValidation.tsx";
 import RunOpsPostmortem from "./runops/pages/Postmortem.tsx";
+import RunOpsProblemActions from "./runops/pages/ProblemActions.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
