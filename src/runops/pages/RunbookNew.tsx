@@ -389,12 +389,14 @@ export default function RunbookNew() {
         eyebrow="Runbooks"
         title="Create Runbook"
         subtitle={`Draft ${draft.id}${draft.lineage ? ` · linked ${draft.lineage.ref}` : ""}`}
-        meta={[
-          { label: "Tenant", value: ops.tenant.name },
-          { label: "Environment", value: draft.environment },
-          { label: "Role", value: ops.role },
-          { label: "Step", value: `${stepIndex + 1}/${STEP_TITLES.length}` },
-        ]}
+        meta={
+          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+            <span>Tenant: <span className="text-foreground">{ops.tenant.name}</span></span>
+            <span>Environment: <span className="text-foreground">{draft.environment}</span></span>
+            <span>Role: <span className="text-foreground">{ops.role}</span></span>
+            <span>Step: <span className="text-foreground">{stepIndex + 1}/{STEP_TITLES.length}</span></span>
+          </div>
+        }
         actions={
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={handleSaveDraft} aria-label="Save draft">
