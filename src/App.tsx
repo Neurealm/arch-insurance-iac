@@ -385,8 +385,9 @@ const App = () => (
             <Route path="services/:serviceId/topology" element={<RunOpsTopologyExplorer />} />
             <Route path="services/:serviceId/observability" element={<RunOpsObservabilityExplorer />} />
             <Route path="services/:serviceId/readiness" element={<RunOpsOperationalReadiness />} />
+            <Route path="runbooks" element={<RunOpsRunbookLibrary />} />
             {runopsRoutes
-              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology" && r.path !== "services/:serviceId/observability" && r.path !== "services/:serviceId/readiness")
+              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology" && r.path !== "services/:serviceId/observability" && r.path !== "services/:serviceId/readiness" && r.path !== "runbooks")
               .map((r) => (
                 <Route key={r.path} path={r.path} element={<RunOpsPlaceholder />} />
               ))}
