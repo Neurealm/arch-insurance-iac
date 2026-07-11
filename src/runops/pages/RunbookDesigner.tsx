@@ -91,20 +91,20 @@ interface ValidationIssue {
 }
 
 const NODE_TONES: Record<NodeType, GraphNode["tone"]> = {
-  "Start": "info",
+  "Start": "connected",
   "Precheck": "neutral",
   "Human Instruction": "neutral",
-  "Command": "info",
-  "API Call": "info",
+  "Command": "connected",
+  "API Call": "connected",
   "Query": "neutral",
   "Decision": "warning",
   "Parallel Branch": "warning",
-  "Wait": "neutral",
+  "Wait": "pending",
   "Approval": "warning",
-  "Digital Worker": "info",
+  "Digital Worker": "connected",
   "Validation": "success",
   "Rollback": "critical",
-  "Subrunbook": "info",
+  "Subrunbook": "connected",
   "Notification": "neutral",
   "Completion": "success",
 };
