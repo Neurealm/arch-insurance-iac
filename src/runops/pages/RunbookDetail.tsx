@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { useNavigate, useParams } from "react-router-dom";
 import {
   AlertTriangle, ArrowRight, ArrowUpRight, BookOpen, Bot, CheckCircle2,
-  ClipboardList, DiffIcon, FileWarning, GitBranch, History, Layers,
+  ClipboardList, Code2, DiffIcon, FileWarning, GitBranch, History, Layers,
   Pencil, Play, PlugZap, ShieldAlert, ShieldCheck, Sparkles, TestTube, Wrench,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
