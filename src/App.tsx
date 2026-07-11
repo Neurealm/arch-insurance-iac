@@ -359,6 +359,7 @@ import RunOpsRunbookStepBuilder from "./runops/pages/RunbookStepBuilder.tsx";
 import RunOpsRunbookPolicyDesigner from "./runops/pages/RunbookPolicyDesigner.tsx";
 import RunOpsRunbookRecoveryDesigner from "./runops/pages/RunbookRecoveryDesigner.tsx";
 import RunOpsRunbookTestLab from "./runops/pages/RunbookTestLab.tsx";
+import RunOpsRunbookRelease from "./runops/pages/RunbookRelease.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
@@ -400,8 +401,9 @@ const App = () => (
             <Route path="runbooks/:runbookId/policy" element={<RunOpsRunbookPolicyDesigner />} />
             <Route path="runbooks/:runbookId/recovery" element={<RunOpsRunbookRecoveryDesigner />} />
             <Route path="runbooks/:runbookId/test" element={<RunOpsRunbookTestLab />} />
+            <Route path="runbooks/:runbookId/release" element={<RunOpsRunbookRelease />} />
             {runopsRoutes
-              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology" && r.path !== "services/:serviceId/observability" && r.path !== "services/:serviceId/readiness" && r.path !== "runbooks" && r.path !== "runbooks/new" && r.path !== "runbooks/:runbookId" && r.path !== "runbooks/:runbookId/designer" && r.path !== "runbooks/:runbookId/steps/:stepId" && r.path !== "runbooks/:runbookId/policy" && r.path !== "runbooks/:runbookId/recovery" && r.path !== "runbooks/:runbookId/test")
+              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology" && r.path !== "services/:serviceId/observability" && r.path !== "services/:serviceId/readiness" && r.path !== "runbooks" && r.path !== "runbooks/new" && r.path !== "runbooks/:runbookId" && r.path !== "runbooks/:runbookId/designer" && r.path !== "runbooks/:runbookId/steps/:stepId" && r.path !== "runbooks/:runbookId/policy" && r.path !== "runbooks/:runbookId/recovery" && r.path !== "runbooks/:runbookId/test" && r.path !== "runbooks/:runbookId/release")
               .map((r) => (
                 <Route key={r.path} path={r.path} element={<RunOpsPlaceholder />} />
               ))}
