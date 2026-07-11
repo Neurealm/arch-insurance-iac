@@ -97,7 +97,7 @@ function PageHeader() {
   return (
     <div>
       <div className="flex items-center gap-2">
-        <h1 className="text-[26px] font-bold tracking-tight">neuGAIN AI Platform</h1>
+        <h1 className="text-[26px] font-bold tracking-tight">NeuGAIN Command Center</h1>
         <Star className="h-4 w-4 text-muted-foreground" />
       </div>
       <p className="text-sm text-muted-foreground mt-1">
