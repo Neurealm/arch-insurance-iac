@@ -277,7 +277,7 @@ export default function ServiceDigitalTwin() {
           }));
           if (service.id === "svc-hc-clinical-care-delivery") {
             const idx = base.findIndex((t) => t.value === "journeys");
-            base.splice(idx, 0, { label: "Architecture Digital Twin", value: "architecture" as TabValue });
+            base.splice(idx, 0, { label: "Architecture Digital Twin", value: "architecture" as TabValue, badge: undefined });
           }
           return base;
         })()}
