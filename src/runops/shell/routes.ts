@@ -126,7 +126,7 @@ export const routes: RouteMeta[] = [
   R("ai-governance",                         "Governance", "AI Governance",               "AI recommendation policy + guardrails", "Built"),
 
   // Integrations
-  R("integrations",                          "Integrations", "Integrations",              "Connected providers and adapters",      "Scaffolded", { isSectionLanding: true, navPrimary: true }),
+  R("integrations",                          "Integrations", "Integrations",              "Connected providers and adapters",      "Built", { isSectionLanding: true, navPrimary: true }),
   R("developer",                             "Integrations", "Developer Portal",          "APIs, SDKs, webhooks",                  "Planned"),
   R("supply-chain",                          "Integrations", "Supply Chain",              "Runbook + automation provenance",       "Planned"),
 
