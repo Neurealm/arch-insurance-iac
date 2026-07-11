@@ -383,6 +383,7 @@ import RunOpsAutomationRegistry from "./runops/pages/AutomationRegistry.tsx";
 import RunOpsSloCenter from "./runops/pages/SloCenter.tsx";
 import RunOpsRunbookFitness from "./runops/pages/RunbookFitness.tsx";
 import RunOpsKnowledgeGraph from "./runops/pages/KnowledgeGraph.tsx";
+import RunOpsAnalytics from "./runops/pages/ReliabilityValueAnalytics.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
