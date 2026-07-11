@@ -843,6 +843,7 @@ function OverviewTab(props: {
 }
 
 function WorkflowTab({ runbook }: { runbook: Runbook }) {
+  const [openStepKey, setOpenStepKey] = useState<string | null>(null);
   return (
     <SectionCard title="Workflow" icon={<GitBranch className="h-4 w-4" />}>
       {runbook.steps.length === 0 ? (
@@ -861,8 +862,26 @@ function WorkflowTab({ runbook }: { runbook: Runbook }) {
                   s.kind === "validate" && "border-emerald-300 text-emerald-700",
                   s.kind === "rollback" && "border-rose-300 text-rose-700",
                 )}>{s.kind}</Badge>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-6 px-2 text-[10px]"
+                  onClick={() => setOpenStepKey(s.key)}
+                  aria-label={`Open code builder for step ${i + 1}`}
+                >
+                  <Code2 className="mr-1 h-3 w-3" aria-hidden /> Code
+                </Button>
               </div>
               <div className="mt-1 pl-7 text-[11px] text-slate-600">{s.description}</div>
+              {openStepKey === s.key && (
+                <StepCodeBuilder
+                  runbookId={runbook.id}
+                  step={s}
+                  stepIndex={i}
+                  open
+                  onOpenChange={(o) => { if (!o) setOpenStepKey(null); }}
+                />
+              )}
             </li>
           ))}
         </ol>
