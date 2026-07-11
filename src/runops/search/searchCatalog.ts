@@ -1,11 +1,9 @@
-// Deterministic cross-entity search catalog. Reads from OperationsProvider
-// state + canonical scenario data. Do not import runtime randomness here.
+// Deterministic cross-entity search catalog. Reads exclusively from the
+// currently selected tenant's OperationsProvider state so no cross-tenant
+// records ever surface in the palette. Do not import runtime randomness or
+// tenant-agnostic scenario fixtures here.
 
 import type { OperationsState } from "@/runops/state/RunOpsProviders";
-import {
-  knowledgeItems, connectors, slos, evidenceItems, problemsList,
-  changesList, runbooksList, executionsList,
-} from "@/runops/data/scenario";
 
 export type EntityType =
   | "Service" | "Component" | "Runbook" | "Execution" | "Incident"
