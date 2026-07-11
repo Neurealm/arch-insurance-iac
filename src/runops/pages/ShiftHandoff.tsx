@@ -162,7 +162,7 @@ export default function ShiftHandoff() {
   const incidents = useMemo(() => [ops.incident], [ops.incident]);
   const activeIncidents = useMemo(() => incidents.filter((i) => i.state !== "Resolved"), [incidents]);
   const degradedServices = useMemo(
-    () => ops.services.filter((s) => (s.status ?? "").toLowerCase() !== "healthy"),
+    () => ops.services.filter((s) => s.health !== "Healthy"),
     [ops.services],
   );
 
