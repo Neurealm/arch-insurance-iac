@@ -369,6 +369,7 @@ import RunOpsEvidenceReplay from "./runops/pages/EvidenceReplay.tsx";
 import RunOpsShiftHandoff from "./runops/pages/ShiftHandoff.tsx";
 import RunOpsAlertTriage from "./runops/pages/AlertTriage.tsx";
 import RunOpsIncidentCommand from "./runops/pages/IncidentCommand.tsx";
+import RunOpsInvestigationWorkspace from "./runops/pages/InvestigationWorkspace.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
