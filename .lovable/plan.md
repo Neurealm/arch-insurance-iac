@@ -1,87 +1,81 @@
-## Multi-Tenant Module Alignment — Plan
+# Multi-Industry Tenant Verification & Hardening
 
-The shared architecture already exists: `RunOpsProviders` swaps `TenantFixtureBundle`/`TenantOperationalProfile`/`TenantPresentationProfile` atomically on tenant change, and all four tenant records (`tenant-contoso`, `tenant-healthcare-amc`, `tenant-saas-production`, `tenant-chip-manufacturing`) are registered. What remains is a coherent alignment pass across every module page + the shell, plus new tenant-specific catalogs (topology node types, readiness categories, story navigator, scenario injections, completeness scorecard).
+This is a verification + hardening pass, not a redesign. I'll audit the existing implementation, produce a defect list, and fix defects in place. No new providers, stores, tenants, or design system.
 
-Given the surface area (50+ pages under `src/runops/pages/`, plus shell, plus new catalogs), I will land this in **six sequenced batches**. Each batch is independently valid, typechecks clean, and preserves Contoso.
+## Approach
 
----
+Six sequential passes. Each pass produces a defect list + fixes + a short verification note. I'll ship fixes at the end of each pass so you can review incrementally rather than in one giant diff.
 
-### Batch 1 — Shell, switching semantics, global scope guards
+### Pass 1 — Isolation audit (read-only)
 
-- Verify `RunOpsProviders.setTenant` performs: shell preservation, default service select, stage reload, story-navigator refresh, drawer-close, tenant-role revalidation, equivalent-route navigation with landing-page fallback.
-- Add missing pieces if any: `closeEntityDrawersOnTenantChange`, `navigateToEquivalentRoute(currentPath, newTenantId)`, `revalidateTenantRole`.
-- `RunOpsTopBar` tenant selector: unchanged UX, but ensure it triggers the full switch pipeline above.
-- `CommandPalette` / Global Search: filter every result set to `selectedTenantId`; add industry-label chip on each result row.
-- `AskNovaPanel` retrieval: hard-scope corpus to current tenant; assert no cross-tenant leak.
+Static audit across the codebase for tenant-leak vectors. Deliverable: defect list categorized by severity.
 
-### Batch 2 — Presentation + topology + readiness catalogs
+- Grep every `runops/pages/**` for: hardcoded tenant IDs, direct fixture imports (`contosoProfile`, `meridianProfile`, `atlasCloudProfile`, `apexFabProfile`), industry-string literals (`"healthcare"`, `"saas"`, `"fab"`), and hardcoded arrays that should come from `TenantPresentationProfile` / `TenantOperationalProfile`.
+- Confirm every page consumes `useOperations()` + `useTenantPresentation()` and filters by `selectedTenantId`.
+- Confirm `GlobalSearch`, `AskNovaPanel`, `SpeechProvider` scope to `selectedTenantId`.
+- Confirm `RunOpsProviders.setTenant` performs: drawer close, default-service reselect, stage reload, story-navigator refresh, role revalidation, equivalent-route navigation with landing fallback.
+- Confirm query keys include `selectedTenantId` so React Query caches don't bleed.
+- Confirm RLS: `runops_has_tenant_access`, `runops_can_write`, `runops_has_role` are used by every mutation RPC and every table policy references `tenant_id`.
 
-- Extend `industryProfiles.ts` with per-industry `topologyNodeTypes` for healthcare, saas, chip (lists specified in the request).
-- Add `operationalReadinessCategories` per industry (healthcare / saas / chip).
-- Add `communicationsAudiences` per industry.
-- Add `runbookDesignerTemplates` per industry (patient-safety assessment, downtime decision, ...; SLO burn, canary, ...; tool hold, lot hold, WIP reroute, ...).
-- Add `toilCategories` per industry.
-- Add `postmortemContributingFactorCategories` per industry.
-- Expose all through `TenantPresentationProfile` and `getPresentation(tenantId)`.
+### Pass 2 — Fix cross-tenant leakage & stale data
 
-### Batch 3 — Reliability Command Center + Service Portfolio + Digital Twin + Topology + Observability
+- Add `selectedTenantId` to any query key missing it.
+- Replace direct fixture imports in pages with profile-driven lookups.
+- Ensure `setTenant` invalidates prior-tenant caches and closes drawers.
+- Fix any page that renders arrays not scoped by `tenant_id`.
 
-Rewrite these five pages to read from `useTenantPresentation()` + `useOperations()`:
-- `Command.tsx` — swap KPI tiles per industry (clinical workflows / customer journeys / production flows) using presentation-driven labels + bundle metrics.
-- `ServicePortfolio.tsx` — categories/criticality/owners/SLOs/runbook coverage from presentation + bundle.
-- `ServiceDigitalTwin.tsx` — journeys, impact dimensions, topology, telemetry, changes, guardrails from bundle.
-- `TopologyExplorer.tsx` — render tenant `topologyNodeTypes` and group components accordingly.
-- `ObservabilityExplorer.tsx` — bind metric definitions/units/thresholds to `presentation.metricDefinitions`.
+### Pass 3 — Terminology, units, guardrails, roles
 
-### Batch 4 — Runbook family + Policy + Launch + Execution + Approval + Evidence
+- Replace generic strings ("service X", "team Y") with presentation-profile labels.
+- Verify metric units per industry (ms, %, wafers/hr, WIP, lots, defect PPM, HL7 msg/s).
+- Verify hard guardrails are immutable in scenario execution paths:
+  - Healthcare: no autonomous med-order changes, no PHI in narration.
+  - SaaS: change-freeze + approver-not-requester enforced.
+  - Fab: recipe changes, interlock bypass, lot release, chamber release require human authority.
+- Verify role restrictions on `runops_approve_execution`, `runops_certify_runbook_version`, `runops_resolve_incident` cover industry-specific roles.
 
-- `RunbookLibrary.tsx` — filter to selected-tenant runbooks; industry-domain tags.
-- `RunbookDetail.tsx` / `RunbookDigitalTwin` — tenant-specific impact, guardrails, workers, approvals, evidence, validation, rollback, standards, terminology.
-- `RunbookDesigner.tsx` — pull node templates from presentation catalog.
-- `RunbookStepBuilder.tsx` — filter connectors/commands/targets/permissions to tenant bundle connectors + workers.
-- `RunbookPolicyDesigner.tsx` — enforce industry hard guardrails as immutable, layer generic policy on top.
-- `RunbookTestLab.tsx` — tenant-specific scenario libraries.
-- `RunbookRelease.tsx` — tenant-specific review roles + certification.
-- `RunbookTriggers.tsx` — tenant-specific events / metric conditions / sources.
-- `RunbookLaunchCenter.tsx` — tenant-specific risk / impact / target types / approvals / connectors / guardrails / validation.
-- `GuidedExecution.tsx` / `AutonomousExecutionMonitor.tsx` — tenant workflow state + impact framing.
-- `ApprovalCenter.tsx` — industry roles + separation of duties from presentation.
-- `EvidenceReplay.tsx` — tenant evidence types + redaction rules + units.
+### Pass 4 — Dead buttons, fake mutations, console/network hygiene
 
-### Batch 5 — Incident lifecycle (Triage → Command → Investigation → Hypothesis → Remediation → Comms → Recovery → Postmortem → Corrective)
+- Wire any dead action buttons to their store mutations or hide them.
+- Confirm each mutation call returns a real domain/audit event.
+- Fix console errors and unexpected 4xx/5xx network calls surfaced during audit.
 
-Rewrite each page to bind labels, roles, correlations, options, audiences, criteria, and category catalogs to the presentation profile. Every content generator that was tenant-agnostic gets a `presentation`/`bundle` parameter. `StakeholderCommunications.tsx` gains per-industry audience lists.
+### Pass 5 — Story dry-run (code trace, no browser)
 
-### Batch 6 — Workers, SLOs, Knowledge, Analytics, Governance, Security, AI Gov, Integration Hub, Platform + Story Navigator + Scenario Injections + Completeness Dashboard
+For each of the three stories (Healthcare, SaaS, Fab), trace the 20+ steps through the code:
+- Scenario stages present and ordered correctly.
+- Each step's target entity exists in the profile bundle.
+- Approvals require the right roles.
+- Postmortem + improvement actions land in the right tables.
 
-- `DigitalWorkerCatalog.tsx` / `DigitalWorkerStudio.tsx` — show only workers assigned to the tenant; enforce tenant tool grants / authority / prohibitions.
-- `SloCenter.tsx` — tenant label, objectives, hard controls.
-- `RunbookFitness.tsx` — tenant fitness dimensions.
-- `KnowledgeGraph.tsx` — tenant vocabulary + access.
-- `ReliabilityValueAnalytics.tsx` — tenant metric catalog.
-- `GovernanceCenter.tsx` — standards mappings only (existing profile field).
-- `ExecutionSecurity.tsx` — tenant identities/service accounts/workers/zones/high-risk actions.
-- `AIGovernance.tsx` — industry-specific worker evaluation tests.
-- `IntegrationHub.tsx` — tenant connectors + dependencies only.
-- `PlatformHealth.tsx` — tenant runner/integration/profile/completeness.
-- **Demo Story Navigator** (`DemoControllerDrawer`) — story selector for the four industries; selecting a story confirms then switches tenant + resets scenario to that story's default service/incident/runbook/execution/change/problem/postmortem/workers/metrics/narrative; "Continue Story" requires the current stage's required-action to be satisfied (advance is gated, not navigational).
-- **Scenario failure injections** — extend `ScenarioStore` with per-industry deterministic, `resetScenario`-reversible injections (healthcare: interface down, msg-seq fail, downtime, approval denied, PHI redaction fail; saas: hot shard, canary fail, tenant-iso fail, region down, flag rollback fail; chip: FDC trace unavail, alt chamber unavail, qual fail, checksum mismatch, quality denied, AMHS reroute unavail).
-- **Profile Completeness Dashboard** on `/platform/tenant-profiles` — extend `validateTenantProfile` with 18 dimensions (Services, Components, Dependencies, Journeys, Metrics, SLOs, Runbooks, Tests, Scenarios, Incidents, Workers, Connectors, Policies, Knowledge, Analytics, Story, Security, Synthetic-data labeling) and render per-dimension score with drilldown into missing/invalid elements.
+I'll flag any story step that isn't code-reachable and fix it.
 
----
+### Pass 6 — Final report
 
-### Technical notes
+Markdown report at `docs/multi-tenant-verification-report.md` with:
+- Profiles tested, routes audited, stories traced.
+- Defects found, defects fixed, defects deferred with rationale.
+- Simulated integrations catalog.
+- Remaining limitations and production work required.
+- Security matrix (per-tenant read/write × role).
 
-- No new provider, scenario store, tenant selector, navigation, or design system is introduced.
-- All page changes are presentation-layer: consume `useOperations()` + `useTenantPresentation()` and drop hardcoded arrays.
-- Route registry in `src/runops/shell/routes.ts` is preserved; equivalent-route mapping and landing-page fallback added inside `setTenant`.
-- Authenticity guardrails: strip generic strings ("Server 1", "Alert triggered", ...) as each page is touched; every metric/incident/runbook/worker must carry the fields listed under Halo of Authenticity.
-- Contoso remains the reference tenant and must keep functioning across every batch.
+## Explicit non-goals (per your instructions)
 
-### Deliverables per batch
+- No redesign of pages, providers, stores, selectors, or design system.
+- No new tenants or industries.
+- No browser testing this build (you deferred it).
+- Responsive/a11y checks are static (source review of Tailwind breakpoints, aria props, focus rings) — no live viewport testing.
+- Speech tests are code-trace only (voice provider config + tenant-scoped narration source).
 
-Each batch: (a) code changes, (b) `tsgo` clean, (c) short list of files touched, (d) a one-line note if anything was deferred to a later batch. No browser testing (per request).
+## Technical details
 
-### Ask before starting
+- Audit tool: `rg` across `src/runops/**`, plus `supabase--read_query` for policy inspection on the ~50 `runops_*` tables.
+- No schema migrations expected unless the audit finds a missing `tenant_id` filter in an RLS policy — in which case I'll surface the exact SQL and ask before applying.
+- Fixes stay in presentation + query-key + provider-glue layers.
+- Expected file touches: 20–40, concentrated in `src/runops/pages/**`, `src/runops/state/**`, `src/runops/shell/**`.
 
-This is roughly 60–90 file touches. Do you want me to proceed batch-by-batch (I ship Batch 1, you review, I ship Batch 2, ...), or land Batches 1+2 (foundations + catalogs) in one pass and then proceed?
+## Deliverable per pass
+
+Code changes + `tsgo` clean + a short "what I found, what I fixed, what I deferred" note. I'll ask before starting a pass that requires schema or policy changes.
+
+Ready to start Pass 1?
