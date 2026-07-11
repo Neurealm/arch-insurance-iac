@@ -358,6 +358,7 @@ import RunOpsRunbookDesigner from "./runops/pages/RunbookDesigner.tsx";
 import RunOpsRunbookStepBuilder from "./runops/pages/RunbookStepBuilder.tsx";
 import RunOpsRunbookPolicyDesigner from "./runops/pages/RunbookPolicyDesigner.tsx";
 import RunOpsRunbookRecoveryDesigner from "./runops/pages/RunbookRecoveryDesigner.tsx";
+import RunOpsRunbookTestLab from "./runops/pages/RunbookTestLab.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
