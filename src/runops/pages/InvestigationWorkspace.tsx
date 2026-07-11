@@ -740,11 +740,11 @@ export default function InvestigationWorkspace() {
         eyebrow={`Incident ${incidentId}`}
         title="Investigation Workspace"
         subtitle={`Shared, evidence-driven investigation · service ${ops.selectedServiceId} · ${ops.environment}`}
-        status={{ tone: record.stage >= 2 ? "warning" : "info", label: stageLabel }}
+        status={{ tone: record.stage >= 2 ? "warning" : "neutral", label: stageLabel }}
         meta={
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
             <Badge variant="outline" className="border-slate-300">Role · {ops.role}</Badge>
-            <Badge variant="outline" className="border-slate-300">Scenario · {ops.scenario?.label ?? "—"}</Badge>
+            <Badge variant="outline" className="border-slate-300">Scenario · {ops.stages[ops.stageIndex]?.label ?? "—"}</Badge>
             <Badge variant="outline" className="border-slate-300">Pinned evidence · {pinned.length}</Badge>
             <Badge variant="outline" className="border-slate-300">Workers · {record.workers.length}</Badge>
             <Badge variant="outline" className="border-slate-300">Notes · {record.notes.length}</Badge>
