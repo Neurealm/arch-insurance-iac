@@ -7,6 +7,7 @@ import {
   digitalWorkers as canonicalWorkers,
   environments as envList,
   executionsList as canonicalExecutionsList,
+  runbooksList as canonicalRunbooksList,
   primaryApproval,
   primaryChange,
   primaryExecution,
