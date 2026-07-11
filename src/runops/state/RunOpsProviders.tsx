@@ -7,6 +7,7 @@ import {
   digitalWorkers as canonicalWorkers,
   environments as envList,
   executionsList as canonicalExecutionsList,
+  runbooksList as canonicalRunbooksList,
   primaryApproval,
   primaryChange,
   primaryExecution,
@@ -109,6 +110,7 @@ export interface OperationsState {
   slos: readonly Slo[];
   connectors: readonly Connector[];
   executions: readonly (Execution & { title: string })[];
+  runbooks: readonly Runbook[];
   changes: readonly Change[];
   environmentOptions: readonly Environment[];
   regionOptions: readonly Region[];
@@ -317,6 +319,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     slos: canonicalSlos,
     connectors: canonicalConnectors,
     executions: canonicalExecutionsList,
+    runbooks: canonicalRunbooksList,
     changes: canonicalChangesList,
     environmentOptions: envList,
     regionOptions: regionList,
@@ -451,10 +454,11 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
         return respond(incident as unknown as ReturnType<OperationsProvider["getIncident"]>["data"]);
       },
 
-      listRunbooks: () => respond([primaryRunbook] as unknown as ReturnType<OperationsProvider["listRunbooks"]>["data"]),
+      listRunbooks: () => respond(canonicalRunbooksList as unknown as ReturnType<OperationsProvider["listRunbooks"]>["data"]),
       getRunbook: (id) => {
-        if ((id as unknown as string) !== primaryRunbook.id) throw notFound("Runbook", id as unknown as string);
-        return respond(primaryRunbook as unknown as ReturnType<OperationsProvider["getRunbook"]>["data"]);
+        const rb = canonicalRunbooksList.find((r) => r.id === (id as unknown as string));
+        if (!rb) throw notFound("Runbook", id as unknown as string);
+        return respond(rb as unknown as ReturnType<OperationsProvider["getRunbook"]>["data"]);
       },
 
       getExecution: (id) => {
