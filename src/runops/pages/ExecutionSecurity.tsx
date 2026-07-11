@@ -593,11 +593,11 @@ export default function ExecutionSecurity() {
   /* --------------------------- Render ----------------------------------- */
 
   const summary = useMemo(() => ({
-    total: identities.length,
-    active: identities.filter((i) => i.status === "Active").length,
-    pending: identities.filter((i) => i.status === "Access pending").length,
-    expiring: identities.filter((i) => i.status === "Expiring").length,
-    violations: identities.filter((i) => i.status === "Policy violation").length,
+    total: tenantIdentities.length,
+    active: tenantIdentities.filter((i) => i.status === "Active").length,
+    pending: tenantIdentities.filter((i) => i.status === "Access pending").length,
+    expiring: tenantIdentities.filter((i) => i.status === "Expiring").length,
+    violations: tenantIdentities.filter((i) => i.status === "Policy violation").length,
     activeBg: breakglass.filter((b) => b.state === "Active").length,
   }), [identities, breakglass]);
 
