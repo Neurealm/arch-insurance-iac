@@ -352,6 +352,7 @@ import RunOpsTopologyExplorer from "./runops/pages/TopologyExplorer.tsx";
 import RunOpsObservabilityExplorer from "./runops/pages/ObservabilityExplorer.tsx";
 import RunOpsOperationalReadiness from "./runops/pages/OperationalReadiness.tsx";
 import RunOpsRunbookLibrary from "./runops/pages/RunbookLibrary.tsx";
+import RunOpsRunbookDetail from "./runops/pages/RunbookDetail.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
