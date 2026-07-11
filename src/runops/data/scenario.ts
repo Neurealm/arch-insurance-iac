@@ -406,7 +406,16 @@ export const changesList: Change[] = [
 
 export const runbooksList: Runbook[] = [
   primaryRunbook,
-  { id: "RB-0039", title: "SQL Primary Failover", version: "v2.1", state: "Published", autonomy: "Human Guided", serviceId: "svc-global-order-processing", fitnessScore: 74, steps: [] },
+  { id: "RB-0039", title: "SQL Primary Failover", version: "v2.1", state: "Published", autonomy: "Human Guided", serviceId: "svc-global-order-processing", fitnessScore: 74, steps: [
+    { key: "s1", label: "Confirm primary is unhealthy",       description: "Verify SQL primary is unreachable or severely degraded via health probe, replication lag, and connection error rate.", kind: "diagnose" },
+    { key: "s2", label: "Assess replica readiness",           description: "Check secondary replica replication lag, log shipping status, and quorum before initiating failover.", kind: "diagnose" },
+    { key: "s3", label: "Quiesce application writes",         description: "Enable read-only mode on Checkout and Orders APIs and drain in-flight write transactions.", kind: "mitigate" },
+    { key: "s4", label: "Promote secondary replica",          description: "Execute controlled failover to promote the healthiest secondary to primary and update the listener endpoint.", kind: "mitigate" },
+    { key: "s5", label: "Repoint application connections",    description: "Recycle checkout and orders pod connection pools so clients bind to the new primary endpoint.", kind: "mitigate" },
+    { key: "s6", label: "Validate service telemetry",         description: "Confirm write success rate, p95 latency, and replication resynchronization against baseline.", kind: "validate" },
+    { key: "s7", label: "Run synthetic checkout journey",     description: "Execute end-to-end synthetic order to verify customer journey succeeds against the new primary.", kind: "validate" },
+    { key: "s8", label: "Rollback: fail back to original primary", description: "If validation fails or original primary recovers cleanly, orchestrate a controlled fail-back during a maintenance window.", kind: "rollback" },
+  ] },
   { id: "RB-0051", title: "Payments 3DS Provider Fallback", version: "v1.4", state: "Certified", autonomy: "Approval Gated Automation", serviceId: "svc-payments", fitnessScore: 81, steps: [] },
   { id: "RB-0060", title: "Identity Token Cache Recycle", version: "v1.0", state: "Approved", autonomy: "Supervised Autonomous", serviceId: "svc-identity", fitnessScore: 69, steps: [] },
 ];
