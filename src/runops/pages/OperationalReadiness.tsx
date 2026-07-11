@@ -508,7 +508,7 @@ export default function OperationalReadiness() {
   const runbook = ops.runbook.serviceId === service.id ? ops.runbook : undefined;
   const runbookPublished = !!runbook && (runbook.state === "Published" || runbook.state === "Certified");
   const runbookCertified = !!runbook && runbook.state === "Certified";
-  const connectorsConnected = ops.connectors.filter((c) => c.state === "Connected").length;
+  const connectorsConnected = ops.connectors.filter((c) => c.status === "Healthy").length;
   const connectorsTotal = ops.connectors.length;
   const postmortemPublished = scenario.stageIndex >= 16;
   const incidentActive = ops.incident.serviceId === service.id && ops.incident.state !== "Resolved";
@@ -635,7 +635,7 @@ export default function OperationalReadiness() {
     // Route through OperationsProvider notification/audit pathway.
     ops.pushNotification({
       kind: "info",
-      title: action.replaceAll(".", " "),
+      title: action.split(".").join(" "),
       detail: `${target}${detail ? " — " + detail : ""}`,
       entityRef: target,
       route: `/runops/services/${service.id}/readiness`,
