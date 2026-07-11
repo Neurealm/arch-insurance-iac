@@ -26,6 +26,13 @@ export function AskNovaProvider({ children }: { children: React.ReactNode }) {
   const ops = useOperations();
   const seq = useRef(0);
 
+  // Clear conversation whenever the selected tenant changes so answers
+  // grounded in a prior tenant's scenario are never left visible.
+  useEffect(() => {
+    setTurns([]);
+    seq.current = 0;
+  }, [ops.tenant.id]);
+
   const ask = useCallback((q: string) => {
     const clean = q.trim();
     if (!clean) return;
