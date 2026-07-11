@@ -470,7 +470,7 @@ export default function GovernanceCenter() {
 
   const roleLabel = ops.role ?? "viewer";
   const canWrite = !(roleLabel === "Read Only User" || roleLabel === "Auditor");
-  const isChangeManager = roleLabel === "Change Manager" || roleLabel === "Platform Admin";
+  const isChangeManager = roleLabel === "Change Manager" || roleLabel === "Incident Commander";
 
   const [tab, setTab] = useState<Tab>("calendar");
   const [changes, setChanges] = useState<ChangeRecord[]>([]);
