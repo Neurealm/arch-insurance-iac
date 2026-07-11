@@ -360,6 +360,7 @@ import RunOpsRunbookPolicyDesigner from "./runops/pages/RunbookPolicyDesigner.ts
 import RunOpsRunbookRecoveryDesigner from "./runops/pages/RunbookRecoveryDesigner.tsx";
 import RunOpsRunbookTestLab from "./runops/pages/RunbookTestLab.tsx";
 import RunOpsRunbookRelease from "./runops/pages/RunbookRelease.tsx";
+import RunOpsRunbookTriggers from "./runops/pages/RunbookTriggers.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
