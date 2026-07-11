@@ -430,7 +430,7 @@ export default function DesignSystem() {
                   topBar={
                     <>
                       <ContextBar>
-                        <span>Tenant: <b>Contoso Global</b></span>
+                        <span>Tenant: <b>{"{tenant.name}"}</b></span>
                         <span>Env: Production</span>
                         <span>Region: US Central</span>
                       </ContextBar>

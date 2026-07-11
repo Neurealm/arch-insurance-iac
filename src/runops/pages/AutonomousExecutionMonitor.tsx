@@ -784,7 +784,7 @@ export default function AutonomousExecutionMonitor() {
               <div className="text-xs uppercase tracking-wide text-muted-foreground mt-2">Uncertainty</div>
               <ul className="text-xs list-disc pl-4 space-y-0.5">
                 <li>Third-party payment latency partially observable</li>
-                <li>Single-tenant sample from Contoso only</li>
+                <li>Synthetic demonstration data — not representative of a production distribution</li>
               </ul>
               <div className="text-xs uppercase tracking-wide text-muted-foreground mt-2">Sources</div>
               <ul className="text-xs list-disc pl-4 space-y-0.5">
