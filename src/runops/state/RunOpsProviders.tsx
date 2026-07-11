@@ -269,6 +269,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
   const setTenant = useCallback((id: string) => {
     const t = registeredTenants.find((x) => x.id === id);
     if (!t || t.id === tenant.id) return;
+    const previousTenantId = tenant.id;
     const nextBundle = getTenantBundle(t.id);
     const nextProfile = getTenantProfile(t.id);
     setTenantState(t);
@@ -285,6 +286,17 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     setNotifications(nextBundle.initialNotifications.map((n) => ({ ...n, read: false })));
     setStageIndex(loadStageIndex(t.id, 5));
     setDataFreshnessAt(new Date().toISOString());
+    // Broadcast a tenant-change event so entity drawers, command palette,
+    // Ask NOVA retrieval, and any route-scoped hooks can close/invalidate
+    // any state that belonged to the previous tenant. Listeners key off
+    // this event via `window.addEventListener("runops:tenant-changed", ...)`.
+    if (typeof window !== "undefined") {
+      try {
+        window.dispatchEvent(new CustomEvent("runops:tenant-changed", {
+          detail: { previousTenantId, tenantId: t.id },
+        }));
+      } catch { /* ignore */ }
+    }
   }, [tenant.id]);
 
   const setSelectedService = useCallback((id: string) => {
