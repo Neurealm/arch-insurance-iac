@@ -517,8 +517,12 @@ export default function ReliabilityValueAnalytics() {
     setExports(readList<ExportRecord>(EX_KEY));
   }, []);
 
-  const roleLabel = ops.selection.role ?? "viewer";
-  const canWrite = roleLabel !== "read_only_user" && roleLabel !== "auditor";
+  const roleLabel = ops.role ?? "viewer";
+  const canWrite = !(roleLabel === "Read Only User" || roleLabel === "Auditor");
+
+  const audit = useCallback((action: string, target: string, detail?: string) => {
+    ops.appendAudit({ at: nowIso(), actor: roleLabel, action, target, detail });
+  }, [ops, roleLabel]);
 
   const visibleMetrics = useMemo(
     () => metrics.filter((m) => m.views.includes(view)),
@@ -541,31 +545,30 @@ export default function ReliabilityValueAnalytics() {
     if (!saveName.trim()) return;
     const sv: SavedView = {
       id: rid("SV"), name: saveName.trim(), view, filters,
-      createdAt: nowIso(), createdBy: ops.selection.role ?? "viewer",
+      createdAt: nowIso(), createdBy: roleLabel,
     };
     const next = [sv, ...savedViews];
     setSavedViews(next); writeList(SV_KEY, next);
-    ops.pushAuditEvent({ action: "analytics.view.saved", targetRef: sv.id, tone: "info" });
-    ops.pushNotification({ level: "info", title: "Saved view", body: `“${sv.name}” saved.` });
+    audit("analytics.view.saved", sv.id, sv.name);
+    ops.pushNotification({ kind: "info", title: "Saved view", detail: `“${sv.name}” saved.`, entityRef: sv.id, route: "/runops/analytics" });
     setSaveOpen(false); setSaveName("");
-  }, [saveName, view, filters, savedViews, ops]);
+  }, [saveName, view, filters, savedViews, ops, roleLabel, audit]);
 
   const applySavedView = useCallback((sv: SavedView) => {
     setView(sv.view); setFilters(sv.filters);
-    ops.pushAuditEvent({ action: "analytics.view.applied", targetRef: sv.id, tone: "info" });
-  }, [ops]);
+    audit("analytics.view.applied", sv.id);
+  }, [audit]);
 
   const exportReport = useCallback(() => {
     const rec: ExportRecord = {
       id: rid("EX"), view, filters, at: nowIso(),
-      by: ops.selection.role ?? "viewer", rowCount: visibleMetrics.length + visibleOutliers.length,
+      by: roleLabel, rowCount: visibleMetrics.length + visibleOutliers.length,
     };
     const next = [rec, ...exports].slice(0, 40);
     setExports(next); writeList(EX_KEY, next);
-    ops.pushAuditEvent({ action: "analytics.report.exported", targetRef: rec.id, tone: "info" });
-    ops.pushDomainEvent({ kind: "AnalyticsReportExported", payload: { view, at: rec.at, rows: rec.rowCount } });
-    ops.pushNotification({ level: "info", title: "Report exported", body: `${VIEW_LABELS[view]} view · ${rec.rowCount} rows.` });
-  }, [view, filters, visibleMetrics.length, visibleOutliers.length, exports, ops]);
+    audit("analytics.report.exported", rec.id, `${VIEW_LABELS[view]} · ${rec.rowCount} rows`);
+    ops.pushNotification({ kind: "info", title: "Report exported", detail: `${VIEW_LABELS[view]} view · ${rec.rowCount} rows.`, entityRef: rec.id, route: "/runops/analytics" });
+  }, [view, filters, visibleMetrics.length, visibleOutliers.length, exports, ops, roleLabel, audit]);
 
   const createTarget = useCallback(() => {
     const targetValue = Number(targetDraft.targetValue);
@@ -577,7 +580,7 @@ export default function ReliabilityValueAnalytics() {
       id: rid("RT"), metricKey: targetDraft.metricKey,
       scopeRef: filters.serviceId === "all" ? "portfolio" : `service:${filters.serviceId}`,
       currentValue: m.current, targetValue, dueAt: inDays(dueDays),
-      owner: targetDraft.owner || (ops.selection.role ?? "viewer"),
+      owner: targetDraft.owner || roleLabel,
       rationale: targetDraft.rationale, createdAt: nowIso(), state: "Proposed",
     };
     const next = [rt, ...targets]; setTargets(next); writeList(RT_KEY, next);
@@ -590,28 +593,26 @@ export default function ReliabilityValueAnalytics() {
     };
     writeList(OPS_KEY, [task, ...tasks].slice(0, 500));
 
-    ops.pushAuditEvent({ action: "analytics.target.created", targetRef: rt.id, tone: "info" });
-    ops.pushDomainEvent({ kind: "ReliabilityTargetProposed", payload: { targetId: rt.id, metric: rt.metricKey, value: rt.targetValue } });
-    ops.pushNotification({ level: "info", title: "Reliability target proposed", body: `${m.label} → ${targetValue}${m.unit}. Ops task created.` });
+    audit("analytics.target.created", rt.id, `${m.label} → ${targetValue}${m.unit}`);
+    ops.pushNotification({ kind: "info", title: "Reliability target proposed", detail: `${m.label} → ${targetValue}${m.unit}. Ops task created.`, entityRef: rt.id, route: "/runops/analytics" });
     setTargetOpen(false);
     setTargetDraft({ metricKey: "recover_min", targetValue: "", dueDays: "60", owner: "", rationale: "" });
-  }, [targetDraft, filters, metrics, targets, ops]);
+  }, [targetDraft, filters, metrics, targets, ops, roleLabel, audit]);
 
   const createAction = useCallback(() => {
     if (!actionDraft.title.trim()) return;
     const ia: ImprovementAction = {
       id: rid("IA"), title: actionDraft.title.trim(), description: actionDraft.description.trim(),
       linkedMetricKey: actionDraft.metricKey, linkedRef: actionDraft.linkedRef.trim() || "portfolio",
-      owner: actionDraft.owner || (ops.selection.role ?? "viewer"),
+      owner: actionDraft.owner || roleLabel,
       createdAt: nowIso(), state: "Proposed",
     };
     const next = [ia, ...actions]; setActions(next); writeList(IA_KEY, next);
-    ops.pushAuditEvent({ action: "analytics.action.created", targetRef: ia.id, tone: "info" });
-    ops.pushDomainEvent({ kind: "ImprovementActionProposed", payload: { actionId: ia.id, metric: ia.linkedMetricKey } });
-    ops.pushNotification({ level: "info", title: "Improvement action proposed", body: ia.title });
+    audit("analytics.action.created", ia.id, ia.title);
+    ops.pushNotification({ kind: "info", title: "Improvement action proposed", detail: ia.title, entityRef: ia.id, route: "/runops/analytics" });
     setActionOpen(false);
     setActionDraft({ title: "", description: "", metricKey: "recover_min", linkedRef: "", owner: "" });
-  }, [actionDraft, actions, ops]);
+  }, [actionDraft, actions, ops, roleLabel, audit]);
 
   const verifyAction = useCallback(() => {
     if (!verifyOpen) return;
@@ -619,7 +620,7 @@ export default function ReliabilityValueAnalytics() {
     const impactUsd = Number(verifyDraft.impactUsd);
     if (!Number.isFinite(hoursSaved) || !Number.isFinite(impactUsd)) return;
     const at = nowIso();
-    const by = ops.selection.role ?? "viewer";
+    const by = roleLabel;
     const updated: ImprovementAction = {
       ...verifyOpen, state: "Verified",
       verifiedBenefit: {
@@ -639,11 +640,10 @@ export default function ReliabilityValueAnalytics() {
     };
     writeList(BEN_KEY, [entry, ...ben].slice(0, 500));
 
-    ops.pushAuditEvent({ action: "analytics.action.verified", targetRef: updated.id, tone: "success" });
-    ops.pushDomainEvent({ kind: "BenefitRealized", payload: { actionId: updated.id, hoursSaved, impactUsd } });
-    ops.pushNotification({ level: "success", title: "Benefit verified", body: `${updated.title} — ${hoursSaved}h / $${impactUsd.toLocaleString()}` });
+    audit("analytics.action.verified", updated.id, `${hoursSaved}h / $${impactUsd}`);
+    ops.pushNotification({ kind: "info", title: "Benefit verified", detail: `${updated.title} — ${hoursSaved}h / $${impactUsd.toLocaleString()}`, entityRef: updated.id, route: "/runops/analytics" });
     setVerifyOpen(null); setVerifyDraft({ hoursSaved: "", impactUsd: "", source: "" });
-  }, [verifyOpen, verifyDraft, actions, ops]);
+  }, [verifyOpen, verifyDraft, actions, ops, roleLabel, audit]);
 
   /* -------- render ----------- */
 
