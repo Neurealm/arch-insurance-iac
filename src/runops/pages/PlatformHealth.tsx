@@ -952,7 +952,7 @@ export default function PlatformHealth() {
                 {derivedState === "Upgrade scheduled" && "A control-plane or runner upgrade is queued. Review Upgrades tab."}
                 {derivedState === "Disaster recovery active" && "A DR exercise is in flight and blocking related administrative actions."}
                 {derivedState === "Healthy" && "All platform components are within their targets."}
-                {derivedState === "Administrative restriction" && "Some destructive actions are held pending elevated authorization."}
+                {(derivedState as string) === "Administrative restriction" && "Some destructive actions are held pending elevated authorization."}
               </span>
             </div>
           </CardContent></Card>
