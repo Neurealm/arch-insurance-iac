@@ -110,6 +110,7 @@ export interface OperationsState {
   slos: readonly Slo[];
   connectors: readonly Connector[];
   executions: readonly (Execution & { title: string })[];
+  runbooks: readonly Runbook[];
   changes: readonly Change[];
   environmentOptions: readonly Environment[];
   regionOptions: readonly Region[];
