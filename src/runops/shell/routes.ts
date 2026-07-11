@@ -131,7 +131,7 @@ export const routes: RouteMeta[] = [
   R("supply-chain",                          "Integrations", "Supply Chain",              "Runbook + automation provenance",       "Built"),
 
   // Platform
-  R("platform",                              "Platform", "Platform Administration",       "Tenant, users, roles, feature flags",   "Scaffolded", { isSectionLanding: true, navPrimary: true }),
+  R("platform",                              "Platform", "Platform Administration",       "Tenant, users, roles, feature flags",   "Built", { isSectionLanding: true, navPrimary: true }),
 ];
 
 /** Ordered list of the sections that appear in the left sidebar. */
