@@ -902,6 +902,16 @@ const DrawerContext = createContext<DrawerState | null>(null);
 export function RightDrawerProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [payload, setPayload] = useState<DrawerPayload | null>(null);
+
+  // Close and clear any open entity drawer whenever the active tenant
+  // changes so records from the prior tenant cannot linger in the drawer.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => { setOpen(false); setPayload(null); };
+    window.addEventListener("runops:tenant-changed", handler);
+    return () => window.removeEventListener("runops:tenant-changed", handler);
+  }, []);
+
   const value = useMemo<DrawerState>(() => ({
     open,
     payload,
