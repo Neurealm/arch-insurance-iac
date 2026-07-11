@@ -71,7 +71,7 @@ export const routes: RouteMeta[] = [
   R("services/:serviceId/readiness",         "Services", "Service Readiness",            "Selected service + runbook coverage",    "Built"),
 
   // Runbooks
-  R("runbooks",                              "Runbooks", "Runbook Library",              "All runbooks in tenant",                 "Scaffolded", { isSectionLanding: true, navPrimary: true }),
+  R("runbooks",                              "Runbooks", "Runbook Library",              "All runbooks in tenant",                 "Built", { isSectionLanding: true, navPrimary: true }),
   R("runbooks/new",                          "Runbooks", "New Runbook",                  "Draft runbook",                          "Planned"),
   R("runbooks/fitness",                      "Runbooks", "Runbook Fitness",              "All runbooks + fitness scores",          "Planned"),
   R("runbooks/:runbookId",                   "Runbooks", "Runbook Detail",               "Selected runbook",                       "Planned"),
