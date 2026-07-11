@@ -247,7 +247,7 @@ export default function RunbookNew() {
     .filter((r) => r.state === "Certified" || r.state === "Approved")
     .slice(0, 6), [ops.runbooks]);
   const executionOptions = useMemo(() => ops.executions
-    .filter((e) => e.state === "Succeeded")
+    .filter((e) => e.state === "Completed")
     .slice(0, 6), [ops.executions]);
   const runbookOptions = useMemo(() => ops.runbooks.slice(0, 8), [ops.runbooks]);
 
