@@ -32,6 +32,7 @@ import {
   FreshnessIndicator, RunbookFitnessScore,
 } from "@/runops/components";
 import { useOperations } from "@/runops/state/RunOpsProviders";
+import { StepCodeBuilder } from "@/runops/components/StepCodeBuilder";
 import type {
   Runbook, RunbookStep, Execution, Change, BusinessService, RunbookState,
 } from "@/runops/data/scenario";
