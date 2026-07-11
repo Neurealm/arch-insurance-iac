@@ -127,7 +127,7 @@ export const routes: RouteMeta[] = [
 
   // Integrations
   R("integrations",                          "Integrations", "Integrations",              "Connected providers and adapters",      "Built", { isSectionLanding: true, navPrimary: true }),
-  R("developer",                             "Integrations", "Developer Portal",          "APIs, SDKs, webhooks",                  "Planned"),
+  R("developer",                             "Integrations", "Developer Portal",          "APIs, SDKs, webhooks",                  "Built"),
   R("supply-chain",                          "Integrations", "Supply Chain",              "Runbook + automation provenance",       "Planned"),
 
   // Platform
