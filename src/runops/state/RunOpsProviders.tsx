@@ -1,26 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
-  changesList as canonicalChangesList,
-  components as canonicalComponents,
-  connectors as canonicalConnectors,
   demoRoles,
-  digitalWorkers as canonicalWorkers,
   environments as envList,
-  executionsList as canonicalExecutionsList,
-  runbooksList as canonicalRunbooksList,
-  primaryApproval,
-  primaryChange,
-  primaryExecution,
-  primaryIncident,
-  primaryPostmortemId,
-  primaryProblemId,
-  primaryRunbook,
   regions as regionList,
-  scenarioStages,
-  services as canonicalServices,
-  slos as canonicalSlos,
-  tenant as canonicalTenant,
-  tenants as canonicalTenants,
   timeRanges as timeRangeList,
   type Approval,
   type BusinessService,
@@ -32,13 +14,22 @@ import {
   type Environment,
   type Execution,
   type Incident,
+  type KnowledgeItem,
+  type Problem,
   type Region,
   type Runbook,
   type ScenarioStage,
   type Slo,
   type Tenant,
   type TimeRange,
+  type EvidenceItem,
 } from "@/runops/data/scenario";
+import {
+  getPresentation, getTenantBundle, getTenantProfile, getTenantRecord,
+  registeredTenants,
+  type IndustryProfile, type TenantOperationalProfile,
+  type TenantPresentationProfile, type TenantFixtureBundle,
+} from "@/runops/profiles";
 import {
   OperationsProviderContext,
   type OperationsProvider,
@@ -112,9 +103,17 @@ export interface OperationsState {
   executions: readonly (Execution & { title: string })[];
   runbooks: readonly Runbook[];
   changes: readonly Change[];
+  knowledgeItems: readonly KnowledgeItem[];
+  evidenceItems: readonly EvidenceItem[];
+  problems: readonly Problem[];
   environmentOptions: readonly Environment[];
   regionOptions: readonly Region[];
   timeRangeOptions: readonly TimeRange[];
+
+  /* Tenant profile (industry-aware presentation and metadata) */
+  tenantProfile: TenantOperationalProfile;
+  industryProfile: IndustryProfile;
+  presentation: TenantPresentationProfile;
 
   /* Persistent context selectors */
   selectedServiceId: string;
@@ -181,55 +180,116 @@ function savePersisted(p: Persisted): void {
   try { window.localStorage.setItem(LS_KEY, JSON.stringify(p)); } catch { /* ignore */ }
 }
 
+/** Per-tenant scenario stage persistence. */
+function stageKey(tenantId: string): string { return `runops.scenario.${tenantId}.stageIndex`; }
+function loadStageIndex(tenantId: string, fallback: number): number {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const v = window.localStorage.getItem(stageKey(tenantId));
+    if (!v) return fallback;
+    const n = Number.parseInt(v, 10);
+    return Number.isFinite(n) ? n : fallback;
+  } catch { return fallback; }
+}
+function saveStageIndex(tenantId: string, index: number): void {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(stageKey(tenantId), String(index)); } catch { /* ignore */ }
+}
+
 /* -------------------------- Operations Provider ------------------------ */
 
 export function DemoOperationsProvider({ children }: { children: React.ReactNode }) {
   const persisted = useMemo(loadPersisted, []);
 
+  // Resolve initial tenant + bundle from persisted selection.
+  const initialTenantId = persisted.tenantId && registeredTenants.some((t) => t.id === persisted.tenantId)
+    ? persisted.tenantId
+    : registeredTenants[0].id;
+  const initialBundle = useMemo(() => getTenantBundle(initialTenantId), [initialTenantId]);
+  const initialProfile = useMemo(() => getTenantProfile(initialTenantId), [initialTenantId]);
+
   const [mode, setModeState] = useState<Mode>(persisted.mode ?? "demo");
-  const [tenant, setTenantState] = useState<Tenant>(() => {
-    const t = canonicalTenants.find((x) => x.id === persisted.tenantId);
-    return t ?? canonicalTenant;
-  });
+  const [tenant, setTenantState] = useState<Tenant>(
+    () => registeredTenants.find((t) => t.id === initialTenantId) ?? registeredTenants[0],
+  );
+
+  // Current tenant's fixture bundle. Recomputed on tenant change.
+  const bundle = useMemo<TenantFixtureBundle>(() => getTenantBundle(tenant.id), [tenant.id]);
+  const tenantProfile = useMemo<TenantOperationalProfile>(() => getTenantProfile(tenant.id), [tenant.id]);
+  const record = useMemo(() => getTenantRecord(tenant.id), [tenant.id]);
+  const industryProfile = record.industry;
+  const presentation = useMemo<TenantPresentationProfile>(
+    () => getPresentation(tenant.id),
+    [tenant.id],
+  );
+
   const [selectedServiceId, setSelectedServiceIdState] = useState<string>(() => {
     const id = persisted.selectedServiceId;
-    return id && canonicalServices.some((s) => s.id === id) ? id : canonicalServices[0].id;
+    return id && initialBundle.services.some((s) => s.id === id)
+      ? id
+      : (initialProfile.defaultServiceId || initialBundle.services[0].id);
   });
-  const [environment, setEnvironmentState] = useState<Environment>(persisted.environment ?? "Production");
-  const [region, setRegionState] = useState<Region>(persisted.region ?? "US Central");
-  const [timeRange, setTimeRangeState] = useState<TimeRange>(persisted.timeRange ?? "1h");
+  const [environment, setEnvironmentState] = useState<Environment>(
+    persisted.environment ?? (initialProfile.defaultEnvironment as Environment),
+  );
+  const [region, setRegionState] = useState<Region>(
+    persisted.region ?? (initialProfile.defaultRegion as Region),
+  );
+  const [timeRange, setTimeRangeState] = useState<TimeRange>(
+    persisted.timeRange ?? (initialProfile.defaultTimeRange as TimeRange),
+  );
   const [dataFreshnessAt, setDataFreshnessAt] = useState<string>(() => new Date().toISOString());
   const [role, setRoleState] = useState<DemoRole>(persisted.role ?? "SRE Engineer");
 
-  const [stageIndex, setStageIndex] = useState<number>(5);
-  const [incident, setIncident] = useState<Incident>(primaryIncident);
-  const [execution, setExecution] = useState<Execution>(primaryExecution);
-  const [approval, setApproval] = useState<Approval>(primaryApproval);
-  const [auditLog, setAuditLog] = useState<AuditEvent[]>([
-    { id: "AUD-1", at: "10:14 CT", actor: "system",   action: "incident.declared", target: primaryIncident.id, detail: "SEV 1 declared" },
-    { id: "AUD-2", at: "10:19 CT", actor: "DW-DB-03", action: "hypothesis.raised", target: primaryIncident.id, detail: "Database wait time dominant" },
-    { id: "AUD-3", at: "10:23 CT", actor: "DW-IC-01", action: "approval.requested", target: primaryApproval.id, detail: "Revert CHG-20391" },
-  ]);
-  const [notifications, setNotifications] = useState<AppNotification[]>([
-    { id: "N-1", at: "10:14 CT", kind: "critical", title: "SEV 1 declared", detail: "INC-10482 · Global Order Processing", read: false, entityRef: "INC-10482", route: "/runops/incidents/INC-10482" },
-    { id: "N-2", at: "10:19 CT", kind: "warning",  title: "SLO burn accelerated", detail: "Availability window · US Central", read: false, entityRef: "SLO-GOP-AV", route: "/runops/reliability/slos" },
-    { id: "N-3", at: "10:23 CT", kind: "info",     title: "Approval requested", detail: "APR-4471 · RB-0042", read: false, entityRef: "APR-4471", route: "/runops/approvals" },
-  ]);
+  // Tenant-scoped scenario state. Reset whenever the tenant changes so no
+  // records from the prior tenant survive.
+  const [stageIndex, setStageIndex] = useState<number>(() => loadStageIndex(initialTenantId, 5));
+  const [incident, setIncident] = useState<Incident>(initialBundle.primaryIncident);
+  const [execution, setExecution] = useState<Execution>(initialBundle.primaryExecution);
+  const [approval, setApproval] = useState<Approval>(initialBundle.primaryApproval);
+  const [auditLog, setAuditLog] = useState<AuditEvent[]>(
+    initialBundle.initialAuditLog.map((a) => ({ ...a })),
+  );
+  const [notifications, setNotifications] = useState<AppNotification[]>(
+    initialBundle.initialNotifications.map((n) => ({ ...n, read: false })),
+  );
 
 
-  // Persist selected context
+  // Persist selected context (tenant-scoped scenario stage stored separately).
   useEffect(() => {
     savePersisted({ tenantId: tenant.id, selectedServiceId, environment, region, timeRange, role, mode });
   }, [tenant.id, selectedServiceId, environment, region, timeRange, role, mode]);
 
+  useEffect(() => {
+    saveStageIndex(tenant.id, stageIndex);
+  }, [tenant.id, stageIndex]);
+
   const setMode = useCallback((m: Mode) => setModeState(m), []);
+
   const setTenant = useCallback((id: string) => {
-    const t = canonicalTenants.find((x) => x.id === id);
-    if (t) setTenantState(t);
-  }, []);
+    const t = registeredTenants.find((x) => x.id === id);
+    if (!t || t.id === tenant.id) return;
+    const nextBundle = getTenantBundle(t.id);
+    const nextProfile = getTenantProfile(t.id);
+    setTenantState(t);
+    // Reset scenario-scoped state to the new tenant's bundle so records from
+    // the previously selected tenant cannot remain visible.
+    setSelectedServiceIdState(nextProfile.defaultServiceId || nextBundle.services[0].id);
+    setEnvironmentState(nextProfile.defaultEnvironment as Environment);
+    setRegionState(nextProfile.defaultRegion as Region);
+    setTimeRangeState(nextProfile.defaultTimeRange as TimeRange);
+    setIncident(nextBundle.primaryIncident);
+    setExecution(nextBundle.primaryExecution);
+    setApproval(nextBundle.primaryApproval);
+    setAuditLog(nextBundle.initialAuditLog.map((a) => ({ ...a })));
+    setNotifications(nextBundle.initialNotifications.map((n) => ({ ...n, read: false })));
+    setStageIndex(loadStageIndex(t.id, 5));
+    setDataFreshnessAt(new Date().toISOString());
+  }, [tenant.id]);
+
   const setSelectedService = useCallback((id: string) => {
-    if (canonicalServices.some((s) => s.id === id)) setSelectedServiceIdState(id);
-  }, []);
+    if (bundle.services.some((s) => s.id === id)) setSelectedServiceIdState(id);
+  }, [bundle.services]);
   const setEnvironment = useCallback((e: Environment) => setEnvironmentState(e), []);
   const setRegion = useCallback((r: Region) => setRegionState(r), []);
   const setTimeRange = useCallback((t: TimeRange) => setTimeRangeState(t), []);
@@ -241,36 +301,36 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
   }, []);
 
   const advanceStage = useCallback(() => {
-    setStageIndex((i) => Math.min(i + 1, scenarioStages.length - 1));
-  }, []);
+    setStageIndex((i) => Math.min(i + 1, bundle.scenarioStages.length - 1));
+  }, [bundle.scenarioStages.length]);
   const resetScenario = useCallback(() => {
     setStageIndex(5);
-    setIncident(primaryIncident);
-    setExecution(primaryExecution);
-    setApproval(primaryApproval);
+    setIncident(bundle.primaryIncident);
+    setExecution(bundle.primaryExecution);
+    setApproval(bundle.primaryApproval);
     appendAudit({ at: "now", actor: "demo.controller", action: "scenario.reset", target: "scenario", detail: "Reset to stage 5" });
-  }, [appendAudit]);
+  }, [appendAudit, bundle]);
   const setStage = useCallback((index: number) => {
-    setStageIndex(Math.max(0, Math.min(scenarioStages.length - 1, index)));
-  }, []);
+    setStageIndex(Math.max(0, Math.min(bundle.scenarioStages.length - 1, index)));
+  }, [bundle.scenarioStages.length]);
   const approveExecution = useCallback((actor = "human.operator") => {
     setApproval((prev) => ({ ...prev, state: "Approved" }));
-    setExecution((prev) => ({ ...prev, state: "Running", startedAt: "10:26 CT" }));
+    setExecution((prev) => ({ ...prev, state: "Running", startedAt: prev.startedAt ?? new Date().toISOString() }));
     setStageIndex(10);
-    appendAudit({ at: "10:26 CT", actor, action: "approval.approved", target: primaryApproval.id });
-    appendAudit({ at: "10:26 CT", actor: "system", action: "execution.started", target: primaryExecution.id });
-  }, [appendAudit]);
+    appendAudit({ at: "now", actor, action: "approval.approved", target: bundle.primaryApproval.id });
+    appendAudit({ at: "now", actor: "system", action: "execution.started", target: bundle.primaryExecution.id });
+  }, [appendAudit, bundle]);
   const denyExecution = useCallback((actor = "human.operator", reason = "Insufficient evidence") => {
     setApproval((prev) => ({ ...prev, state: "Denied" }));
     setExecution((prev) => ({ ...prev, state: "Cancelled" }));
-    appendAudit({ at: "now", actor, action: "approval.denied", target: primaryApproval.id, detail: reason });
-  }, [appendAudit]);
-  const resolveIncident = useCallback((actor = "DW-IC-01") => {
+    appendAudit({ at: "now", actor, action: "approval.denied", target: bundle.primaryApproval.id, detail: reason });
+  }, [appendAudit, bundle]);
+  const resolveIncident = useCallback((actor = "operator") => {
     setIncident((prev) => ({ ...prev, state: "Resolved" }));
     setExecution((prev) => ({ ...prev, state: "Completed" }));
     setStageIndex(15);
-    appendAudit({ at: "now", actor, action: "incident.resolved", target: primaryIncident.id });
-  }, [appendAudit]);
+    appendAudit({ at: "now", actor, action: "incident.resolved", target: bundle.primaryIncident.id });
+  }, [appendAudit, bundle]);
 
   const markAllNotificationsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
@@ -291,8 +351,8 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
 
 
   const selectedService = useMemo<BusinessService>(() => {
-    return canonicalServices.find((s) => s.id === selectedServiceId) ?? canonicalServices[0];
-  }, [selectedServiceId]);
+    return bundle.services.find((s) => s.id === selectedServiceId) ?? bundle.services[0];
+  }, [selectedServiceId, bundle.services]);
 
   const unreadNotifications = useMemo(
     () => notifications.reduce((n, x) => n + (x.read ? 0 : 1), 0),
@@ -301,29 +361,35 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
 
   const value = useMemo<OperationsState & OperationsActions>(() => ({
     mode,
-    tenants: canonicalTenants,
+    tenants: [...registeredTenants],
     tenant,
-    services: canonicalServices,
-    components: canonicalComponents,
-    digitalWorkers: canonicalWorkers,
+    services: [...bundle.services],
+    components: [...bundle.components],
+    digitalWorkers: [...bundle.digitalWorkers],
     incident,
-    change: primaryChange,
-    runbook: primaryRunbook,
+    change: bundle.primaryChange,
+    runbook: bundle.primaryRunbook,
     execution,
     approval,
-    problemId: primaryProblemId,
-    postmortemId: primaryPostmortemId,
+    problemId: bundle.primaryProblemId,
+    postmortemId: bundle.primaryPostmortemId,
     stageIndex,
-    stages: scenarioStages,
+    stages: [...bundle.scenarioStages],
     auditLog,
-    slos: canonicalSlos,
-    connectors: canonicalConnectors,
-    executions: canonicalExecutionsList,
-    runbooks: canonicalRunbooksList,
-    changes: canonicalChangesList,
+    slos: bundle.slos,
+    connectors: bundle.connectors,
+    executions: bundle.executionsList,
+    runbooks: bundle.runbooksList,
+    changes: bundle.changesList,
+    knowledgeItems: bundle.knowledgeItems,
+    evidenceItems: bundle.evidenceItems,
+    problems: bundle.problemsList,
     environmentOptions: envList,
     regionOptions: regionList,
     timeRangeOptions: timeRangeList,
+    tenantProfile,
+    industryProfile,
+    presentation,
     selectedServiceId,
     selectedService,
     environment,
@@ -341,7 +407,8 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     markAllNotificationsRead, pushNotification,
     acknowledgeNotification, snoozeNotification,
   }), [
-    mode, tenant, incident, execution, approval, stageIndex, auditLog,
+    mode, tenant, bundle, tenantProfile, industryProfile, presentation,
+    incident, execution, approval, stageIndex, auditLog,
     selectedServiceId, selectedService, environment, region, timeRange,
     dataFreshnessAt, role, notifications, unreadNotifications,
     setMode, setTenant, setSelectedService, setEnvironment, setRegion, setTimeRange,
@@ -428,23 +495,23 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
 
       getContext: getSelectionContext,
 
-      listTenants: () => respond(canonicalTenants as unknown as OperationsProvider["listTenants"] extends () => ProviderResponse<infer U> ? U : never),
+      listTenants: () => respond(registeredTenants as unknown as OperationsProvider["listTenants"] extends () => ProviderResponse<infer U> ? U : never),
       getTenant: (id) => {
-        const t = canonicalTenants.find((x) => x.id === (id as unknown as string));
+        const t = registeredTenants.find((x) => x.id === (id as unknown as string));
         if (!t) throw notFound("Tenant", id as unknown as string);
         return respond(t as unknown as ReturnType<OperationsProvider["getTenant"]>["data"]);
       },
 
-      listServices: () => respond(canonicalServices as unknown as ReturnType<OperationsProvider["listServices"]>["data"]),
+      listServices: () => respond(bundle.services as unknown as ReturnType<OperationsProvider["listServices"]>["data"]),
       getService: (id) => {
-        const s = canonicalServices.find((x) => x.id === (id as unknown as string));
+        const s = bundle.services.find((x) => x.id === (id as unknown as string));
         if (!s) throw notFound("Service", id as unknown as string);
         return respond(s as unknown as ReturnType<OperationsProvider["getService"]>["data"]);
       },
       listComponents: (serviceId) => {
-        const svc = canonicalServices.find((x) => x.id === (serviceId as unknown as string));
+        const svc = bundle.services.find((x) => x.id === (serviceId as unknown as string));
         const ids = new Set(svc?.componentIds ?? []);
-        const list = canonicalComponents.filter((c) => ids.has(c.id));
+        const list = bundle.components.filter((c) => ids.has(c.id));
         return respond(list as unknown as ReturnType<OperationsProvider["listComponents"]>["data"]);
       },
 
@@ -454,9 +521,9 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
         return respond(incident as unknown as ReturnType<OperationsProvider["getIncident"]>["data"]);
       },
 
-      listRunbooks: () => respond(canonicalRunbooksList as unknown as ReturnType<OperationsProvider["listRunbooks"]>["data"]),
+      listRunbooks: () => respond(bundle.runbooksList as unknown as ReturnType<OperationsProvider["listRunbooks"]>["data"]),
       getRunbook: (id) => {
-        const rb = canonicalRunbooksList.find((r) => r.id === (id as unknown as string));
+        const rb = bundle.runbooksList.find((r) => r.id === (id as unknown as string));
         if (!rb) throw notFound("Runbook", id as unknown as string);
         return respond(rb as unknown as ReturnType<OperationsProvider["getRunbook"]>["data"]);
       },
@@ -470,11 +537,11 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
         return respond(approval as unknown as ReturnType<OperationsProvider["getApproval"]>["data"]);
       },
 
-      listChanges: () => respond([primaryChange] as unknown as ReturnType<OperationsProvider["listChanges"]>["data"]),
-      listDigitalWorkers: () => respond(canonicalWorkers as unknown as ReturnType<OperationsProvider["listDigitalWorkers"]>["data"]),
+      listChanges: () => respond(bundle.changesList as unknown as ReturnType<OperationsProvider["listChanges"]>["data"]),
+      listDigitalWorkers: () => respond(bundle.digitalWorkers as unknown as ReturnType<OperationsProvider["listDigitalWorkers"]>["data"]),
       listAuditLog: () => respond(auditLog as unknown as ReturnType<OperationsProvider["listAuditLog"]>["data"]),
       listNotifications: () => respond(notifications as unknown as ReturnType<OperationsProvider["listNotifications"]>["data"]),
-      listScenarioStages: () => respond(scenarioStages as unknown as ReturnType<OperationsProvider["listScenarioStages"]>["data"]),
+      listScenarioStages: () => respond(bundle.scenarioStages as unknown as ReturnType<OperationsProvider["listScenarioStages"]>["data"]),
 
       setSelectedService: (id) => setSelectedService(id as unknown as string),
       setEnvironment,
@@ -541,8 +608,8 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
 
       advanceScenario: async () => {
         advanceStage();
-        const nextIndex = Math.min(stageIndex + 1, scenarioStages.length - 1);
-        const stage = scenarioStages[nextIndex];
+        const nextIndex = Math.min(stageIndex + 1, bundle.scenarioStages.length - 1);
+        const stage = bundle.scenarioStages[nextIndex];
         const stageId = `stage-${stage.index}` as unknown as ScenarioStageId;
         const ev: DomainEvent = {
           id: nextEventId(), at: now(), kind: "ScenarioStageAdvanced",
@@ -560,7 +627,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
 
       resetScenario: async () => {
         resetScenarioAction();
-        const stage = scenarioStages[5];
+        const stage = bundle.scenarioStages[5];
         const stageId = `stage-${stage.index}` as unknown as ScenarioStageId;
         const ev: DomainEvent = {
           id: nextEventId(), at: now(), kind: "ScenarioStageAdvanced",
@@ -596,7 +663,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     };
     /* eslint-enable @typescript-eslint/consistent-type-assertions */
   }, [
-    tenant, selectedServiceId, environment, region, timeRange, role, dataFreshnessAt,
+    tenant, bundle, selectedServiceId, environment, region, timeRange, role, dataFreshnessAt,
     incident, execution, approval, notifications, auditLog, stageIndex,
     flags, eventBus,
   ]);

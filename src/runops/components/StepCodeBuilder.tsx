@@ -248,7 +248,7 @@ resource "runops_sql_failover" "ag_failover" {
       uncertainty: "Forced failover mode with data-loss disallowed will error out if replica lag exceeded thresholds mid-drain — falls to step 8 rollback branch.",
       evidence: [
         "Approval APR-4471 pattern applies — requires SoD from Change Manager.",
-        "AG listener DNS TTL is 30s in Contoso deployment.",
+        "AG listener DNS TTL is 30s in this deployment.",
       ],
       sources: [
         { id: "SEP-DUTY-POL", label: "Separation-of-duties policy" },

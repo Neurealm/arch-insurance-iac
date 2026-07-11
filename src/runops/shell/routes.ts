@@ -132,6 +132,7 @@ export const routes: RouteMeta[] = [
 
   // Platform
   R("platform",                              "Platform", "Platform Administration",       "Tenant, users, roles, feature flags",   "Built", { isSectionLanding: true, navPrimary: true }),
+  R("platform/tenant-profiles",              "Platform", "Tenant Profile Manager",        "Industry profiles, guardrails, and completeness", "Built"),
 ];
 
 /** Ordered list of the sections that appear in the left sidebar. */
