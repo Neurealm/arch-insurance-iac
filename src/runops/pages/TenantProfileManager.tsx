@@ -170,6 +170,7 @@ export default function TenantProfileManager() {
               <TabsTrigger value="policies">Policies & Guardrails</TabsTrigger>
               <TabsTrigger value="connectors">Connectors</TabsTrigger>
               <TabsTrigger value="standards">Standards Mappings</TabsTrigger>
+              <TabsTrigger value="completeness">Completeness</TabsTrigger>
               <TabsTrigger value="integrity">Integrity</TabsTrigger>
             </TabsList>
 
