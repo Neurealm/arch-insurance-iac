@@ -95,7 +95,7 @@ export const routes: RouteMeta[] = [
 
   // Incidents
   R("incidents",                             "Incidents", "Incidents",                   "All incidents in tenant",                "Scaffolded", { isSectionLanding: true, navPrimary: true }),
-  R("incidents/:incidentId",                 "Incidents", "Incident Detail",             "Selected incident",                      "Planned"),
+  R("incidents/:incidentId",                 "Incidents", "Incident Detail",             "Selected incident",                      "Built"),
 
   R("incidents/:incidentId/investigate",     "Incidents", "Investigation",               "Selected incident + evidence graph",     "Planned"),
   R("incidents/:incidentId/hypotheses",      "Incidents", "Hypotheses",                  "Selected incident + AI hypotheses",      "Planned"),
