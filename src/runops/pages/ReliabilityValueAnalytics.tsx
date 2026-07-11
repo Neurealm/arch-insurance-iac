@@ -658,7 +658,7 @@ export default function ReliabilityValueAnalytics() {
         eyebrow="Analytics"
         title="Reliability & Value Analytics"
         subtitle="Quantify reliability outcomes, operational performance, automation value, and worker effectiveness — every metric traces to source records."
-        status={{ label: `View: ${VIEW_LABELS[view]}`, tone: "info" }}
+        status={{ label: `View: ${VIEW_LABELS[view]}`, tone: "connected" }}
         actions={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => setSaveOpen(true)} disabled={!canWrite}>
