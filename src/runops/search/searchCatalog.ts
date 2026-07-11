@@ -43,14 +43,14 @@ export function buildSearchCatalog(ops: OperationsState): SearchResult[] {
     keywords: `${c.name} ${c.kind} ${c.health}`,
   }));
 
-  runbooksList.forEach((r) => out.push({
+  ops.runbooks.forEach((r) => out.push({
     id: r.id, type: "Runbook", title: `${r.id} · ${r.title}`, status: r.state,
     service: svcName(r.serviceId), source: "runbook-library", freshness: fresh,
     route: `/runops/runbooks/${r.id}`,
     keywords: `${r.id} ${r.title} ${r.version} ${r.state} ${r.autonomy}`,
   }));
 
-  executionsList.forEach((e) => out.push({
+  ops.executions.forEach((e) => out.push({
     id: e.id, type: "Execution", title: `${e.id} · ${e.title}`, status: e.state,
     source: "execution-queue", freshness: fresh,
     route: `/runops/executions/${e.id}`,
@@ -67,14 +67,14 @@ export function buildSearchCatalog(ops: OperationsState): SearchResult[] {
     keywords: `${ops.incident.id} ${ops.incident.title} ${ops.incident.severity}`,
   });
 
-  problemsList.forEach((p) => out.push({
+  ops.problems.forEach((p) => out.push({
     id: p.id, type: "Problem", title: `${p.id} · ${p.title}`, status: p.state,
     service: svcName(p.serviceId), source: "problem-mgmt", freshness: fresh,
     route: `/runops/problems/actions#${p.id}`,
     keywords: `${p.id} ${p.title} ${p.state}`,
   }));
 
-  changesList.forEach((c) => out.push({
+  ops.changes.forEach((c) => out.push({
     id: c.id, type: "Change", title: `${c.id} · ${c.title}`, status: c.risk,
     service: svcName(c.serviceId), source: "change-mgmt", freshness: c.deployedAt,
     route: `/runops/governance#${c.id}`,
@@ -88,7 +88,7 @@ export function buildSearchCatalog(ops: OperationsState): SearchResult[] {
     keywords: `${w.id} ${w.name} ${w.role} ${w.autonomy} ${w.status}`,
   }));
 
-  slos.forEach((s) => out.push({
+  ops.slos.forEach((s) => out.push({
     id: s.id, type: "SLO", title: s.name,
     status: `${s.current}% / ${s.target}%`,
     service: svcName(s.serviceId), source: "slo-registry", freshness: fresh,
@@ -96,7 +96,7 @@ export function buildSearchCatalog(ops: OperationsState): SearchResult[] {
     keywords: `${s.name} ${s.window} SLO error budget`,
   }));
 
-  knowledgeItems.forEach((k) => out.push({
+  ops.knowledgeItems.forEach((k) => out.push({
     id: k.id, type: "Knowledge", title: k.title,
     status: k.kind, service: svcName(k.serviceId),
     source: k.source, freshness: k.freshness,
@@ -104,14 +104,14 @@ export function buildSearchCatalog(ops: OperationsState): SearchResult[] {
     keywords: `${k.title} ${k.kind} ${k.snippet}`,
   }));
 
-  evidenceItems.forEach((e) => out.push({
+  ops.evidenceItems.forEach((e) => out.push({
     id: e.id, type: "Evidence", title: e.title, status: e.kind,
     source: e.source, freshness: e.capturedAt,
     route: e.incidentId ? `/runops/incidents/${e.incidentId}/investigate#${e.id}` : "/runops",
     keywords: `${e.id} ${e.title} ${e.kind} ${e.source}`,
   }));
 
-  connectors.forEach((c) => out.push({
+  ops.connectors.forEach((c) => out.push({
     id: c.id, type: "Connector", title: c.name, status: c.status,
     source: c.kind, freshness: c.freshness,
     route: `/runops/integrations#${c.id}`,
