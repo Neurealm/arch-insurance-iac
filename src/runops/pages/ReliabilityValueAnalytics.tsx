@@ -521,8 +521,13 @@ export default function ReliabilityValueAnalytics() {
   const canWrite = !(roleLabel === "Read Only User" || roleLabel === "Auditor");
 
   const audit = useCallback((action: string, target: string, detail?: string) => {
-    ops.appendAudit({ at: nowIso(), actor: roleLabel, action, target, detail });
-  }, [ops, roleLabel]);
+    const AUD_KEY = "runops.audit.events.v1";
+    const list = readList<{ id: string; at: string; actor: string; action: string; target: string; detail?: string }>(AUD_KEY);
+    writeList(AUD_KEY, [{ id: rid("AUD"), at: nowIso(), actor: roleLabel, action, target, detail }, ...list].slice(0, 1000));
+    const DOM_KEY = "runops.domain.events.v1";
+    const dom = readList<{ id: string; at: string; kind: string; payload: unknown }>(DOM_KEY);
+    writeList(DOM_KEY, [{ id: rid("DEV"), at: nowIso(), kind: action, payload: { target, detail } }, ...dom].slice(0, 1000));
+  }, [roleLabel]);
 
   const visibleMetrics = useMemo(
     () => metrics.filter((m) => m.views.includes(view)),
