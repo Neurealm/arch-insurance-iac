@@ -793,7 +793,7 @@ export default function ProblemActions() {
         meta={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="border-slate-200 bg-white">Tenant: {ops.tenant.name}</Badge>
-            <Badge variant="outline" className="border-slate-200 bg-white">Service: {ops.service.name}</Badge>
+            <Badge variant="outline" className="border-slate-200 bg-white">Service: {ops.selectedService.name}</Badge>
             <Badge variant="outline" className="border-slate-200 bg-white">Env: {ops.environment}</Badge>
             <Badge variant="outline" className="border-slate-200 bg-white">Role: {ops.role}</Badge>
             <Badge variant="outline" className="border-slate-200 bg-white">Scenario stage: {ops.stageIndex}</Badge>
