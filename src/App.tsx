@@ -367,6 +367,7 @@ import RunOpsAutonomousExecutionMonitor from "./runops/pages/AutonomousExecution
 import RunOpsApprovalCenter from "./runops/pages/ApprovalCenter.tsx";
 import RunOpsEvidenceReplay from "./runops/pages/EvidenceReplay.tsx";
 import RunOpsShiftHandoff from "./runops/pages/ShiftHandoff.tsx";
+import RunOpsAlertTriage from "./runops/pages/AlertTriage.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
@@ -416,8 +417,9 @@ const App = () => (
             <Route path="executions/:executionId" element={<RunOpsAutonomousExecutionMonitor />} />
             <Route path="approvals" element={<RunOpsApprovalCenter />} />
             <Route path="operations/handoff" element={<RunOpsShiftHandoff />} />
+            <Route path="operations/alerts" element={<RunOpsAlertTriage />} />
             {runopsRoutes
-              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology" && r.path !== "services/:serviceId/observability" && r.path !== "services/:serviceId/readiness" && r.path !== "runbooks" && r.path !== "runbooks/new" && r.path !== "runbooks/:runbookId" && r.path !== "runbooks/:runbookId/designer" && r.path !== "runbooks/:runbookId/steps/:stepId" && r.path !== "runbooks/:runbookId/policy" && r.path !== "runbooks/:runbookId/recovery" && r.path !== "runbooks/:runbookId/test" && r.path !== "runbooks/:runbookId/release" && r.path !== "runbooks/:runbookId/triggers" && r.path !== "runbooks/:runbookId/launch" && r.path !== "executions/:executionId/guided" && r.path !== "executions/:executionId/evidence" && r.path !== "executions/:executionId" && r.path !== "approvals" && r.path !== "operations/handoff")
+              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology" && r.path !== "services/:serviceId/observability" && r.path !== "services/:serviceId/readiness" && r.path !== "runbooks" && r.path !== "runbooks/new" && r.path !== "runbooks/:runbookId" && r.path !== "runbooks/:runbookId/designer" && r.path !== "runbooks/:runbookId/steps/:stepId" && r.path !== "runbooks/:runbookId/policy" && r.path !== "runbooks/:runbookId/recovery" && r.path !== "runbooks/:runbookId/test" && r.path !== "runbooks/:runbookId/release" && r.path !== "runbooks/:runbookId/triggers" && r.path !== "runbooks/:runbookId/launch" && r.path !== "executions/:executionId/guided" && r.path !== "executions/:executionId/evidence" && r.path !== "executions/:executionId" && r.path !== "approvals" && r.path !== "operations/handoff" && r.path !== "operations/alerts")
               .map((r) => (
                 <Route key={r.path} path={r.path} element={<RunOpsPlaceholder />} />
               ))}
