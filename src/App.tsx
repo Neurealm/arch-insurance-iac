@@ -376,6 +376,7 @@ import RunOpsStakeholderCommunications from "./runops/pages/StakeholderCommunica
 import RunOpsRecoveryValidation from "./runops/pages/RecoveryValidation.tsx";
 import RunOpsPostmortem from "./runops/pages/Postmortem.tsx";
 import RunOpsProblemActions from "./runops/pages/ProblemActions.tsx";
+import RunOpsDigitalWorkerCatalog from "./runops/pages/DigitalWorkerCatalog.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
