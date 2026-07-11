@@ -266,16 +266,26 @@ export default function ServiceDigitalTwin() {
       />
 
       <EntityTabs
-        tabs={TABS.map((t) => ({
-          ...t,
-          badge:
-            t.value === "components" ? String(serviceComponents.length) :
-            t.value === "changes"    ? String(serviceChanges.length) :
-            t.value === "runbooks"   ? String(serviceRunbooks.length) :
-            undefined,
-        }))}
+        tabs={(() => {
+          const base = TABS.map((t) => ({
+            ...t,
+            badge:
+              t.value === "components" ? String(serviceComponents.length) :
+              t.value === "changes"    ? String(serviceChanges.length) :
+              t.value === "runbooks"   ? String(serviceRunbooks.length) :
+              undefined,
+          }));
+          if (service.id === "svc-hc-clinical-care-delivery") {
+            const idx = base.findIndex((t) => t.value === "journeys");
+            base.splice(idx, 0, { label: "Architecture Digital Twin", value: "architecture" as TabValue, badge: undefined });
+          }
+          return base;
+        })()}
         value={tab}
-        onChange={(v) => setTab(v as TabValue)}
+        onChange={(v) => {
+          if (v === "architecture") { openTopology(); return; }
+          setTab(v as TabValue);
+        }}
       />
 
       {stale && (
