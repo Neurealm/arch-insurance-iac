@@ -608,8 +608,8 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
 
       advanceScenario: async () => {
         advanceStage();
-        const nextIndex = Math.min(stageIndex + 1, scenarioStages.length - 1);
-        const stage = scenarioStages[nextIndex];
+        const nextIndex = Math.min(stageIndex + 1, bundle.scenarioStages.length - 1);
+        const stage = bundle.scenarioStages[nextIndex];
         const stageId = `stage-${stage.index}` as unknown as ScenarioStageId;
         const ev: DomainEvent = {
           id: nextEventId(), at: now(), kind: "ScenarioStageAdvanced",
@@ -627,7 +627,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
 
       resetScenario: async () => {
         resetScenarioAction();
-        const stage = scenarioStages[5];
+        const stage = bundle.scenarioStages[5];
         const stageId = `stage-${stage.index}` as unknown as ScenarioStageId;
         const ev: DomainEvent = {
           id: nextEventId(), at: now(), kind: "ScenarioStageAdvanced",
