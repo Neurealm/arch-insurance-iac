@@ -389,6 +389,7 @@ import RunOpsExecutionSecurity from "./runops/pages/ExecutionSecurity.tsx";
 import RunOpsAIGovernance from "./runops/pages/AIGovernance.tsx";
 import RunOpsIntegrationHub from "./runops/pages/IntegrationHub.tsx";
 import RunOpsDeveloperPortal from "./runops/pages/DeveloperPortal.tsx";
+import RunOpsSupplyChain from "./runops/pages/SupplyChain.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
