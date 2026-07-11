@@ -319,6 +319,7 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
     slos: canonicalSlos,
     connectors: canonicalConnectors,
     executions: canonicalExecutionsList,
+    runbooks: canonicalRunbooksList,
     changes: canonicalChangesList,
     environmentOptions: envList,
     regionOptions: regionList,
