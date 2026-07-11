@@ -98,7 +98,7 @@ export const routes: RouteMeta[] = [
   R("incidents/:incidentId",                 "Incidents", "Incident Detail",             "Selected incident",                      "Built"),
 
   R("incidents/:incidentId/investigate",     "Incidents", "Investigation",               "Selected incident + evidence graph",     "Built"),
-  R("incidents/:incidentId/hypotheses",      "Incidents", "Hypotheses",                  "Selected incident + AI hypotheses",      "Planned"),
+  R("incidents/:incidentId/hypotheses",      "Incidents", "Hypotheses",                  "Selected incident + AI hypotheses",      "Built"),
   R("incidents/:incidentId/remediations",    "Incidents", "Remediation Options",         "Selected incident + candidate runbooks", "Planned"),
   R("incidents/:incidentId/communications",  "Incidents", "Communications",              "Selected incident + audiences",          "Planned"),
   R("incidents/:incidentId/recovery",        "Incidents", "Recovery Validation",         "Selected incident + validation checks",  "Planned"),
