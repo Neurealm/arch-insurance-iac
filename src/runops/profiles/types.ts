@@ -86,6 +86,46 @@ export type TopologyNodeType = {
   readonly description: string;
 };
 
+export type ReadinessCategory = {
+  readonly key: string;
+  readonly label: string;
+  readonly description: string;
+};
+
+export type CommunicationsAudience = {
+  readonly key: string;
+  readonly label: string;
+  readonly channelHint: string;
+};
+
+export type DesignerNodeTemplate = {
+  readonly key: string;
+  readonly label: string;
+  readonly kind: "diagnose" | "mitigate" | "validate" | "rollback" | "approval" | "evidence";
+  readonly description: string;
+};
+
+export type ToilCategory = {
+  readonly key: string;
+  readonly label: string;
+  readonly description: string;
+};
+
+export type ContributingFactorCategory = {
+  readonly key: string;
+  readonly label: string;
+  readonly description: string;
+};
+
+export type ScenarioInjectionDefinition = {
+  readonly id: string;
+  readonly label: string;
+  readonly description: string;
+  /** Deterministic, reversible through Reset Scenario. */
+  readonly reversible: true;
+  readonly appliesToServices?: readonly string[];
+};
+
 /** IndustryProfile — shared across every tenant that adopts this industry. */
 export interface IndustryProfile {
   readonly id: string;
@@ -115,6 +155,17 @@ export interface IndustryProfile {
   readonly defaultRunbookCategories: readonly string[];
   readonly defaultWorkerCategories: readonly string[];
   readonly defaultConnectorCategories: readonly string[];
+
+  // Extended catalogs consumed by module pages so no page hardcodes an
+  // industry list. Optional on the type so older industries can grow into
+  // these without breaking the shape; every canonical industry in this
+  // build populates them.
+  readonly readinessCategories?: readonly ReadinessCategory[];
+  readonly communicationsAudiences?: readonly CommunicationsAudience[];
+  readonly designerTemplates?: readonly DesignerNodeTemplate[];
+  readonly toilCategories?: readonly ToilCategory[];
+  readonly postmortemFactorCategories?: readonly ContributingFactorCategory[];
+  readonly scenarioInjections?: readonly ScenarioInjectionDefinition[];
 
   readonly presentationGuidance: string;
   readonly glossary: readonly GlossaryTerm[];
