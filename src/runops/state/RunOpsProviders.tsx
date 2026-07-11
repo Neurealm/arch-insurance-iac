@@ -495,23 +495,23 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
 
       getContext: getSelectionContext,
 
-      listTenants: () => respond(canonicalTenants as unknown as OperationsProvider["listTenants"] extends () => ProviderResponse<infer U> ? U : never),
+      listTenants: () => respond(registeredTenants as unknown as OperationsProvider["listTenants"] extends () => ProviderResponse<infer U> ? U : never),
       getTenant: (id) => {
-        const t = canonicalTenants.find((x) => x.id === (id as unknown as string));
+        const t = registeredTenants.find((x) => x.id === (id as unknown as string));
         if (!t) throw notFound("Tenant", id as unknown as string);
         return respond(t as unknown as ReturnType<OperationsProvider["getTenant"]>["data"]);
       },
 
-      listServices: () => respond(canonicalServices as unknown as ReturnType<OperationsProvider["listServices"]>["data"]),
+      listServices: () => respond(bundle.services as unknown as ReturnType<OperationsProvider["listServices"]>["data"]),
       getService: (id) => {
-        const s = canonicalServices.find((x) => x.id === (id as unknown as string));
+        const s = bundle.services.find((x) => x.id === (id as unknown as string));
         if (!s) throw notFound("Service", id as unknown as string);
         return respond(s as unknown as ReturnType<OperationsProvider["getService"]>["data"]);
       },
       listComponents: (serviceId) => {
-        const svc = canonicalServices.find((x) => x.id === (serviceId as unknown as string));
+        const svc = bundle.services.find((x) => x.id === (serviceId as unknown as string));
         const ids = new Set(svc?.componentIds ?? []);
-        const list = canonicalComponents.filter((c) => ids.has(c.id));
+        const list = bundle.components.filter((c) => ids.has(c.id));
         return respond(list as unknown as ReturnType<OperationsProvider["listComponents"]>["data"]);
       },
 
@@ -521,9 +521,9 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
         return respond(incident as unknown as ReturnType<OperationsProvider["getIncident"]>["data"]);
       },
 
-      listRunbooks: () => respond(canonicalRunbooksList as unknown as ReturnType<OperationsProvider["listRunbooks"]>["data"]),
+      listRunbooks: () => respond(bundle.runbooksList as unknown as ReturnType<OperationsProvider["listRunbooks"]>["data"]),
       getRunbook: (id) => {
-        const rb = canonicalRunbooksList.find((r) => r.id === (id as unknown as string));
+        const rb = bundle.runbooksList.find((r) => r.id === (id as unknown as string));
         if (!rb) throw notFound("Runbook", id as unknown as string);
         return respond(rb as unknown as ReturnType<OperationsProvider["getRunbook"]>["data"]);
       },
@@ -537,11 +537,11 @@ export function DemoOperationsProvider({ children }: { children: React.ReactNode
         return respond(approval as unknown as ReturnType<OperationsProvider["getApproval"]>["data"]);
       },
 
-      listChanges: () => respond([primaryChange] as unknown as ReturnType<OperationsProvider["listChanges"]>["data"]),
-      listDigitalWorkers: () => respond(canonicalWorkers as unknown as ReturnType<OperationsProvider["listDigitalWorkers"]>["data"]),
+      listChanges: () => respond(bundle.changesList as unknown as ReturnType<OperationsProvider["listChanges"]>["data"]),
+      listDigitalWorkers: () => respond(bundle.digitalWorkers as unknown as ReturnType<OperationsProvider["listDigitalWorkers"]>["data"]),
       listAuditLog: () => respond(auditLog as unknown as ReturnType<OperationsProvider["listAuditLog"]>["data"]),
       listNotifications: () => respond(notifications as unknown as ReturnType<OperationsProvider["listNotifications"]>["data"]),
-      listScenarioStages: () => respond(scenarioStages as unknown as ReturnType<OperationsProvider["listScenarioStages"]>["data"]),
+      listScenarioStages: () => respond(bundle.scenarioStages as unknown as ReturnType<OperationsProvider["listScenarioStages"]>["data"]),
 
       setSelectedService: (id) => setSelectedService(id as unknown as string),
       setEnvironment,
