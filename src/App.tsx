@@ -386,6 +386,7 @@ import RunOpsKnowledgeGraph from "./runops/pages/KnowledgeGraph.tsx";
 import RunOpsAnalytics from "./runops/pages/ReliabilityValueAnalytics.tsx";
 import RunOpsGovernance from "./runops/pages/GovernanceCenter.tsx";
 import RunOpsExecutionSecurity from "./runops/pages/ExecutionSecurity.tsx";
+import RunOpsAIGovernance from "./runops/pages/AIGovernance.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
