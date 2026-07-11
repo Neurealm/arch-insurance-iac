@@ -80,6 +80,13 @@ export function resolvePresentation(
     glossary:            industry.glossary,
     sourceSystemAliases: profile.sourceSystemAliases,
 
+    readinessCategories:         industry.readinessCategories         ?? [],
+    communicationsAudiences:     industry.communicationsAudiences     ?? [],
+    designerTemplates:           industry.designerTemplates           ?? [],
+    toilCategories:              industry.toilCategories              ?? [],
+    postmortemFactorCategories:  industry.postmortemFactorCategories  ?? [],
+    scenarioInjections:          industry.scenarioInjections          ?? [],
+
     narrationTemplates: NARRATION_BY_INDUSTRY[industry.code],
   };
 }
