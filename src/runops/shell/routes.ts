@@ -87,7 +87,7 @@ export const routes: RouteMeta[] = [
   // Operations
   R("operations/queue",                      "Operations", "Operations Queue",           "All active executions and approvals",    "Built",     { isSectionLanding: true, navPrimary: true }),
   R("operations/handoff",                    "Operations", "Shift Handoff",              "Active shift + outstanding work",        "Built"),
-  R("operations/alerts",                     "Operations", "Alerts",                     "All active alerts and correlations",     "Planned"),
+  R("operations/alerts",                     "Operations", "Alerts",                     "All active alerts and correlations",     "Built"),
   R("approvals",                             "Operations", "Approvals",                  "Pending approvals across executions",    "Built"),
   R("executions/:executionId",               "Operations", "Execution Detail",           "Selected execution",                     "Built"),
   R("executions/:executionId/guided",        "Operations", "Guided Execution",           "Selected execution + step guidance",     "Built"),
