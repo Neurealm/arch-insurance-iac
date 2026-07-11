@@ -317,6 +317,51 @@ export default function TenantProfileManager() {
               ))}
             </TabsContent>
 
+            <TabsContent value="completeness" className="mt-3 space-y-2">
+              <div className="rounded border border-slate-200 bg-white p-2 text-[12px]">
+                <div className="flex items-center gap-2">
+                  <StatusPill ok={report.ok} />
+                  <span>Overall completeness {report.completenessPercent}%</span>
+                  <span className="ml-auto text-[10.5px] text-slate-500">
+                    18 dimensions · drill in for missing elements
+                  </span>
+                </div>
+              </div>
+              <ul className="grid gap-2 md:grid-cols-2">
+                {report.dimensions.map((d) => (
+                  <li key={d.key} className="rounded border border-slate-200 bg-white p-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[12px] font-medium text-slate-900">{d.label}</span>
+                      <span className={cn(
+                        "rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                        d.ok ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                             : "border-amber-300 bg-amber-50 text-amber-800",
+                      )}>{d.score}%</span>
+                    </div>
+                    <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className={cn(
+                          "h-full",
+                          d.score >= 85 ? "bg-emerald-500" :
+                          d.score >= 70 ? "bg-emerald-400" :
+                          d.score >= 50 ? "bg-amber-400" : "bg-rose-500",
+                        )}
+                        style={{ width: `${d.score}%` }}
+                      />
+                    </div>
+                    <div className="mt-1 text-[11px] text-slate-600">{d.detail}</div>
+                    {d.missing.length > 0 && (
+                      <ul className="mt-1 space-y-0.5 text-[10.5px] text-rose-700">
+                        {d.missing.map((m, i) => (
+                          <li key={i}>• {m}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </TabsContent>
+
             <TabsContent value="integrity" className="mt-3 space-y-2">
               <div className="rounded border border-slate-200 bg-white p-2 text-[12px]">
                 <div className="flex items-center gap-2">
