@@ -906,11 +906,13 @@ export default function AutomationRegistry() {
       <EntityHeader
         title="Toil Discovery, Automation Backlog & Marketplace"
         subtitle="Move observed toil into governed, reusable operational capabilities."
-        badges={[
-          { label: `${candidates.length} candidates`, tone: "default" },
-          { label: `${metrics.inEngineering} in engineering`, tone: "info" },
-          { label: `${metrics.published} published`, tone: "success" },
-        ]}
+        meta={
+          <div className="flex flex-wrap gap-2 text-xs">
+            <Badge variant="outline">{candidates.length} candidates</Badge>
+            <Badge variant="outline">{metrics.inEngineering} in engineering</Badge>
+            <Badge variant="outline">{metrics.published} published</Badge>
+          </div>
+        }
         actions={
           <div className="flex items-center gap-2">
             <Button
