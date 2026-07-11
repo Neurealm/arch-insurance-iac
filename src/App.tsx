@@ -353,6 +353,7 @@ import RunOpsObservabilityExplorer from "./runops/pages/ObservabilityExplorer.ts
 import RunOpsOperationalReadiness from "./runops/pages/OperationalReadiness.tsx";
 import RunOpsRunbookLibrary from "./runops/pages/RunbookLibrary.tsx";
 import RunOpsRunbookDetail from "./runops/pages/RunbookDetail.tsx";
+import RunOpsRunbookNew from "./runops/pages/RunbookNew.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
@@ -387,9 +388,10 @@ const App = () => (
             <Route path="services/:serviceId/observability" element={<RunOpsObservabilityExplorer />} />
             <Route path="services/:serviceId/readiness" element={<RunOpsOperationalReadiness />} />
             <Route path="runbooks" element={<RunOpsRunbookLibrary />} />
+            <Route path="runbooks/new" element={<RunOpsRunbookNew />} />
             <Route path="runbooks/:runbookId" element={<RunOpsRunbookDetail />} />
             {runopsRoutes
-              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology" && r.path !== "services/:serviceId/observability" && r.path !== "services/:serviceId/readiness" && r.path !== "runbooks" && r.path !== "runbooks/:runbookId")
+              .filter((r) => r.path !== "" && r.path !== "command" && r.path !== "operations/queue" && r.path !== "services" && r.path !== "services/:serviceId" && r.path !== "services/:serviceId/topology" && r.path !== "services/:serviceId/observability" && r.path !== "services/:serviceId/readiness" && r.path !== "runbooks" && r.path !== "runbooks/new" && r.path !== "runbooks/:runbookId")
               .map((r) => (
                 <Route key={r.path} path={r.path} element={<RunOpsPlaceholder />} />
               ))}
