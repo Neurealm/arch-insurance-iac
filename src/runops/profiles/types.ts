@@ -284,6 +284,14 @@ export interface TenantPresentationProfile {
   readonly glossary: readonly GlossaryTerm[];
   readonly sourceSystemAliases: readonly SourceSystemAlias[];
 
+  // Extended catalogs surfaced from the industry profile.
+  readonly readinessCategories: readonly ReadinessCategory[];
+  readonly communicationsAudiences: readonly CommunicationsAudience[];
+  readonly designerTemplates: readonly DesignerNodeTemplate[];
+  readonly toilCategories: readonly ToilCategory[];
+  readonly postmortemFactorCategories: readonly ContributingFactorCategory[];
+  readonly scenarioInjections: readonly ScenarioInjectionDefinition[];
+
   /** Narration templates ready for a future TTS layer to consume without
    *  another refactor. Never contain sensitive record identifiers. */
   readonly narrationTemplates: {
@@ -300,9 +308,23 @@ export interface ValidationFinding {
   readonly code: string;
   readonly message: string;
 }
+
+/** Per-dimension completeness score used by the Tenant Profile Manager. */
+export interface CompletenessDimension {
+  readonly key: string;
+  readonly label: string;
+  /** 0..100 */
+  readonly score: number;
+  readonly ok: boolean;
+  readonly detail: string;
+  readonly missing: readonly string[];
+}
+
 export interface ValidationReport {
   readonly tenantId: string;
   readonly ok: boolean;
   readonly findings: readonly ValidationFinding[];
   readonly completenessPercent: number;
+  readonly dimensions: readonly CompletenessDimension[];
 }
+
