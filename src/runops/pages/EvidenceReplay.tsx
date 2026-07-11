@@ -549,14 +549,17 @@ export default function EvidenceReplay() {
   return (
     <div className="p-4 md:p-6 space-y-4">
       <EntityHeader
+        eyebrow={`${record.runbookId} ${record.runbookVersion} · ${record.environment}`}
         title={`Evidence · ${record.id}`}
-        subtitle={`${runbook?.name ?? record.runbookId} ${record.runbookVersion} · ${service?.name ?? record.serviceId} · ${record.environment}`}
-        badges={[
-          { label: `State: ${record.state}`, tone: record.state === "Completed" ? "success" : record.state === "Cancelled" ? "warning" : "info" },
-          { label: isArchived ? "Archived" : "Live", tone: isArchived ? "warning" : "success" },
-          { label: integrityOk ? "Integrity: OK" : "Integrity: Warning", tone: integrityOk ? "success" : "warning" },
-          { label: `Evidence coverage: ${evidenceCoverage.pct}%`, tone: evidenceCoverage.pct >= 60 ? "success" : "warning" },
-        ]}
+        subtitle={`${runbook?.title ?? record.runbookId} · ${service?.name ?? record.serviceId}`}
+        meta={
+          <div className="flex flex-wrap gap-1.5">
+            <Badge variant="outline" className="text-[10px]">State: {record.state}</Badge>
+            <Badge variant={isArchived ? "secondary" : "outline"} className="text-[10px]">{isArchived ? "Archived" : "Live"}</Badge>
+            <Badge variant="outline" className="text-[10px]">{integrityOk ? "Integrity: OK" : "Integrity: Warning"}</Badge>
+            <Badge variant="outline" className="text-[10px]">Coverage: {evidenceCoverage.pct}%</Badge>
+          </div>
+        }
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" variant="outline" onClick={() => navigate(`/runops/executions/${record.id}`)}>
