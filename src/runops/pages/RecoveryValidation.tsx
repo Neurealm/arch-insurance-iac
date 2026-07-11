@@ -813,21 +813,23 @@ export default function RecoveryValidation() {
         eyebrow={`Incident · ${incidentId}`}
         title="Recovery Validation & Closure"
         subtitle={`Confirm service and customer recovery for ${service.name} · ${service.tier} · ${ops.environment}`}
-        status={
-          <Badge variant="outline" className={cn("gap-1", incidentTone(record.incidentState))}>
-            {record.incidentState === "Resolved" ? <CheckCircle2 className="h-3.5 w-3.5" /> :
-             record.incidentState === "Validation Failed" ? <XCircle className="h-3.5 w-3.5" /> :
-             record.incidentState === "Residual Risk Accepted" ? <AlertTriangle className="h-3.5 w-3.5" /> :
-             <Activity className="h-3.5 w-3.5" />}
-            {record.incidentState}
-          </Badge>
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className={cn("gap-1", incidentTone(record.incidentState))}>
+              {record.incidentState === "Resolved" ? <CheckCircle2 className="h-3.5 w-3.5" /> :
+               record.incidentState === "Validation Failed" ? <XCircle className="h-3.5 w-3.5" /> :
+               record.incidentState === "Residual Risk Accepted" ? <AlertTriangle className="h-3.5 w-3.5" /> :
+               <Activity className="h-3.5 w-3.5" />}
+              {record.incidentState}
+            </Badge>
+            <span className="text-slate-500">Tier:</span> <span>{service.tier}</span>
+            <span className="text-slate-500">· Started:</span>
+            <span>{record.startedAt ? new Date(record.startedAt).toLocaleTimeString() : "—"}</span>
+            <span className="text-slate-500">· Window:</span> <span>{record.observationWindowMin} min</span>
+            <span className="text-slate-500">· Consecutive OK required:</span>
+            <span>{record.requiredConsecutive}</span>
+          </div>
         }
-        meta={[
-          { label: "Tier", value: service.tier },
-          { label: "Started", value: record.startedAt ? new Date(record.startedAt).toLocaleTimeString() : "—" },
-          { label: "Window", value: `${record.observationWindowMin} min` },
-          { label: "Consecutive OK required", value: String(record.requiredConsecutive) },
-        ]}
         actions={
           <div className="flex flex-wrap gap-2">
             <Button
