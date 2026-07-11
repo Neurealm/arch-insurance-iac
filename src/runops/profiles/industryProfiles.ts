@@ -68,6 +68,38 @@ export const genericEnterpriseIndustry: IndustryProfile = {
     { term: "MTTR", expansion: "Mean Time To Restore",    industry: "cross-industry",
       definition: "Average time from detection to service restoration.", tooltip: "Average recovery time." },
   ],
+  readinessCategories: [
+    { key: "reliability",   label: "Reliability",   description: "SLO/error-budget hygiene." },
+    { key: "change-safety", label: "Change safety", description: "Approval gates and rollback." },
+    { key: "observability", label: "Observability", description: "Metrics, logs, traces." },
+    { key: "capacity",      label: "Capacity",      description: "Saturation and headroom." },
+  ],
+  communicationsAudiences: [
+    { key: "engineering", label: "Engineering", channelHint: "Engineering channel" },
+    { key: "executive",   label: "Executive",   channelHint: "Executive brief" },
+    { key: "customer",    label: "Customer",    channelHint: "Customer notification" },
+  ],
+  designerTemplates: [
+    { key: "diagnose",      label: "Diagnose step",       kind: "diagnose", description: "Generic diagnostic step." },
+    { key: "mitigate",      label: "Mitigate step",       kind: "mitigate", description: "Generic mitigation step." },
+    { key: "validate",      label: "Validate step",       kind: "validate", description: "Generic validation step." },
+    { key: "rollback",      label: "Rollback step",       kind: "rollback", description: "Generic rollback step." },
+    { key: "approval",      label: "Approval gate",       kind: "approval", description: "Approval-gated action." },
+  ],
+  toilCategories: [
+    { key: "manual-triage", label: "Manual triage",  description: "Repetitive alert triage." },
+    { key: "ad-hoc-scale",  label: "Ad hoc scaling", description: "Manual capacity adjustments." },
+  ],
+  postmortemFactorCategories: [
+    { key: "change",        label: "Change",        description: "Deployment or config change contributors." },
+    { key: "capacity",      label: "Capacity",      description: "Saturation or resource contributors." },
+    { key: "dependency",    label: "Dependency",    description: "Upstream/downstream contributors." },
+    { key: "detection",     label: "Detection",     description: "Monitoring gaps." },
+  ],
+  scenarioInjections: [
+    { id: "inj-generic-latency-spike", label: "Latency spike",       description: "P95 latency doubles.",             reversible: true },
+    { id: "inj-generic-dep-timeout",   label: "Dependency timeout",  description: "A dependency exceeds its budget.", reversible: true },
+  ],
   createdAt: NOW,
   updatedAt: NOW,
 };
