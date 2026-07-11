@@ -291,7 +291,7 @@ export default function RunbookTriggers() {
     const t = store.triggers.find((x) => x.id === id);
     if (!t || readOnly) return;
     const src = ops.connectors.find((c) => c.id === t.sourceConnectorId);
-    const sourceUnavailable = src?.state === "Unavailable";
+    const sourceUnavailable = src?.status === "Unavailable";
     if (sourceUnavailable) {
       patch(id, { state: "Source unavailable" });
       emit("warning", "Cannot enable — source unavailable",
