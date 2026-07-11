@@ -361,6 +361,7 @@ import RunOpsRunbookRecoveryDesigner from "./runops/pages/RunbookRecoveryDesigne
 import RunOpsRunbookTestLab from "./runops/pages/RunbookTestLab.tsx";
 import RunOpsRunbookRelease from "./runops/pages/RunbookRelease.tsx";
 import RunOpsRunbookTriggers from "./runops/pages/RunbookTriggers.tsx";
+import RunOpsRunbookLaunchCenter from "./runops/pages/RunbookLaunchCenter.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
