@@ -636,7 +636,7 @@ export default function RunbookLibrary() {
         }
       />
 
-      {stale && <StaleDataState capturedAt={ops.dataFreshnessAt} onRefresh={ops.refreshData} />}
+      {stale && <StaleDataState description={`Last refresh ${new Date(ops.dataFreshnessAt).toLocaleTimeString()}. Data may not reflect the latest catalog.`} action={{ label: "Refresh now", onClick: ops.refreshData }} />}
       {importInProgress && (
         <div className="rounded border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
           Import in progress from {imports.find((j) => j.state === "In Progress")?.source ?? "source"}. Newly discovered runbooks will appear here when ingestion completes.
