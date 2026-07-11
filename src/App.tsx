@@ -373,6 +373,7 @@ import RunOpsInvestigationWorkspace from "./runops/pages/InvestigationWorkspace.
 import RunOpsHypothesisGraph from "./runops/pages/HypothesisGraph.tsx";
 import RunOpsRemediationComparison from "./runops/pages/RemediationComparison.tsx";
 import RunOpsStakeholderCommunications from "./runops/pages/StakeholderCommunications.tsx";
+import RunOpsRecoveryValidation from "./runops/pages/RecoveryValidation.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
