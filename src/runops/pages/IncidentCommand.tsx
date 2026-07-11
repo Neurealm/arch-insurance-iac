@@ -284,8 +284,7 @@ export default function IncidentCommand() {
     ops.role === "SRE Engineer" ||
     ops.role === "Service Owner" ||
     ops.role === "Change Manager" ||
-    ops.role === "Platform Engineer" ||
-    ops.role === "Platform Admin"
+    ops.role === "Platform Engineer"
   );
 
   const [record, setRecord] = useState<IncidentRecord | null>(null);
