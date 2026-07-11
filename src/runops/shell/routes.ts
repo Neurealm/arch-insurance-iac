@@ -106,7 +106,7 @@ export const routes: RouteMeta[] = [
   R("problems/actions",                      "Incidents", "Problem Corrective Actions",  "All open corrective actions",            "Built"),
 
   // Digital Workers
-  R("workers",                               "Digital Workers", "Digital Worker Fleet",     "All digital workers in tenant",         "Scaffolded", { isSectionLanding: true, navPrimary: true }),
+  R("workers",                               "Digital Workers", "Digital Worker Catalog",   "All digital workers in tenant",         "Built",     { isSectionLanding: true, navPrimary: true }),
   R("workers/:workerId/studio",              "Digital Workers", "Digital Worker Studio",    "Selected worker + capabilities",        "Planned"),
   R("workers/collaboration/:sessionId",      "Digital Workers", "Worker Collaboration",     "Selected multi-worker session",         "Planned"),
   R("automation",                            "Digital Workers", "Automation Registry",      "All automations + autonomy levels",     "Planned"),
