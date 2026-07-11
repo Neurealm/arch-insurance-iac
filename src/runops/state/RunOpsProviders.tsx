@@ -180,6 +180,22 @@ function savePersisted(p: Persisted): void {
   try { window.localStorage.setItem(LS_KEY, JSON.stringify(p)); } catch { /* ignore */ }
 }
 
+/** Per-tenant scenario stage persistence. */
+function stageKey(tenantId: string): string { return `runops.scenario.${tenantId}.stageIndex`; }
+function loadStageIndex(tenantId: string, fallback: number): number {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const v = window.localStorage.getItem(stageKey(tenantId));
+    if (!v) return fallback;
+    const n = Number.parseInt(v, 10);
+    return Number.isFinite(n) ? n : fallback;
+  } catch { return fallback; }
+}
+function saveStageIndex(tenantId: string, index: number): void {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(stageKey(tenantId), String(index)); } catch { /* ignore */ }
+}
+
 /* -------------------------- Operations Provider ------------------------ */
 
 export function DemoOperationsProvider({ children }: { children: React.ReactNode }) {
