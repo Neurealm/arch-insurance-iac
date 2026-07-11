@@ -80,7 +80,7 @@ export const routes: RouteMeta[] = [
   R("runbooks/:runbookId/policy",            "Runbooks", "Runbook Policy",               "Selected runbook + autonomy policy",     "Built"),
   R("runbooks/:runbookId/recovery",          "Runbooks", "Runbook Recovery Paths",       "Selected runbook + rollback branches",   "Built"),
   R("runbooks/:runbookId/test",              "Runbooks", "Runbook Test Harness",         "Selected runbook + test fixtures",       "Built"),
-  R("runbooks/:runbookId/release",           "Runbooks", "Runbook Release",              "Selected runbook + version history",     "Planned"),
+  R("runbooks/:runbookId/release",           "Runbooks", "Runbook Release",              "Selected runbook + version history",     "Built"),
   R("runbooks/:runbookId/triggers",          "Runbooks", "Runbook Triggers",             "Selected runbook + trigger bindings",    "Planned"),
   R("runbooks/:runbookId/launch",            "Runbooks", "Launch Runbook",               "Selected runbook + execution parameters", "Planned"),
 
