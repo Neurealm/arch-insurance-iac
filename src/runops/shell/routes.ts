@@ -73,7 +73,7 @@ export const routes: RouteMeta[] = [
   // Runbooks
   R("runbooks",                              "Runbooks", "Runbook Library",              "All runbooks in tenant",                 "Built", { isSectionLanding: true, navPrimary: true }),
   R("runbooks/new",                          "Runbooks", "New Runbook",                  "Draft runbook",                          "Built"),
-  R("runbooks/fitness",                      "Runbooks", "Runbook Fitness",              "All runbooks + fitness scores",          "Planned"),
+  R("runbooks/fitness",                      "Runbooks", "Runbook Fitness",              "All runbooks + fitness scores",          "Built"),
   R("runbooks/:runbookId",                   "Runbooks", "Runbook Detail",               "Selected runbook",                       "Built"),
   R("runbooks/:runbookId/designer",          "Runbooks", "Runbook Designer",             "Selected runbook + steps",               "Built"),
   R("runbooks/:runbookId/steps/:stepId",     "Runbooks", "Runbook Step",                 "Selected runbook + step",                "Built"),
