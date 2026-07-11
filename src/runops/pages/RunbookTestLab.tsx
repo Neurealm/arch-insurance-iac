@@ -363,7 +363,6 @@ export default function RunbookTestLab() {
           }
           return finished;
         });
-        void anySkipped; void failed;
         return;
       }
       const idx = stepIndex;
