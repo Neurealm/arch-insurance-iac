@@ -118,7 +118,7 @@ export const routes: RouteMeta[] = [
   R("knowledge",                             "Knowledge", "Knowledge Base",               "Postmortems, known errors, playbooks",  "Built", { isSectionLanding: true, navPrimary: true }),
 
   // Analytics
-  R("analytics",                             "Analytics", "Reliability Analytics",        "Trend metrics across tenant",           "Scaffolded", { isSectionLanding: true, navPrimary: true }),
+  R("analytics",                             "Analytics", "Reliability Analytics",        "Trend metrics across tenant",           "Built", { isSectionLanding: true, navPrimary: true }),
 
   // Governance
   R("governance",                            "Governance", "Governance",                  "Policies, approvals, audit evidence",   "Scaffolded", { isSectionLanding: true, navPrimary: true }),
