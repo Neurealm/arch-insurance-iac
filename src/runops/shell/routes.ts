@@ -109,7 +109,7 @@ export const routes: RouteMeta[] = [
   R("workers",                               "Digital Workers", "Digital Worker Catalog",   "All digital workers in tenant",         "Built",     { isSectionLanding: true, navPrimary: true }),
   R("workers/:workerId/studio",              "Digital Workers", "Digital Worker Studio",    "Selected worker + capabilities",        "Built"),
   R("workers/collaboration/:sessionId",      "Digital Workers", "Worker Collaboration",     "Selected multi-worker session",         "Built"),
-  R("automation",                            "Digital Workers", "Automation Registry",      "All automations + autonomy levels",     "Planned"),
+  R("automation",                            "Digital Workers", "Automation Registry",      "Toil discovery + backlog + marketplace","Built"),
 
   // Reliability
   R("reliability/slos",                      "Reliability", "SLOs & Error Budgets",       "All SLOs across services",              "Scaffolded", { isSectionLanding: true, navPrimary: true }),
