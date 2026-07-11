@@ -90,7 +90,7 @@ export const routes: RouteMeta[] = [
   R("operations/alerts",                     "Operations", "Alerts",                     "All active alerts and correlations",     "Planned"),
   R("approvals",                             "Operations", "Approvals",                  "Pending approvals across executions",    "Planned"),
   R("executions/:executionId",               "Operations", "Execution Detail",           "Selected execution",                     "Planned"),
-  R("executions/:executionId/guided",        "Operations", "Guided Execution",           "Selected execution + step guidance",     "Planned"),
+  R("executions/:executionId/guided",        "Operations", "Guided Execution",           "Selected execution + step guidance",     "Built"),
   R("executions/:executionId/evidence",      "Operations", "Execution Evidence",         "Selected execution + audit evidence",    "Planned"),
 
   // Incidents
