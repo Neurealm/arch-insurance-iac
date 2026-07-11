@@ -103,7 +103,7 @@ export const routes: RouteMeta[] = [
   R("incidents/:incidentId/communications",  "Incidents", "Communications",              "Selected incident + audiences",          "Built"),
   R("incidents/:incidentId/recovery",        "Incidents", "Recovery Validation",         "Selected incident + validation checks",  "Built"),
   R("incidents/:incidentId/postmortem",      "Incidents", "Postmortem",                  "Selected incident + postmortem draft",   "Built"),
-  R("problems/actions",                      "Incidents", "Problem Corrective Actions",  "All open corrective actions",            "Planned"),
+  R("problems/actions",                      "Incidents", "Problem Corrective Actions",  "All open corrective actions",            "Built"),
 
   // Digital Workers
   R("workers",                               "Digital Workers", "Digital Worker Fleet",     "All digital workers in tenant",         "Scaffolded", { isSectionLanding: true, navPrimary: true }),
