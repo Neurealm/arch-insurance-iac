@@ -366,6 +366,7 @@ import RunOpsGuidedExecution from "./runops/pages/GuidedExecution.tsx";
 import RunOpsAutonomousExecutionMonitor from "./runops/pages/AutonomousExecutionMonitor.tsx";
 import RunOpsApprovalCenter from "./runops/pages/ApprovalCenter.tsx";
 import RunOpsEvidenceReplay from "./runops/pages/EvidenceReplay.tsx";
+import RunOpsShiftHandoff from "./runops/pages/ShiftHandoff.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
