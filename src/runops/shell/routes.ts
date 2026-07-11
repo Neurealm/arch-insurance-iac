@@ -78,7 +78,7 @@ export const routes: RouteMeta[] = [
   R("runbooks/:runbookId/designer",          "Runbooks", "Runbook Designer",             "Selected runbook + steps",               "Built"),
   R("runbooks/:runbookId/steps/:stepId",     "Runbooks", "Runbook Step",                 "Selected runbook + step",                "Built"),
   R("runbooks/:runbookId/policy",            "Runbooks", "Runbook Policy",               "Selected runbook + autonomy policy",     "Built"),
-  R("runbooks/:runbookId/recovery",          "Runbooks", "Runbook Recovery Paths",       "Selected runbook + rollback branches",   "Planned"),
+  R("runbooks/:runbookId/recovery",          "Runbooks", "Runbook Recovery Paths",       "Selected runbook + rollback branches",   "Built"),
   R("runbooks/:runbookId/test",              "Runbooks", "Runbook Test Harness",         "Selected runbook + test fixtures",       "Planned"),
   R("runbooks/:runbookId/release",           "Runbooks", "Runbook Release",              "Selected runbook + version history",     "Planned"),
   R("runbooks/:runbookId/triggers",          "Runbooks", "Runbook Triggers",             "Selected runbook + trigger bindings",    "Planned"),
