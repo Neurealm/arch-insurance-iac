@@ -364,6 +364,7 @@ import RunOpsRunbookTriggers from "./runops/pages/RunbookTriggers.tsx";
 import RunOpsRunbookLaunchCenter from "./runops/pages/RunbookLaunchCenter.tsx";
 import RunOpsGuidedExecution from "./runops/pages/GuidedExecution.tsx";
 import RunOpsAutonomousExecutionMonitor from "./runops/pages/AutonomousExecutionMonitor.tsx";
+import RunOpsApprovalCenter from "./runops/pages/ApprovalCenter.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
