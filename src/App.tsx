@@ -380,6 +380,7 @@ import RunOpsDigitalWorkerCatalog from "./runops/pages/DigitalWorkerCatalog.tsx"
 import RunOpsDigitalWorkerStudio from "./runops/pages/DigitalWorkerStudio.tsx";
 import RunOpsMultiAgentCollaboration from "./runops/pages/MultiAgentCollaboration.tsx";
 import RunOpsAutomationRegistry from "./runops/pages/AutomationRegistry.tsx";
+import RunOpsSloCenter from "./runops/pages/SloCenter.tsx";
 import { routes as runopsRoutes } from "./runops/shell/routes.ts";
 
 const queryClient = new QueryClient();
