@@ -1,114 +1,87 @@
-# NOVA multi-industry tenant profiles — implementation plan
+## Multi-Tenant Module Alignment — Plan
 
-## Current state (grounding, not proposals)
+The shared architecture already exists: `RunOpsProviders` swaps `TenantFixtureBundle`/`TenantOperationalProfile`/`TenantPresentationProfile` atomically on tenant change, and all four tenant records (`tenant-contoso`, `tenant-healthcare-amc`, `tenant-saas-production`, `tenant-chip-manufacturing`) are registered. What remains is a coherent alignment pass across every module page + the shell, plus new tenant-specific catalogs (topology node types, readiness categories, story navigator, scenario injections, completeness scorecard).
 
-The exploration confirmed the shape of what exists today. Highlights that shape this plan:
+Given the surface area (50+ pages under `src/runops/pages/`, plus shell, plus new catalogs), I will land this in **six sequenced batches**. Each batch is independently valid, typechecks clean, and preserves Contoso.
 
-- `OperationsProvider` interface at `src/runops/providers/OperationsProvider.ts` **already takes `tenantId` on every list method** — but the sole implementation (`DemoOperationsProvider` inside `src/runops/state/RunOpsProviders.tsx`) ignores it and returns a single global fixture from `src/runops/data/scenario.ts` ("Contoso Global").
-- Only one tenant is wired (`tenant-contoso`). The tenant `<Select>` in `RunOpsTopBar.tsx` calls `setTenant` but nothing downstream re-scopes.
-- `ScenarioStore` is module-scoped, not tenant-keyed. `AskNova` engine reads global `OperationsState` and has no `tenantId`. No centralized label/vocabulary layer exists. No TTS code exists yet.
-- `queryKeys.ts` is already tenant-parameterized but largely unused (fixtures are read directly from context).
-- Backend `runops_*` tables are multi-tenant-ready and unreferenced by the client — we will keep it that way for this pass and stay in-memory, matching the existing demo architecture.
-- Hardcoded Contoso literals to clean up: `DesignSystem.tsx:433`, `AutonomousExecutionMonitor.tsx:787`, `AutomationRegistry.tsx:398-422`, `StepCodeBuilder.tsx:251`.
+---
 
-## Scope boundary
+### Batch 1 — Shell, switching semantics, global scope guards
 
-This plan **extends existing modules**. No second provider, no new shell, no new route registry, no new design system. All tenant-specific content moves behind a profile resolver consumed via `useOperations()` / a new `useTenantProfile()` hook that lives inside the existing provider.
+- Verify `RunOpsProviders.setTenant` performs: shell preservation, default service select, stage reload, story-navigator refresh, drawer-close, tenant-role revalidation, equivalent-route navigation with landing-page fallback.
+- Add missing pieces if any: `closeEntityDrawersOnTenantChange`, `navigateToEquivalentRoute(currentPath, newTenantId)`, `revalidateTenantRole`.
+- `RunOpsTopBar` tenant selector: unchanged UX, but ensure it triggers the full switch pipeline above.
+- `CommandPalette` / Global Search: filter every result set to `selectedTenantId`; add industry-label chip on each result row.
+- `AskNovaPanel` retrieval: hard-scope corpus to current tenant; assert no cross-tenant leak.
 
-Because there is no server persistence for demo fixtures today, tenant profiles will be **in-memory profile modules** consumed by the existing `DemoOperationsProvider`. Backend migrations are **not** part of this pass (the current app never writes to `runops_*` tables). A follow-up can wire persistence when Connected mode is turned on.
+### Batch 2 — Presentation + topology + readiness catalogs
 
-## Deliverables
+- Extend `industryProfiles.ts` with per-industry `topologyNodeTypes` for healthcare, saas, chip (lists specified in the request).
+- Add `operationalReadinessCategories` per industry (healthcare / saas / chip).
+- Add `communicationsAudiences` per industry.
+- Add `runbookDesignerTemplates` per industry (patient-safety assessment, downtime decision, ...; SLO burn, canary, ...; tool hold, lot hold, WIP reroute, ...).
+- Add `toilCategories` per industry.
+- Add `postmortemContributingFactorCategories` per industry.
+- Expose all through `TenantPresentationProfile` and `getPresentation(tenantId)`.
 
-### 1. Domain model (types-only additions)
-Extend `src/runops/domain/models.ts` with strict types (no runtime values):
+### Batch 3 — Reliability Command Center + Service Portfolio + Digital Twin + Topology + Observability
 
-- `IndustryProfile` — journey/service/component/incident/impact/SLO/error-budget labels, criticality levels, impact dimensions, hard guardrails, standards mappings, default metric/runbook/worker/connector categories, presentation guidance, glossary.
-- `TenantOperationalProfile` — tenantId, industryProfileId, displayName, shortName, industry, businessDescription, operatingModel, operatingHours, geographicScope, defaultServiceId, defaultScenarioId, defaultStoryId, defaultEnvironment/Region/TimeRange, tenantAccent, dataClassification, complianceContext, operationalPriorities, hardGuardrails, terminologyOverrides, scenarioMode, syntheticDataNotice, profileVersion, profileState.
-- Supporting types: `TenantVocabulary`, `TenantImpactModel`, `TenantCriticalityModel`, `TenantReliabilityPolicy`, `TenantSafetyGuardrail`, `TenantStandardsMapping`, `TenantMetricDefinition`, `TenantTopologyProfile`, `TenantScenarioProfile`, `TenantStoryProfile`, `TenantConnectorProfile`, `TenantWorkerProfile`, `TenantRunbookProfile`, `TenantDisplayPreference`, `TenantSourceSystemAlias`, `GlossaryTerm`.
+Rewrite these five pages to read from `useTenantPresentation()` + `useOperations()`:
+- `Command.tsx` — swap KPI tiles per industry (clinical workflows / customer journeys / production flows) using presentation-driven labels + bundle metrics.
+- `ServicePortfolio.tsx` — categories/criticality/owners/SLOs/runbook coverage from presentation + bundle.
+- `ServiceDigitalTwin.tsx` — journeys, impact dimensions, topology, telemetry, changes, guardrails from bundle.
+- `TopologyExplorer.tsx` — render tenant `topologyNodeTypes` and group components accordingly.
+- `ObservabilityExplorer.tsx` — bind metric definitions/units/thresholds to `presentation.metricDefinitions`.
 
-### 2. Industry profile catalog
-New folder `src/runops/profiles/` containing:
+### Batch 4 — Runbook family + Policy + Launch + Execution + Approval + Evidence
 
-- `industryProfiles.ts` — the four industry profiles (generic, healthcare-amc, saas-production, chip-manufacturing) with labels, guardrails, impact dimensions, criticality levels, default categories, glossary entries.
-- `contosoProfile.ts` — wraps the existing `src/runops/data/scenario.ts` fixture as a `TenantOperationalProfile` + tenant-scoped fixture bundle (no data change; just re-export in profile shape). Preserves all existing Contoso behavior.
-- `meridianHealthProfile.ts` — Meridian University Health (Healthcare AMC): clinical services (EHR, PACS, ADT/HL7 interface engine, patient portal, medication administration, lab), clinical workflow journeys, HL7/FHIR system aliases, HIPAA compliance context, patient-safety hard guardrail, sample incident (interface engine ADT backlog), runbooks with clinical validation steps, digital workers scoped to clinical technology, connectors labeled synthetic, glossary (ADT, HL7, FHIR, EHR, PACS, MPI, RCM, HIS).
-- `atlasCloudProfile.ts` — AtlasCloud Production (SaaS): multi-tenant API gateway, ingestion pipeline, control plane, customer-facing dashboards, checkout, auth service; customer-journey SLOs, error-budget policy, security-bypass guardrail; sample incident (ingestion queue backpressure); glossary (SLO, SLI, MTTR, MTTA, RPO, RTO, tenant isolation).
-- `apexFabProfile.ts` — Apex Semiconductor Fab 12 (Chip Manufacturing): MES, EAP, RMS, SPC, FDC, WIP tracker, tool controllers, recipe management; production-flow journeys; safety-interlock guardrail; sample incident (photolithography tool FDC excursion / WIP at risk); glossary (MES, EAP, FDC, SPC, WIP, RMS, OEE, CIM).
-- `index.ts` — exports `tenantProfiles: Record<TenantId, TenantOperationalProfile>` and helpers `getIndustryProfile(code)`, `getTenantProfile(tenantId)`.
-- `presentation.ts` — the single shared `TenantPresentationProfile` resolver: `resolvePresentation(tenantProfile, industryProfile) → { journeyLabel, serviceLabel, componentLabel, incidentLabel, impactLabel, sloLabel, errorBudgetLabel, criticalityLevels, topologyNodeTypes, metricDefinitions, runbookCategories, workerCategories, governanceMappings, glossary, syntheticDataNotice, tenantAccent }`.
+- `RunbookLibrary.tsx` — filter to selected-tenant runbooks; industry-domain tags.
+- `RunbookDetail.tsx` / `RunbookDigitalTwin` — tenant-specific impact, guardrails, workers, approvals, evidence, validation, rollback, standards, terminology.
+- `RunbookDesigner.tsx` — pull node templates from presentation catalog.
+- `RunbookStepBuilder.tsx` — filter connectors/commands/targets/permissions to tenant bundle connectors + workers.
+- `RunbookPolicyDesigner.tsx` — enforce industry hard guardrails as immutable, layer generic policy on top.
+- `RunbookTestLab.tsx` — tenant-specific scenario libraries.
+- `RunbookRelease.tsx` — tenant-specific review roles + certification.
+- `RunbookTriggers.tsx` — tenant-specific events / metric conditions / sources.
+- `RunbookLaunchCenter.tsx` — tenant-specific risk / impact / target types / approvals / connectors / guardrails / validation.
+- `GuidedExecution.tsx` / `AutonomousExecutionMonitor.tsx` — tenant workflow state + impact framing.
+- `ApprovalCenter.tsx` — industry roles + separation of duties from presentation.
+- `EvidenceReplay.tsx` — tenant evidence types + redaction rules + units.
 
-All new-tenant fixtures carry `syntheticDataNotice: "Synthetic demonstration data — not a live customer integration."` and connectors are marked as demo simulators.
+### Batch 5 — Incident lifecycle (Triage → Command → Investigation → Hypothesis → Remediation → Comms → Recovery → Postmortem → Corrective)
 
-### 3. OperationsProvider extension (no new provider)
-Modify `src/runops/state/RunOpsProviders.tsx` `DemoOperationsProvider` in place:
+Rewrite each page to bind labels, roles, correlations, options, audiences, criteria, and category catalogs to the presentation profile. Every content generator that was tenant-agnostic gets a `presentation`/`bundle` parameter. `StakeholderCommunications.tsx` gains per-industry audience lists.
 
-- Replace the single canonical bundle with a `Map<TenantId, TenantFixtureBundle>` keyed off `tenantProfiles`.
-- `getContext()`, `listServices/Incidents/Runbooks/Changes/DigitalWorkers/AuditLog/Notifications/ScenarioStages` route through the map by the arg's `tenantId` (each call already receives it — currently ignored).
-- `setTenant(id)` now, in order: (a) persist to `localStorage("runops.selectedTenantId")`; (b) close any open right drawer / entity quick view / command palette selection; (c) reset `selectedServiceId`, `selectedIncident`, `selectedRunbook`, `selectedExecution` to the new tenant's defaults from its profile; (d) re-seed scenario state for that tenant (see §4); (e) emit `TenantSwitched` domain event; (f) append audit event only when acting role is `platform_admin` or `demo_controller`.
-- Extend `OperationsProvider` interface with `getTenantProfile(tenantId): ProviderResponse<TenantOperationalProfile>` and `getIndustryProfile(code): ProviderResponse<IndustryProfile>` — both read-only, no persistence dependency.
-- Add cross-tenant guard: any `get*(id)` method that finds an entity whose `tenantId` does not match the currently selected tenant returns `{ ok: false, error: "TenantContextMismatch" }` — pages already handle `ProviderResponse` unions.
+### Batch 6 — Workers, SLOs, Knowledge, Analytics, Governance, Security, AI Gov, Integration Hub, Platform + Story Navigator + Scenario Injections + Completeness Dashboard
 
-### 4. Scenario isolation
-Modify `src/runops/scenario/ScenarioStore.tsx`:
+- `DigitalWorkerCatalog.tsx` / `DigitalWorkerStudio.tsx` — show only workers assigned to the tenant; enforce tenant tool grants / authority / prohibitions.
+- `SloCenter.tsx` — tenant label, objectives, hard controls.
+- `RunbookFitness.tsx` — tenant fitness dimensions.
+- `KnowledgeGraph.tsx` — tenant vocabulary + access.
+- `ReliabilityValueAnalytics.tsx` — tenant metric catalog.
+- `GovernanceCenter.tsx` — standards mappings only (existing profile field).
+- `ExecutionSecurity.tsx` — tenant identities/service accounts/workers/zones/high-risk actions.
+- `AIGovernance.tsx` — industry-specific worker evaluation tests.
+- `IntegrationHub.tsx` — tenant connectors + dependencies only.
+- `PlatformHealth.tsx` — tenant runner/integration/profile/completeness.
+- **Demo Story Navigator** (`DemoControllerDrawer`) — story selector for the four industries; selecting a story confirms then switches tenant + resets scenario to that story's default service/incident/runbook/execution/change/problem/postmortem/workers/metrics/narrative; "Continue Story" requires the current stage's required-action to be satisfied (advance is gated, not navigational).
+- **Scenario failure injections** — extend `ScenarioStore` with per-industry deterministic, `resetScenario`-reversible injections (healthcare: interface down, msg-seq fail, downtime, approval denied, PHI redaction fail; saas: hot shard, canary fail, tenant-iso fail, region down, flag rollback fail; chip: FDC trace unavail, alt chamber unavail, qual fail, checksum mismatch, quality denied, AMHS reroute unavail).
+- **Profile Completeness Dashboard** on `/platform/tenant-profiles` — extend `validateTenantProfile` with 18 dimensions (Services, Components, Dependencies, Journeys, Metrics, SLOs, Runbooks, Tests, Scenarios, Incidents, Workers, Connectors, Policies, Knowledge, Analytics, Story, Security, Synthetic-data labeling) and render per-dimension score with drilldown into missing/invalid elements.
 
-- Change the state shape from a single `{stageIndex, playState, injections}` to `Record<TenantId, ScenarioSessionState>`.
-- Selectors take current tenant from `useOperations().context.tenant.id`.
-- Persist per-tenant scenario stage in `localStorage("runops.scenario.<tenantId>")`.
-- `resetScenario()` resets only the current tenant. Add `resetAllScenarios()` behind a Demo Controller-only action for the "Reset All Demo Tenants" affordance.
-- No `ScenarioStoreProvider` re-instantiation; state simply becomes keyed.
+---
 
-### 5. Ask NOVA tenant scoping
-- Extend `AiProvider` interface with a `tenantId: TenantId` param on all retrieval methods.
-- Update `askNovaEngine.ts` so the `ops` argument is filtered to only the selected tenant's entities before classification, and the response uses `resolvePresentation(...)`-derived labels (impact label, incident label, SLO/error-budget label, guardrails). Evidence lookup only inspects the current tenant's fixture bundle — cross-tenant evidence is unreachable by construction.
-- Update `AskNovaPanel.tsx` to pass `ops.tenant.id` explicitly.
+### Technical notes
 
-### 6. Tenant selector & context indicator
-Modify `src/runops/shell/RunOpsTopBar.tsx`:
+- No new provider, scenario store, tenant selector, navigation, or design system is introduced.
+- All page changes are presentation-layer: consume `useOperations()` + `useTenantPresentation()` and drop hardcoded arrays.
+- Route registry in `src/runops/shell/routes.ts` is preserved; equivalent-route mapping and landing-page fallback added inside `setTenant`.
+- Authenticity guardrails: strip generic strings ("Server 1", "Alert triggered", ...) as each page is touched; every metric/incident/runbook/worker must carry the fields listed under Halo of Authenticity.
+- Contoso remains the reference tenant and must keep functioning across every batch.
 
-- Populate the `<Select>` from `useOperations().listTenants()` (already returns the full canonical tenant list — will now include four entries).
-- Add an inline tenant-context indicator chip next to the selector: tenant `shortName` + industry label + a small "Synthetic demo data" badge for the three new tenants.
-- Emit an audit event via `OperationsProvider.appendAudit` only for admin/impersonation switches (role check).
+### Deliverables per batch
 
-### 7. Tenant Profile Manager page
-- Register route in `src/runops/shell/routes.ts`: `platform/tenant-profiles`, section `Platform`, gated to `platform_engineer` and `demo_controller` roles.
-- New page `src/runops/pages/platform/TenantProfileManager.tsx` using existing `shell.tsx`, `panels.tsx`, `data.tsx` primitives. Sections: All Profiles list → open one → tabs for Business Context, Terminology, Services & Components, Metrics & SLOs, Scenarios, Runbooks, Digital Workers, Policies & Guardrails, Connectors, Standards Mappings, Data Completeness.
-- Actions (calling profile validator and `OperationsProvider` mutations): Activate/Deactivate profile, Set default service, Set default scenario, Set default story, Validate integrity. Never renders secrets/credentials fields.
+Each batch: (a) code changes, (b) `tsgo` clean, (c) short list of files touched, (d) a one-line note if anything was deferred to a later batch. No browser testing (per request).
 
-### 8. Profile integrity validator
-New `src/runops/profiles/validate.ts` — pure function `validateTenantProfile(profile, bundle): ValidationReport` covering the checklist from the request (default service/scenario/story exist, runbooks have owners, prod runbooks have validation+rollback or exception, SLOs have source metrics, workers have tool grants and authority boundaries, connectors have owners, incidents reference valid services, topology edges reference valid entities, analytics metrics have definitions, standards mappings labeled as mappings not certifications, synthetic-data notices present, no cross-tenant references). Consumed by the Tenant Profile Manager and by a dev-time assertion in `RunOpsProviders.tsx` (console warning in dev only).
+### Ask before starting
 
-### 9. Presentation cleanup
-Replace the four hardcoded Contoso literals with values sourced from the resolver:
-- `src/runops/pages/DesignSystem.tsx:433` → `ops.tenant.name`.
-- `src/runops/pages/AutonomousExecutionMonitor.tsx:787` → drop or generalize the note.
-- `src/runops/pages/AutomationRegistry.tsx:398-422` → `publisher` sourced from tenant profile.
-- `src/runops/components/StepCodeBuilder.tsx:251` → derive AG listener TTL note from the current tenant's `sourceSystemAliases` / topology profile.
-
-### 10. Audit + domain events
-- Extend the local `DomainEvent` union in `src/runops/domain/events.ts` with `TenantSwitched`, `TenantProfileActivated`, `TenantProfileDeactivated`, `DefaultScenarioChanged`, `StandardsMappingChanged`, `GuardrailChanged`, `ProfileValidationOverridden`.
-- Emit through the existing in-memory bus and `appendAudit` — same wiring the app already uses.
-
-## Non-goals for this pass
-
-- No Supabase migrations, no new backend tables, no edge functions. The existing app never writes to `runops_*` tables; adding server persistence is a separate task once Connected mode is enabled.
-- No new speech/TTS provider. The spec says "where speech is enabled" — since no TTS exists today, we only expose the tenant-aware narration text via the resolver (`resolvePresentation(...).narrationTemplates`) so a future TTS layer can consume it without another refactor.
-- No browser end-to-end tests (per the request).
-- No visual redesign — same tokens, same layout, industry authenticity comes from data.
-
-## Risks / trade-offs
-
-- The existing `DemoOperationsProvider` is one ~420-line function. Refactoring to a per-tenant map without breaking the current Contoso flow is the highest-risk edit. Mitigation: keep the Contoso bundle identical (built from `data/scenario.ts` unchanged) and add the three new bundles alongside; the map-lookup path collapses to the current behavior when only Contoso is selected.
-- The `Tenant` fixture in `data/scenario.ts` currently omits `slug` and is force-cast. This plan reconciles the type by adding `slug` to the fixture (non-breaking) rather than loosening the domain type.
-- `ProviderResponse` error path for cross-tenant mismatch is new; a handful of pages currently assume `ok: true`. We'll add a shared "tenant context mismatch" empty-state component in `runops/components/states.tsx` and route mismatches through it.
-
-## Rollout order (single PR, incremental commits)
-
-1. Types in `models.ts` + profiles folder scaffolding (no behavior change).
-2. Contoso profile wrapper — verify app still renders identically.
-3. Meridian / AtlasCloud / Apex profiles + selector wiring.
-4. Scenario store keying by tenant.
-5. Ask NOVA scoping + presentation cleanup.
-6. Tenant Profile Manager route + validator.
-7. Audit/domain events + hardcoded-literal cleanup.
-
-Confirm this plan (or point at sections to change) and I'll implement.
+This is roughly 60–90 file touches. Do you want me to proceed batch-by-batch (I ship Batch 1, you review, I ship Batch 2, ...), or land Batches 1+2 (foundations + catalogs) in one pass and then proceed?
