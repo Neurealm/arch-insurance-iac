@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DemoAiProvider, DemoOperationsProvider, RightDrawerProvider } from "@/runops/state/RunOpsProviders";
+import {
+  DemoAiProvider, DemoOperationsProvider, RightDrawerProvider,
+  useOperations,
+} from "@/runops/state/RunOpsProviders";
 import { ScenarioStoreProvider } from "@/runops/scenario/ScenarioStore";
 import { RunOpsSidebar } from "@/runops/shell/RunOpsSidebar";
 import { RunOpsTopBar } from "@/runops/shell/RunOpsTopBar";
@@ -12,8 +15,51 @@ import { DemoControllerDrawer } from "@/runops/shell/DemoControllerDrawer";
 import { CommandPalette, CommandPaletteProvider } from "@/runops/shell/CommandPalette";
 import { AskNovaPanel, AskNovaProvider } from "@/runops/shell/AskNovaPanel";
 
+/**
+ * Redirects the current URL to a safe section landing when a tenant switch
+ * leaves the path pointing at an entity id that does not exist in the new
+ * tenant's bundle (e.g. `/runops/runbooks/RB-CT-004` under Meridian).
+ * Prevents dangling entity-detail pages from silently falling back to the
+ * bundle's first record.
+ */
+function useTenantRouteEqualizer() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const ops = useOperations();
+
+  useEffect(() => {
+    const path = location.pathname;
+    if (!path.startsWith("/runops/")) return;
+
+    const check = (
+      prefix: string,
+      collection: readonly { id: string }[],
+      landing: string,
+    ) => {
+      const m = new RegExp(`^${prefix}([^/]+)`).exec(path);
+      if (!m) return false;
+      const id = decodeURIComponent(m[1]);
+      if (id.includes(":")) return false;
+      if (collection.some((x) => x.id === id)) return false;
+      navigate(landing, { replace: true });
+      return true;
+    };
+
+    if (check("/runops/services/", ops.services, "/runops/services")) return;
+    if (check("/runops/runbooks/", ops.runbooks, "/runops/runbooks")) return;
+    if (check("/runops/executions/", ops.executions, "/runops/operations/queue")) return;
+    if (check("/runops/incidents/",
+      [ops.incident, ...(ops.incident ? [] : [])],
+      "/runops/incidents")) return;
+    if (check("/runops/workers/", ops.digitalWorkers, "/runops/workers")) return;
+  }, [ops.tenant.id, location.pathname, navigate,
+      ops.services, ops.runbooks, ops.executions, ops.incident, ops.digitalWorkers]);
+}
+
+
 
 function Shell() {
+  useTenantRouteEqualizer();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
