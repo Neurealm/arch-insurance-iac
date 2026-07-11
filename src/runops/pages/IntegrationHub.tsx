@@ -505,8 +505,8 @@ export default function IntegrationHub() {
     const message = ok ? `${c.name} responded OK in ${latencyMs}ms` : `${c.name}: ${c.health}`;
     updateConnector(id, { health: c.health === "Testing" ? "Healthy" : c.health, lastActivityAt: now() },
       "connector.test", "ConnectorTested");
-    setLogs((prev) => [{ id: `LOG-${Date.now()}`, connectorId: id, at: now(),
-      level: ok ? "info" : "warn", message }, ...prev].slice(0, 200));
+    const level: ConnectorLog["level"] = ok ? "info" : "warn";
+    setLogs((prev) => [{ id: `LOG-${Date.now()}`, connectorId: id, at: now(), level, message }, ...prev].slice(0, 200));
     setDialog({ kind: "test", id, result: { ok, latencyMs, message } });
   }, [connectors, scenario, updateConnector]);
 
