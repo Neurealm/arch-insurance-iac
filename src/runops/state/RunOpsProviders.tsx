@@ -103,9 +103,17 @@ export interface OperationsState {
   executions: readonly (Execution & { title: string })[];
   runbooks: readonly Runbook[];
   changes: readonly Change[];
+  knowledgeItems: readonly KnowledgeItem[];
+  evidenceItems: readonly EvidenceItem[];
+  problems: readonly Problem[];
   environmentOptions: readonly Environment[];
   regionOptions: readonly Region[];
   timeRangeOptions: readonly TimeRange[];
+
+  /* Tenant profile (industry-aware presentation and metadata) */
+  tenantProfile: TenantOperationalProfile;
+  industryProfile: IndustryProfile;
+  presentation: TenantPresentationProfile;
 
   /* Persistent context selectors */
   selectedServiceId: string;
