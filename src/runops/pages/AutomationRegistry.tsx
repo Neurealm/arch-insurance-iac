@@ -395,7 +395,7 @@ function seedMarketplace(): MarketplaceItem[] {
     {
       id: "MP-3011", title: "Weekly Reliability Digest",
       summary: "Publishes evidence-linked digest per service. Bring-your-own comms channel.",
-      kind: "Runbook", version: "1.2.0", publisher: "Contoso Platform",
+      kind: "Runbook", version: "1.2.0", publisher: "NOVA Platform",
       autonomy: "L1", ratingCalibrated: 0.86, installs: 14,
       installedForServices: ["checkout-api", "orders-api"], candidateId: "AUT-1045",
       createdAt: inDays(-42),
@@ -403,7 +403,7 @@ function seedMarketplace(): MarketplaceItem[] {
     {
       id: "MP-3020", title: "Orders Cache Warm — Golden Path",
       summary: "Nightly cache warm with regional readiness gates. Ships with rollback probe.",
-      kind: "Golden Path", version: "2.0.1", publisher: "Contoso Platform",
+      kind: "Golden Path", version: "2.0.1", publisher: "NOVA Platform",
       autonomy: "L2", ratingCalibrated: 0.91, installs: 8,
       installedForServices: ["orders-api"], candidateId: "AUT-1047",
       createdAt: inDays(-30),
@@ -411,7 +411,7 @@ function seedMarketplace(): MarketplaceItem[] {
     {
       id: "MP-3030", title: "DB Connection Diagnoser",
       summary: "Investigation-only worker. Correlates pool metrics with request p95.",
-      kind: "Digital Worker", version: "0.9.0", publisher: "Contoso Platform",
+      kind: "Digital Worker", version: "0.9.0", publisher: "NOVA Platform",
       autonomy: "L1", ratingCalibrated: 0.74, installs: 3,
       installedForServices: [], candidateId: null,
       createdAt: inDays(-10),
@@ -419,7 +419,7 @@ function seedMarketplace(): MarketplaceItem[] {
     {
       id: "MP-3040", title: "Approval-Gated Rollback Component",
       summary: "Reusable rollback step with policy-required approval and evidence pinning.",
-      kind: "Reusable Component", version: "1.4.2", publisher: "Contoso Platform",
+      kind: "Reusable Component", version: "1.4.2", publisher: "NOVA Platform",
       autonomy: "L2", ratingCalibrated: 0.88, installs: 21,
       installedForServices: ["checkout-api", "payments-api", "orders-api"], candidateId: null,
       createdAt: inDays(-75),
