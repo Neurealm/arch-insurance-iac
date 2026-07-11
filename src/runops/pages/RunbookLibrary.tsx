@@ -745,17 +745,20 @@ export default function RunbookLibrary() {
             <EmptyState
               title="No runbooks yet"
               description="Import from an existing knowledge source, or draft your first runbook."
-              action={<Button size="sm" onClick={doCreate} disabled={readOnly}><Plus className="mr-1 h-4 w-4" />Create Runbook</Button>}
+              action={{ label: "Create Runbook", onClick: doCreate }}
             />
           ) : noResults ? (
             <EmptyState
               title="No matches"
               description="Adjust the search text or filters to widen results."
-              action={<Button size="sm" variant="outline" onClick={() => {
-                setSearch(""); setFDomain("all"); setFState("all"); setFRisk("all");
-                setFAutonomy("all"); setFFitness("all"); setFOwner("all"); setFCert("all"); setFEnv("all");
-                setShowFailedOnly(false);
-              }}>Clear filters</Button>}
+              action={{
+                label: "Clear filters",
+                onClick: () => {
+                  setSearch(""); setFDomain("all"); setFState("all"); setFRisk("all");
+                  setFAutonomy("all"); setFFitness("all"); setFOwner("all"); setFCert("all"); setFEnv("all");
+                  setShowFailedOnly(false);
+                },
+              }}
             />
           ) : (
             <div className="overflow-x-auto">
