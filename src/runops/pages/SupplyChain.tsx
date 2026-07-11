@@ -811,7 +811,7 @@ export default function SupplyChain() {
         eyebrow="Governance · Integrations"
         title="Artifact Supply Chain & Git Security"
         subtitle="Every executable artifact traced from source, through build, to release and execution."
-        status={{ label: `${counts.Trusted} trusted · ${counts.Blocked + counts.Quarantined} restricted`, tone: counts.Blocked > 0 ? "danger" : "success" }}
+        status={{ label: `${counts.Trusted} trusted · ${counts.Blocked + counts.Quarantined} restricted`, tone: counts.Blocked > 0 ? "critical" : "healthy" }}
         actions={
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={() => setShowAI(true)}>
