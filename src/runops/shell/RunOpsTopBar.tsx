@@ -111,11 +111,13 @@ function ContextBar() {
   const incidentState = incidentStateTone[incident.state];
   const budgetChip = errorBudgetTone(selectedService.errorBudgetRemaining);
 
+  const { tenantProfile, presentation } = useOperations();
+
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur">
       {/* Tenant */}
       <Select value={tenant.id} onValueChange={setTenant}>
-        <SelectTrigger className="h-7 w-[170px] text-[11.5px]">
+        <SelectTrigger className="h-7 w-[210px] text-[11.5px]">
           <span className="text-[10px] uppercase tracking-wider text-slate-500 mr-1">Tenant</span>
           <SelectValue />
         </SelectTrigger>
@@ -123,6 +125,22 @@ function ContextBar() {
           {tenants.map((t) => <SelectItem key={t.id} value={t.id} className="text-[12px]">{t.name}</SelectItem>)}
         </SelectContent>
       </Select>
+
+      {/* Industry + synthetic-demo indicator */}
+      <span
+        className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10.5px] text-slate-700"
+        title={tenantProfile.businessDescription}
+      >
+        {presentation.industryName}
+      </span>
+      {presentation.isSyntheticDemo && (
+        <span
+          className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10.5px] font-medium text-amber-800"
+          title={presentation.syntheticDataNotice}
+        >
+          Synthetic demo data
+        </span>
+      )}
 
       {/* Service */}
       <Select value={selectedServiceId} onValueChange={setSelectedService}>
