@@ -305,10 +305,10 @@ function crossFlags(rows: CatalogRow[]): CatalogRow[] {
 /* Tokens                                                                     */
 /* -------------------------------------------------------------------------- */
 
-const STATE_TONE: Record<RunbookState, "success" | "info" | "warning" | "neutral" | "critical"> = {
+const STATE_TONE: Record<RunbookState, "success" | "recovering" | "warning" | "neutral" | "critical"> = {
   Draft: "neutral",
-  "In Review": "info",
-  Approved: "info",
+  "In Review": "recovering",
+  Approved: "recovering",
   Certified: "success",
   Published: "success",
   Deprecated: "warning",
