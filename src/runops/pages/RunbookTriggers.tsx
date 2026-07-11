@@ -382,7 +382,7 @@ export default function RunbookTriggers() {
   };
 
   const selectedSource = selected ? ops.connectors.find((c) => c.id === selected.sourceConnectorId) : null;
-  const selectedSourceUnavailable = selectedSource?.state === "Unavailable";
+  const selectedSourceUnavailable = selectedSource?.status === "Unavailable";
   const activationsForSelected = selected ? store.activations.filter((a) => a.triggerId === selected.id) : [];
   const testsForSelected = selected ? store.tests.filter((t) => t.triggerId === selected.id) : [];
 
@@ -517,7 +517,7 @@ export default function RunbookTriggers() {
                       <SelectTrigger aria-label="Event source"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {ops.connectors.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name} · {c.state}</SelectItem>
+                          <SelectItem key={c.id} value={c.id}>{c.name} · {c.status}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -743,7 +743,7 @@ export default function RunbookTriggers() {
                   ))}% confidence</Badge>
                 </div>
                 <ul className="text-xs list-disc pl-4 space-y-1">
-                  <li>Evidence: {selected.conditions.length} condition(s), source connector <b>{selectedSource?.name ?? selected.sourceConnectorId}</b> · {selectedSource?.state ?? "unknown"}, {activationsForSelected.length} recent activations, {testsForSelected.filter((t) => t.matched).length} historical matches.</li>
+                  <li>Evidence: {selected.conditions.length} condition(s), source connector <b>{selectedSource?.name ?? selected.sourceConnectorId}</b> · {selectedSource?.status ?? "unknown"}, {activationsForSelected.length} recent activations, {testsForSelected.filter((t) => t.matched).length} historical matches.</li>
                   <li>Confidence adjusted by condition count, storm protection, source availability, and execution/approval balance.</li>
                   <li>Uncertainty: without live traffic, storm-protection and rate-limit behavior are inferred from cooldown ({selected.cooldownSeconds}s) and rate ({selected.rateLimitPerHour}/h) — real signals may differ.</li>
                 </ul>
