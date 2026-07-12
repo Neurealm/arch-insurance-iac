@@ -404,7 +404,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-        <Suspense fallback={null}>
+        <LazyRouteBoundary>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/q/:token" element={<PublicQuestionnaire />} />
