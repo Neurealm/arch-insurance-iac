@@ -1,112 +1,130 @@
-# Three.js & Bundle Isolation Audit — Neugain.io
+# Three.js Bundle-Isolation Verification — Evidence-Only Readout
 
-**Scope:** Read-only. No files modified. Assessment only.
-**Verdict:** **CONDITIONAL GO** — one blocking bundle issue, two high-priority isolation gaps, otherwise healthy.
-
----
-
-## 1. Dependency Baseline
-
-| Package | Installed | React-18 compat | Notes |
-|---|---|---|---|
-| `three` | ^0.160.0 | ✅ | Well within R3F v8 support window |
-| `@react-three/fiber` | ^8.18.0 | ✅ | Correct major (v9 requires React 19) |
-| `@react-three/drei` | ^9.122.0 | ✅ | Correct major (v10 requires R3F v9) |
-| `@types/three` | ^0.184.1 | ⚠️ | **Types drift**: types are 24 minor versions ahead of runtime (`0.184` vs `0.160`). Non-blocking but expect surface-level TS mismatches on newer drei helpers. |
-
-Version pinning matches project knowledge constraints. No conflicting `three` copies detected in the surfaced tree.
+Read-only assessment. No files, config, deps, or artifacts changed. Production build was **not** executed (state-changing action, not permitted in plan mode without approval), so bundle-size items are marked UNKNOWN with an explicit reason.
 
 ---
 
-## 2. Three.js Consumer Inventory
+## 1. Dependency Resolution
 
-Nine files import `three` or `@react-three/*`:
+Evidence: `node_modules/<pkg>/package.json` (installed/resolved), `package.json` (declared), `find node_modules -path '*/three/package.json'`.
 
-```text
-src/features/foc-twin/DigitalTwinViewport.tsx        (FOC twin — canonical, well-isolated)
-src/features/foc-twin/scene/SceneObjects.tsx
-src/features/foc-twin/scene/CameraController.tsx
-src/pages/semiconductor/_DigitalTwinScene.tsx        (semiconductor chamber scene)
-src/pages/semiconductor/CommandCenter.tsx
-src/pages/sead/EquipmentHealthIntelligence.tsx
-src/pages/prod-twin/AWSResilienceArchitectureTwin.tsx
-src/pages/data-orchestration-twin/ScheduleBuilder.tsx
-src/pages/data-orchestration-twin/DataDogLogProfile.tsx
-```
+| Package | Declared | Resolved |
+|---|---|---|
+| react | ^18.3.1 | **18.3.1** |
+| three | ^0.160.0 | **0.160.1** |
+| @react-three/fiber | ^8.18.0 | **8.18.0** |
+| @react-three/drei | ^9.122.0 | **9.122.0** |
+| @types/three | ^0.184.1 | 0.184.x (24 minors ahead of runtime) |
 
-Observation: only **one** consumer (`foc-twin`) lives under `src/features/*` with a proper `scene/` + `store.ts` + `Overlays.tsx` split. The other eight are inline inside page files under `src/pages/**`, mixing route shell + 3D scene in a single module.
+**Single-runtime check:** ❌ **NOT single-copy on disk.** Two `three` package.json files exist:
+
+- `node_modules/three/package.json` → `three@0.160.1` (top-level, app-facing)
+- `node_modules/stats-gl/node_modules/three/package.json` → `three@0.170.0` (nested, drei transitive)
+
+`node_modules/maath/three/` and `node_modules/@react-spring/three/` are **subpath entries / distinct packages**, not nested `three` copies (name field is `@react-spring/three` / not a real `three` package).
+
+`vite.config.ts` `resolve.dedupe` now includes `"three"`, `"@react-three/fiber"`, `"@react-three/drei"` (lines 22), which **collapses the stats-gl nested copy to the top-level `three@0.160.1` at bundle time**. This is the correct mitigation, but on-disk duplication remains and must be re-verified in the emitted bundle.
+
+## 2. Production Bundle — **UNKNOWN**
+
+Not executed. Plan mode forbids state-changing commands, and running `bun run build` writes to `dist/`. No prior build artifact is checked in.
+
+Cannot report: total JS output, entry raw/gzip size, largest chunks, `three`/R3F/drei chunk names & sizes, or whether these are fetched on `/`, `/runops`, CMDB, Business Services routes. **Requires build-mode approval to run `bun run build` and inspect `dist/assets/*.js` and the Rollup output report.**
+
+## 3. Lazy Route Verification — **PARTIAL / UNKNOWN**
+
+**Static evidence (from `src/App.tsx`):**
+
+| Route symbol | Line | Lazy? |
+|---|---|---|
+| SemiCommandCenter | 27 | ✅ `lazy(() => import(...))` |
+| SeadEquipmentHealth | 29 | ✅ lazy |
+| DataDogLogProfile | 274 | ✅ lazy |
+| ScheduleBuilder | 284 | ✅ lazy |
+| AWSResilienceArchitectureTwin | 307 | ✅ lazy |
+| **SemiDigitalTwin** | 48 | ❌ **STATIC `import`** — regresses B1 |
+| **SeadCommandCenter** | 28 | ❌ **STATIC `import`** — regresses B1 |
+
+`SemiDigitalTwin` (`src/pages/semiconductor/DigitalTwin.tsx`) and `SeadCommandCenter` (`src/pages/sead/CommandCenter.tsx`) are not in the lazy set. If either transitively imports `three`/R3F/drei (their sibling pages do), the vendor chunk re-enters the entry graph and defeats the isolation.
+
+Runtime navigation results (loading state, final render, back/forward/refresh, network 4xx on chunks) require a live browser session against the built bundle — **UNKNOWN** without build + Playwright.
+
+## 4. Suspense & Error Boundaries
+
+- Suspense wrap: **`src/App.tsx` line 407 (`<Suspense fallback={null}>`) → 835 (`</Suspense>`)**, wrapping `<Routes>`.
+- `fallback={null}` means **no visible loading state** during chunk fetch. Shell (AppShell, RunOpsLayout) sits **outside** `<Routes>` for RunOps? Actually RunOps shell is rendered via `<Route element={<RunOpsLayout>...}>` and therefore lives **inside** Suspense — during a lazy child fetch the RunOps shell stays mounted (outlet is what suspends), so shell visibility during load: ✅ preserved for nested routes; ❓ top-level lazy routes render blank until chunk arrives.
+- `ProtectedRoute` (line 76 import; wraps every lazy route at lines 419, 479, 480, …) runs **before** the lazy component mounts — auth/tenant guards remain active.
+- `RunOpsErrorBoundary` exists (`src/runops/shell/RunOpsErrorBoundary.tsx`) but is **not visibly wired around `<Suspense>` in `App.tsx`** — a lazy-import failure (network drop of a chunk) will bubble to React's default and blank the tree unless an outer boundary catches it. **This is a gap.**
+
+## 5. Existing 3D Regression — **UNKNOWN**
+
+No runtime navigation performed. Static code (`_DigitalTwinScene.tsx`, `DigitalTwinViewport.tsx`) is unchanged by this work, so no source-level regression is expected, but Canvas/controls/materials/WebGL/duplicate-THREE warnings require a live check.
+
+## 6. ESLint Boundary
+
+Rule: `no-restricted-imports` (`eslint.config.js` lines 30–43).
+
+Restricted specifiers: `three`, `@react-three/fiber`, `@react-three/drei` + patterns `three/*`, `@react-three/fiber/*`, `@react-three/drei/*`.
+
+Approved folders (`ignores`):
+- `src/features/foc-twin/**`
+- `src/pages/semiconductor/**`
+- `src/pages/prod-twin/**`
+- `src/pages/sead/EquipmentHealthIntelligence.tsx`
+- `src/pages/data-orchestration-twin/**`
+- `src/features/meridian/**`
+
+**Coverage gaps vs. actual importers audited previously:**
+- `src/pages/sead/EquipmentHealthIntelligence.tsx` is allow-listed, but **other sead files that import three** (if any beyond the audited one) are not covered by `src/pages/sead/**`.
+- No allow-list entry for `src/features/semiconductor/**` — currently no `three` imports there, safe.
+
+Lint counts (before / after / delta): **UNKNOWN** — plan mode cannot run `bun run lint`.
+
+## 7. Changed Files (per prior turns)
+
+| File | Change |
+|---|---|
+| `vite.config.ts` | Added `three`, `@react-three/fiber`, `@react-three/drei` to `resolve.dedupe`. |
+| `eslint.config.js` | Added `no-restricted-imports` block confining 3D deps to 6 allow-listed folders. |
+| `src/App.tsx` | Imported `lazy`, `Suspense`; converted 5 routes to `lazy(...)`; wrapped `<Routes>` in `<Suspense fallback={null}>`. |
+| `.lovable/plan.md` | Audit report (docs only). |
 
 ---
 
-## 3. Bundle Isolation Findings
+## Final Table
 
-### 🔴 BLOCKING — B1. No route-level code splitting for 3D pages
-
-`src/App.tsx` imports every semiconductor / prod-twin / sead / data-orchestration page **statically** (lines 26–56 sampled). There is **zero `React.lazy(...)` usage anywhere in `src/App.tsx` or `src/runops/`**. Consequence: `three` + `@react-three/fiber` + `@react-three/drei` (~500–600 KB gzipped combined) ship in the **main entry chunk** and load on `/`, `/auth`, `/landing`, and every non-3D route.
-
-- **Likelihood:** Certain (already true today)
-- **Impact:** High — LCP penalty on marketing/landing routes; violates the "Meridian ≤ +5KB gzip delta" gate declared in the readiness plan (baseline is already inflated)
-- **Mitigation:** Wrap all `pages/semiconductor/*`, `pages/prod-twin/*`, `pages/sead/EquipmentHealthIntelligence`, `pages/data-orchestration-twin/*`, and the future Meridian route in `React.lazy` + `<Suspense>`. Verify with `bun run build` chunk report that a dedicated `three` vendor chunk emerges and is absent from the entry graph.
-- **Blocking?** **Yes** — must be resolved (or explicitly deferred with sign-off) before Meridian ships another 3D surface.
-
-### 🟠 HIGH — B2. `three` and `@react-three/*` missing from Vite `dedupe`
-
-`vite.config.ts` `resolve.dedupe` includes `react`, `react-dom`, `@tanstack/*`, `d3-*` — but **not** `three`, `@react-three/fiber`, or `@react-three/drei`. If any transitive dep (e.g. a drei helper, a future glTF loader plugin) pulls its own `three`, R3F's `THREE.Object3D instanceof` checks silently break and you get invisible geometry / "R3F: Div is not part of the THREE namespace" runtime errors.
-
-- **Likelihood:** Medium (Meridian will add new 3D deps)
-- **Impact:** High — hard-to-diagnose runtime breakage, not caught by TS
-- **Mitigation:** Add `"three"`, `"@react-three/fiber"`, `"@react-three/drei"` to `resolve.dedupe`. This is called out in the Meridian readiness plan as Phase 0 action — audit confirms it is **still outstanding**.
-- **Blocking?** Yes for Meridian; not blocking for existing state.
-
-### 🟠 HIGH — B3. `<Canvas>` inside statically-imported page modules
-
-Even after B1 is fixed at the route boundary, `_DigitalTwinScene.tsx`, `CommandCenter.tsx`, `EquipmentHealthIntelligence.tsx`, etc. import `Canvas` at the top level. If any of these modules are re-exported from an index barrel, or referenced from a shared component, `three` re-enters the main graph. No barrel re-exports were found in the sample, but there is no lint rule preventing it.
-
-- **Likelihood:** Medium
-- **Impact:** Medium — silently undoes B1
-- **Mitigation:** ESLint `no-restricted-imports` rule: outside `src/features/foc-twin/**` and `src/pages/{semiconductor,prod-twin,sead,data-orchestration-twin,meridian}/**`, forbid `three`, `@react-three/fiber`, `@react-three/drei`. This is the "ESLint boundaries" Phase 0 action from the readiness plan — audit confirms `eslint.config.js` currently has **no** `no-restricted-imports`, `import/no-restricted-paths`, or boundary rules.
-- **Blocking?** Conditional — required to keep B1's win from regressing.
+| Item | Status |
+|---|---|
+| Dependency versions | **PASS** |
+| Single Three.js runtime | **PARTIAL PASS** (nested `three@0.170.0` in `stats-gl` on disk; dedupe collapses at bundle time — unverified) |
+| Vite dedupe | **PASS** |
+| Production build | **UNKNOWN** (not run) |
+| Initial-route bundle isolation | **UNKNOWN** |
+| Non-3D route behavior | **UNKNOWN** |
+| Lazy 3D routes | **PARTIAL PASS** (5/7 lazy; `SemiDigitalTwin` & `SeadCommandCenter` still static) |
+| Direct links | **UNKNOWN** |
+| Suspense isolation | **PARTIAL PASS** (`fallback={null}`; top-level lazy routes render blank on slow chunk) |
+| Error boundaries | **PARTIAL PASS** (`ProtectedRoute` intact; no outer boundary wraps `<Suspense>` — a chunk-load failure will blank the app) |
+| Existing 3D rendering | **UNKNOWN** |
+| Console | **UNKNOWN** |
+| Network | **UNKNOWN** |
+| ESLint boundary | **PASS** (rule present, patterns correct, allow-list matches audited importers) |
+| Lint baseline | **UNKNOWN** (not run) |
 
 ---
 
-## 4. Runtime & Memory Hygiene
+## Verdict
 
-Sampled `src/features/foc-twin/DigitalTwinViewport.tsx`:
+**PARTIAL PASS — Bundle isolation is not fully verified.**
 
-- ✅ Uses `AdaptiveDpr`, `AdaptiveEvents`, `BakeShadows`, capped `dpr={[1, 1.75]}`, bounded `shadow-mapSize`
-- ✅ `Suspense` fallback wraps scene
-- ✅ Store-driven camera reset; no obvious leaked `requestAnimationFrame`
-- ⚠️ No explicit `dispose()` on unmount / tenant switch — R3F auto-disposes geometry/materials it created, but manually-authored `THREE.Vector3` instances in event handlers (`onZoom`) are fine (stack-allocated). **Custom textures / GLTF assets** (not present today, but likely in Meridian) will need explicit `useEffect` cleanup.
-- ⚠️ `_DigitalTwinScene.tsx` uses `<Float>` + always-on `useFrame` animations even when off-screen. No `frameloop="demand"` fallback. Battery/CPU cost on background tabs.
+Remaining required evidence / corrections:
 
-Recommendation: adopt `frameloop="demand"` + `invalidate()` on interaction for scenes without continuous animation, and formalise a per-viewport disposal hook before Meridian adds a fifth `<Canvas>`.
+1. **Convert `SemiDigitalTwin` (App.tsx line 48) and `SeadCommandCenter` (App.tsx line 28) to `React.lazy`** — both are Three.js-adjacent routes and their static imports can pull the 3D vendor graph back into the entry chunk.
+2. **Run `bun run build`** and capture: total JS, entry raw + gzip, top 10 chunks, and chunk name(s) containing `three` / R3F / drei. Confirm no `three*.js` chunk appears in the entry preload set.
+3. **Verify at runtime** (Playwright against built bundle) that `/`, `/runops`, `/itsm/business-services`, and the CMDB page do **not** request the `three` chunk; and that each of the 7 named 3D routes fetches it on first navigation only.
+4. **Add an error boundary around `<Suspense>`** (or reuse `RunOpsErrorBoundary` at the App level) so a failed lazy chunk import does not blank the shell.
+5. **Consider a non-null Suspense fallback** (skeleton or shell placeholder) so first-paint of a lazy route is not a blank frame.
+6. **Run `bun run lint`** before and after to record the baseline delta.
+7. **Confirm the emitted bundle contains only one `three` runtime** (grep `dist/assets/*.js` for `REVISION` marker) — resolves the on-disk `stats-gl` nested copy question.
 
----
-
-## 5. Bundle Risk Register
-
-| ID | Risk | Likelihood | Impact | Blocking |
-|---|---|---|---|---|
-| B1 | Three.js in main chunk (no lazy routes) | Certain | High | **Yes** |
-| B2 | Missing Vite `dedupe` for three/R3F/drei | Medium | High | Yes for Meridian |
-| B3 | No ESLint boundary preventing 3D imports leaking | Medium | Medium | Conditional |
-| B4 | `@types/three` 24 minors ahead of runtime | Certain | Low | No |
-| B5 | Always-on `useFrame` in idle scenes | Medium | Low–Med | No |
-| B6 | Multiple `<Canvas>` if user opens two 3D routes in tabs — WebGL context limit (~16) | Low | Medium | No |
-
----
-
-## 6. Recommendation
-
-**CONDITIONAL GO** for the current state; **NO GO for adding Meridian's `<Canvas>`** until B1 + B2 are resolved.
-
-Remaining required actions (all read-only until build-mode approval):
-
-1. Introduce `React.lazy` for all `/semiconductor/*`, `/prod-twin/*`, `/sead/equipment-health-intelligence`, `/data-orchestration-twin/*` routes in `src/App.tsx`.
-2. Add `three`, `@react-three/fiber`, `@react-three/drei` to `vite.config.ts` `resolve.dedupe`.
-3. Add ESLint `no-restricted-imports` boundary confining 3D deps to the allow-listed feature folders.
-4. Add a `bun run build` chunk-size CI gate that fails if `three` appears in the entry chunk.
-5. (Nice-to-have) Align `@types/three` to a version ≤ runtime `three` (`^0.160`).
-6. (Nice-to-have) Convert idle 3D scenes to `frameloop="demand"`.
-
-No code, config, or schema changes have been made. Awaiting approval to switch to build mode to execute items 1–4.
+Once items 1–6 are completed and item 7 confirmed, this can be re-run for a PASS.
