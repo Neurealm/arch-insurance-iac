@@ -17,6 +17,6 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core", "d3-selection", "d3-zoom", "d3-drag"],
+    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core", "d3-selection", "d3-zoom", "d3-drag", "three", "@react-three/fiber", "@react-three/drei"],
   },
 }));

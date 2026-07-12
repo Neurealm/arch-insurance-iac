@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -23,9 +24,9 @@ import ComplianceCenter from "./pages/enterprise-cert/ComplianceCenter.tsx";
 import AuditEvidenceCenter from "./pages/enterprise-cert/AuditEvidenceCenter.tsx";
 import PolicyEngine from "./pages/enterprise-cert/PolicyEngine.tsx";
 import CtLogsMonitor from "./pages/enterprise-cert/CtLogsMonitor.tsx";
-import SemiCommandCenter from "./pages/semiconductor/CommandCenter.tsx";
+const SemiCommandCenter = lazy(() => import("./pages/semiconductor/CommandCenter.tsx"));
 import SeadCommandCenter from "./pages/sead/CommandCenter.tsx";
-import SeadEquipmentHealth from "./pages/sead/EquipmentHealthIntelligence.tsx";
+const SeadEquipmentHealth = lazy(() => import("./pages/sead/EquipmentHealthIntelligence.tsx"));
 import SeadCrossDomain from "./pages/sead/CrossDomainContextTwin.tsx";
 import SeadMaintenanceSim from "./pages/sead/MaintenanceDecisionSimulator.tsx";
 import SeadFactoryImpact from "./pages/sead/FactoryImpactSimulator.tsx";
@@ -270,7 +271,7 @@ import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/Execu
 import UseCaseToDataContractMapper from "./pages/data-orchestration-twin/UseCaseToDataContractMapper.tsx";
 import SiteResilienceCoworker from "./pages/data-orchestration-twin/SiteResilienceCoworker.tsx";
 import LogSourceInventoryAndScopeRegistry from "./pages/data-orchestration-twin/LogSourceInventoryAndScopeRegistry.tsx";
-import DataDogLogProfile from "./pages/data-orchestration-twin/DataDogLogProfile.tsx";
+const DataDogLogProfile = lazy(() => import("./pages/data-orchestration-twin/DataDogLogProfile.tsx"));
 import CyberThreatIntelligenceAndIocAnalysis from "./pages/data-orchestration-twin/CyberThreatIntelligenceAndIocAnalysis.tsx";
 import DataPlacementDecisionEngine from "./pages/data-orchestration-twin/DataPlacementDecisionEngine.tsx";
 import PlacementScenarioModeler from "./pages/data-orchestration-twin/PlacementScenarioModeler.tsx";
@@ -280,7 +281,7 @@ import OptionsAndTradeoffMatrix from "./pages/data-orchestration-twin/OptionsAnd
 import ConnectorAccessGovernanceRegistry from "./pages/data-orchestration-twin/ConnectorAccessGovernanceRegistry.tsx";
 import ConnectionMethodProfile from "./pages/data-orchestration-twin/ConnectionMethodProfile.tsx";
 import FetchOrchestrationScheduler from "./pages/data-orchestration-twin/FetchOrchestrationScheduler.tsx";
-import ScheduleBuilder from "./pages/data-orchestration-twin/ScheduleBuilder.tsx";
+const ScheduleBuilder = lazy(() => import("./pages/data-orchestration-twin/ScheduleBuilder.tsx"));
 import SourceOnboardingFactory from "./pages/data-orchestration-twin/SourceOnboardingFactory.tsx";
 import AssistedSchemaDiscoveryAndFieldMapping from "./pages/data-orchestration-twin/AssistedSchemaDiscoveryAndFieldMapping.tsx";
 import SchemaDriftAndExceptionWorkbench from "./pages/data-orchestration-twin/SchemaDriftAndExceptionWorkbench.tsx";
@@ -303,7 +304,7 @@ import ProductionTopology from "./pages/prod-twin/ProductionTopology.tsx";
 import SreOperatingModel from "./pages/prod-twin/SreOperatingModel.tsx";
 import SignalIntelligence from "./pages/prod-twin/SignalIntelligence.tsx";
 import EnterpriseCloudTwin from "./pages/prod-twin/EnterpriseCloudTwin.tsx";
-import AWSResilienceArchitectureTwin from "./pages/prod-twin/AWSResilienceArchitectureTwin.tsx";
+const AWSResilienceArchitectureTwin = lazy(() => import("./pages/prod-twin/AWSResilienceArchitectureTwin.tsx"));
 import { ScenarioStateProvider } from "./context/ScenarioStateContext.tsx";
 import PlatformEngineeringFactory from "./pages/prod-twin/PlatformEngineeringFactory.tsx";
 import HybridCloudWorkbench from "./pages/prod-twin/HybridCloudWorkbench.tsx";
@@ -403,6 +404,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+        <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/q/:token" element={<PublicQuestionnaire />} />
@@ -830,6 +832,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
