@@ -30,7 +30,6 @@ class LazyRouteErrorBoundary extends React.Component<
   }
 
   componentDidCatch(err: unknown): void {
-    // eslint-disable-next-line no-console
     console.error("[LazyRouteBoundary] caught error", err);
   }
 
