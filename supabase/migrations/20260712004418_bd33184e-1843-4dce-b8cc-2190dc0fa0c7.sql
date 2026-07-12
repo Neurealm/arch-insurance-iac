@@ -1,0 +1,15 @@
+REVOKE EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.is_platform_admin(uuid) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.is_user_approved(uuid) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_can_write(uuid) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_has_role(uuid, public.runops_role) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_has_any_role(uuid, public.runops_role[]) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_has_tenant_access(uuid) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_advance_scenario(uuid, text) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_reset_scenario(uuid, text) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_resolve_incident(uuid, text) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_approve_change(uuid, text) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_approve_execution(uuid, text) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_deny_execution(uuid, text, text) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_certify_runbook_version(uuid, text) FROM authenticated;
+REVOKE EXECUTE ON FUNCTION public.runops_bootstrap_current_user() FROM authenticated;
