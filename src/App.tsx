@@ -404,6 +404,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+        <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/q/:token" element={<PublicQuestionnaire />} />
@@ -831,6 +832,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
