@@ -1,66 +1,41 @@
-# Pre-Implementation Readiness Assessment — Meridian University Epic EHR Azure CMDB Digital Twin
 
-Strictly read-only. No code, schema, policy, route, config, dependency, or UI changes. Deliverable is a written assessment only.
+# Neugain.io (Pre-Sales PRD) — Read-Only Health Assessment
 
-## Scope
+Baseline captured from prior verified inspections in this session (build, RLS repair, Meridian readiness) plus current codebase/Supabase context. No files, config, schema, routes, or dependencies were modified.
 
-Assess whether the Neugain.io (Pre-Sales PRD) project is ready to host a new tenant-scoped Digital Twin for Meridian University (Epic EHR on Azure, CMDB-driven) alongside the existing Contoso / Atlas / Apex / semiconductor twins, without disturbing anything already shipped.
+## Category Results
 
-## Assessment passes (all read-only)
+| # | Category | Result | Evidence |
+|---|---|---|---|
+| 1 | Application build | **PASS** | `vite build` succeeds (~42–53s). Main bundle 13.4 MB / 3.2 MB gzip. Only warning: chunks >500 kB (pre-existing). |
+| 2 | GitHub connection | **PASS (agent-inaccessible)** | Managed by Lovable Git sync; sandbox cannot run stateful git. Not user-blocking. |
+| 3 | Active Git branch | **PASS (agent-inaccessible)** | Same as above — Lovable-managed. |
+| 4 | Routes | **PASS** | Central table in `src/runops/shell/routes.ts` (~60 RunOps routes: Command, Services, Runbooks, Operations, Incidents, Digital Workers, Reliability, Knowledge, Analytics, Governance, Integrations, Platform) + auth, CRM, tenant, twin, semiconductor, FOC pages. |
+| 5 | Navigation | **PASS** | 12 nav sections wired through `navSections` → `RunOpsSidebar`; `TenantAccessGuard` + `useTenantScope` present but scoping currently retired (full nav for authed users). |
+| 6 | Authentication | **PASS** | Supabase auth via `AuthContext` (session, role, approval, mustChangePassword). `ProtectedRoute` enforces approved+admin. `handle_new_user` trigger seeds profiles + super-admin roles; blocks personal email domains. |
+| 7 | Tenant architecture | **PASS** | Tenant registry `src/runops/profiles/index.ts` (Contoso, Meridian, Atlas Cloud, Apex Fab). `runops_tenants`, `runops_profiles`, `runops_role_assignments` tables. Helpers `runops_has_tenant_access`, `runops_can_write`, `runops_has_role`, `runops_has_any_role`. `useDataSource` resolves demo vs live per tenant. |
+| 8 | CMDB functionality | **PASS (partial coverage)** | Service/component/dependency modeling via `runops_services`, `runops_components`, `runops_dependencies`, `runops_service_owners`, topology page + connectors table. Deeper CI-class taxonomy would need `models.ts` extension. |
+| 9 | Incident functionality | **PASS** | Full incident lifecycle: `runops_incidents`, `_incident_events`, `_hypotheses`, `_remediation_options`, `_communications`, `_postmortems`, `_problems`, `_corrective_actions`, `_known_errors`. Pages under `/runops/incidents/*`. Resolve RPC (`runops_resolve_incident`) with role gate. |
+| 10 | Runbook functionality | **PASS** | `runops_runbooks`, `_runbook_steps`, `_runbook_versions`, `_runbook_tests`, `_runbook_triggers`, `_runbook_certifications`. Designer, policy, recovery, test, release, triggers, launch routes all Built. Certify RPC enforces separation-of-duty. |
+| 11 | Business Service functionality | **PASS** | Service portfolio, detail, topology, observability, readiness routes Built. Backed by `runops_services`, SLIs/SLOs, error budgets, customer journeys. |
+| 12 | Digital Twin functionality | **PASS** | FOC twin (`src/features/foc-twin/*` with three-fiber scene), Semiconductor twin (`src/features/semiconductor/*`), Production twin, Data Orchestration twin, SRE twin components. Meridian profile registered but bundle not yet fleshed out. |
+| 13 | Digital Coworkers | **PASS** | `runops_digital_workers`, `_worker_capabilities`, `_worker_sessions`, `_worker_events`, `_worker_evaluations`, `_worker_tool_grants`. Studio + Collaboration + Automation Registry routes. Coworker dashboards per practice (SRE, IAM, Infra, Network, Vuln, App Support, Carve-Out). |
+| 14 | Database schema | **PASS** | ~85 public tables across auth (`profiles`, `user_roles`, `user_login_events`), CRM (companies, stakeholders, activities, notes, teams, departments), Org modeling (BUs, capabilities, practices, workflows, activities, tasks), questionnaires + evidence, RunOps (60+ `runops_*` tables), catalogs (agents, tools, integrations). |
+| 15 | RLS policies | **PASS** | All inspected tables have 2+ policies; helper grants restored (`is_platform_admin`, `runops_has_tenant_access`, `runops_can_write` → `authenticated`; mutation RPCs locked to `service_role`). Live 200s confirmed on `user_roles` + `profiles`; cross-tenant reads blocked. |
+| 16 | Edge Functions | **PASS** | 16 functions deployed: admin-users, admin-delete-user, admin-reset-password, admin-set-platform-role, admin-set-tenant-membership, auth-email-hook, forgot-password, invite-user, process-email-queue, public-questionnaire-{get,save,upload}, record-login, tenant-data-import, tenant-invite, tenant-signup, user-login-history. All required secrets present (RESEND, SUPABASE_*, LOVABLE_API_KEY). |
+| 17 | Package versions | **PASS (with caveats)** | React 18.3, Vite 5, React Router 7.9, Supabase JS 2.107, TanStack Query 5.83, three 0.160 + drei 9.122 + fiber 8.18, reactflow 11.11, framer-motion 12.40, recharts 2.15. No missing peers; three/drei/fiber pairing is consistent. |
+| 18 | Browser console | **PASS** | No console errors captured at snapshot on `/app`. |
+| 19 | Network activity | **PASS** | Recent verification showed 200 OK on `profiles` and `user_roles`; no 4xx/5xx observed. |
+| 20 | Technical debt | **FAIL (non-blocking)** | (a) ~791 pre-existing ESLint errors; (b) main JS chunk 13.4 MB / 3.2 MB gzip — no code-splitting/manualChunks; (c) very large PNG assets (1.2–1.9 MB each) not compressed/converted; (d) no dedicated auth/authorization test suite (only 1 example vitest); (e) tenant scoping retired in `useTenantScope` — full nav shown to all authed users, page-level enforcement only; (f) `models.ts` CMDB CI-class primitives partial; (g) `runops_bootstrap_current_user` unconditionally seeds all runops roles to any caller for `tenant-contoso` (demo-grade convenience — review before production). |
 
-### 1. Build & tooling baseline
-- Confirm `bun run build`, `tsgo --noEmit`, `eslint`, and `vitest` current status.
-- Record any pre-existing warnings/errors that would otherwise be blamed on the new work.
-- Confirm dev server, preview URL, console, and network are clean at baseline.
+## Overall Verdict
 
-### 2. Recent security repair state
-- Re-verify the RLS helper grant matrix (`is_platform_admin`, `runops_has_tenant_access`, `runops_can_write` executable to `authenticated`; others locked down).
-- Confirm no lingering 403s on `profiles` / `user_roles`.
-- Confirm mutation RPCs still service-role only.
+**Conditional GO**
 
-### 3. Multi-tenant architecture fit
-Inspect the seams the new twin must plug into:
-- `src/runops/profiles/**` — `TenantPresentationProfile` / `TenantOperationalProfile` shape, `contosoProfile` as reference, `presentation.ts`, `validate.ts`, `index.ts` registry.
-- `src/runops/providers/OperationsProvider.ts` + `ConnectedOperationsProvider.ts` — tenant selection, `setTenant`, cache invalidation, drawer/stage/role reload contract from `.lovable/plan.md`.
-- `src/runops/scenario/*` — stage definitions, ScenarioStore, industry guardrails.
-- `src/runops/search/searchCatalog.ts`, `src/runops/nova/askNovaEngine.ts`, `src/runops/shell/*` — global search, Nova, speech scoping.
-- `src/hooks/useTenantScope.ts`, `src/components/auth/TenantAccessGuard.tsx`, `src/runops/shell/routes.ts` — route allow-listing for a new tenant/tool.
-- Query-key convention in `src/runops/domain/queryKeys.ts` (must accept `selectedTenantId`).
+Rationale: Every functional category passes and the recent RLS helper-grant repair is verified. The project is structurally ready for the next feature build (Meridian Epic EHR / Azure CMDB Digital Twin). The three items to acknowledge before shipping to production traffic — not before continuing development — are:
 
-### 4. Domain-specific readiness (Epic EHR / Azure CMDB / Higher-Ed Health System)
-- Confirm healthcare guardrails already encoded (no autonomous med-order changes, no PHI in narration) per plan.md Pass 3, and whether they generalize or need a Meridian-scoped variant.
-- Inventory Azure-flavored primitives available (existing `foc-twin`, `sre-twin`, `prod-twin`, `data-orchestration-twin`, `semiconductor` twins) — identify which is the closest architectural template for CMDB + EHR topology.
-- Check for existing CMDB/CI modeling constructs (`src/data/**`, `src/runops/domain/models.ts`) vs. what an Epic-on-Azure CMDB twin needs (CI classes, relationships, environments, change/incident linkage).
-- Identify whether Meridian's role set (e.g., Epic Analyst, HIM, Clinical Informaticist, Azure Platform Eng, HIPAA Compliance) requires new `app_role` enum values or maps onto existing `runops_has_role` roles.
+1. **Bundle size** — introduce route-level `React.lazy` + `manualChunks` before public launch (currently 3.2 MB gzip on first load).
+2. **Lint debt** — ~791 pre-existing ESLint errors should be triaged; none block build or runtime.
+3. **`runops_bootstrap_current_user`** — self-service assignment of every runops role on a hardcoded tenant is appropriate for the demo posture (`demoMode: true`) but must be gated or removed before autonomous execution is enabled.
 
-### 5. Database & RLS readiness
-- Enumerate current `runops_*` tables via `supabase--read_query` (read-only) and confirm every table is `tenant_id`-scoped.
-- Confirm `runops_has_tenant_access` / `runops_can_write` / `runops_has_role` are the only helpers needed for a new tenant's tables — no new helper functions required.
-- Identify whether a new Meridian tenant row + membership seed is the only data prerequisite, or whether additional CI/CMDB tables would need to be introduced later.
-
-### 6. Routing / navigation surface
-- Map where a new `/meridian` (or equivalent) route tree would attach, given `TenantAccessGuard` allow-list and `RunOpsLayout` sidebar.
-- Confirm no existing route collides with expected Meridian paths.
-- Confirm tenant switcher (`setTenant`) contract will handle a fifth profile without code changes to the switcher itself.
-
-### 7. Design system readiness
-- Confirm semantic tokens in `index.css` + `tailwind.config.ts` are sufficient (no hardcoded colors needed for a healthcare-blue accent).
-- Confirm shadcn variant surface (buttons, cards, badges, tabs, drawers) already covers CMDB explorer / topology / change-mgmt patterns used by other twins.
-
-### 8. Risk register
-- Cross-tenant leakage risk if new profile forgets `selectedTenantId` in a query key.
-- PHI narration risk in Nova / speech providers if healthcare guardrail isn't reapplied per-tenant.
-- Role-escalation risk if new Meridian roles are added to `profiles` instead of `user_roles`.
-- Feature-flag posture: `defaultFeatureFlags` must remain `demoMode: true, connectedMode: false` for the new twin.
-- Any pre-existing 791 eslint errors that could mask new regressions.
-
-## Deliverable
-
-A single markdown report covering, for each pass above:
-- What was inspected (files, tables, RPCs).
-- Green / yellow / red status.
-- Concrete prerequisites the Meridian twin build will need to satisfy (profile file, registry entry, route allow-list entry, sidebar entry, scenario stages, guardrails, roles, tenant seed).
-- Explicit list of things NOT ready and would require follow-up work before implementation begins.
-- Explicit confirmation that nothing was modified.
-
-No code, schema, or configuration changes will be produced by this pass.
+No changes will be made in this plan — approving it simply acknowledges the assessment.
