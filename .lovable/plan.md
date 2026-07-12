@@ -1,135 +1,106 @@
 
-# Neugain.io (Pre-Sales PRD) — Architecture Inventory & Reuse Matrix
+# Backend Inspection & Migration Readiness (Neugain.io Pre-Sales PRD)
 
-Read-only inventory of the existing project, oriented toward reuse decisions for the upcoming Meridian University Epic EHR / Azure CMDB Digital Twin. No files, config, schema, or dependencies will be modified.
+Read-only inspection oriented toward the upcoming Meridian Epic EHR / Azure CMDB Digital Twin. No files, schema, policies, or data will be modified.
 
-## Inventory
+## Backend Inventory
 
-### 1. Existing routes
-Central declarative table at `src/runops/shell/routes.ts` (~60 RunOps routes across 12 sections). Additional route families: `/login`, `/signup`, `/pending-approval`, `/reset-password`, `/set-password`, `/app`, `/profile`, `/t/:tenant`, `/q/:questionnaire`, `/crm/*`, `/carveout/*`, `/coworkers/*`, `/prod-twin/*`, `/data-orchestration-twin/*`, `/semiconductor/*`, `/foc-twin/*`, `/sead/*`, `/aocp/*`, `/itsm/*`, `/practice-library/*`, `/settings/*`.
+### 1. Backend platform
+Supabase (managed) — project ref `esfpbiishpkvhlejnxzq`. Frontend uses `@supabase/supabase-js` 2.107 via `src/integrations/supabase/client.ts`. Edge Functions run on Deno. Lovable Cloud is not enabled on this project (external Supabase connection).
 
-### 2. Shared layouts
-- `RunOpsLayout` (`src/runops/shell/RunOpsLayout.tsx`) — sidebar + topbar + right drawer.
-- `RunOpsSidebar`, `RunOpsTopBar`, `RunOpsRightDrawer`, `AskNovaPanel`, `CommandPalette`, `NotificationCenter`, `SimulationBadge`, `DemoControllerDrawer`, `RunOpsErrorBoundary`.
-- `AuthLayout` (`src/pages/auth/AuthLayout.tsx`) for public auth pages.
-- `DataOrchLayout`, `OrganizationLayout`, `SemiShell`, `DashShell` (carveout), practice-library `TableOfContents`.
+### 2. Shared or isolated database
+**Shared** single Postgres database, single `public` schema. Multi-tenancy is row-level, keyed by `tenant_id` on every `runops_*` domain table. No per-tenant schemas or databases.
 
-### 3. Authentication
-- `AuthContext` (`src/context/AuthContext.tsx`) — session, user, `isAdmin`, `hasPlatformAdminRole`, approval status, `mustChangePassword`, `refreshRole`, `signOut`, `activeWorkspace`.
-- `ProtectedRoute` gates approved+admin. `TenantAccessGuard` scopes routes (currently retired but wired).
-- `handle_new_user` trigger seeds `profiles` + super-admin roles; blocks personal email domains.
-- Edge functions: `forgot-password`, `invite-user`, `record-login`, `tenant-invite`, `tenant-signup`, `admin-reset-password`, `auth-email-hook`, `user-login-history`.
+### 3. Current migrations
+20 migrations in `supabase/migrations/` between `20260604134024` and `20260712005358_c1ebba5d…` (the RLS helper-grant repair). Managed exclusively via the Lovable migration tool.
 
-### 4. Tenant model
-- Registry: `src/runops/profiles/index.ts` — Contoso, Meridian, Atlas Cloud, Apex Fab. Types in `types.ts`; presentation resolver in `presentation.ts`; validator in `validate.ts`.
-- Tables: `runops_tenants`, `runops_profiles`, `runops_role_assignments`.
-- Helpers: `runops_has_tenant_access`, `runops_can_write`, `runops_has_role`, `runops_has_any_role`, `runops_bootstrap_current_user`.
-- Hook: `useDataSource` resolves demo/live per tenant from `runops_tenants.data_mode`.
+### 4. Existing tenant isolation
+- `runops_tenants` (id, external_id, name, data_mode, …).
+- `runops_profiles(tenant_id, user_id, display_name)` — tenant membership.
+- `runops_role_assignments(tenant_id, user_id, role runops_role)` — per-tenant roles.
+- Every `runops_*` domain table carries `tenant_id uuid NOT NULL`.
+- RLS policies gate reads/writes via `runops_has_tenant_access(_tenant_id)` and mutations via `runops_can_write(_tenant_id)` / `runops_has_role` / `runops_has_any_role`.
 
-### 5. User model
-- `profiles` (20 cols): `user_id`, `email`, `display_name`, `approval_status`, `must_change_password`, `user_category`, timestamps.
-- `user_roles` with `app_role` enum (`platform_admin`, `platform_support`, …).
-- `runops_role_assignments` with `runops_role` enum per tenant (SRE, NOC, incident commander, service owner, runbook author, change manager, digital worker admin, platform engineer, demo controller, …).
-- `user_login_events`, `user_page_activity` for audit.
+### 5. Existing RLS
+All ~85 public tables have RLS enabled with ≥2 policies each. Verified after the recent helper-grant repair: `is_platform_admin`, `runops_has_tenant_access`, `runops_can_write` have `EXECUTE` on `authenticated`; `has_role`, `is_user_approved`, `runops_has_role`, `runops_has_any_role` are locked to `service_role`; all mutation RPCs (`runops_resolve_incident`, `_approve_change`, `_approve_execution`, `_deny_execution`, `_certify_runbook_version`, `_advance_scenario`, `_reset_scenario`, `_bootstrap_current_user`) are `SECURITY DEFINER` and `service_role`-only from the client. Live 200s confirmed on `profiles`/`user_roles`; cross-tenant reads blocked.
 
-### 6. Navigation
-12 sections in `navSections` (Command, Services, Runbooks, Operations, Incidents, Digital Workers, Reliability, Knowledge, Analytics, Governance, Integrations, Platform). Rendered by `RunOpsSidebar` using `sectionLanding()`. Non-RunOps trees have their own sidebars (semiconductor, foc-twin, data-orch, practice-library, carveout, settings/organization).
+### 6. Existing authentication
+Supabase Auth. Client uses `localStorage` session with autoRefresh. `handle_new_user` trigger seeds `profiles` (approval workflow) and grants `platform_admin` / `platform_support` roles for super-admins/invited users; blocks personal email domains. Email flows via `auth-email-hook` + Resend (`RESEND_API_KEY` present).
 
-### 7. Shared components
-- `src/runops/components/*` — panels, indicators, metrics, telemetry, timeline, graphs, states, dialogs, variants, `StepCodeBuilder`.
-- shadcn-ui primitives under `src/components/ui/*` (Radix).
-- Auth: `ProtectedRoute`, `TenantAccessGuard`, `AuthVerificationOverlay`.
-- Investigation: `GuidedInvestigationMode`.
-- SRE twin: `SRETwinSections`.
-- FOC twin: `DigitalTwinViewport`, `Overlays`, `SelectionDrawer`, `SceneObjects`, `CameraController`.
-- CRM sheets: Company/Department/Stakeholder/Team/Note/Activity/PromoteToTenantDialog.
-- Assurance: `AssuranceHeader`, `LiveAgentOverlay`.
-- Coworkers: `CoworkerDashboard`.
+### 7. Existing authorization
+Two-layer:
+- **Platform layer** — `app_role` enum (`platform_admin`, `platform_support`, …) in `user_roles`, checked via `has_role` / `is_platform_admin`.
+- **Tenant layer** — `runops_role` enum (`sre_engineer`, `noc_operator`, `incident_commander`, `service_owner`, `runbook_author`, `change_manager`, `digital_worker_administrator`, `platform_engineer`, `demo_controller`, …) in `runops_role_assignments`, checked via `runops_has_role` / `runops_has_any_role` / `runops_can_write`.
+- Frontend: `ProtectedRoute` (approved+admin) + `TenantAccessGuard` (route allow-list, currently retired).
 
-### 8. Zustand stores
-- `src/features/foc-twin/store.ts` — FOC twin selection/scene state.
-- No global app-level Zustand store; state is otherwise React Query + Context.
+### 8. Existing helper functions
+`is_platform_admin`, `is_user_approved`, `has_role`, `runops_has_tenant_access`, `runops_has_role`, `runops_has_any_role`, `runops_can_write`, `update_updated_at_column`, `set_user_category_from_email`, `handle_new_user`. All `SECURITY DEFINER` with `SET search_path = public` where applicable.
 
-### 9. Context providers
-- `AuthContext` — session/role/approval.
-- `PersonaContext` — active persona/journey.
-- `ScenarioStateContext` — demo scenario stage state.
-- `EvidenceGraphContext` — evidence graph selection.
-- `GuidedInvestigationContext` — guided investigation flow.
-- `ScenarioStore` (`src/runops/scenario/ScenarioStore.tsx`) — RunOps scenario stages.
-- `OperationsProvider` / `AiProvider` (`src/runops/providers/*`) with connected variants.
+### 9. Existing RPCs (mutation)
+`runops_resolve_incident`, `runops_approve_change`, `runops_approve_execution`, `runops_deny_execution`, `runops_certify_runbook_version`, `runops_advance_scenario`, `runops_reset_scenario`, `runops_bootstrap_current_user`, `record_user_login_event`, `admin_get_user_login_history`, `admin_user_page_activity`. All enforce `auth.uid()`, tenant access, role, and self-approval prohibitions where relevant.
 
-### 10. Database schema
-~85 public tables. Groupings: auth (`profiles`, `user_roles`, `user_login_events`, `user_page_activity`), CRM (companies/stakeholders/activities/notes/teams/departments), Org modeling (BUs/capabilities/practices/workflows/activities/tasks/service_functions), questionnaires + evidence, catalogs (agents/tools/integrations), and 60+ `runops_*` tables (services, components, dependencies, connectors, runbooks + steps/versions/tests/triggers/certifications, executions + step_executions, approvals, incidents + events/hypotheses/remediation/communications/postmortems, problems, corrective actions, known errors, changes, digital workers + capabilities/sessions/events/evaluations/tool_grants, SLIs/SLOs/error budgets, customer journeys, teams, policies + policy decisions, alerts, notifications, audit events, domain events, scenario instances/events, telemetry snapshots, knowledge items).
+### 10. Existing Edge Functions
+16 deployed: `admin-users`, `admin-delete-user`, `admin-reset-password`, `admin-set-platform-role`, `admin-set-tenant-membership`, `auth-email-hook`, `forgot-password`, `invite-user`, `process-email-queue`, `public-questionnaire-{get,save,upload}`, `record-login`, `tenant-data-import`, `tenant-invite`, `tenant-signup`, `user-login-history`. Required secrets all set (`LOVABLE_API_KEY`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `SUPABASE_*`).
 
-### 11. Existing CMDB
-`runops_services`, `runops_components`, `runops_dependencies`, `runops_service_owners`, `runops_connectors`. Topology page under `/runops/services/:serviceId/topology`. CI-class taxonomy is partial in `src/runops/domain/models.ts`.
+## CMDB Table Review
 
-### 12. Existing Business Services
-Portfolio, Detail, Topology, Observability, Readiness routes. Backed by services, SLIs/SLOs, error budgets, customer journeys.
+| Table | Columns of note | Classification | Rationale |
+|---|---|---|---|
+| `runops_services` | `tenant_id`, `external_id`, `name`, `tier`, `environment`, `region`, `health`, `owner_team_id`, `slo_availability`, `slo_latency_ms`, `error_budget_remaining`, `metadata jsonb`, `source_system`, `data_freshness` | **Reuse** | Business-service row for Epic-facing services fits verbatim; put Meridian-specific tags in `metadata`. |
+| `runops_components` | `tenant_id`, `service_id`, `name`, `kind` (enum), `health`, `metadata jsonb`, `source_system`, `data_freshness` | **Extend** (data-only) | The `kind` enum values must be inspected before adding Azure CI classes (subscription, RG, VNet, AKS, App Service, Function App, Storage, Cosmos, Key Vault, PrivateLink, ExpressRoute…) and Epic modules (Chart Review, Orders, HIM, RevCycle, MyChart, Bridges). Add values via migration only if enum lacks them; otherwise reuse. Metadata jsonb absorbs cloud attributes. |
+| `runops_dependencies` | `tenant_id`, `from_service_id`, `to_service_id`, `criticality`, `metadata jsonb` | **Reuse** | Edge model supports directional service-to-service dependency; component-to-component edges must piggyback through their parent services or via metadata. |
+| `runops_service_owners` | `tenant_id`, `service_id`, `team_id`, `primary_user_id`, `secondary_user_id` | **Reuse** | Fits Meridian ownership. |
+| `runops_connectors` | `tenant_id`, `kind`, `state`, `metadata jsonb` | **Adapter** | Azure Resource Graph / Epic API surface implemented as connector rows; runtime code lives in an Edge Function adapter — no schema change. |
+| `runops_teams` | tenant-scoped teams | **Reuse** | Epic teams (Ancillary, Revenue Cycle, Infrastructure) as team rows. |
+| CI-class taxonomy | not currently a table | **New table (optional)** | If structured CI classification is required beyond the `kind` enum + `metadata`, introduce `runops_ci_classes(tenant_id, key, label, parent_key, attributes_schema jsonb)` and a `runops_components.ci_class_key` FK. Only needed if we plan to enforce per-class attribute schemas server-side; otherwise `metadata jsonb` + a domain-side registry in `src/runops/domain/models.ts` is sufficient. |
+| Component-to-component edges | not currently a table | **New table (optional)** | If Azure CMDB needs first-class component graph (e.g. VM → NIC → NSG → Subnet → VNet), add `runops_component_edges(tenant_id, from_component_id, to_component_id, relation, metadata)` rather than overloading `runops_dependencies`. Optional if graph density is low. |
+| Epic module registry | not currently a table | **Reuse via `runops_services`** | Epic modules modeled as services with `metadata.epic_module = true`. |
 
-### 13. Existing Runbooks
-Library, Fitness, Designer, Steps, Policy, Recovery, Test, Release, Triggers, Launch. Tables: `runops_runbooks`, `_steps`, `_versions`, `_tests`, `_triggers`, `_certifications`. `runops_certify_runbook_version` RPC with separation-of-duty.
+## Migration Risk Review
 
-### 14. Existing Incident Management
-Full lifecycle: incidents, investigate, hypotheses, remediation options, communications, recovery validation, postmortem, problem corrective actions. Tables: `runops_incidents`, `_incident_events`, `_hypotheses`, `_remediation_options`, `_communications`, `_postmortems`, `_problems`, `_corrective_actions`, `_known_errors`. RPC: `runops_resolve_incident`.
-
-### 15. Existing Change Management
-`runops_changes` table + `runops_approve_change` RPC (change_manager role, self-approval blocked). Approvals routed via `runops_approvals` and `runops_approve_execution` / `runops_deny_execution` RPCs. Change management is not currently a dedicated left-nav section — surfaced within Operations/Governance.
-
-### 16. Existing Audit
-`runops_audit_events` (structured actor/action/target), `runops_domain_events` (event stream). `user_login_events`, `user_page_activity`, `admin_get_user_login_history` RPC. Evidence: `runops_evidence_items`, `evidence` storage bucket, `evidence_files`.
-
-### 17. Existing Digital Twin functionality
-- FOC twin — `src/features/foc-twin/*` with `react-three/fiber` scene, buildings, overlays, selection drawer.
-- Semiconductor twin — `src/features/semiconductor/*` with factory map, KPI ribbon, scenario context.
-- Production twin — `src/pages/prod-twin/*` (Golden Workflow, Hybrid Cloud Workbench, Modernization Roadmap, Platform Engineering Factory, Production Topology, Value Creation Board).
-- Data Orchestration twin — `src/pages/data-orchestration-twin/*`.
-- SRE twin — `src/components/sre-twin/SRETwinSections.tsx`.
-- Meridian profile stub registered but bundle not yet fleshed out.
-
-### 18. Existing integrations
-`runops_connectors` table, `integrations_catalog`, `tools_catalog`, `agents_catalog`. Routes: `/runops/integrations`, `/runops/developer`, `/runops/supply-chain`. Standard connectors available via Lovable gateway (not yet linked to project).
-
-### 19. Existing Edge Functions
-16 deployed: `admin-users`, `admin-delete-user`, `admin-reset-password`, `admin-set-platform-role`, `admin-set-tenant-membership`, `auth-email-hook`, `forgot-password`, `invite-user`, `process-email-queue`, `public-questionnaire-{get,save,upload}`, `record-login`, `tenant-data-import`, `tenant-invite`, `tenant-signup`, `user-login-history`. All required secrets present.
-
-### 20. Existing feature flags
-`src/runops/domain/featureFlags.ts` — `demoMode` (default true), `connectedMode`, `liveAi`, `autonomousExecution`, `externalPublishing`, `realInfrastructureActions` (all default false). Frozen `defaultFeatureFlags` + `assertFlagEnabled` helper. Per-tenant `data_mode` on `runops_tenants` toggles demo/live at the data layer.
-
-## Reuse Matrix (for Meridian Epic EHR / Azure CMDB Digital Twin)
-
-| Capability | Classification | Notes |
+| Risk | Severity | Mitigation |
 |---|---|---|
-| Route table (`routes.ts`) | **Reuse unchanged** | Add Meridian entries into the same table; no structural change. |
-| `RunOpsLayout` + sidebar/topbar/right drawer | **Reuse unchanged** | Layout is tenant-agnostic. |
-| `AuthContext` + `ProtectedRoute` | **Reuse unchanged** | No new auth surface. |
-| `TenantAccessGuard` + `useTenantScope` | **Extend** | Re-enable/tune scoping when Meridian goes live; today it is retired. |
-| Tenant registry (`profiles/index.ts`) | **Extend** | Flesh out `meridianProfile.ts` bundle (presentation, scenario stages, roles, guardrails). |
-| Tenant tables + RLS helpers | **Reuse unchanged** | `runops_has_tenant_access` / `_can_write` / `_has_role` cover Meridian. |
-| User model (`profiles`, `user_roles`, `runops_role_assignments`) | **Reuse unchanged** | Existing `runops_role` enum values map onto Epic Analyst / HIM / Clinical Informaticist. |
-| Navigation sections | **Reuse unchanged** | 12 sections already fit CMDB/Runbook/Incident coverage. |
-| shadcn primitives + `src/runops/components/*` | **Reuse unchanged** | Full design system in place. |
-| FOC twin scene primitives (`react-three/fiber`) | **Wrap with adapter** | Reuse camera/selection/overlays; adapt scene graph for Azure region/AZ/VNet topology. |
-| Semiconductor + Production + Data-Orch twins | **Reuse unchanged (reference)** | Templates only; no runtime dependency for Meridian. |
-| Zustand FOC store | **Wrap with adapter** | Model Meridian twin selection state via a parallel store rather than mutating shared FOC store. |
-| Context providers (Persona/Scenario/Evidence/Guided) | **Reuse unchanged** | Tenant-agnostic; Meridian scenario just adds new stage definitions. |
-| `ScenarioStore` + `stageDefinitions.ts` | **Extend** | Add Meridian-specific stages (Epic go-live, cutover, PHI-safe scenarios). |
-| CMDB tables (`runops_services/_components/_dependencies/_connectors`) | **Extend** | May need additional CI classes (Epic modules, Azure resources) via `models.ts` and seed data; consider migration for a CI-class column if categorization becomes structured. |
-| CMDB topology page | **Reuse unchanged** | Renders whatever is in `runops_dependencies`. |
-| Business Services module | **Reuse unchanged** | Epic-hosted services register as `runops_services` rows. |
-| Runbook module | **Reuse unchanged** | Meridian runbooks are additional rows; existing designer/certification pipeline applies. |
-| Incident Management module | **Reuse unchanged** | Add PHI-safe communication templates as data, not code. |
-| Change Management (`runops_changes` + approve RPC) | **Reuse unchanged** | Change_manager role enforcement already correct. |
-| Audit (`runops_audit_events` + `_domain_events` + evidence) | **Reuse unchanged** | Meridian scenarios emit into the same audit stream. |
-| Digital Coworkers (workers + capabilities + sessions + tool grants) | **Extend** | Add Meridian-specific worker templates + tool grants; no schema change. |
-| Integrations (`runops_connectors`, catalogs) | **Wrap with adapter** | Add an Azure/Epic adapter surface in the catalog; keep gateway calls in an Edge Function when moving beyond demo. |
-| Existing Edge Functions | **Reuse unchanged** | None are tenant-specific in a way that blocks Meridian. |
-| Feature flags | **Reuse unchanged** | Meridian ships under `demoMode: true`; do not flip `autonomousExecution` / `realInfrastructureActions`. |
-| Epic EHR domain services (charting, orders, HIM, revenue cycle) | **Create new module** | New Meridian profile bundle: services, components, dependencies, runbooks, roles, guardrails, PHI redaction. |
-| Azure CMDB CI taxonomy (subscription/RG/VNet/Region/AKS/App Service/…) | **Create new module** | New CI-class definitions + seed data + optional `models.ts` extension. |
-| Meridian digital twin scene (hospital campus + Azure regions) | **Create new module** | New page under `/meridian/*` (or reused `/runops/*`) with its own three-fiber scene composed via FOC adapter. |
-| Meridian scenario stages + narration | **Create new module** | Author into `stageDefinitions.ts` under a Meridian scenario id. |
-| Healthcare guardrails (PHI redaction, break-glass) | **Create new module** | Guardrail definitions in the Meridian profile bundle, enforced in narration/redaction helpers. |
+| Adding enum values to `component_kind` / `service_tier` / `service_environment` | Low | `ALTER TYPE ... ADD VALUE` is non-blocking in Postgres 12+; must run outside a transaction — Lovable migration tool handles this. Never `DROP` existing values. |
+| Adding nullable columns to `runops_*` tables | Low | Backward compatible; frontend types regenerate after apply. |
+| Adding new tables (`runops_ci_classes`, `runops_component_edges`) | Low–Medium | Must include GRANTs (`authenticated`, `service_role`), RLS, and tenant-scoped policies using existing helpers. Skipping GRANTs is the top failure mode — same class as the just-repaired regression. |
+| RLS policy changes on existing hot tables | High | Any redefinition of policies on `runops_components` / `_services` / `_dependencies` risks blocking live 200s; require a follow-up verification pass mirroring the recent RLS repair. |
+| Modifying existing helper functions (`runops_has_tenant_access`, `_can_write`) | High | These are on the read path for every runops table. Prefer adding new helpers over altering existing ones. |
+| Backfill of tenant seed data (Meridian) | Low | Use `insert` tool, not migration; must scope to Meridian tenant id. |
+| Enum value ordering | Low | Additions must be appended, not reordered. |
+| Foreign keys to `auth.users` | N/A | Not proposed; profiles pattern is already correct. |
+| Storage bucket changes | N/A | No changes proposed. |
 
-Nothing will be implemented from this plan — approving it simply acknowledges the inventory + reuse matrix as the baseline for the Meridian build.
+## Rollback Strategy
+
+- **Migrations are forward-only** in Lovable. There is no automated `down` migration.
+- Practical rollback options:
+  1. **Additive-only migrations** (columns, new tables, new enum values, new policies): revert by writing a compensating migration that drops the added object. Enum values cannot be removed in Postgres — plan additions with care.
+  2. **Data seed changes**: revert via a targeted `DELETE` scoped by `tenant_id` (Meridian tenant only) through the `insert` tool.
+  3. **RLS policy changes**: keep prior policy definitions in the migration comment header and re-issue them in a compensating migration if regression occurs.
+  4. **Helper function changes**: never modify in place; introduce `runops_has_tenant_access_v2` etc., swap policies, retire the old function after a soak period.
+- Verification gate: every migration touching RLS/helpers must run the same live check used in the July 12 repair (200 on `profiles`/`user_roles` for authed user, 403 for cross-tenant read).
+
+## Tenant Isolation Review
+
+- Every domain table is `tenant_id`-scoped, and no domain policy is currently written against `auth.uid()` alone.
+- `runops_has_tenant_access` short-circuits for platform admins and otherwise requires a `runops_profiles` row; `runops_can_write` additionally requires a writer role.
+- Client Query keys must include `selectedTenantId` (already the convention in `queryKeys.ts`); Meridian additions must follow this.
+- Two soft caveats:
+  - `runops_bootstrap_current_user` self-grants **every** `runops_role` on `tenant-contoso` to any authed user. Acceptable under `demoMode: true`; unacceptable once `autonomousExecution` or `realInfrastructureActions` are enabled.
+  - `useTenantScope` is currently retired (returns unscoped); tenant enforcement relies on RLS at the data layer, not the route layer.
+- No cross-tenant data leakage observed in the previous verification pass.
+
+## Verdict
+
+**CONDITIONAL GO**
+
+Sufficient backend foundation exists to add the Meridian Epic EHR / Azure CMDB Digital Twin without new tables. Conditions:
+
+1. Any new migration must include GRANTs, RLS, and tenant-scoped policies keyed off the existing helpers (do not modify the helpers).
+2. Enum additions (component kinds, if needed) must be additive and appended.
+3. Prefer `metadata jsonb` + domain-side CI-class registry over new tables; only add `runops_ci_classes` / `runops_component_edges` if the Meridian requirements specifically demand server-enforced class attributes or first-class component graphs.
+4. Before Meridian rows are inserted, seed the tenant via `runops_tenants` + `runops_profiles` + `runops_role_assignments` using the `insert` tool, not a migration.
+5. Do not alter `runops_bootstrap_current_user` yet, but track it for gating before leaving demo mode.
+6. Every migration that touches RLS or helpers must be followed by the same live verification pass used on July 12.
+
+No implementation will be performed from this plan — approval simply acknowledges the backend readiness baseline.
