@@ -25,7 +25,7 @@ import AuditEvidenceCenter from "./pages/enterprise-cert/AuditEvidenceCenter.tsx
 import PolicyEngine from "./pages/enterprise-cert/PolicyEngine.tsx";
 import CtLogsMonitor from "./pages/enterprise-cert/CtLogsMonitor.tsx";
 const SemiCommandCenter = lazy(() => import("./pages/semiconductor/CommandCenter.tsx"));
-import SeadCommandCenter from "./pages/sead/CommandCenter.tsx";
+const SeadCommandCenter = lazy(() => import("./pages/sead/CommandCenter.tsx"));
 const SeadEquipmentHealth = lazy(() => import("./pages/sead/EquipmentHealthIntelligence.tsx"));
 import SeadCrossDomain from "./pages/sead/CrossDomainContextTwin.tsx";
 import SeadMaintenanceSim from "./pages/sead/MaintenanceDecisionSimulator.tsx";
