@@ -1,233 +1,154 @@
 
-# Meridian Digital Twin — Integration Plan / Implementation Roadmap
+# Meridian Implementation — Risk Review
 
-Read-only planning artefact. No code, no schema, no config changes. Builds on the previously approved:
-- Frontend architecture verdict (**CONDITIONAL GO**)
-- Backend reuse matrix (**CONDITIONAL GO**)
-- Digital Twin architectural specification (13 sections)
+Read-only assessment against the approved architectural specification + integration roadmap. No code, schema, or config changes. Scale: Likelihood/Impact = **Low / Med / High**. Blocking = "must be resolved before code merges to main".
 
 ---
 
-## 1. Routes
+## 1. Technical Risks
 
-Single **lazy-loaded** entry, added additively to `src/App.tsx`. No existing route touched.
+| # | Risk | Likelihood | Impact | Mitigation | Blocking |
+|---|---|---|---|---|---|
+| T1 | Multiple `three` instances (nested dep pulls its own copy) → R3F throws "Multiple instances of Three.js" | Med | High | Add `three`, `@react-three/fiber`, `@react-three/drei` to `vite.config.ts` `dedupe`; add an E2E guard asserting a single `THREE` instance. | **Yes** |
+| T2 | R3F 8 / drei 9 pairing accidentally bumped to v9/v10 (needs React 19) | Low | High | Pin exact versions in `package.json`; block major bumps via Renovate config. | **Yes** |
+| T3 | Zustand store re-renders whole scene on any state change | Med | Med | Selector-based subscriptions (`useTwinStore(s => s.selection.primary)`); shader uniforms updated imperatively, not via React state. | No |
+| T4 | GPU picking misses on high-DPI or after canvas resize | Med | Med | Use raycaster on instance IDs, not colour-buffer picking; recompute on `ResizeObserver`. | No |
+| T5 | Web worker for hull/layout breaks in older Safari / iframe | Low | Med | Fallback to main-thread compute behind capability detect. | No |
+| T6 | `frameloop="demand"` starves animated shaders (traffic edges) | Med | Low | Invalidate on animation tick from a `useFrame` inside animated layers; disable when layer hidden. | No |
 
-| Path | Purpose | Lazy chunk |
-|---|---|---|
-| `/runops/twin` | Meridian twin canvas (default LOD = `Estate`) | `meridian` |
-| `/runops/twin/services/:serviceId` | Deep-link to a business service; sets selection + `fitToBox` | same |
-| `/runops/twin/components/:componentId` | Deep-link to a CI; opens Context Panel | same |
-| `/runops/twin/present/:cueSetId?` | Presentation mode (§13 of spec) | same |
+## 2. Performance Risks
 
-Query-param sub-state (not new routes): `?pose=…&layers=…&lod=…&select=…&hop=1&view=3d|2d|split`.
+| # | Risk | Likelihood | Impact | Mitigation | Blocking |
+|---|---|---|---|---|---|
+| P1 | 5k+ node estates blow the 16 ms frame budget | Med | High | Hard cap via `meridianTwin.perf.maxNodes`; instanced meshes; frustum + distance culling; LOD gating. | No |
+| P2 | drei `<Html>` labels cost DOM reflows at scale | High | Med | Only render at LOD ≥ Service; cap visible labels to N=200; virtualise off-screen. | No |
+| P3 | Convex-hull recompute on every service change | Med | Med | Memoise per service; recompute in worker; debounce 250 ms. | No |
+| P4 | TanStack Query storm on tenant switch | Med | Med | Cancel in-flight queries; use query key with `tenant_id`; `staleTime: 60s`. | No |
+| P5 | Presentation-mode cinematic paths keep GPU pegged | Low | Med | Force `frameloop="always"` only while a cue is transitioning; return to `"demand"` on dwell. | No |
+| P6 | First paint > 1.5 s on cold Meridian tenant | Med | Med | Preload topology query on route hover; render 2D fallback under Suspense while 3D warms. | No |
+| P7 | Memory leak on repeated tenant switches (three geometries/materials) | High | High | Explicit `dispose()` in unmount + on `useTenantRouteEqualizer` hook; leak test in Playwright over 20 switches. | **Yes** |
 
-**Placement in nav tree:** under existing RunOps section (`src/runops/shell/routes.ts` — add one `RouteMeta` entry with `section: "Services"`, `title: "Digital Twin"`, `status: "Built"`). No changes to `navSections` order.
+## 3. Security Risks
 
-## 2. Tenant Behavior
+| # | Risk | Likelihood | Impact | Mitigation | Blocking |
+|---|---|---|---|---|---|
+| S1 | Cross-tenant leakage via cached topology after tenant switch | Med | High | Query keys include `tenant_id`; RLS enforces server-side; add integration test asserting 403 on cross-tenant read. | **Yes** |
+| S2 | `runops_bootstrap_current_user` grants every role on `tenant-contoso` — presentation mode inherits over-privilege | High | High | Presentation mode forces `demoMode: true` and disables all mutation actions. Retire bootstrap once `autonomousExecution` flips on. | **Yes** |
+| S3 | Presentation cues stored in `metadata` could carry XSS in narration markdown | Med | Med | Render narration through the existing sanitised markdown pipeline; no `dangerouslySetInnerHTML`. | No |
+| S4 | Deep-link `?pose=` / `?select=` parameters trigger unbounded state | Low | Low | Zod-parse query params; clamp numeric ranges; reject unknown node IDs silently. | No |
+| S5 | Live-ingest Azure Resource Graph adapter exposed to client | Low | High | Runs only in Edge Function with `service_role`; frontend calls a narrow RPC; anon key never sees Azure creds. | **Yes** when Phase 2 lands |
+| S6 | Client-side role checks used to gate write actions | Med | High | Never trust client; every write goes through RLS + SECURITY DEFINER RPC; UI affordances are cosmetic. | **Yes** |
+| S7 | Screen-recorded presentation exports leak sensitive tenant data | Low | Med | "Export cue JSON" strips PII fields via allow-list; document in tenant profile. | No |
 
-- Reuses the existing tenant resolution via `useOperations().tenant` from `RunOpsProviders` — no new tenant plumbing.
-- Twin data queries carry `tenant_id` explicitly; RLS enforces isolation server-side.
-- On tenant switch, `useTenantRouteEqualizer` (already in `RunOpsLayout`) will bump the user to `/runops/twin` landing if a `:serviceId` / `:componentId` does not exist in the new tenant's dataset — extend its `check(...)` list additively.
-- Empty-tenant state: renders "No topology data for `<tenant>` yet — connect Azure Resource Graph in Integrations" rather than falling back to any other tenant's data.
-- Presentation cues are tenant-scoped (`runops_services.metadata.presentation.cues`) — never cross-tenant.
+## 4. Bundle Risks
 
-## 3. Feature Flags
+| # | Risk | Likelihood | Impact | Mitigation | Blocking |
+|---|---|---|---|---|---|
+| B1 | Meridian chunk imported eagerly from a shared file → lands in main bundle | High | High | ESLint rule forbidding `import` of `src/features/meridian/*` outside the folder + `App.tsx`; CI bundle-diff gate ≤ +5 KB on `index-*.js`. | **Yes** |
+| B2 | ReactFlow (used by 2D fallback) shipped twice — once via existing routes, once via Meridian | Low | Med | Reuse the existing `reactflow` dep; do not fork. Confirmed already in root deps. | No |
+| B3 | drei's tree-shaking regressions (v9 exports everything from `index`) | Med | Med | Import from deep paths (`@react-three/drei/core/CameraControls`); check bundle analyser output. | No |
+| B4 | Fixture JSON files inflate the Meridian chunk | Med | Med | Ship fixtures as `?url` imports fetched at runtime, not bundled statically. | No |
+| B5 | Source maps ship to prod | Low | Low | Vite default already excludes; verify in CI. | No |
+| B6 | Meridian chunk > 350 KB gzip budget | Med | Med | `size-limit` CI check; three/drei are the biggest — mitigated by dedupe (shared with existing 3D pages). | No |
 
-Extend the existing `src/runops/domain/featureFlags.ts` — no new flag module.
+## 5. Database Risks
 
-| Flag | Default | Purpose |
-|---|---|---|
-| `meridianTwin.enabled` | `false` | Master gate; when off, route + nav entry are hidden. |
-| `meridianTwin.mode` | `"demo"` | `demo` (bundled fixtures) \| `live` (Supabase-backed) \| `hybrid`. |
-| `meridianTwin.threeD` | `true` | When false, force 2D fallback regardless of device. |
-| `meridianTwin.presentation` | `true` | Enables `/runops/twin/present/*`. |
-| `meridianTwin.layerDefaults` | `[L0..L5]` | Layers visible on first mount. |
-| `meridianTwin.perf.maxNodes` | `5000` | Hard cap; above this the twin renders a stub with a "Filter by service" prompt. |
-| `meridianTwin.perf.frameloop` | `"demand"` | `"demand"` \| `"always"` for stress tests. |
+| # | Risk | Likelihood | Impact | Mitigation | Blocking |
+|---|---|---|---|---|---|
+| D1 | `runops_components.kind` enum lacks Azure CI classes → ingestion fails silently | High | Med | Ship additive enum migration **before** live ingest; MVP uses free-form `metadata.ciClass` string. | **Yes** at Phase 2 |
+| D2 | `runops_services.metadata->'presentation'` writes conflict across editors | Med | Med | Optimistic concurrency via `updated_at` compare-and-set; last-writer-wins with toast warning. | No |
+| D3 | Query for full topology hits Supabase 1000-row default limit | High | High | Paginate by subscription/RG; never `.select('*')` without `.range()`; add integration test. | **Yes** |
+| D4 | `runops_dependencies` graph cycles crash layout | Med | Med | Cycle detection in adapter; render cyclic edges as dashed and skip layout iteration. | No |
+| D5 | JSONB `metadata` schema drift breaks presentation cues over time | Med | Med | Zod schema for `TwinCue` at read boundary; migration script versions the payload. | No |
+| D6 | Missing indexes on `runops_components(tenant_id, kind)` slow twin cold load | Med | Med | Verify indexes exist; add composite index if EXPLAIN shows seq scan. | No |
 
-Flags flow: env → featureFlags module → `useTwinStore` initialiser. No React context added.
+## 6. Migration Risks
 
-## 4. Navigation
+| # | Risk | Likelihood | Impact | Mitigation | Blocking |
+|---|---|---|---|---|---|
+| M1 | Enum-value addition rolled back → breaks any row already using it | High | High | Enum additions are **forward-only**; document that no rollback exists; delay enum change until Phase 2 with explicit approval. | **Yes** at Phase 2 |
+| M2 | New `runops_ci_classes` / `runops_component_edges` tables shipped without GRANTs → PostgREST returns permission error | Med | High | Enforced by project rule: every `CREATE TABLE` in `public` must be paired with GRANTs in the same migration. Code review checklist. | **Yes** if/when tables are added |
+| M3 | RLS policy on new tables allows cross-tenant read | Low | High | Every policy scopes to `runops_has_tenant_access(tenant_id)`; live verification pass (200 same-tenant, 403 cross-tenant) required post-migration. | **Yes** |
+| M4 | Modifying `runops_can_write` or other helpers to add roles cascades to every dependent policy | Med | High | Never modify existing helpers — add new named helpers (`runops_can_author_twin`) instead. | **Yes** |
+| M5 | Presentation JSON migration script runs against wrong tenant | Low | High | Migration runs per-tenant with explicit `tenant_id` filter; dry-run first. | No |
+| M6 | Deferred migrations pile up and ship together | Med | Med | Ship each deferred migration as its own PR with its own verification pass. | No |
 
-- Add one sidebar item in `RunOpsSidebar` under **Services**: "Digital Twin" — visible only when `meridianTwin.enabled`.
-- Command Palette (`src/runops/shell/CommandPalette.tsx`): add search entries for "Open Digital Twin", "Present Twin", "Twin: focus service …", "Twin: 2D view". Registered via existing `searchCatalog` extension point — no new palette host.
-- Breadcrumbs: reuse existing route-title resolver in `routes.ts`. No new breadcrumb component.
-- Top bar: no changes. Twin-local controls (LOD, layer toggles, view mode, Present) live inside the twin surface as an overlay panel, not in `RunOpsTopBar`.
+## 7. Architecture Risks
 
-## 5. Providers
+| # | Risk | Likelihood | Impact | Mitigation | Blocking |
+|---|---|---|---|---|---|
+| A1 | Two sources of truth (Zustand view state + URL query params) diverge | High | Med | URL is authoritative on mount; Zustand mirrors it via a subscribe→history.replaceState bridge. Single write-through. | No |
+| A2 | 2D fallback drifts from 3D over time (features only added in 3D) | High | Med | Both views bind the same selectors from `useTwinStore`; component tests assert feature parity for a whitelist of interactions. | No |
+| A3 | Context Panel duplicates existing RunOps entity panels | Med | Med | Reuse the existing `RunOpsRightDrawer` mount; share tab components with `/runops/services/:id` where identical. | No |
+| A4 | Presentation cues become a proprietary format nobody else can edit | Med | Low | JSON schema documented + versioned; import/export round-trip test. | No |
+| A5 | Adapter layer bypassed for "one small direct query" | Med | High | Lint rule: only `src/features/meridian/adapters/*` may import `@/integrations/supabase/client` inside the Meridian folder. | **Yes** |
+| A6 | Feature flags accumulate without cleanup | Med | Low | Track flags in `.lovable/plan.md`; retire `meridianTwin.enabled` post-GA. | No |
 
-Wrapped **locally at the Meridian route**, not hoisted into `App.tsx` or `RunOpsLayout`.
+## 8. Regression Risks
 
-```
-<Suspense fallback={<TwinSkeleton/>}>
-  <MeridianRoute>
-    <TwinStoreProvider>            // Zustand bootstrap (view state)
-      <TwinDataProvider>            // TanStack Query keys + tenant scope
-        <TwinCanvasErrorBoundary>
-          <TwinShell />              // renders <Canvas> + panel + 2D fallback
-        </TwinCanvasErrorBoundary>
-      </TwinDataProvider>
-    </TwinStoreProvider>
-  </MeridianRoute>
-</Suspense>
-```
+| # | Risk | Likelihood | Impact | Mitigation | Blocking |
+|---|---|---|---|---|---|
+| R1 | Adding lazy Suspense boundary to `App.tsx` breaks an existing route's error boundary chain | Low | High | Wrap only the Meridian route in Suspense; leave existing routes untouched; snapshot test on router tree. | **Yes** |
+| R2 | Sidebar/palette entries push existing items off-screen on mobile | Low | Med | Feature-flag gated; visual regression test on mobile viewport. | No |
+| R3 | `useTenantRouteEqualizer` extension mis-classifies existing entity IDs as missing → redirects users mid-flow | Med | High | New `check()` entries scoped to `/runops/twin/*` prefix only; existing checks untouched. E2E on tenant switch across every RunOps section. | **Yes** |
+| R4 | `dedupe` list change alters how existing 3D pages resolve `three` | Low | High | Existing semiconductor pages already use the same `three@0.160` — dedupe is additive. Visual regression on `/semiconductor/*` after merge. | **Yes** |
+| R5 | Query key naming (`['twin','node',id]`) collides with existing key | Low | Med | Namespace all Meridian keys under `['twin',...]`; grep existing keys to confirm no collision. | No |
+| R6 | ESLint rule change (import boundary) fails lint on unrelated legacy files | Low | Low | Rule scoped to `src/features/meridian/*` only. | No |
 
-- Reuses ambient providers already provided by `RunOpsLayout`: `DemoOperationsProvider`, `DemoAiProvider`, `RightDrawerProvider`, `ScenarioStoreProvider`, `AskNovaProvider`, `CommandPaletteProvider`.
-- `RightDrawerProvider` is the mount point for the Context Panel — **reused**, not duplicated.
-- No new global context; `TwinStoreProvider` is a thin Zustand bootstrap.
+## 9. Visual Risks
 
-## 6. Adapters
+| # | Risk | Likelihood | Impact | Mitigation | Blocking |
+|---|---|---|---|---|---|
+| V1 | Hardcoded hex colours in glyph shaders bypass theme | High | Med | Bridge CSS custom properties (from `index.css`) → shader uniforms at mount; forbid hex in shader code via lint. | **Yes** |
+| V2 | Health colour communicated by hue alone (fails WCAG 1.4.1) | High | High | Every health state carries shape + label prefix (● ▲ ■) — enforced in `TwinLegend` snapshot test. | **Yes** |
+| V3 | Text on translucent hulls fails contrast | Med | Med | Cartouche renders on solid Card background above the hull, not on it. | No |
+| V4 | `prefers-reduced-motion` ignored by camera easing / edge flow | High | Med | Global check at `TwinCameraRig` and edge shader init; snap transitions when reduced-motion is on. | **Yes** |
+| V5 | Presentation teleprompter overflows on 4:3 projectors | Low | Low | Max-width clamp + line-height responsive to viewport. | No |
+| V6 | Dark-mode canvas washes out against dark chrome | Med | Med | Canvas background token from `--background`; test in both themes. | No |
 
-All external data crosses **one** adapter layer so the twin never talks to Supabase or a cloud API directly.
+## 10. Operational Risks
 
-| Adapter | Reads | Writes | Notes |
-|---|---|---|---|
-| `TwinTopologyAdapter` | `runops_services`, `runops_components`, `runops_dependencies`, `runops_service_owners`, `runops_teams` | none | Projects to `TwinNode` / `TwinEdge` domain types. Reuse-only. |
-| `TwinHealthAdapter` | `runops_slos`, `runops_error_budgets`, `runops_telemetry_snapshots`, `runops_incidents` | none | Merges into `healthState`, `incidentState`, `budgetBurn`. |
-| `TwinChangeAdapter` | `runops_changes` | none | Feeds `L8-Change` layer + change-window prisms. |
-| `TwinRunbookAdapter` | `runops_runbooks`, `runops_runbook_certifications`, `runops_executions` | via existing RPCs | Context Panel "Runbooks" tab; write path already exists (`runops_approve_execution`, etc.). |
-| `TwinPresentationAdapter` | `runops_services.metadata.presentation` | update `metadata` only | Cue authoring lands in `metadata` JSON — no schema change. |
-| `TwinCloudConnectorAdapter` | `runops_connectors` | none | Runtime CI enrichment via Edge Functions (Azure Resource Graph) — **future**, gated by `meridianTwin.mode = "live"`. |
-
-Adapters live in `src/features/meridian/adapters/*` and export pure functions returning `TwinNode[] / TwinEdge[] / TwinOverlay[]`. No JSX in adapters.
-
-## 7. Shared Components
-
-**Reused as-is (no fork):**
-- shadcn primitives: `Sheet`, `Tabs`, `Badge`, `Button`, `Card`, `Tooltip`, `Command`, `Toast`.
-- `RunOpsErrorBoundary`, `RunOpsRightDrawer`, `CommandPalette`, `AskNovaPanel`, `SimulationBadge`, `DemoControllerDrawer`.
-- Route registry `src/runops/shell/routes.ts`.
-- Tenant scope + auth guards: `ProtectedRoute`, `TenantAccessGuard`.
-- 3D helpers already in `@react-three/drei@9.122`.
-
-**New, Meridian-only (folder-isolated):**
-- `TwinCanvas`, `TwinScene`, `TwinCameraRig`, `TwinLayers`, `TwinNodesInstanced`, `TwinEdges`, `TwinServiceHulls`, `TwinCartouche`, `TwinLegend`, `TwinLayerRail`, `TwinLodBadge`, `TwinPresentBar`, `Twin2DGraph` (ReactFlow), `TwinContextPanel` (mounted into `RightDrawerProvider`).
-
-## 8. Database Reuse
-
-Per prior Backend Reuse Matrix — **no schema migration required for MVP**.
-
-| Capability | Table | Classification |
-|---|---|---|
-| Services / hulls | `runops_services` | Reuse (put Meridian tags in `metadata`) |
-| CIs / glyphs | `runops_components` | Extend data-only (new `kind` enum values require an additive enum migration — deferred until Meridian ingestion needs them) |
-| Edges | `runops_dependencies` | Reuse |
-| Ownership | `runops_service_owners`, `runops_teams` | Reuse |
-| Health/SLOs | `runops_slos`, `runops_error_budgets`, `runops_telemetry_snapshots` | Reuse |
-| Incidents / halos | `runops_incidents`, `runops_incident_events` | Reuse |
-| Changes | `runops_changes` | Reuse |
-| Runbooks (Context Panel) | `runops_runbooks`, `_versions`, `_certifications`, `_executions` | Reuse |
-| Presentation cues | `runops_services.metadata->'presentation'->'cues'` | Reuse (JSON extension) |
-| CI-class registry (optional) | `runops_ci_classes` | **Deferred** — only if hard-coded taxonomy proves insufficient |
-| Component-to-component edges (optional) | `runops_component_edges` | **Deferred** — start with `runops_dependencies` |
-
-**Deferred migrations** are scheduled but not part of MVP. When needed, each must include GRANTs + tenant-scoped RLS per project rules.
-
-## 9. Authentication Reuse
-
-- 100% reuse of Supabase Auth flow already wired via `AuthContext` + `ProtectedRoute`.
-- Route `/runops/twin/*` wrapped in `<ProtectedRoute><TenantAccessGuard>…</TenantAccessGuard></ProtectedRoute>` — same pattern as every other RunOps route.
-- Anonymous users: 302 to existing `/auth/login`.
-- Unapproved users: existing `PendingApproval` page (unchanged).
-- Presentation mode without an active session: falls back to the demo tenant (`tenant-contoso`) when `meridianTwin.mode = "demo"`, otherwise blocks with existing `NoAccess` page.
-
-## 10. Authorization Reuse
-
-Reuses the two-layer model — no new roles.
-
-| Action | Gate |
-|---|---|
-| View twin | `runops_has_tenant_access(tenant_id)` |
-| Toggle layers / change LOD / lasso / present | tenant access only |
-| "Attach runbook" from Context Panel | `runops_can_write(tenant_id)` + `runbook_author`/`service_owner` |
-| "Open incident" from a node | `runops_can_write` + `incident_commander`/`sre_engineer` |
-| "Simulate failure" (scenario) | `runops_has_role(tenant_id, 'demo_controller')` |
-| Author presentation cues | `runops_can_write` + `demo_controller` |
-| Live ingestion via `TwinCloudConnectorAdapter` | `platform_engineer` (Edge Function bearer) |
-
-All checks routed through existing SECURITY DEFINER helpers (`runops_has_tenant_access`, `runops_can_write`, `runops_has_role`, `runops_has_any_role`). Frontend never reads roles directly — it lets RLS + RPC responses drive UI affordances.
-
-## 11. Performance
-
-Concrete budgets and gates (numbers align with §10 of the architectural spec).
-
-| Metric | Budget | Enforcement |
-|---|---|---|
-| Route chunk size (`meridian-*.js`) | ≤ 350 KB gzip | CI `size-limit` check on `dist/assets/meridian-*` |
-| Time-to-first-frame (500 visible nodes) | ≤ 1.5 s p95 | Playwright perf run in CI |
-| Frame time at Service LOD | ≤ 16 ms p95 (M1) | React DevTools profile + `stats.js` check |
-| Draw calls | ≤ 60 for 5k nodes | Instanced meshes + edge batching |
-| Idle frame rate | 0 fps | `frameloop="demand"` on `<Canvas>` |
-| Data fetch | Per subscription/RG on demand | TanStack Query, `staleTime: 60s` |
-| Layout compute | Off main thread | Web worker (`twin.worker.ts`) |
-| Bundle dedupe | Single `three` instance | Add `three`, `@react-three/fiber`, `@react-three/drei` to `vite.config.ts` `dedupe` |
-| Above-cap protection | `nodes > maxNodes` → stub | `meridianTwin.perf.maxNodes` flag |
-
-Regressions on any budget block the PR merge.
-
-## 12. Testing
-
-Layered strategy, all layers required for GA.
-
-| Layer | Tool | Scope |
-|---|---|---|
-| Unit | Vitest | Adapters (topology → `TwinNode[]`), Zustand selectors, hull math, LOD selector. |
-| Component | Vitest + Testing Library + jsdom | `TwinContextPanel`, `TwinLegend`, `Twin2DGraph`, keyboard nav. |
-| 3D smoke | Vitest + `@react-three/test-renderer` | Scene mounts, instanced meshes attach, camera pose serialises. |
-| Integration | Vitest with mocked Supabase | Tenant switch clears cache, empty tenant renders stub, RLS-forbidden query surfaces error state. |
-| E2E | Playwright | Auth → land on `/runops/twin` → select service → 3D→2D toggle → keyboard walk → presentation mode step-through. |
-| Perf | Playwright + `page.metrics()` | First-frame budget, frame time under 500/2k/5k node fixtures. |
-| Accessibility | `@axe-core/playwright` on 2D fallback + panel; manual NVDA/VoiceOver pass on selection announcements. |
-| Visual regression | Playwright screenshot compare on canvas element at fixed camera poses (deterministic thanks to seeded layout). |
-| Contract | `supabase--test_edge_functions` on any new Edge Functions (deferred until live-ingest phase). |
-
-CI matrix: Node 20 + jsdom + Chromium. Fixtures live in `src/features/meridian/fixtures/*` (three sizes: `small.json`, `medium.json`, `large.json`).
-
-## 13. Regression Strategy
-
-Prevents Meridian from breaking anything else.
-
-1. **Additive-only** frontend edits: one new route, one new sidebar item, one new palette catalog entry, one Zustand store, one `dedupe` list update. No changes to existing pages.
-2. **Lazy import boundary** enforced by lint: a repo-level ESLint rule forbids `import` of `src/features/meridian/*` from any file outside `src/features/meridian/` and `src/App.tsx` (the route registration). Prevents accidental bundle bloat.
-3. **Bundle diff gate** in CI: `dist/assets/index-*.js` size delta must be ≤ +5 KB gzip after Meridian merges. Fails the PR otherwise.
-4. **Feature flag off in prod** at merge time; enabled via env for staging QA. Prod flip after all §12 layers pass on staging for 24 h.
-5. **Existing route smoke** in CI: Playwright hits `/`, `/app`, `/runops`, `/runops/services`, `/runops/incidents`, `/runops/runbooks` and asserts 200 + no console errors after Meridian merges.
-6. **Tenant regression**: run `useTenantRouteEqualizer` E2E over `tenant-contoso` and `tenant-meridian` (once seeded) to confirm no dangling routes leak across tenants.
-7. **RLS regression**: re-run the July-12 live verification pass (200s on `profiles`/`user_roles` for authed user, 403 on cross-tenant reads) after any adapter change.
-8. **Three.js instance check** in E2E: `expect(window.__THREE__ ?? []).toHaveLength(1)` guard to catch dedupe drift.
-
-## 14. Rollback Strategy
-
-Every artefact is reversible without a migration or a data restore.
-
-| Change | Rollback |
-|---|---|
-| New lazy route + Suspense wrapper | Remove the `<Route>` entry in `App.tsx`; the chunk is orphaned and stops being served. Zero user impact. |
-| Sidebar + palette entries | Guarded by `meridianTwin.enabled`; flip flag to `false` to hide instantly. |
-| `vite.config.ts` `dedupe` additions | Additive; safe to revert. Only affects bundling. |
-| `useTenantRouteEqualizer` new `check()` entries | Additive; safe to revert. |
-| `runops_services.metadata.presentation` writes | `UPDATE runops_services SET metadata = metadata - 'presentation' WHERE tenant_id = …` — reversible per-tenant. |
-| Any deferred enum additions (CI classes) | **Forward-only**; guarded by not shipping until absolutely required. Compensating cleanup migration must be authored *before* the enum lands. |
-| Deferred new tables (`runops_ci_classes`, `runops_component_edges`) | Only added if MVP proves insufficient; each ships with a paired down-migration in the plan (drop policy → revoke grants → drop table). |
-| Feature-flag flip | Instant rollback via env; no redeploy required. |
-| Presentation mode | Independently flag-gated (`meridianTwin.presentation`); can be disabled without disabling the twin. |
-| Fixture drift | Fixtures under `src/features/meridian/fixtures` are versioned; roll back by reverting the file. |
-
-**Kill-switch:** flipping `meridianTwin.enabled=false` in env hides the route from the router (`ProtectedRoute` returns to `/runops`), removes the nav entry, and drops the palette actions — full rollback in < 60 s with no rebuild.
+| # | Risk | Likelihood | Impact | Mitigation | Blocking |
+|---|---|---|---|---|---|
+| O1 | Flag-flip on prod without staging burn-in | Med | High | 24 h clean staging required in Phase 5; documented in `.lovable/plan.md`. | **Yes** |
+| O2 | Support has no visibility into why a tenant sees empty twin | Med | Med | Empty-state message includes tenant name + "connect Azure Resource Graph"; log a `runops_domain_events` row on empty-render. | No |
+| O3 | Rollback via flag flip leaves stale cached chunks in browsers | Low | Low | Route is lazy and gated; users hit nav entry only when flag on. Stale chunk becomes orphaned. | No |
+| O4 | Live-ingest Edge Function rate-limited by Azure | Med | Med | Backoff + jitter; cache in `runops_telemetry_snapshots`; alert on 429. | No |
+| O5 | Presentation-mode demo fails at customer meeting (network, data drift) | Med | High | `demoMode: true` uses bundled fixtures; presentation cues are self-contained; pre-flight check button. | No |
+| O6 | Feature-flag misconfiguration in an environment enables live mode against demo data | Low | High | Env schema validation on boot; refuse to render twin if `mode="live"` but no connectors configured. | **Yes** |
+| O7 | On-call has no runbook for "twin canvas frozen" | Med | Low | Add a knowledge-base entry with reload + 2D-fallback steps; link from empty state. | No |
 
 ---
 
-## Delivery Phasing (for reference — not a build order approval)
+## Summary — Blocking Items
 
-1. **Phase 0 — Foundation (no user-visible change):** `vite.config.ts` dedupe additions, feature flag stubs, folder scaffold, route registered behind `meridianTwin.enabled=false`.
-2. **Phase 1 — Static twin:** demo-mode fixtures, glyphs, hulls, LOD 3/4, Context Panel skeleton, 2D fallback.
-3. **Phase 2 — Live data:** adapters wired to `runops_*` tables, TanStack Query pagination, tenant switch.
-4. **Phase 3 — Interactivity:** selection, keyboard nav, lasso, layer rail, presentation cues (author + play).
-5. **Phase 4 — Performance & a11y hardening:** perf budgets, axe pass, NVDA/VoiceOver pass, visual regression baselines.
-6. **Phase 5 — GA:** flag flip on prod after 24 h clean staging.
+The following **must** be resolved before Meridian code merges to main (or before the phase they belong to):
 
-Each phase is independently mergeable, each ends with a green regression suite, and each is rollback-safe under §14.
+- **T1** dedupe `three` in `vite.config.ts`
+- **T2** version-pin R3F pair
+- **P7** dispose geometries on tenant switch (leak test)
+- **S1** tenant-scoped query keys + 403 integration test
+- **S2** presentation mode forces `demoMode: true` and disables mutations
+- **S5** live-ingest confined to Edge Function (Phase 2)
+- **S6** no client-side role gates for writes
+- **B1** ESLint import-boundary rule + bundle-diff gate
+- **D1** enum additions deferred until Phase 2 with explicit approval
+- **D3** paginated topology queries; no unbounded selects
+- **M1–M4** migration checklist (GRANTs, tenant-scoped RLS, new helpers only)
+- **A5** adapter-only Supabase access (lint enforced)
+- **R1, R3, R4** regression tests on router tree, tenant equalizer, existing 3D pages
+- **V1, V2, V4** semantic tokens in shaders, non-colour health encoding, reduced-motion support
+- **O1** 24 h staging burn-in
+- **O6** env-schema refuses `live` without connectors
+
+Non-blocking items are tracked for phase-appropriate mitigation but do not gate merge.
 
 ---
 
-**Deliverable:** integration plan / implementation roadmap only. No code, migration, dependency, or route changes performed. Awaiting per-phase approval before any subsequent build-mode work.
+## Verdict
+
+**CONDITIONAL GO.**
+
+Rationale: no risk in the review is unresolvable, and every High-impact / High-likelihood item has a concrete mitigation that fits within the additive, feature-flagged architecture already approved. Conditions are the 18 blocking items above, applied per phase per the roadmap. Meridian may proceed to Phase 0 (foundation scaffolding behind `meridianTwin.enabled=false`) once these are acknowledged.
+
+No implementation performed. Awaiting phase approval to switch to build mode.
