@@ -1,3 +1,7 @@
+# Three.js Bundle-Isolation — Runtime Verification Report (2026-07-12)
+
+See `docs/meridian-test-baseline.md` for the Playwright run against `vite preview`.
+
 # Three.js Bundle-Isolation — Verification Report
 
 Read-only verification of the completed corrections. Production build executed (`bun run build`), lint executed, static bundle analysis performed. Runtime Playwright sweep and visual-regression baseline **not executed** in this pass and are marked UNKNOWN.
