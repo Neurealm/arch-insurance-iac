@@ -45,7 +45,7 @@ import SeadEngineeringSandbox from "./pages/sead/EngineeringSandbox.tsx";
 import SeadDigitalCoworkerConversation from "./pages/sead/DigitalCoworkerConversation.tsx";
 import SeadIotAiArchitecture from "./pages/sead/IotAiArchitecture.tsx";
 import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
-import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
+const SemiDigitalTwin = lazy(() => import("./pages/semiconductor/DigitalTwin.tsx"));
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
 import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
 import SemiVisionOperations from "./pages/semiconductor/VisionOperations.tsx";
