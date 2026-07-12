@@ -1,182 +1,233 @@
 
-# Meridian Digital Twin — Architectural Specification
+# Meridian Digital Twin — Integration Plan / Implementation Roadmap
 
-Read-only design. No implementation. All references below map to the existing frontend stack (React 18 / R3F 8.18 / drei 9.122 / three 0.160 / Zustand 5 / TanStack Query 5 / Tailwind + shadcn) and the confirmed backend (Supabase, `runops_*` tables, tenant-scoped RLS).
+Read-only planning artefact. No code, no schema, no config changes. Builds on the previously approved:
+- Frontend architecture verdict (**CONDITIONAL GO**)
+- Backend reuse matrix (**CONDITIONAL GO**)
+- Digital Twin architectural specification (13 sections)
 
 ---
 
-## 1. 3D Camera
+## 1. Routes
 
-- **Type:** Single `PerspectiveCamera` (fov 45°, near 0.1, far 5000) driven by drei `CameraControls` (not `OrbitControls` — needed for smooth `moveTo` / `fitToBox` transitions).
-- **Modes:**
-  - `Overview` — orthographic-feeling top-down tilt (pitch ≈ 60°), frames the entire Meridian estate.
-  - `Service` — orbits a business-service cluster; pitch ≈ 45°.
-  - `Component` — close orbit around a single CI; pitch 20–35°.
-  - `Presentation` — cinematic dolly along a scripted spline (see §13).
-- **Transitions:** all camera moves are `cameraControls.fitToBox(target, true, { paddingTop: 0.2, ... })` with 600 ms ease-out; interrupted by any user input.
-- **Constraints:** minDistance 4, maxDistance 800, polar clamp [10°, 85°], azimuth free. Damping 0.08.
-- **Determinism:** camera pose (position, target, zoom) is a serialisable `CameraPose` struct persisted in URL query (`?pose=…`) so deep-links and presentation cues restore the exact frame.
+Single **lazy-loaded** entry, added additively to `src/App.tsx`. No existing route touched.
 
-## 2. Node System
-
-- **Node domain model** (frontend only, sourced from `runops_components` + `runops_services`):
-  ```
-  TwinNode {
-    id, tenantId, kind ('service'|'component'|'group'|'tier'),
-    ciClass (Subscription|RG|VNet|AKS|AppService|Function|Storage|Cosmos|KeyVault|PrivateLink|ExpressRoute|EpicModule|...),
-    parentId, layerKey, position (Vec3 | null → auto-layout),
-    healthState, changeState, incidentState,
-    metrics: { latencyP95, errorRate, saturation, budgetBurn },
-    tags, ownerTeamId
-  }
-  ```
-- **Render primitives:** each `ciClass` maps to a **glyph** (instanced mesh) — cube, prism, disc, ring, torus — never a bespoke model. All glyphs share one `InstancedMesh` per class for O(1) draw calls.
-- **Labels:** drei `<Html occlude="blending">` at zoom ≥ Service; hidden at Overview.
-- **State channels** (independent, composable, each a shader uniform on the glyph):
-  1. `healthState` → base emissive hue (green/amber/red/grey-unknown)
-  2. `changeState` → outline pulse (blue = change window active)
-  3. `incidentState` → red bloom halo when tied to open incident
-  4. `selection` → white rim-light
-- **Identity:** every node is picked via GPU picking (`raycaster` on instance IDs). No per-node React components in the scene graph.
-
-## 3. Layer System
-
-Layers are **toggleable semantic slices** rendered as sibling groups under one root `<group name="twin-root">`. Each layer has its own visibility flag, opacity, and z-offset so layers can be stacked or exploded vertically.
-
-| Layer | Source | Default |
+| Path | Purpose | Lazy chunk |
 |---|---|---|
-| `L0-Ground` | static grid + tenant label | on |
-| `L1-Cloud` | Azure subscriptions / RGs from `runops_components.kind='cloud'` | on |
-| `L2-Network` | VNets, subnets, PrivateLink, ExpressRoute | on |
-| `L3-Compute` | AKS, App Service, Function, VM | on |
-| `L4-Data` | Cosmos, SQL, Storage, KeyVault | on |
-| `L5-BusinessServices` | `runops_services` overlay (see §4) | on |
-| `L6-Traffic` | live edges from telemetry (animated) | off |
-| `L7-Incidents` | red halos + blast-radius volume | on when incident open |
-| `L8-Change` | change-window prisms | off |
-| `L9-SLO` | error-budget columns (height = burn rate) | off |
+| `/runops/twin` | Meridian twin canvas (default LOD = `Estate`) | `meridian` |
+| `/runops/twin/services/:serviceId` | Deep-link to a business service; sets selection + `fitToBox` | same |
+| `/runops/twin/components/:componentId` | Deep-link to a CI; opens Context Panel | same |
+| `/runops/twin/present/:cueSetId?` | Presentation mode (§13 of spec) | same |
 
-Layer state lives in a **Zustand store** (`useTwinStore`) — never React context — because glyph shaders read it every frame.
+Query-param sub-state (not new routes): `?pose=…&layers=…&lod=…&select=…&hop=1&view=3d|2d|split`.
 
-## 4. Business Service Overlay
+**Placement in nav tree:** under existing RunOps section (`src/runops/shell/routes.ts` — add one `RouteMeta` entry with `section: "Services"`, `title: "Digital Twin"`, `status: "Built"`). No changes to `navSections` order.
 
-- Business services (`runops_services`) render as **translucent convex hulls** enclosing their member components. Hulls are computed with a Quickhull pass on the union of member positions + padding.
-- Hull colour = service `healthState`; hull opacity = 0.12 idle, 0.28 hovered, 0.4 selected.
-- Each hull carries a floating `ServiceCartouche` (drei `<Billboard>` + `<Html>`) with: service name, owner team badge, SLO burn, active incident chip.
-- Multiple overlapping services (a component belongs to N services) are rendered as **stacked ribbons** on the top face of the hull rather than nested hulls — avoids z-fighting.
-- Overlay is a pure derivation of `runops_service_owners` + component membership; no new tables required.
+## 2. Tenant Behavior
 
-## 5. Relationship Rendering
+- Reuses the existing tenant resolution via `useOperations().tenant` from `RunOpsProviders` — no new tenant plumbing.
+- Twin data queries carry `tenant_id` explicitly; RLS enforces isolation server-side.
+- On tenant switch, `useTenantRouteEqualizer` (already in `RunOpsLayout`) will bump the user to `/runops/twin` landing if a `:serviceId` / `:componentId` does not exist in the new tenant's dataset — extend its `check(...)` list additively.
+- Empty-tenant state: renders "No topology data for `<tenant>` yet — connect Azure Resource Graph in Integrations" rather than falling back to any other tenant's data.
+- Presentation cues are tenant-scoped (`runops_services.metadata.presentation.cues`) — never cross-tenant.
 
-- **Source:** `runops_dependencies` (directed edges) + a derived `runops_component_edges`-style projection computed client-side from `metadata.links`.
-- **Edge classes:**
-  - `depends_on` — solid cyan tube, arrowhead at target
-  - `traffic` — animated dashed shader (flow direction, thickness = RPS bucket)
-  - `data_flow` — magenta dashed
-  - `identity` — grey dotted (KeyVault / managed identity)
-  - `change_impact` — orange, only visible in `L8-Change`
-- **Geometry:** cubic Bezier tubes with control points offset perpendicular to the parent layer plane; batched into one `MeshLine`-style buffer per edge class (single draw call per class).
-- **Culling:** edges are hidden when either endpoint is outside the frustum OR the current LOD is Overview (replaced with an aggregate arc between parent groups).
-- **Directionality:** arrowhead is a separate instanced cone; opacity fades with distance.
+## 3. Feature Flags
 
-## 6. Semantic Zoom
+Extend the existing `src/runops/domain/featureFlags.ts` — no new flag module.
 
-Zoom levels are **discrete LODs**, not continuous, chosen from camera distance to nearest node:
+| Flag | Default | Purpose |
+|---|---|---|
+| `meridianTwin.enabled` | `false` | Master gate; when off, route + nav entry are hidden. |
+| `meridianTwin.mode` | `"demo"` | `demo` (bundled fixtures) \| `live` (Supabase-backed) \| `hybrid`. |
+| `meridianTwin.threeD` | `true` | When false, force 2D fallback regardless of device. |
+| `meridianTwin.presentation` | `true` | Enables `/runops/twin/present/*`. |
+| `meridianTwin.layerDefaults` | `[L0..L5]` | Layers visible on first mount. |
+| `meridianTwin.perf.maxNodes` | `5000` | Hard cap; above this the twin renders a stub with a "Filter by service" prompt. |
+| `meridianTwin.perf.frameloop` | `"demand"` | `"demand"` \| `"always"` for stress tests. |
 
-| LOD | Distance | Shows | Hides |
+Flags flow: env → featureFlags module → `useTwinStore` initialiser. No React context added.
+
+## 4. Navigation
+
+- Add one sidebar item in `RunOpsSidebar` under **Services**: "Digital Twin" — visible only when `meridianTwin.enabled`.
+- Command Palette (`src/runops/shell/CommandPalette.tsx`): add search entries for "Open Digital Twin", "Present Twin", "Twin: focus service …", "Twin: 2D view". Registered via existing `searchCatalog` extension point — no new palette host.
+- Breadcrumbs: reuse existing route-title resolver in `routes.ts`. No new breadcrumb component.
+- Top bar: no changes. Twin-local controls (LOD, layer toggles, view mode, Present) live inside the twin surface as an overlay panel, not in `RunOpsTopBar`.
+
+## 5. Providers
+
+Wrapped **locally at the Meridian route**, not hoisted into `App.tsx` or `RunOpsLayout`.
+
+```
+<Suspense fallback={<TwinSkeleton/>}>
+  <MeridianRoute>
+    <TwinStoreProvider>            // Zustand bootstrap (view state)
+      <TwinDataProvider>            // TanStack Query keys + tenant scope
+        <TwinCanvasErrorBoundary>
+          <TwinShell />              // renders <Canvas> + panel + 2D fallback
+        </TwinCanvasErrorBoundary>
+      </TwinDataProvider>
+    </TwinStoreProvider>
+  </MeridianRoute>
+</Suspense>
+```
+
+- Reuses ambient providers already provided by `RunOpsLayout`: `DemoOperationsProvider`, `DemoAiProvider`, `RightDrawerProvider`, `ScenarioStoreProvider`, `AskNovaProvider`, `CommandPaletteProvider`.
+- `RightDrawerProvider` is the mount point for the Context Panel — **reused**, not duplicated.
+- No new global context; `TwinStoreProvider` is a thin Zustand bootstrap.
+
+## 6. Adapters
+
+All external data crosses **one** adapter layer so the twin never talks to Supabase or a cloud API directly.
+
+| Adapter | Reads | Writes | Notes |
 |---|---|---|---|
-| `Estate` | > 300 | subscription + business-service hulls, aggregate arcs | components, edges, labels |
-| `Domain` | 120–300 | RGs, tiers, service cartouches | individual CIs, traffic edges |
-| `Service` | 40–120 | components, `depends_on` edges, health colour | traffic shader animation |
-| `Component` | 10–40 | full detail, traffic + data_flow, metric sparklines on Html tags | — |
-| `Inspector` | < 10 | opens Context Panel (§9) automatically; camera locked to node | other layers dimmed to 0.15 |
+| `TwinTopologyAdapter` | `runops_services`, `runops_components`, `runops_dependencies`, `runops_service_owners`, `runops_teams` | none | Projects to `TwinNode` / `TwinEdge` domain types. Reuse-only. |
+| `TwinHealthAdapter` | `runops_slos`, `runops_error_budgets`, `runops_telemetry_snapshots`, `runops_incidents` | none | Merges into `healthState`, `incidentState`, `budgetBurn`. |
+| `TwinChangeAdapter` | `runops_changes` | none | Feeds `L8-Change` layer + change-window prisms. |
+| `TwinRunbookAdapter` | `runops_runbooks`, `runops_runbook_certifications`, `runops_executions` | via existing RPCs | Context Panel "Runbooks" tab; write path already exists (`runops_approve_execution`, etc.). |
+| `TwinPresentationAdapter` | `runops_services.metadata.presentation` | update `metadata` only | Cue authoring lands in `metadata` JSON — no schema change. |
+| `TwinCloudConnectorAdapter` | `runops_connectors` | none | Runtime CI enrichment via Edge Functions (Azure Resource Graph) — **future**, gated by `meridianTwin.mode = "live"`. |
 
-LOD transitions cross-fade over 250 ms via a shared `uLodBlend` uniform to avoid pop-in.
+Adapters live in `src/features/meridian/adapters/*` and export pure functions returning `TwinNode[] / TwinEdge[] / TwinOverlay[]`. No JSX in adapters.
 
-## 7. Clustering
+## 7. Shared Components
 
-- At `Estate` and `Domain` LODs, nodes collapse into **super-nodes** by `parentId → tier → ciClass`. Super-node label shows count + worst child health.
-- Clustering algorithm: deterministic hierarchical roll-up (no k-means / force). Order: `subscription → resourceGroup → tier → ciClass`. This mirrors the Azure hierarchy so the twin is legible without physics.
-- Super-nodes explode on click via animated child-position tween from super-node origin to their real positions (400 ms stagger).
-- Force layout is **not used** for cluster placement — positions come from a stable, seeded grid layout keyed by `parentId` so the twin looks identical on every load (critical for demos).
+**Reused as-is (no fork):**
+- shadcn primitives: `Sheet`, `Tabs`, `Badge`, `Button`, `Card`, `Tooltip`, `Command`, `Toast`.
+- `RunOpsErrorBoundary`, `RunOpsRightDrawer`, `CommandPalette`, `AskNovaPanel`, `SimulationBadge`, `DemoControllerDrawer`.
+- Route registry `src/runops/shell/routes.ts`.
+- Tenant scope + auth guards: `ProtectedRoute`, `TenantAccessGuard`.
+- 3D helpers already in `@react-three/drei@9.122`.
 
-## 8. Selection
+**New, Meridian-only (folder-isolated):**
+- `TwinCanvas`, `TwinScene`, `TwinCameraRig`, `TwinLayers`, `TwinNodesInstanced`, `TwinEdges`, `TwinServiceHulls`, `TwinCartouche`, `TwinLegend`, `TwinLayerRail`, `TwinLodBadge`, `TwinPresentBar`, `Twin2DGraph` (ReactFlow), `TwinContextPanel` (mounted into `RightDrawerProvider`).
 
-- **Selection model:** `useTwinStore.selection = { primary: NodeId|null, secondary: NodeId[], hover: NodeId|null }`. Multi-select via shift-click; lasso via drag on empty space (2D screen-space rectangle → GPU pick).
-- **Focus-and-context:** on selection, non-related nodes drop to `opacity 0.15`, related edges highlight, camera `fitToBox` on the selection + its 1-hop neighbourhood.
-- **Keyboard:** ↑/↓/←/→ walks the dependency graph; `Esc` clears; `F` frames selection; `.` cycles LOD.
-- **URL binding:** `?select=<nodeId>&hop=1` — deep-linkable, presentation-safe.
+## 8. Database Reuse
 
-## 9. Context Panel
+Per prior Backend Reuse Matrix — **no schema migration required for MVP**.
 
-- Right-hand shadcn `Sheet` (drawer), width 420 px desktop / full-width mobile, driven by existing `RightDrawerProvider` in `RunOpsLayout` — reused, not duplicated.
-- **Tabs:** `Overview`, `Health`, `Dependencies`, `Runbooks`, `Incidents`, `Changes`, `Evidence`.
-- Data via TanStack Query keys `['twin','node',nodeId]`, `['twin','node',nodeId,'runbooks']`, etc. All queries tenant-scoped through the existing Supabase client + RLS — no new endpoints required for MVP.
-- Actions surface (only when `runops_can_write`): "Attach runbook", "Open incident", "Simulate failure" (calls existing scenario store).
-- Panel never blocks the canvas — canvas re-fits to the visible viewport (canvas width = viewport − panel width) so selection stays framed.
+| Capability | Table | Classification |
+|---|---|---|
+| Services / hulls | `runops_services` | Reuse (put Meridian tags in `metadata`) |
+| CIs / glyphs | `runops_components` | Extend data-only (new `kind` enum values require an additive enum migration — deferred until Meridian ingestion needs them) |
+| Edges | `runops_dependencies` | Reuse |
+| Ownership | `runops_service_owners`, `runops_teams` | Reuse |
+| Health/SLOs | `runops_slos`, `runops_error_budgets`, `runops_telemetry_snapshots` | Reuse |
+| Incidents / halos | `runops_incidents`, `runops_incident_events` | Reuse |
+| Changes | `runops_changes` | Reuse |
+| Runbooks (Context Panel) | `runops_runbooks`, `_versions`, `_certifications`, `_executions` | Reuse |
+| Presentation cues | `runops_services.metadata->'presentation'->'cues'` | Reuse (JSON extension) |
+| CI-class registry (optional) | `runops_ci_classes` | **Deferred** — only if hard-coded taxonomy proves insufficient |
+| Component-to-component edges (optional) | `runops_component_edges` | **Deferred** — start with `runops_dependencies` |
 
-## 10. Performance Strategy
+**Deferred migrations** are scheduled but not part of MVP. When needed, each must include GRANTs + tenant-scoped RLS per project rules.
 
-- **Draw calls:** one `InstancedMesh` per `ciClass`, one `LineSegments`/tube batch per edge class, one hull mesh per business service. Target ≤ 60 draw calls for a 5k-node estate.
-- **Frustum + distance culling** on instances via a compute pass in the animation loop (CPU-side; GPU instancing hides invisible instances by setting matrix to zero-scale).
-- **LOD gating** (see §6) — traffic shaders, Html labels, and edge arrowheads are the expensive items and are only enabled at `Service`+.
-- **On-demand rendering:** `frameloop="demand"` on the R3F `<Canvas>`. Frames are only requested on state change, camera move, or animation tick. Idle = 0 fps.
-- **Data pagination:** components fetched per subscription/RG on demand; the twin never queries the full estate in one call. Cache in TanStack Query with `staleTime: 60s`.
-- **Web worker** for hull computation and layout roll-ups (Quickhull + hierarchical grid) — keeps main thread free.
-- **Texture atlas** for glyph icons; no per-node textures.
-- **Budget:** first paint < 1.5 s for 500 visible nodes; interaction < 16 ms/frame at Service LOD on M1-class hardware.
-- **Memory:** dispose geometries + materials on tenant switch (hook into existing `useTenantRouteEqualizer`).
+## 9. Authentication Reuse
 
-## 11. Accessibility
+- 100% reuse of Supabase Auth flow already wired via `AuthContext` + `ProtectedRoute`.
+- Route `/runops/twin/*` wrapped in `<ProtectedRoute><TenantAccessGuard>…</TenantAccessGuard></ProtectedRoute>` — same pattern as every other RunOps route.
+- Anonymous users: 302 to existing `/auth/login`.
+- Unapproved users: existing `PendingApproval` page (unchanged).
+- Presentation mode without an active session: falls back to the demo tenant (`tenant-contoso`) when `meridianTwin.mode = "demo"`, otherwise blocks with existing `NoAccess` page.
 
-- The 3D canvas is decorative-primary; every state visible in 3D is also present in the **2D fallback** (§12) which is the a11y source of truth.
-- Canvas element gets `role="application"` + `aria-label="Meridian digital twin (interactive 3D). Press T to switch to accessible list view."` and `aria-describedby` pointing to a live region.
-- **Keyboard-first:** all selection, navigation, LOD, and layer toggles have shortcuts (documented in a `?` overlay). No interaction is mouse-only.
-- **Live region** (`aria-live="polite"`) announces selection changes: "Selected AKS cluster meridian-prod-aks. Health: degraded. 2 open incidents."
-- **Colour:** health states use hue + shape + label prefix (`● GREEN`, `▲ AMBER`, `■ RED`) — never colour alone. All tokens sourced from `index.css` semantic tokens; no hardcoded hex in glyph shaders (uniforms pull from CSS custom properties via a small bridge).
-- **Reduced motion:** `prefers-reduced-motion` disables camera easing, edge flow animation, and LOD cross-fade; snaps instead.
-- **Focus ring:** visible 2 px outline on the canvas when keyboard-focused.
-- WCAG 2.2 AA target for panel + fallback; 3D canvas exempted under WCAG "canvas content is provided in accessible alternative form".
+## 10. Authorization Reuse
 
-## 12. 2D Fallback
+Reuses the two-layer model — no new roles.
 
-- Toggle in top bar (`View: 3D | 2D | Split`). Persisted per-user.
-- 2D view is a **ReactFlow** graph (already in dependencies) driven by the same `useTwinStore` selectors — one source of truth.
-- Layout: dagre hierarchical (subscription → RG → tier → CI), collapsible group nodes matching §7 clustering.
-- Business services rendered as ReactFlow group nodes with the same cartouche.
-- Edges use the same class taxonomy (§5).
-- 2D is the **default** on:
-  - `prefers-reduced-motion` users
-  - devices without WebGL2 (feature-detect on mount)
-  - viewport < 768 px
-  - screen reader detected (heuristic: focus-visible + no pointer events for 5 s after mount → suggest 2D)
+| Action | Gate |
+|---|---|
+| View twin | `runops_has_tenant_access(tenant_id)` |
+| Toggle layers / change LOD / lasso / present | tenant access only |
+| "Attach runbook" from Context Panel | `runops_can_write(tenant_id)` + `runbook_author`/`service_owner` |
+| "Open incident" from a node | `runops_can_write` + `incident_commander`/`sre_engineer` |
+| "Simulate failure" (scenario) | `runops_has_role(tenant_id, 'demo_controller')` |
+| Author presentation cues | `runops_can_write` + `demo_controller` |
+| Live ingestion via `TwinCloudConnectorAdapter` | `platform_engineer` (Edge Function bearer) |
 
-## 13. Presentation Mode
+All checks routed through existing SECURITY DEFINER helpers (`runops_has_tenant_access`, `runops_can_write`, `runops_has_role`, `runops_has_any_role`). Frontend never reads roles directly — it lets RLS + RPC responses drive UI affordances.
 
-- Entered via `P` or top-bar "Present" button. Full-viewport, chrome hidden, sidebar collapsed.
-- **Scene script:** ordered list of `TwinCue` items, stored in `runops_services.metadata.presentation.cues` (no new table). Each cue:
-  ```
-  TwinCue {
-    id, label, cameraPose, layerState, selection,
-    narration (markdown), dwellMs, transitionMs
-  }
-  ```
-- **Playback:** `←/→` steps, `Space` play/pause, `Esc` exits. A thin progress rail shows cue index / total.
-- **Narration** renders as a bottom-centre teleprompter card (shadcn `Card`, semi-transparent). Optional TTS via Lovable AI Gateway (not required for MVP).
-- **Determinism:** cues capture the full `TwinViewState` (camera + layers + selection + LOD); replay is pixel-stable regardless of tenant data changes (data is snapshotted per cue when authored).
-- **Guardrails:** presentation mode forces `demoMode: true`, disables mutation actions in the context panel, and pins the tenant — safe for customer demos.
-- **Recording:** an "Export" action serialises the cue list to JSON for check-in with the tenant profile; no video export in MVP.
+## 11. Performance
+
+Concrete budgets and gates (numbers align with §10 of the architectural spec).
+
+| Metric | Budget | Enforcement |
+|---|---|---|
+| Route chunk size (`meridian-*.js`) | ≤ 350 KB gzip | CI `size-limit` check on `dist/assets/meridian-*` |
+| Time-to-first-frame (500 visible nodes) | ≤ 1.5 s p95 | Playwright perf run in CI |
+| Frame time at Service LOD | ≤ 16 ms p95 (M1) | React DevTools profile + `stats.js` check |
+| Draw calls | ≤ 60 for 5k nodes | Instanced meshes + edge batching |
+| Idle frame rate | 0 fps | `frameloop="demand"` on `<Canvas>` |
+| Data fetch | Per subscription/RG on demand | TanStack Query, `staleTime: 60s` |
+| Layout compute | Off main thread | Web worker (`twin.worker.ts`) |
+| Bundle dedupe | Single `three` instance | Add `three`, `@react-three/fiber`, `@react-three/drei` to `vite.config.ts` `dedupe` |
+| Above-cap protection | `nodes > maxNodes` → stub | `meridianTwin.perf.maxNodes` flag |
+
+Regressions on any budget block the PR merge.
+
+## 12. Testing
+
+Layered strategy, all layers required for GA.
+
+| Layer | Tool | Scope |
+|---|---|---|
+| Unit | Vitest | Adapters (topology → `TwinNode[]`), Zustand selectors, hull math, LOD selector. |
+| Component | Vitest + Testing Library + jsdom | `TwinContextPanel`, `TwinLegend`, `Twin2DGraph`, keyboard nav. |
+| 3D smoke | Vitest + `@react-three/test-renderer` | Scene mounts, instanced meshes attach, camera pose serialises. |
+| Integration | Vitest with mocked Supabase | Tenant switch clears cache, empty tenant renders stub, RLS-forbidden query surfaces error state. |
+| E2E | Playwright | Auth → land on `/runops/twin` → select service → 3D→2D toggle → keyboard walk → presentation mode step-through. |
+| Perf | Playwright + `page.metrics()` | First-frame budget, frame time under 500/2k/5k node fixtures. |
+| Accessibility | `@axe-core/playwright` on 2D fallback + panel; manual NVDA/VoiceOver pass on selection announcements. |
+| Visual regression | Playwright screenshot compare on canvas element at fixed camera poses (deterministic thanks to seeded layout). |
+| Contract | `supabase--test_edge_functions` on any new Edge Functions (deferred until live-ingest phase). |
+
+CI matrix: Node 20 + jsdom + Chromium. Fixtures live in `src/features/meridian/fixtures/*` (three sizes: `small.json`, `medium.json`, `large.json`).
+
+## 13. Regression Strategy
+
+Prevents Meridian from breaking anything else.
+
+1. **Additive-only** frontend edits: one new route, one new sidebar item, one new palette catalog entry, one Zustand store, one `dedupe` list update. No changes to existing pages.
+2. **Lazy import boundary** enforced by lint: a repo-level ESLint rule forbids `import` of `src/features/meridian/*` from any file outside `src/features/meridian/` and `src/App.tsx` (the route registration). Prevents accidental bundle bloat.
+3. **Bundle diff gate** in CI: `dist/assets/index-*.js` size delta must be ≤ +5 KB gzip after Meridian merges. Fails the PR otherwise.
+4. **Feature flag off in prod** at merge time; enabled via env for staging QA. Prod flip after all §12 layers pass on staging for 24 h.
+5. **Existing route smoke** in CI: Playwright hits `/`, `/app`, `/runops`, `/runops/services`, `/runops/incidents`, `/runops/runbooks` and asserts 200 + no console errors after Meridian merges.
+6. **Tenant regression**: run `useTenantRouteEqualizer` E2E over `tenant-contoso` and `tenant-meridian` (once seeded) to confirm no dangling routes leak across tenants.
+7. **RLS regression**: re-run the July-12 live verification pass (200s on `profiles`/`user_roles` for authed user, 403 on cross-tenant reads) after any adapter change.
+8. **Three.js instance check** in E2E: `expect(window.__THREE__ ?? []).toHaveLength(1)` guard to catch dedupe drift.
+
+## 14. Rollback Strategy
+
+Every artefact is reversible without a migration or a data restore.
+
+| Change | Rollback |
+|---|---|
+| New lazy route + Suspense wrapper | Remove the `<Route>` entry in `App.tsx`; the chunk is orphaned and stops being served. Zero user impact. |
+| Sidebar + palette entries | Guarded by `meridianTwin.enabled`; flip flag to `false` to hide instantly. |
+| `vite.config.ts` `dedupe` additions | Additive; safe to revert. Only affects bundling. |
+| `useTenantRouteEqualizer` new `check()` entries | Additive; safe to revert. |
+| `runops_services.metadata.presentation` writes | `UPDATE runops_services SET metadata = metadata - 'presentation' WHERE tenant_id = …` — reversible per-tenant. |
+| Any deferred enum additions (CI classes) | **Forward-only**; guarded by not shipping until absolutely required. Compensating cleanup migration must be authored *before* the enum lands. |
+| Deferred new tables (`runops_ci_classes`, `runops_component_edges`) | Only added if MVP proves insufficient; each ships with a paired down-migration in the plan (drop policy → revoke grants → drop table). |
+| Feature-flag flip | Instant rollback via env; no redeploy required. |
+| Presentation mode | Independently flag-gated (`meridianTwin.presentation`); can be disabled without disabling the twin. |
+| Fixture drift | Fixtures under `src/features/meridian/fixtures` are versioned; roll back by reverting the file. |
+
+**Kill-switch:** flipping `meridianTwin.enabled=false` in env hides the route from the router (`ProtectedRoute` returns to `/runops`), removes the nav entry, and drops the palette actions — full rollback in < 60 s with no rebuild.
 
 ---
 
-## Cross-Cutting Contracts
+## Delivery Phasing (for reference — not a build order approval)
 
-- **State ownership:** Zustand (`useTwinStore`) owns view state (camera, layers, selection, LOD, mode). TanStack Query owns server state. React context owns nothing in the twin.
-- **Data source:** reuses `runops_services`, `runops_components`, `runops_dependencies`, `runops_service_owners` verbatim (per prior Backend Reuse Matrix — Reuse / Extend-data-only). No schema changes required to ship MVP.
-- **Routing:** single lazy route (per approved frontend plan) — e.g. `/runops/twin` with sub-selectors as query params, so deep-links do not multiply routes.
-- **Feature flag:** gated behind `featureFlags.meridianTwin` in `src/runops/domain/featureFlags.ts` (extension, not new module).
-- **Tenant isolation:** all queries go through the tenant-scoped Supabase client; twin renders empty scaffold with a "No data for this tenant" state rather than falling back to another tenant's bundle.
+1. **Phase 0 — Foundation (no user-visible change):** `vite.config.ts` dedupe additions, feature flag stubs, folder scaffold, route registered behind `meridianTwin.enabled=false`.
+2. **Phase 1 — Static twin:** demo-mode fixtures, glyphs, hulls, LOD 3/4, Context Panel skeleton, 2D fallback.
+3. **Phase 2 — Live data:** adapters wired to `runops_*` tables, TanStack Query pagination, tenant switch.
+4. **Phase 3 — Interactivity:** selection, keyboard nav, lasso, layer rail, presentation cues (author + play).
+5. **Phase 4 — Performance & a11y hardening:** perf budgets, axe pass, NVDA/VoiceOver pass, visual regression baselines.
+6. **Phase 5 — GA:** flag flip on prod after 24 h clean staging.
+
+Each phase is independently mergeable, each ends with a green regression suite, and each is rollback-safe under §14.
 
 ---
 
-**Deliverable:** architectural specification only. No code, schema, dependency, or route changes performed. Awaiting approval before switching to build mode for any subsequent implementation task.
+**Deliverable:** integration plan / implementation roadmap only. No code, migration, dependency, or route changes performed. Awaiting per-phase approval before any subsequent build-mode work.
