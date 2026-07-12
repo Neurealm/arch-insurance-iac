@@ -1,4 +1,5 @@
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
+import { LazyRouteBoundary } from "@/components/routing/LazyRouteBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -25,7 +26,7 @@ import AuditEvidenceCenter from "./pages/enterprise-cert/AuditEvidenceCenter.tsx
 import PolicyEngine from "./pages/enterprise-cert/PolicyEngine.tsx";
 import CtLogsMonitor from "./pages/enterprise-cert/CtLogsMonitor.tsx";
 const SemiCommandCenter = lazy(() => import("./pages/semiconductor/CommandCenter.tsx"));
-import SeadCommandCenter from "./pages/sead/CommandCenter.tsx";
+const SeadCommandCenter = lazy(() => import("./pages/sead/CommandCenter.tsx"));
 const SeadEquipmentHealth = lazy(() => import("./pages/sead/EquipmentHealthIntelligence.tsx"));
 import SeadCrossDomain from "./pages/sead/CrossDomainContextTwin.tsx";
 import SeadMaintenanceSim from "./pages/sead/MaintenanceDecisionSimulator.tsx";
@@ -45,7 +46,7 @@ import SeadEngineeringSandbox from "./pages/sead/EngineeringSandbox.tsx";
 import SeadDigitalCoworkerConversation from "./pages/sead/DigitalCoworkerConversation.tsx";
 import SeadIotAiArchitecture from "./pages/sead/IotAiArchitecture.tsx";
 import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
-import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
+const SemiDigitalTwin = lazy(() => import("./pages/semiconductor/DigitalTwin.tsx"));
 import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
 import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
 import SemiVisionOperations from "./pages/semiconductor/VisionOperations.tsx";
@@ -404,7 +405,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-        <Suspense fallback={null}>
+        <LazyRouteBoundary>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/q/:token" element={<PublicQuestionnaire />} />
@@ -832,7 +833,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        </Suspense>
+        </LazyRouteBoundary>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

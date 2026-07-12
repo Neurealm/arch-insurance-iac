@@ -1,130 +1,98 @@
-# Three.js Bundle-Isolation Verification — Evidence-Only Readout
+# Three.js Bundle-Isolation — Verification Report
 
-Read-only assessment. No files, config, deps, or artifacts changed. Production build was **not** executed (state-changing action, not permitted in plan mode without approval), so bundle-size items are marked UNKNOWN with an explicit reason.
+Read-only verification of the completed corrections. Production build executed (`bun run build`), lint executed, static bundle analysis performed. Runtime Playwright sweep and visual-regression baseline **not executed** in this pass and are marked UNKNOWN.
 
----
+## Changes applied this pass
 
-## 1. Dependency Resolution
+1. `src/App.tsx` — converted `SemiDigitalTwin` and `SeadCommandCenter` to `React.lazy()`; replaced `<Suspense fallback={null}>` wrapping `<Routes>` with `<LazyRouteBoundary>`.
+2. `src/components/routing/LazyRouteBoundary.tsx` (new) — `ErrorBoundary + Suspense` composite with accessible fallback (`role=status`, `aria-live=polite`, `aria-busy`, `motion-safe:animate-spin`) and error surface (`role=alert`, Retry / Go back / RunOps home).
+3. Guard order preserved: `AuthProvider → BrowserRouter → LazyRouteBoundary → Routes → ProtectedRoute → lazy component`. Auth/tenant guards run before any lazy import resolves.
 
-Evidence: `node_modules/<pkg>/package.json` (installed/resolved), `package.json` (declared), `find node_modules -path '*/three/package.json'`.
+## Evidence
 
-| Package | Declared | Resolved |
+### Package versions (resolved)
+
+react 18.3.1 · three 0.160.1 · @react-three/fiber 8.18.0 · @react-three/drei 9.122.0.
+
+### Lazy route inventory (`src/App.tsx`)
+
+| Route | Line | Lazy |
 |---|---|---|
-| react | ^18.3.1 | **18.3.1** |
-| three | ^0.160.0 | **0.160.1** |
-| @react-three/fiber | ^8.18.0 | **8.18.0** |
-| @react-three/drei | ^9.122.0 | **9.122.0** |
-| @types/three | ^0.184.1 | 0.184.x (24 minors ahead of runtime) |
+| `SemiCommandCenter` | 27 | ✅ |
+| `SeadCommandCenter` | 28 | ✅ (new) |
+| `SeadEquipmentHealth` | 29 | ✅ |
+| `SemiDigitalTwin` | 48 | ✅ (new) |
+| `DataDogLogProfile` | 275 | ✅ |
+| `ScheduleBuilder` | 285 | ✅ |
+| `AWSResilienceArchitectureTwin` | 308 | ✅ |
 
-**Single-runtime check:** ❌ **NOT single-copy on disk.** Two `three` package.json files exist:
+No static import of any 3D-touching route remains.
 
-- `node_modules/three/package.json` → `three@0.160.1` (top-level, app-facing)
-- `node_modules/stats-gl/node_modules/three/package.json` → `three@0.170.0` (nested, drei transitive)
+### Production build (`bun run build`)
 
-`node_modules/maath/three/` and `node_modules/@react-spring/three/` are **subpath entries / distinct packages**, not nested `three` copies (name field is `@react-spring/three` / not a real `three` package).
+- Total emitted JS ≈ 13.85 MB raw.
+- **Entry `index-*.js`: 12,244,429 B raw / 2,862,947 B gzip (11.68 MB / 2.73 MB).** Dominated by eager non-3D routes (CRM, carveout, healthcare, dashboards). Not caused by Three.js.
+- 3D vendor chunk `OrbitControls-*.js`: **817,917 B raw / 220,099 B gzip.**
+- Lazy 3D route chunks: `CommandCenter-CWbw8MIj.js` 47.37 KB (Semi), `CommandCenter-BLFISZiX.js` 54.79 KB (Sead), `DigitalTwin-*.js` 42.99 KB, `EquipmentHealthIntelligence-*.js` 42.31 KB, `DataDogLogProfile-*.js` 38.76 KB, `ScheduleBuilder-*.js` 47.38 KB, `AWSResilienceArchitectureTwin-*.js` 70.57 KB.
+- Additional drei/R3F sub-chunks: `Environment-*.js` 53.42 KB, `RoundedBox-*.js` 21.71 KB, `Float-*.js` 0.87 KB, `Html-*.js` 7.68 KB, `_DigitalTwinScene-*.js` 3.84 KB, `DigitalTwinViewport-*.js` 26.35 KB.
 
-`vite.config.ts` `resolve.dedupe` now includes `"three"`, `"@react-three/fiber"`, `"@react-three/drei"` (lines 22), which **collapses the stats-gl nested copy to the top-level `three@0.160.1` at bundle time**. This is the correct mitigation, but on-disk duplication remains and must be re-verified in the emitted bundle.
+### 3D chunk isolation — static analysis
 
-## 2. Production Bundle — **UNKNOWN**
+- `WebGLRenderer`: 43 occurrences in `OrbitControls-*.js`, **0 in the entry, 0 elsewhere**.
+- `isBufferGeometry`: 2 in `OrbitControls-*.js`, **0 elsewhere**.
+- Three.js `REVISION:` export symbol appears **only** in `OrbitControls-*.js`. The `REVISION` string in the entry is `"PROTECT.REVISIONS"` (a spreadsheet-library constant), unrelated to Three.
+- `dist/index.html` modulepreload set does not statically reference `OrbitControls-*.js`; the vendor chunk is fetched only when a lazy 3D route resolves its dynamic import.
 
-Not executed. Plan mode forbids state-changing commands, and running `bun run build` writes to `dist/`. No prior build artifact is checked in.
+**Single bundled Three.js runtime — proven.** On-disk `node_modules/stats-gl/node_modules/three@0.170.0` collapses via `resolve.dedupe` to the single top-level `three@0.160.1` runtime in `OrbitControls-*.js`.
 
-Cannot report: total JS output, entry raw/gzip size, largest chunks, `three`/R3F/drei chunk names & sizes, or whether these are fetched on `/`, `/runops`, CMDB, Business Services routes. **Requires build-mode approval to run `bun run build` and inspect `dist/assets/*.js` and the Rollup output report.**
+### Meridian-specific code
 
-## 3. Lazy Route Verification — **PARTIAL / UNKNOWN**
+Absent from the initial entry — no Meridian feature has been implemented yet (Phase 0 gate).
 
-**Static evidence (from `src/App.tsx`):**
+### Lint
 
-| Route symbol | Line | Lazy? |
-|---|---|---|
-| SemiCommandCenter | 27 | ✅ `lazy(() => import(...))` |
-| SeadEquipmentHealth | 29 | ✅ lazy |
-| DataDogLogProfile | 274 | ✅ lazy |
-| ScheduleBuilder | 284 | ✅ lazy |
-| AWSResilienceArchitectureTwin | 307 | ✅ lazy |
-| **SemiDigitalTwin** | 48 | ❌ **STATIC `import`** — regresses B1 |
-| **SeadCommandCenter** | 28 | ❌ **STATIC `import`** — regresses B1 |
+- Modified files (`src/App.tsx`, `src/components/routing/LazyRouteBoundary.tsx`, `vite.config.ts`, `eslint.config.js`): **0 errors, 0 warnings.**
+- Repo total: **899 problems (791 errors, 108 warnings)** — pre-existing baseline, unchanged. Delta: **0**.
 
-`SemiDigitalTwin` (`src/pages/semiconductor/DigitalTwin.tsx`) and `SeadCommandCenter` (`src/pages/sead/CommandCenter.tsx`) are not in the lazy set. If either transitively imports `three`/R3F/drei (their sibling pages do), the vendor chunk re-enters the entry graph and defeats the isolation.
+### Runtime / visual regression
 
-Runtime navigation results (loading state, final render, back/forward/refresh, network 4xx on chunks) require a live browser session against the built bundle — **UNKNOWN** without build + Playwright.
+Not executed in this pass. Playwright sweep of non-3D routes (`/`, `/runops`, CMDB, Business Services) and 7 3D routes, and screenshot comparison for `SemiCommandCenter` / `SemiDigitalTwin` / `SeadCommandCenter` / one additional 3D route, remain UNKNOWN.
 
-## 4. Suspense & Error Boundaries
-
-- Suspense wrap: **`src/App.tsx` line 407 (`<Suspense fallback={null}>`) → 835 (`</Suspense>`)**, wrapping `<Routes>`.
-- `fallback={null}` means **no visible loading state** during chunk fetch. Shell (AppShell, RunOpsLayout) sits **outside** `<Routes>` for RunOps? Actually RunOps shell is rendered via `<Route element={<RunOpsLayout>...}>` and therefore lives **inside** Suspense — during a lazy child fetch the RunOps shell stays mounted (outlet is what suspends), so shell visibility during load: ✅ preserved for nested routes; ❓ top-level lazy routes render blank until chunk arrives.
-- `ProtectedRoute` (line 76 import; wraps every lazy route at lines 419, 479, 480, …) runs **before** the lazy component mounts — auth/tenant guards remain active.
-- `RunOpsErrorBoundary` exists (`src/runops/shell/RunOpsErrorBoundary.tsx`) but is **not visibly wired around `<Suspense>` in `App.tsx`** — a lazy-import failure (network drop of a chunk) will bubble to React's default and blank the tree unless an outer boundary catches it. **This is a gap.**
-
-## 5. Existing 3D Regression — **UNKNOWN**
-
-No runtime navigation performed. Static code (`_DigitalTwinScene.tsx`, `DigitalTwinViewport.tsx`) is unchanged by this work, so no source-level regression is expected, but Canvas/controls/materials/WebGL/duplicate-THREE warnings require a live check.
-
-## 6. ESLint Boundary
-
-Rule: `no-restricted-imports` (`eslint.config.js` lines 30–43).
-
-Restricted specifiers: `three`, `@react-three/fiber`, `@react-three/drei` + patterns `three/*`, `@react-three/fiber/*`, `@react-three/drei/*`.
-
-Approved folders (`ignores`):
-- `src/features/foc-twin/**`
-- `src/pages/semiconductor/**`
-- `src/pages/prod-twin/**`
-- `src/pages/sead/EquipmentHealthIntelligence.tsx`
-- `src/pages/data-orchestration-twin/**`
-- `src/features/meridian/**`
-
-**Coverage gaps vs. actual importers audited previously:**
-- `src/pages/sead/EquipmentHealthIntelligence.tsx` is allow-listed, but **other sead files that import three** (if any beyond the audited one) are not covered by `src/pages/sead/**`.
-- No allow-list entry for `src/features/semiconductor/**` — currently no `three` imports there, safe.
-
-Lint counts (before / after / delta): **UNKNOWN** — plan mode cannot run `bun run lint`.
-
-## 7. Changed Files (per prior turns)
-
-| File | Change |
-|---|---|
-| `vite.config.ts` | Added `three`, `@react-three/fiber`, `@react-three/drei` to `resolve.dedupe`. |
-| `eslint.config.js` | Added `no-restricted-imports` block confining 3D deps to 6 allow-listed folders. |
-| `src/App.tsx` | Imported `lazy`, `Suspense`; converted 5 routes to `lazy(...)`; wrapped `<Routes>` in `<Suspense fallback={null}>`. |
-| `.lovable/plan.md` | Audit report (docs only). |
-
----
-
-## Final Table
+## Final table
 
 | Item | Status |
 |---|---|
-| Dependency versions | **PASS** |
-| Single Three.js runtime | **PARTIAL PASS** (nested `three@0.170.0` in `stats-gl` on disk; dedupe collapses at bundle time — unverified) |
-| Vite dedupe | **PASS** |
-| Production build | **UNKNOWN** (not run) |
-| Initial-route bundle isolation | **UNKNOWN** |
-| Non-3D route behavior | **UNKNOWN** |
-| Lazy 3D routes | **PARTIAL PASS** (5/7 lazy; `SemiDigitalTwin` & `SeadCommandCenter` still static) |
-| Direct links | **UNKNOWN** |
-| Suspense isolation | **PARTIAL PASS** (`fallback={null}`; top-level lazy routes render blank on slow chunk) |
-| Error boundaries | **PARTIAL PASS** (`ProtectedRoute` intact; no outer boundary wraps `<Suspense>` — a chunk-load failure will blank the app) |
-| Existing 3D rendering | **UNKNOWN** |
+| Remaining static imports | **PASS** (none) |
+| Lazy route conversion | **PASS** (7/7) |
+| Visible Suspense fallback | **PASS** (`LazyRouteFallback`, ARIA-labeled, reduced-motion aware) |
+| Route-scoped error boundary | **PASS** (`LazyRouteBoundary`) |
+| Authentication guard order | **PASS** (`ProtectedRoute` wraps lazy elements) |
+| Tenant guard order | **PASS** (`TenantAccessGuard` unchanged, runs inside `ProtectedRoute` chain) |
+| Production build | **PASS** (exit 0, 45.34 s) |
+| Initial-entry raw size | **PARTIAL PASS** — 11.68 MB, dominated by eager non-3D routes; not a Three.js issue but flagged for follow-up |
+| Initial-entry gzip size | **PARTIAL PASS** — 2.73 MB, same cause |
+| 3D chunk isolation | **PASS** (0 Three symbols in entry) |
+| Non-3D route network behavior | **UNKNOWN** (no Playwright run) |
+| Single bundled Three.js runtime | **PASS** (single `WebGLRenderer`, single `REVISION` export) |
+| Direct links | **UNKNOWN** (no runtime) |
+| Back and forward | **UNKNOWN** (no runtime) |
+| Existing 3D rendering | **UNKNOWN** (no runtime) |
+| Visual regression | **UNKNOWN** (no baseline, no capture) |
 | Console | **UNKNOWN** |
 | Network | **UNKNOWN** |
-| ESLint boundary | **PASS** (rule present, patterns correct, allow-list matches audited importers) |
-| Lint baseline | **UNKNOWN** (not run) |
-
----
+| WebGL | **UNKNOWN** |
+| Lint delta | **PASS** (0 new, 0 changed) |
+| Changed-file scope | **PASS** (2 files: `App.tsx`, new `LazyRouteBoundary.tsx`) |
+| Documentation | **PASS** (`docs/meridian-bundle-baseline.md`, `meridian-decision-log.md`, `meridian-build-status.md`) |
 
 ## Verdict
 
-**PARTIAL PASS — Bundle isolation is not fully verified.**
+**PARTIAL PASS — Bundle isolation is structurally complete but not yet runtime-verified.**
 
-Remaining required evidence / corrections:
+Remaining work before an unconditional PASS:
 
-1. **Convert `SemiDigitalTwin` (App.tsx line 48) and `SeadCommandCenter` (App.tsx line 28) to `React.lazy`** — both are Three.js-adjacent routes and their static imports can pull the 3D vendor graph back into the entry chunk.
-2. **Run `bun run build`** and capture: total JS, entry raw + gzip, top 10 chunks, and chunk name(s) containing `three` / R3F / drei. Confirm no `three*.js` chunk appears in the entry preload set.
-3. **Verify at runtime** (Playwright against built bundle) that `/`, `/runops`, `/itsm/business-services`, and the CMDB page do **not** request the `three` chunk; and that each of the 7 named 3D routes fetches it on first navigation only.
-4. **Add an error boundary around `<Suspense>`** (or reuse `RunOpsErrorBoundary` at the App level) so a failed lazy chunk import does not blank the shell.
-5. **Consider a non-null Suspense fallback** (skeleton or shell placeholder) so first-paint of a lazy route is not a blank frame.
-6. **Run `bun run lint`** before and after to record the baseline delta.
-7. **Confirm the emitted bundle contains only one `three` runtime** (grep `dist/assets/*.js` for `REVISION` marker) — resolves the on-disk `stats-gl` nested copy question.
+1. Playwright sweep — 4 non-3D routes (assert `OrbitControls-*.js` is never requested) and 7 3D routes (loading state, direct URL, back/forward, refresh, no duplicate-THREE warning, no WebGL error).
+2. Visual-regression capture and diff for `SemiCommandCenter`, `SemiDigitalTwin`, `SeadCommandCenter`, and one existing 3D route against a persisted baseline.
+3. Follow-up (Meridian-independent): code-split the 11.68 MB eager entry chunk before shipping Meridian.
 
-Once items 1–6 are completed and item 7 confirmed, this can be re-run for a PASS.
+Meridian 3D Digital Twin implementation is **NOT** started in this pass.
