@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/eoc/AppShell";
+import { CoworkersBackLink } from "@/components/eoc/CoworkersBackLink";
 import { Link } from "react-router-dom";
 import {
   UserRound, Briefcase, Monitor, Lock, Database, TrendingUp,
@@ -199,6 +200,7 @@ function FooterBenefit({ icon: Icon, title, desc, color }: { icon: typeof Bot; t
 export default function HealthcarePayer() {
   return (
     <AppShell>
+      <CoworkersBackLink />
       <main className="flex-1 bg-slate-50 px-8 py-6 animate-fade-in">
         <div className="mx-auto max-w-[1480px] rounded-2xl bg-white border border-slate-200 shadow-sm p-8">
           {/* Header */}

@@ -275,7 +275,7 @@ const tree: Node[] = [
   },
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
   { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
-  { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers", children: coworkerChildren },
+  { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers" },
   { key: "questionnaires", label: "Questionnaires", icon: ClipboardList, to: "/questionnaires" },
   { key: "services",   label: "Business Services",   icon: Boxes,         to: "/itsm/exec-biz-ops/business-services" },
   { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
