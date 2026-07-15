@@ -61,9 +61,22 @@ export default function SetInitialPassword() {
     if (pErr) console.warn("could not clear must_change_password", pErr.message);
 
     await refreshRole();
+
+    // Check if this invited user still needs to fill in the optional profile.
+    // This is a one-shot redirect on the success path — it never blocks routing.
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("profile_completed_at")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
     setBusy(false);
     toast.success("Password set. Welcome to neuGAIN!");
-    navigate("/app", { replace: true });
+    if (prof && !(prof as any).profile_completed_at) {
+      navigate("/complete-profile", { replace: true });
+    } else {
+      navigate("/app", { replace: true });
+    }
   };
 
   return (
