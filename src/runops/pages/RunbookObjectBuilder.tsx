@@ -24,18 +24,19 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-type StepId = 1 | 2 | 3 | 4 | 5 | 6;
+type StepId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 const STEPS: {
   id: StepId; title: string; subtitle: string; icon: React.ComponentType<{ className?: string }>;
   story: string;
 }[] = [
-  { id: 1, title: "Bind Business Service", subtitle: "E-Commerce Platform",     icon: Boxes,    story: "Every change begins with the business object it serves — not an instance ID." },
-  { id: 2, title: "Compose Resources",     subtitle: "3 tiers · 7 typed assets", icon: Layers,   story: "The service is composed of typed Resource objects with declared relationships." },
-  { id: 3, title: "Select Target Object",  subtitle: "EC2Instance · EBSVolume",  icon: Server,   story: "Pick the instance & volume. Their class exposes the safe methods available." },
-  { id: 4, title: "Instantiate Operation", subtitle: "ExpandVolumeOperation",    icon: Workflow, story: "The operation is an object — parameters, invariants, and rollback in one place." },
-  { id: 5, title: "Generate Plan",         subtitle: "Python · CLI · IaC",       icon: Code2,    story: "Same object model, four renderings. The code is derived, not written." },
-  { id: 6, title: "Validate & Execute",    subtitle: "Approvals · Digital Twin", icon: ShieldCheck, story: "Twin simulates. Governance approves. Executor runs. All against the same object." },
+  { id: 1, title: "Bind Business Service", subtitle: "E-Commerce Platform",     icon: Boxes,       story: "Every change begins with the business object it serves — not an instance ID." },
+  { id: 2, title: "Compose Resources",     subtitle: "3 tiers · 7 typed assets", icon: Layers,      story: "The service is composed of typed Resource objects with declared relationships." },
+  { id: 3, title: "Select Target Object",  subtitle: "EC2Instance · EBSVolume",  icon: Server,      story: "Pick the instance & volume. Their class exposes the safe methods available." },
+  { id: 4, title: "Instantiate Operation", subtitle: "ExpandVolumeOperation",    icon: Workflow,    story: "The operation is an object — parameters, invariants, and rollback in one place." },
+  { id: 5, title: "Generate Plan",         subtitle: "Python · CLI · IaC",       icon: Code2,       story: "Same object model, four renderings. The code is derived, not written." },
+  { id: 6, title: "Model Cross-Domain Impact", subtitle: "Business · Tech · SRE · Support · FinOps · Cyber", icon: Activity, story: "Before we execute, project the operation into every stakeholder domain and quantify the delta." },
+  { id: 7, title: "Validate & Execute",    subtitle: "Approvals · Digital Twin", icon: ShieldCheck, story: "Twin simulates. Governance approves. Executor runs. All against the same object." },
 ];
 
 const RUNBOOK_CODE = `from runops import Service, ExpandVolumeOperation
