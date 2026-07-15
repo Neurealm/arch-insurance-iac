@@ -22,24 +22,28 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  Plus, GripVertical, MoreVertical, Eye, Pencil, Copy, Power, Trash2,
+  Plus, GripVertical, MoreVertical, Eye, Pencil, Copy, Power, Trash2, Sparkles,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   useDomainsForTechnology, useReorderDomains, useSetDomainActive, useCloneDomain,
-  useSoftDeleteDomain, type Domain,
+  useSoftDeleteDomain, useMasterDomains, type Domain,
 } from "@/hooks/etdm/useDomains";
 import {
   LifecycleBadge, ApprovalBadge, CriticalityBadge, ActiveBadge,
 } from "./DomainBadges";
+import AutoBuildDomainsDialog from "./AutoBuildDomainsDialog";
 
 interface Props {
   technologyId: string;
+  technologyName?: string;
   disabled?: boolean;
 }
 
-export default function DomainsTab({ technologyId, disabled }: Props) {
+export default function DomainsTab({ technologyId, technologyName, disabled }: Props) {
   const nav = useNavigate();
   const { data, isLoading, isError, refetch } = useDomainsForTechnology(technologyId);
+  const { data: masters = [] } = useMasterDomains();
   const reorder = useReorderDomains();
   const setActive = useSetDomainActive();
   const clone = useCloneDomain();
@@ -52,6 +56,16 @@ export default function DomainsTab({ technologyId, disabled }: Props) {
   const [confirmDelete, setConfirmDelete] = useState<Domain | null>(null);
   const [confirmClone, setConfirmClone] = useState<Domain | null>(null);
   const [confirmActive, setConfirmActive] = useState<{ domain: Domain; next: boolean } | null>(null);
+  const [autoBuildOpen, setAutoBuildOpen] = useState(false);
+
+  const coverageCount = useMemo(() => {
+    const activeMasterIds = new Set(masters.filter((m) => m.is_active).map((m) => m.id));
+    const covered = new Set(
+      rows.filter((r) => activeMasterIds.has(r.master_domain_id)).map((r) => r.master_domain_id),
+    );
+    return covered.size;
+  }, [rows, masters]);
+  const coverageTotal = masters.length || 16;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -79,20 +93,36 @@ export default function DomainsTab({ technologyId, disabled }: Props) {
 
   return (
     <Card className="p-0 overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="flex items-center justify-between p-4 border-b border-border gap-3 flex-wrap">
         <div>
-          <div className="text-sm font-medium">Domains</div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-sm font-medium flex items-center gap-2">
+            Domains
+            <Badge variant="outline" className="bg-indigo/10 text-indigo border-indigo/30">
+              Standard Domain Coverage: {coverageCount} of {coverageTotal}
+            </Badge>
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">
             Child records that describe the taxonomy domains this Technology participates in. Drag rows to reorder.
           </div>
         </div>
-        <Button
-          size="sm"
-          onClick={() => nav(`/admin/technology-taxonomy/domains/new?technology_id=${technologyId}`)}
-          disabled={disabled}
-        >
-          <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Domain
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setAutoBuildOpen(true)}
+            disabled={disabled}
+            title="Create the standard 16 ETDM Domain records for this Technology"
+          >
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Auto-Build Domains
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => nav(`/admin/technology-taxonomy/domains/new?technology_id=${technologyId}`)}
+            disabled={disabled}
+          >
+            <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Domain
+          </Button>
+        </div>
       </div>
 
       <Table>
@@ -120,18 +150,27 @@ export default function DomainsTab({ technologyId, disabled }: Props) {
           {!isLoading && !isError && list.length === 0 && (
             <TableRow>
               <TableCell colSpan={10} className="text-center py-12">
-                <div className="text-sm font-medium">No Domains linked to this Technology yet.</div>
+                <div className="text-sm font-medium">No domains have been created for this technology.</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  Add a Domain to describe how this Technology participates in the taxonomy.
+                  Build the standard ETDM domain structure or add an individual domain manually.
                 </div>
-                <Button
-                  size="sm"
-                  className="mt-4"
-                  disabled={disabled}
-                  onClick={() => nav(`/admin/technology-taxonomy/domains/new?technology_id=${technologyId}`)}
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Domain
-                </Button>
+                <div className="mt-4 flex items-center justify-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => setAutoBuildOpen(true)}
+                    disabled={disabled}
+                  >
+                    <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Auto-Build Standard Domains
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={disabled}
+                    onClick={() => nav(`/admin/technology-taxonomy/domains/new?technology_id=${technologyId}`)}
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Domain
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           )}
@@ -233,6 +272,12 @@ export default function DomainsTab({ technologyId, disabled }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AutoBuildDomainsDialog
+        open={autoBuildOpen}
+        onOpenChange={setAutoBuildOpen}
+        technology={{ id: technologyId, technology_name: technologyName ?? "this technology" }}
+        onBuilt={() => refetch()}
+      />
     </Card>
   );
 }

@@ -22,8 +22,9 @@ import {
 import { toast } from "sonner";
 import {
   ArrowLeft, Copy, Download, Eye, Filter, Layers, MoreVertical, Pencil, Plus, Power,
-  RefreshCw, RotateCcw, Search as SearchIcon, Trash2, X,
+  RefreshCw, RotateCcw, Search as SearchIcon, Sparkles, Trash2, X,
 } from "lucide-react";
+import AutoBuildDomainsDialog from "@/components/etdm/AutoBuildDomainsDialog";
 import {
   useDomains, useMasterDomains, useTechnologyOptions,
   useSetDomainActive, useCloneDomain, useSoftDeleteDomain, useRestoreDomain,
@@ -76,6 +77,7 @@ export default function DomainsPage() {
   const [confirmDelete, setConfirmDelete] = useState<Domain | null>(null);
   const [confirmClone, setConfirmClone] = useState<Domain | null>(null);
   const [confirmActive, setConfirmActive] = useState<{ domain: Domain; next: boolean } | null>(null);
+  const [autoBuildOpen, setAutoBuildOpen] = useState(false);
 
   const filters: DomainFilters = useMemo(() => ({
     search, technology_ids: techIds, master_domain_ids: masterIds,
@@ -212,6 +214,9 @@ export default function DomainsPage() {
             </Button>
             <Button variant="outline" size="sm" onClick={() => doExport("all")}>
               <Download className="h-3.5 w-3.5 mr-1.5" /> Export CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setAutoBuildOpen(true)}>
+              <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Auto-Build Domains
             </Button>
             <Button size="sm" onClick={() => nav("/admin/technology-taxonomy/domains/new")}>
               <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Domain
@@ -557,6 +562,11 @@ export default function DomainsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AutoBuildDomainsDialog
+        open={autoBuildOpen}
+        onOpenChange={setAutoBuildOpen}
+        onBuilt={() => refetch()}
+      />
     </AppShell>
   );
 }
