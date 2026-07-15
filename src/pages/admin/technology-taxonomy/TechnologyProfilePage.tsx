@@ -27,11 +27,11 @@ import {
 type Mode = "view" | "edit" | "new";
 
 type Field =
-  | { key: string; label: string; type: "text" | "textarea" | "url" | "number" | "date" }
-  | { key: string; label: string; type: "select"; options: readonly string[] }
-  | { key: string; label: string; type: "multi"; options: readonly string[] }
-  | { key: string; label: string; type: "tags" }
-  | { key: string; label: string; type: "boolean" };
+  | { key: string; label: string; type: "text" | "textarea" | "url" | "number" | "date"; help?: string }
+  | { key: string; label: string; type: "select"; options: readonly string[]; help?: string }
+  | { key: string; label: string; type: "multi"; options: readonly string[]; help?: string }
+  | { key: string; label: string; type: "tags"; help?: string }
+  | { key: string; label: string; type: "boolean"; help?: string };
 
 const SECTIONS: { key: string; label: string; fields: Field[] }[] = [
   {
