@@ -282,10 +282,8 @@ const tree: Node[] = [
     icon: Settings,
     to: "/settings",
     exact: true,
-    children: [
-      { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
-    ],
   },
+
 
 ];
 
