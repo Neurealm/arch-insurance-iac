@@ -259,6 +259,16 @@ export default function TechnologyProfilePage() {
     const e: Record<string, string> = {};
     if (!form.technology_name?.trim()) e.technology_name = "Technology name is required.";
     if (!form.slug?.trim()) e.slug = "Slug is required.";
+
+    // Neurealm Practice: required for new records, and required unless the record
+    // is Draft (existing records may temporarily have no Practice assigned).
+    const practice = typeof form.neurealm_practice === "string" ? form.neurealm_practice.trim() : form.neurealm_practice;
+    const status = form.approval_status ?? "Draft";
+    const needsPractice = isNew || status !== "Draft" || form.is_active === true;
+    if (needsPractice && !practice) {
+      e.neurealm_practice = "Select the Neurealm Practice responsible for this technology.";
+    }
+
     for (const s of SECTIONS) for (const f of s.fields) {
       if (f.type === "number") {
         const v = form[f.key];
@@ -274,7 +284,7 @@ export default function TechnologyProfilePage() {
       }
     }
     return e;
-  }, [form]);
+  }, [form, isNew]);
 
   const readonly = mode === "view";
 
