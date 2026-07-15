@@ -44,7 +44,7 @@ const TABS: { key: string; label: string; active: boolean }[] = [
 
 const DEFAULT_COLUMNS = {
   name: true, short_name: true, vendor: true, family: true, category: true, type: true,
-  version: true, lifecycle: true, criticality: true, owner: false, approval: true,
+  version: true, lifecycle: true, criticality: true, practice: true, owner: false, approval: true,
   active: true, modified: true,
 } as const;
 type ColKey = keyof typeof DEFAULT_COLUMNS;
