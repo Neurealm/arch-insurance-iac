@@ -135,18 +135,6 @@ const categories: Category[] = [
   },
 ];
 
-const comingSoon: { title: string; desc: string; icon: LucideIcon; tone: Tone }[] = [
-  {
-    title: "Data & Observability Coworkers",
-    desc: "Pipeline health, data-quality guardrails, and telemetry curation.",
-    icon: Database, tone: "slate",
-  },
-  {
-    title: "Cloud & Platform Engineering",
-    desc: "Landing zones, FinOps, IaC review, and platform golden paths.",
-    icon: Cloud, tone: "slate",
-  },
-];
 
 const Coworkers = () => {
   const nav = useNavigate();
