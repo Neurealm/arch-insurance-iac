@@ -198,7 +198,7 @@ export default function RunbookObjectBuilder() {
         {/* Left rail — wizard steps + operation summary */}
         <aside className="border-r border-border bg-card/40 p-4 space-y-4 overflow-auto">
           <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1">
-            Story · Act {step} of 6
+            Story · Act {step} of 7
           </div>
           <ol className="space-y-1.5">
             {STEPS.map((s) => {
