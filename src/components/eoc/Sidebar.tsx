@@ -602,7 +602,7 @@ const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
-  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "services", "crm", "settings", "auth-orch"] },
+  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "services", "crm", "etdm", "settings", "auth-orch"] },
 ];
 
 const ADMIN_ONLY_KEYS = new Set(["questionnaires", "crm", "etdm"]);
