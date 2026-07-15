@@ -150,18 +150,27 @@ export default function DomainsTab({ technologyId, technologyName, disabled }: P
           {!isLoading && !isError && list.length === 0 && (
             <TableRow>
               <TableCell colSpan={10} className="text-center py-12">
-                <div className="text-sm font-medium">No Domains linked to this Technology yet.</div>
+                <div className="text-sm font-medium">No domains have been created for this technology.</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  Add a Domain to describe how this Technology participates in the taxonomy.
+                  Build the standard ETDM domain structure or add an individual domain manually.
                 </div>
-                <Button
-                  size="sm"
-                  className="mt-4"
-                  disabled={disabled}
-                  onClick={() => nav(`/admin/technology-taxonomy/domains/new?technology_id=${technologyId}`)}
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Domain
-                </Button>
+                <div className="mt-4 flex items-center justify-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => setAutoBuildOpen(true)}
+                    disabled={disabled}
+                  >
+                    <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Auto-Build Standard Domains
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={disabled}
+                    onClick={() => nav(`/admin/technology-taxonomy/domains/new?technology_id=${technologyId}`)}
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Domain
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           )}
