@@ -71,14 +71,17 @@ type NotifRule = { id: string; priority: string; channels: string[]; timing: str
 export function AccountPanel({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent className="max-h-[92vh]">
-        <div className="mx-auto w-full max-w-5xl overflow-y-auto px-4 pb-8 md:px-8">
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>{children}</SheetTrigger>
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-xl p-0 flex flex-col gap-0"
+      >
+        <div className="flex-1 overflow-y-auto px-5 pb-8 md:px-6">
           <AccountPanelBody onRequestClose={() => setOpen(false)} />
         </div>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }
 
