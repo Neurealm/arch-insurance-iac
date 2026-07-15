@@ -405,7 +405,6 @@ export default function RunbookObjectBuilder() {
             >
               Next: {STEPS[Math.min(step, 6)].title} <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
-            </Button>
           </div>
         </main>
 
