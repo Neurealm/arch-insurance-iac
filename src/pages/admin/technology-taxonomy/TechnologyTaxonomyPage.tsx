@@ -33,14 +33,14 @@ import {
   ETDM_CATEGORIES, ETDM_TECH_TYPES, ETDM_LIFECYCLE_STATUSES, ETDM_CRITICALITIES, ETDM_APPROVAL_STATUSES,
 } from "@/lib/etdm/constants";
 
-const TABS = [
+const TABS: { key: string; label: string; active: boolean }[] = [
   { key: "technologies", label: "Technologies", active: true },
-  { key: "domains", label: "Domains" },
-  { key: "capabilities", label: "Capabilities" },
-  { key: "services", label: "Services" },
-  { key: "subservices", label: "Subservices" },
-  { key: "components", label: "Components" },
-] as const;
+  { key: "domains", label: "Domains", active: false },
+  { key: "capabilities", label: "Capabilities", active: false },
+  { key: "services", label: "Services", active: false },
+  { key: "subservices", label: "Subservices", active: false },
+  { key: "components", label: "Components", active: false },
+];
 
 const DEFAULT_COLUMNS = {
   name: true, short_name: true, vendor: true, family: true, category: true, type: true,
