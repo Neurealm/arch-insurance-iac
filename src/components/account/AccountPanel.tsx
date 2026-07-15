@@ -167,7 +167,7 @@ function AccountPanelBody({ onRequestClose }: { onRequestClose: () => void }) {
               <TabsContent value="profile"><ProfileTab profile={profile} setProfile={setProfile} userId={user.id} userEmail={email} /></TabsContent>
               <TabsContent value="availability"><AvailabilityTab profile={profile} setProfile={setProfile} userId={user.id} /></TabsContent>
               <TabsContent value="notifications"><NotificationsTab profile={profile} setProfile={setProfile} userId={user.id} contacts={contacts} setContacts={setContacts} rules={rules} setRules={setRules} /></TabsContent>
-              <TabsContent value="security"><SecurityTab userEmail={email} userUpdatedAt={user.updated_at ?? user.created_at} /></TabsContent>
+              <TabsContent value="security"><SecurityTab userId={user.id} userEmail={email} userUpdatedAt={user.updated_at ?? user.created_at} /></TabsContent>
             </>
           )}
         </div>
@@ -638,7 +638,7 @@ function ContactIcon({ type }: { type: string }) {
 }
 
 /* ---------------- SECURITY TAB ---------------- */
-function SecurityTab({ userEmail, userUpdatedAt }: { userEmail: string; userUpdatedAt?: string }) {
+function SecurityTab({ userId, userEmail, userUpdatedAt }: { userId: string; userEmail: string; userUpdatedAt?: string }) {
   const [sendingReset, setSendingReset] = useState(false);
   const [signingOutOthers, setSigningOutOthers] = useState(false);
   const [mfaLoading, setMfaLoading] = useState(true);
@@ -662,7 +662,7 @@ function SecurityTab({ userEmail, userUpdatedAt }: { userEmail: string; userUpda
   useEffect(() => {
     (async () => {
       setActivityLoading(true);
-      const { data } = await supabase.functions.invoke("user-login-history", { body: {} }).catch(() => ({ data: null } as any));
+      const { data } = await supabase.functions.invoke("user-login-history", { body: { userId, email: userEmail } }).catch(() => ({ data: null } as any));
       const events = (data as any)?.events ?? [];
       setActivity(events.slice(0, 5));
       setActivityLoading(false);
