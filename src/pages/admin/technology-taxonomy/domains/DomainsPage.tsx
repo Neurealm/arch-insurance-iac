@@ -215,6 +215,9 @@ export default function DomainsPage() {
             <Button variant="outline" size="sm" onClick={() => doExport("all")}>
               <Download className="h-3.5 w-3.5 mr-1.5" /> Export CSV
             </Button>
+            <Button variant="outline" size="sm" onClick={() => setAutoBuildOpen(true)}>
+              <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Auto-Build Domains
+            </Button>
             <Button size="sm" onClick={() => nav("/admin/technology-taxonomy/domains/new")}>
               <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Domain
             </Button>
