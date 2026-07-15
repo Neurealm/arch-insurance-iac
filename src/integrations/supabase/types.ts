@@ -992,6 +992,16 @@ export type Database = {
           technical_limitations: string | null
           technical_prerequisites: string | null
           technology_icon_url: string | null
+          technology_image_crop_metadata: Json | null
+          technology_image_height: number | null
+          technology_image_last_updated: string | null
+          technology_image_last_updated_by: string | null
+          technology_image_original_filename: string | null
+          technology_image_scale: number | null
+          technology_image_storage_path: string | null
+          technology_image_type: string | null
+          technology_image_url: string | null
+          technology_image_width: number | null
           technology_maturity: string | null
           technology_name: string
           technology_owner_id: string | null
@@ -1137,6 +1147,16 @@ export type Database = {
           technical_limitations?: string | null
           technical_prerequisites?: string | null
           technology_icon_url?: string | null
+          technology_image_crop_metadata?: Json | null
+          technology_image_height?: number | null
+          technology_image_last_updated?: string | null
+          technology_image_last_updated_by?: string | null
+          technology_image_original_filename?: string | null
+          technology_image_scale?: number | null
+          technology_image_storage_path?: string | null
+          technology_image_type?: string | null
+          technology_image_url?: string | null
+          technology_image_width?: number | null
           technology_maturity?: string | null
           technology_name: string
           technology_owner_id?: string | null
@@ -1282,6 +1302,16 @@ export type Database = {
           technical_limitations?: string | null
           technical_prerequisites?: string | null
           technology_icon_url?: string | null
+          technology_image_crop_metadata?: Json | null
+          technology_image_height?: number | null
+          technology_image_last_updated?: string | null
+          technology_image_last_updated_by?: string | null
+          technology_image_original_filename?: string | null
+          technology_image_scale?: number | null
+          technology_image_storage_path?: string | null
+          technology_image_type?: string | null
+          technology_image_url?: string | null
+          technology_image_width?: number | null
           technology_maturity?: string | null
           technology_name?: string
           technology_owner_id?: string | null
@@ -6469,6 +6499,16 @@ export type Database = {
           technical_limitations: string | null
           technical_prerequisites: string | null
           technology_icon_url: string | null
+          technology_image_crop_metadata: Json | null
+          technology_image_height: number | null
+          technology_image_last_updated: string | null
+          technology_image_last_updated_by: string | null
+          technology_image_original_filename: string | null
+          technology_image_scale: number | null
+          technology_image_storage_path: string | null
+          technology_image_type: string | null
+          technology_image_url: string | null
+          technology_image_width: number | null
           technology_maturity: string | null
           technology_name: string
           technology_owner_id: string | null
