@@ -6528,6 +6528,10 @@ export type Database = {
           user_agent: string
         }[]
       }
+      etdm_auto_build_domains: {
+        Args: { _master_domain_ids: string[]; _technology_id: string }
+        Returns: Json
+      }
       etdm_clone_domain: {
         Args: { _source_id: string }
         Returns: {
