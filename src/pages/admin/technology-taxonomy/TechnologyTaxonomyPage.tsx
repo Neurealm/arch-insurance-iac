@@ -35,9 +35,9 @@ import {
 import { TechnologyBrand } from "@/components/etdm/TechnologyBrand";
 
 
-const TABS: { key: string; label: string; active: boolean }[] = [
+const TABS: { key: string; label: string; active: boolean; to?: string }[] = [
   { key: "technologies", label: "Technologies", active: true },
-  { key: "domains", label: "Domains", active: false },
+  { key: "domains", label: "Domains", active: true, to: "/admin/technology-taxonomy/domains" },
   { key: "capabilities", label: "Capabilities", active: false },
   { key: "services", label: "Services", active: false },
   { key: "subservices", label: "Subservices", active: false },
@@ -210,21 +210,32 @@ export default function TechnologyTaxonomyPage() {
 
         {/* Future-ready taxonomy tabs */}
         <div className="flex items-center gap-1 mb-5 border-b border-border overflow-x-auto">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              disabled={!t.active}
-              className={[
-                "px-3 py-2 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors",
-                t.active
-                  ? "border-indigo text-foreground"
+          {TABS.map((t) => {
+            const isCurrent = t.key === "technologies";
+            const clickable = t.active && !isCurrent && t.to;
+            const inner = (
+              <>
+                {t.label}
+                {!t.active && <span className="ml-2 text-[10px] uppercase tracking-wide text-muted-foreground/60">Coming Soon</span>}
+              </>
+            );
+            const className = [
+              "px-3 py-2 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors",
+              isCurrent
+                ? "border-indigo text-foreground"
+                : t.active
+                  ? "border-transparent text-muted-foreground hover:text-foreground"
                   : "border-transparent text-muted-foreground/60 cursor-not-allowed",
-              ].join(" ")}
-            >
-              {t.label}
-              {!t.active && <span className="ml-2 text-[10px] uppercase tracking-wide text-muted-foreground/60">Coming Soon</span>}
-            </button>
-          ))}
+            ].join(" ");
+            if (clickable) {
+              return <Link key={t.key} to={t.to!} className={className}>{inner}</Link>;
+            }
+            return (
+              <button key={t.key} disabled={!t.active || isCurrent} className={className}>
+                {inner}
+              </button>
+            );
+          })}
         </div>
 
         {/* Toolbar */}
