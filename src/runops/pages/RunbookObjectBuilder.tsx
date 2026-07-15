@@ -293,7 +293,7 @@ export default function RunbookObjectBuilder() {
           {/* Step-specific canvas */}
           {step <= 3 && <ArchitectureCanvas step={step} />}
           {step === 4 && <ClassModelCanvas />}
-          {(step === 5 || step === 6) && (
+          {(step === 5 || step === 7) && (
             <Card className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="grid grid-cols-[1fr_320px]">
