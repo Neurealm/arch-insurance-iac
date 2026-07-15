@@ -577,42 +577,242 @@ function ContextChip({
   );
 }
 
+/* ---------- Isometric 3D architecture (Cloudcraft-style) ---------- */
+
+const ISO_COS = 0.8660254; // cos(30°)
+const ISO_SIN = 0.5;       // sin(30°)
+const ISO_U = 22;          // pixels per grid unit
+
+type IsoColor = { top: string; right: string; left: string; edge: string; glow?: string };
+
+const ISO_PALETTE: Record<string, IsoColor> = {
+  internet: { top: "#94a3b8", right: "#64748b", left: "#475569", edge: "#e2e8f0" },
+  alb:      { top: "#a78bfa", right: "#7c3aed", left: "#5b21b6", edge: "#ede9fe" },
+  ec2:      { top: "#fbbf24", right: "#f59e0b", left: "#b45309", edge: "#fef3c7" },
+  ebs:      { top: "#f87171", right: "#dc2626", left: "#991b1b", edge: "#fee2e2", glow: "#ef4444" },
+  aurora:   { top: "#60a5fa", right: "#2563eb", left: "#1e3a8a", edge: "#dbeafe" },
+  redis:    { top: "#fb7185", right: "#e11d48", left: "#881337", edge: "#ffe4e6" },
+};
+
+function isoProject(x: number, y: number, z: number, cx: number, cy: number, u = ISO_U) {
+  return { sx: cx + (x - y) * u * ISO_COS, sy: cy + (x + y) * u * ISO_SIN - z * u };
+}
+
+function IsoBlock({
+  gx, gy, w, d, h, cx, cy, color, label, sub, glyph, active, u = ISO_U,
+}: {
+  gx: number; gy: number; w: number; d: number; h: number;
+  cx: number; cy: number; color: IsoColor;
+  label: string; sub?: string; glyph?: string; active?: boolean; u?: number;
+}) {
+  const p = (x: number, y: number, z: number) => isoProject(gx + x, gy + y, z, cx, cy, u);
+  // corners
+  const A = p(0, 0, 0), B = p(w, 0, 0), C = p(w, d, 0), D = p(0, d, 0);
+  const E = p(0, 0, h), F = p(w, 0, h), G = p(w, d, h), H = p(0, d, h);
+  const pts = (arr: { sx: number; sy: number }[]) => arr.map((q) => `${q.sx},${q.sy}`).join(" ");
+  // label anchor = top-center
+  const topCenter = p(w / 2, d / 2, h);
+  // ground shadow (project base to z=0, softened)
+  const shadow = `${A.sx},${A.sy + 4} ${B.sx},${B.sy + 4} ${C.sx},${C.sy + 4} ${D.sx},${D.sy + 4}`;
+  return (
+    <g className={cn("iso-block", active && "iso-block--active")}>
+      <polygon points={shadow} fill="#000" opacity="0.18" filter="url(#isoShadowBlur)" />
+      {/* left/front face (y = d) */}
+      <polygon points={pts([D, C, G, H])} fill={color.left} stroke={color.edge} strokeWidth="0.6" strokeOpacity="0.5" />
+      {/* right face (x = w) */}
+      <polygon points={pts([B, C, G, F])} fill={color.right} stroke={color.edge} strokeWidth="0.6" strokeOpacity="0.5" />
+      {/* top face */}
+      <polygon points={pts([E, F, G, H])} fill={color.top} stroke={color.edge} strokeWidth="0.7" strokeOpacity="0.7" />
+      {active && color.glow && (
+        <polygon points={pts([E, F, G, H])} fill="none" stroke={color.glow} strokeWidth="2.2" opacity="0.9">
+          <animate attributeName="opacity" values="0.4;1;0.4" dur="1.6s" repeatCount="indefinite" />
+        </polygon>
+      )}
+      {glyph && (
+        <text x={topCenter.sx} y={topCenter.sy + 4} textAnchor="middle"
+              fontSize="14" fontWeight="800" fill="#fff" opacity="0.92"
+              style={{ pointerEvents: "none", textShadow: "0 1px 2px rgba(0,0,0,0.35)" }}>
+          {glyph}
+        </text>
+      )}
+      {/* label above block */}
+      <g transform={`translate(${topCenter.sx}, ${topCenter.sy - h * u * 0.15 - 18})`}>
+        <rect x={-((label.length * 5.4 + 12) / 2)} y="-9" rx="4" ry="4"
+              width={label.length * 5.4 + 12} height={sub ? 26 : 16}
+              fill="rgba(15, 23, 42, 0.88)" stroke={active ? color.glow ?? color.top : color.top}
+              strokeWidth={active ? 1.4 : 0.8} strokeOpacity="0.7" />
+        <text x="0" y="2" textAnchor="middle" fontSize="9.5" fontWeight="700" fill="#f8fafc"
+              letterSpacing="0.02em">{label}</text>
+        {sub && (
+          <text x="0" y="13" textAnchor="middle" fontSize="7.5" fill="#94a3b8"
+                fontFamily="ui-monospace, monospace">{sub}</text>
+        )}
+      </g>
+    </g>
+  );
+}
+
+function IsoWire({
+  from, to, cx, cy, dashed, animated, color = "#64748b",
+}: {
+  from: [number, number, number]; to: [number, number, number];
+  cx: number; cy: number; dashed?: boolean; animated?: boolean; color?: string;
+}) {
+  const a = isoProject(from[0], from[1], from[2], cx, cy);
+  const b = isoProject(to[0], to[1], to[2], cx, cy);
+  const mx = (a.sx + b.sx) / 2;
+  const my = Math.min(a.sy, b.sy) - 14;
+  return (
+    <g>
+      <path d={`M ${a.sx} ${a.sy} Q ${mx} ${my} ${b.sx} ${b.sy}`}
+            fill="none" stroke={color} strokeWidth="1.4"
+            strokeDasharray={dashed ? "4 3" : undefined} opacity="0.75" />
+      {animated && (
+        <circle r="2.4" fill={color}>
+          <animateMotion dur="2.2s" repeatCount="indefinite"
+            path={`M ${a.sx} ${a.sy} Q ${mx} ${my} ${b.sx} ${b.sy}`} />
+        </circle>
+      )}
+    </g>
+  );
+}
+
 function ArchitectureCanvas({ step }: { step: StepId }) {
   const highlight = step === 3;
+  const cx = 460, cy = 210;
+
+  // grid coords: (gx, gy) — increasing gx pushes down-right; gy down-left.
+  // Layout tuned so items read roughly left→right on screen.
+  const blocks = [
+    { key: "internet", gx: -8,  gy: -2, w: 2.4, d: 2.4, h: 1.2, color: ISO_PALETTE.internet, label: "Internet",       sub: "0.0.0.0/0",           glyph: "☁" },
+    { key: "alb",      gx: -4,  gy: -1, w: 2.2, d: 2.2, h: 1.4, color: ISO_PALETTE.alb,      label: "ALB",            sub: "prod-alb",            glyph: "⇄" },
+    { key: "ec2a",     gx:  0,  gy: -2.5, w: 2, d: 2, h: 1.8, color: ISO_PALETTE.ec2,      label: "WebServer-01",   sub: "i-0ab12…7890",        glyph: "▶", active: highlight },
+    { key: "ec2b",     gx:  0,  gy:  0.8, w: 2, d: 2, h: 1.8, color: ISO_PALETTE.ec2,      label: "WebServer-02",   sub: "i-0bc23…8901",        glyph: "▶" },
+    { key: "ebs",      gx:  3.6, gy: -0.9, w: 1.8, d: 1.8, h: 0.9, color: ISO_PALETTE.ebs,   label: "EBSVolume",      sub: "vol-0f12 · 200 GiB",  glyph: "◈", active: highlight },
+    { key: "aurora",   gx:  7,  gy: -2.2, w: 2.2, d: 2.2, h: 2.0, color: ISO_PALETTE.aurora,label: "Aurora",         sub: "mysql · primary",     glyph: "◉" },
+    { key: "redis",    gx:  7,  gy:  1,   w: 2.2, d: 2.2, h: 1.6, color: ISO_PALETTE.redis, label: "ElastiCache",    sub: "redis · cluster",     glyph: "◎" },
+  ];
+
+  // Wires: source → target (grid-coord midpoints, elevated slightly)
+  const wires: Array<{ from: [number, number, number]; to: [number, number, number]; animated?: boolean; color?: string }> = [
+    { from: [-6.8, -0.8, 0.6], to: [-2.9, 0.1, 0.7],  animated: true },
+    { from: [-2, 0.1, 0.7],    to: [1, -1.5, 0.9],    animated: true },
+    { from: [-2, 0.1, 0.7],    to: [1, 1.8, 0.9],     animated: true },
+    { from: [2, -1.5, 0.5],    to: [4.5, 0, 0.5],     animated: highlight, color: highlight ? "#ef4444" : "#64748b" },
+    { from: [2, 1.8, 0.5],     to: [4.5, 0, 0.5],     color: "#64748b" },
+    { from: [5.4, 0, 0.5],     to: [8.1, -1.1, 1.0],  animated: true },
+    { from: [5.4, 0, 0.5],     to: [8.1, 2.1, 0.8],   animated: true },
+  ];
+
+  // Draw order: back-to-front by (gx+gy) ascending
+  const sorted = [...blocks].sort((a, b) => (a.gx + a.gy) - (b.gx + b.gy));
+
   return (
     <Card>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            Composition · Service → Resources
+            Composition · Isometric Digital Twin
           </div>
-          <Badge variant="outline" className="text-[10px]">7 assets · 3 tiers</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-[10px] gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-status-healthy animate-pulse" />
+              live
+            </Badge>
+            <Badge variant="outline" className="text-[10px]">7 assets · 3 tiers</Badge>
+          </div>
         </div>
-        <div className="rounded-lg border border-dashed border-border bg-gradient-to-br from-secondary/30 to-transparent p-5">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
-            <Boxes className="h-3 w-3" /> Service.ecom-platform
-          </div>
-          <div className="flex items-center gap-3 flex-wrap justify-between text-[12px]">
-            <Node icon={Cloud} label="Internet" />
-            <Arrow />
-            <Node icon={Server} label="ALB" sub="prod-alb" />
-            <Arrow />
-            <div className="flex flex-col gap-2">
-              <Node icon={Server} label="WebServer-01" sub="i-0ab12…7890" active={highlight} />
-              <Node icon={Server} label="WebServer-02" sub="i-0bc23…8901" />
-            </div>
-            <Arrow />
-            <Node icon={Database} label="EBSVolume" sub="vol-0f12… · 200 GiB" tone="crimson" active={highlight} />
-            <Arrow />
-            <div className="flex flex-col gap-2">
-              <Node icon={Database} label="Aurora" sub="mysql · primary" />
-              <Node icon={Database} label="ElastiCache" sub="redis · cluster" />
-            </div>
-          </div>
+        <div className="relative rounded-lg border border-border overflow-hidden"
+             style={{ background: "radial-gradient(ellipse at 30% 20%, #1e293b 0%, #0b1220 55%, #05070d 100%)" }}>
+          <svg viewBox="0 0 920 420" className="w-full h-[380px]" role="img" aria-label="Isometric architecture of ecom-platform">
+            <defs>
+              <pattern id="isoGrid" width="38" height="22" patternUnits="userSpaceOnUse">
+                <path d="M 0 11 L 19 0 L 38 11 L 19 22 Z" fill="none" stroke="#1f2a44" strokeWidth="0.5" />
+              </pattern>
+              <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#0f172a" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#020617" stopOpacity="0.4" />
+              </linearGradient>
+              <filter id="isoShadowBlur" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" />
+              </filter>
+            </defs>
+
+            {/* iso ground plane */}
+            <polygon
+              points={(() => {
+                const c = [
+                  isoProject(-10, -6, 0, cx, cy),
+                  isoProject( 12, -6, 0, cx, cy),
+                  isoProject( 12,  6, 0, cx, cy),
+                  isoProject(-10,  6, 0, cx, cy),
+                ];
+                return c.map((q) => `${q.sx},${q.sy}`).join(" ");
+              })()}
+              fill="url(#floorGrad)" stroke="#1e293b" strokeWidth="0.6"
+            />
+            <rect x="0" y="0" width="920" height="420" fill="url(#isoGrid)" opacity="0.22" />
+
+            {/* VPC boundary label */}
+            <g opacity="0.75">
+              {(() => {
+                const a = isoProject(-9, -5, 0, cx, cy);
+                const b = isoProject(11, -5, 0, cx, cy);
+                const c = isoProject(11, 5, 0, cx, cy);
+                const d = isoProject(-9, 5, 0, cx, cy);
+                return (
+                  <>
+                    <polygon points={`${a.sx},${a.sy} ${b.sx},${b.sy} ${c.sx},${c.sy} ${d.sx},${d.sy}`}
+                             fill="none" stroke="#334155" strokeWidth="0.8" strokeDasharray="4 3" />
+                    <text x={a.sx + 8} y={a.sy + 12} fontSize="9" fill="#64748b" letterSpacing="0.14em">
+                      VPC · us-east-1 · 10.0.0.0/16
+                    </text>
+                  </>
+                );
+              })()}
+            </g>
+
+            {/* wires (draw behind blocks that are in front, but on top of ground) */}
+            {wires.map((w, i) => (
+              <IsoWire key={i} {...w} cx={cx} cy={cy} />
+            ))}
+
+            {/* blocks back-to-front */}
+            {sorted.map((b) => (
+              <IsoBlock key={b.key} {...b} cx={cx} cy={cy} />
+            ))}
+
+            {/* compass */}
+            <g transform="translate(28,380)" opacity="0.55">
+              <circle r="12" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+              <path d="M 0 -8 L 3 0 L 0 8 L -3 0 Z" fill="#60a5fa" />
+              <text x="0" y="-14" textAnchor="middle" fontSize="8" fill="#94a3b8">N</text>
+            </g>
+
+            {/* legend */}
+            <g transform="translate(720, 24)" fontSize="9" fill="#cbd5e1">
+              <rect x="-6" y="-14" width="180" height="90" rx="4" fill="rgba(15,23,42,0.75)" stroke="#1e293b" />
+              <text x="0" y="0" fontWeight="700" fill="#e2e8f0" letterSpacing="0.08em">TIER LEGEND</text>
+              {[
+                { c: ISO_PALETTE.alb.top,    t: "Edge · ALB" },
+                { c: ISO_PALETTE.ec2.top,    t: "Compute · EC2" },
+                { c: ISO_PALETTE.ebs.top,    t: "Storage · EBS" },
+                { c: ISO_PALETTE.aurora.top, t: "Data · Aurora" },
+                { c: ISO_PALETTE.redis.top,  t: "Cache · Redis" },
+              ].map((r, i) => (
+                <g key={r.t} transform={`translate(0, ${14 + i * 12})`}>
+                  <rect x="0" y="-6" width="9" height="9" fill={r.c} />
+                  <text x="14" y="2">{r.t}</text>
+                </g>
+              ))}
+            </g>
+          </svg>
+
           {highlight && (
-            <div className="mt-4 rounded-md border border-crimson/30 bg-crimson-soft p-2.5 text-[11.5px] flex items-center gap-2">
-              <Zap className="h-3.5 w-3.5 text-crimson" />
-              <span>Target object bound: <span className="font-mono font-semibold">EBSVolume vol-0f12…abcd0</span> attached to <span className="font-mono">i-0ab12…7890</span></span>
+            <div className="absolute left-3 bottom-3 right-3 rounded-md border border-crimson/40 bg-slate-950/85 backdrop-blur px-3 py-2 text-[11.5px] flex items-center gap-2 text-slate-200">
+              <Zap className="h-3.5 w-3.5 text-crimson animate-pulse" />
+              <span>Target object bound: <span className="font-mono font-semibold text-crimson">EBSVolume vol-0f12…abcd0</span> attached to <span className="font-mono">i-0ab12…7890</span></span>
+              <Badge className="ml-auto text-[9.5px] bg-crimson/20 text-crimson border-crimson/40 border">blast-radius: 1</Badge>
             </div>
           )}
         </div>
