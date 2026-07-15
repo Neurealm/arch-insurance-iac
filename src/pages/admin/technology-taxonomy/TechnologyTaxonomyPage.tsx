@@ -340,16 +340,16 @@ export default function TechnologyTaxonomyPage() {
             </TableHeader>
             <TableBody>
               {isLoading && (
-                <TableRow><TableCell colSpan={14} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>
+                <TableRow><TableCell colSpan={15} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>
               )}
               {!isLoading && isError && (
-                <TableRow><TableCell colSpan={14} className="text-center py-10">
+                <TableRow><TableCell colSpan={15} className="text-center py-10">
                   <div className="text-destructive font-medium">Failed to load technology records.</div>
                   <Button size="sm" variant="outline" className="mt-2" onClick={() => refetch()}>Retry</Button>
                 </TableCell></TableRow>
               )}
               {!isLoading && !isError && rows.length === 0 && (
-                <TableRow><TableCell colSpan={14} className="text-center py-16">
+                <TableRow><TableCell colSpan={15} className="text-center py-16">
                   <div className="text-lg font-medium">No technologies have been created yet.</div>
                   <div className="text-sm text-muted-foreground mt-1">
                     Create the first technology record to begin building the Enterprise Technology Domain Model.
