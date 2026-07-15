@@ -559,7 +559,7 @@ function useIsDesktop() {
 }
 
 function UserPill({ collapsed }: { collapsed: boolean }) {
-  const { displayName, initials, email, signOut } = useUserProfile();
+  const { displayName, initials, email, avatarUrl, signOut } = useUserProfile();
   const navigate = useNavigate();
   const handleSignOut = async () => { await signOut(); navigate("/"); };
 
