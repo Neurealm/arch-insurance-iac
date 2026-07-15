@@ -85,6 +85,7 @@ import PrivilegedAccessDashboard from "./pages/coworkers/iam/PrivilegedAccessDas
 import ReleaseDeploymentRollout from "./pages/coworkers/sre/ReleaseDeploymentRollout.tsx";
 import SloSlaSliMonitoring from "./pages/coworkers/sre/SloSlaSliMonitoring.tsx";
 import CoworkersInfra from "./pages/CoworkersInfra.tsx";
+import CitrixPlatformDigitalCoworkers from "./pages/coworkers/CitrixPlatformDigitalCoworkers.tsx";
 import CoworkersApplicationSupport from "./pages/CoworkersApplicationSupport.tsx";
 import HadoopHealthPrecheckAgent from "./pages/coworkers/appsupport/HadoopHealthPrecheckAgent.tsx";
 import IntegrationMonitoringAgent from "./pages/coworkers/appsupport/IntegrationMonitoringAgent.tsx";
