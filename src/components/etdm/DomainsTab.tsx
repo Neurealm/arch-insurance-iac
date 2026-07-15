@@ -272,6 +272,12 @@ export default function DomainsTab({ technologyId, technologyName, disabled }: P
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AutoBuildDomainsDialog
+        open={autoBuildOpen}
+        onOpenChange={setAutoBuildOpen}
+        technology={{ id: technologyId, technology_name: technologyName ?? "this technology" }}
+        onBuilt={() => refetch()}
+      />
     </Card>
   );
 }
