@@ -32,6 +32,8 @@ import {
 import {
   ETDM_CATEGORIES, ETDM_TECH_TYPES, ETDM_LIFECYCLE_STATUSES, ETDM_CRITICALITIES, ETDM_APPROVAL_STATUSES, ETDM_PRACTICES,
 } from "@/lib/etdm/constants";
+import { TechnologyBrand } from "@/components/etdm/TechnologyBrand";
+
 
 const TABS: { key: string; label: string; active: boolean }[] = [
   { key: "technologies", label: "Technologies", active: true },
@@ -369,12 +371,22 @@ export default function TechnologyTaxonomyPage() {
                   </TableCell>
                   {columns.name && (
                     <TableCell className="font-medium">
-                      <Link to={`/admin/technology-taxonomy/technologies/${r.id}`} className="hover:underline">
-                        {r.technology_name}
-                      </Link>
-                      {r.is_sample && <Badge variant="outline" className="ml-2 text-[9px]">SAMPLE</Badge>}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <TechnologyBrand
+                          technology={r as unknown as Parameters<typeof TechnologyBrand>[0]["technology"]}
+                          size={32}
+                          mode="icon"
+                          background="white"
+                          className="ring-1 ring-border"
+                        />
+                        <Link to={`/admin/technology-taxonomy/technologies/${r.id}`} className="hover:underline truncate">
+                          {r.technology_name}
+                        </Link>
+                        {r.is_sample && <Badge variant="outline" className="ml-1 text-[9px]">SAMPLE</Badge>}
+                      </div>
                     </TableCell>
                   )}
+
                   {columns.short_name && <TableCell>{r.short_name ?? "—"}</TableCell>}
                   {columns.vendor && <TableCell>{r.vendor_name ?? "—"}</TableCell>}
                   {columns.family && <TableCell>{r.product_family ?? "—"}</TableCell>}
