@@ -562,6 +562,11 @@ export default function DomainsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AutoBuildDomainsDialog
+        open={autoBuildOpen}
+        onOpenChange={setAutoBuildOpen}
+        onBuilt={() => refetch()}
+      />
     </AppShell>
   );
 }
