@@ -890,6 +890,39 @@ export type Database = {
         }
         Relationships: []
       }
+      nova_knowledge_base: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          route: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          route: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          route?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       org_activities: {
         Row: {
           ai_summary: string | null
