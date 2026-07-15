@@ -120,15 +120,16 @@ export function useUpsertTechnology() {
   return useMutation({
     mutationFn: async (payload: Partial<Technology> & { id?: string }) => {
       const { id, ...rest } = payload;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const client = supabase.from(TABLE) as any;
       if (id) {
-        const { data, error } = await supabase.from(TABLE).update(rest).eq("id", id).select().single();
+        const { data, error } = await client.update(rest).eq("id", id).select().single();
         if (error) throw error;
         return data as Technology;
       }
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
-      const { data, error } = await supabase
-        .from(TABLE)
+      const { data, error } = await client
         .insert({ ...rest, created_by: uid, updated_by: uid })
         .select()
         .single();
