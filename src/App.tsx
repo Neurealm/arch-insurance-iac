@@ -785,6 +785,10 @@ const App = () => (
           <Route path="/auth-orchestration" element={<AuthOrchestration />} />
           <Route path="/data-orchestration-twin/site-resilience-detect-and-isolate-network-issue" element={<SiteResilienceCoworker />} />
           <Route path="/questionnaires" element={<ProtectedRoute><Questionnaires /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy" element={<ProtectedRoute requireAdmin><TechnologyTaxonomyPage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/technologies/new" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/technologies/:technologyId" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/technologies/:technologyId/edit" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
           <Route path="/settings/approvals" element={<Navigate to="/settings/user-management" replace />} />
           <Route path="/settings/user-management" element={<ProtectedRoute requireAdmin><UserManagement /></ProtectedRoute>} />
           <Route path="/settings/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
