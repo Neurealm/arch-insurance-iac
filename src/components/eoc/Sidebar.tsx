@@ -278,7 +278,15 @@ const tree: Node[] = [
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers" },
   { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
   { key: "etdm", label: "Technology Taxonomy", icon: Database, to: "/admin/technology-taxonomy" },
-  { key: "settings",   label: "Settings",            icon: Settings,      to: "/settings", exact: true },
+  {
+    key: "settings",
+    label: "Settings",
+    icon: Settings,
+    to: "/settings",
+    children: [
+      { key: "questionnaires", label: "Questionnaires", icon: ClipboardList, to: "/questionnaires" },
+    ],
+  },
 ];
 
 /* ---------- Quick actions ---------- */
