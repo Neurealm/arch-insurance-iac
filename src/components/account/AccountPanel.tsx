@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserProfile, setCachedAvatar } from "@/hooks/useUserProfile";
 import { toast } from "@/hooks/use-toast";
 
 const TIME_ZONES = [
