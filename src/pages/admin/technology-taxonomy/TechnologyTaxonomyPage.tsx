@@ -23,7 +23,7 @@ import {
 import { toast } from "sonner";
 import {
   Database as DbIcon, Plus, Search as SearchIcon, RefreshCw, Download, MoreVertical,
-  Eye, Pencil, Copy, Power, Trash2, RotateCcw, Filter, X,
+  Eye, Pencil, Copy, Power, Trash2, RotateCcw, Filter, X, ArrowLeft,
 } from "lucide-react";
 import {
   useTechnologies, useSoftDeleteTechnology, useSetActive, useCloneTechnology,
