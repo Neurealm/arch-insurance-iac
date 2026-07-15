@@ -181,6 +181,9 @@ export default function TechnologyTaxonomyPage() {
   return (
     <AppShell>
       <div className="p-6 max-w-[1600px] mx-auto w-full">
+        <Link to="/settings" className="inline-flex items-center gap-1.5 rounded-md bg-indigo/10 px-3 py-1.5 text-sm font-semibold text-indigo ring-1 ring-indigo/30 hover:bg-indigo/15 transition-colors mb-4">
+          <ArrowLeft className="h-4 w-4" /> Back to Settings
+        </Link>
         <header className="flex items-start justify-between mb-6 gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-semibold flex items-center gap-2">
