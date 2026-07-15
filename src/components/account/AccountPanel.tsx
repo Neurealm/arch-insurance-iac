@@ -1,13 +1,10 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,14 +71,17 @@ type NotifRule = { id: string; priority: string; channels: string[]; timing: str
 export function AccountPanel({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent className="max-h-[92vh]">
-        <div className="mx-auto w-full max-w-5xl overflow-y-auto px-4 pb-8 md:px-8">
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>{children}</SheetTrigger>
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-xl p-0 flex flex-col gap-0"
+      >
+        <div className="flex-1 overflow-y-auto px-5 pb-8 md:px-6">
           <AccountPanelBody onRequestClose={() => setOpen(false)} />
         </div>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -116,7 +116,7 @@ function AccountPanelBody({ onRequestClose }: { onRequestClose: () => void }) {
 
   return (
     <>
-      <DrawerHeader className="px-0 pt-6">
+      <div className="pt-6 pb-2">
         <div className="flex items-center gap-4">
           {profile?.avatar_url ? (
             <img src={profile.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover border" />
@@ -126,13 +126,13 @@ function AccountPanelBody({ onRequestClose }: { onRequestClose: () => void }) {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <DrawerTitle className="text-xl">{displayName}</DrawerTitle>
-            <DrawerDescription className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold leading-tight truncate">{displayName}</h2>
+            <div className="mt-0.5 flex items-center gap-2 text-sm text-muted-foreground">
               <span className="truncate">{email}</span>
               <Badge variant="outline" className="gap-1 text-[10px]">
                 <BadgeCheck className="h-3 w-3 text-status-healthy" /> Verified
               </Badge>
-            </DrawerDescription>
+            </div>
           </div>
           <Button
             variant="ghost"
@@ -149,14 +149,14 @@ function AccountPanelBody({ onRequestClose }: { onRequestClose: () => void }) {
             Finish setting up your profile so teammates can reach you the right way.
           </div>
         )}
-      </DrawerHeader>
+      </div>
 
       <Tabs value={tab} onValueChange={setTab} className="mt-2">
-        <TabsList className="grid grid-cols-4 w-full">
-          <TabsTrigger value="profile"><UserIcon className="h-4 w-4 mr-1.5" />Profile</TabsTrigger>
-          <TabsTrigger value="availability"><CalendarClock className="h-4 w-4 mr-1.5" />Availability</TabsTrigger>
-          <TabsTrigger value="notifications"><Bell className="h-4 w-4 mr-1.5" />Notifications</TabsTrigger>
-          <TabsTrigger value="security"><ShieldCheck className="h-4 w-4 mr-1.5" />Security</TabsTrigger>
+        <TabsList className="grid grid-cols-4 w-full h-9">
+          <TabsTrigger value="profile" className="text-xs"><UserIcon className="h-3.5 w-3.5 mr-1" />Profile</TabsTrigger>
+          <TabsTrigger value="availability" className="text-xs"><CalendarClock className="h-3.5 w-3.5 mr-1" />Hours</TabsTrigger>
+          <TabsTrigger value="notifications" className="text-xs"><Bell className="h-3.5 w-3.5 mr-1" />Alerts</TabsTrigger>
+          <TabsTrigger value="security" className="text-xs"><ShieldCheck className="h-3.5 w-3.5 mr-1" />Security</TabsTrigger>
         </TabsList>
 
         <div className="mt-6">
