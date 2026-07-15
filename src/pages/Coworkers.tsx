@@ -245,7 +245,7 @@ const Coworkers = () => {
                 </div>
 
                 {s.themes.length > 0 && (
-                  <div className="grid grid-cols-1 gap-1">
+                  <div className="grid grid-cols-3 gap-1.5">
                     {s.themes.slice(0, 3).map((k) => {
                       const th = themeMeta[k];
                       const tt = toneMap[th.tone];
@@ -254,12 +254,12 @@ const Coworkers = () => {
                         <span
                           key={k}
                           className={cn(
-                            "inline-flex items-center gap-1.5 h-6 px-2 rounded text-[10.5px] font-semibold ring-1",
+                            "inline-flex items-center justify-center gap-1 h-6 px-1.5 rounded text-[10px] font-semibold ring-1 text-center leading-tight",
                             tt.bg, tt.text, tt.ring,
                           )}
                         >
                           <ThIcon className="h-3 w-3 shrink-0" />
-                          {th.label}
+                          <span className="truncate">{th.label}</span>
                         </span>
                       );
                     })}
