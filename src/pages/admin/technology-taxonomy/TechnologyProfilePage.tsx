@@ -399,7 +399,11 @@ export default function TechnologyProfilePage() {
 
           {!isNew && (
             <TabsContent value="__domains">
-              <DomainsTab technologyId={technologyId!} disabled={form.is_deleted} />
+              <DomainsTab
+                technologyId={technologyId!}
+                technologyName={form.technology_name as string | undefined}
+                disabled={form.is_deleted}
+              />
             </TabsContent>
           )}
 
