@@ -662,7 +662,7 @@ function SecurityTab({ userId, userEmail, userUpdatedAt }: { userId: string; use
   useEffect(() => {
     (async () => {
       setActivityLoading(true);
-      const { data } = await supabase.functions.invoke("user-login-history", { body: {} }).catch(() => ({ data: null } as any));
+      const { data } = await supabase.functions.invoke("user-login-history", { body: { userId, email: userEmail } }).catch(() => ({ data: null } as any));
       const events = (data as any)?.events ?? [];
       setActivity(events.slice(0, 5));
       setActivityLoading(false);
