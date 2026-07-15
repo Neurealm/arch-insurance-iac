@@ -1001,3 +1001,411 @@ function RiskGauge({ value }: { value: number }) {
     </svg>
   );
 }
+
+/* ============================================================
+   Impact Model — Act 6
+   Projects the operation across every stakeholder domain and
+   quantifies the delta (before → after) with confidence & risk.
+   ============================================================ */
+
+type ImpactTone = "positive" | "neutral" | "warning" | "critical";
+
+interface ImpactMetric {
+  label: string;
+  before: string;
+  after: string;
+  delta: string;
+  tone: ImpactTone;
+  confidence: number; // 0-100
+}
+
+interface ImpactDomain {
+  id: string;
+  name: string;
+  role: string;
+  icon: React.ComponentType<{ className?: string }>;
+  accent: string;        // tailwind class stub, e.g. "indigo"
+  thesis: string;
+  metrics: ImpactMetric[];
+  callouts: { kind: "risk" | "win" | "watch"; text: string }[];
+  stakeholder: string;
+}
+
+const IMPACT_DOMAINS: ImpactDomain[] = [
+  {
+    id: "business",
+    name: "Business",
+    role: "Revenue · Customer Experience",
+    icon: Briefcase,
+    accent: "indigo",
+    thesis: "Prevents checkout stalls during Black Friday spike; unlocks +20 % order throughput headroom.",
+    stakeholder: "VP Digital Commerce",
+    metrics: [
+      { label: "Order Capacity",     before: "42k /hr",    after: "50k /hr",   delta: "+19 %",    tone: "positive", confidence: 92 },
+      { label: "Revenue at Risk",    before: "$1.2M / day", after: "$180k / day", delta: "−85 %",  tone: "positive", confidence: 88 },
+      { label: "NPS Sensitivity",    before: "−4 pts",     after: "−0.5 pts",  delta: "improved", tone: "positive", confidence: 74 },
+    ],
+    callouts: [
+      { kind: "win",  text: "Aligns to Q4 revenue commit; no marketing pause required." },
+      { kind: "watch", text: "Comms plan needed for CX in case of >30s API latency blip." },
+    ],
+  },
+  {
+    id: "tech",
+    name: "Technical",
+    role: "Application · Data Platform",
+    icon: Cpu,
+    accent: "indigo",
+    thesis: "Same instance class, same FS, +100 GiB block device — no application code path changes.",
+    stakeholder: "Principal Engineer, Web",
+    metrics: [
+      { label: "IOPS Ceiling",       before: "3,000",  after: "3,000",  delta: "unchanged",   tone: "neutral",  confidence: 99 },
+      { label: "Throughput",         before: "125 MB/s", after: "125 MB/s", delta: "unchanged", tone: "neutral", confidence: 99 },
+      { label: "Free Space (30d)",   before: "12 %",   after: "41 %",   delta: "+29 pts",     tone: "positive", confidence: 95 },
+      { label: "Config Drift Risk",  before: "medium", after: "low",    delta: "reduced",     tone: "positive", confidence: 86 },
+    ],
+    callouts: [
+      { kind: "win",  text: "Terraform state converges; drift alarms auto-clear post-apply." },
+      { kind: "watch", text: "xfs_growfs runs online — verify checksum on /data mount." },
+    ],
+  },
+  {
+    id: "sre",
+    name: "SRE",
+    role: "Reliability · Error Budget",
+    icon: Gauge,
+    accent: "indigo",
+    thesis: "Zero-downtime path with pre-committed snapshot; SLO burn projected to fall 34 %.",
+    stakeholder: "SRE Lead, Storefront",
+    metrics: [
+      { label: "Availability SLO",   before: "99.92 %", after: "99.97 %", delta: "+0.05 pp",   tone: "positive", confidence: 91 },
+      { label: "Error Budget Burn",  before: "1.4× /wk", after: "0.9× /wk", delta: "−34 %",    tone: "positive", confidence: 87 },
+      { label: "MTTR (disk-full)",   before: "42 min",  after: "n/a",    delta: "eliminated", tone: "positive", confidence: 96 },
+      { label: "Change Failure Rate", before: "8 %",    after: "8 %",    delta: "unchanged",   tone: "neutral",  confidence: 90 },
+    ],
+    callouts: [
+      { kind: "win", text: "Rollback contract via snap-0a1b2c3d meets 15-min RTO." },
+      { kind: "watch", text: "Runbook auto-links to /oncall/storefront pager rotation." },
+    ],
+  },
+  {
+    id: "support",
+    name: "Support",
+    role: "Customer Support · L1/L2",
+    icon: LifeBuoy,
+    accent: "indigo",
+    thesis: "Removes the #2 ticket driver (checkout errors linked to disk pressure).",
+    stakeholder: "Director, Global Support",
+    metrics: [
+      { label: "Weekly Tickets",     before: "312",    after: "84",     delta: "−73 %",       tone: "positive", confidence: 82 },
+      { label: "Escalations to L2",  before: "48",     after: "12",     delta: "−75 %",       tone: "positive", confidence: 80 },
+      { label: "Avg. Handle Time",   before: "9m 20s", after: "6m 40s", delta: "−29 %",       tone: "positive", confidence: 71 },
+    ],
+    callouts: [
+      { kind: "win",  text: "Macro auto-retired: 'Checkout timeout — disk space'." },
+      { kind: "watch", text: "Notify support 15 min before execute — banner in Zendesk." },
+    ],
+  },
+  {
+    id: "finops",
+    name: "FinOps",
+    role: "Cost · Commit Coverage",
+    icon: DollarSign,
+    accent: "indigo",
+    thesis: "Marginal gp3 storage adds $10.40/mo; avoids $1.2M/day revenue loss risk (ROI ~3,461×).",
+    stakeholder: "FinOps Partner, Digital",
+    metrics: [
+      { label: "Monthly Storage",    before: "$16.00", after: "$26.40", delta: "+$10.40",     tone: "warning",  confidence: 99 },
+      { label: "Snapshot Storage",   before: "$0.00",  after: "$4.20",  delta: "+$4.20",      tone: "warning",  confidence: 99 },
+      { label: "Annual Run-Rate",    before: "$192",   after: "$367",   delta: "+$175",       tone: "warning",  confidence: 99 },
+      { label: "Risk-Weighted Save", before: "—",      after: "$28.4k / mo", delta: "unlocked", tone: "positive", confidence: 78 },
+    ],
+    callouts: [
+      { kind: "win",  text: "Falls within existing Savings Plan coverage — no commit change." },
+      { kind: "watch", text: "Chargeback tag 'ecom-platform' confirmed present on new volume." },
+    ],
+  },
+  {
+    id: "cyber",
+    name: "Cyber",
+    role: "Security · Compliance",
+    icon: Lock,
+    accent: "indigo",
+    thesis: "Encryption inherited from KMS key alias/ebs-prod; snapshot policy satisfies PCI 3.2 §3.1.",
+    stakeholder: "AppSec Lead",
+    metrics: [
+      { label: "Encryption at Rest", before: "AES-256", after: "AES-256", delta: "unchanged",  tone: "neutral",  confidence: 100 },
+      { label: "IAM Blast Radius",   before: "scoped",  after: "scoped",  delta: "unchanged",  tone: "neutral",  confidence: 98 },
+      { label: "Audit Evidence",     before: "manual",  after: "auto",    delta: "improved",   tone: "positive", confidence: 95 },
+      { label: "Data Exfil Surface", before: "low",     after: "low",     delta: "unchanged",  tone: "neutral",  confidence: 97 },
+    ],
+    callouts: [
+      { kind: "win",  text: "Snapshot lifecycle inherits 35-day retention — SOX-compliant." },
+      { kind: "watch", text: "New volume tag propagates to CloudTrail change record." },
+    ],
+  },
+];
+
+function toneClass(t: ImpactTone) {
+  switch (t) {
+    case "positive": return "text-status-healthy";
+    case "warning":  return "text-status-warning";
+    case "critical": return "text-crimson";
+    default:         return "text-muted-foreground";
+  }
+}
+
+function toneBg(t: ImpactTone) {
+  switch (t) {
+    case "positive": return "bg-status-healthy/10 border-status-healthy/30";
+    case "warning":  return "bg-status-warning/10 border-status-warning/30";
+    case "critical": return "bg-crimson/10 border-crimson/30";
+    default:         return "bg-secondary/40 border-border";
+  }
+}
+
+function DeltaIcon({ t }: { t: ImpactTone }) {
+  if (t === "positive") return <TrendingUp className="h-3 w-3" />;
+  if (t === "warning" || t === "critical") return <TrendingDown className="h-3 w-3" />;
+  return <Circle className="h-2 w-2 fill-current" />;
+}
+
+function ImpactModelCanvas() {
+  const [selected, setSelected] = useState<string>("business");
+  const domain = IMPACT_DOMAINS.find((d) => d.id === selected)!;
+
+  // Aggregate roll-up
+  const positives = IMPACT_DOMAINS.flatMap((d) => d.metrics).filter((m) => m.tone === "positive").length;
+  const warnings  = IMPACT_DOMAINS.flatMap((d) => d.metrics).filter((m) => m.tone === "warning").length;
+  const neutrals  = IMPACT_DOMAINS.flatMap((d) => d.metrics).filter((m) => m.tone === "neutral").length;
+  const avgConfidence = Math.round(
+    IMPACT_DOMAINS.flatMap((d) => d.metrics).reduce((a, m) => a + m.confidence, 0) /
+    IMPACT_DOMAINS.flatMap((d) => d.metrics).length
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Header roll-up */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Cross-Domain Impact · Digital Twin Projection
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">
+                One operation object, projected into every stakeholder's language.
+              </div>
+            </div>
+            <Badge variant="outline" className="text-[10px] gap-1 border-indigo/30 bg-indigo/10 text-indigo">
+              <Sparkles className="h-3 w-3" /> {avgConfidence}% avg confidence
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-4 gap-3">
+            <div className="rounded-lg border border-status-healthy/30 bg-status-healthy/10 p-3">
+              <div className="text-[10px] uppercase tracking-wider text-status-healthy font-bold">Positive Signals</div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-xl font-bold text-status-healthy">{positives}</span>
+                <span className="text-[10px] text-muted-foreground">metrics improved</span>
+              </div>
+            </div>
+            <div className="rounded-lg border border-status-warning/30 bg-status-warning/10 p-3">
+              <div className="text-[10px] uppercase tracking-wider text-status-warning font-bold">Watch Items</div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-xl font-bold text-status-warning">{warnings}</span>
+                <span className="text-[10px] text-muted-foreground">to monitor</span>
+              </div>
+            </div>
+            <div className="rounded-lg border border-border p-3">
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Unchanged</div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-xl font-bold">{neutrals}</span>
+                <span className="text-[10px] text-muted-foreground">invariants held</span>
+              </div>
+            </div>
+            <div className="rounded-lg border border-crimson/30 bg-crimson-soft p-3">
+              <div className="text-[10px] uppercase tracking-wider text-crimson font-bold">Critical</div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-xl font-bold text-crimson">0</span>
+                <span className="text-[10px] text-muted-foreground">blocking</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Domain lane selector */}
+      <div className="grid grid-cols-6 gap-2">
+        {IMPACT_DOMAINS.map((d) => {
+          const Icon = d.icon;
+          const active = d.id === selected;
+          const pos = d.metrics.filter((m) => m.tone === "positive").length;
+          const warn = d.metrics.filter((m) => m.tone === "warning").length;
+          return (
+            <button
+              key={d.id}
+              onClick={() => setSelected(d.id)}
+              className={cn(
+                "text-left rounded-lg border p-3 transition-all",
+                active
+                  ? "border-indigo/50 bg-gradient-to-br from-indigo/10 to-transparent shadow-sm ring-1 ring-indigo/20"
+                  : "border-border bg-card hover:bg-secondary/50"
+              )}
+            >
+              <div className="flex items-center gap-1.5">
+                <div className={cn(
+                  "h-6 w-6 rounded-md grid place-items-center shrink-0",
+                  active ? "bg-indigo text-indigo-foreground" : "bg-secondary text-muted-foreground"
+                )}>
+                  <Icon className="h-3.5 w-3.5" />
+                </div>
+                <div className="text-[11.5px] font-semibold leading-tight">{d.name}</div>
+              </div>
+              <div className="text-[9.5px] text-muted-foreground mt-1.5 truncate">{d.role}</div>
+              <div className="flex gap-1 mt-2">
+                {pos > 0 && (
+                  <span className="text-[9px] px-1 rounded bg-status-healthy/15 text-status-healthy font-semibold">+{pos}</span>
+                )}
+                {warn > 0 && (
+                  <span className="text-[9px] px-1 rounded bg-status-warning/15 text-status-warning font-semibold">△{warn}</span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Selected domain detail */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="grid grid-cols-[1fr_260px]">
+            <div className="p-4 border-r border-border">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo/20 to-indigo/5 grid place-items-center shrink-0">
+                  <domain.icon className="h-5 w-5 text-indigo" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold">{domain.name} Impact</span>
+                    <Badge variant="outline" className="text-[10px]">Owner: {domain.stakeholder}</Badge>
+                  </div>
+                  <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug">{domain.thesis}</p>
+                </div>
+              </div>
+
+              {/* Metrics table */}
+              <div className="rounded-lg border border-border overflow-hidden">
+                <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr_80px] gap-2 px-3 py-2 bg-secondary/50 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <div>Metric</div>
+                  <div>Before</div>
+                  <div>After</div>
+                  <div>Δ</div>
+                  <div className="text-right">Confidence</div>
+                </div>
+                {domain.metrics.map((m, i) => (
+                  <div
+                    key={m.label}
+                    className={cn(
+                      "grid grid-cols-[1.5fr_1fr_1fr_1fr_80px] gap-2 px-3 py-2 items-center text-[12px]",
+                      i < domain.metrics.length - 1 && "border-b border-border"
+                    )}
+                  >
+                    <div className="font-medium">{m.label}</div>
+                    <div className="font-mono text-muted-foreground">{m.before}</div>
+                    <div className="font-mono">{m.after}</div>
+                    <div className={cn("inline-flex items-center gap-1 font-semibold", toneClass(m.tone))}>
+                      <DeltaIcon t={m.tone} />
+                      {m.delta}
+                    </div>
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <div className="h-1.5 w-12 rounded-full bg-secondary overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full",
+                            m.confidence >= 90 ? "bg-status-healthy" :
+                            m.confidence >= 75 ? "bg-indigo" : "bg-status-warning"
+                          )}
+                          style={{ width: `${m.confidence}%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-muted-foreground w-6 text-right">{m.confidence}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Callouts */}
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {domain.callouts.map((c) => (
+                  <div
+                    key={c.text}
+                    className={cn(
+                      "rounded-md border p-2.5 text-[11.5px] flex items-start gap-2",
+                      c.kind === "win"   && "border-status-healthy/30 bg-status-healthy/5",
+                      c.kind === "watch" && "border-status-warning/30 bg-status-warning/5",
+                      c.kind === "risk"  && "border-crimson/30 bg-crimson-soft"
+                    )}
+                  >
+                    {c.kind === "win"   && <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-status-healthy shrink-0" />}
+                    {c.kind === "watch" && <AlertTriangle className="h-3.5 w-3.5 mt-0.5 text-status-warning shrink-0" />}
+                    {c.kind === "risk"  && <Zap className="h-3.5 w-3.5 mt-0.5 text-crimson shrink-0" />}
+                    <span className="leading-snug">{c.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right side: Domain sign-off */}
+            <aside className="p-4 bg-gradient-to-b from-accent/30 to-transparent space-y-3">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="h-4 w-4 text-indigo" />
+                <span className="text-sm font-semibold">Domain Sign-off</span>
+              </div>
+              <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                Each domain owner receives a projection generated from the same <span className="font-mono text-foreground">ExpandVolumeOperation</span> object — no re-authoring.
+              </p>
+
+              <div className="space-y-2">
+                {IMPACT_DOMAINS.map((d) => {
+                  const anyWarn = d.metrics.some((m) => m.tone === "warning");
+                  const status = anyWarn ? "review" : "approved";
+                  return (
+                    <div
+                      key={d.id}
+                      className={cn(
+                        "flex items-center justify-between rounded-md border px-2.5 py-1.5 text-[11px]",
+                        status === "approved"
+                          ? "border-status-healthy/30 bg-status-healthy/5"
+                          : "border-status-warning/30 bg-status-warning/5"
+                      )}
+                    >
+                      <span className="font-medium truncate pr-2">{d.name}</span>
+                      <span className={cn(
+                        "inline-flex items-center gap-1 shrink-0",
+                        status === "approved" ? "text-status-healthy" : "text-status-warning"
+                      )}>
+                        {status === "approved"
+                          ? <><CheckCircle2 className="h-3 w-3" /> approved</>
+                          : <><AlertTriangle className="h-3 w-3" /> review</>}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="rounded-md border border-indigo/20 bg-indigo/5 p-2.5 text-[11px]">
+                <div className="font-semibold mb-1 text-indigo flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" /> Twin Verdict
+                </div>
+                <span className="text-foreground/80">
+                  All six domains net-positive. Proceed to Validate &amp; Execute — projected error-budget burn falls 34 %.
+                </span>
+              </div>
+            </aside>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
