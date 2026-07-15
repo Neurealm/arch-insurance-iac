@@ -167,7 +167,7 @@ function AccountPanelBody({ onRequestClose }: { onRequestClose: () => void }) {
               <TabsContent value="profile"><ProfileTab profile={profile} setProfile={setProfile} userId={user.id} userEmail={email} /></TabsContent>
               <TabsContent value="availability"><AvailabilityTab profile={profile} setProfile={setProfile} userId={user.id} /></TabsContent>
               <TabsContent value="notifications"><NotificationsTab profile={profile} setProfile={setProfile} userId={user.id} contacts={contacts} setContacts={setContacts} rules={rules} setRules={setRules} /></TabsContent>
-              <TabsContent value="security"><SecurityTab userEmail={email} userUpdatedAt={user.updated_at ?? user.created_at} /></TabsContent>
+              <TabsContent value="security"><SecurityTab userId={user.id} userEmail={email} userUpdatedAt={user.updated_at ?? user.created_at} /></TabsContent>
             </>
           )}
         </div>
