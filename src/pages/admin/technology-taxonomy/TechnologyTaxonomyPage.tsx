@@ -380,6 +380,13 @@ export default function TechnologyTaxonomyPage() {
                   {columns.version && <TableCell>{r.version ?? "—"}</TableCell>}
                   {columns.lifecycle && <TableCell>{r.lifecycle_status ?? "—"}</TableCell>}
                   {columns.criticality && <TableCell>{r.business_criticality ?? "—"}</TableCell>}
+                  {columns.practice && (
+                    <TableCell>
+                      {(r as unknown as { neurealm_practice?: string | null }).neurealm_practice
+                        ? <Badge variant="outline" className="bg-indigo/10 text-indigo border-indigo/30">{(r as unknown as { neurealm_practice?: string }).neurealm_practice}</Badge>
+                        : <span className="text-xs text-muted-foreground">—</span>}
+                    </TableCell>
+                  )}
                   {columns.approval && (
                     <TableCell>
                       <Badge variant="outline" className={statusTone(r.approval_status)}>{r.approval_status}</Badge>
