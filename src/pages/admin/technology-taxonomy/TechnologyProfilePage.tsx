@@ -21,17 +21,17 @@ import {
 import {
   ETDM_CATEGORIES, ETDM_TECH_TYPES, ETDM_LIFECYCLE_STATUSES, ETDM_CRITICALITIES,
   ETDM_MATURITIES, ETDM_APPROVAL_STATUSES, ETDM_VISIBILITIES, ETDM_MASTER_DOMAINS,
-  ETDM_DEPLOYMENT_MODELS, ETDM_CLOUD_PROVIDERS, ETDM_HYPERVISORS, slugify,
+  ETDM_DEPLOYMENT_MODELS, ETDM_CLOUD_PROVIDERS, ETDM_HYPERVISORS, ETDM_PRACTICES, slugify,
 } from "@/lib/etdm/constants";
 
 type Mode = "view" | "edit" | "new";
 
 type Field =
-  | { key: string; label: string; type: "text" | "textarea" | "url" | "number" | "date" }
-  | { key: string; label: string; type: "select"; options: readonly string[] }
-  | { key: string; label: string; type: "multi"; options: readonly string[] }
-  | { key: string; label: string; type: "tags" }
-  | { key: string; label: string; type: "boolean" };
+  | { key: string; label: string; type: "text" | "textarea" | "url" | "number" | "date"; help?: string }
+  | { key: string; label: string; type: "select"; options: readonly string[]; help?: string }
+  | { key: string; label: string; type: "multi"; options: readonly string[]; help?: string }
+  | { key: string; label: string; type: "tags"; help?: string }
+  | { key: string; label: string; type: "boolean"; help?: string };
 
 const SECTIONS: { key: string; label: string; fields: Field[] }[] = [
   {
@@ -59,6 +59,13 @@ const SECTIONS: { key: string; label: string; fields: Field[] }[] = [
     key: "classification", label: "Classification & Ownership",
     fields: [
       { key: "technology_tower", label: "Technology Tower", type: "text" },
+      {
+        key: "neurealm_practice",
+        label: "Neurealm Practice *",
+        type: "select",
+        options: ETDM_PRACTICES,
+        help: "Select the Neurealm practice primarily responsible for supporting, engineering, modernizing, or operating this technology.",
+      },
       { key: "primary_domain", label: "Primary Domain", type: "select", options: ETDM_MASTER_DOMAINS },
       { key: "secondary_domains", label: "Secondary Domains", type: "multi", options: ETDM_MASTER_DOMAINS },
       { key: "support_group", label: "Support Group", type: "text" },
@@ -252,6 +259,16 @@ export default function TechnologyProfilePage() {
     const e: Record<string, string> = {};
     if (!form.technology_name?.trim()) e.technology_name = "Technology name is required.";
     if (!form.slug?.trim()) e.slug = "Slug is required.";
+
+    // Neurealm Practice: required for new records, and required unless the record
+    // is Draft (existing records may temporarily have no Practice assigned).
+    const practice = typeof form.neurealm_practice === "string" ? form.neurealm_practice.trim() : form.neurealm_practice;
+    const status = form.approval_status ?? "Draft";
+    const needsPractice = isNew || status !== "Draft" || form.is_active === true;
+    if (needsPractice && !practice) {
+      e.neurealm_practice = "Select the Neurealm Practice responsible for this technology.";
+    }
+
     for (const s of SECTIONS) for (const f of s.fields) {
       if (f.type === "number") {
         const v = form[f.key];
@@ -267,7 +284,7 @@ export default function TechnologyProfilePage() {
       }
     }
     return e;
-  }, [form]);
+  }, [form, isNew]);
 
   const readonly = mode === "view";
 
@@ -519,6 +536,7 @@ function FieldRenderer({
         />
       ) : null}
 
+      {field.help && !error && <div className="text-xs text-muted-foreground mt-1">{field.help}</div>}
       {error && <div className="text-xs text-destructive mt-1">{error}</div>}
     </div>
   );

@@ -51,6 +51,7 @@ export interface TechFilters {
   lifecycle_status?: string[];
   business_criticality?: string[];
   approval_status?: string[];
+  neurealm_practice?: string[];
   active?: "all" | "active" | "inactive";
   showDeleted?: boolean;
   sortBy?: string;
@@ -90,6 +91,7 @@ export function useTechnologies(f: TechFilters) {
       if (f.lifecycle_status?.length) q = q.in("lifecycle_status", f.lifecycle_status);
       if (f.business_criticality?.length) q = q.in("business_criticality", f.business_criticality);
       if (f.approval_status?.length) q = q.in("approval_status", f.approval_status);
+      if (f.neurealm_practice?.length) q = q.in("neurealm_practice", f.neurealm_practice);
       if (f.active === "active") q = q.eq("is_active", true);
       if (f.active === "inactive") q = q.eq("is_active", false);
 
@@ -164,6 +166,21 @@ export function useRestoreTechnology() {
       const { error } = await (supabase.from(TABLE) as any)
         .update({ is_deleted: false, deleted_by: null, deleted_at: null })
         .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["etdm-technologies"] }),
+  });
+}
+
+export function useBulkSetPractice() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ ids, practice }: { ids: string[]; practice: string | null }) => {
+      if (!ids.length) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase.from(TABLE) as any)
+        .update({ neurealm_practice: practice })
+        .in("id", ids);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["etdm-technologies"] }),

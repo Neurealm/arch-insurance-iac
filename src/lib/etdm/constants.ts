@@ -33,6 +33,18 @@ export const ETDM_VISIBILITIES = [
   "Internal Restricted","Internal","Future Customer Eligible",
 ] as const;
 
+// Neurealm practices — the internal delivery organizations that own a technology.
+// Controlled values enforced by a CHECK constraint on etdm_technologies.neurealm_practice.
+export const ETDM_PRACTICES = [
+  "AI",
+  "Product Engineering",
+  "RunOps",
+  "Cyber",
+  "S.E.A.D.",
+  "Versa",
+] as const;
+export type EtdmPractice = typeof ETDM_PRACTICES[number];
+
 // The 16 approved ETDM master domains.
 export const ETDM_MASTER_DOMAINS = [
   "Business & Services",

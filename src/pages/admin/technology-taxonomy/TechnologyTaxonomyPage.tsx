@@ -27,10 +27,10 @@ import {
 } from "lucide-react";
 import {
   useTechnologies, useSoftDeleteTechnology, useSetActive, useCloneTechnology,
-  useRestoreTechnology, type Technology, type TechFilters,
+  useRestoreTechnology, useBulkSetPractice, type Technology, type TechFilters,
 } from "@/hooks/etdm/useTechnologies";
 import {
-  ETDM_CATEGORIES, ETDM_TECH_TYPES, ETDM_LIFECYCLE_STATUSES, ETDM_CRITICALITIES, ETDM_APPROVAL_STATUSES,
+  ETDM_CATEGORIES, ETDM_TECH_TYPES, ETDM_LIFECYCLE_STATUSES, ETDM_CRITICALITIES, ETDM_APPROVAL_STATUSES, ETDM_PRACTICES,
 } from "@/lib/etdm/constants";
 
 const TABS: { key: string; label: string; active: boolean }[] = [
@@ -44,7 +44,7 @@ const TABS: { key: string; label: string; active: boolean }[] = [
 
 const DEFAULT_COLUMNS = {
   name: true, short_name: true, vendor: true, family: true, category: true, type: true,
-  version: true, lifecycle: true, criticality: true, owner: false, approval: true,
+  version: true, lifecycle: true, criticality: true, practice: true, owner: false, approval: true,
   active: true, modified: true,
 } as const;
 type ColKey = keyof typeof DEFAULT_COLUMNS;
@@ -70,6 +70,7 @@ export default function TechnologyTaxonomyPage() {
   const [lifecycle, setLifecycle] = useState<string[]>(sp.get("lc")?.split(",").filter(Boolean) ?? []);
   const [criticality, setCriticality] = useState<string[]>(sp.get("cr")?.split(",").filter(Boolean) ?? []);
   const [approval, setApproval] = useState<string[]>(sp.get("ap")?.split(",").filter(Boolean) ?? []);
+  const [practice, setPractice] = useState<string[]>(sp.get("pr")?.split(",").filter(Boolean) ?? []);
   const [active, setActive] = useState<"all" | "active" | "inactive">((sp.get("a") as "all" | "active" | "inactive") ?? "all");
   const [showDeleted, setShowDeleted] = useState(sp.get("del") === "1");
   const [pageSize, setPageSize] = useState<number>(Number(sp.get("ps") ?? 25));
@@ -83,13 +84,15 @@ export default function TechnologyTaxonomyPage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [confirmClone, setConfirmClone] = useState<Technology | null>(null);
   const [confirmActive, setConfirmActive] = useState<{ tech: Technology; next: boolean } | null>(null);
+  const [bulkPracticeOpen, setBulkPracticeOpen] = useState(false);
+  const [bulkPracticeValue, setBulkPracticeValue] = useState<string>("");
 
   const filters: TechFilters = useMemo(() => ({
     search, vendor: undefined, category, technology_type: type,
     lifecycle_status: lifecycle, business_criticality: criticality,
-    approval_status: approval, active, showDeleted,
+    approval_status: approval, neurealm_practice: practice, active, showDeleted,
     sortBy, sortDir, page, pageSize,
-  }), [search, category, type, lifecycle, criticality, approval, active, showDeleted, sortBy, sortDir, page, pageSize]);
+  }), [search, category, type, lifecycle, criticality, approval, practice, active, showDeleted, sortBy, sortDir, page, pageSize]);
 
   const { data, isLoading, isError, refetch, isFetching } = useTechnologies(filters);
   const rows = data?.rows ?? [];
@@ -104,6 +107,7 @@ export default function TechnologyTaxonomyPage() {
     if (lifecycle.length) p.set("lc", lifecycle.join(","));
     if (criticality.length) p.set("cr", criticality.join(","));
     if (approval.length) p.set("ap", approval.join(","));
+    if (practice.length) p.set("pr", practice.join(","));
     if (active !== "all") p.set("a", active);
     if (showDeleted) p.set("del", "1");
     if (pageSize !== 25) p.set("ps", String(pageSize));
@@ -112,15 +116,16 @@ export default function TechnologyTaxonomyPage() {
     if (sortDir !== "desc") p.set("sd", sortDir);
     setSp(p, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, type, lifecycle, criticality, approval, active, showDeleted, pageSize, page, sortBy, sortDir]);
+  }, [search, category, type, lifecycle, criticality, approval, practice, active, showDeleted, pageSize, page, sortBy, sortDir]);
 
   const del = useSoftDeleteTechnology();
   const restore = useRestoreTechnology();
   const setActiveM = useSetActive();
   const clone = useCloneTechnology();
+  const bulkPractice = useBulkSetPractice();
 
   const clearFilters = () => {
-    setCategory([]); setType([]); setLifecycle([]); setCriticality([]); setApproval([]);
+    setCategory([]); setType([]); setLifecycle([]); setCriticality([]); setApproval([]); setPractice([]);
     setActive("all"); setSearch(""); setShowDeleted(false); setPage(0);
   };
 
@@ -130,7 +135,7 @@ export default function TechnologyTaxonomyPage() {
   };
 
   const doExport = () => {
-    const cols = ["technology_name","short_name","vendor_name","product_family","category","technology_type","version","lifecycle_status","business_criticality","approval_status","is_active","updated_at"];
+    const cols = ["technology_name","short_name","vendor_name","product_family","category","technology_type","version","lifecycle_status","business_criticality","neurealm_practice","approval_status","is_active","updated_at"];
     const header = cols.join(",");
     const body = rows.map((r) => cols.map((c) => {
       const v = r[c as keyof Technology] as unknown;
@@ -147,7 +152,7 @@ export default function TechnologyTaxonomyPage() {
   };
 
   const activeFilterCount =
-    category.length + type.length + lifecycle.length + criticality.length + approval.length +
+    category.length + type.length + lifecycle.length + criticality.length + approval.length + practice.length +
     (active !== "all" ? 1 : 0) + (showDeleted ? 1 : 0);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -235,6 +240,7 @@ export default function TechnologyTaxonomyPage() {
             <FilterMulti label="Lifecycle" values={lifecycle} setValues={(v) => { setLifecycle(v); setPage(0); }} options={[...ETDM_LIFECYCLE_STATUSES]} />
             <FilterMulti label="Criticality" values={criticality} setValues={(v) => { setCriticality(v); setPage(0); }} options={[...ETDM_CRITICALITIES]} />
             <FilterMulti label="Approval" values={approval} setValues={(v) => { setApproval(v); setPage(0); }} options={[...ETDM_APPROVAL_STATUSES]} />
+            <FilterMulti label="Practice" values={practice} setValues={(v) => { setPractice(v); setPage(0); }} options={[...ETDM_PRACTICES]} />
 
             <Select value={active} onValueChange={(v) => { setActive(v as "all" | "active" | "inactive"); setPage(0); }}>
               <SelectTrigger className="h-9 w-[130px]"><SelectValue placeholder="Status" /></SelectTrigger>
@@ -296,6 +302,7 @@ export default function TechnologyTaxonomyPage() {
               <div className="flex items-center gap-2">
                 <Button size="sm" variant="outline" onClick={() => bulkSetActive(true)}>Activate</Button>
                 <Button size="sm" variant="outline" onClick={() => bulkSetActive(false)}>Deactivate</Button>
+                <Button size="sm" variant="outline" onClick={() => { setBulkPracticeValue(""); setBulkPracticeOpen(true); }}>Assign Practice</Button>
                 <Button size="sm" variant="outline" onClick={doExport}>Export</Button>
                 <Button size="sm" variant="destructive" onClick={bulkDelete}>Soft delete</Button>
                 <Button size="sm" variant="ghost" onClick={() => setSelection(new Set())}>Clear</Button>
@@ -324,6 +331,7 @@ export default function TechnologyTaxonomyPage() {
                 {columns.version && <TableHead>Version</TableHead>}
                 {columns.lifecycle && <TableHead>Lifecycle</TableHead>}
                 {columns.criticality && <TableHead>Criticality</TableHead>}
+                {columns.practice && <TableHead className="cursor-pointer" onClick={() => toggleSort("neurealm_practice")}>Practice</TableHead>}
                 {columns.approval && <TableHead>Approval</TableHead>}
                 {columns.active && <TableHead>Active</TableHead>}
                 {columns.modified && <TableHead className="cursor-pointer" onClick={() => toggleSort("updated_at")}>Last Modified</TableHead>}
@@ -332,16 +340,16 @@ export default function TechnologyTaxonomyPage() {
             </TableHeader>
             <TableBody>
               {isLoading && (
-                <TableRow><TableCell colSpan={14} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>
+                <TableRow><TableCell colSpan={15} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>
               )}
               {!isLoading && isError && (
-                <TableRow><TableCell colSpan={14} className="text-center py-10">
+                <TableRow><TableCell colSpan={15} className="text-center py-10">
                   <div className="text-destructive font-medium">Failed to load technology records.</div>
                   <Button size="sm" variant="outline" className="mt-2" onClick={() => refetch()}>Retry</Button>
                 </TableCell></TableRow>
               )}
               {!isLoading && !isError && rows.length === 0 && (
-                <TableRow><TableCell colSpan={14} className="text-center py-16">
+                <TableRow><TableCell colSpan={15} className="text-center py-16">
                   <div className="text-lg font-medium">No technologies have been created yet.</div>
                   <div className="text-sm text-muted-foreground mt-1">
                     Create the first technology record to begin building the Enterprise Technology Domain Model.
@@ -372,6 +380,13 @@ export default function TechnologyTaxonomyPage() {
                   {columns.version && <TableCell>{r.version ?? "—"}</TableCell>}
                   {columns.lifecycle && <TableCell>{r.lifecycle_status ?? "—"}</TableCell>}
                   {columns.criticality && <TableCell>{r.business_criticality ?? "—"}</TableCell>}
+                  {columns.practice && (
+                    <TableCell>
+                      {(r as unknown as { neurealm_practice?: string | null }).neurealm_practice
+                        ? <Badge variant="outline" className="bg-indigo/10 text-indigo border-indigo/30">{(r as unknown as { neurealm_practice?: string }).neurealm_practice}</Badge>
+                        : <span className="text-xs text-muted-foreground">—</span>}
+                    </TableCell>
+                  )}
                   {columns.approval && (
                     <TableCell>
                       <Badge variant="outline" className={statusTone(r.approval_status)}>{r.approval_status}</Badge>
@@ -406,7 +421,14 @@ export default function TechnologyTaxonomyPage() {
                             <DropdownMenuItem onClick={() => setConfirmClone(r)}>
                               <Copy className="h-3.5 w-3.5 mr-2" /> Clone
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setConfirmActive({ tech: r, next: !r.is_active })}>
+                            <DropdownMenuItem onClick={() => {
+                              const practiceVal = (r as unknown as { neurealm_practice?: string | null }).neurealm_practice;
+                              if (!r.is_active && !practiceVal) {
+                                toast.error("Assign a Neurealm Practice before activating this technology.");
+                                return;
+                              }
+                              setConfirmActive({ tech: r, next: !r.is_active });
+                            }}>
                               <Power className="h-3.5 w-3.5 mr-2" /> {r.is_active ? "Deactivate" : "Activate"}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
@@ -515,6 +537,44 @@ export default function TechnologyTaxonomyPage() {
                 setConfirmActive(null);
               }}
             >Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk assign Neurealm Practice */}
+      <AlertDialog open={bulkPracticeOpen} onOpenChange={setBulkPracticeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Assign Neurealm Practice</AlertDialogTitle>
+            <AlertDialogDescription>
+              Update the Neurealm Practice for <span className="font-semibold">{selection.size}</span> selected technology record{selection.size === 1 ? "" : "s"}.
+              This change is written to each record and captured in the audit history.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-2">
+            <Select value={bulkPracticeValue} onValueChange={setBulkPracticeValue}>
+              <SelectTrigger><SelectValue placeholder="Select a practice…" /></SelectTrigger>
+              <SelectContent>
+                {ETDM_PRACTICES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!bulkPracticeValue || bulkPractice.isPending}
+              onClick={async () => {
+                if (!bulkPracticeValue) return;
+                try {
+                  await bulkPractice.mutateAsync({ ids: Array.from(selection), practice: bulkPracticeValue });
+                  toast.success(`Practice set to ${bulkPracticeValue} for ${selection.size} record${selection.size === 1 ? "" : "s"}`);
+                  setSelection(new Set());
+                  setBulkPracticeOpen(false);
+                } catch (e) {
+                  toast.error(e instanceof Error ? e.message : "Failed to update practice");
+                }
+              }}
+            >Apply</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -947,6 +947,7 @@ export type Database = {
           monitoring_integrations: Json | null
           multi_region_supported: boolean | null
           native_integrations: Json | null
+          neurealm_practice: string | null
           operational_maturity_score: number | null
           operations_owner_id: string | null
           overall_maturity_notes: string | null
@@ -1091,6 +1092,7 @@ export type Database = {
           monitoring_integrations?: Json | null
           multi_region_supported?: boolean | null
           native_integrations?: Json | null
+          neurealm_practice?: string | null
           operational_maturity_score?: number | null
           operations_owner_id?: string | null
           overall_maturity_notes?: string | null
@@ -1235,6 +1237,7 @@ export type Database = {
           monitoring_integrations?: Json | null
           multi_region_supported?: boolean | null
           native_integrations?: Json | null
+          neurealm_practice?: string | null
           operational_maturity_score?: number | null
           operations_owner_id?: string | null
           overall_maturity_notes?: string | null
@@ -6421,6 +6424,7 @@ export type Database = {
           monitoring_integrations: Json | null
           multi_region_supported: boolean | null
           native_integrations: Json | null
+          neurealm_practice: string | null
           operational_maturity_score: number | null
           operations_owner_id: string | null
           overall_maturity_notes: string | null
