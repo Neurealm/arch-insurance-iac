@@ -51,6 +51,7 @@ export interface TechFilters {
   lifecycle_status?: string[];
   business_criticality?: string[];
   approval_status?: string[];
+  neurealm_practice?: string[];
   active?: "all" | "active" | "inactive";
   showDeleted?: boolean;
   sortBy?: string;
