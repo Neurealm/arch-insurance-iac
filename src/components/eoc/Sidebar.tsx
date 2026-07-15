@@ -279,6 +279,7 @@ const tree: Node[] = [
   { key: "questionnaires", label: "Questionnaires", icon: ClipboardList, to: "/questionnaires" },
   { key: "services",   label: "Business Services",   icon: Boxes,         to: "/itsm/exec-biz-ops/business-services" },
   { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
+  { key: "etdm", label: "Technology Taxonomy", icon: Database, to: "/admin/technology-taxonomy" },
   { key: "settings",   label: "Settings",            icon: Settings,      to: "/settings", exact: true },
   { key: "auth-orch",  label: "Auth Orchestration",  icon: ShieldCheck,   to: "/auth-orchestration" },
 ];
@@ -601,10 +602,10 @@ const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
-  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "services", "crm", "settings", "auth-orch"] },
+  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "services", "crm", "etdm", "settings", "auth-orch"] },
 ];
 
-const ADMIN_ONLY_KEYS = new Set(["questionnaires", "crm"]);
+const ADMIN_ONLY_KEYS = new Set(["questionnaires", "crm", "etdm"]);
 
 
 function findActiveTrail(nodes: Node[], pathname: string, trail: string[] = []): string[] | null {

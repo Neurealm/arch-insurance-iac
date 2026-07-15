@@ -75,6 +75,8 @@ import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
 import ResetPassword from "./pages/auth/ResetPassword.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
+import TechnologyTaxonomyPage from "./pages/admin/technology-taxonomy/TechnologyTaxonomyPage.tsx";
+import TechnologyProfilePage from "./pages/admin/technology-taxonomy/TechnologyProfilePage.tsx";
 import Coworkers from "./pages/Coworkers.tsx";
 import CoworkersNetwork from "./pages/CoworkersNetwork.tsx";
 import CoworkersSRE from "./pages/CoworkersSRE.tsx";
@@ -785,6 +787,10 @@ const App = () => (
           <Route path="/auth-orchestration" element={<AuthOrchestration />} />
           <Route path="/data-orchestration-twin/site-resilience-detect-and-isolate-network-issue" element={<SiteResilienceCoworker />} />
           <Route path="/questionnaires" element={<ProtectedRoute><Questionnaires /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy" element={<ProtectedRoute requireAdmin><TechnologyTaxonomyPage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/technologies/new" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/technologies/:technologyId" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/technologies/:technologyId/edit" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
           <Route path="/settings/approvals" element={<Navigate to="/settings/user-management" replace />} />
           <Route path="/settings/user-management" element={<ProtectedRoute requireAdmin><UserManagement /></ProtectedRoute>} />
           <Route path="/settings/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
