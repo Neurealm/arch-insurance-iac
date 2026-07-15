@@ -146,8 +146,8 @@ export function useSoftDeleteTechnology() {
     mutationFn: async (id: string) => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
-      const { error } = await supabase
-        .from(TABLE)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase.from(TABLE) as any)
         .update({ is_deleted: true, is_active: false, deleted_by: uid, deleted_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
@@ -160,8 +160,8 @@ export function useRestoreTechnology() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from(TABLE)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase.from(TABLE) as any)
         .update({ is_deleted: false, deleted_by: null, deleted_at: null })
         .eq("id", id);
       if (error) throw error;
@@ -174,7 +174,8 @@ export function useSetActive() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
-      const { error } = await supabase.from(TABLE).update({ is_active: active }).eq("id", id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase.from(TABLE) as any).update({ is_active: active }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["etdm-technologies"] }),
