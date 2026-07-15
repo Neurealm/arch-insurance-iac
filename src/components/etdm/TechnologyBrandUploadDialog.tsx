@@ -152,7 +152,12 @@ export default function TechnologyBrandUploadDialog({ open, onOpenChange, techno
       toast.success("Branding asset saved");
       onOpenChange(false);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Save failed");
+      // Surface the real DB / storage error so trigger and RLS failures are actionable.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const err = e as any;
+      const msg = err?.message || err?.error_description || err?.error || "Save failed";
+      toast.error(`Save failed: ${msg}`);
+      console.error("Technology branding save failed:", err);
     } finally {
       setSaving(false);
     }
