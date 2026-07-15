@@ -524,6 +524,8 @@ const App = () => (
           <Route path="/coworkers/site-reliability-engineering/release-deployment-rollout" element={<ReleaseDeploymentRollout />} />
           <Route path="/coworkers/site-reliability-engineering/slo-sla-sli-monitoring" element={<SloSlaSliMonitoring />} />
           <Route path="/coworkers/infrastructure-automation" element={<CoworkersInfra />} />
+          <Route path="/coworkers/citrix-platform-digital-coworkers" element={<CitrixPlatformDigitalCoworkers />} />
+
           <Route path="/coworkers/application-support" element={<CoworkersApplicationSupport />} />
           <Route path="/coworkers/application-support/hadoop-health-precheck-agent" element={<HadoopHealthPrecheckAgent />} />
           <Route path="/coworkers/application-support/integration-monitoring-agent" element={<IntegrationMonitoringAgent />} />
