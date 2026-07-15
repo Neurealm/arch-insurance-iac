@@ -172,6 +172,21 @@ export function useRestoreTechnology() {
   });
 }
 
+export function useBulkSetPractice() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ ids, practice }: { ids: string[]; practice: string | null }) => {
+      if (!ids.length) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase.from(TABLE) as any)
+        .update({ neurealm_practice: practice })
+        .in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["etdm-technologies"] }),
+  });
+}
+
 export function useSetActive() {
   const qc = useQueryClient();
   return useMutation({
