@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/eoc/AppShell";
+import { CoworkersBackLink } from "@/components/eoc/CoworkersBackLink";
 import {
   Bot, Search, Sparkles, PlayCircle, GitBranch, Brain, ChevronDown, ChevronRight,
   Activity, Clock, DollarSign, ShieldCheck, HeartPulse, TrendingUp, Users, AlertTriangle,
@@ -348,6 +349,7 @@ export default function CitrixPlatformDigitalCoworkers() {
 
   return (
     <AppShell>
+      <CoworkersBackLink />
       <main className="min-h-screen bg-slate-50">
         {/* Banner */}
         <div className="border-b border-slate-200 bg-gradient-to-br from-white via-blue-50/40 to-indigo-50/40">

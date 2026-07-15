@@ -4,6 +4,7 @@ import {
   PieChart, Headphones, Share2, Gauge, FileText, ArrowRight, Sparkles,
 } from "lucide-react";
 import { AppShell } from "@/components/eoc/AppShell";
+import { CoworkersBackLink } from "@/components/eoc/CoworkersBackLink";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -131,6 +132,7 @@ const CoworkersSRE = () => {
   const nav = useNavigate();
   return (
     <AppShell>
+      <CoworkersBackLink />
       {/* Header — matches project pattern (bg-card with title + actions) */}
       <header className="bg-card border-b border-border">
         <div className="px-8 pt-5 pb-5 flex items-start gap-6">

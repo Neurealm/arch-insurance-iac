@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/eoc/AppShell";
+import { CoworkersBackLink } from "@/components/eoc/CoworkersBackLink";
 import {
   Bot, CheckCircle, Rocket, Activity, Clock, Award, DollarSign, Star, Search,
   ShieldCheck, Network, Activity as ActivityIcon, Wrench, Wifi, Cloud, AlertTriangle,
@@ -170,6 +171,7 @@ export default function CoworkersNetwork() {
 
   return (
     <AppShell>
+      <CoworkersBackLink />
       <main className="flex-1 px-6 py-5 bg-slate-50/50 animate-fade-in min-w-0">
         <div className="mb-5">
           <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900 uppercase">

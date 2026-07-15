@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/eoc/AppShell";
+import { CoworkersBackLink } from "@/components/eoc/CoworkersBackLink";
 import {
   Bot, PlayCircle, CheckCircle2, Activity, Clock, DollarSign, Search, Sparkles,
   ServerCog, Database, ScanSearch, Wrench, ShieldCheck, Network, HardDrive, PiggyBank,
@@ -283,6 +284,7 @@ export default function CoworkersInfra() {
 
   return (
     <AppShell>
+      <CoworkersBackLink />
       <main className="flex-1 px-6 py-5 bg-slate-50/50 animate-fade-in min-w-0">
         {/* Header */}
         <div className="mb-5">
