@@ -22,8 +22,9 @@ import {
 import { toast } from "sonner";
 import {
   ArrowLeft, Copy, Download, Eye, Filter, Layers, MoreVertical, Pencil, Plus, Power,
-  RefreshCw, RotateCcw, Search as SearchIcon, Trash2, X,
+  RefreshCw, RotateCcw, Search as SearchIcon, Sparkles, Trash2, X,
 } from "lucide-react";
+import AutoBuildDomainsDialog from "@/components/etdm/AutoBuildDomainsDialog";
 import {
   useDomains, useMasterDomains, useTechnologyOptions,
   useSetDomainActive, useCloneDomain, useSoftDeleteDomain, useRestoreDomain,
