@@ -29,15 +29,15 @@ const toneMap: Record<Tone, { bg: string; text: string; ring: string }> = {
 type ThemeKey = "mttr" | "toil" | "reliability" | "cost" | "risk" | "compliance" | "experience" | "throughput" | "security";
 
 const themeMeta: Record<ThemeKey, { label: string; icon: LucideIcon; tone: Tone }> = {
-  mttr:        { label: "MTTR ↓",        icon: TrendingDown, tone: "emerald" },
-  toil:        { label: "Toil ↓",        icon: TrendingDown, tone: "teal" },
-  reliability: { label: "Reliability ↑", icon: TrendingUp,   tone: "green" },
-  cost:        { label: "Cost ↓",        icon: DollarSign,   tone: "amber" },
-  risk:        { label: "Risk ↓",        icon: ShieldHalf,   tone: "orange" },
-  compliance:  { label: "Compliance ↑",  icon: ShieldCheck,  tone: "blue" },
-  experience:  { label: "CX ↑",          icon: Smile,        tone: "pink" },
-  throughput:  { label: "Throughput ↑",  icon: Gauge,        tone: "cyan" },
-  security:    { label: "Security ↑",    icon: ShieldCheck,  tone: "red" },
+  mttr:        { label: "Faster Incident Recovery", icon: TrendingDown, tone: "emerald" },
+  toil:        { label: "Less Engineering Toil",    icon: TrendingDown, tone: "teal" },
+  reliability: { label: "Higher Reliability",       icon: TrendingUp,   tone: "green" },
+  cost:        { label: "Lower Run Cost",           icon: DollarSign,   tone: "amber" },
+  risk:        { label: "Reduced Operational Risk", icon: ShieldHalf,   tone: "orange" },
+  compliance:  { label: "Stronger Compliance",      icon: ShieldCheck,  tone: "blue" },
+  experience:  { label: "Better User Experience",   icon: Smile,        tone: "pink" },
+  throughput:  { label: "Increased Throughput",     icon: Gauge,        tone: "cyan" },
+  security:    { label: "Hardened Security",        icon: ShieldCheck,  tone: "red" },
 };
 
 type Category = {
