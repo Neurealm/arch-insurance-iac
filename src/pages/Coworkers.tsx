@@ -223,25 +223,29 @@ const Coworkers = () => {
                   </div>
                 </div>
 
-                <div className="mt-auto pt-3 border-t border-border/70 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-[11px]">
-                    <span className={cn("h-5 px-2 rounded-full font-bold grid place-items-center", t.bg, t.text)}>
-                      {s.agents} agents
-                    </span>
+                <div className="mt-auto pt-3 border-t border-border/70 grid grid-cols-3 gap-2 text-[11px]">
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-[10px] uppercase tracking-wide">Agents</span>
+                    <span className={cn("font-bold", t.text)}>{s.agents}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-[10px] uppercase tracking-wide">Deployed</span>
                     <span className={cn(
-                      "font-semibold",
-                      s.deployed > 0 ? "text-emerald-600" : "text-muted-foreground",
+                      "font-bold",
+                      s.deployed > 0 ? "text-emerald-600" : "text-foreground/70",
                     )}>
-                      {s.deployed} deployed
+                      {s.deployed}
                     </span>
                   </div>
-                  <div className="text-[11px] font-semibold text-indigo inline-flex items-center gap-1 group-hover:gap-1.5 transition-all">
-                    Explore <ArrowRight className="h-3.5 w-3.5" />
+                  <div className="flex flex-col items-end justify-end">
+                    <span className="text-[11px] font-semibold text-indigo inline-flex items-center gap-1 group-hover:gap-1.5 transition-all">
+                      Explore <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
                   </div>
                 </div>
 
                 {s.themes.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-1">
+                  <div className="grid grid-cols-1 gap-1">
                     {s.themes.slice(0, 3).map((k) => {
                       const th = themeMeta[k];
                       const tt = toneMap[th.tone];
@@ -250,11 +254,11 @@ const Coworkers = () => {
                         <span
                           key={k}
                           className={cn(
-                            "inline-flex items-center gap-1 h-5 px-1.5 rounded text-[10px] font-semibold ring-1",
+                            "inline-flex items-center gap-1.5 h-6 px-2 rounded text-[10.5px] font-semibold ring-1",
                             tt.bg, tt.text, tt.ring,
                           )}
                         >
-                          <ThIcon className="h-3 w-3" />
+                          <ThIcon className="h-3 w-3 shrink-0" />
                           {th.label}
                         </span>
                       );
@@ -262,37 +266,6 @@ const Coworkers = () => {
                   </div>
                 )}
               </button>
-            );
-          })}
-
-          {comingSoon.map((s) => {
-            const t = toneMap[s.tone];
-            const Icon = s.icon;
-            return (
-              <div
-                key={s.title}
-                aria-disabled
-                className="rounded-xl border border-dashed border-border p-5 flex flex-col gap-3 bg-muted/20 opacity-80"
-              >
-                <div className="flex items-start gap-3">
-                  <div className={cn("h-12 w-12 rounded-xl grid place-items-center shrink-0 ring-1", t.bg, t.text, t.ring)}>
-                    <Icon className="h-6 w-6" strokeWidth={2} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-[14px] font-bold leading-tight text-foreground/80">{s.title}</h3>
-                      <span className="h-4 px-1.5 rounded text-[9px] font-bold grid place-items-center bg-slate-500/10 text-slate-500 ring-1 ring-slate-500/20 inline-flex items-center gap-1">
-                        <Clock className="h-2.5 w-2.5" /> COMING SOON
-                      </span>
-                    </div>
-                    <p className="text-[11.5px] text-muted-foreground mt-1 leading-snug">{s.desc}</p>
-                  </div>
-                </div>
-                <div className="mt-auto pt-3 border-t border-border/70 flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span className="italic">Roadmap</span>
-                  <span>—</span>
-                </div>
-              </div>
             );
           })}
         </div>
