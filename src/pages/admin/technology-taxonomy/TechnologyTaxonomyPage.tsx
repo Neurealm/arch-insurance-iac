@@ -135,7 +135,7 @@ export default function TechnologyTaxonomyPage() {
   };
 
   const doExport = () => {
-    const cols = ["technology_name","short_name","vendor_name","product_family","category","technology_type","version","lifecycle_status","business_criticality","approval_status","is_active","updated_at"];
+    const cols = ["technology_name","short_name","vendor_name","product_family","category","technology_type","version","lifecycle_status","business_criticality","neurealm_practice","approval_status","is_active","updated_at"];
     const header = cols.join(",");
     const body = rows.map((r) => cols.map((c) => {
       const v = r[c as keyof Technology] as unknown;
@@ -152,7 +152,7 @@ export default function TechnologyTaxonomyPage() {
   };
 
   const activeFilterCount =
-    category.length + type.length + lifecycle.length + criticality.length + approval.length +
+    category.length + type.length + lifecycle.length + criticality.length + approval.length + practice.length +
     (active !== "all" ? 1 : 0) + (showDeleted ? 1 : 0);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
