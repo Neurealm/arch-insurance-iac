@@ -21,6 +21,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/context/AuthContext";
 import { useTenantScope } from "@/hooks/useTenantScope";
 import { LogOut } from "lucide-react";
+import { AccountPanel } from "@/components/account/AccountPanel";
 
 /* ---------- Tree model ---------- */
 
