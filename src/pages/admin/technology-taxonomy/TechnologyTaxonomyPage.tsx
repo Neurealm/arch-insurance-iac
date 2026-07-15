@@ -421,7 +421,14 @@ export default function TechnologyTaxonomyPage() {
                             <DropdownMenuItem onClick={() => setConfirmClone(r)}>
                               <Copy className="h-3.5 w-3.5 mr-2" /> Clone
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setConfirmActive({ tech: r, next: !r.is_active })}>
+                            <DropdownMenuItem onClick={() => {
+                              const practiceVal = (r as unknown as { neurealm_practice?: string | null }).neurealm_practice;
+                              if (!r.is_active && !practiceVal) {
+                                toast.error("Assign a Neurealm Practice before activating this technology.");
+                                return;
+                              }
+                              setConfirmActive({ tech: r, next: !r.is_active });
+                            }}>
                               <Power className="h-3.5 w-3.5 mr-2" /> {r.is_active ? "Deactivate" : "Activate"}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
