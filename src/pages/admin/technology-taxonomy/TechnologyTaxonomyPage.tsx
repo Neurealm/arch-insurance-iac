@@ -27,10 +27,10 @@ import {
 } from "lucide-react";
 import {
   useTechnologies, useSoftDeleteTechnology, useSetActive, useCloneTechnology,
-  useRestoreTechnology, type Technology, type TechFilters,
+  useRestoreTechnology, useBulkSetPractice, type Technology, type TechFilters,
 } from "@/hooks/etdm/useTechnologies";
 import {
-  ETDM_CATEGORIES, ETDM_TECH_TYPES, ETDM_LIFECYCLE_STATUSES, ETDM_CRITICALITIES, ETDM_APPROVAL_STATUSES,
+  ETDM_CATEGORIES, ETDM_TECH_TYPES, ETDM_LIFECYCLE_STATUSES, ETDM_CRITICALITIES, ETDM_APPROVAL_STATUSES, ETDM_PRACTICES,
 } from "@/lib/etdm/constants";
 
 const TABS: { key: string; label: string; active: boolean }[] = [
