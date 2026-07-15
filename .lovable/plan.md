@@ -1,88 +1,28 @@
-# Technology Branding Asset Management
+## Root cause
 
-Add one official branding asset per Technology record — uploaded, cropped/scaled by admins, stored once, rendered everywhere via a single reusable `TechnologyBrand` component.
+The `etdm_enforce_practice` BEFORE UPDATE trigger on `public.etdm_technologies` blocks any update to a row that has `is_active = true` (or `approval_status = 'Approved'`) while `neurealm_practice` is null/blank. The sample "Microsoft Windows Server" record was activated earlier without a practice being set, so the branding-asset UPDATE now fails at the trigger with a check_violation. The dialog catches the error and shows a generic "Save failed" toast.
 
-## 1. Database (migration)
+## Fix
 
-Add columns to `etdm_technologies`:
+Two small changes:
 
-- `technology_image_url` text
-- `technology_image_storage_path` text
-- `technology_image_original_filename` text
-- `technology_image_type` text (mime)
-- `technology_image_width` int
-- `technology_image_height` int
-- `technology_image_crop_metadata` jsonb (`{x,y,w,h}` normalized 0–1)
-- `technology_image_scale` numeric (default 1.0)
-- `technology_image_last_updated` timestamptz
-- `technology_image_last_updated_by` uuid
+1. **Make the trigger transition-aware** so it only blocks the *transition into* Approved/Active without a practice, not routine edits to already-active records. New logic:
+   - On UPDATE, raise only if `NEW.neurealm_practice` is null/blank AND either `NEW.approval_status = 'Approved'` and `OLD.approval_status <> 'Approved'`, or `NEW.is_active = true` and `OLD.is_active = false`.
+   - On INSERT, keep the existing rule (blocks creating an already-Approved/Active row without a practice).
+   
+   This preserves the governance intent (you still can't approve or activate without a practice) but lets branding uploads, edits, etc. go through on rows that are already active.
 
-The existing `etdm_clone_technology` SQL function already copies `technology_icon_url`; extend it to also copy the new columns (storage path is shared — replacing on the clone will overwrite, so we copy the reference; admin can replace after cloning). Existing `etdm_write_audit` trigger already captures all field changes into `etdm_record_audit_log`, so upload/replace/crop/scale/remove get audited automatically (user, date, technology, previous & new values).
+2. **Surface the real database error** in `TechnologyBrandUploadDialog.onSave` so future trigger/RLS failures show the actual message (`error.message`) instead of "Save failed". Same for `useRemoveTechnologyBrand` consumers if applicable.
 
-## 2. Storage
+## Verification
 
-Reuse existing private `etdm-assets` bucket. Path layout:
+- Reload the Windows Server edit page and click Save branding — upload should succeed and the toast should read "Branding asset saved".
+- Try to activate a Draft technology that has no `neurealm_practice` — the trigger should still block it.
+- Try to set `approval_status` to Approved on a Draft with no practice — still blocked.
 
-```
-etdm-assets/technologies/{technology_id}/brand-{timestamp}.{ext}
-```
+## Files touched
 
-RLS policies on `storage.objects` for `etdm-assets`:
-- SELECT: authenticated (signed-URL access via app)
-- INSERT / UPDATE / DELETE: `is_platform_admin(auth.uid())`
+- New migration: redefine `public.etdm_enforce_practice()` with the transition-aware logic above (trigger definition unchanged).
+- `src/components/etdm/TechnologyBrandUploadDialog.tsx`: keep `e.message` fallback but ensure Supabase `PostgrestError`/`StorageError` messages are shown (they already have `.message`, so no change needed unless we want a nicer prefix like `Save failed: <message>`).
 
-We store a signed URL cache in `technology_image_url` (long expiry) OR resolve on read. Simpler: keep bucket private, expose read via signed URLs generated in the hook. Cache-bust with `?v={last_updated_epoch}`.
-
-## 3. Components
-
-New:
-- `src/components/etdm/TechnologyBrand.tsx` — reusable renderer.
-  Props: `technology` (or `technologyId`), `size` (number or preset: `xs|sm|md|lg|xl`), `mode` (`logo | icon`), `background` (`transparent|white|dark`), `className`.
-  Behavior: `object-contain`, centered, aspect-ratio preserved, lazy `loading="lazy"`, alt `"{name} logo"`. Fallback: neutral tile with 1–2 initials derived from `technology_name` (skip stopwords; `Windows Server` → `WS`, `Citrix` → `C`).
-- `src/components/etdm/TechnologyBrandCard.tsx` — the Identity-section card in the profile with preview + metadata + action buttons.
-- `src/components/etdm/TechnologyBrandUploadDialog.tsx` — file picker + validation + crop/scale editor + preview modes + save. Uses `react-image-crop` (already lightweight) or a custom canvas — we'll use a minimal canvas-based crop/scale UI to avoid a new dep.
-  - Validate: type in `[svg,png,jpg,jpeg,webp]`, size ≤ 5MB, image loads without error.
-  - Editor tools: Crop, Scale slider, Zoom, Pan, Reset, Fit to Canvas, Center, Cancel, Save.
-  - Preview modes tabs: Large Logo (128), Medium Logo (64), Navigation Icon (24), Table Icon (32), Profile Header (96), Dropdown Selector (20), Technology Card (48).
-  - Background toggle for preview: White / Dark / Transparent checkerboard.
-  - On Save: upload file bytes to storage → update DB row with metadata + crop + scale.
-
-Updated:
-- `src/hooks/etdm/useTechnologies.ts` — add `useUploadTechnologyBrand`, `useRemoveTechnologyBrand`, and a `useTechnologyBrandUrl(technology)` helper that returns the signed URL.
-- `src/pages/admin/technology-taxonomy/TechnologyProfilePage.tsx` — add `TechnologyBrandCard` at top of Identity section; use `TechnologyBrand` in the header at 96×96.
-- `src/pages/admin/technology-taxonomy/TechnologyTaxonomyPage.tsx` — render `TechnologyBrand` at 32×32 next to Technology Name in the list; row height unchanged.
-- `src/integrations/supabase/types.ts` — auto-regenerated by the platform after the migration.
-
-## 4. Routes
-
-No new routes. Edit dialog is inline within the existing profile page.
-
-## 5. Security
-
-- Only `is_platform_admin` can INSERT/UPDATE/DELETE branding fields (existing table policies already restrict writes to admins — no change needed).
-- Storage policies restrict writes to admins; reads to authenticated.
-- Customers never see admin UI (page is under `/admin/*`).
-
-## 6. Rendering rules (baked into `TechnologyBrand`)
-
-- Always `object-contain`, aspect-ratio preserved, centered.
-- Never stretch / clip / distort.
-- Responsive: parent supplies size; component fills.
-- SVG passes through unchanged; raster gets `loading="lazy"` + `decoding="async"`.
-- Cache busting via `?v=<last_updated>`.
-
-## 7. Fallback
-
-`initials(name)` — split on whitespace, filter tokens matching stopwords (`the`, `of`, `and`), take first 1–2 uppercase first letters. Render as rounded tile using neutral tokens (`bg-muted text-muted-foreground`).
-
-## 8. Clone
-
-Extend `etdm_clone_technology` to copy all `technology_image_*` fields so clones inherit the branding reference. Admin can Replace afterwards.
-
-## 9. Test
-
-Manual: upload the Microsoft Windows logo (PNG), crop whitespace, scale, save, verify it appears at 32×32 in list, 96×96 in profile header, and in the branding card. Confirm audit rows in `etdm_record_audit_log`.
-
-## Deliverables
-
-DB migration + storage policies + `TechnologyBrand`, `TechnologyBrandCard`, `TechnologyBrandUploadDialog`, hook additions, profile-page + list-page integration.
+No schema, RLS, storage, or type changes required.
