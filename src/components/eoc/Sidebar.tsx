@@ -276,12 +276,9 @@ const tree: Node[] = [
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
   { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers" },
-  { key: "questionnaires", label: "Questionnaires", icon: ClipboardList, to: "/questionnaires" },
-  { key: "services",   label: "Business Services",   icon: Boxes,         to: "/itsm/exec-biz-ops/business-services" },
   { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
   { key: "etdm", label: "Technology Taxonomy", icon: Database, to: "/admin/technology-taxonomy" },
   { key: "settings",   label: "Settings",            icon: Settings,      to: "/settings", exact: true },
-  { key: "auth-orch",  label: "Auth Orchestration",  icon: ShieldCheck,   to: "/auth-orchestration" },
 ];
 
 /* ---------- Quick actions ---------- */
@@ -602,10 +599,10 @@ const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
-  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "services", "crm", "etdm", "settings", "auth-orch"] },
+  { label: "ADMIN WORKSPACE", keys: ["crm", "etdm", "settings"] },
 ];
 
-const ADMIN_ONLY_KEYS = new Set(["questionnaires", "crm", "etdm"]);
+const ADMIN_ONLY_KEYS = new Set(["crm", "etdm"]);
 
 
 function findActiveTrail(nodes: Node[], pathname: string, trail: string[] = []): string[] | null {
