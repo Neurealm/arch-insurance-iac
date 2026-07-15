@@ -312,6 +312,13 @@ export default function UserManagement() {
               />
               <Button onClick={sendInvite} disabled={actionBusy || !inviteEmail.trim()}>Create invite</Button>
             </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-w-3xl">
+              <Input value={inviteFirst} onChange={(e) => setInviteFirst(e.target.value)} placeholder="First name (optional)" disabled={actionBusy} className="h-9" />
+              <Input value={inviteLast} onChange={(e) => setInviteLast(e.target.value)} placeholder="Last name (optional)" disabled={actionBusy} className="h-9" />
+              <Input value={inviteJob} onChange={(e) => setInviteJob(e.target.value)} placeholder="Job title (optional)" disabled={actionBusy} className="h-9" />
+              <Input value={inviteDept} onChange={(e) => setInviteDept(e.target.value)} placeholder="Department (optional)" disabled={actionBusy} className="h-9" />
+            </div>
+            <p className="text-[11px] text-muted-foreground">Pre-fill helps the invitee land in a filled-out profile. All fields optional — they can edit anything later.</p>
             {inviteResult && (
               <div className={`rounded-md border p-3 space-y-2 max-w-xl ${inviteResult.emailSent ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
                 <div className={`text-[13px] font-medium ${inviteResult.emailSent ? "text-emerald-900" : "text-amber-900"}`}>
