@@ -731,38 +731,15 @@ function SecurityTab({ userId, userEmail, userUpdatedAt }: { userId: string; use
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card p-5 space-y-3">
+      <div className="rounded-xl border bg-card/60 p-5 space-y-3 opacity-60 pointer-events-none select-none">
         <div className="flex items-center justify-between">
           <div>
             <Label className="text-sm font-semibold flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Two-factor authentication</Label>
             <p className="text-xs text-muted-foreground">Time-based one-time code (Google Authenticator, 1Password, etc.).</p>
           </div>
-          {mfaLoading ? <Skeleton className="h-8 w-24" /> : hasTotp ? (
-            <div className="flex items-center gap-2">
-              <Badge className="gap-1"><Check className="h-3 w-3" /> Enabled</Badge>
-              <Button variant="ghost" size="sm" onClick={disableMfa}>Disable</Button>
-            </div>
-          ) : !enrollment ? (
-            <Button variant="outline" onClick={startEnroll} disabled={enrollBusy}>Set up</Button>
-          ) : null}
+          <Badge variant="outline" className="gap-1 text-[10px]">Not enabled</Badge>
         </div>
-        {enrollment && (
-          <div className="rounded-lg border bg-muted/40 p-4 space-y-3">
-            <p className="text-xs text-muted-foreground">Scan this QR code with your authenticator app, then enter the 6-digit code.</p>
-            <div className="flex items-center gap-4">
-              <div className="bg-white p-2 rounded-md border" dangerouslySetInnerHTML={{ __html: enrollment.qr }} />
-              <div className="text-xs space-y-1">
-                <div className="text-muted-foreground">Can't scan? Enter manually:</div>
-                <code className="font-mono text-[11px] bg-background px-2 py-1 rounded border block break-all">{enrollment.secret}</code>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Input value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="123456" className="max-w-32 font-mono tracking-widest" />
-              <Button onClick={verifyEnroll} disabled={enrollBusy || otp.length !== 6}>Verify & enable</Button>
-              <Button variant="ghost" onClick={() => setEnrollment(null)}>Cancel</Button>
-            </div>
-          </div>
-        )}
+        <p className="text-[11px] text-muted-foreground">Coming soon — this workspace does not yet enforce 2FA at sign-in.</p>
       </div>
 
       <div className="rounded-xl border bg-card p-5 space-y-3">
