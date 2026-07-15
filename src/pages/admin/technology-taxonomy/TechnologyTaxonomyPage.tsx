@@ -540,6 +540,44 @@ export default function TechnologyTaxonomyPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bulk assign Neurealm Practice */}
+      <AlertDialog open={bulkPracticeOpen} onOpenChange={setBulkPracticeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Assign Neurealm Practice</AlertDialogTitle>
+            <AlertDialogDescription>
+              Update the Neurealm Practice for <span className="font-semibold">{selection.size}</span> selected technology record{selection.size === 1 ? "" : "s"}.
+              This change is written to each record and captured in the audit history.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-2">
+            <Select value={bulkPracticeValue} onValueChange={setBulkPracticeValue}>
+              <SelectTrigger><SelectValue placeholder="Select a practice…" /></SelectTrigger>
+              <SelectContent>
+                {ETDM_PRACTICES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!bulkPracticeValue || bulkPractice.isPending}
+              onClick={async () => {
+                if (!bulkPracticeValue) return;
+                try {
+                  await bulkPractice.mutateAsync({ ids: Array.from(selection), practice: bulkPracticeValue });
+                  toast.success(`Practice set to ${bulkPracticeValue} for ${selection.size} record${selection.size === 1 ? "" : "s"}`);
+                  setSelection(new Set());
+                  setBulkPracticeOpen(false);
+                } catch (e) {
+                  toast.error(e instanceof Error ? e.message : "Failed to update practice");
+                }
+              }}
+            >Apply</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppShell>
   );
 }
