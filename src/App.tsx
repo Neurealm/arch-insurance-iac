@@ -361,6 +361,7 @@ import RunOpsObservabilityExplorer from "./runops/pages/ObservabilityExplorer.ts
 import RunOpsOperationalReadiness from "./runops/pages/OperationalReadiness.tsx";
 import RunOpsRunbookLibrary from "./runops/pages/RunbookLibrary.tsx";
 import RunOpsRunbookDetail from "./runops/pages/RunbookDetail.tsx";
+import RunOpsRunbookObjectBuilder from "./runops/pages/RunbookObjectBuilder.tsx";
 import RunOpsRunbookNew from "./runops/pages/RunbookNew.tsx";
 import RunOpsRunbookDesigner from "./runops/pages/RunbookDesigner.tsx";
 import RunOpsRunbookStepBuilder from "./runops/pages/RunbookStepBuilder.tsx";
@@ -438,6 +439,7 @@ const App = () => (
             <Route path="runbooks" element={<RunOpsRunbookLibrary />} />
             <Route path="runbooks/new" element={<RunOpsRunbookNew />} />
             <Route path="runbooks/:runbookId" element={<RunOpsRunbookDetail />} />
+            <Route path="runbooks/:runbookId/builder" element={<RunOpsRunbookObjectBuilder />} />
             <Route path="runbooks/:runbookId/designer" element={<RunOpsRunbookDesigner />} />
             <Route path="runbooks/:runbookId/steps/:stepId" element={<RunOpsRunbookStepBuilder />} />
             <Route path="runbooks/:runbookId/policy" element={<RunOpsRunbookPolicyDesigner />} />
