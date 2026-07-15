@@ -77,6 +77,8 @@ import { AuthProvider } from "./context/AuthContext.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
 import TechnologyTaxonomyPage from "./pages/admin/technology-taxonomy/TechnologyTaxonomyPage.tsx";
 import TechnologyProfilePage from "./pages/admin/technology-taxonomy/TechnologyProfilePage.tsx";
+import DomainsPage from "./pages/admin/technology-taxonomy/domains/DomainsPage.tsx";
+import DomainProfilePage from "./pages/admin/technology-taxonomy/domains/DomainProfilePage.tsx";
 import Coworkers from "./pages/Coworkers.tsx";
 import CoworkersNetwork from "./pages/CoworkersNetwork.tsx";
 import CoworkersSRE from "./pages/CoworkersSRE.tsx";
@@ -791,6 +793,10 @@ const App = () => (
           <Route path="/admin/technology-taxonomy/technologies/new" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
           <Route path="/admin/technology-taxonomy/technologies/:technologyId" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
           <Route path="/admin/technology-taxonomy/technologies/:technologyId/edit" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/domains" element={<ProtectedRoute requireAdmin><DomainsPage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/domains/new" element={<ProtectedRoute requireAdmin><DomainProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/domains/:domainId" element={<ProtectedRoute requireAdmin><DomainProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/domains/:domainId/edit" element={<ProtectedRoute requireAdmin><DomainProfilePage /></ProtectedRoute>} />
           <Route path="/settings/approvals" element={<Navigate to="/settings/user-management" replace />} />
           <Route path="/settings/user-management" element={<ProtectedRoute requireAdmin><UserManagement /></ProtectedRoute>} />
           <Route path="/settings/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
