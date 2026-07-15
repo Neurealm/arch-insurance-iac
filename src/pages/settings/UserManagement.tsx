@@ -122,6 +122,10 @@ export default function UserManagement() {
   const [activityDays, setActivityDays] = useState<number>(7);
   const [actionBusy, setActionBusy] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteFirst, setInviteFirst] = useState("");
+  const [inviteLast, setInviteLast] = useState("");
+  const [inviteJob, setInviteJob] = useState("");
+  const [inviteDept, setInviteDept] = useState("");
   const [inviteResult, setInviteResult] = useState<{ email: string; tempPassword: string; emailSent: boolean } | null>(null);
 
   const invoke = async (action: string, payload: Record<string, unknown> = {}) => {
@@ -241,10 +245,20 @@ export default function UserManagement() {
     if (!email) return;
     setActionBusy(true);
     try {
-      const res = await invoke("invite_user", { email });
+      const first = inviteFirst.trim();
+      const last = inviteLast.trim();
+      const full_name = [first, last].filter(Boolean).join(" ") || undefined;
+      const res = await invoke("invite_user", {
+        email,
+        full_name,
+        first_name: first || undefined,
+        last_name: last || undefined,
+        job_title: inviteJob.trim() || undefined,
+        department: inviteDept.trim() || undefined,
+      });
       setInviteResult({ email: res.email ?? email, tempPassword: res.temp_password, emailSent: !!res.email_sent });
       toast.success(res.email_sent ? `Invite email sent to ${email}` : `Account created for ${email} — email failed, share the password manually`);
-      setInviteEmail("");
+      setInviteEmail(""); setInviteFirst(""); setInviteLast(""); setInviteJob(""); setInviteDept("");
       await load();
     } catch (e: any) {
       toast.error(e.message ?? "Invite failed");
@@ -298,6 +312,13 @@ export default function UserManagement() {
               />
               <Button onClick={sendInvite} disabled={actionBusy || !inviteEmail.trim()}>Create invite</Button>
             </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-w-3xl">
+              <Input value={inviteFirst} onChange={(e) => setInviteFirst(e.target.value)} placeholder="First name (optional)" disabled={actionBusy} className="h-9" />
+              <Input value={inviteLast} onChange={(e) => setInviteLast(e.target.value)} placeholder="Last name (optional)" disabled={actionBusy} className="h-9" />
+              <Input value={inviteJob} onChange={(e) => setInviteJob(e.target.value)} placeholder="Job title (optional)" disabled={actionBusy} className="h-9" />
+              <Input value={inviteDept} onChange={(e) => setInviteDept(e.target.value)} placeholder="Department (optional)" disabled={actionBusy} className="h-9" />
+            </div>
+            <p className="text-[11px] text-muted-foreground">Pre-fill helps the invitee land in a filled-out profile. All fields optional — they can edit anything later.</p>
             {inviteResult && (
               <div className={`rounded-md border p-3 space-y-2 max-w-xl ${inviteResult.emailSent ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
                 <div className={`text-[13px] font-medium ${inviteResult.emailSent ? "text-emerald-900" : "text-amber-900"}`}>

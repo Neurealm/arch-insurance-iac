@@ -2,6 +2,7 @@ import { AppShell } from "@/components/eoc/AppShell";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
+import { AccountPanel } from "@/components/account/AccountPanel";
 import { useEffect, useState } from "react";
 import {
   Search, Bell, HelpCircle, ChevronDown, Star, ArrowRight, ChevronRight,
@@ -61,20 +62,15 @@ function CommandTopBar() {
         <button className="h-9 w-9 grid place-items-center rounded-lg hover:bg-accent">
           <HelpCircle className="h-4 w-4 text-muted-foreground" />
         </button>
-        <div className="flex items-center gap-2 pl-3 border-l border-border">
-          <div className="h-9 w-9 rounded-full bg-foreground text-background grid place-items-center text-xs font-bold">{initials}</div>
-          <div className="leading-tight">
-            <div className="text-[13px] font-semibold">{displayName}</div>
-            <div className="text-[11px] text-muted-foreground">{role}</div>
-          </div>
-          <button
-            onClick={async () => { await signOut(); navigate("/"); }}
-            className="ml-1 h-9 w-9 grid place-items-center rounded-lg hover:bg-accent"
-            title="Sign out"
-          >
-            <LogOut className="h-4 w-4 text-muted-foreground" />
+        <AccountPanel>
+          <button className="flex items-center gap-2 pl-3 border-l border-border outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-r-lg" aria-label="Open account panel">
+            <div className="h-9 w-9 rounded-full bg-foreground text-background grid place-items-center text-xs font-bold">{initials}</div>
+            <div className="leading-tight text-left">
+              <div className="text-[13px] font-semibold">{displayName}</div>
+              <div className="text-[11px] text-muted-foreground">{role}</div>
+            </div>
           </button>
-        </div>
+        </AccountPanel>
       </div>
     </header>
   );

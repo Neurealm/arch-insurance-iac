@@ -201,6 +201,10 @@ Deno.serve(async (req) => {
         // on first login. No magic link — immune to email-scanner link consumption.
         const email = String(body.email ?? "").trim().toLowerCase();
         const full_name = String(body.full_name ?? "").trim();
+        const first_name = String(body.first_name ?? "").trim();
+        const last_name = String(body.last_name ?? "").trim();
+        const job_title = String(body.job_title ?? "").trim();
+        const department = String(body.department ?? "").trim();
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
           return json({ error: "A valid email is required" }, 400);
         }
@@ -236,16 +240,19 @@ Deno.serve(async (req) => {
         if (!userId) return json({ error: "Could not create user" }, 500);
 
         // Approve + require a password change on first login.
-        await admin
-          .from("profiles")
-          .update({
-            approval_status: "approved",
-            approved_at: new Date().toISOString(),
-            approved_by: caller.id,
-            must_change_password: true,
-            full_name: full_name || null,
-          })
-          .eq("user_id", userId);
+        // Optional pre-fill fields land on the profile so the invitee sees a filled-out profile.
+        const profilePatch: Record<string, unknown> = {
+          approval_status: "approved",
+          approved_at: new Date().toISOString(),
+          approved_by: caller.id,
+          must_change_password: true,
+          full_name: full_name || null,
+        };
+        if (first_name) profilePatch.first_name = first_name;
+        if (last_name) profilePatch.last_name = last_name;
+        if (job_title) profilePatch.job_title = job_title;
+        if (department) profilePatch.department = department;
+        await admin.from("profiles").update(profilePatch).eq("user_id", userId);
 
         // Ensure a read-only role exists (handle_new_user already grants it for invited users).
         await admin

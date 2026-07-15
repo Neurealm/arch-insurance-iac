@@ -2125,17 +2125,29 @@ export type Database = {
           department: string | null
           display_name: string | null
           email: string | null
+          first_name: string | null
           full_name: string | null
+          hybrid_days: string[] | null
           id: string
           job_title: string | null
+          last_name: string | null
           location: string | null
           must_change_password: boolean
+          office_site: string | null
+          ooo_delegate_user_id: string | null
+          ooo_enabled: boolean
+          ooo_end: string | null
+          ooo_start: string | null
           phone: string | null
+          preferred_contact_method: string | null
           preferred_language: string | null
+          profile_completed_at: string | null
           time_zone: string | null
           updated_at: string
           user_category: Database["public"]["Enums"]["user_category"] | null
           user_id: string
+          weekly_hours: Json | null
+          working_location_type: string | null
         }
         Insert: {
           approval_status?: string
@@ -2147,17 +2159,29 @@ export type Database = {
           department?: string | null
           display_name?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
+          hybrid_days?: string[] | null
           id?: string
           job_title?: string | null
+          last_name?: string | null
           location?: string | null
           must_change_password?: boolean
+          office_site?: string | null
+          ooo_delegate_user_id?: string | null
+          ooo_enabled?: boolean
+          ooo_end?: string | null
+          ooo_start?: string | null
           phone?: string | null
+          preferred_contact_method?: string | null
           preferred_language?: string | null
+          profile_completed_at?: string | null
           time_zone?: string | null
           updated_at?: string
           user_category?: Database["public"]["Enums"]["user_category"] | null
           user_id: string
+          weekly_hours?: Json | null
+          working_location_type?: string | null
         }
         Update: {
           approval_status?: string
@@ -2169,19 +2193,39 @@ export type Database = {
           department?: string | null
           display_name?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
+          hybrid_days?: string[] | null
           id?: string
           job_title?: string | null
+          last_name?: string | null
           location?: string | null
           must_change_password?: boolean
+          office_site?: string | null
+          ooo_delegate_user_id?: string | null
+          ooo_enabled?: boolean
+          ooo_end?: string | null
+          ooo_start?: string | null
           phone?: string | null
+          preferred_contact_method?: string | null
           preferred_language?: string | null
+          profile_completed_at?: string | null
           time_zone?: string | null
           updated_at?: string
           user_category?: Database["public"]["Enums"]["user_category"] | null
           user_id?: string
+          weekly_hours?: Json | null
+          working_location_type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_ooo_delegate_fk"
+            columns: ["ooo_delegate_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       programs: {
         Row: {
@@ -5942,6 +5986,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_contact_methods: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          method_type: string
+          updated_at: string
+          user_id: string
+          value: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          method_type: string
+          updated_at?: string
+          user_id: string
+          value: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          method_type?: string
+          updated_at?: string
+          user_id?: string
+          value?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_contact_methods_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       user_login_events: {
         Row: {
           action: string
@@ -5980,6 +6065,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_notification_rules: {
+        Row: {
+          channels: string[]
+          created_at: string
+          escalate_after_minutes: number | null
+          id: string
+          priority: string
+          timing: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channels?: string[]
+          created_at?: string
+          escalate_after_minutes?: number | null
+          id?: string
+          priority: string
+          timing?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channels?: string[]
+          created_at?: string
+          escalate_after_minutes?: number | null
+          id?: string
+          priority?: string
+          timing?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_rules_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_page_activity: {
         Row: {
@@ -6901,6 +7027,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      seed_user_defaults: {
+        Args: { _email: string; _user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

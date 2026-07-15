@@ -232,6 +232,7 @@ import ChangePassword from "./pages/settings/ChangePassword.tsx";
 import PendingApproval from "./pages/auth/PendingApproval.tsx";
 import UpdateProfile from "./pages/auth/UpdateProfile.tsx";
 import SetInitialPassword from "./pages/auth/SetInitialPassword.tsx";
+import CompleteProfile from "./pages/auth/CompleteProfile.tsx";
 import OrganizationLayout from "./pages/settings/organization/OrganizationLayout.tsx";
 import EntityListPage from "./pages/settings/organization/EntityListPage.tsx";
 import EntityDetailPage from "./pages/settings/organization/EntityDetailPage.tsx";
@@ -422,6 +423,7 @@ const App = () => (
           <Route path="/no-access" element={<Navigate to="/app" replace />} />
           <Route path="/profile" element={<UpdateProfile />} />
           <Route path="/set-password" element={<ProtectedRoute><SetInitialPassword /></ProtectedRoute>} />
+          <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/runops" element={<ProtectedRoute><RunOpsLayout /></ProtectedRoute>}>
             <Route index element={<RunOpsExperienceEntry />} />
