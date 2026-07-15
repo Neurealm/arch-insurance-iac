@@ -247,8 +247,8 @@ export default function RunbookObjectBuilder() {
                     <TabsContent value="cli" className="px-3 pb-3 text-sm text-muted-foreground">
                       aws ec2 modify-volume --volume-id vol-0f1234567890abcd0 --size 300
                     </TabsContent>
-                    <TabsContent value="tf" className="px-3 pb-3 text-sm text-muted-foreground">
-                      resource "aws_ebs_volume" "web" {`{ size = 300 }`}
+                    <TabsContent value="tf" className="px-3 pb-3 text-sm text-muted-foreground font-mono">
+                      {`resource "aws_ebs_volume" "web" { size = 300 }`}
                     </TabsContent>
                     <TabsContent value="cf" className="px-3 pb-3 text-sm text-muted-foreground">
                       Resources.WebVolume.Properties.Size: 300
