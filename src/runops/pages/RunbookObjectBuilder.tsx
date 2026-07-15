@@ -11,13 +11,14 @@
  * generated from those objects — not hand-written scripts.
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Circle, Cloud, Database, Server,
   ShieldCheck, Sparkles, Play, FileCheck2, Info, Users, MapPin, Boxes,
   Code2, GitBranch, Lock, Layers, Zap, Activity, Copy, Package, Workflow,
   DollarSign, LifeBuoy, TrendingUp, TrendingDown, AlertTriangle, Briefcase, Cpu, Gauge,
+  Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw, Move,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
