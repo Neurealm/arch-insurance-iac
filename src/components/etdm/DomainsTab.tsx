@@ -93,20 +93,36 @@ export default function DomainsTab({ technologyId, technologyName, disabled }: P
 
   return (
     <Card className="p-0 overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="flex items-center justify-between p-4 border-b border-border gap-3 flex-wrap">
         <div>
-          <div className="text-sm font-medium">Domains</div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-sm font-medium flex items-center gap-2">
+            Domains
+            <Badge variant="outline" className="bg-indigo/10 text-indigo border-indigo/30">
+              Standard Domain Coverage: {coverageCount} of {coverageTotal}
+            </Badge>
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">
             Child records that describe the taxonomy domains this Technology participates in. Drag rows to reorder.
           </div>
         </div>
-        <Button
-          size="sm"
-          onClick={() => nav(`/admin/technology-taxonomy/domains/new?technology_id=${technologyId}`)}
-          disabled={disabled}
-        >
-          <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Domain
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setAutoBuildOpen(true)}
+            disabled={disabled}
+            title="Create the standard 16 ETDM Domain records for this Technology"
+          >
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Auto-Build Domains
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => nav(`/admin/technology-taxonomy/domains/new?technology_id=${technologyId}`)}
+            disabled={disabled}
+          >
+            <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Domain
+          </Button>
+        </div>
       </div>
 
       <Table>
