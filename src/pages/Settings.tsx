@@ -37,6 +37,9 @@ export default function Settings() {
                 description="Curate the Enterprise Technology Domain Model — technologies, practices, and classifications." />
               <SettingsCard to="/admin/technology-taxonomy/domains" icon={Database} title="Domains"
                 description="Manage the Domain records that describe how each Technology participates in the ETDM taxonomy." />
+              <SettingsCard to="/crm" icon={Building2} title="Customer Relation Manager"
+                description="Manage customer companies, departments, teams, stakeholders, activities, and notes." />
+
             </>
           )}
         </div>
