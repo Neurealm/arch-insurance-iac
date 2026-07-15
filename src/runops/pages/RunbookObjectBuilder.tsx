@@ -17,6 +17,7 @@ import {
   ArrowLeft, ArrowRight, CheckCircle2, Circle, Cloud, Database, Server,
   ShieldCheck, Sparkles, Play, FileCheck2, Info, Users, MapPin, Boxes,
   Code2, GitBranch, Lock, Layers, Zap, Activity, Copy, Package, Workflow,
+  DollarSign, LifeBuoy, TrendingUp, TrendingDown, AlertTriangle, Briefcase, Cpu, Gauge,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
