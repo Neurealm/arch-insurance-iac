@@ -11,13 +11,14 @@
  * generated from those objects — not hand-written scripts.
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Circle, Cloud, Database, Server,
   ShieldCheck, Sparkles, Play, FileCheck2, Info, Users, MapPin, Boxes,
   Code2, GitBranch, Lock, Layers, Zap, Activity, Copy, Package, Workflow,
   DollarSign, LifeBuoy, TrendingUp, TrendingDown, AlertTriangle, Briefcase, Cpu, Gauge,
+  Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw, Move,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -710,6 +711,53 @@ function ArchitectureCanvas({ step }: { step: StepId }) {
   // Draw order: back-to-front by (gx+gy) ascending
   const sorted = [...blocks].sort((a, b) => (a.gx + a.gy) - (b.gx + b.gy));
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [tilt, setTilt] = useState(1); // 1 = full isometric height; 0.35 = flatter top-down
+  const [isFull, setIsFull] = useState(false);
+  const dragRef = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
+
+  useEffect(() => {
+    const onFsChange = () => setIsFull(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (!document.fullscreenElement) el.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  };
+
+  const resetView = () => { setZoom(1); setPan({ x: 0, y: 0 }); setTilt(1); };
+
+  const onWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    setZoom((z) => Math.min(4, Math.max(0.4, z * (e.deltaY < 0 ? 1.12 : 1 / 1.12))));
+  };
+  const onPointerDown = (e: React.PointerEvent) => {
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    dragRef.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y };
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    const dx = e.clientX - dragRef.current.x;
+    const dy = e.clientY - dragRef.current.y;
+    if (e.shiftKey) {
+      // shift-drag = tilt
+      setTilt(Math.min(1, Math.max(0.25, 1 - dy / 300)));
+    } else {
+      setPan({ x: dragRef.current.px + dx, y: dragRef.current.py + dy });
+    }
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    (e.target as Element).releasePointerCapture?.(e.pointerId);
+    dragRef.current = null;
+  };
+
   return (
     <Card>
       <CardContent className="p-4">
@@ -725,77 +773,138 @@ function ArchitectureCanvas({ step }: { step: StepId }) {
             <Badge variant="outline" className="text-[10px]">7 assets · 3 tiers</Badge>
           </div>
         </div>
-        <div className="relative rounded-lg border border-border overflow-hidden"
-             style={{ background: "radial-gradient(ellipse at 30% 20%, #1e293b 0%, #0b1220 55%, #05070d 100%)" }}>
-          <svg viewBox="0 0 920 420" className="w-full h-[380px]" role="img" aria-label="Isometric architecture of ecom-platform">
+        <div
+          ref={containerRef}
+          className={cn(
+            "relative rounded-lg border border-border overflow-hidden bg-white",
+            isFull && "h-screen w-screen rounded-none border-0",
+          )}
+          style={{
+            backgroundImage:
+              "radial-gradient(ellipse at 50% 20%, #f8fafc 0%, #ffffff 55%, #eef2f7 100%)",
+          }}
+        >
+          {/* Toolbar */}
+          <div className="absolute top-2 right-2 z-10 flex items-center gap-1 rounded-md border border-slate-200 bg-white/90 backdrop-blur px-1 py-1 shadow-sm">
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0"
+                    onClick={() => setZoom((z) => Math.min(4, z * 1.2))} title="Zoom in">
+              <ZoomIn className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0"
+                    onClick={() => setZoom((z) => Math.max(0.4, z / 1.2))} title="Zoom out">
+              <ZoomOut className="h-3.5 w-3.5" />
+            </Button>
+            <div className="mx-1 h-4 w-px bg-slate-200" />
+            <div className="flex items-center gap-1 px-1" title="Tilt (shift-drag also tilts)">
+              <Move className="h-3 w-3 text-slate-500" />
+              <input
+                type="range" min={0.25} max={1} step={0.01} value={tilt}
+                onChange={(e) => setTilt(parseFloat(e.target.value))}
+                className="h-1 w-16 accent-slate-600 cursor-pointer"
+                aria-label="Tilt camera"
+              />
+            </div>
+            <div className="mx-1 h-4 w-px bg-slate-200" />
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={resetView} title="Reset view">
+              <RotateCcw className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={toggleFullscreen}
+                    title={isFull ? "Exit fullscreen" : "Fullscreen"}>
+              {isFull ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
+
+          <div className="absolute left-2 top-2 z-10 rounded-md border border-slate-200 bg-white/80 backdrop-blur px-2 py-1 text-[10px] text-slate-500">
+            Drag to pan · scroll to zoom · shift-drag to tilt
+          </div>
+
+          <svg
+            ref={svgRef}
+            viewBox="0 0 920 420"
+            preserveAspectRatio="xMidYMid meet"
+            className={cn("w-full select-none", isFull ? "h-full" : "h-[380px]")}
+            role="img"
+            aria-label="Isometric architecture of ecom-platform"
+            onWheel={onWheel}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            style={{ cursor: dragRef.current ? "grabbing" : "grab", touchAction: "none" }}
+          >
             <defs>
               <pattern id="isoGrid" width="38" height="22" patternUnits="userSpaceOnUse">
-                <path d="M 0 11 L 19 0 L 38 11 L 19 22 Z" fill="none" stroke="#1f2a44" strokeWidth="0.5" />
+                <path d="M 0 11 L 19 0 L 38 11 L 19 22 Z" fill="none" stroke="#cbd5e1" strokeWidth="0.5" />
               </pattern>
               <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#0f172a" stopOpacity="0.9" />
-                <stop offset="100%" stopColor="#020617" stopOpacity="0.4" />
+                <stop offset="0%" stopColor="#f1f5f9" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0.3" />
               </linearGradient>
               <filter id="isoShadowBlur" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="3" />
               </filter>
             </defs>
 
-            {/* iso ground plane */}
-            <polygon
-              points={(() => {
-                const c = [
-                  isoProject(-10, -6, 0, cx, cy),
-                  isoProject( 12, -6, 0, cx, cy),
-                  isoProject( 12,  6, 0, cx, cy),
-                  isoProject(-10,  6, 0, cx, cy),
-                ];
-                return c.map((q) => `${q.sx},${q.sy}`).join(" ");
-              })()}
-              fill="url(#floorGrad)" stroke="#1e293b" strokeWidth="0.6"
-            />
-            <rect x="0" y="0" width="920" height="420" fill="url(#isoGrid)" opacity="0.22" />
+            {/* Grid background (fixed, does not zoom) */}
+            <rect x="0" y="0" width="920" height="420" fill="url(#isoGrid)" opacity="0.55" />
 
-            {/* VPC boundary label */}
-            <g opacity="0.75">
-              {(() => {
-                const a = isoProject(-9, -5, 0, cx, cy);
-                const b = isoProject(11, -5, 0, cx, cy);
-                const c = isoProject(11, 5, 0, cx, cy);
-                const d = isoProject(-9, 5, 0, cx, cy);
-                return (
-                  <>
-                    <polygon points={`${a.sx},${a.sy} ${b.sx},${b.sy} ${c.sx},${c.sy} ${d.sx},${d.sy}`}
-                             fill="none" stroke="#334155" strokeWidth="0.8" strokeDasharray="4 3" />
-                    <text x={a.sx + 8} y={a.sy + 12} fontSize="9" fill="#64748b" letterSpacing="0.14em">
-                      VPC · us-east-1 · 10.0.0.0/16
-                    </text>
-                  </>
-                );
-              })()}
+            {/* Zoom + pan + tilt group */}
+            <g transform={`translate(${pan.x} ${pan.y}) translate(${cx} ${cy}) scale(${zoom} ${zoom * tilt}) translate(${-cx} ${-cy})`}>
+              {/* iso ground plane */}
+              <polygon
+                points={(() => {
+                  const c = [
+                    isoProject(-10, -6, 0, cx, cy),
+                    isoProject( 12, -6, 0, cx, cy),
+                    isoProject( 12,  6, 0, cx, cy),
+                    isoProject(-10,  6, 0, cx, cy),
+                  ];
+                  return c.map((q) => `${q.sx},${q.sy}`).join(" ");
+                })()}
+                fill="url(#floorGrad)" stroke="#cbd5e1" strokeWidth="0.8"
+              />
+
+              {/* VPC boundary label */}
+              <g opacity="0.9">
+                {(() => {
+                  const a = isoProject(-9, -5, 0, cx, cy);
+                  const b = isoProject(11, -5, 0, cx, cy);
+                  const c = isoProject(11, 5, 0, cx, cy);
+                  const d = isoProject(-9, 5, 0, cx, cy);
+                  return (
+                    <>
+                      <polygon points={`${a.sx},${a.sy} ${b.sx},${b.sy} ${c.sx},${c.sy} ${d.sx},${d.sy}`}
+                               fill="none" stroke="#94a3b8" strokeWidth="0.9" strokeDasharray="4 3" />
+                      <text x={a.sx + 8} y={a.sy + 12} fontSize="9" fill="#64748b" letterSpacing="0.14em">
+                        VPC · us-east-1 · 10.0.0.0/16
+                      </text>
+                    </>
+                  );
+                })()}
+              </g>
+
+              {/* wires */}
+              {wires.map((w, i) => (
+                <IsoWire key={i} {...w} cx={cx} cy={cy} />
+              ))}
+
+              {/* blocks back-to-front */}
+              {sorted.map((b) => (
+                <IsoBlock key={b.key} {...b} cx={cx} cy={cy} />
+              ))}
             </g>
 
-            {/* wires (draw behind blocks that are in front, but on top of ground) */}
-            {wires.map((w, i) => (
-              <IsoWire key={i} {...w} cx={cx} cy={cy} />
-            ))}
-
-            {/* blocks back-to-front */}
-            {sorted.map((b) => (
-              <IsoBlock key={b.key} {...b} cx={cx} cy={cy} />
-            ))}
-
-            {/* compass */}
-            <g transform="translate(28,380)" opacity="0.55">
-              <circle r="12" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
-              <path d="M 0 -8 L 3 0 L 0 8 L -3 0 Z" fill="#60a5fa" />
-              <text x="0" y="-14" textAnchor="middle" fontSize="8" fill="#94a3b8">N</text>
+            {/* compass (fixed) */}
+            <g transform="translate(28,380)" opacity="0.7">
+              <circle r="12" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.9" />
+              <path d="M 0 -8 L 3 0 L 0 8 L -3 0 Z" fill="#3b82f6" />
+              <text x="0" y="-14" textAnchor="middle" fontSize="8" fill="#64748b">N</text>
             </g>
 
-            {/* legend */}
-            <g transform="translate(720, 24)" fontSize="9" fill="#cbd5e1">
-              <rect x="-6" y="-14" width="180" height="90" rx="4" fill="rgba(15,23,42,0.75)" stroke="#1e293b" />
-              <text x="0" y="0" fontWeight="700" fill="#e2e8f0" letterSpacing="0.08em">TIER LEGEND</text>
+            {/* legend (fixed) */}
+            <g transform="translate(720, 24)" fontSize="9" fill="#334155">
+              <rect x="-6" y="-14" width="180" height="90" rx="4" fill="rgba(255,255,255,0.9)" stroke="#e2e8f0" />
+              <text x="0" y="0" fontWeight="700" fill="#0f172a" letterSpacing="0.08em">TIER LEGEND</text>
               {[
                 { c: ISO_PALETTE.alb.top,    t: "Edge · ALB" },
                 { c: ISO_PALETTE.ec2.top,    t: "Compute · EC2" },
@@ -812,7 +921,7 @@ function ArchitectureCanvas({ step }: { step: StepId }) {
           </svg>
 
           {highlight && (
-            <div className="absolute left-3 bottom-3 right-3 rounded-md border border-crimson/40 bg-slate-950/85 backdrop-blur px-3 py-2 text-[11.5px] flex items-center gap-2 text-slate-200">
+            <div className="absolute left-3 bottom-3 right-3 rounded-md border border-crimson/40 bg-white/95 backdrop-blur px-3 py-2 text-[11.5px] flex items-center gap-2 text-slate-800 shadow-sm">
               <Zap className="h-3.5 w-3.5 text-crimson animate-pulse" />
               <span>Target object bound: <span className="font-mono font-semibold text-crimson">EBSVolume vol-0f12…abcd0</span> attached to <span className="font-mono">i-0ab12…7890</span></span>
               <Badge className="ml-auto text-[9.5px] bg-crimson/20 text-crimson border-crimson/40 border">blast-radius: 1</Badge>
