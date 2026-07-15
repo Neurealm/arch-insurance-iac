@@ -84,13 +84,15 @@ export default function TechnologyTaxonomyPage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [confirmClone, setConfirmClone] = useState<Technology | null>(null);
   const [confirmActive, setConfirmActive] = useState<{ tech: Technology; next: boolean } | null>(null);
+  const [bulkPracticeOpen, setBulkPracticeOpen] = useState(false);
+  const [bulkPracticeValue, setBulkPracticeValue] = useState<string>("");
 
   const filters: TechFilters = useMemo(() => ({
     search, vendor: undefined, category, technology_type: type,
     lifecycle_status: lifecycle, business_criticality: criticality,
-    approval_status: approval, active, showDeleted,
+    approval_status: approval, neurealm_practice: practice, active, showDeleted,
     sortBy, sortDir, page, pageSize,
-  }), [search, category, type, lifecycle, criticality, approval, active, showDeleted, sortBy, sortDir, page, pageSize]);
+  }), [search, category, type, lifecycle, criticality, approval, practice, active, showDeleted, sortBy, sortDir, page, pageSize]);
 
   const { data, isLoading, isError, refetch, isFetching } = useTechnologies(filters);
   const rows = data?.rows ?? [];
@@ -105,6 +107,7 @@ export default function TechnologyTaxonomyPage() {
     if (lifecycle.length) p.set("lc", lifecycle.join(","));
     if (criticality.length) p.set("cr", criticality.join(","));
     if (approval.length) p.set("ap", approval.join(","));
+    if (practice.length) p.set("pr", practice.join(","));
     if (active !== "all") p.set("a", active);
     if (showDeleted) p.set("del", "1");
     if (pageSize !== 25) p.set("ps", String(pageSize));
@@ -113,15 +116,16 @@ export default function TechnologyTaxonomyPage() {
     if (sortDir !== "desc") p.set("sd", sortDir);
     setSp(p, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, type, lifecycle, criticality, approval, active, showDeleted, pageSize, page, sortBy, sortDir]);
+  }, [search, category, type, lifecycle, criticality, approval, practice, active, showDeleted, pageSize, page, sortBy, sortDir]);
 
   const del = useSoftDeleteTechnology();
   const restore = useRestoreTechnology();
   const setActiveM = useSetActive();
   const clone = useCloneTechnology();
+  const bulkPractice = useBulkSetPractice();
 
   const clearFilters = () => {
-    setCategory([]); setType([]); setLifecycle([]); setCriticality([]); setApproval([]);
+    setCategory([]); setType([]); setLifecycle([]); setCriticality([]); setApproval([]); setPractice([]);
     setActive("all"); setSearch(""); setShowDeleted(false); setPage(0);
   };
 
