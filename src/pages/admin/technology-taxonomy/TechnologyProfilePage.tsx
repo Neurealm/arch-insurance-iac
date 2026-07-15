@@ -23,6 +23,9 @@ import {
   ETDM_MATURITIES, ETDM_APPROVAL_STATUSES, ETDM_VISIBILITIES, ETDM_MASTER_DOMAINS,
   ETDM_DEPLOYMENT_MODELS, ETDM_CLOUD_PROVIDERS, ETDM_HYPERVISORS, ETDM_PRACTICES, slugify,
 } from "@/lib/etdm/constants";
+import { TechnologyBrand } from "@/components/etdm/TechnologyBrand";
+import TechnologyBrandCard from "@/components/etdm/TechnologyBrandCard";
+
 
 type Mode = "view" | "edit" | "new";
 
@@ -333,13 +336,22 @@ export default function TechnologyProfilePage() {
     <AppShell>
       <div className="p-6 max-w-[1400px] mx-auto w-full">
         <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => {
               if (dirty && !confirm("Discard unsaved changes?")) return;
               nav("/admin/technology-taxonomy");
             }}>
               <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Back
             </Button>
+            {!isNew && (
+              <TechnologyBrand
+                technology={form as unknown as Parameters<typeof TechnologyBrand>[0]["technology"]}
+                size={96}
+                mode="logo"
+                background="white"
+                className="ring-1 ring-border"
+              />
+            )}
             <h1 className="text-xl font-semibold">
               {isNew ? "New Technology" : form.technology_name || "Technology"}
             </h1>
@@ -353,6 +365,7 @@ export default function TechnologyProfilePage() {
               </>
             )}
           </div>
+
           <div className="flex items-center gap-2">
             {readonly && !isNew && !form.is_deleted && (
               <Button size="sm" onClick={() => setMode("edit")}>Edit</Button>
@@ -384,6 +397,12 @@ export default function TechnologyProfilePage() {
 
           {SECTIONS.map((s) => (
             <TabsContent key={s.key} value={s.key}>
+              {s.key === "identity" && !isNew && (
+                <TechnologyBrandCard
+                  technology={form as unknown as Parameters<typeof TechnologyBrandCard>[0]["technology"]}
+                  disabled={readonly}
+                />
+              )}
               <Card className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {s.fields.map((f) => (
@@ -397,6 +416,7 @@ export default function TechnologyProfilePage() {
                     />
                   ))}
                 </div>
+
                 {s.key === "identity" && (
                   <>
                     <Separator className="my-6" />

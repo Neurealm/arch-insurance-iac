@@ -229,3 +229,115 @@ export function useAuditLog(entityId: string | undefined) {
     },
   });
 }
+
+/* ---------------------- Technology Branding Assets ---------------------- */
+
+export interface UploadBrandArgs {
+  technologyId: string;
+  blob: Blob;
+  mime: string;
+  ext: string;
+  originalFilename: string;
+  width: number;
+  height: number;
+  crop: { top: number; right: number; bottom: number; left: number };
+  scale: number;
+}
+
+export function useUploadTechnologyBrand() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: UploadBrandArgs) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      const ts = Date.now();
+      const path = `technologies/${args.technologyId}/brand-${ts}.${args.ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("etdm-assets")
+        .upload(path, args.blob, { contentType: args.mime, upsert: true, cacheControl: "3600" });
+      if (upErr) throw upErr;
+
+      // Fetch previous storage path to clean up after DB update.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const client = supabase.from(TABLE) as any;
+      const { data: prev } = await client
+        .select("technology_image_storage_path")
+        .eq("id", args.technologyId)
+        .maybeSingle();
+
+      const nowIso = new Date().toISOString();
+      const { data, error } = await client
+        .update({
+          technology_image_url: null, // signed URLs are resolved on read; do not cache
+          technology_image_storage_path: path,
+          technology_image_original_filename: args.originalFilename,
+          technology_image_type: args.mime,
+          technology_image_width: args.width,
+          technology_image_height: args.height,
+          technology_image_crop_metadata: args.crop,
+          technology_image_scale: args.scale,
+          technology_image_last_updated: nowIso,
+          technology_image_last_updated_by: uid,
+          updated_by: uid,
+        })
+        .eq("id", args.technologyId)
+        .select()
+        .single();
+      if (error) throw error;
+
+      // Best-effort cleanup of the previous file
+      const oldPath = prev?.technology_image_storage_path as string | null | undefined;
+      if (oldPath && oldPath !== path) {
+        await supabase.storage.from("etdm-assets").remove([oldPath]).catch(() => {});
+      }
+      return data as Technology;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["etdm-technology"] });
+      qc.invalidateQueries({ queryKey: ["etdm-technologies"] });
+      qc.invalidateQueries({ queryKey: ["etdm-brand-signed-url"] });
+    },
+  });
+}
+
+export function useRemoveTechnologyBrand() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (technologyId: string) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const client = supabase.from(TABLE) as any;
+      const { data: prev } = await client
+        .select("technology_image_storage_path")
+        .eq("id", technologyId)
+        .maybeSingle();
+      const { error } = await client
+        .update({
+          technology_image_url: null,
+          technology_image_storage_path: null,
+          technology_image_original_filename: null,
+          technology_image_type: null,
+          technology_image_width: null,
+          technology_image_height: null,
+          technology_image_crop_metadata: null,
+          technology_image_scale: null,
+          technology_image_last_updated: new Date().toISOString(),
+          technology_image_last_updated_by: uid,
+          updated_by: uid,
+        })
+        .eq("id", technologyId);
+      if (error) throw error;
+      const oldPath = prev?.technology_image_storage_path as string | null | undefined;
+      if (oldPath) {
+        await supabase.storage.from("etdm-assets").remove([oldPath]).catch(() => {});
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["etdm-technology"] });
+      qc.invalidateQueries({ queryKey: ["etdm-technologies"] });
+      qc.invalidateQueries({ queryKey: ["etdm-brand-signed-url"] });
+    },
+  });
+}
+
