@@ -80,6 +80,33 @@ function CommandTopBar() {
   );
 }
 function Divider() { return <div className="h-8 w-px bg-border" />; }
+
+function LiveClockCST() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const dateStr = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    weekday: "short", month: "short", day: "numeric",
+  }).format(now);
+  const timeStr = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false, timeZoneName: "short",
+  }).format(now);
+  return (
+    <div
+      className="h-9 px-3 flex flex-col justify-center rounded-lg border border-border bg-background leading-tight"
+      aria-live="polite"
+      title="Central Time"
+    >
+      <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{dateStr}</div>
+      <div className="text-[13px] font-semibold font-mono tabular-nums" suppressHydrationWarning>{timeStr}</div>
+    </div>
+  );
+}
 function TopField({ label, value, dotColor, icon: Icon, hasChevron }: any) {
   return (
     <div className="flex flex-col">
