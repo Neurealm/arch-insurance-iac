@@ -638,7 +638,7 @@ function ContactIcon({ type }: { type: string }) {
 }
 
 /* ---------------- SECURITY TAB ---------------- */
-function SecurityTab({ userEmail, userUpdatedAt }: { userEmail: string; userUpdatedAt?: string }) {
+function SecurityTab({ userId, userEmail, userUpdatedAt }: { userId: string; userEmail: string; userUpdatedAt?: string }) {
   const [sendingReset, setSendingReset] = useState(false);
   const [signingOutOthers, setSigningOutOthers] = useState(false);
   const [mfaLoading, setMfaLoading] = useState(true);
