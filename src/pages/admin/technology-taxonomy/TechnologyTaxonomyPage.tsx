@@ -240,6 +240,7 @@ export default function TechnologyTaxonomyPage() {
             <FilterMulti label="Lifecycle" values={lifecycle} setValues={(v) => { setLifecycle(v); setPage(0); }} options={[...ETDM_LIFECYCLE_STATUSES]} />
             <FilterMulti label="Criticality" values={criticality} setValues={(v) => { setCriticality(v); setPage(0); }} options={[...ETDM_CRITICALITIES]} />
             <FilterMulti label="Approval" values={approval} setValues={(v) => { setApproval(v); setPage(0); }} options={[...ETDM_APPROVAL_STATUSES]} />
+            <FilterMulti label="Practice" values={practice} setValues={(v) => { setPractice(v); setPage(0); }} options={[...ETDM_PRACTICES]} />
 
             <Select value={active} onValueChange={(v) => { setActive(v as "all" | "active" | "inactive"); setPage(0); }}>
               <SelectTrigger className="h-9 w-[130px]"><SelectValue placeholder="Status" /></SelectTrigger>
