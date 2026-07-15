@@ -593,8 +593,8 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
           title="Open profile"
           className="flex items-center gap-2 min-w-0 flex-1 -mx-1 px-1 py-1 rounded hover:bg-sidebar-accent/60 transition-colors"
         >
-          <span className="h-6 w-6 rounded-full bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold shrink-0">
-            {initials}
+          <span className="h-6 w-6 rounded-full overflow-hidden bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold shrink-0">
+            {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : initials}
           </span>
           <span className="min-w-0 flex-1 text-left text-[12px] font-medium text-sidebar-foreground truncate" title={email || displayName}>
             {displayName}
