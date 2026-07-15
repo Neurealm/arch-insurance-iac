@@ -85,6 +85,7 @@ import PrivilegedAccessDashboard from "./pages/coworkers/iam/PrivilegedAccessDas
 import ReleaseDeploymentRollout from "./pages/coworkers/sre/ReleaseDeploymentRollout.tsx";
 import SloSlaSliMonitoring from "./pages/coworkers/sre/SloSlaSliMonitoring.tsx";
 import CoworkersInfra from "./pages/CoworkersInfra.tsx";
+import CitrixPlatformDigitalCoworkers from "./pages/coworkers/CitrixPlatformDigitalCoworkers.tsx";
 import CoworkersApplicationSupport from "./pages/CoworkersApplicationSupport.tsx";
 import HadoopHealthPrecheckAgent from "./pages/coworkers/appsupport/HadoopHealthPrecheckAgent.tsx";
 import IntegrationMonitoringAgent from "./pages/coworkers/appsupport/IntegrationMonitoringAgent.tsx";
@@ -523,6 +524,8 @@ const App = () => (
           <Route path="/coworkers/site-reliability-engineering/release-deployment-rollout" element={<ReleaseDeploymentRollout />} />
           <Route path="/coworkers/site-reliability-engineering/slo-sla-sli-monitoring" element={<SloSlaSliMonitoring />} />
           <Route path="/coworkers/infrastructure-automation" element={<CoworkersInfra />} />
+          <Route path="/coworkers/citrix-platform-digital-coworkers" element={<CitrixPlatformDigitalCoworkers />} />
+
           <Route path="/coworkers/application-support" element={<CoworkersApplicationSupport />} />
           <Route path="/coworkers/application-support/hadoop-health-precheck-agent" element={<HadoopHealthPrecheckAgent />} />
           <Route path="/coworkers/application-support/integration-monitoring-agent" element={<IntegrationMonitoringAgent />} />
