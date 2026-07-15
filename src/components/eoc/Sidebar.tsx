@@ -282,10 +282,7 @@ const tree: Node[] = [
     label: "Settings",
     icon: Settings,
     to: "/settings",
-    children: [
-      { key: "questionnaires", label: "Questionnaires", icon: ClipboardList, to: "/questionnaires" },
-      { key: "etdm", label: "Technology Taxonomy", icon: Database, to: "/admin/technology-taxonomy" },
-    ],
+    exact: true,
   },
 ];
 
