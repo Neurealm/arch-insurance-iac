@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserProfile, setCachedAvatar } from "@/hooks/useUserProfile";
 import { toast } from "@/hooks/use-toast";
 
 const TIME_ZONES = [
@@ -200,14 +200,27 @@ function ProfileTab({ profile, setProfile, userId, userEmail }: { profile: any; 
     if (!file.type.startsWith("image/")) return toast({ title: "Invalid file", description: "Please choose an image.", variant: "destructive" });
     if (file.size > 5 * 1024 * 1024) return toast({ title: "File too large", description: "Max 5MB.", variant: "destructive" });
     setUploading(true);
-    const ext = file.name.split(".").pop() || "png";
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
     const path = `${userId}/avatar-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
-    if (error) { setUploading(false); return toast({ title: "Upload failed", description: error.message, variant: "destructive" }); }
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) { setUploading(false); return toast({ title: "Upload failed", description: upErr.message, variant: "destructive" }); }
     const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-    set("avatar_url", pub.publicUrl);
+    const url = `${pub.publicUrl}?v=${Date.now()}`; // cache-bust so the new image renders immediately
+
+    // Persist immediately so the avatar sticks even if the user never clicks Save.
+    const { error: dbErr } = await supabase
+      .from("profiles")
+      .update({ avatar_url: url })
+      .eq("user_id", userId);
     setUploading(false);
-    toast({ title: "Photo uploaded", description: "Click Save to keep it." });
+    if (dbErr) return toast({ title: "Save failed", description: dbErr.message, variant: "destructive" });
+
+    set("avatar_url", url);
+    setProfile({ ...(profile ?? {}), avatar_url: url });
+    setCachedAvatar(userId, url); // updates top bar + sidebar instantly
+    // reset file input so re-selecting the same file still fires onChange
+    e.target.value = "";
+    toast({ title: "Photo updated" });
   };
 
   const onSave = async () => {

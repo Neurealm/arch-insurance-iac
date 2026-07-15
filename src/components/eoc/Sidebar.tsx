@@ -559,7 +559,7 @@ function useIsDesktop() {
 }
 
 function UserPill({ collapsed }: { collapsed: boolean }) {
-  const { displayName, initials, email, signOut } = useUserProfile();
+  const { displayName, initials, email, avatarUrl, signOut } = useUserProfile();
   const navigate = useNavigate();
   const handleSignOut = async () => { await signOut(); navigate("/"); };
 
@@ -570,9 +570,9 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
           <button
             title={`${displayName} — open profile`}
             aria-label="Open profile"
-            className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold hover:ring-2 hover:ring-sidebar-accent transition"
+            className="h-7 w-7 rounded-full overflow-hidden bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold hover:ring-2 hover:ring-sidebar-accent transition"
           >
-            {initials}
+            {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : initials}
           </button>
         </AccountPanel>
         <button
@@ -593,8 +593,8 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
           title="Open profile"
           className="flex items-center gap-2 min-w-0 flex-1 -mx-1 px-1 py-1 rounded hover:bg-sidebar-accent/60 transition-colors"
         >
-          <span className="h-6 w-6 rounded-full bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold shrink-0">
-            {initials}
+          <span className="h-6 w-6 rounded-full overflow-hidden bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold shrink-0">
+            {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : initials}
           </span>
           <span className="min-w-0 flex-1 text-left text-[12px] font-medium text-sidebar-foreground truncate" title={email || displayName}>
             {displayName}

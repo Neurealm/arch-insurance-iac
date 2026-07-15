@@ -34,7 +34,7 @@ export default Index;
 
 /* ---------- TOP BAR ---------- */
 function CommandTopBar() {
-  const { displayName, initials, role, signOut } = useUserProfile();
+  const { displayName, initials, role, avatarUrl, signOut } = useUserProfile();
   const navigate = useNavigate();
   return (
     <header className="border-b border-border bg-card">
@@ -64,7 +64,11 @@ function CommandTopBar() {
         </button>
         <AccountPanel>
           <button className="flex items-center gap-2 pl-3 border-l border-border outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-r-lg" aria-label="Open account panel">
-            <div className="h-9 w-9 rounded-full bg-foreground text-background grid place-items-center text-xs font-bold">{initials}</div>
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
+            ) : (
+              <div className="h-9 w-9 rounded-full bg-foreground text-background grid place-items-center text-xs font-bold">{initials}</div>
+            )}
             <div className="leading-tight text-left">
               <div className="text-[13px] font-semibold">{displayName}</div>
               <div className="text-[11px] text-muted-foreground">{role}</div>
