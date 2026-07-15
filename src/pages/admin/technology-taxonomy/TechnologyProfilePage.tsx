@@ -536,6 +536,7 @@ function FieldRenderer({
         />
       ) : null}
 
+      {field.help && !error && <div className="text-xs text-muted-foreground mt-1">{field.help}</div>}
       {error && <div className="text-xs text-destructive mt-1">{error}</div>}
     </div>
   );
