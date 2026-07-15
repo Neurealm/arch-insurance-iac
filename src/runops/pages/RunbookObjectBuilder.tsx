@@ -140,7 +140,7 @@ export default function RunbookObjectBuilder() {
   const [codeTab, setCodeTab] = useState("python");
 
   const currentStep = useMemo(() => STEPS.find((s) => s.id === step)!, [step]);
-  const progressPct = (step / 6) * 100;
+  const progressPct = (step / 7) * 100;
 
   return (
     <div className="flex-1 min-h-0 flex flex-col bg-background">
