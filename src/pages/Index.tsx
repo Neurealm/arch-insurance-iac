@@ -34,7 +34,7 @@ export default Index;
 
 /* ---------- TOP BAR ---------- */
 function CommandTopBar() {
-  const { displayName, initials, role, signOut } = useUserProfile();
+  const { displayName, initials, role, avatarUrl, signOut } = useUserProfile();
   const navigate = useNavigate();
   return (
     <header className="border-b border-border bg-card">
