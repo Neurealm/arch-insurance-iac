@@ -59,6 +59,13 @@ const SECTIONS: { key: string; label: string; fields: Field[] }[] = [
     key: "classification", label: "Classification & Ownership",
     fields: [
       { key: "technology_tower", label: "Technology Tower", type: "text" },
+      {
+        key: "neurealm_practice",
+        label: "Neurealm Practice *",
+        type: "select",
+        options: ETDM_PRACTICES,
+        help: "Select the Neurealm practice primarily responsible for supporting, engineering, modernizing, or operating this technology.",
+      },
       { key: "primary_domain", label: "Primary Domain", type: "select", options: ETDM_MASTER_DOMAINS },
       { key: "secondary_domains", label: "Secondary Domains", type: "multi", options: ETDM_MASTER_DOMAINS },
       { key: "support_group", label: "Support Group", type: "text" },
