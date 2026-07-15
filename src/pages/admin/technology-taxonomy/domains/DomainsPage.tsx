@@ -77,6 +77,7 @@ export default function DomainsPage() {
   const [confirmDelete, setConfirmDelete] = useState<Domain | null>(null);
   const [confirmClone, setConfirmClone] = useState<Domain | null>(null);
   const [confirmActive, setConfirmActive] = useState<{ domain: Domain; next: boolean } | null>(null);
+  const [autoBuildOpen, setAutoBuildOpen] = useState(false);
 
   const filters: DomainFilters = useMemo(() => ({
     search, technology_ids: techIds, master_domain_ids: masterIds,
