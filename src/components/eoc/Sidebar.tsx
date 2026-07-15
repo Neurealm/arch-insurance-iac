@@ -277,7 +277,6 @@ const tree: Node[] = [
   { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers" },
   { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
-  { key: "etdm", label: "Technology Taxonomy", icon: Database, to: "/admin/technology-taxonomy" },
   {
     key: "settings",
     label: "Settings",
@@ -285,6 +284,7 @@ const tree: Node[] = [
     to: "/settings",
     children: [
       { key: "questionnaires", label: "Questionnaires", icon: ClipboardList, to: "/questionnaires" },
+      { key: "etdm", label: "Technology Taxonomy", icon: Database, to: "/admin/technology-taxonomy" },
     ],
   },
 ];

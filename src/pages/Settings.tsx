@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/eoc/AppShell";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings as SettingsIcon, Network, ArrowRight, UserCog, KeyRound } from "lucide-react";
+import { Settings as SettingsIcon, Network, ArrowRight, UserCog, KeyRound, ClipboardList, Database } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
@@ -31,6 +31,10 @@ export default function Settings() {
                 description="Manage Business Units → Practices → Capability Areas → Service Functions → Workflows → Activities → Tasks." />
               <SettingsCard to="/settings/user-management" icon={UserCog} title="User Management"
                 description="Invite users, reset passwords, manage NeuRealm Employee vs Customer categories, platform roles, and review activity." />
+              <SettingsCard to="/questionnaires" icon={ClipboardList} title="Questionnaires"
+                description="Design, publish, and manage assessment questionnaires across programs and workstreams." />
+              <SettingsCard to="/admin/technology-taxonomy" icon={Database} title="Technology Taxonomy"
+                description="Curate the Enterprise Technology Domain Model — technologies, practices, and classifications." />
             </>
           )}
         </div>

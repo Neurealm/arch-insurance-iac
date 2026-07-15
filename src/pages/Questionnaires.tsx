@@ -427,6 +427,11 @@ function QuestionnaireStudio() {
       <div className="absolute top-1/3 -right-32 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl -z-10" />
       <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-sky-400/15 rounded-full blur-3xl -z-10" />
 
+      <div className="px-4 pt-2">
+        <Link to="/settings" className="inline-flex items-center gap-1.5 rounded-md bg-indigo/10 px-3 py-1.5 text-sm font-semibold text-indigo ring-1 ring-indigo/30 hover:bg-indigo/15 transition-colors">
+          <ArrowLeft className="h-4 w-4" /> Back to Settings
+        </Link>
+      </div>
       <div className="flex gap-4 p-2">
         <LeftNav
           programId={programId} workstreamId={workstreamId} questionnaireId={questionnaireId}
