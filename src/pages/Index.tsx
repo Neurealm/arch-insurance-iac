@@ -53,6 +53,7 @@ function CommandTopBar() {
             className="w-full h-9 pl-9 pr-3 rounded-lg border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ai/20"
           />
         </div>
+        <LiveClockCST />
         <button className="relative h-9 w-9 grid place-items-center rounded-lg hover:bg-accent">
           <Bell className="h-4 w-4 text-muted-foreground" />
           <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-status-critical text-[10px] font-bold text-white grid place-items-center">0</span>
