@@ -816,6 +816,489 @@ export type Database = {
           },
         ]
       }
+      etdm_record_audit_log: {
+        Row: {
+          action: string
+          changed_at: string
+          changed_by: string | null
+          changed_fields: string[] | null
+          correlation_id: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          new_values: Json | null
+          previous_values: Json | null
+          reason: string | null
+          source: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          action: string
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          correlation_id?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          new_values?: Json | null
+          previous_values?: Json | null
+          reason?: string | null
+          source?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          action?: string
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          correlation_id?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          new_values?: Json | null
+          previous_values?: Json | null
+          reason?: string | null
+          source?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: []
+      }
+      etdm_technologies: {
+        Row: {
+          agent_required: boolean | null
+          agentless_supported: boolean | null
+          ai_maturity_score: number | null
+          ai_opportunity_summary: string | null
+          ai_playbooks_available: boolean | null
+          ai_ready: boolean | null
+          api_available: boolean | null
+          approval_status: string
+          assessed_by_id: string | null
+          audit_logging_supported: boolean | null
+          authentication_methods: string[] | null
+          authentication_types: string[] | null
+          authorization_model: string | null
+          automation_integrations: Json | null
+          automation_maturity_score: number | null
+          automation_opportunity_summary: string | null
+          automation_ready: boolean | null
+          automations_available: boolean | null
+          available_automation_interfaces: Json | null
+          backup_supported: boolean | null
+          banner_image_url: string | null
+          business_criticality: string | null
+          business_impact_if_unavailable: string | null
+          business_outcome_summary: string | null
+          business_owner_id: string | null
+          business_purpose: string | null
+          category: string | null
+          cli_available: boolean | null
+          cloned_from_technology_id: string | null
+          clustering_supported: boolean | null
+          color_theme: string | null
+          community_url: string | null
+          compliance_standards: string[] | null
+          created_at: string
+          created_by: string | null
+          data_classification: string | null
+          data_integrations: Json | null
+          data_owner_id: string | null
+          data_residency_requirements: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deployment_models: string[] | null
+          description: string | null
+          digital_coworkers_available: boolean | null
+          digital_twin_readiness_score: number | null
+          disaster_recovery_supported: boolean | null
+          documentation_completeness_percentage: number | null
+          documentation_url: string | null
+          edition: string | null
+          effective_date: string | null
+          encryption_at_rest: boolean | null
+          encryption_in_transit: boolean | null
+          end_of_extended_support_date: string | null
+          end_of_life_date: string | null
+          end_of_mainstream_support_date: string | null
+          end_of_sale_date: string | null
+          engineering_owner_id: string | null
+          escalation_group: string | null
+          expiration_date: string | null
+          external_reference_id: string | null
+          general_availability_date: string | null
+          governance_notes: string | null
+          graphql_available: boolean | null
+          high_availability_supported: boolean | null
+          id: string
+          infrastructure_as_code_supported: boolean | null
+          integration_notes: string | null
+          is_active: boolean
+          is_deleted: boolean
+          is_sample: boolean
+          itsm_integrations: Json | null
+          knowledge_articles_available: boolean | null
+          known_security_considerations: string | null
+          last_assessment_date: string | null
+          licensing_model: string | null
+          lifecycle_notes: string | null
+          lifecycle_status: string | null
+          mfa_supported: boolean | null
+          monitoring_integrations: Json | null
+          multi_region_supported: boolean | null
+          native_integrations: Json | null
+          operational_maturity_score: number | null
+          operations_owner_id: string | null
+          overall_maturity_notes: string | null
+          powershell_available: boolean | null
+          primary_domain: string | null
+          product_family: string | null
+          product_name: string | null
+          product_website_url: string | null
+          published_version: number
+          rbac_supported: boolean | null
+          record_steward_id: string | null
+          replacement_technology_id: string | null
+          required_security_controls: Json | null
+          rest_api_available: boolean | null
+          review_date: string | null
+          runbooks_available: boolean | null
+          scalability_model: string | null
+          sdk_available: boolean | null
+          secondary_domains: string[] | null
+          security_certifications: string[] | null
+          security_maturity_score: number | null
+          security_owner_id: string | null
+          short_name: string | null
+          siem_integrations: Json | null
+          slug: string
+          sop_library_available: boolean | null
+          source_of_record: string | null
+          strategic_importance: string | null
+          support_contract_reference: string | null
+          support_group: string | null
+          support_readiness_score: number | null
+          support_url: string | null
+          supported_architectures: string[] | null
+          supported_business_services: Json | null
+          supported_cloud_providers: string[] | null
+          supported_databases: string[] | null
+          supported_hypervisors: string[] | null
+          supported_industries: string[] | null
+          supported_operating_systems: string[] | null
+          tags: string[] | null
+          target_audiences: string[] | null
+          technical_limitations: string | null
+          technical_prerequisites: string | null
+          technology_icon_url: string | null
+          technology_maturity: string | null
+          technology_name: string
+          technology_owner_id: string | null
+          technology_tower: string | null
+          technology_type: string | null
+          tenant_id: string | null
+          tenant_scope: string | null
+          third_party_integrations: Json | null
+          typical_deployment_size: string | null
+          typical_use_cases: Json | null
+          updated_at: string
+          updated_by: string | null
+          upgrade_path: string | null
+          vendor_name: string | null
+          version: string | null
+          visibility: string
+          webhooks_available: boolean | null
+        }
+        Insert: {
+          agent_required?: boolean | null
+          agentless_supported?: boolean | null
+          ai_maturity_score?: number | null
+          ai_opportunity_summary?: string | null
+          ai_playbooks_available?: boolean | null
+          ai_ready?: boolean | null
+          api_available?: boolean | null
+          approval_status?: string
+          assessed_by_id?: string | null
+          audit_logging_supported?: boolean | null
+          authentication_methods?: string[] | null
+          authentication_types?: string[] | null
+          authorization_model?: string | null
+          automation_integrations?: Json | null
+          automation_maturity_score?: number | null
+          automation_opportunity_summary?: string | null
+          automation_ready?: boolean | null
+          automations_available?: boolean | null
+          available_automation_interfaces?: Json | null
+          backup_supported?: boolean | null
+          banner_image_url?: string | null
+          business_criticality?: string | null
+          business_impact_if_unavailable?: string | null
+          business_outcome_summary?: string | null
+          business_owner_id?: string | null
+          business_purpose?: string | null
+          category?: string | null
+          cli_available?: boolean | null
+          cloned_from_technology_id?: string | null
+          clustering_supported?: boolean | null
+          color_theme?: string | null
+          community_url?: string | null
+          compliance_standards?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          data_classification?: string | null
+          data_integrations?: Json | null
+          data_owner_id?: string | null
+          data_residency_requirements?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deployment_models?: string[] | null
+          description?: string | null
+          digital_coworkers_available?: boolean | null
+          digital_twin_readiness_score?: number | null
+          disaster_recovery_supported?: boolean | null
+          documentation_completeness_percentage?: number | null
+          documentation_url?: string | null
+          edition?: string | null
+          effective_date?: string | null
+          encryption_at_rest?: boolean | null
+          encryption_in_transit?: boolean | null
+          end_of_extended_support_date?: string | null
+          end_of_life_date?: string | null
+          end_of_mainstream_support_date?: string | null
+          end_of_sale_date?: string | null
+          engineering_owner_id?: string | null
+          escalation_group?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          general_availability_date?: string | null
+          governance_notes?: string | null
+          graphql_available?: boolean | null
+          high_availability_supported?: boolean | null
+          id?: string
+          infrastructure_as_code_supported?: boolean | null
+          integration_notes?: string | null
+          is_active?: boolean
+          is_deleted?: boolean
+          is_sample?: boolean
+          itsm_integrations?: Json | null
+          knowledge_articles_available?: boolean | null
+          known_security_considerations?: string | null
+          last_assessment_date?: string | null
+          licensing_model?: string | null
+          lifecycle_notes?: string | null
+          lifecycle_status?: string | null
+          mfa_supported?: boolean | null
+          monitoring_integrations?: Json | null
+          multi_region_supported?: boolean | null
+          native_integrations?: Json | null
+          operational_maturity_score?: number | null
+          operations_owner_id?: string | null
+          overall_maturity_notes?: string | null
+          powershell_available?: boolean | null
+          primary_domain?: string | null
+          product_family?: string | null
+          product_name?: string | null
+          product_website_url?: string | null
+          published_version?: number
+          rbac_supported?: boolean | null
+          record_steward_id?: string | null
+          replacement_technology_id?: string | null
+          required_security_controls?: Json | null
+          rest_api_available?: boolean | null
+          review_date?: string | null
+          runbooks_available?: boolean | null
+          scalability_model?: string | null
+          sdk_available?: boolean | null
+          secondary_domains?: string[] | null
+          security_certifications?: string[] | null
+          security_maturity_score?: number | null
+          security_owner_id?: string | null
+          short_name?: string | null
+          siem_integrations?: Json | null
+          slug: string
+          sop_library_available?: boolean | null
+          source_of_record?: string | null
+          strategic_importance?: string | null
+          support_contract_reference?: string | null
+          support_group?: string | null
+          support_readiness_score?: number | null
+          support_url?: string | null
+          supported_architectures?: string[] | null
+          supported_business_services?: Json | null
+          supported_cloud_providers?: string[] | null
+          supported_databases?: string[] | null
+          supported_hypervisors?: string[] | null
+          supported_industries?: string[] | null
+          supported_operating_systems?: string[] | null
+          tags?: string[] | null
+          target_audiences?: string[] | null
+          technical_limitations?: string | null
+          technical_prerequisites?: string | null
+          technology_icon_url?: string | null
+          technology_maturity?: string | null
+          technology_name: string
+          technology_owner_id?: string | null
+          technology_tower?: string | null
+          technology_type?: string | null
+          tenant_id?: string | null
+          tenant_scope?: string | null
+          third_party_integrations?: Json | null
+          typical_deployment_size?: string | null
+          typical_use_cases?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+          upgrade_path?: string | null
+          vendor_name?: string | null
+          version?: string | null
+          visibility?: string
+          webhooks_available?: boolean | null
+        }
+        Update: {
+          agent_required?: boolean | null
+          agentless_supported?: boolean | null
+          ai_maturity_score?: number | null
+          ai_opportunity_summary?: string | null
+          ai_playbooks_available?: boolean | null
+          ai_ready?: boolean | null
+          api_available?: boolean | null
+          approval_status?: string
+          assessed_by_id?: string | null
+          audit_logging_supported?: boolean | null
+          authentication_methods?: string[] | null
+          authentication_types?: string[] | null
+          authorization_model?: string | null
+          automation_integrations?: Json | null
+          automation_maturity_score?: number | null
+          automation_opportunity_summary?: string | null
+          automation_ready?: boolean | null
+          automations_available?: boolean | null
+          available_automation_interfaces?: Json | null
+          backup_supported?: boolean | null
+          banner_image_url?: string | null
+          business_criticality?: string | null
+          business_impact_if_unavailable?: string | null
+          business_outcome_summary?: string | null
+          business_owner_id?: string | null
+          business_purpose?: string | null
+          category?: string | null
+          cli_available?: boolean | null
+          cloned_from_technology_id?: string | null
+          clustering_supported?: boolean | null
+          color_theme?: string | null
+          community_url?: string | null
+          compliance_standards?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          data_classification?: string | null
+          data_integrations?: Json | null
+          data_owner_id?: string | null
+          data_residency_requirements?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deployment_models?: string[] | null
+          description?: string | null
+          digital_coworkers_available?: boolean | null
+          digital_twin_readiness_score?: number | null
+          disaster_recovery_supported?: boolean | null
+          documentation_completeness_percentage?: number | null
+          documentation_url?: string | null
+          edition?: string | null
+          effective_date?: string | null
+          encryption_at_rest?: boolean | null
+          encryption_in_transit?: boolean | null
+          end_of_extended_support_date?: string | null
+          end_of_life_date?: string | null
+          end_of_mainstream_support_date?: string | null
+          end_of_sale_date?: string | null
+          engineering_owner_id?: string | null
+          escalation_group?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          general_availability_date?: string | null
+          governance_notes?: string | null
+          graphql_available?: boolean | null
+          high_availability_supported?: boolean | null
+          id?: string
+          infrastructure_as_code_supported?: boolean | null
+          integration_notes?: string | null
+          is_active?: boolean
+          is_deleted?: boolean
+          is_sample?: boolean
+          itsm_integrations?: Json | null
+          knowledge_articles_available?: boolean | null
+          known_security_considerations?: string | null
+          last_assessment_date?: string | null
+          licensing_model?: string | null
+          lifecycle_notes?: string | null
+          lifecycle_status?: string | null
+          mfa_supported?: boolean | null
+          monitoring_integrations?: Json | null
+          multi_region_supported?: boolean | null
+          native_integrations?: Json | null
+          operational_maturity_score?: number | null
+          operations_owner_id?: string | null
+          overall_maturity_notes?: string | null
+          powershell_available?: boolean | null
+          primary_domain?: string | null
+          product_family?: string | null
+          product_name?: string | null
+          product_website_url?: string | null
+          published_version?: number
+          rbac_supported?: boolean | null
+          record_steward_id?: string | null
+          replacement_technology_id?: string | null
+          required_security_controls?: Json | null
+          rest_api_available?: boolean | null
+          review_date?: string | null
+          runbooks_available?: boolean | null
+          scalability_model?: string | null
+          sdk_available?: boolean | null
+          secondary_domains?: string[] | null
+          security_certifications?: string[] | null
+          security_maturity_score?: number | null
+          security_owner_id?: string | null
+          short_name?: string | null
+          siem_integrations?: Json | null
+          slug?: string
+          sop_library_available?: boolean | null
+          source_of_record?: string | null
+          strategic_importance?: string | null
+          support_contract_reference?: string | null
+          support_group?: string | null
+          support_readiness_score?: number | null
+          support_url?: string | null
+          supported_architectures?: string[] | null
+          supported_business_services?: Json | null
+          supported_cloud_providers?: string[] | null
+          supported_databases?: string[] | null
+          supported_hypervisors?: string[] | null
+          supported_industries?: string[] | null
+          supported_operating_systems?: string[] | null
+          tags?: string[] | null
+          target_audiences?: string[] | null
+          technical_limitations?: string | null
+          technical_prerequisites?: string | null
+          technology_icon_url?: string | null
+          technology_maturity?: string | null
+          technology_name?: string
+          technology_owner_id?: string | null
+          technology_tower?: string | null
+          technology_type?: string | null
+          tenant_id?: string | null
+          tenant_scope?: string | null
+          third_party_integrations?: Json | null
+          typical_deployment_size?: string | null
+          typical_use_cases?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+          upgrade_path?: string | null
+          vendor_name?: string | null
+          version?: string | null
+          visibility?: string
+          webhooks_available?: boolean | null
+        }
+        Relationships: []
+      }
       evidence_files: {
         Row: {
           answer_id: string
@@ -5392,7 +5875,441 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      etdm_technologies_active: {
+        Row: {
+          agent_required: boolean | null
+          agentless_supported: boolean | null
+          ai_maturity_score: number | null
+          ai_opportunity_summary: string | null
+          ai_playbooks_available: boolean | null
+          ai_ready: boolean | null
+          api_available: boolean | null
+          approval_status: string | null
+          assessed_by_id: string | null
+          audit_logging_supported: boolean | null
+          authentication_methods: string[] | null
+          authentication_types: string[] | null
+          authorization_model: string | null
+          automation_integrations: Json | null
+          automation_maturity_score: number | null
+          automation_opportunity_summary: string | null
+          automation_ready: boolean | null
+          automations_available: boolean | null
+          available_automation_interfaces: Json | null
+          backup_supported: boolean | null
+          banner_image_url: string | null
+          business_criticality: string | null
+          business_impact_if_unavailable: string | null
+          business_outcome_summary: string | null
+          business_owner_id: string | null
+          business_purpose: string | null
+          category: string | null
+          cli_available: boolean | null
+          cloned_from_technology_id: string | null
+          clustering_supported: boolean | null
+          color_theme: string | null
+          community_url: string | null
+          compliance_standards: string[] | null
+          created_at: string | null
+          created_by: string | null
+          data_classification: string | null
+          data_integrations: Json | null
+          data_owner_id: string | null
+          data_residency_requirements: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deployment_models: string[] | null
+          description: string | null
+          digital_coworkers_available: boolean | null
+          digital_twin_readiness_score: number | null
+          disaster_recovery_supported: boolean | null
+          documentation_completeness_percentage: number | null
+          documentation_url: string | null
+          edition: string | null
+          effective_date: string | null
+          encryption_at_rest: boolean | null
+          encryption_in_transit: boolean | null
+          end_of_extended_support_date: string | null
+          end_of_life_date: string | null
+          end_of_mainstream_support_date: string | null
+          end_of_sale_date: string | null
+          engineering_owner_id: string | null
+          escalation_group: string | null
+          expiration_date: string | null
+          external_reference_id: string | null
+          general_availability_date: string | null
+          governance_notes: string | null
+          graphql_available: boolean | null
+          high_availability_supported: boolean | null
+          id: string | null
+          infrastructure_as_code_supported: boolean | null
+          integration_notes: string | null
+          is_active: boolean | null
+          is_deleted: boolean | null
+          is_sample: boolean | null
+          itsm_integrations: Json | null
+          knowledge_articles_available: boolean | null
+          known_security_considerations: string | null
+          last_assessment_date: string | null
+          licensing_model: string | null
+          lifecycle_notes: string | null
+          lifecycle_status: string | null
+          mfa_supported: boolean | null
+          monitoring_integrations: Json | null
+          multi_region_supported: boolean | null
+          native_integrations: Json | null
+          operational_maturity_score: number | null
+          operations_owner_id: string | null
+          overall_maturity_notes: string | null
+          powershell_available: boolean | null
+          primary_domain: string | null
+          product_family: string | null
+          product_name: string | null
+          product_website_url: string | null
+          published_version: number | null
+          rbac_supported: boolean | null
+          record_steward_id: string | null
+          replacement_technology_id: string | null
+          required_security_controls: Json | null
+          rest_api_available: boolean | null
+          review_date: string | null
+          runbooks_available: boolean | null
+          scalability_model: string | null
+          sdk_available: boolean | null
+          secondary_domains: string[] | null
+          security_certifications: string[] | null
+          security_maturity_score: number | null
+          security_owner_id: string | null
+          short_name: string | null
+          siem_integrations: Json | null
+          slug: string | null
+          sop_library_available: boolean | null
+          source_of_record: string | null
+          strategic_importance: string | null
+          support_contract_reference: string | null
+          support_group: string | null
+          support_readiness_score: number | null
+          support_url: string | null
+          supported_architectures: string[] | null
+          supported_business_services: Json | null
+          supported_cloud_providers: string[] | null
+          supported_databases: string[] | null
+          supported_hypervisors: string[] | null
+          supported_industries: string[] | null
+          supported_operating_systems: string[] | null
+          tags: string[] | null
+          target_audiences: string[] | null
+          technical_limitations: string | null
+          technical_prerequisites: string | null
+          technology_icon_url: string | null
+          technology_maturity: string | null
+          technology_name: string | null
+          technology_owner_id: string | null
+          technology_tower: string | null
+          technology_type: string | null
+          tenant_id: string | null
+          tenant_scope: string | null
+          third_party_integrations: Json | null
+          typical_deployment_size: string | null
+          typical_use_cases: Json | null
+          updated_at: string | null
+          updated_by: string | null
+          upgrade_path: string | null
+          vendor_name: string | null
+          version: string | null
+          visibility: string | null
+          webhooks_available: boolean | null
+        }
+        Insert: {
+          agent_required?: boolean | null
+          agentless_supported?: boolean | null
+          ai_maturity_score?: number | null
+          ai_opportunity_summary?: string | null
+          ai_playbooks_available?: boolean | null
+          ai_ready?: boolean | null
+          api_available?: boolean | null
+          approval_status?: string | null
+          assessed_by_id?: string | null
+          audit_logging_supported?: boolean | null
+          authentication_methods?: string[] | null
+          authentication_types?: string[] | null
+          authorization_model?: string | null
+          automation_integrations?: Json | null
+          automation_maturity_score?: number | null
+          automation_opportunity_summary?: string | null
+          automation_ready?: boolean | null
+          automations_available?: boolean | null
+          available_automation_interfaces?: Json | null
+          backup_supported?: boolean | null
+          banner_image_url?: string | null
+          business_criticality?: string | null
+          business_impact_if_unavailable?: string | null
+          business_outcome_summary?: string | null
+          business_owner_id?: string | null
+          business_purpose?: string | null
+          category?: string | null
+          cli_available?: boolean | null
+          cloned_from_technology_id?: string | null
+          clustering_supported?: boolean | null
+          color_theme?: string | null
+          community_url?: string | null
+          compliance_standards?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          data_classification?: string | null
+          data_integrations?: Json | null
+          data_owner_id?: string | null
+          data_residency_requirements?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deployment_models?: string[] | null
+          description?: string | null
+          digital_coworkers_available?: boolean | null
+          digital_twin_readiness_score?: number | null
+          disaster_recovery_supported?: boolean | null
+          documentation_completeness_percentage?: number | null
+          documentation_url?: string | null
+          edition?: string | null
+          effective_date?: string | null
+          encryption_at_rest?: boolean | null
+          encryption_in_transit?: boolean | null
+          end_of_extended_support_date?: string | null
+          end_of_life_date?: string | null
+          end_of_mainstream_support_date?: string | null
+          end_of_sale_date?: string | null
+          engineering_owner_id?: string | null
+          escalation_group?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          general_availability_date?: string | null
+          governance_notes?: string | null
+          graphql_available?: boolean | null
+          high_availability_supported?: boolean | null
+          id?: string | null
+          infrastructure_as_code_supported?: boolean | null
+          integration_notes?: string | null
+          is_active?: boolean | null
+          is_deleted?: boolean | null
+          is_sample?: boolean | null
+          itsm_integrations?: Json | null
+          knowledge_articles_available?: boolean | null
+          known_security_considerations?: string | null
+          last_assessment_date?: string | null
+          licensing_model?: string | null
+          lifecycle_notes?: string | null
+          lifecycle_status?: string | null
+          mfa_supported?: boolean | null
+          monitoring_integrations?: Json | null
+          multi_region_supported?: boolean | null
+          native_integrations?: Json | null
+          operational_maturity_score?: number | null
+          operations_owner_id?: string | null
+          overall_maturity_notes?: string | null
+          powershell_available?: boolean | null
+          primary_domain?: string | null
+          product_family?: string | null
+          product_name?: string | null
+          product_website_url?: string | null
+          published_version?: number | null
+          rbac_supported?: boolean | null
+          record_steward_id?: string | null
+          replacement_technology_id?: string | null
+          required_security_controls?: Json | null
+          rest_api_available?: boolean | null
+          review_date?: string | null
+          runbooks_available?: boolean | null
+          scalability_model?: string | null
+          sdk_available?: boolean | null
+          secondary_domains?: string[] | null
+          security_certifications?: string[] | null
+          security_maturity_score?: number | null
+          security_owner_id?: string | null
+          short_name?: string | null
+          siem_integrations?: Json | null
+          slug?: string | null
+          sop_library_available?: boolean | null
+          source_of_record?: string | null
+          strategic_importance?: string | null
+          support_contract_reference?: string | null
+          support_group?: string | null
+          support_readiness_score?: number | null
+          support_url?: string | null
+          supported_architectures?: string[] | null
+          supported_business_services?: Json | null
+          supported_cloud_providers?: string[] | null
+          supported_databases?: string[] | null
+          supported_hypervisors?: string[] | null
+          supported_industries?: string[] | null
+          supported_operating_systems?: string[] | null
+          tags?: string[] | null
+          target_audiences?: string[] | null
+          technical_limitations?: string | null
+          technical_prerequisites?: string | null
+          technology_icon_url?: string | null
+          technology_maturity?: string | null
+          technology_name?: string | null
+          technology_owner_id?: string | null
+          technology_tower?: string | null
+          technology_type?: string | null
+          tenant_id?: string | null
+          tenant_scope?: string | null
+          third_party_integrations?: Json | null
+          typical_deployment_size?: string | null
+          typical_use_cases?: Json | null
+          updated_at?: string | null
+          updated_by?: string | null
+          upgrade_path?: string | null
+          vendor_name?: string | null
+          version?: string | null
+          visibility?: string | null
+          webhooks_available?: boolean | null
+        }
+        Update: {
+          agent_required?: boolean | null
+          agentless_supported?: boolean | null
+          ai_maturity_score?: number | null
+          ai_opportunity_summary?: string | null
+          ai_playbooks_available?: boolean | null
+          ai_ready?: boolean | null
+          api_available?: boolean | null
+          approval_status?: string | null
+          assessed_by_id?: string | null
+          audit_logging_supported?: boolean | null
+          authentication_methods?: string[] | null
+          authentication_types?: string[] | null
+          authorization_model?: string | null
+          automation_integrations?: Json | null
+          automation_maturity_score?: number | null
+          automation_opportunity_summary?: string | null
+          automation_ready?: boolean | null
+          automations_available?: boolean | null
+          available_automation_interfaces?: Json | null
+          backup_supported?: boolean | null
+          banner_image_url?: string | null
+          business_criticality?: string | null
+          business_impact_if_unavailable?: string | null
+          business_outcome_summary?: string | null
+          business_owner_id?: string | null
+          business_purpose?: string | null
+          category?: string | null
+          cli_available?: boolean | null
+          cloned_from_technology_id?: string | null
+          clustering_supported?: boolean | null
+          color_theme?: string | null
+          community_url?: string | null
+          compliance_standards?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          data_classification?: string | null
+          data_integrations?: Json | null
+          data_owner_id?: string | null
+          data_residency_requirements?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deployment_models?: string[] | null
+          description?: string | null
+          digital_coworkers_available?: boolean | null
+          digital_twin_readiness_score?: number | null
+          disaster_recovery_supported?: boolean | null
+          documentation_completeness_percentage?: number | null
+          documentation_url?: string | null
+          edition?: string | null
+          effective_date?: string | null
+          encryption_at_rest?: boolean | null
+          encryption_in_transit?: boolean | null
+          end_of_extended_support_date?: string | null
+          end_of_life_date?: string | null
+          end_of_mainstream_support_date?: string | null
+          end_of_sale_date?: string | null
+          engineering_owner_id?: string | null
+          escalation_group?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          general_availability_date?: string | null
+          governance_notes?: string | null
+          graphql_available?: boolean | null
+          high_availability_supported?: boolean | null
+          id?: string | null
+          infrastructure_as_code_supported?: boolean | null
+          integration_notes?: string | null
+          is_active?: boolean | null
+          is_deleted?: boolean | null
+          is_sample?: boolean | null
+          itsm_integrations?: Json | null
+          knowledge_articles_available?: boolean | null
+          known_security_considerations?: string | null
+          last_assessment_date?: string | null
+          licensing_model?: string | null
+          lifecycle_notes?: string | null
+          lifecycle_status?: string | null
+          mfa_supported?: boolean | null
+          monitoring_integrations?: Json | null
+          multi_region_supported?: boolean | null
+          native_integrations?: Json | null
+          operational_maturity_score?: number | null
+          operations_owner_id?: string | null
+          overall_maturity_notes?: string | null
+          powershell_available?: boolean | null
+          primary_domain?: string | null
+          product_family?: string | null
+          product_name?: string | null
+          product_website_url?: string | null
+          published_version?: number | null
+          rbac_supported?: boolean | null
+          record_steward_id?: string | null
+          replacement_technology_id?: string | null
+          required_security_controls?: Json | null
+          rest_api_available?: boolean | null
+          review_date?: string | null
+          runbooks_available?: boolean | null
+          scalability_model?: string | null
+          sdk_available?: boolean | null
+          secondary_domains?: string[] | null
+          security_certifications?: string[] | null
+          security_maturity_score?: number | null
+          security_owner_id?: string | null
+          short_name?: string | null
+          siem_integrations?: Json | null
+          slug?: string | null
+          sop_library_available?: boolean | null
+          source_of_record?: string | null
+          strategic_importance?: string | null
+          support_contract_reference?: string | null
+          support_group?: string | null
+          support_readiness_score?: number | null
+          support_url?: string | null
+          supported_architectures?: string[] | null
+          supported_business_services?: Json | null
+          supported_cloud_providers?: string[] | null
+          supported_databases?: string[] | null
+          supported_hypervisors?: string[] | null
+          supported_industries?: string[] | null
+          supported_operating_systems?: string[] | null
+          tags?: string[] | null
+          target_audiences?: string[] | null
+          technical_limitations?: string | null
+          technical_prerequisites?: string | null
+          technology_icon_url?: string | null
+          technology_maturity?: string | null
+          technology_name?: string | null
+          technology_owner_id?: string | null
+          technology_tower?: string | null
+          technology_type?: string | null
+          tenant_id?: string | null
+          tenant_scope?: string | null
+          third_party_integrations?: Json | null
+          typical_deployment_size?: string | null
+          typical_use_cases?: Json | null
+          updated_at?: string | null
+          updated_by?: string | null
+          upgrade_path?: string | null
+          vendor_name?: string | null
+          version?: string | null
+          visibility?: string | null
+          webhooks_available?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_get_user_login_history: {
@@ -5419,6 +6336,159 @@ export type Database = {
           session_id: string
           user_agent: string
         }[]
+      }
+      etdm_clone_technology: {
+        Args: { _source_id: string }
+        Returns: {
+          agent_required: boolean | null
+          agentless_supported: boolean | null
+          ai_maturity_score: number | null
+          ai_opportunity_summary: string | null
+          ai_playbooks_available: boolean | null
+          ai_ready: boolean | null
+          api_available: boolean | null
+          approval_status: string
+          assessed_by_id: string | null
+          audit_logging_supported: boolean | null
+          authentication_methods: string[] | null
+          authentication_types: string[] | null
+          authorization_model: string | null
+          automation_integrations: Json | null
+          automation_maturity_score: number | null
+          automation_opportunity_summary: string | null
+          automation_ready: boolean | null
+          automations_available: boolean | null
+          available_automation_interfaces: Json | null
+          backup_supported: boolean | null
+          banner_image_url: string | null
+          business_criticality: string | null
+          business_impact_if_unavailable: string | null
+          business_outcome_summary: string | null
+          business_owner_id: string | null
+          business_purpose: string | null
+          category: string | null
+          cli_available: boolean | null
+          cloned_from_technology_id: string | null
+          clustering_supported: boolean | null
+          color_theme: string | null
+          community_url: string | null
+          compliance_standards: string[] | null
+          created_at: string
+          created_by: string | null
+          data_classification: string | null
+          data_integrations: Json | null
+          data_owner_id: string | null
+          data_residency_requirements: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deployment_models: string[] | null
+          description: string | null
+          digital_coworkers_available: boolean | null
+          digital_twin_readiness_score: number | null
+          disaster_recovery_supported: boolean | null
+          documentation_completeness_percentage: number | null
+          documentation_url: string | null
+          edition: string | null
+          effective_date: string | null
+          encryption_at_rest: boolean | null
+          encryption_in_transit: boolean | null
+          end_of_extended_support_date: string | null
+          end_of_life_date: string | null
+          end_of_mainstream_support_date: string | null
+          end_of_sale_date: string | null
+          engineering_owner_id: string | null
+          escalation_group: string | null
+          expiration_date: string | null
+          external_reference_id: string | null
+          general_availability_date: string | null
+          governance_notes: string | null
+          graphql_available: boolean | null
+          high_availability_supported: boolean | null
+          id: string
+          infrastructure_as_code_supported: boolean | null
+          integration_notes: string | null
+          is_active: boolean
+          is_deleted: boolean
+          is_sample: boolean
+          itsm_integrations: Json | null
+          knowledge_articles_available: boolean | null
+          known_security_considerations: string | null
+          last_assessment_date: string | null
+          licensing_model: string | null
+          lifecycle_notes: string | null
+          lifecycle_status: string | null
+          mfa_supported: boolean | null
+          monitoring_integrations: Json | null
+          multi_region_supported: boolean | null
+          native_integrations: Json | null
+          operational_maturity_score: number | null
+          operations_owner_id: string | null
+          overall_maturity_notes: string | null
+          powershell_available: boolean | null
+          primary_domain: string | null
+          product_family: string | null
+          product_name: string | null
+          product_website_url: string | null
+          published_version: number
+          rbac_supported: boolean | null
+          record_steward_id: string | null
+          replacement_technology_id: string | null
+          required_security_controls: Json | null
+          rest_api_available: boolean | null
+          review_date: string | null
+          runbooks_available: boolean | null
+          scalability_model: string | null
+          sdk_available: boolean | null
+          secondary_domains: string[] | null
+          security_certifications: string[] | null
+          security_maturity_score: number | null
+          security_owner_id: string | null
+          short_name: string | null
+          siem_integrations: Json | null
+          slug: string
+          sop_library_available: boolean | null
+          source_of_record: string | null
+          strategic_importance: string | null
+          support_contract_reference: string | null
+          support_group: string | null
+          support_readiness_score: number | null
+          support_url: string | null
+          supported_architectures: string[] | null
+          supported_business_services: Json | null
+          supported_cloud_providers: string[] | null
+          supported_databases: string[] | null
+          supported_hypervisors: string[] | null
+          supported_industries: string[] | null
+          supported_operating_systems: string[] | null
+          tags: string[] | null
+          target_audiences: string[] | null
+          technical_limitations: string | null
+          technical_prerequisites: string | null
+          technology_icon_url: string | null
+          technology_maturity: string | null
+          technology_name: string
+          technology_owner_id: string | null
+          technology_tower: string | null
+          technology_type: string | null
+          tenant_id: string | null
+          tenant_scope: string | null
+          third_party_integrations: Json | null
+          typical_deployment_size: string | null
+          typical_use_cases: Json | null
+          updated_at: string
+          updated_by: string | null
+          upgrade_path: string | null
+          vendor_name: string | null
+          version: string | null
+          visibility: string
+          webhooks_available: boolean | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "etdm_technologies"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       has_role: {
         Args: {
