@@ -605,7 +605,7 @@ const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "ADMIN WORKSPACE", keys: ["questionnaires", "services", "crm", "settings", "auth-orch"] },
 ];
 
-const ADMIN_ONLY_KEYS = new Set(["questionnaires", "crm"]);
+const ADMIN_ONLY_KEYS = new Set(["questionnaires", "crm", "etdm"]);
 
 
 function findActiveTrail(nodes: Node[], pathname: string, trail: string[] = []): string[] | null {
