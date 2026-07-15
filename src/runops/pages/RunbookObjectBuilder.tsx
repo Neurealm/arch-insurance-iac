@@ -387,7 +387,8 @@ export default function RunbookObjectBuilder() {
             </Card>
           )}
 
-          {step === 6 && <ExecutionTimeline />}
+          {step === 6 && <ImpactModelCanvas />}
+          {step === 7 && <ExecutionTimeline />}
 
           <div className="flex justify-between pt-2">
             <Button
@@ -398,11 +399,12 @@ export default function RunbookObjectBuilder() {
               <ArrowLeft className="h-4 w-4 mr-1" /> Back
             </Button>
             <Button
-              disabled={step === 6}
-              onClick={() => setStep((s) => (Math.min(6, s + 1) as StepId))}
+              disabled={step === 7}
+              onClick={() => setStep((s) => (Math.min(7, s + 1) as StepId))}
               className="bg-indigo hover:bg-indigo/90 text-indigo-foreground"
             >
-              Next: {STEPS[Math.min(step, 5)].title} <ArrowRight className="h-4 w-4 ml-1" />
+              Next: {STEPS[Math.min(step, 6)].title} <ArrowRight className="h-4 w-4 ml-1" />
+            </Button>
             </Button>
           </div>
         </main>
