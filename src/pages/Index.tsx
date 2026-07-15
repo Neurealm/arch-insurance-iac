@@ -2,6 +2,7 @@ import { AppShell } from "@/components/eoc/AppShell";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
   Search, Bell, HelpCircle, ChevronDown, Star, ArrowRight, ChevronRight,
   Sparkles, ShieldCheck, CheckCircle2, Activity, Database, Cloud, Box,
