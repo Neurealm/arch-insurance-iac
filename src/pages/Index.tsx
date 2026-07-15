@@ -94,7 +94,7 @@ function LiveClockCST() {
   const timeStr = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/Chicago",
     hour: "2-digit", minute: "2-digit", second: "2-digit",
-    hour12: false, timeZoneName: "short",
+    hour12: true, timeZoneName: "short",
   }).format(now);
   return (
     <div
