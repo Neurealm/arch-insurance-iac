@@ -570,9 +570,9 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
           <button
             title={`${displayName} — open profile`}
             aria-label="Open profile"
-            className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold hover:ring-2 hover:ring-sidebar-accent transition"
+            className="h-7 w-7 rounded-full overflow-hidden bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold hover:ring-2 hover:ring-sidebar-accent transition"
           >
-            {initials}
+            {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : initials}
           </button>
         </AccountPanel>
         <button
