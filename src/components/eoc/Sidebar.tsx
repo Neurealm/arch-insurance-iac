@@ -276,14 +276,17 @@ const tree: Node[] = [
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
   { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers" },
-  { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
   {
     key: "settings",
     label: "Settings",
     icon: Settings,
     to: "/settings",
     exact: true,
+    children: [
+      { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
+    ],
   },
+
 ];
 
 /* ---------- Quick actions ---------- */
