@@ -152,11 +152,11 @@ function AccountPanelBody({ onRequestClose }: { onRequestClose: () => void }) {
       </div>
 
       <Tabs value={tab} onValueChange={setTab} className="mt-2">
-        <TabsList className="grid grid-cols-4 w-full">
-          <TabsTrigger value="profile"><UserIcon className="h-4 w-4 mr-1.5" />Profile</TabsTrigger>
-          <TabsTrigger value="availability"><CalendarClock className="h-4 w-4 mr-1.5" />Availability</TabsTrigger>
-          <TabsTrigger value="notifications"><Bell className="h-4 w-4 mr-1.5" />Notifications</TabsTrigger>
-          <TabsTrigger value="security"><ShieldCheck className="h-4 w-4 mr-1.5" />Security</TabsTrigger>
+        <TabsList className="grid grid-cols-4 w-full h-9">
+          <TabsTrigger value="profile" className="text-xs"><UserIcon className="h-3.5 w-3.5 mr-1" />Profile</TabsTrigger>
+          <TabsTrigger value="availability" className="text-xs"><CalendarClock className="h-3.5 w-3.5 mr-1" />Hours</TabsTrigger>
+          <TabsTrigger value="notifications" className="text-xs"><Bell className="h-3.5 w-3.5 mr-1" />Alerts</TabsTrigger>
+          <TabsTrigger value="security" className="text-xs"><ShieldCheck className="h-3.5 w-3.5 mr-1" />Security</TabsTrigger>
         </TabsList>
 
         <div className="mt-6">
