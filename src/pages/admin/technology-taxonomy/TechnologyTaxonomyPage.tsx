@@ -331,6 +331,7 @@ export default function TechnologyTaxonomyPage() {
                 {columns.version && <TableHead>Version</TableHead>}
                 {columns.lifecycle && <TableHead>Lifecycle</TableHead>}
                 {columns.criticality && <TableHead>Criticality</TableHead>}
+                {columns.practice && <TableHead className="cursor-pointer" onClick={() => toggleSort("neurealm_practice")}>Practice</TableHead>}
                 {columns.approval && <TableHead>Approval</TableHead>}
                 {columns.active && <TableHead>Active</TableHead>}
                 {columns.modified && <TableHead className="cursor-pointer" onClick={() => toggleSort("updated_at")}>Last Modified</TableHead>}
