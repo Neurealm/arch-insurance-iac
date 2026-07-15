@@ -91,6 +91,7 @@ export function useTechnologies(f: TechFilters) {
       if (f.lifecycle_status?.length) q = q.in("lifecycle_status", f.lifecycle_status);
       if (f.business_criticality?.length) q = q.in("business_criticality", f.business_criticality);
       if (f.approval_status?.length) q = q.in("approval_status", f.approval_status);
+      if (f.neurealm_practice?.length) q = q.in("neurealm_practice", f.neurealm_practice);
       if (f.active === "active") q = q.eq("is_active", true);
       if (f.active === "inactive") q = q.eq("is_active", false);
 
