@@ -279,6 +279,7 @@ const tree: Node[] = [
   { key: "questionnaires", label: "Questionnaires", icon: ClipboardList, to: "/questionnaires" },
   { key: "services",   label: "Business Services",   icon: Boxes,         to: "/itsm/exec-biz-ops/business-services" },
   { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
+  { key: "etdm", label: "Technology Taxonomy", icon: Database, to: "/admin/technology-taxonomy" },
   { key: "settings",   label: "Settings",            icon: Settings,      to: "/settings", exact: true },
   { key: "auth-orch",  label: "Auth Orchestration",  icon: ShieldCheck,   to: "/auth-orchestration" },
 ];
