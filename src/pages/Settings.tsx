@@ -35,6 +35,8 @@ export default function Settings() {
                 description="Design, publish, and manage assessment questionnaires across programs and workstreams." />
               <SettingsCard to="/admin/technology-taxonomy" icon={Database} title="Technology Taxonomy"
                 description="Curate the Enterprise Technology Domain Model — technologies, practices, and classifications." />
+              <SettingsCard to="/admin/technology-taxonomy/domains" icon={Database} title="Domains"
+                description="Manage the Domain records that describe how each Technology participates in the ETDM taxonomy." />
             </>
           )}
         </div>

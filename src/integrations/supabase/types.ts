@@ -816,6 +816,164 @@ export type Database = {
           },
         ]
       }
+      etdm_domains: {
+        Row: {
+          approval_status: Database["public"]["Enums"]["etdm_domain_approval"]
+          business_criticality: Database["public"]["Enums"]["etdm_domain_criticality"]
+          business_purpose: string | null
+          cloned_from_domain_id: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          description: string | null
+          display_order: number
+          domain_display_name: string
+          effective_date: string | null
+          expiration_date: string | null
+          external_reference_id: string | null
+          governance_notes: string | null
+          id: string
+          is_active: boolean
+          is_deleted: boolean
+          lifecycle_status: Database["public"]["Enums"]["etdm_domain_lifecycle"]
+          master_domain_id: string
+          published_version: number
+          review_date: string | null
+          scope_summary: string | null
+          short_name: string | null
+          slug: string
+          source_of_record: string | null
+          tags: string[]
+          technology_id: string
+          tenant_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          approval_status?: Database["public"]["Enums"]["etdm_domain_approval"]
+          business_criticality?: Database["public"]["Enums"]["etdm_domain_criticality"]
+          business_purpose?: string | null
+          cloned_from_domain_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          description?: string | null
+          display_order?: number
+          domain_display_name: string
+          effective_date?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          governance_notes?: string | null
+          id?: string
+          is_active?: boolean
+          is_deleted?: boolean
+          lifecycle_status?: Database["public"]["Enums"]["etdm_domain_lifecycle"]
+          master_domain_id: string
+          published_version?: number
+          review_date?: string | null
+          scope_summary?: string | null
+          short_name?: string | null
+          slug: string
+          source_of_record?: string | null
+          tags?: string[]
+          technology_id: string
+          tenant_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          approval_status?: Database["public"]["Enums"]["etdm_domain_approval"]
+          business_criticality?: Database["public"]["Enums"]["etdm_domain_criticality"]
+          business_purpose?: string | null
+          cloned_from_domain_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          description?: string | null
+          display_order?: number
+          domain_display_name?: string
+          effective_date?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          governance_notes?: string | null
+          id?: string
+          is_active?: boolean
+          is_deleted?: boolean
+          lifecycle_status?: Database["public"]["Enums"]["etdm_domain_lifecycle"]
+          master_domain_id?: string
+          published_version?: number
+          review_date?: string | null
+          scope_summary?: string | null
+          short_name?: string | null
+          slug?: string
+          source_of_record?: string | null
+          tags?: string[]
+          technology_id?: string
+          tenant_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "etdm_domains_cloned_from_domain_id_fkey"
+            columns: ["cloned_from_domain_id"]
+            isOneToOne: false
+            referencedRelation: "etdm_domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "etdm_domains_master_domain_id_fkey"
+            columns: ["master_domain_id"]
+            isOneToOne: false
+            referencedRelation: "etdm_master_domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "etdm_domains_technology_id_fkey"
+            columns: ["technology_id"]
+            isOneToOne: false
+            referencedRelation: "etdm_technologies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "etdm_domains_technology_id_fkey"
+            columns: ["technology_id"]
+            isOneToOne: false
+            referencedRelation: "etdm_technologies_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      etdm_master_domains: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       etdm_record_audit_log: {
         Row: {
           action: string
@@ -6370,6 +6528,48 @@ export type Database = {
           user_agent: string
         }[]
       }
+      etdm_clone_domain: {
+        Args: { _source_id: string }
+        Returns: {
+          approval_status: Database["public"]["Enums"]["etdm_domain_approval"]
+          business_criticality: Database["public"]["Enums"]["etdm_domain_criticality"]
+          business_purpose: string | null
+          cloned_from_domain_id: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          description: string | null
+          display_order: number
+          domain_display_name: string
+          effective_date: string | null
+          expiration_date: string | null
+          external_reference_id: string | null
+          governance_notes: string | null
+          id: string
+          is_active: boolean
+          is_deleted: boolean
+          lifecycle_status: Database["public"]["Enums"]["etdm_domain_lifecycle"]
+          master_domain_id: string
+          published_version: number
+          review_date: string | null
+          scope_summary: string | null
+          short_name: string | null
+          slug: string
+          source_of_record: string | null
+          tags: string[]
+          technology_id: string
+          tenant_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "etdm_domains"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       etdm_clone_technology: {
         Args: { _source_id: string }
         Returns: {
@@ -6533,6 +6733,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      etdm_reorder_domains: {
+        Args: { _ordered_ids: string[]; _technology_id: string }
+        Returns: undefined
       }
       has_role: {
         Args: {
@@ -6706,6 +6910,28 @@ export type Database = {
         | "Deferred"
         | "Not Applicable"
       app_role: "platform_admin" | "platform_support"
+      etdm_domain_approval:
+        | "Draft"
+        | "In Review"
+        | "Approved"
+        | "Rejected"
+        | "Retired"
+      etdm_domain_criticality:
+        | "Mission Critical"
+        | "Business Critical"
+        | "Important"
+        | "Standard"
+        | "Noncritical"
+      etdm_domain_lifecycle:
+        | "Emerging"
+        | "Evaluation"
+        | "Strategic"
+        | "Active"
+        | "Maintenance"
+        | "Legacy"
+        | "Deprecated"
+        | "End of Support"
+        | "Retired"
       runops_approval_state:
         | "Pending"
         | "Approved"
@@ -6958,6 +7184,31 @@ export const Constants = {
         "Not Applicable",
       ],
       app_role: ["platform_admin", "platform_support"],
+      etdm_domain_approval: [
+        "Draft",
+        "In Review",
+        "Approved",
+        "Rejected",
+        "Retired",
+      ],
+      etdm_domain_criticality: [
+        "Mission Critical",
+        "Business Critical",
+        "Important",
+        "Standard",
+        "Noncritical",
+      ],
+      etdm_domain_lifecycle: [
+        "Emerging",
+        "Evaluation",
+        "Strategic",
+        "Active",
+        "Maintenance",
+        "Legacy",
+        "Deprecated",
+        "End of Support",
+        "Retired",
+      ],
       runops_approval_state: [
         "Pending",
         "Approved",

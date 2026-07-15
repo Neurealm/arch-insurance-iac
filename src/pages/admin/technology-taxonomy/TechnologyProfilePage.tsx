@@ -25,6 +25,7 @@ import {
 } from "@/lib/etdm/constants";
 import { TechnologyBrand } from "@/components/etdm/TechnologyBrand";
 import TechnologyBrandCard from "@/components/etdm/TechnologyBrandCard";
+import DomainsTab from "@/components/etdm/DomainsTab";
 
 
 type Mode = "view" | "edit" | "new";
@@ -391,9 +392,16 @@ export default function TechnologyProfilePage() {
         <Tabs defaultValue="identity">
           <TabsList className="flex-wrap h-auto justify-start">
             {SECTIONS.map((s) => <TabsTrigger key={s.key} value={s.key}>{s.label}</TabsTrigger>)}
+            {!isNew && <TabsTrigger value="__domains">Domains</TabsTrigger>}
             {!isNew && <TabsTrigger value="__system">System</TabsTrigger>}
             {!isNew && <TabsTrigger value="__history">History</TabsTrigger>}
           </TabsList>
+
+          {!isNew && (
+            <TabsContent value="__domains">
+              <DomainsTab technologyId={technologyId!} disabled={form.is_deleted} />
+            </TabsContent>
+          )}
 
           {SECTIONS.map((s) => (
             <TabsContent key={s.key} value={s.key}>
