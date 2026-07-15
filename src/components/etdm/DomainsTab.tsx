@@ -36,12 +36,14 @@ import AutoBuildDomainsDialog from "./AutoBuildDomainsDialog";
 
 interface Props {
   technologyId: string;
+  technologyName?: string;
   disabled?: boolean;
 }
 
-export default function DomainsTab({ technologyId, disabled }: Props) {
+export default function DomainsTab({ technologyId, technologyName, disabled }: Props) {
   const nav = useNavigate();
   const { data, isLoading, isError, refetch } = useDomainsForTechnology(technologyId);
+  const { data: masters = [] } = useMasterDomains();
   const reorder = useReorderDomains();
   const setActive = useSetDomainActive();
   const clone = useCloneDomain();
@@ -54,6 +56,16 @@ export default function DomainsTab({ technologyId, disabled }: Props) {
   const [confirmDelete, setConfirmDelete] = useState<Domain | null>(null);
   const [confirmClone, setConfirmClone] = useState<Domain | null>(null);
   const [confirmActive, setConfirmActive] = useState<{ domain: Domain; next: boolean } | null>(null);
+  const [autoBuildOpen, setAutoBuildOpen] = useState(false);
+
+  const coverageCount = useMemo(() => {
+    const activeMasterIds = new Set(masters.filter((m) => m.is_active).map((m) => m.id));
+    const covered = new Set(
+      rows.filter((r) => activeMasterIds.has(r.master_domain_id)).map((r) => r.master_domain_id),
+    );
+    return covered.size;
+  }, [rows, masters]);
+  const coverageTotal = masters.length || 16;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
