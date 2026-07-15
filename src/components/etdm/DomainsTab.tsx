@@ -22,15 +22,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  Plus, GripVertical, MoreVertical, Eye, Pencil, Copy, Power, Trash2,
+  Plus, GripVertical, MoreVertical, Eye, Pencil, Copy, Power, Trash2, Sparkles,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   useDomainsForTechnology, useReorderDomains, useSetDomainActive, useCloneDomain,
-  useSoftDeleteDomain, type Domain,
+  useSoftDeleteDomain, useMasterDomains, type Domain,
 } from "@/hooks/etdm/useDomains";
 import {
   LifecycleBadge, ApprovalBadge, CriticalityBadge, ActiveBadge,
 } from "./DomainBadges";
+import AutoBuildDomainsDialog from "./AutoBuildDomainsDialog";
 
 interface Props {
   technologyId: string;
