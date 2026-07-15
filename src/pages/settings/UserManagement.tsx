@@ -122,6 +122,10 @@ export default function UserManagement() {
   const [activityDays, setActivityDays] = useState<number>(7);
   const [actionBusy, setActionBusy] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteFirst, setInviteFirst] = useState("");
+  const [inviteLast, setInviteLast] = useState("");
+  const [inviteJob, setInviteJob] = useState("");
+  const [inviteDept, setInviteDept] = useState("");
   const [inviteResult, setInviteResult] = useState<{ email: string; tempPassword: string; emailSent: boolean } | null>(null);
 
   const invoke = async (action: string, payload: Record<string, unknown> = {}) => {
@@ -241,10 +245,20 @@ export default function UserManagement() {
     if (!email) return;
     setActionBusy(true);
     try {
-      const res = await invoke("invite_user", { email });
+      const first = inviteFirst.trim();
+      const last = inviteLast.trim();
+      const full_name = [first, last].filter(Boolean).join(" ") || undefined;
+      const res = await invoke("invite_user", {
+        email,
+        full_name,
+        first_name: first || undefined,
+        last_name: last || undefined,
+        job_title: inviteJob.trim() || undefined,
+        department: inviteDept.trim() || undefined,
+      });
       setInviteResult({ email: res.email ?? email, tempPassword: res.temp_password, emailSent: !!res.email_sent });
       toast.success(res.email_sent ? `Invite email sent to ${email}` : `Account created for ${email} — email failed, share the password manually`);
-      setInviteEmail("");
+      setInviteEmail(""); setInviteFirst(""); setInviteLast(""); setInviteJob(""); setInviteDept("");
       await load();
     } catch (e: any) {
       toast.error(e.message ?? "Invite failed");
