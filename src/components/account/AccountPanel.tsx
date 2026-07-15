@@ -116,7 +116,7 @@ function AccountPanelBody({ onRequestClose }: { onRequestClose: () => void }) {
 
   return (
     <>
-      <DrawerHeader className="px-0 pt-6">
+      <div className="pt-6 pb-2">
         <div className="flex items-center gap-4">
           {profile?.avatar_url ? (
             <img src={profile.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover border" />
@@ -126,13 +126,13 @@ function AccountPanelBody({ onRequestClose }: { onRequestClose: () => void }) {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <DrawerTitle className="text-xl">{displayName}</DrawerTitle>
-            <DrawerDescription className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold leading-tight truncate">{displayName}</h2>
+            <div className="mt-0.5 flex items-center gap-2 text-sm text-muted-foreground">
               <span className="truncate">{email}</span>
               <Badge variant="outline" className="gap-1 text-[10px]">
                 <BadgeCheck className="h-3 w-3 text-status-healthy" /> Verified
               </Badge>
-            </DrawerDescription>
+            </div>
           </div>
           <Button
             variant="ghost"
@@ -149,7 +149,7 @@ function AccountPanelBody({ onRequestClose }: { onRequestClose: () => void }) {
             Finish setting up your profile so teammates can reach you the right way.
           </div>
         )}
-      </DrawerHeader>
+      </div>
 
       <Tabs value={tab} onValueChange={setTab} className="mt-2">
         <TabsList className="grid grid-cols-4 w-full">
