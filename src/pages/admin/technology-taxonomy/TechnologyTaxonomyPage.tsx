@@ -70,6 +70,7 @@ export default function TechnologyTaxonomyPage() {
   const [lifecycle, setLifecycle] = useState<string[]>(sp.get("lc")?.split(",").filter(Boolean) ?? []);
   const [criticality, setCriticality] = useState<string[]>(sp.get("cr")?.split(",").filter(Boolean) ?? []);
   const [approval, setApproval] = useState<string[]>(sp.get("ap")?.split(",").filter(Boolean) ?? []);
+  const [practice, setPractice] = useState<string[]>(sp.get("pr")?.split(",").filter(Boolean) ?? []);
   const [active, setActive] = useState<"all" | "active" | "inactive">((sp.get("a") as "all" | "active" | "inactive") ?? "all");
   const [showDeleted, setShowDeleted] = useState(sp.get("del") === "1");
   const [pageSize, setPageSize] = useState<number>(Number(sp.get("ps") ?? 25));
