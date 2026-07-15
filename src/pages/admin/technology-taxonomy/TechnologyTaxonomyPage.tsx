@@ -302,6 +302,7 @@ export default function TechnologyTaxonomyPage() {
               <div className="flex items-center gap-2">
                 <Button size="sm" variant="outline" onClick={() => bulkSetActive(true)}>Activate</Button>
                 <Button size="sm" variant="outline" onClick={() => bulkSetActive(false)}>Deactivate</Button>
+                <Button size="sm" variant="outline" onClick={() => { setBulkPracticeValue(""); setBulkPracticeOpen(true); }}>Assign Practice</Button>
                 <Button size="sm" variant="outline" onClick={doExport}>Export</Button>
                 <Button size="sm" variant="destructive" onClick={bulkDelete}>Soft delete</Button>
                 <Button size="sm" variant="ghost" onClick={() => setSelection(new Set())}>Clear</Button>
