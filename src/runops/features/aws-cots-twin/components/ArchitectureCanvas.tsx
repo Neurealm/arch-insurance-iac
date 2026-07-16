@@ -44,6 +44,7 @@ import {
   type HealthStatus,
   type ResourceRelationship,
 } from "..";
+import { ResourceHoverCard } from "./ResourceHoverCard";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                      */
@@ -53,6 +54,8 @@ export interface ArchitectureCanvasProps {
   selectedResourceId: string | null;
   onSelectResource: (id: string | null) => void;
   onSelectRelationship?: (id: string | null) => void;
+  /** Fires the "Open resource details" action from the hover card. */
+  onOpenResourceDetails?: (id: string) => void;
 }
 
 type CanvasHealth =
@@ -65,6 +68,8 @@ interface ResourceNodeData {
   azLabel: string;
   alertCount: number;
   selected: boolean;
+  onOpenDetails?: (id: string) => void;
+  roleLabel?: string;
 }
 
 interface BoundaryNodeData {
@@ -195,8 +200,9 @@ const ResourceNode = memo(function ResourceNode({ data }: NodeProps<ResourceNode
   const Marker = styles.marker;
   const isSynth = "__synthetic" in r;
   const roleTag = isSynth && r.synthetic_role ? r.synthetic_role : undefined;
+  const realId = isSynth ? (r as SyntheticResource).resource_id : r.id;
 
-  return (
+  const card = (
     <div
       role="button"
       tabIndex={0}
@@ -204,6 +210,7 @@ const ResourceNode = memo(function ResourceNode({ data }: NodeProps<ResourceNode
       className={cn(
         "group relative flex h-full w-full flex-col rounded-md border bg-white px-2 py-1.5 shadow-sm transition-all",
         "hover:shadow-md hover:-translate-y-[0.5px]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1",
         styles.border,
         styles.borderStyle === "dashed" && "border-dashed",
         styles.borderStyle === "dotted" && "border-dotted",
@@ -241,6 +248,20 @@ const ResourceNode = memo(function ResourceNode({ data }: NodeProps<ResourceNode
         )}
       </div>
     </div>
+  );
+
+  // "Internet" is a purely visual anchor with no repository record — skip
+  // the hover card for it so we don't fire a lookup that will 404.
+  if (r.resource_type === "Internet") return card;
+
+  return (
+    <ResourceHoverCard
+      resourceId={realId}
+      roleLabel={data.roleLabel ?? roleTag}
+      onOpenDetails={data.onOpenDetails}
+    >
+      {card}
+    </ResourceHoverCard>
   );
 });
 
@@ -315,7 +336,7 @@ export function ArchitectureCanvas(props: ArchitectureCanvasProps) {
   );
 }
 
-function ArchitectureCanvasInner({ selectedResourceId, onSelectResource, onSelectRelationship }: ArchitectureCanvasProps) {
+function ArchitectureCanvasInner({ selectedResourceId, onSelectResource, onSelectRelationship, onOpenResourceDetails }: ArchitectureCanvasProps) {
   const [resources, setResources] = useState<AwsResource[]>([]);
   const [relationships, setRelationships] = useState<ResourceRelationship[]>([]);
   const [alertCountByResource, setAlertCountByResource] = useState<Record<string, number>>({});
@@ -482,11 +503,13 @@ function ArchitectureCanvasInner({ selectedResourceId, onSelectResource, onSelec
           azLabel,
           alertCount,
           selected: selectedResourceId === targetId,
+          onOpenDetails: onOpenResourceDetails,
+          roleLabel: isSynth ? (res as SyntheticResource).synthetic_role : undefined,
         },
       };
       return node;
     }).filter(Boolean) as Node<ResourceNodeData>[];
-  }, [placements, byId, syntheticById, loaded, alertCountByResource, selectedResourceId]);
+  }, [placements, byId, syntheticById, loaded, alertCountByResource, selectedResourceId, onOpenResourceDetails]);
 
   const allNodes = useMemo<Node[]>(() => [...boundaryNodes, ...resourceNodes], [boundaryNodes, resourceNodes]);
   const [nodes, setNodes, onNodesChange] = useNodesState<any>(allNodes);

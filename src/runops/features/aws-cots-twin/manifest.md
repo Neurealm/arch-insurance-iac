@@ -4,14 +4,14 @@
 - **Subject:** COTS Application, Single Region, Dual Availability Zone
 - **Route:** `/runops/aws-cots-digital-twin`
 - **Nav label:** AWS COTS Digital Twin (under Services)
-- **Current build phase:** Phase 3 — Interactive architecture canvas
+- **Current build phase:** Phase 4 — Standardized resource hover cards
 - **Completed phases:**
   - Prompt 0 — Project audit, guardrails, feature scaffold, route reservation, placeholder page
   - Prompt 1 — Typed data model, repository interface, in-memory demo repository, deterministic seed dataset
   - Prompt 2 — Page shell (header, business-service summary, responsive layout, URL-driven selection)
-  - Prompt 3 — React Flow architecture canvas with nested boundaries (Enterprise → Account → Region → VPC → AZ → Subnet), regional edge/shared services, animated traffic flow (Internet → Route 53 → WAF → ALB → Target Group → EC2 → RDS), progressive-disclosure dependency + observability edges, health-encoded resource nodes (color + border style + status text + marker icon + tooltip), pan / zoom / fit / reset / minimap / fullscreen, click-to-select resource, double-click-to-center, click-to-select relationship, compact legend
+  - Prompt 3 — React Flow architecture canvas (nested boundaries, animated traffic, progressive-disclosure edges, health-encoded nodes, pan/zoom/fit/reset/minimap/fullscreen, click/double-click/edge selection, compact legend)
+  - Prompt 4 — Reusable `ResourceHoverCard`: header (icon, name, type, health, env, AZ, criticality) + Identity (id, ARN with copy, account, region, AZ, application, business service, owner, support group, cost center, tags) + type-specific Configuration (EC2/EBS/RDS/ALB/VPC/NAT/ASG/S3/WAF/Secrets/KMS/ACM + fallback) + Telemetry rows with SVG sparkline + threshold labels + trend arrows + Alerts (count, severity badge, top alert, first detected, duration, team, ack) + Relationships (upstream/downstream/connected/blast radius tiles) + Operations (last config change, patch, backup, compliance, incidents, changes, related runbook, automation eligibility) + 9 actions ("Open details" functional, others fire truthful "coming later" toast). Radix HoverCard with 220ms open delay, 140ms close delay, viewport-collision avoidance, keyboard focus support. Wired into canvas `ResourceNode` (skipped for the synthetic Internet node). Right details panel now shows a stub summary when a resource is selected.
 - **Pending phases:**
-  - Prompt 4 — Standardized resource hover cards
   - Prompt 5 — Persistent resource details panel (12 tabs)
 - **Data layer:**
   - Types: `src/runops/features/aws-cots-twin/types.ts`
