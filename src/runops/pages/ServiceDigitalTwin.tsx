@@ -170,6 +170,18 @@ export default function ServiceDigitalTwin() {
   const serviceComponents: Component[] = ops.components.filter((c) => service.componentIds.includes(c.id));
   const activeIncident = ops.incident.serviceId === service.id && ops.incident.state !== "Resolved" ? ops.incident : undefined;
   const serviceRunbooks: Runbook[] = [ops.runbook].filter((r) => r.serviceId === service.id);
+  if (service.id === "svc-hc-clinical-care-delivery") {
+    serviceRunbooks.push({
+      id: "RB-0117",
+      title: "Clinical Interface Queue Saturation and Message Recovery",
+      version: "v2.4",
+      state: "Certified",
+      autonomy: "Approval Gated Automation",
+      serviceId: service.id,
+      fitnessScore: 92,
+      steps: [],
+    });
+  }
   const serviceChanges: Change[] = ops.changes.filter((c) => c.serviceId === service.id);
   const serviceSlos = ops.slos.filter((s) => s.serviceId === service.id);
   const serviceWorkers: DigitalWorker[] = ops.digitalWorkers.slice(0, 4);
