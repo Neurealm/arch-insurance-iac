@@ -85,70 +85,6 @@ const itsmChildren: Node[] = [
 
 const tree: Node[] = [
   { key: "home",       label: "Command Center",      icon: Home,          to: "/app" },
-  {
-    key: "aocp",
-    label: "App Ops Control Plane",
-    icon: Package,
-    to: "/aocp/claims-processing",
-    navOnClick: true,
-    children: [
-      {
-        key: "aocp-intel", label: "Application Intelligence", icon: Layers,
-        children: [
-          { key: "aocp-profile",   label: "Application Profile",       icon: Package,     to: "/aocp/claims-processing", exact: true },
-          { key: "aocp-env",       label: "Environment Model",         icon: Server,      to: "/aocp/claims-processing/environments" },
-          { key: "aocp-crit",      label: "Business Criticality",      icon: ShieldAlert, to: "/aocp/claims-processing/criticality" },
-          { key: "aocp-outcomes",  label: "Desired Outcomes",          icon: Target,      to: "/aocp/claims-processing/outcomes" },
-          { key: "aocp-lifecycle", label: "Lifecycle & Tech Debt",     icon: GitBranch,   to: "/aocp/claims-processing/lifecycle" },
-          { key: "aocp-admin",     label: "Admin Model",               icon: Settings,    to: "/aocp/claims-processing/admin" },
-        ],
-      },
-      {
-        key: "aocp-infra", label: "Infrastructure", icon: Server,
-        children: [
-          { key: "aocp-hosting",  label: "Hosting Platform",     icon: Cloud,    to: "/aocp/claims-processing/hosting" },
-          { key: "aocp-compute",  label: "Compute Services",     icon: Server,   to: "/aocp/claims-processing/compute" },
-          { key: "aocp-storage",  label: "Storage & Data",       icon: Boxes,    to: "/aocp/claims-processing/storage" },
-          { key: "aocp-db",       label: "Database Services",    icon: Workflow, to: "/aocp/claims-processing/databases" },
-          { key: "aocp-net",      label: "Network & Edge",       icon: NetIcon,  to: "/aocp/claims-processing/network" },
-          { key: "aocp-drift",    label: "Config & Drift",       icon: ShieldAlert, to: "/aocp/claims-processing/config-drift" },
-        ],
-      },
-      {
-        key: "aocp-ops", label: "Operations", icon: Activity,
-        children: [
-          { key: "aocp-tasks",     label: "Task Inventory",       icon: ClipboardList, to: "/aocp/claims-processing/tasks" },
-          { key: "aocp-support",   label: "Support Scope L1–L4",  icon: Headphones,    to: "/aocp/claims-processing/support-scope" },
-          { key: "aocp-workload",  label: "Workload Profile",     icon: BarChart3,     to: "/aocp/claims-processing/workload" },
-          { key: "aocp-catalog",   label: "Service Catalog",      icon: BookOpen,      to: "/aocp/claims-processing/service-catalog" },
-          { key: "aocp-escalation",label: "Escalation & On-Call", icon: Bell,          to: "/aocp/claims-processing/escalation" },
-        ],
-      },
-      {
-        key: "aocp-ai", label: "Automation & AI", icon: Bot,
-        children: [
-          { key: "aocp-auto-cat",  label: "Automation Catalog",      icon: Zap,      to: "/aocp/claims-processing/automation-catalog" },
-          { key: "aocp-heatmap",   label: "Opportunity Heatmap",     icon: BarChart3,to: "/aocp/claims-processing/automation-heatmap" },
-          { key: "aocp-remediate", label: "Auto Remediation",        icon: Workflow, to: "/aocp/claims-processing/auto-remediation" },
-          { key: "aocp-dc-cat",    label: "Digital Coworker Catalog",icon: Bot,      to: "/aocp/claims-processing/coworker-catalog" },
-          { key: "aocp-agentic",   label: "Agentic Workflow Library", icon: Sparkles2, to: "/aocp/claims-processing/agentic-workflows" },
-          { key: "aocp-raci",      label: "RACI Matrix",             icon: Users,    to: "/aocp/claims-processing/raci" },
-          { key: "aocp-gov",       label: "Agentic Governance",      icon: ShieldCheck, to: "/aocp/claims-processing/agentic-governance" },
-          { key: "aocp-roi",       label: "Automation Value & ROI",  icon: TrendingUp2, to: "/aocp/claims-processing/automation-roi" },
-        ],
-      },
-      {
-        key: "aocp-exec", label: "Executive", icon: Briefcase,
-        children: [
-          { key: "aocp-maturity",  label: "Maturity Model",       icon: Target,      to: "/aocp/claims-processing/maturity" },
-          { key: "aocp-cost",      label: "Internal Cost Model",  icon: DollarSign2, to: "/aocp/claims-processing/cost-model" },
-          { key: "aocp-pricing",   label: "Customer Pricing",     icon: FileBarChart2, to: "/aocp/claims-processing/pricing" },
-          { key: "aocp-scenario",  label: "Scenario Modeling",    icon: LayoutGrid,  to: "/aocp/claims-processing/scenarios" },
-          { key: "aocp-runops",    label: "Final RunOps Model",   icon: CheckCircle2b, to: "/aocp/claims-processing/runops-model" },
-        ],
-      },
-    ],
-  },
   { key: "ops",        label: "Operations Overview", icon: LayoutGrid,    to: "/operations" },
   {
     key: "ai-engineering",
@@ -595,7 +531,7 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
 
 const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "PLATFORM",       keys: ["home", "ops"] },
-  { label: "DIGITAL TWINS",  keys: ["aocp", "sre-practice", "runops-runbooks", "sead", "ai-vlsi"] },
+  { label: "DIGITAL TWINS",  keys: ["sre-practice", "runops-runbooks", "sead", "ai-vlsi"] },
   { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
