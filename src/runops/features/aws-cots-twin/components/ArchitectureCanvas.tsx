@@ -503,11 +503,13 @@ function ArchitectureCanvasInner({ selectedResourceId, onSelectResource, onSelec
           azLabel,
           alertCount,
           selected: selectedResourceId === targetId,
+          onOpenDetails: onOpenResourceDetails,
+          roleLabel: isSynth ? (res as SyntheticResource).synthetic_role : undefined,
         },
       };
       return node;
     }).filter(Boolean) as Node<ResourceNodeData>[];
-  }, [placements, byId, syntheticById, loaded, alertCountByResource, selectedResourceId]);
+  }, [placements, byId, syntheticById, loaded, alertCountByResource, selectedResourceId, onOpenResourceDetails]);
 
   const allNodes = useMemo<Node[]>(() => [...boundaryNodes, ...resourceNodes], [boundaryNodes, resourceNodes]);
   const [nodes, setNodes, onNodesChange] = useNodesState<any>(allNodes);
