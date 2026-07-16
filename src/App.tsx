@@ -589,7 +589,7 @@ const App = () => (
           <Route path="/coworkers/it-carve-out-and-separation/cmm/solution-design" element={<CmmSolutionDesign />} />
           <Route path="/coworkers/it-carve-out-and-separation/cmm/operational-dashboard" element={<CmmDashboard />} />
           <Route path="/coworkers/deploy" element={<DeployCoworker />} />
-          <Route path="/operations" element={<Operations />} />
+          
           <Route path="/operational-friction-index" element={<OperationalFrictionIndex />} />
           <Route path="/reliability-foundations" element={<ReliabilityFoundations />} />
           <Route path="/reliability-foundations/google-sre" element={<GoogleSre />} />
