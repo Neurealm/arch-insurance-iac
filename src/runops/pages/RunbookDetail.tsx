@@ -71,7 +71,8 @@ function writeLS<T>(key: string, value: T): void {
 
 type TabValue =
   | "overview" | "workflow" | "live" | "executions" | "tests" | "versions"
-  | "incidents" | "changes" | "evidence" | "approvals" | "knowledge" | "history";
+  | "incidents" | "changes" | "evidence" | "approvals" | "knowledge" | "history"
+  | "architecture";
 
 const TABS: { label: string; value: TabValue }[] = [
   { label: "Overview",            value: "overview" },
@@ -86,7 +87,9 @@ const TABS: { label: string; value: TabValue }[] = [
   { label: "Approvals",           value: "approvals" },
   { label: "Knowledge",           value: "knowledge" },
   { label: "Improvement History", value: "history" },
+  { label: "Architecture",        value: "architecture" },
 ];
+
 
 type Applicability = "Applicable" | "Conditionally applicable" | "Not applicable" | "Certification expired";
 
@@ -422,7 +425,14 @@ export default function RunbookDetail() {
                 undefined,
             }))}
             value={tab}
-            onChange={(v) => setTab(v as TabValue)}
+            onChange={(v) => {
+              if (v === "architecture") {
+                navigate("/runops/aws-cots-digital-twin");
+                return;
+              }
+              setTab(v as TabValue);
+            }}
+
           />
         </div>
         <Button
