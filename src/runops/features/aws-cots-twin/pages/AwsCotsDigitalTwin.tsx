@@ -112,8 +112,10 @@ export default function AwsCotsDigitalTwinPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
   const [selectedRelationshipId, setSelectedRelationshipId] = useState<string | null>(null);
-
-  // URL-driven selection state
+  // Retained across resource selection so the operator stays on the tab they were using.
+  const [activeDetailsTab, setActiveDetailsTab] = useState<DetailsTab>("overview");
+  const isMobile = useIsMobile();
+  const canvasFocusRef = useRef<HTMLDivElement>(null);
   const tenantId = params.get("tenant") ?? "tenant.meridian";
   const serviceId = params.get("service") ?? "bs.erm";
   const applicationId = params.get("application") ?? "app.atlas-cots";
