@@ -2,7 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutGrid, Boxes, BookOpen, Workflow, AlertOctagon, Bot,
   Target, Library, BarChart3, ShieldCheck, Plug, Server, Home,
-  ChevronLeft, ChevronRight, type LucideIcon,
+  ChevronLeft, ChevronRight, Cloud, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navSections, sectionLanding, type NavSection } from "@/runops/shell/routes";
