@@ -174,7 +174,7 @@ const tree: Node[] = [
   },
   {
     key: "runops-runbooks",
-    label: "RunOps Runbooks",
+    label: "Runbook Engineering",
     icon: Sparkles2,
     to: "/runops",
   },
