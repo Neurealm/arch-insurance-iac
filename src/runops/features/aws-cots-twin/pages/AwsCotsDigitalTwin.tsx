@@ -234,6 +234,10 @@ export default function AwsCotsDigitalTwinPage() {
                       selectedResourceId={selectedResourceId}
                       onSelectResource={setSelectedResourceId}
                       onSelectRelationship={setSelectedRelationshipId}
+                      onOpenResourceDetails={(id) => {
+                        setSelectedResourceId(id);
+                        setRightOpen(true);
+                      }}
                     />
                   ) : (
                     <CanvasPlaceholder view={view} />
@@ -252,7 +256,11 @@ export default function AwsCotsDigitalTwinPage() {
                 widthOpen="w-full md:w-[320px]"
                 widthClosed="md:w-10"
               >
-                <Placeholder text="Persistent resource details panel (12 tabs) arrives in Prompt 5." />
+                {selectedResourceId ? (
+                  <SelectedResourceStub resourceId={selectedResourceId} onClear={() => setSelectedResourceId(null)} />
+                ) : (
+                  <Placeholder text="Hover a canvas resource for its full card, or click to select. The persistent 12-tab details panel arrives in Prompt 5." />
+                )}
               </PanelSection>
             </div>
 
