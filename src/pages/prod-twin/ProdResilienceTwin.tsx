@@ -48,7 +48,7 @@ const kpis = [
 ];
 
 const workflows = [
-  { key: "evv",     name: "Caregiver Visit / EVV", desc: "Digital visit verification and caregiver engagement", health: 97, owner: "Caregiver Platform Team", status: "healthy", deps: [
+  { key: "evv",     name: "Caregiver Visit / EVV", desc: "Digital visit verification and caregiver engagement", health: 97, owner: "Caregiver Platform Team", status: "healthy", route: "/runops/services/svc-hc-clinical-integration", deps: [
     { name: "Mobile Services", icon: Smartphone }, { name: "Identity", icon: Key }, { name: "API Gateway", icon: Network }, { name: "AWS Platform", icon: Cloud }, { name: "SQL Cluster", icon: Database },
   ], insight: { tone: "ai", text: "AI Recommendation", sub: "Move API workload to managed container platform" } },
   { key: "claims",  name: "Claims Processing", desc: "Claims intake, adjudication and payment", health: 93, owner: "Revenue Operations", status: "healthy", deps: [
