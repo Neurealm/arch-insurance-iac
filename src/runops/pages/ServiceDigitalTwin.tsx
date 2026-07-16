@@ -470,7 +470,8 @@ function OverviewTab(props: {
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
       {/* Purpose + narrative */}
-      <Card className="xl:col-span-2">
+      <Card className="h-full">
+
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Service purpose & reliability narrative</CardTitle>
         </CardHeader>
@@ -499,7 +500,7 @@ function OverviewTab(props: {
       </Card>
 
       {/* Incident briefing video */}
-      <Card className="xl:col-span-3">
+      <Card className="h-full">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Incident briefing video</CardTitle>
         </CardHeader>
@@ -510,7 +511,7 @@ function OverviewTab(props: {
             controlsList="nodownload"
             preload="metadata"
             playsInline
-            className="w-full rounded border border-slate-200 bg-black"
+            className="aspect-video w-full rounded border border-slate-200 bg-black object-contain"
           >
             Your browser does not support embedded video.
           </video>
@@ -519,8 +520,10 @@ function OverviewTab(props: {
 
 
 
+
       {/* Readiness + KPIs */}
-      <Card>
+      <Card className="h-full">
+
         <CardHeader className="pb-2"><CardTitle className="text-sm">Operational readiness</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <ReadinessScore score={readinessScore} />
