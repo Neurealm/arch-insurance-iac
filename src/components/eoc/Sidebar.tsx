@@ -250,7 +250,7 @@ const tree: Node[] = [
   },
   {
     key: "ai-vlsi",
-    label: "AI VLSI Engineering Platform",
+    label: "AI VLSI Engineering",
     icon: Sparkles2,
     to: "/ai-vlsi-engineering",
   },
