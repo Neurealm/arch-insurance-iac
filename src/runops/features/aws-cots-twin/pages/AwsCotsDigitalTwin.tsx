@@ -12,6 +12,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import {
   getAwsCotsRepository,
@@ -21,6 +23,7 @@ import {
   type AwsAccount,
 } from "..";
 import { ArchitectureCanvas } from "../components/ArchitectureCanvas";
+import { ResourceDetailsPanel, type DetailsTab } from "../components/ResourceDetailsPanel";
 
 /* -------------------------------------------------------------------------- */
 /*  Static reference values (from seed / Prompt 2 spec)                        */
