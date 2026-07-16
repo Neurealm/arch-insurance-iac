@@ -25,6 +25,7 @@ import {
   ShieldCheck, Sparkles, Target, Wrench,
 } from "lucide-react";
 import { useOperations, useRightDrawer } from "@/runops/state/RunOpsProviders";
+import incidentVideo from "@/assets/incident-clinical-integration.mp4.asset.json";
 import { useScenarioStore } from "@/runops/scenario/ScenarioStore";
 import {
   EntityHeader, EntityTabs, MetricCard, StatusIndicator, ReadinessScore,
@@ -496,6 +497,27 @@ function OverviewTab(props: {
           )}
         </CardContent>
       </Card>
+
+      {/* Incident briefing video */}
+      <Card className="xl:col-span-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Incident briefing video</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <video
+            src={incidentVideo.url}
+            controls
+            controlsList="nodownload"
+            preload="metadata"
+            playsInline
+            className="w-full rounded border border-slate-200 bg-black"
+          >
+            Your browser does not support embedded video.
+          </video>
+        </CardContent>
+      </Card>
+
+
 
       {/* Readiness + KPIs */}
       <Card>
