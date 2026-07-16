@@ -1,5 +1,5 @@
-import { AtcShell, PageHeader, PriBadge, StatusPill, Card } from "./atc/shared";
-import { SLA_AT_RISK, ASSIGNMENT_GROUPS, PERF_SERIES } from "./atc/data";
+import { AtcShell, PageHeader, PriBadge, StatusPill, Card } from "./shared";
+import { SLA_AT_RISK, ASSIGNMENT_GROUPS, PERF_SERIES } from "./data";
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
 import { cn } from "@/lib/utils";
 

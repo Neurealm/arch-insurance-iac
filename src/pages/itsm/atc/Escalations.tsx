@@ -1,5 +1,5 @@
-import { AtcShell, PageHeader, PriBadge, Card } from "./atc/shared";
-import { ESCALATIONS, TICKETS } from "./atc/data";
+import { AtcShell, PageHeader, PriBadge, Card } from "./shared";
+import { ESCALATIONS, TICKETS } from "./data";
 import { ArrowUpRight, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 

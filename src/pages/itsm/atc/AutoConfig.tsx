@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { AtcShell, PageHeader, PriBadge, Card } from "./atc/shared";
-import { MANUAL_REVIEW, CATEGORY_DIST, PERF_SERIES, CATEGORIZATION_RULES } from "./atc/data";
+import { AtcShell, PageHeader, PriBadge, Card } from "./shared";
+import { MANUAL_REVIEW, CATEGORY_DIST, PERF_SERIES, CATEGORIZATION_RULES } from "./data";
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
 import { Sparkles, Play, Pause, RotateCcw, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";

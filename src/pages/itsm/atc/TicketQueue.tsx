@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { AtcShell, PageHeader, PriBadge, StatusPill, Card } from "./atc/shared";
-import { TICKETS, ASSIGNMENT_GROUPS, CATEGORIES } from "./atc/data";
+import { AtcShell, PageHeader, PriBadge, StatusPill, Card } from "./shared";
+import { TICKETS, ASSIGNMENT_GROUPS, CATEGORIES } from "./data";
 import { Search, Filter, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 

@@ -1,5 +1,5 @@
-import { AtcShell, PageHeader, StatusPill, Card } from "./atc/shared";
-import { BUSINESS_SERVICES } from "./atc/data";
+import { AtcShell, PageHeader, StatusPill, Card } from "./shared";
+import { BUSINESS_SERVICES } from "./data";
 import { Boxes } from "lucide-react";
 import { cn } from "@/lib/utils";
 

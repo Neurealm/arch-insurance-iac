@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { AtcShell, PageHeader, PriBadge, StatusPill, Card } from "./atc/shared";
-import { MAJOR_INCIDENTS, ESCALATIONS, TICKETS, ALERTS } from "./atc/data";
+import { AtcShell, PageHeader, PriBadge, StatusPill, Card } from "./shared";
+import { MAJOR_INCIDENTS, ESCALATIONS, TICKETS, ALERTS } from "./data";
 import { AlertOctagon, Radio, PhoneCall, ArrowUpRight, MessageSquare, Users } from "lucide-react";
 
 export default function IncidentConsole() {

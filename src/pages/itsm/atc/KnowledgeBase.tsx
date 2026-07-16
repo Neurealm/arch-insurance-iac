@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { AtcShell, PageHeader, Card } from "./atc/shared";
-import { KB_ARTICLES, CATEGORIES } from "./atc/data";
+import { AtcShell, PageHeader, Card } from "./shared";
+import { KB_ARTICLES, CATEGORIES } from "./data";
 import { Search, BookOpen, ThumbsUp, Eye, Plus } from "lucide-react";
 
 export default function KnowledgeBase() {

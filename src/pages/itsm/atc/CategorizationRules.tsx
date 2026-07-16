@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { AtcShell, PageHeader, PriBadge, Card } from "./atc/shared";
-import { CATEGORIZATION_RULES } from "./atc/data";
+import { AtcShell, PageHeader, PriBadge, Card } from "./shared";
+import { CATEGORIZATION_RULES } from "./data";
 import { Search, Plus, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 

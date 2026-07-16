@@ -1,5 +1,5 @@
-import { AtcShell, PageHeader, StatusPill, Card } from "./atc/shared";
-import { AGENTS } from "./atc/data";
+import { AtcShell, PageHeader, StatusPill, Card } from "./shared";
+import { AGENTS } from "./data";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from "recharts";
 import { cn } from "@/lib/utils";
 import { UserPlus, MessageSquare, GraduationCap } from "lucide-react";

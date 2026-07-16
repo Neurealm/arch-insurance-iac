@@ -1,5 +1,5 @@
-import { AtcShell, PageHeader, Card } from "./atc/shared";
-import { ON_CALL } from "./atc/data";
+import { AtcShell, PageHeader, Card } from "./shared";
+import { ON_CALL } from "./data";
 import { CalendarClock, PhoneCall } from "lucide-react";
 
 export default function OnCallSchedule() {

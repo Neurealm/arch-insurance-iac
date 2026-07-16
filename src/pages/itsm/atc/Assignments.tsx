@@ -1,5 +1,5 @@
-import { AtcShell, PageHeader, Card } from "./atc/shared";
-import { ASSIGNMENT_GROUPS, CATEGORY_DIST } from "./atc/data";
+import { AtcShell, PageHeader, Card } from "./shared";
+import { ASSIGNMENT_GROUPS, CATEGORY_DIST } from "./data";
 import { UserPlus, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 

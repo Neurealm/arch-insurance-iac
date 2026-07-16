@@ -1,5 +1,5 @@
-import { AtcShell, PageHeader, Card } from "./atc/shared";
-import { REPORT_CATALOG } from "./atc/data";
+import { AtcShell, PageHeader, Card } from "./shared";
+import { REPORT_CATALOG } from "./data";
 import { FileText, Download, Play, Clock, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 

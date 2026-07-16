@@ -1,5 +1,5 @@
-import { AtcShell, PageHeader, StatusPill, Card } from "./atc/shared";
-import { INTEGRATIONS } from "./atc/data";
+import { AtcShell, PageHeader, StatusPill, Card } from "./shared";
+import { INTEGRATIONS } from "./data";
 import { Plug, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 

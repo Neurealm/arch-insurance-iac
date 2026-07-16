@@ -1,5 +1,5 @@
-import { AtcShell, PageHeader, PriBadge, StatusPill, Card } from "./atc/shared";
-import { MAJOR_INCIDENTS } from "./atc/data";
+import { AtcShell, PageHeader, PriBadge, StatusPill, Card } from "./shared";
+import { MAJOR_INCIDENTS } from "./data";
 import { AlertOctagon, PhoneCall, MessageSquare, Plus, Users, FileText } from "lucide-react";
 
 export default function MajorIncidents() {

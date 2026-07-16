@@ -1,5 +1,5 @@
-import { AtcShell, PageHeader, StatusPill, Card } from "./atc/shared";
-import { CHANGES } from "./atc/data";
+import { AtcShell, PageHeader, StatusPill, Card } from "./shared";
+import { CHANGES } from "./data";
 import { CalendarRange, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
