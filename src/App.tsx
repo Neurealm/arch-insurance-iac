@@ -94,7 +94,7 @@ import CoworkersApplicationSupport from "./pages/CoworkersApplicationSupport.tsx
 import HadoopHealthPrecheckAgent from "./pages/coworkers/appsupport/HadoopHealthPrecheckAgent.tsx";
 import IntegrationMonitoringAgent from "./pages/coworkers/appsupport/IntegrationMonitoringAgent.tsx";
 import EtlPipelineTraceCoworker from "./pages/coworkers/appsupport/EtlPipelineTraceCoworker.tsx";
-import FactoryMaintenanceCopilot from "./pages/factory-ops/FactoryMaintenanceCopilot.tsx";
+
 import VmwareCapacityContention from "./pages/coworkers/infra/VmwareCapacityContention.tsx";
 import ServerProvisioningDeprovisioning from "./pages/coworkers/infra/ServerProvisioningDeprovisioning.tsx";
 import HostFailureEarlyWarning from "./pages/coworkers/infra/HostFailureEarlyWarning.tsx";
@@ -567,7 +567,7 @@ const App = () => (
           <Route path="/coworkers/network-connectivity-engineering/firewall-rule-optimizer" element={<FirewallRuleOptimizer />} />
           <Route path="/coworkers/network-connectivity-engineering/zero-touch-policy-implementation" element={<ZeroTouchPolicyImplementation />} />
           <Route path="/coworkers/network-connectivity-engineering/zero-touch-s2s-vpn-implementation" element={<ZeroTouchS2SVPNImplementation />} />
-          <Route path="/factory-ops-intelligence/maintenance-copilot" element={<FactoryMaintenanceCopilot />} />
+          
           <Route path="/coworkers/it-carve-out-and-separation" element={<CoworkersCarveOut />} />
           <Route path="/coworkers/healthcare-payer" element={<HealthcarePayer />} />
           <Route path="/coworkers/healthcare-payer/prior-authorization" element={<PriorAuthorization />} />
