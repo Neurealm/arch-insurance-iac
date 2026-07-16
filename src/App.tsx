@@ -750,6 +750,21 @@ const App = () => (
           <Route path="/assurance/execute" element={<LiveExecution />} />
           <Route path="/itsm" element={<Itsm />} />
           <Route path="/itsm/auto-ticket-categorization" element={<AutoTicketCategorization />} />
+          <Route path="/itsm/auto-ticket-categorization/incident-console" element={<AtcIncidentConsole />} />
+          <Route path="/itsm/auto-ticket-categorization/ticket-queue" element={<AtcTicketQueue />} />
+          <Route path="/itsm/auto-ticket-categorization/my-team" element={<AtcMyTeam />} />
+          <Route path="/itsm/auto-ticket-categorization/sla-kpis" element={<AtcSlaKpis />} />
+          <Route path="/itsm/auto-ticket-categorization/knowledge-base" element={<AtcKnowledgeBase />} />
+          <Route path="/itsm/auto-ticket-categorization/reports" element={<AtcReports />} />
+          <Route path="/itsm/auto-ticket-categorization/auto" element={<AtcAutoConfig />} />
+          <Route path="/itsm/auto-ticket-categorization/major-incidents" element={<AtcMajorIncidents />} />
+          <Route path="/itsm/auto-ticket-categorization/escalations" element={<AtcEscalations />} />
+          <Route path="/itsm/auto-ticket-categorization/change-calendar" element={<AtcChangeCalendar />} />
+          <Route path="/itsm/auto-ticket-categorization/on-call-schedule" element={<AtcOnCallSchedule />} />
+          <Route path="/itsm/auto-ticket-categorization/business-services" element={<AtcBusinessServices />} />
+          <Route path="/itsm/auto-ticket-categorization/assignments" element={<AtcAssignments />} />
+          <Route path="/itsm/auto-ticket-categorization/categorization-rules" element={<AtcCategorizationRules />} />
+          <Route path="/itsm/auto-ticket-categorization/integrations" element={<AtcIntegrations />} />
           <Route path="/itsm/exec-biz-ops" element={<ExecBizOps />} />
           <Route path="/itsm/exec-biz-ops/executive-command-center" element={<ExecutiveCommandCenter />} />
           <Route path="/itsm/exec-biz-ops/business-services" element={<BusinessServices />} />
