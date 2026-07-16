@@ -239,6 +239,8 @@ export default function AwsCotsDigitalTwinPage() {
                     <CanvasPlaceholder view={view} />
                   )}
                 </div>
+              </section>
+
 
               {/* Right details panel */}
               <PanelSection
