@@ -146,7 +146,7 @@ import CmmOverview from "./pages/carveout/CmmOverview.tsx";
 import CmmSolutionDesign from "./pages/carveout/CmmSolutionDesign.tsx";
 import CmmDashboard from "./pages/carveout/CmmDashboard.tsx";
 import DeployCoworker from "./pages/DeployCoworker.tsx";
-import Operations from "./pages/Operations.tsx";
+
 import Incidents from "./pages/Incidents.tsx";
 import Alerts from "./pages/Alerts.tsx";
 import ChangeManagement from "./pages/ChangeManagement.tsx";
@@ -589,7 +589,7 @@ const App = () => (
           <Route path="/coworkers/it-carve-out-and-separation/cmm/solution-design" element={<CmmSolutionDesign />} />
           <Route path="/coworkers/it-carve-out-and-separation/cmm/operational-dashboard" element={<CmmDashboard />} />
           <Route path="/coworkers/deploy" element={<DeployCoworker />} />
-          <Route path="/operations" element={<Operations />} />
+          
           <Route path="/operational-friction-index" element={<OperationalFrictionIndex />} />
           <Route path="/reliability-foundations" element={<ReliabilityFoundations />} />
           <Route path="/reliability-foundations/google-sre" element={<GoogleSre />} />
