@@ -488,8 +488,8 @@ function ArchitectureCanvasInner({ selectedResourceId, onSelectResource, onSelec
     }).filter(Boolean) as Node<ResourceNodeData>[];
   }, [placements, byId, syntheticById, loaded, alertCountByResource, selectedResourceId]);
 
-  const allNodes = useMemo(() => [...boundaryNodes, ...resourceNodes], [boundaryNodes, resourceNodes]);
-  const [nodes, setNodes, onNodesChange] = useNodesState(allNodes);
+  const allNodes = useMemo<Node[]>(() => [...boundaryNodes, ...resourceNodes], [boundaryNodes, resourceNodes]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<any>(allNodes);
   useEffect(() => { setNodes(allNodes); }, [allNodes, setNodes]);
 
   /* ----------------------------- Edges ------------------------------------ */
