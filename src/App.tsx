@@ -734,6 +734,7 @@ const App = () => (
           <Route path="/assurance/workflow-detail" element={<WorkflowDetail />} />
           <Route path="/assurance/execute" element={<LiveExecution />} />
           <Route path="/itsm" element={<Itsm />} />
+          <Route path="/itsm/auto-ticket-categorization" element={<AutoTicketCategorization />} />
           <Route path="/itsm/exec-biz-ops" element={<ExecBizOps />} />
           <Route path="/itsm/exec-biz-ops/executive-command-center" element={<ExecutiveCommandCenter />} />
           <Route path="/itsm/exec-biz-ops/business-services" element={<BusinessServices />} />
