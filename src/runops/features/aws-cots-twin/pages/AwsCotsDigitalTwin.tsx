@@ -582,9 +582,11 @@ interface PanelSectionProps {
   widthOpen: string;
   widthClosed: string;
   children: React.ReactNode;
+  /** Skip the default `p-3` wrapper (children manage their own padding). */
+  noPadding?: boolean;
 }
 
-function PanelSection({ title, icon, side, open, onToggle, widthOpen, widthClosed, children }: PanelSectionProps) {
+function PanelSection({ title, icon, side, open, onToggle, widthOpen, widthClosed, children, noPadding }: PanelSectionProps) {
   const Toggle = side === "left"
     ? (open ? ChevronLeft : ChevronRight)
     : (open ? ChevronRight : ChevronLeft);
