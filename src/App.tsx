@@ -362,6 +362,7 @@ import RunOpsOperationalReadiness from "./runops/pages/OperationalReadiness.tsx"
 import RunOpsRunbookLibrary from "./runops/pages/RunbookLibrary.tsx";
 import RunOpsRunbookDetail from "./runops/pages/RunbookDetail.tsx";
 import RunOpsRunbookObjectBuilder from "./runops/pages/RunbookObjectBuilder.tsx";
+import { AwsCotsDigitalTwinPage } from "./runops/features/aws-cots-twin";
 import RunOpsRunbookNew from "./runops/pages/RunbookNew.tsx";
 import RunOpsRunbookDesigner from "./runops/pages/RunbookDesigner.tsx";
 import RunOpsRunbookStepBuilder from "./runops/pages/RunbookStepBuilder.tsx";
