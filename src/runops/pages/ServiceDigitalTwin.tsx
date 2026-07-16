@@ -522,7 +522,8 @@ function OverviewTab(props: {
 
 
       {/* Readiness + KPIs */}
-      <Card>
+      <Card className="h-full">
+
         <CardHeader className="pb-2"><CardTitle className="text-sm">Operational readiness</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <ReadinessScore score={readinessScore} />
