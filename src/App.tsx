@@ -48,6 +48,9 @@ import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { SiliconLayout } from "./silicon/shell/SiliconLayout";
 import FoundationStatus from "./silicon/pages/FoundationStatus";
+import { AvepLayout } from "./avep/shell/AvepLayout";
+import { ModulePlaceholder } from "./avep/pages/ModulePlaceholder";
+import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
 import CyberMasterDashboard from "./pages/practice-library/dashboards/cyber/CyberMasterDashboard.tsx";
@@ -777,6 +780,12 @@ const App = () => (
           <Route path="/settings/stakeholder-register-legacy" element={<ProtectedRoute><StakeholderRegister /></ProtectedRoute>} />
           <Route path="/silicon" element={<SiliconLayout />}>
             <Route index element={<FoundationStatus />} />
+          </Route>
+          <Route path="/avep" element={<AvepLayout />}>
+            <Route index element={<ModulePlaceholder />} />
+            {AVEP_NAV.filter((n) => n.path !== "/avep").map((n) => (
+              <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
+            ))}
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
