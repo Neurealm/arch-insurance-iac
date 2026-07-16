@@ -48,7 +48,7 @@ const kpis = [
 ];
 
 const workflows = [
-  { key: "evv",     name: "Caregiver Visit / EVV", desc: "Digital visit verification and caregiver engagement", health: 97, owner: "Caregiver Platform Team", status: "healthy", deps: [
+  { key: "evv",     name: "Caregiver Visit / EVV", desc: "Digital visit verification and caregiver engagement", health: 97, owner: "Caregiver Platform Team", status: "healthy", route: "/runops/services/svc-hc-clinical-integration", deps: [
     { name: "Mobile Services", icon: Smartphone }, { name: "Identity", icon: Key }, { name: "API Gateway", icon: Network }, { name: "AWS Platform", icon: Cloud }, { name: "SQL Cluster", icon: Database },
   ], insight: { tone: "ai", text: "AI Recommendation", sub: "Move API workload to managed container platform" } },
   { key: "claims",  name: "Claims Processing", desc: "Claims intake, adjudication and payment", health: 93, owner: "Revenue Operations", status: "healthy", deps: [
@@ -525,7 +525,13 @@ export default function ProdResilienceTwin() {
                     return (
                       <div
                         key={w.key}
-                        onClick={() => openDrawer(`Workflow Detail: ${w.name}`, w.desc, w)}
+                        onClick={() => {
+                          if ((w as any).route) {
+                            navigate((w as any).route);
+                          } else {
+                            openDrawer(`Workflow Detail: ${w.name}`, w.desc, w);
+                          }
+                        }}
                         className="grid grid-cols-12 items-center py-2.5 group hover:bg-blue-50/30 cursor-pointer rounded-lg px-1 -mx-1"
                       >
                         <div className="col-span-3 flex items-center gap-2">
