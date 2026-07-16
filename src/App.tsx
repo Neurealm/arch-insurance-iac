@@ -151,6 +151,55 @@ import Incidents from "./pages/Incidents.tsx";
 import Alerts from "./pages/Alerts.tsx";
 import ChangeManagement from "./pages/ChangeManagement.tsx";
 import NeuGAIN from "./pages/NeuGAIN.tsx";
+import CarveOut from "./pages/CarveOut.tsx";
+import CarveOutPage from "./pages/CarveOutPage.tsx";
+import WorkforceReadiness from "./pages/carveout/WorkforceReadiness.tsx";
+import DeviceProvisioningFactory from "./pages/carveout/DeviceProvisioningFactory.tsx";
+import GoldenImage from "./pages/carveout/GoldenImage.tsx";
+import PersonaAssignment from "./pages/carveout/PersonaAssignment.tsx";
+import IdentityCutover from "./pages/carveout/IdentityCutover.tsx";
+import VdiContinuity from "./pages/carveout/VdiContinuity.tsx";
+import GlobalLogistics from "./pages/carveout/GlobalLogistics.tsx";
+import EndpointHealth from "./pages/carveout/EndpointHealth.tsx";
+import DigitalCoworkerEuc from "./pages/carveout/DigitalCoworkerEuc.tsx";
+import SelfServiceSupport from "./pages/carveout/SelfServiceSupport.tsx";
+import AssetLifecycle from "./pages/carveout/AssetLifecycle.tsx";
+import NetworkSeparationCommand from "./pages/carveout/NetworkSeparationCommand.tsx";
+import NetworkTopology from "./pages/carveout/NetworkTopology.tsx";
+import SiteConnectivity from "./pages/carveout/SiteConnectivity.tsx";
+import WanSdwan from "./pages/carveout/WanSdwan.tsx";
+import DcCloudFabric from "./pages/carveout/DcCloudFabric.tsx";
+import FirewallZeroTrust from "./pages/carveout/FirewallZeroTrust.tsx";
+import NetworkProvisioningFactory from "./pages/carveout/NetworkProvisioningFactory.tsx";
+import FieldNetworkDeployment from "./pages/carveout/FieldNetworkDeployment.tsx";
+import NocOperations from "./pages/carveout/NocOperations.tsx";
+import NetworkExperience from "./pages/carveout/NetworkExperience.tsx";
+import DigitalCoworkerNetwork from "./pages/carveout/DigitalCoworkerNetwork.tsx";
+import NetworkCostOptimization from "./pages/carveout/NetworkCostOptimization.tsx";
+import InfraSeparationCommand from "./pages/carveout/InfraSeparationCommand.tsx";
+import InfraTopology from "./pages/carveout/InfraTopology.tsx";
+import EnvCarveOut from "./pages/carveout/EnvCarveOut.tsx";
+import ServerStorageFactory from "./pages/carveout/ServerStorageFactory.tsx";
+import StorageDataReadiness from "./pages/carveout/StorageDataReadiness.tsx";
+import HybridPlacement from "./pages/carveout/HybridPlacement.tsx";
+import DcExitMigration from "./pages/carveout/DcExitMigration.tsx";
+import FieldInfraDeployment from "./pages/carveout/FieldInfraDeployment.tsx";
+import InfraOperations from "./pages/carveout/InfraOperations.tsx";
+import WorkloadPerformance from "./pages/carveout/WorkloadPerformance.tsx";
+import DigitalCoworkerInfra from "./pages/carveout/DigitalCoworkerInfra.tsx";
+import InfraFinOps from "./pages/carveout/InfraFinOps.tsx";
+import CloudTransformation from "./pages/carveout/CloudTransformation.tsx";
+import LandingZone from "./pages/carveout/LandingZone.tsx";
+import AppPortfolioRationalization from "./pages/carveout/AppPortfolioRationalization.tsx";
+import MigrationWavePlanning from "./pages/carveout/MigrationWavePlanning.tsx";
+import HybridCloudFabric from "./pages/carveout/HybridCloudFabric.tsx";
+import MultiRegionDR from "./pages/carveout/MultiRegionDR.tsx";
+import CloudMigrationFactory from "./pages/carveout/CloudMigrationFactory.tsx";
+import CloudSecurityCspm from "./pages/carveout/CloudSecurityCspm.tsx";
+import CloudOperations from "./pages/carveout/CloudOperations.tsx";
+import CloudPerformanceAnalytics from "./pages/carveout/CloudPerformanceAnalytics.tsx";
+import DigitalCoworkerCloud from "./pages/carveout/DigitalCoworkerCloud.tsx";
+import CloudFinOps from "./pages/carveout/CloudFinOps.tsx";
 import AssuranceCommand from "./pages/assurance/AssuranceCommand.tsx";
 import WorkflowDetail from "./pages/assurance/WorkflowDetail.tsx";
 import LiveExecution from "./pages/assurance/LiveExecution.tsx";
@@ -616,6 +665,55 @@ const App = () => (
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />
           <Route path="/neugain" element={<NeuGAIN />} />
+          <Route path="/carve-out" element={<CarveOut />} />
+          <Route path="/carve-out/euc/workforce-readiness-command-center-day-1-view" element={<WorkforceReadiness />} />
+          <Route path="/carve-out/euc/device-provisioning-factory-global-view" element={<DeviceProvisioningFactory />} />
+          <Route path="/carve-out/euc/golden-image-and-configuration-control-plane" element={<GoldenImage />} />
+          <Route path="/carve-out/euc/persona-based-device-assignment-engine" element={<PersonaAssignment />} />
+          <Route path="/carve-out/euc/identity-and-access-cutover-dashboard" element={<IdentityCutover />} />
+          <Route path="/carve-out/euc/vdi-and-day-1-continuity-layer" element={<VdiContinuity />} />
+          <Route path="/carve-out/euc/global-logistics-and-field-services-orchestration" element={<GlobalLogistics />} />
+          <Route path="/carve-out/euc/endpoint-health-and-experience-monitoring" element={<EndpointHealth />} />
+          <Route path="/carve-out/euc/digital-coworker-euc-automation-console" element={<DigitalCoworkerEuc />} />
+          <Route path="/carve-out/euc/self-service-and-agentic-support-experience" element={<SelfServiceSupport />} />
+          <Route path="/carve-out/euc/asset-lifecycle-and-financial-optimization" element={<AssetLifecycle />} />
+          <Route path="/carve-out/network/global-network-separation-command-center-day-1-view" element={<NetworkSeparationCommand />} />
+          <Route path="/carve-out/network/network-topology-and-architecture-control-plane" element={<NetworkTopology />} />
+          <Route path="/carve-out/network/site-connectivity-readiness-dashboard" element={<SiteConnectivity />} />
+          <Route path="/carve-out/network/wan-sd-wan-orchestration-console" element={<WanSdwan />} />
+          <Route path="/carve-out/network/data-center-and-cloud-connectivity-fabric" element={<DcCloudFabric />} />
+          <Route path="/carve-out/network/firewall-security-and-zero-trust-control-layer" element={<FirewallZeroTrust />} />
+          <Route path="/carve-out/network/network-provisioning-and-build-factory" element={<NetworkProvisioningFactory />} />
+          <Route path="/carve-out/network/field-network-deployment-orchestration" element={<FieldNetworkDeployment />} />
+          <Route path="/carve-out/network/noc-operations-command-center-live-ops" element={<NocOperations />} />
+          <Route path="/carve-out/network/network-experience-and-performance-analytics" element={<NetworkExperience />} />
+          <Route path="/carve-out/network/digital-coworker-network-automation-console" element={<DigitalCoworkerNetwork />} />
+          <Route path="/carve-out/network/network-cost-and-vendor-optimization-dashboard" element={<NetworkCostOptimization />} />
+          <Route path="/carve-out/infra/infrastructure-separation-command-center-day-1-view" element={<InfraSeparationCommand />} />
+          <Route path="/carve-out/infra/data-center-topology-and-dependency-mapping-control-plane" element={<InfraTopology />} />
+          <Route path="/carve-out/infra/environment-carve-out-and-replication-tracker" element={<EnvCarveOut />} />
+          <Route path="/carve-out/infra/server-provisioning-and-build-factory-compute-layer" element={<ServerStorageFactory />} />
+          <Route path="/carve-out/infra/storage-and-data-platform-readiness-dashboard" element={<StorageDataReadiness />} />
+          <Route path="/carve-out/infra/hybrid-infrastructure-placement-decision-engine-on-prem-vs-cloud" element={<HybridPlacement />} />
+          <Route path="/carve-out/infra/data-center-exit-and-migration-orchestration-console" element={<DcExitMigration />} />
+          <Route path="/carve-out/infra/field-infrastructure-deployment-and-rack-integration-tracker" element={<FieldInfraDeployment />} />
+          <Route path="/carve-out/infra/infrastructure-operations-command-center-live-ops" element={<InfraOperations />} />
+          <Route path="/carve-out/infra/workload-performance-and-capacity-analytics" element={<WorkloadPerformance />} />
+          <Route path="/carve-out/infra/digital-coworker-infrastructure-automation-console" element={<DigitalCoworkerInfra />} />
+          <Route path="/carve-out/infra/infrastructure-cost-capacity-and-optimization-finops-for-infra" element={<InfraFinOps />} />
+          <Route path="/carve-out/cloud/cloud-transformation-command-center-day-1-and-future-state-view" element={<CloudTransformation />} />
+          <Route path="/carve-out/cloud/cloud-architecture-and-landing-zone-control-plane" element={<LandingZone />} />
+          <Route path="/carve-out/cloud/application-portfolio-rationalization-and-migration-decision-engine" element={<AppPortfolioRationalization />} />
+          <Route path="/carve-out/cloud/migration-wave-planning-and-execution-orchestration-console" element={<MigrationWavePlanning />} />
+          <Route path="/carve-out/cloud/hybrid-cloud-connectivity-and-integration-fabric" element={<HybridCloudFabric />} />
+          <Route path="/carve-out/cloud/multi-region-resiliency-and-disaster-recovery-control-layer" element={<MultiRegionDR />} />
+          <Route path="/carve-out/cloud/cloud-migration-factory-build-deploy-validate" element={<CloudMigrationFactory />} />
+          <Route path="/carve-out/cloud/cloud-security-and-governance-cspm-policy-control-plane" element={<CloudSecurityCspm />} />
+          <Route path="/carve-out/cloud/cloud-operations-command-center-live-ops" element={<CloudOperations />} />
+          <Route path="/carve-out/cloud/cloud-performance-reliability-and-experience-analytics" element={<CloudPerformanceAnalytics />} />
+          <Route path="/carve-out/cloud/digital-coworker-cloud-automation-marketplace" element={<DigitalCoworkerCloud />} />
+          <Route path="/carve-out/cloud/cloud-finops-cost-optimization-and-value-realization-dashboard" element={<CloudFinOps />} />
+          <Route path="/carve-out/:group/:slug" element={<CarveOutPage />} />
           <Route path="/assurance" element={<AssuranceCommand />} />
           <Route path="/assurance/workflow-detail" element={<WorkflowDetail />} />
           <Route path="/assurance/execute" element={<LiveExecution />} />
