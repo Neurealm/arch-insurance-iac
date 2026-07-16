@@ -525,7 +525,13 @@ export default function ProdResilienceTwin() {
                     return (
                       <div
                         key={w.key}
-                        onClick={() => openDrawer(`Workflow Detail: ${w.name}`, w.desc, w)}
+                        onClick={() => {
+                          if ((w as any).route) {
+                            navigate((w as any).route);
+                          } else {
+                            openDrawer(`Workflow Detail: ${w.name}`, w.desc, w);
+                          }
+                        }}
                         className="grid grid-cols-12 items-center py-2.5 group hover:bg-blue-50/30 cursor-pointer rounded-lg px-1 -mx-1"
                       >
                         <div className="col-span-3 flex items-center gap-2">
