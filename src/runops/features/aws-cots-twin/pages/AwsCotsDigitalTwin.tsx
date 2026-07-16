@@ -204,24 +204,9 @@ export default function AwsCotsDigitalTwinPage() {
             "flex-col md:flex-row",
           )}
         >
-          {/* Left control panel */}
-          <PanelSection
-            title="Filters & Layers"
-            icon={<Layers className="h-3.5 w-3.5 text-slate-500" />}
-            side="left"
-            open={leftOpen}
-            onToggle={() => setLeftOpen((o) => !o)}
-            widthOpen="w-full md:w-[240px]"
-            widthClosed="md:w-10"
-          >
-            <Placeholder
-              text="Control panel — filters, layers, and grouping controls will arrive in Prompt 3."
-            />
-          </PanelSection>
-
-          {/* Center + Right + Bottom */}
+          {/* Center + Bottom */}
           <div className="flex min-w-0 flex-1 flex-col gap-3">
-            <div className="flex min-w-0 flex-1 flex-col gap-3 md:flex-row">
+            <div className="flex min-w-0 flex-1 flex-col gap-3">
               {/* Canvas */}
               <section
                 ref={canvasFocusRef}
@@ -245,7 +230,6 @@ export default function AwsCotsDigitalTwinPage() {
                       onSelectRelationship={setSelectedRelationshipId}
                       onOpenResourceDetails={(id) => {
                         setSelectedResourceId(id);
-                        setRightOpen(true);
                       }}
                     />
                   ) : (
@@ -253,64 +237,35 @@ export default function AwsCotsDigitalTwinPage() {
                   )}
                 </div>
               </section>
-
-
-              {/* Right details panel — desktop / tablet persistent, mobile handled by Sheet below */}
-              {!isMobile && (
-                <PanelSection
-                  title="Resource Details"
-                  icon={<AlertOctagon className="h-3.5 w-3.5 text-slate-500" />}
-                  side="right"
-                  open={rightOpen}
-                  onToggle={() => setRightOpen((o) => !o)}
-                  widthOpen="w-full md:w-[420px] xl:w-[480px]"
-                  widthClosed="md:w-10"
-                  noPadding
-                >
-                  {selectedResourceId ? (
-                    <ResourceDetailsPanel
-                      resourceId={selectedResourceId}
-                      onClose={() => setSelectedResourceId(null)}
-                      onFocusCanvas={() => canvasFocusRef.current?.focus()}
-                      activeTab={activeDetailsTab}
-                      onActiveTabChange={setActiveDetailsTab}
-                    />
-                  ) : (
-                    <div className="p-3">
-                      <Placeholder text="Select a resource on the canvas to see its full details across 12 tabs: overview, configuration, telemetry, alerts, dependencies, security, cost, changes, incidents, runbooks, automation, and raw JSON." />
-                    </div>
-                  )}
-                </PanelSection>
-              )}
             </div>
 
-            {/* Mobile: full-screen sheet drawer */}
-            {isMobile && (
-              <Sheet
-                open={!!selectedResourceId}
-                onOpenChange={(o) => {
-                  if (!o) {
-                    setSelectedResourceId(null);
-                    canvasFocusRef.current?.focus();
-                  }
-                }}
-              >
-                <SheetContent side="right" className="w-full p-0 sm:max-w-full">
-                  <SheetHeader className="border-b border-slate-200 px-3 py-2">
-                    <SheetTitle className="text-[13px]">Resource details</SheetTitle>
-                  </SheetHeader>
-                  {selectedResourceId && (
-                    <ResourceDetailsPanel
-                      resourceId={selectedResourceId}
-                      onClose={() => setSelectedResourceId(null)}
-                      onFocusCanvas={() => canvasFocusRef.current?.focus()}
-                      activeTab={activeDetailsTab}
-                      onActiveTabChange={setActiveDetailsTab}
-                    />
-                  )}
-                </SheetContent>
-              </Sheet>
-            )}
+            {/* Resource details drawer (all viewports) */}
+            <Sheet
+              open={!!selectedResourceId}
+              onOpenChange={(o) => {
+                if (!o) {
+                  setSelectedResourceId(null);
+                  canvasFocusRef.current?.focus();
+                }
+              }}
+            >
+              <SheetContent side="right" className="w-full p-0 sm:max-w-[540px]">
+                <SheetHeader className="border-b border-slate-200 px-3 py-2">
+                  <SheetTitle className="text-[13px]">Resource details</SheetTitle>
+                </SheetHeader>
+                {selectedResourceId && (
+                  <ResourceDetailsPanel
+                    resourceId={selectedResourceId}
+                    onClose={() => setSelectedResourceId(null)}
+                    onFocusCanvas={() => canvasFocusRef.current?.focus()}
+                    activeTab={activeDetailsTab}
+                    onActiveTabChange={setActiveDetailsTab}
+                  />
+                )}
+              </SheetContent>
+            </Sheet>
+
+
 
             {/* Bottom telemetry panel */}
             <section
