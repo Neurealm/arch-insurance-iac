@@ -25,7 +25,7 @@ import ComplianceCenter from "./pages/enterprise-cert/ComplianceCenter.tsx";
 import AuditEvidenceCenter from "./pages/enterprise-cert/AuditEvidenceCenter.tsx";
 import PolicyEngine from "./pages/enterprise-cert/PolicyEngine.tsx";
 import CtLogsMonitor from "./pages/enterprise-cert/CtLogsMonitor.tsx";
-const SemiCommandCenter = lazy(() => import("./pages/semiconductor/CommandCenter.tsx"));
+
 const SeadCommandCenter = lazy(() => import("./pages/sead/CommandCenter.tsx"));
 const SeadEquipmentHealth = lazy(() => import("./pages/sead/EquipmentHealthIntelligence.tsx"));
 import SeadCrossDomain from "./pages/sead/CrossDomainContextTwin.tsx";
@@ -46,16 +46,6 @@ import SeadEngineeringSandbox from "./pages/sead/EngineeringSandbox.tsx";
 import SeadDigitalCoworkerConversation from "./pages/sead/DigitalCoworkerConversation.tsx";
 import SeadIotAiArchitecture from "./pages/sead/IotAiArchitecture.tsx";
 import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
-const SemiDigitalTwin = lazy(() => import("./pages/semiconductor/DigitalTwin.tsx"));
-import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
-import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
-import SemiVisionOperations from "./pages/semiconductor/VisionOperations.tsx";
-import SemiOperationsIntelligence from "./pages/semiconductor/OperationsIntelligence.tsx";
-import SemiResourceOptimization from "./pages/semiconductor/ResourceOptimization.tsx";
-import SemiKnowledgeGraph from "./pages/semiconductor/KnowledgeGraph.tsx";
-import SemiProofOfValue from "./pages/semiconductor/ProofOfValue.tsx";
-import SemiFacilitator from "./pages/semiconductor/Facilitator.tsx";
-import { ScenarioProvider } from "./features/semiconductor/state/ScenarioContext.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 import Landing from "./pages/Landing.tsx";
@@ -525,16 +515,6 @@ const App = () => (
           <Route path="/sead/iot-ai-architecture" element={<ProtectedRoute><SeadIotAiArchitecture /></ProtectedRoute>} />
           <Route path="/sead/simulation-comparison" element={<ProtectedRoute><SeadSimulationComparison /></ProtectedRoute>} />
 
-          <Route path="/semiconductor/command-center" element={<ProtectedRoute><ScenarioProvider><SemiCommandCenter /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/digital-twin" element={<ProtectedRoute><ScenarioProvider><SemiDigitalTwin /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/production-flow" element={<ProtectedRoute><ScenarioProvider><SemiProductionFlow /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/physical-automation" element={<ProtectedRoute><ScenarioProvider><SemiPhysicalAutomation /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/vision-operations" element={<ProtectedRoute><ScenarioProvider><SemiVisionOperations /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/operations-intelligence" element={<ProtectedRoute><ScenarioProvider><SemiOperationsIntelligence /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/resource-optimization" element={<ProtectedRoute><ScenarioProvider><SemiResourceOptimization /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/knowledge-graph" element={<ProtectedRoute><ScenarioProvider><SemiKnowledgeGraph /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/proof-of-value" element={<ProtectedRoute><ScenarioProvider><SemiProofOfValue /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/facilitator" element={<ProtectedRoute><ScenarioProvider><SemiFacilitator /></ScenarioProvider></ProtectedRoute>} />
 
           <Route path="/ai-engineering/backlog" element={<ProtectedRoute><AiEngineeringBacklog /></ProtectedRoute>} />
           <Route path="/ai-engineering/answers-actions" element={<ProtectedRoute><AnswersActions /></ProtectedRoute>} />
