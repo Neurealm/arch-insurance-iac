@@ -200,8 +200,9 @@ const ResourceNode = memo(function ResourceNode({ data }: NodeProps<ResourceNode
   const Marker = styles.marker;
   const isSynth = "__synthetic" in r;
   const roleTag = isSynth && r.synthetic_role ? r.synthetic_role : undefined;
+  const realId = isSynth ? (r as SyntheticResource).resource_id : r.id;
 
-  return (
+  const card = (
     <div
       role="button"
       tabIndex={0}
@@ -209,6 +210,7 @@ const ResourceNode = memo(function ResourceNode({ data }: NodeProps<ResourceNode
       className={cn(
         "group relative flex h-full w-full flex-col rounded-md border bg-white px-2 py-1.5 shadow-sm transition-all",
         "hover:shadow-md hover:-translate-y-[0.5px]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1",
         styles.border,
         styles.borderStyle === "dashed" && "border-dashed",
         styles.borderStyle === "dotted" && "border-dotted",
@@ -246,6 +248,20 @@ const ResourceNode = memo(function ResourceNode({ data }: NodeProps<ResourceNode
         )}
       </div>
     </div>
+  );
+
+  // "Internet" is a purely visual anchor with no repository record — skip
+  // the hover card for it so we don't fire a lookup that will 404.
+  if (r.resource_type === "Internet") return card;
+
+  return (
+    <ResourceHoverCard
+      resourceId={realId}
+      roleLabel={data.roleLabel ?? roleTag}
+      onOpenDetails={data.onOpenDetails}
+    >
+      {card}
+    </ResourceHoverCard>
   );
 });
 
