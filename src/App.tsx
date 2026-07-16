@@ -437,6 +437,7 @@ const App = () => (
             <Route path="services/:serviceId/topology" element={<RunOpsTopologyExplorer />} />
             <Route path="services/:serviceId/observability" element={<RunOpsObservabilityExplorer />} />
             <Route path="services/:serviceId/readiness" element={<RunOpsOperationalReadiness />} />
+            <Route path="aws-cots-digital-twin" element={<AwsCotsDigitalTwinPage />} />
             <Route path="runbooks" element={<RunOpsRunbookLibrary />} />
             <Route path="runbooks/new" element={<RunOpsRunbookNew />} />
             <Route path="runbooks/:runbookId" element={<RunOpsRunbookDetail />} />
