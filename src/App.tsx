@@ -223,6 +223,7 @@ import CustomerExperience from "./pages/itsm/CustomerExperience.tsx";
 import SlaSloErrorBudget from "./pages/itsm/SlaSloErrorBudget.tsx";
 import RiskExposure from "./pages/itsm/RiskExposure.tsx";
 import BusinessServices from "./pages/itsm/BusinessServices.tsx";
+import AutoTicketCategorization from "./pages/itsm/AutoTicketCategorization.tsx";
 import StakeholderRegister from "./pages/settings/StakeholderRegister.tsx";
 import Settings from "./pages/Settings.tsx";
 import AuthOrchestration from "./pages/AuthOrchestration.tsx";
@@ -733,6 +734,7 @@ const App = () => (
           <Route path="/assurance/workflow-detail" element={<WorkflowDetail />} />
           <Route path="/assurance/execute" element={<LiveExecution />} />
           <Route path="/itsm" element={<Itsm />} />
+          <Route path="/itsm/auto-ticket-categorization" element={<AutoTicketCategorization />} />
           <Route path="/itsm/exec-biz-ops" element={<ExecBizOps />} />
           <Route path="/itsm/exec-biz-ops/executive-command-center" element={<ExecutiveCommandCenter />} />
           <Route path="/itsm/exec-biz-ops/business-services" element={<BusinessServices />} />
