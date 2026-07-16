@@ -500,7 +500,7 @@ function OverviewTab(props: {
       </Card>
 
       {/* Incident briefing video */}
-      <Card className="xl:col-span-3">
+      <Card className="h-full">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Incident briefing video</CardTitle>
         </CardHeader>
@@ -511,12 +511,13 @@ function OverviewTab(props: {
             controlsList="nodownload"
             preload="metadata"
             playsInline
-            className="w-full rounded border border-slate-200 bg-black"
+            className="aspect-video w-full rounded border border-slate-200 bg-black object-contain"
           >
             Your browser does not support embedded video.
           </video>
         </CardContent>
       </Card>
+
 
 
 
