@@ -1,0 +1,171 @@
+/*
+ * AVEP — AI VLSI Engineering Platform
+ * Foundation Build 1 — Design Tokens
+ *
+ * All tokens are scoped to the `.avep-root` container so they never leak
+ * into or inherit from other applications that share this codebase.
+ * Dark mode is intentionally disabled — AVEP is a bright engineering UI.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+.avep-root {
+  /* ---------- Color palette (HSL) ---------- */
+  /* Neutral surfaces — cool, engineering-grade */
+  --avep-bg: 210 25% 98%;
+  --avep-surface: 0 0% 100%;
+  --avep-surface-muted: 214 22% 96%;
+  --avep-surface-sunken: 214 24% 93%;
+  --avep-foreground: 222 33% 12%;
+  --avep-foreground-muted: 220 12% 40%;
+  --avep-foreground-subtle: 220 10% 55%;
+
+  /* Brand — deep engineering indigo */
+  --avep-primary: 222 78% 36%;
+  --avep-primary-hover: 222 78% 30%;
+  --avep-primary-foreground: 0 0% 100%;
+  --avep-primary-soft: 222 78% 96%;
+
+  /* Accent — silicon cyan */
+  --avep-accent: 194 92% 42%;
+  --avep-accent-foreground: 0 0% 100%;
+  --avep-accent-soft: 194 92% 95%;
+
+  /* AI — verification magenta */
+  --avep-ai: 268 78% 55%;
+  --avep-ai-foreground: 0 0% 100%;
+  --avep-ai-soft: 268 90% 96%;
+
+  /* Status */
+  --avep-pass: 152 62% 38%;
+  --avep-pass-soft: 152 60% 94%;
+  --avep-warn: 36 96% 48%;
+  --avep-warn-soft: 40 100% 94%;
+  --avep-fail: 358 78% 52%;
+  --avep-fail-soft: 358 82% 96%;
+  --avep-info: 214 90% 52%;
+  --avep-info-soft: 214 100% 96%;
+
+  /* Structural */
+  --avep-border: 214 20% 88%;
+  --avep-border-strong: 214 18% 78%;
+  --avep-input: 214 22% 92%;
+  --avep-ring: 222 78% 46%;
+
+  /* ---------- Typography ---------- */
+  --avep-font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --avep-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+    Consolas, "Liberation Mono", monospace;
+
+  --avep-text-2xs: 0.6875rem;   /* 11 */
+  --avep-text-xs:  0.75rem;     /* 12 */
+  --avep-text-sm:  0.8125rem;   /* 13 */
+  --avep-text-base:0.875rem;    /* 14 — engineering density baseline */
+  --avep-text-md:  0.9375rem;   /* 15 */
+  --avep-text-lg:  1.0625rem;   /* 17 */
+  --avep-text-xl:  1.25rem;     /* 20 */
+  --avep-text-2xl: 1.5rem;      /* 24 */
+  --avep-text-3xl: 1.875rem;    /* 30 */
+  --avep-text-4xl: 2.25rem;     /* 36 */
+
+  --avep-leading-tight: 1.2;
+  --avep-leading-snug:  1.35;
+  --avep-leading-normal:1.5;
+  --avep-leading-relaxed:1.65;
+
+  --avep-tracking-tight: -0.01em;
+  --avep-tracking-normal: 0;
+  --avep-tracking-wide:   0.04em;
+
+  /* ---------- Spacing (4px base, engineering density) ---------- */
+  --avep-space-0: 0;
+  --avep-space-1: 0.25rem;   /* 4  */
+  --avep-space-2: 0.5rem;    /* 8  */
+  --avep-space-3: 0.75rem;   /* 12 */
+  --avep-space-4: 1rem;      /* 16 */
+  --avep-space-5: 1.25rem;   /* 20 */
+  --avep-space-6: 1.5rem;    /* 24 */
+  --avep-space-8: 2rem;      /* 32 */
+  --avep-space-10: 2.5rem;   /* 40 */
+  --avep-space-12: 3rem;     /* 48 */
+  --avep-space-16: 4rem;     /* 64 */
+
+  /* ---------- Corner radius ---------- */
+  --avep-radius-xs: 2px;
+  --avep-radius-sm: 4px;
+  --avep-radius-md: 6px;
+  --avep-radius-lg: 10px;
+  --avep-radius-xl: 14px;
+  --avep-radius-pill: 999px;
+
+  /* ---------- Elevation ---------- */
+  --avep-shadow-xs: 0 1px 1px hsl(222 40% 15% / 0.04);
+  --avep-shadow-sm: 0 1px 2px hsl(222 40% 15% / 0.06),
+                    0 1px 3px hsl(222 40% 15% / 0.04);
+  --avep-shadow-md: 0 2px 4px hsl(222 40% 15% / 0.06),
+                    0 4px 12px hsl(222 40% 15% / 0.06);
+  --avep-shadow-lg: 0 8px 24px hsl(222 40% 15% / 0.10),
+                    0 2px 6px hsl(222 40% 15% / 0.06);
+  --avep-shadow-focus: 0 0 0 3px hsl(var(--avep-ring) / 0.28);
+
+  /* ---------- Borders ---------- */
+  --avep-border-width: 1px;
+  --avep-border-width-strong: 1.5px;
+
+  /* ---------- Animation ---------- */
+  --avep-duration-instant: 80ms;
+  --avep-duration-fast:    140ms;
+  --avep-duration-base:    200ms;
+  --avep-duration-slow:    320ms;
+  --avep-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --avep-ease-emphasized: cubic-bezier(0.2, 0, 0, 1.2);
+
+  /* ---------- Responsive breakpoints (informational; consumed by JS) ---------- */
+  --avep-bp-sm: 640px;
+  --avep-bp-md: 768px;
+  --avep-bp-lg: 1024px;
+  --avep-bp-xl: 1280px;
+  --avep-bp-2xl: 1536px;
+
+  /* ---------- Base surface application ---------- */
+  color: hsl(var(--avep-foreground));
+  background-color: hsl(var(--avep-bg));
+  font-family: var(--avep-font-sans);
+  font-size: var(--avep-text-base);
+  line-height: var(--avep-leading-normal);
+  letter-spacing: var(--avep-tracking-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+}
+
+/* Force light mode — AVEP explicitly disables dark mode. */
+.avep-root,
+.avep-root * {
+  color-scheme: light;
+}
+
+/* Accessibility: honor user motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  .avep-root,
+  .avep-root * {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* Accessibility: keyboard focus ring for any focusable child. */
+.avep-root :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--avep-shadow-focus);
+  border-radius: var(--avep-radius-sm);
+}
+
+/* Monospace utility inside AVEP surfaces. */
+.avep-root .avep-mono {
+  font-family: var(--avep-font-mono);
+  font-variant-ligatures: none;
+}
