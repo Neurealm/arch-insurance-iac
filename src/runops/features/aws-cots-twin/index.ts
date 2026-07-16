@@ -1,5 +1,29 @@
 // AWS COTS Digital Twin — feature root exports.
-// Foundation phase: only the placeholder page is exposed. Data model,
-// repositories, canvas, hover cards, and details panel arrive in later prompts.
+//
+// Phase 1 exposes the placeholder page, the typed data model, and the
+// repository layer. UI components must consume data only through the
+// repository interface (never import from ./data/seed directly).
 
 export { default as AwsCotsDigitalTwinPage } from "./pages/AwsCotsDigitalTwin";
+export * from "./types";
+export {
+  getAwsCotsRepository,
+  setAwsCotsRepository,
+  getBusinessService,
+  getApplication,
+  getResources,
+  getResourceById,
+  getResourceRelationships,
+  getResourceTelemetry,
+  getAlerts,
+  getRunbooks,
+  getIncidents,
+  getChanges,
+  getSecurityFindings,
+  getCostObservations,
+  getSimulationScenario,
+  saveSimulationState,
+  resetSimulationState,
+  type AwsCotsRepository,
+  type ResourceFilter,
+} from "./repositories";
