@@ -65,7 +65,7 @@ async function loadPayload(resourceId: string): Promise<HoverPayload | null> {
   const repo = getAwsCotsRepository();
   const resource = await repo.getResourceById(resourceId);
   if (!resource) return null;
-  const [relationships, telemetry, telemetryDefs, alerts, backup, compliance, runbooks] = await Promise.all([
+  const [relationships, telemetry, telemetryDefs, directAlerts, backup, compliance, runbooks, allResources] = await Promise.all([
     repo.getResourceRelationships(resourceId),
     repo.getResourceTelemetry(resourceId),
     repo.getTelemetryDefinitions(),
@@ -73,7 +73,15 @@ async function loadPayload(resourceId: string): Promise<HoverPayload | null> {
     repo.getBackupStatus(resourceId),
     repo.getComplianceFindings(resourceId),
     repo.getRunbooks({ resourceType: resource.resource_type }),
+    repo.getResources(),
   ]);
+  // Bubble up alerts from directly attached child resources (e.g. EC2 → EBS).
+  const childIds = allResources.filter((x) => x.parent_resource_id === resourceId).map((x) => x.id);
+  const childAlerts = childIds.length
+    ? (await Promise.all(childIds.map((id) => repo.getAlerts({ resourceId: id })))).flat()
+    : [];
+  const seen = new Set<string>();
+  const alerts = [...directAlerts, ...childAlerts].filter((a) => (seen.has(a.id) ? false : (seen.add(a.id), true)));
   return { resource, relationships, telemetry, telemetryDefs, alerts, backup, compliance, runbooks };
 }
 
@@ -594,7 +602,6 @@ function configAttrsFor(r: AwsResource): CfgAttr[] {
         { label: "DNS support", value: yes(c["dns_support"] ?? true) },
         { label: "Endpoint count", value: "6" },
       ];
-    case "Alb" as never:
     case "AlbTargetGroup":
       return [
         { label: "Protocol", value: "HTTP" },
