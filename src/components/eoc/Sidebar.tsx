@@ -54,16 +54,6 @@ const coworkerChildren: Node[] = [
   { key: "hcpayer",label: "Healthcare Payer",                        to: "/coworkers/healthcare-payer",                    icon: Activity },
 ];
 
-const carveOpModelChildren: Node[] = carveOutGroups.map((g) => ({
-  key: g.key,
-  label: g.title,
-  icon: g.icon,
-  children: g.children.map((c) => ({
-    key: c.slug,
-    label: c.title,
-    to: `/carve-out/${g.key}/${c.slug}`,
-  })),
-}));
 
 const itsmChildren: Node[] = [
   {
