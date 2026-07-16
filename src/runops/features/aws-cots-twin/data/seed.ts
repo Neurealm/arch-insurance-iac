@@ -272,7 +272,7 @@ const compute: AwsResource[] = [
 ];
 
 const storage: AwsResource[] = [
-  R({ id: "ebs-a1", resource_type: "EbsVolume", resource_name: "EBS Root — A1", network_scope: "private-app", parent_resource_id: "ec2-a1", availability_zone: AZ_A_CODE, configuration: { size_gib: 100, type: "gp3" }, backup_status: "Protected" }),
+  R({ id: "ebs-a1", resource_type: "EbsVolume", resource_name: "EBS Root — A1", network_scope: "private-app", parent_resource_id: "ec2-a1", availability_zone: AZ_A_CODE, health_status: "Critical", configuration: { size_gib: 100, type: "gp3", used_pct: 94 }, backup_status: "Protected" }),
   R({ id: "ebs-a2", resource_type: "EbsVolume", resource_name: "EBS Root — A2", network_scope: "private-app", parent_resource_id: "ec2-a2", availability_zone: AZ_A_CODE, configuration: { size_gib: 100, type: "gp3" }, backup_status: "Protected" }),
   R({ id: "ebs-b1", resource_type: "EbsVolume", resource_name: "EBS Root — B1", network_scope: "private-app", parent_resource_id: "ec2-b1", availability_zone: AZ_B_CODE, configuration: { size_gib: 100, type: "gp3" }, backup_status: "Protected" }),
   R({ id: "ebs-b2", resource_type: "EbsVolume", resource_name: "EBS Root — B2", network_scope: "private-app", parent_resource_id: "ec2-b2", availability_zone: AZ_B_CODE, health_status: "Warning", configuration: { size_gib: 100, type: "gp3", used_pct: 84 }, backup_status: "Protected" }),
