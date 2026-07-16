@@ -863,7 +863,12 @@ function RunbooksTab({ runbooks, onLaunch, disabled }: {
             <div className="text-slate-500">Version {r.version} · autonomy {r.autonomy}</div>
             <RunbookFitnessScore score={r.fitnessScore} />
             <div className="flex gap-2">
-              <Button size="sm" disabled={disabled} onClick={() => onLaunch(r.id)}>
+              <Button
+                size="sm"
+                disabled={disabled}
+                onClick={() => navigate(`/runops/runbooks/${r.id}`)}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
                 <Play className="mr-1 h-3.5 w-3.5" /> Launch
               </Button>
               <Button size="sm" variant="outline" onClick={() => navigate(`/runops/runbooks/${r.id}`)}>
