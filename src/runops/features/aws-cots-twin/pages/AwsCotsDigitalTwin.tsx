@@ -20,6 +20,7 @@ import {
   type Application,
   type AwsAccount,
 } from "..";
+import { ArchitectureCanvas } from "../components/ArchitectureCanvas";
 
 /* -------------------------------------------------------------------------- */
 /*  Static reference values (from seed / Prompt 2 spec)                        */
