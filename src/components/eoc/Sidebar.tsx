@@ -87,14 +87,6 @@ const tree: Node[] = [
   { key: "home",       label: "Command Center",      icon: Home,          to: "/app" },
   { key: "ops",        label: "Operations Overview", icon: LayoutGrid,    to: "/operations" },
   {
-    key: "ai-engineering",
-    label: "AI Engineering",
-    icon: Bot,
-    children: [
-      { key: "ai-eng-backlog", label: "AI Engineering Backlog", icon: LayoutGrid, to: "/ai-engineering/backlog" },
-    ],
-  },
-  {
     key: "sre-practice",
     label: "Site Resilience Engineering",
     icon: ShieldCheck,
@@ -532,7 +524,7 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
 const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "PLATFORM",       keys: ["home", "ops"] },
   { label: "DIGITAL TWINS",  keys: ["sre-practice", "runops-runbooks", "sead", "ai-vlsi"] },
-  { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
+  { label: "AI & DATA",      keys: ["sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
   { label: "ADMIN WORKSPACE", keys: ["crm", "etdm", "settings"] },
