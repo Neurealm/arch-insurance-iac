@@ -84,8 +84,6 @@ const itsmChildren: Node[] = [
 ];
 
 const tree: Node[] = [
-  { key: "home",       label: "Command Center",      icon: Home,          to: "/app" },
-  { key: "ops",        label: "Operations Overview", icon: LayoutGrid,    to: "/operations" },
   {
     key: "sre-practice",
     label: "Site Resilience Engineering",
