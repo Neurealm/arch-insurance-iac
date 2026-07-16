@@ -633,42 +633,6 @@ function Placeholder({ text }: { text: string }) {
   );
 }
 
-function SelectedResourceStub({ resourceId, onClear }: { resourceId: string; onClear: () => void }) {
-  const [resource, setResource] = useState<AwsResource | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    getAwsCotsRepository().getResourceById(resourceId).then((r) => { if (!cancelled) setResource(r); });
-    return () => { cancelled = true; };
-  }, [resourceId]);
-
-  return (
-    <div className="space-y-2 text-[12px]">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-wider text-slate-500">Selected resource</div>
-          <div className="mt-0.5 truncate text-[13px] font-semibold text-slate-900">{resource?.resource_name ?? "Loading…"}</div>
-          {resource && (
-            <div className="mt-0.5 text-[11px] text-slate-600">
-              {resource.resource_type} · {resource.availability_zone ?? "Regional"} · {resource.health_status}
-            </div>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={onClear}
-          className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10.5px] text-slate-600 hover:bg-slate-50"
-        >
-          Clear
-        </button>
-      </div>
-      <div className="rounded-md border border-dashed border-slate-200 bg-slate-50/60 p-2.5 text-[11.5px] leading-relaxed text-slate-600">
-        Full 12-tab details panel (identity, configuration, telemetry, alerts, incidents, changes, dependencies,
-        blast radius, security, compliance, cost, raw JSON) arrives in Prompt 5. Hover cards on the canvas already
-        show the compact multi-section summary.
-      </div>
-    </div>
-  );
-}
 
 
 function CanvasPlaceholder({ view }: { view: ViewMode }) {
