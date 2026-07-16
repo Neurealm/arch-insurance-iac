@@ -69,6 +69,7 @@ export const routes: RouteMeta[] = [
   R("services/:serviceId/topology",          "Services", "Service Topology",             "Selected service + components + dependencies", "Built"),
   R("services/:serviceId/observability",     "Services", "Service Observability",        "Selected service + telemetry sources",   "Built"),
   R("services/:serviceId/readiness",         "Services", "Service Readiness",            "Selected service + runbook coverage",    "Built"),
+  R("aws-cots-digital-twin",                 "Services", "AWS COTS Digital Twin",        "COTS Application, Single Region, Dual AZ", "Scaffolded"),
 
   // Runbooks
   R("runbooks",                              "Runbooks", "Runbook Library",              "All runbooks in tenant",                 "Built", { isSectionLanding: true, navPrimary: true }),
