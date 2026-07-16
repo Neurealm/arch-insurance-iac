@@ -12,6 +12,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import {
   getAwsCotsRepository,
@@ -21,6 +23,7 @@ import {
   type AwsAccount,
 } from "..";
 import { ArchitectureCanvas } from "../components/ArchitectureCanvas";
+import { ResourceDetailsPanel, type DetailsTab } from "../components/ResourceDetailsPanel";
 
 /* -------------------------------------------------------------------------- */
 /*  Static reference values (from seed / Prompt 2 spec)                        */
@@ -109,8 +112,10 @@ export default function AwsCotsDigitalTwinPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
   const [selectedRelationshipId, setSelectedRelationshipId] = useState<string | null>(null);
-
-  // URL-driven selection state
+  // Retained across resource selection so the operator stays on the tab they were using.
+  const [activeDetailsTab, setActiveDetailsTab] = useState<DetailsTab>("overview");
+  const isMobile = useIsMobile();
+  const canvasFocusRef = useRef<HTMLDivElement>(null);
   const tenantId = params.get("tenant") ?? "tenant.meridian";
   const serviceId = params.get("service") ?? "bs.erm";
   const applicationId = params.get("application") ?? "app.atlas-cots";
@@ -218,7 +223,11 @@ export default function AwsCotsDigitalTwinPage() {
           <div className="flex min-w-0 flex-1 flex-col gap-3">
             <div className="flex min-w-0 flex-1 flex-col gap-3 md:flex-row">
               {/* Canvas */}
-              <section className="flex min-w-0 flex-1 flex-col rounded-md border border-slate-200 bg-white">
+              <section
+                ref={canvasFocusRef}
+                tabIndex={-1}
+                className="flex min-w-0 flex-1 flex-col rounded-md border border-slate-200 bg-white focus:outline-none"
+              >
                 <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
                   <div className="flex items-center gap-2 text-[12.5px] font-semibold text-slate-800">
                     <Server className="h-3.5 w-3.5 text-slate-500" />
@@ -246,23 +255,62 @@ export default function AwsCotsDigitalTwinPage() {
               </section>
 
 
-              {/* Right details panel */}
-              <PanelSection
-                title="Resource Details"
-                icon={<AlertOctagon className="h-3.5 w-3.5 text-slate-500" />}
-                side="right"
-                open={rightOpen}
-                onToggle={() => setRightOpen((o) => !o)}
-                widthOpen="w-full md:w-[320px]"
-                widthClosed="md:w-10"
-              >
-                {selectedResourceId ? (
-                  <SelectedResourceStub resourceId={selectedResourceId} onClear={() => setSelectedResourceId(null)} />
-                ) : (
-                  <Placeholder text="Hover a canvas resource for its full card, or click to select. The persistent 12-tab details panel arrives in Prompt 5." />
-                )}
-              </PanelSection>
+              {/* Right details panel — desktop / tablet persistent, mobile handled by Sheet below */}
+              {!isMobile && (
+                <PanelSection
+                  title="Resource Details"
+                  icon={<AlertOctagon className="h-3.5 w-3.5 text-slate-500" />}
+                  side="right"
+                  open={rightOpen}
+                  onToggle={() => setRightOpen((o) => !o)}
+                  widthOpen="w-full md:w-[420px] xl:w-[480px]"
+                  widthClosed="md:w-10"
+                  noPadding
+                >
+                  {selectedResourceId ? (
+                    <ResourceDetailsPanel
+                      resourceId={selectedResourceId}
+                      onClose={() => setSelectedResourceId(null)}
+                      onFocusCanvas={() => canvasFocusRef.current?.focus()}
+                      activeTab={activeDetailsTab}
+                      onActiveTabChange={setActiveDetailsTab}
+                    />
+                  ) : (
+                    <div className="p-3">
+                      <Placeholder text="Select a resource on the canvas to see its full details across 12 tabs: overview, configuration, telemetry, alerts, dependencies, security, cost, changes, incidents, runbooks, automation, and raw JSON." />
+                    </div>
+                  )}
+                </PanelSection>
+              )}
             </div>
+
+            {/* Mobile: full-screen sheet drawer */}
+            {isMobile && (
+              <Sheet
+                open={!!selectedResourceId}
+                onOpenChange={(o) => {
+                  if (!o) {
+                    setSelectedResourceId(null);
+                    canvasFocusRef.current?.focus();
+                  }
+                }}
+              >
+                <SheetContent side="right" className="w-full p-0 sm:max-w-full">
+                  <SheetHeader className="border-b border-slate-200 px-3 py-2">
+                    <SheetTitle className="text-[13px]">Resource details</SheetTitle>
+                  </SheetHeader>
+                  {selectedResourceId && (
+                    <ResourceDetailsPanel
+                      resourceId={selectedResourceId}
+                      onClose={() => setSelectedResourceId(null)}
+                      onFocusCanvas={() => canvasFocusRef.current?.focus()}
+                      activeTab={activeDetailsTab}
+                      onActiveTabChange={setActiveDetailsTab}
+                    />
+                  )}
+                </SheetContent>
+              </Sheet>
+            )}
 
             {/* Bottom telemetry panel */}
             <section
@@ -534,9 +582,11 @@ interface PanelSectionProps {
   widthOpen: string;
   widthClosed: string;
   children: React.ReactNode;
+  /** Skip the default `p-3` wrapper (children manage their own padding). */
+  noPadding?: boolean;
 }
 
-function PanelSection({ title, icon, side, open, onToggle, widthOpen, widthClosed, children }: PanelSectionProps) {
+function PanelSection({ title, icon, side, open, onToggle, widthOpen, widthClosed, children, noPadding }: PanelSectionProps) {
   const Toggle = side === "left"
     ? (open ? ChevronLeft : ChevronRight)
     : (open ? ChevronRight : ChevronLeft);
@@ -564,7 +614,9 @@ function PanelSection({ title, icon, side, open, onToggle, widthOpen, widthClose
           <Toggle className="h-3.5 w-3.5" />
         </button>
       </div>
-      {open && <div className="min-h-0 flex-1 overflow-auto p-3">{children}</div>}
+      {open && (
+        <div className={cn("min-h-0 flex-1", noPadding ? "overflow-hidden" : "overflow-auto p-3")}>{children}</div>
+      )}
     </aside>
   );
 }
@@ -581,42 +633,6 @@ function Placeholder({ text }: { text: string }) {
   );
 }
 
-function SelectedResourceStub({ resourceId, onClear }: { resourceId: string; onClear: () => void }) {
-  const [resource, setResource] = useState<AwsResource | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    getAwsCotsRepository().getResourceById(resourceId).then((r) => { if (!cancelled) setResource(r); });
-    return () => { cancelled = true; };
-  }, [resourceId]);
-
-  return (
-    <div className="space-y-2 text-[12px]">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-wider text-slate-500">Selected resource</div>
-          <div className="mt-0.5 truncate text-[13px] font-semibold text-slate-900">{resource?.resource_name ?? "Loading…"}</div>
-          {resource && (
-            <div className="mt-0.5 text-[11px] text-slate-600">
-              {resource.resource_type} · {resource.availability_zone ?? "Regional"} · {resource.health_status}
-            </div>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={onClear}
-          className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10.5px] text-slate-600 hover:bg-slate-50"
-        >
-          Clear
-        </button>
-      </div>
-      <div className="rounded-md border border-dashed border-slate-200 bg-slate-50/60 p-2.5 text-[11.5px] leading-relaxed text-slate-600">
-        Full 12-tab details panel (identity, configuration, telemetry, alerts, incidents, changes, dependencies,
-        blast radius, security, compliance, cost, raw JSON) arrives in Prompt 5. Hover cards on the canvas already
-        show the compact multi-section summary.
-      </div>
-    </div>
-  );
-}
 
 
 function CanvasPlaceholder({ view }: { view: ViewMode }) {
