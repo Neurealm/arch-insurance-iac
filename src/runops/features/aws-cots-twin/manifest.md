@@ -4,13 +4,13 @@
 - **Subject:** COTS Application, Single Region, Dual Availability Zone
 - **Route:** `/runops/aws-cots-digital-twin`
 - **Nav label:** AWS COTS Digital Twin (under Services)
-- **Current build phase:** Phase 2 — Page shell, header, business-service summary, responsive layout
+- **Current build phase:** Phase 3 — Interactive architecture canvas
 - **Completed phases:**
   - Prompt 0 — Project audit, guardrails, feature scaffold, route reservation, placeholder page
   - Prompt 1 — Typed data model, repository interface, in-memory demo repository, deterministic seed dataset
-  - Prompt 2 — Page header (tenant/service/app/env selectors, view selector, refresh + fullscreen, health/alert/cost/sync stats), business-service summary bar (all 16 requested fields), four structural placeholders (left filters, center canvas, right details, bottom telemetry), responsive stacking, URL-driven selection state
+  - Prompt 2 — Page shell (header, business-service summary, responsive layout, URL-driven selection)
+  - Prompt 3 — React Flow architecture canvas with nested boundaries (Enterprise → Account → Region → VPC → AZ → Subnet), regional edge/shared services, animated traffic flow (Internet → Route 53 → WAF → ALB → Target Group → EC2 → RDS), progressive-disclosure dependency + observability edges, health-encoded resource nodes (color + border style + status text + marker icon + tooltip), pan / zoom / fit / reset / minimap / fullscreen, click-to-select resource, double-click-to-center, click-to-select relationship, compact legend
 - **Pending phases:**
-  - Prompt 3 — Architecture canvas + visual hierarchy
   - Prompt 4 — Standardized resource hover cards
   - Prompt 5 — Persistent resource details panel (12 tabs)
 - **Data layer:**
