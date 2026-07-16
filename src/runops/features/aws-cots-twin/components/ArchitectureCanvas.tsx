@@ -44,6 +44,7 @@ import {
   type HealthStatus,
   type ResourceRelationship,
 } from "..";
+import { ResourceHoverCard } from "./ResourceHoverCard";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                      */
@@ -53,6 +54,8 @@ export interface ArchitectureCanvasProps {
   selectedResourceId: string | null;
   onSelectResource: (id: string | null) => void;
   onSelectRelationship?: (id: string | null) => void;
+  /** Fires the "Open resource details" action from the hover card. */
+  onOpenResourceDetails?: (id: string) => void;
 }
 
 type CanvasHealth =
@@ -65,6 +68,8 @@ interface ResourceNodeData {
   azLabel: string;
   alertCount: number;
   selected: boolean;
+  onOpenDetails?: (id: string) => void;
+  roleLabel?: string;
 }
 
 interface BoundaryNodeData {
