@@ -2,7 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutGrid, Boxes, BookOpen, Workflow, AlertOctagon, Bot,
   Target, Library, BarChart3, ShieldCheck, Plug, Server, Home,
-  ChevronLeft, ChevronRight, type LucideIcon,
+  ChevronLeft, ChevronRight, Cloud, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navSections, sectionLanding, type NavSection } from "@/runops/shell/routes";
@@ -123,6 +123,24 @@ export function RunOpsSidebar({ collapsed, onToggle, onNavigate }: Props) {
             </NavLink>
           );
         })}
+
+        <div className="mx-2 my-1 h-px bg-slate-200" aria-hidden />
+        <NavLink
+          to="/runops/aws-cots-digital-twin"
+          onClick={onNavigate}
+          className={({ isActive }) => cn(
+            "mx-2 my-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[12.5px] transition-colors",
+            isActive ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
+          )}
+          title={collapsed ? "AWS COTS Digital Twin" : undefined}
+        >
+          {({ isActive }) => (
+            <>
+              <Cloud className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-slate-500")} />
+              {!collapsed && <span className="truncate">AWS COTS Digital Twin</span>}
+            </>
+          )}
+        </NavLink>
       </nav>
 
       <div className="border-t border-slate-200 px-3 py-2 text-[10px] text-slate-500">
