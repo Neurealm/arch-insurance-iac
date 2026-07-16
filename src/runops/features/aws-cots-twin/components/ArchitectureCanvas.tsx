@@ -336,7 +336,7 @@ export function ArchitectureCanvas(props: ArchitectureCanvasProps) {
   );
 }
 
-function ArchitectureCanvasInner({ selectedResourceId, onSelectResource, onSelectRelationship }: ArchitectureCanvasProps) {
+function ArchitectureCanvasInner({ selectedResourceId, onSelectResource, onSelectRelationship, onOpenResourceDetails }: ArchitectureCanvasProps) {
   const [resources, setResources] = useState<AwsResource[]>([]);
   const [relationships, setRelationships] = useState<ResourceRelationship[]>([]);
   const [alertCountByResource, setAlertCountByResource] = useState<Record<string, number>>({});
