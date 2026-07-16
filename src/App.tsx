@@ -773,6 +773,9 @@ const App = () => (
           <Route path="/crm-demo/confidence" element={<DiscoveryConfidenceDemo />} />
           <Route path="/settings/stakeholder-register" element={<Navigate to="/crm" replace />} />
           <Route path="/settings/stakeholder-register-legacy" element={<ProtectedRoute><StakeholderRegister /></ProtectedRoute>} />
+          <Route path="/silicon" element={<SiliconLayout />}>
+            <Route index element={<FoundationStatus />} />
+          </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
