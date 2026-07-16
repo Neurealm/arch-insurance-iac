@@ -180,7 +180,7 @@ const tree: Node[] = [
     icon: Sparkles2,
     to: "/ai-vlsi-engineering",
   },
-  { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
+  
   { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers" },
   {
