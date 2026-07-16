@@ -470,7 +470,8 @@ function OverviewTab(props: {
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
       {/* Purpose + narrative */}
-      <Card className="xl:col-span-2">
+      <Card className="h-full">
+
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Service purpose & reliability narrative</CardTitle>
         </CardHeader>
