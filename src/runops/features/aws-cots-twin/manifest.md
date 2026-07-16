@@ -4,20 +4,27 @@
 - **Subject:** COTS Application, Single Region, Dual Availability Zone
 - **Route:** `/runops/aws-cots-digital-twin`
 - **Nav label:** AWS COTS Digital Twin (under Services)
-- **Current build phase:** Phase 1 — Core data model + seeded demo data
+- **Current build phase:** Phase 2 — Page shell, header, business-service summary, responsive layout
 - **Completed phases:**
   - Prompt 0 — Project audit, guardrails, feature scaffold, route reservation, placeholder page
   - Prompt 1 — Typed data model, repository interface, in-memory demo repository, deterministic seed dataset
+  - Prompt 2 — Page header (tenant/service/app/env selectors, view selector, refresh + fullscreen, health/alert/cost/sync stats), business-service summary bar (all 16 requested fields), four structural placeholders (left filters, center canvas, right details, bottom telemetry), responsive stacking, URL-driven selection state
 - **Pending phases:**
-  - Prompt 2 — Page shell, header, business-service summary, responsive layout
   - Prompt 3 — Architecture canvas + visual hierarchy
   - Prompt 4 — Standardized resource hover cards
   - Prompt 5 — Persistent resource details panel (12 tabs)
 - **Data layer:**
   - Types: `src/runops/features/aws-cots-twin/types.ts`
-  - Seed: `src/runops/features/aws-cots-twin/data/seed.ts` (deterministic, synthetic; no live data)
+  - Seed: `src/runops/features/aws-cots-twin/data/seed.ts`
   - Repository: `src/runops/features/aws-cots-twin/repositories/index.ts`
-- **Live-integration status:** Not connected. Repository interface is the sole data-access surface; live implementations (Supabase / server-side AWS adapters) will replace `InMemoryAwsCotsRepository` without changing UI callers.
+- **Interactive controls (Phase 2):**
+  - Tenant / Business service / Application / Environment selectors write to URL (`?tenant`, `?service`, `?application`, `?env`) via `useSearchParams`
+  - View selector writes `?view`; only "Architecture" is enabled; others show "Coming in a later build phase" tooltip
+  - Refresh action reloads repository data and updates last-synced timestamp
+  - Fullscreen action uses `element.requestFullscreen()`; hidden when unsupported
+  - Left, right, and bottom panels each collapse with keyboard-labeled buttons
+- **Responsive behavior:** flex layout stacks vertically below `md`; panels remain reachable via collapse toggles; canvas retains min-height so it is never clipped.
+- **Live-integration status:** Not connected. UI consumes only `getAwsCotsRepository()` — no direct import from seed files.
 - **Known issues:** None.
-- **Validation status:** Types compile; repository exposes every method required by Prompt 1. UI components have not yet been wired to the data layer.
+- **Validation status:** Types compile; validation script for Prompt 1 reports zero orphan / duplicate / self-ref records; page shell renders behind auth guard as expected.
 - **Last validation date:** 2026-07-16
