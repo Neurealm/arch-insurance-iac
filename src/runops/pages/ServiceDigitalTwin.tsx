@@ -841,6 +841,7 @@ function OperationsTab({ activeExecution, workers, drafts }: {
 function RunbooksTab({ runbooks, onLaunch, disabled }: {
   runbooks: Runbook[]; onLaunch: (id: string) => void; disabled: boolean;
 }) {
+  const navigate = useNavigate();
   if (runbooks.length === 0) return <EmptyState title="No runbooks" description="No runbooks mapped to this service. Consider authoring one." />;
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -848,16 +849,27 @@ function RunbooksTab({ runbooks, onLaunch, disabled }: {
         <Card key={r.id}>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center justify-between text-sm">
-              <span>{r.id} · {r.title}</span>
+              <button
+                type="button"
+                onClick={() => navigate(`/runops/runbooks/${r.id}`)}
+                className="text-left hover:underline"
+              >
+                {r.id} · {r.title}
+              </button>
               <Badge variant="outline">{r.state}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-xs">
             <div className="text-slate-500">Version {r.version} · autonomy {r.autonomy}</div>
             <RunbookFitnessScore score={r.fitnessScore} />
-            <Button size="sm" disabled={disabled} onClick={() => onLaunch(r.id)}>
-              <Play className="mr-1 h-3.5 w-3.5" /> Launch
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" disabled={disabled} onClick={() => onLaunch(r.id)}>
+                <Play className="mr-1 h-3.5 w-3.5" /> Launch
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => navigate(`/runops/runbooks/${r.id}`)}>
+                Open {r.id}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ))}
