@@ -602,7 +602,6 @@ function configAttrsFor(r: AwsResource): CfgAttr[] {
         { label: "DNS support", value: yes(c["dns_support"] ?? true) },
         { label: "Endpoint count", value: "6" },
       ];
-    case "Alb" as never:
     case "AlbTargetGroup":
       return [
         { label: "Protocol", value: "HTTP" },
