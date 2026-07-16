@@ -264,8 +264,9 @@ const compute: AwsResource[] = [
   R({ id: "lt-atlas", resource_type: "LaunchTemplate", resource_name: "Atlas Launch Template v14", network_scope: "private-app" }),
   R({ id: "ami-golden", resource_type: "Ami", resource_name: "Atlas Golden AMI 2026-06", network_scope: "n/a", patch_status: "Overdue", security_status: "Advisory", configuration: { base_os: "Amazon Linux 2023", pending_patches: 2 } }),
 
-  R({ id: "ec2-a1", resource_type: "Ec2Instance", resource_name: "Application Server A1", network_scope: "private-app", parent_resource_id: "subnet-app-a", availability_zone: AZ_A_CODE, monthly_cost: 210, configuration: { instance_type: "m6i.large" }, backup_status: "Protected", patch_status: "Current" }),
+  R({ id: "ec2-a1", resource_type: "Ec2Instance", resource_name: "Application Server A1", network_scope: "private-app", parent_resource_id: "subnet-app-a", availability_zone: AZ_A_CODE, monthly_cost: 210, health_status: "Critical", configuration: { instance_type: "m6i.large" }, backup_status: "Protected", patch_status: "Current" }),
   R({ id: "ec2-a2", resource_type: "Ec2Instance", resource_name: "Application Server A2", network_scope: "private-app", parent_resource_id: "subnet-app-a", availability_zone: AZ_A_CODE, monthly_cost: 210, configuration: { instance_type: "m6i.large" }, backup_status: "Protected", patch_status: "Current" }),
+
   R({ id: "ec2-b1", resource_type: "Ec2Instance", resource_name: "Application Server B1", network_scope: "private-app", parent_resource_id: "subnet-app-b", availability_zone: AZ_B_CODE, monthly_cost: 210, configuration: { instance_type: "m6i.large" }, backup_status: "Protected", patch_status: "Current" }),
   R({ id: "ec2-b2", resource_type: "Ec2Instance", resource_name: "Application Server B2", network_scope: "private-app", parent_resource_id: "subnet-app-b", availability_zone: AZ_B_CODE, monthly_cost: 210, health_status: "Warning", configuration: { instance_type: "m6i.large" }, backup_status: "Protected", patch_status: "Pending" }),
 ];
