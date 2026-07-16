@@ -46,6 +46,8 @@ import SeadIotAiArchitecture from "./pages/sead/IotAiArchitecture.tsx";
 import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
+import { SiliconLayout } from "./silicon/shell/SiliconLayout";
+import FoundationStatus from "./silicon/pages/FoundationStatus";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
 import CyberMasterDashboard from "./pages/practice-library/dashboards/cyber/CyberMasterDashboard.tsx";
