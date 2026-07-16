@@ -1048,11 +1048,14 @@ function ChangeRow({ c }: { c: Change }) {
 
 function IncidentsTab({ p }: { p: DetailsPayload }) {
   const { incidents, alerts, changes } = p;
-  const open = incidents.filter((i) => i.status !== "Resolved");
-  const history = incidents.filter((i) => i.status === "Resolved");
+  const linkedIds = new Set(alerts.map((a) => a.incident_id).filter((x): x is string => !!x));
+  const scoped = incidents.filter((i) => linkedIds.has(i.id));
+  const open = scoped.filter((i) => i.status !== "Resolved");
+  const history = scoped.filter((i) => i.status === "Resolved");
   const mttrMinutes = history.length
     ? Math.round(history.reduce((s, i) => s + (new Date(i.resolved_at ?? i.opened_at).getTime() - new Date(i.opened_at).getTime()) / 60000, 0) / history.length)
     : null;
+
 
   return (
     <div className="space-y-3">
