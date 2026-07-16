@@ -65,23 +65,6 @@ const carveOpModelChildren: Node[] = carveOutGroups.map((g) => ({
   })),
 }));
 
-const itsmChildren: Node[] = [
-  {
-    key: "exec-biz-ops",
-    label: "Executive & Business Operations",
-    icon: Briefcase,
-    children: [
-      { key: "ecc",   label: "Executive Command Center",                       to: "/itsm/exec-biz-ops/executive-command-center", icon: LayoutGrid },
-      { key: "bsh",   label: "Business Services (Service Portfolio & Health)", to: "/itsm/exec-biz-ops/business-services",        icon: Boxes },
-      { key: "cxjh",  label: "Customer Experience & Journey Health (XLA)",    to: "/itsm/exec-biz-ops/customer-experience",      icon: Smile },
-      { key: "slo",   label: "SLA / SLO / Error Budget Performance",          to: "/itsm/exec-biz-ops/sla-slo-error-budget",     icon: Target },
-      { key: "risk",  label: "Risk & Operational Exposure View",              to: "/itsm/exec-biz-ops/risk-exposure",            icon: ShieldX },
-    ],
-  },
-  { key: "incidents",  label: "Incidents",         icon: AlertTriangle, to: "/incidents", badge: "342", badgeTone: "critical" },
-  { key: "alerts",     label: "Alerts",            icon: Bell,          to: "/alerts",    badge: "1.5k", badgeTone: "critical" },
-  { key: "change",     label: "Change Management", icon: GitBranch,     to: "/change",    badge: "1.2k", badgeTone: "critical" },
-];
 
 const tree: Node[] = [
   {
@@ -181,7 +164,7 @@ const tree: Node[] = [
     to: "/ai-vlsi-engineering",
   },
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
-  { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
+  
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers" },
   {
     key: "settings",
@@ -524,7 +507,7 @@ const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "DIGITAL TWINS",  keys: ["sre-practice", "runops-runbooks", "sead", "ai-vlsi"] },
   { label: "AI & DATA",      keys: ["sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
-  { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
+  { label: "OPERATIONS",     keys: ["carve-op", "coworkers"] },
   { label: "ADMIN WORKSPACE", keys: ["crm", "etdm", "settings"] },
 ];
 
