@@ -15,7 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { carveOutGroups } from "@/data/carveout";
+
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/context/AuthContext";
@@ -54,16 +54,6 @@ const coworkerChildren: Node[] = [
   { key: "hcpayer",label: "Healthcare Payer",                        to: "/coworkers/healthcare-payer",                    icon: Activity },
 ];
 
-const carveOpModelChildren: Node[] = carveOutGroups.map((g) => ({
-  key: g.key,
-  label: g.title,
-  icon: g.icon,
-  children: g.children.map((c) => ({
-    key: c.slug,
-    label: c.title,
-    to: `/carve-out/${g.key}/${c.slug}`,
-  })),
-}));
 
 const itsmChildren: Node[] = [
   {
@@ -180,7 +170,7 @@ const tree: Node[] = [
     icon: Sparkles2,
     to: "/ai-vlsi-engineering",
   },
-  { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
+  
   { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers" },
   {
