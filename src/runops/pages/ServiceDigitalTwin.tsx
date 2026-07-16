@@ -858,6 +858,9 @@ function RunbooksTab({ runbooks, onLaunch, disabled }: {
             <Button size="sm" disabled={disabled} onClick={() => onLaunch(r.id)}>
               <Play className="mr-1 h-3.5 w-3.5" /> Launch
             </Button>
+            <Button size="sm" variant="outline" asChild>
+              <RouterLink to={`/runops/runbooks/${r.id}`}>Open {r.id}</RouterLink>
+            </Button>
           </CardContent>
         </Card>
       ))}
