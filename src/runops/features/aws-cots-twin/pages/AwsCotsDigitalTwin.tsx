@@ -614,7 +614,9 @@ function PanelSection({ title, icon, side, open, onToggle, widthOpen, widthClose
           <Toggle className="h-3.5 w-3.5" />
         </button>
       </div>
-      {open && <div className="min-h-0 flex-1 overflow-auto p-3">{children}</div>}
+      {open && (
+        <div className={cn("min-h-0 flex-1", noPadding ? "overflow-hidden" : "overflow-auto p-3")}>{children}</div>
+      )}
     </aside>
   );
 }
