@@ -146,7 +146,7 @@ import CmmOverview from "./pages/carveout/CmmOverview.tsx";
 import CmmSolutionDesign from "./pages/carveout/CmmSolutionDesign.tsx";
 import CmmDashboard from "./pages/carveout/CmmDashboard.tsx";
 import DeployCoworker from "./pages/DeployCoworker.tsx";
-import Operations from "./pages/Operations.tsx";
+
 import Incidents from "./pages/Incidents.tsx";
 import Alerts from "./pages/Alerts.tsx";
 import ChangeManagement from "./pages/ChangeManagement.tsx";
