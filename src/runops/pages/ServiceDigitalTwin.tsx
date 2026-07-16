@@ -25,6 +25,7 @@ import {
   ShieldCheck, Sparkles, Target, Wrench,
 } from "lucide-react";
 import { useOperations, useRightDrawer } from "@/runops/state/RunOpsProviders";
+import incidentVideo from "@/assets/incident-clinical-integration.mp4.asset.json";
 import { useScenarioStore } from "@/runops/scenario/ScenarioStore";
 import {
   EntityHeader, EntityTabs, MetricCard, StatusIndicator, ReadinessScore,
