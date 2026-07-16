@@ -107,6 +107,8 @@ export default function AwsCotsDigitalTwinPage() {
   const [resources, setResources] = useState<AwsResource[]>([]);
   const [syncedAt, setSyncedAt] = useState<string>(() => new Date(Date.now() - 42_000).toISOString());
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
+  const [selectedRelationshipId, setSelectedRelationshipId] = useState<string | null>(null);
 
   // URL-driven selection state
   const tenantId = params.get("tenant") ?? "tenant.meridian";
@@ -226,10 +228,17 @@ export default function AwsCotsDigitalTwinPage() {
                     {resources.length} resources · {environment} · {account?.alias ?? "—"}
                   </div>
                 </div>
-                <div className="flex-1 min-h-[380px] p-3">
-                  <CanvasPlaceholder view={view} />
+                <div className="flex-1 min-h-[420px] p-2">
+                  {view === "architecture" ? (
+                    <ArchitectureCanvas
+                      selectedResourceId={selectedResourceId}
+                      onSelectResource={setSelectedResourceId}
+                      onSelectRelationship={setSelectedRelationshipId}
+                    />
+                  ) : (
+                    <CanvasPlaceholder view={view} />
+                  )}
                 </div>
-              </section>
 
               {/* Right details panel */}
               <PanelSection
