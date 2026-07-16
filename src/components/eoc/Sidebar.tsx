@@ -249,6 +249,12 @@ const tree: Node[] = [
     to: "/sead/command-center",
   },
   {
+    key: "ai-vlsi",
+    label: "AI VLSI Engineering Platform",
+    icon: Sparkles2,
+    to: "/ai-vlsi-engineering",
+  },
+  {
     key: "semi",
     label: "Semiconductor Ops Command Center",
     icon: Activity,
