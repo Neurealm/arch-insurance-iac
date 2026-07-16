@@ -6,8 +6,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
-import AiEngineeringBacklog from "./pages/ai-engineering/Backlog.tsx";
-import AnswersActions from "./pages/ai-engineering/AnswersActions.tsx";
 
 import EnterpriseCertificateManagement from "./pages/enterprise-cert/EnterpriseCertificateManagement.tsx";
 import RiskExposureMap from "./pages/enterprise-cert/RiskExposureMap.tsx";
@@ -509,8 +507,6 @@ const App = () => (
           <Route path="/sead/simulation-comparison" element={<ProtectedRoute><SeadSimulationComparison /></ProtectedRoute>} />
 
 
-          <Route path="/ai-engineering/backlog" element={<ProtectedRoute><AiEngineeringBacklog /></ProtectedRoute>} />
-          <Route path="/ai-engineering/answers-actions" element={<ProtectedRoute><AnswersActions /></ProtectedRoute>} />
           
 
           <Route path="/coworkers" element={<Coworkers />} />
