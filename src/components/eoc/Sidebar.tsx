@@ -254,24 +254,6 @@ const tree: Node[] = [
     icon: Sparkles2,
     to: "/ai-vlsi-engineering",
   },
-  {
-    key: "semi",
-    label: "Semiconductor Ops Command Center",
-    icon: Activity,
-    to: "/semiconductor/command-center",
-    navOnClick: true,
-    children: [
-      { key: "semi-cc",   label: "Command Center",           icon: LayoutGrid, to: "/semiconductor/command-center" },
-      { key: "semi-twin", label: "Factory Digital Twin",     icon: Boxes,      to: "/semiconductor/digital-twin" },
-      { key: "semi-flow", label: "Production Flow",          icon: Workflow,   to: "/semiconductor/production-flow" },
-      { key: "semi-phys", label: "Physical Automation",      icon: Bot,        to: "/semiconductor/physical-automation" },
-      { key: "semi-vis",  label: "Vision Operations",        icon: Activity,   to: "/semiconductor/vision-operations" },
-      { key: "semi-ops",  label: "Operations Intelligence",  icon: Sparkles2,  to: "/semiconductor/operations-intelligence" },
-      { key: "semi-res",  label: "Resource Optimization",    icon: Zap,        to: "/semiconductor/resource-optimization" },
-      { key: "semi-kg",   label: "Knowledge Graph",          icon: NetIcon,    to: "/semiconductor/knowledge-graph" },
-      { key: "semi-pov",  label: "Proof of Value",           icon: Target,     to: "/semiconductor/proof-of-value" },
-    ],
-  },
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
   { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers" },
@@ -613,7 +595,7 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
 
 const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "PLATFORM",       keys: ["home", "ops"] },
-  { label: "DIGITAL TWINS",  keys: ["aocp", "sre-practice", "runops-runbooks", "sead", "ai-vlsi", "semi"] },
+  { label: "DIGITAL TWINS",  keys: ["aocp", "sre-practice", "runops-runbooks", "sead", "ai-vlsi"] },
   { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
