@@ -264,14 +264,15 @@ const compute: AwsResource[] = [
   R({ id: "lt-atlas", resource_type: "LaunchTemplate", resource_name: "Atlas Launch Template v14", network_scope: "private-app" }),
   R({ id: "ami-golden", resource_type: "Ami", resource_name: "Atlas Golden AMI 2026-06", network_scope: "n/a", patch_status: "Overdue", security_status: "Advisory", configuration: { base_os: "Amazon Linux 2023", pending_patches: 2 } }),
 
-  R({ id: "ec2-a1", resource_type: "Ec2Instance", resource_name: "Application Server A1", network_scope: "private-app", parent_resource_id: "subnet-app-a", availability_zone: AZ_A_CODE, monthly_cost: 210, configuration: { instance_type: "m6i.large" }, backup_status: "Protected", patch_status: "Current" }),
+  R({ id: "ec2-a1", resource_type: "Ec2Instance", resource_name: "Application Server A1", network_scope: "private-app", parent_resource_id: "subnet-app-a", availability_zone: AZ_A_CODE, monthly_cost: 210, health_status: "Critical", configuration: { instance_type: "m6i.large" }, backup_status: "Protected", patch_status: "Current" }),
   R({ id: "ec2-a2", resource_type: "Ec2Instance", resource_name: "Application Server A2", network_scope: "private-app", parent_resource_id: "subnet-app-a", availability_zone: AZ_A_CODE, monthly_cost: 210, configuration: { instance_type: "m6i.large" }, backup_status: "Protected", patch_status: "Current" }),
+
   R({ id: "ec2-b1", resource_type: "Ec2Instance", resource_name: "Application Server B1", network_scope: "private-app", parent_resource_id: "subnet-app-b", availability_zone: AZ_B_CODE, monthly_cost: 210, configuration: { instance_type: "m6i.large" }, backup_status: "Protected", patch_status: "Current" }),
   R({ id: "ec2-b2", resource_type: "Ec2Instance", resource_name: "Application Server B2", network_scope: "private-app", parent_resource_id: "subnet-app-b", availability_zone: AZ_B_CODE, monthly_cost: 210, health_status: "Warning", configuration: { instance_type: "m6i.large" }, backup_status: "Protected", patch_status: "Pending" }),
 ];
 
 const storage: AwsResource[] = [
-  R({ id: "ebs-a1", resource_type: "EbsVolume", resource_name: "EBS Root — A1", network_scope: "private-app", parent_resource_id: "ec2-a1", availability_zone: AZ_A_CODE, configuration: { size_gib: 100, type: "gp3" }, backup_status: "Protected" }),
+  R({ id: "ebs-a1", resource_type: "EbsVolume", resource_name: "EBS Root — A1", network_scope: "private-app", parent_resource_id: "ec2-a1", availability_zone: AZ_A_CODE, health_status: "Critical", configuration: { size_gib: 100, type: "gp3", used_pct: 94 }, backup_status: "Protected" }),
   R({ id: "ebs-a2", resource_type: "EbsVolume", resource_name: "EBS Root — A2", network_scope: "private-app", parent_resource_id: "ec2-a2", availability_zone: AZ_A_CODE, configuration: { size_gib: 100, type: "gp3" }, backup_status: "Protected" }),
   R({ id: "ebs-b1", resource_type: "EbsVolume", resource_name: "EBS Root — B1", network_scope: "private-app", parent_resource_id: "ec2-b1", availability_zone: AZ_B_CODE, configuration: { size_gib: 100, type: "gp3" }, backup_status: "Protected" }),
   R({ id: "ebs-b2", resource_type: "EbsVolume", resource_name: "EBS Root — B2", network_scope: "private-app", parent_resource_id: "ec2-b2", availability_zone: AZ_B_CODE, health_status: "Warning", configuration: { size_gib: 100, type: "gp3", used_pct: 84 }, backup_status: "Protected" }),
@@ -471,6 +472,7 @@ const telemetry_observations: TelemetryObservation[] = [
   { id: "to.ec2.a2.cpu", tenant_id: TENANT_ID, resource_id: "ec2-a2", metric_definition_id: "td.ec2.cpu", timestamp: NOW, current_value: 41, previous_value: 39, baseline_value: 38, anomaly_score: 0.06, trend: "up", freshness_status: "Fresh", source: "CloudWatch" },
   { id: "to.ec2.b1.cpu", tenant_id: TENANT_ID, resource_id: "ec2-b1", metric_definition_id: "td.ec2.cpu", timestamp: NOW, current_value: 44, previous_value: 43, baseline_value: 40, anomaly_score: 0.09, trend: "flat", freshness_status: "Fresh", source: "CloudWatch" },
   { id: "to.ec2.b2.cpu", tenant_id: TENANT_ID, resource_id: "ec2-b2", metric_definition_id: "td.ec2.cpu", timestamp: NOW, current_value: 58, previous_value: 46, baseline_value: 40, anomaly_score: 0.38, trend: "up", freshness_status: "Fresh", source: "CloudWatch" },
+  { id: "to.ebs.a1.disk", tenant_id: TENANT_ID, resource_id: "ebs-a1", metric_definition_id: "td.ec2.disk", timestamp: NOW, current_value: 94, previous_value: 91, baseline_value: 62, anomaly_score: 0.88, trend: "up", freshness_status: "Fresh", source: "Agent" },
   { id: "to.ebs.b2.disk", tenant_id: TENANT_ID, resource_id: "ebs-b2", metric_definition_id: "td.ec2.disk", timestamp: NOW, current_value: 84, previous_value: 78, baseline_value: 60, anomaly_score: 0.72, trend: "up", freshness_status: "Fresh", source: "Agent" },
   { id: "to.alb.5xx", tenant_id: TENANT_ID, resource_id: "alb-atlas", metric_definition_id: "td.alb.5xx", timestamp: NOW, current_value: 2, previous_value: 1, baseline_value: 1, anomaly_score: 0.1, trend: "flat", freshness_status: "Fresh", source: "CloudWatch" },
   { id: "to.alb.latency", tenant_id: TENANT_ID, resource_id: "alb-atlas", metric_definition_id: "td.alb.latency", timestamp: NOW, current_value: 0.31, previous_value: 0.29, baseline_value: 0.30, anomaly_score: 0.05, trend: "flat", freshness_status: "Fresh", source: "CloudWatch" },
@@ -526,6 +528,30 @@ const changes: Change[] = [
 ];
 
 const alerts: Alert[] = [
+  {
+    id: "alt.a1-disk",
+    tenant_id: TENANT_ID,
+    resource_id: "ebs-a1",
+    title: "Application Server A1 EBS volume capacity is 94% (critical)",
+    description: "Root EBS volume on Application Server A1 exceeded critical threshold (90%). Filesystem is at imminent risk of exhaustion.",
+    severity: "Critical",
+    status: "Firing",
+    category: "Capacity",
+    detection_source: "CloudWatch Alarm — Atlas EC2 Disk Utilization",
+    metric_name: "DiskUsedPercent",
+    current_value: 94,
+    threshold: 90,
+    first_detected_at: DAY_AGO,
+    last_detected_at: NOW,
+    assigned_team: "SRE — Atlas COTS",
+    assigned_owner: "on-call",
+    business_impact: "A1 will begin failing writes and ALB health checks when the volume fills; capacity in AZ A degrades to a single node.",
+    probable_cause: "Runaway application temp files after batch job; log rotation not reclaiming space.",
+    recommended_action: "Expand EBS volume online to 200 GiB and clear stale temp files, then verify rotation policy.",
+    runbook_id: "rb.expand-ebs",
+    automation_available: true,
+    automated_action_status: "Awaiting Approval",
+  },
   {
     id: "alt.b2-disk",
     tenant_id: TENANT_ID,
