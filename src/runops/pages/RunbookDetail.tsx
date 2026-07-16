@@ -425,7 +425,14 @@ export default function RunbookDetail() {
                 undefined,
             }))}
             value={tab}
-            onChange={(v) => setTab(v as TabValue)}
+            onChange={(v) => {
+              if (v === "architecture") {
+                navigate("/runops/aws-cots-digital-twin");
+                return;
+              }
+              setTab(v as TabValue);
+            }}
+
           />
         </div>
         <Button
