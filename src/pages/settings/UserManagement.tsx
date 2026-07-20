@@ -742,6 +742,87 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: number; 
   );
 }
 
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="text-muted-foreground text-xs">{label}</div>
+      <div className="font-medium text-sm break-words">{children ?? <span className="text-muted-foreground">—</span>}</div>
+    </div>
+  );
+}
+
+function fmtDate(v: any) {
+  if (!v) return null;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? String(v) : d.toLocaleDateString();
+}
+
+function ProfileDetailsCard({ profile }: { profile: any }) {
+  if (!profile) {
+    return (
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-sm">Profile details</CardTitle></CardHeader>
+        <CardContent className="text-sm text-muted-foreground">No profile record.</CardContent>
+      </Card>
+    );
+  }
+  const nn = (v: any) => (v === null || v === undefined || v === "" ? null : v);
+  const hybrid = Array.isArray(profile.hybrid_days) && profile.hybrid_days.length ? profile.hybrid_days.join(", ") : null;
+  const ooo =
+    profile.ooo_enabled && (profile.ooo_start || profile.ooo_end)
+      ? `${fmtDate(profile.ooo_start) ?? "—"} → ${fmtDate(profile.ooo_end) ?? "—"}`
+      : profile.ooo_enabled ? "Enabled" : "Off";
+
+  return (
+    <Card>
+      <CardHeader className="pb-2"><CardTitle className="text-sm">Profile details</CardTitle></CardHeader>
+      <CardContent className="space-y-4 text-sm">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Identity</div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="First name">{nn(profile.first_name)}</Field>
+            <Field label="Last name">{nn(profile.last_name)}</Field>
+            <Field label="Display name">{nn(profile.display_name) ?? nn(profile.full_name)}</Field>
+            <Field label="Job title">{nn(profile.job_title)}</Field>
+            <Field label="Department">{nn(profile.department)}</Field>
+            <Field label="Company">
+              {profile.company_id && nn(profile.company) ? (
+                <Link to={`/crm/companies/${profile.company_id}`} className="text-primary hover:underline">
+                  {profile.company}
+                </Link>
+              ) : nn(profile.company)}
+            </Field>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Contact & location</div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Phone">{nn(profile.phone)}</Field>
+            <Field label="Preferred contact">{nn(profile.preferred_contact_method)}</Field>
+            <Field label="Working location">{nn(profile.working_location_type)}</Field>
+            <Field label="Office site">{nn(profile.office_site)}</Field>
+            <Field label="Hybrid days">{hybrid}</Field>
+            <Field label="Location">{nn(profile.location)}</Field>
+            <Field label="Time zone">{nn(profile.time_zone)}</Field>
+            <Field label="Preferred language">{nn(profile.preferred_language)}</Field>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Status</div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="User category">{nn(profile.user_category)}</Field>
+            <Field label="Profile completed">{fmtDate(profile.profile_completed_at) ?? "Incomplete"}</Field>
+            <Field label="Must change password">{profile.must_change_password ? "Yes" : "No"}</Field>
+            <Field label="Out of office">{ooo}</Field>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function ActionRow({ icon: Icon, title, description, button }: { icon: any; title: string; description: string; button: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between rounded-md border px-3 py-3">
