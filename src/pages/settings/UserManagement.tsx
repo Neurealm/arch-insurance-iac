@@ -523,6 +523,8 @@ export default function UserManagement() {
                       <div><div className="text-muted-foreground text-xs">Last sign-in</div><div className="font-medium">{selected.last_sign_in_at ? new Date(selected.last_sign_in_at).toLocaleString() : "Never"}</div></div>
                     </CardContent>
                   </Card>
+
+                  <ProfileDetailsCard profile={selected.profile} />
                 </TabsContent>
 
                 <TabsContent value="history" className="mt-4 space-y-3">

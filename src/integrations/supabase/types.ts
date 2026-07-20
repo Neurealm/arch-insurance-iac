@@ -2121,6 +2121,7 @@ export type Database = {
           approved_by: string | null
           avatar_url: string | null
           company: string | null
+          company_id: string | null
           created_at: string
           department: string | null
           display_name: string | null
@@ -2155,6 +2156,7 @@ export type Database = {
           approved_by?: string | null
           avatar_url?: string | null
           company?: string | null
+          company_id?: string | null
           created_at?: string
           department?: string | null
           display_name?: string | null
@@ -2189,6 +2191,7 @@ export type Database = {
           approved_by?: string | null
           avatar_url?: string | null
           company?: string | null
+          company_id?: string | null
           created_at?: string
           department?: string | null
           display_name?: string | null
@@ -2218,6 +2221,13 @@ export type Database = {
           working_location_type?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "crm_companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_ooo_delegate_fk"
             columns: ["ooo_delegate_user_id"]
