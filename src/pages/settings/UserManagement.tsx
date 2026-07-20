@@ -127,6 +127,8 @@ export default function UserManagement() {
   const [inviteJob, setInviteJob] = useState("");
   const [inviteDept, setInviteDept] = useState("");
   const [inviteResult, setInviteResult] = useState<{ email: string; tempPassword: string; emailSent: boolean } | null>(null);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+
 
   const invoke = async (action: string, payload: Record<string, unknown> = {}) => {
     const { data, error } = await supabase.functions.invoke("admin-users", {
