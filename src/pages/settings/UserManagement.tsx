@@ -524,7 +524,11 @@ export default function UserManagement() {
                     </CardContent>
                   </Card>
 
-                  <ProfileDetailsCard profile={selected.profile} />
+                  <ProfileDetailsCard
+                    profile={selected.profile}
+                    onEdit={() => setEditProfileOpen(true)}
+                  />
+
                 </TabsContent>
 
                 <TabsContent value="history" className="mt-4 space-y-3">
