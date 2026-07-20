@@ -376,8 +376,52 @@ Deno.serve(async (req) => {
         return json({ ok: true });
       }
 
+      case "update_profile": {
+        const userId = String(body.user_id ?? "");
+        if (!userId) return json({ error: "user_id required" }, 400);
+        const patch = (body.patch ?? {}) as Record<string, unknown>;
+        const ALLOWED = new Set([
+          "first_name", "last_name", "full_name", "display_name",
+          "job_title", "department", "company",
+          "phone", "preferred_contact_method",
+          "working_location_type", "office_site", "hybrid_days",
+          "location", "time_zone", "preferred_language",
+          "ooo_enabled", "ooo_start", "ooo_end",
+        ]);
+        const clean: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(patch)) {
+          if (!ALLOWED.has(k)) continue;
+          if (k === "hybrid_days") {
+            clean[k] = Array.isArray(v) ? v.map((x) => String(x)).slice(0, 7) : null;
+          } else if (k === "ooo_enabled") {
+            clean[k] = !!v;
+          } else if (k === "ooo_start" || k === "ooo_end") {
+            clean[k] = v === "" || v === null || v === undefined ? null : String(v);
+          } else {
+            const s = v === null || v === undefined ? null : String(v).trim();
+            clean[k] = s === "" ? null : s;
+          }
+          if (typeof clean[k] === "string" && (clean[k] as string).length > 500) {
+            return json({ error: `${k} too long` }, 400);
+          }
+        }
+        if (Object.keys(clean).length === 0) return json({ error: "No valid fields" }, 400);
+        // Keep full_name coherent if first/last provided but full_name not.
+        if ((clean.first_name || clean.last_name) && !("full_name" in clean)) {
+          const { data: cur } = await admin.from("profiles").select("first_name,last_name").eq("user_id", userId).maybeSingle();
+          const fn = (clean.first_name ?? cur?.first_name ?? "") as string;
+          const ln = (clean.last_name ?? cur?.last_name ?? "") as string;
+          const combined = [fn, ln].filter(Boolean).join(" ").trim();
+          if (combined) clean.full_name = combined;
+        }
+        const { error } = await admin.from("profiles").update(clean).eq("user_id", userId);
+        if (error) throw error;
+        return json({ ok: true });
+      }
+
       default:
         return json({ error: `Unknown action: ${action}` }, 400);
+
     }
   } catch (err) {
     return json({ error: err instanceof Error ? err.message : String(err) }, 500);
