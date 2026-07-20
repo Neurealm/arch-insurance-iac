@@ -763,11 +763,14 @@ function fmtDate(v: any) {
   return isNaN(d.getTime()) ? String(v) : d.toLocaleDateString();
 }
 
-function ProfileDetailsCard({ profile }: { profile: any }) {
+function ProfileDetailsCard({ profile, onEdit }: { profile: any; onEdit?: () => void }) {
   if (!profile) {
     return (
       <Card>
-        <CardHeader className="pb-2"><CardTitle className="text-sm">Profile details</CardTitle></CardHeader>
+        <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm">Profile details</CardTitle>
+          {onEdit && <Button size="sm" variant="outline" onClick={onEdit}>Edit</Button>}
+        </CardHeader>
         <CardContent className="text-sm text-muted-foreground">No profile record.</CardContent>
       </Card>
     );
@@ -781,7 +784,11 @@ function ProfileDetailsCard({ profile }: { profile: any }) {
 
   return (
     <Card>
-      <CardHeader className="pb-2"><CardTitle className="text-sm">Profile details</CardTitle></CardHeader>
+      <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-sm">Profile details</CardTitle>
+        {onEdit && <Button size="sm" variant="outline" onClick={onEdit}>Edit</Button>}
+      </CardHeader>
+
       <CardContent className="space-y-4 text-sm">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Identity</div>
