@@ -1,127 +1,52 @@
-# Plan: Build Prompts 0A–0F, then 0G
 
-Prompts 0A–0F were never executed in this project. Before I can build 0G (global state, scenario/persona controls, search palette, entity drawer, shared components, Foundation gallery), I need a canonical data foundation for a semiconductor verification / silicon program management platform (tenants → portfolios → programs → IPs, with Requirements, Specifications, RTL modules, Interfaces, Registers, Tests, Regressions, Formal properties, Static findings, Defects, AI analyses, Changes, Milestones, Sign-off gates, People, Teams).
+## Goal
 
-The existing project (EOC/RunOps/NeuGAIN + Supabase) will be **left completely untouched**. All new work goes under a new namespace `src/silicon/` with a new mount point `/silicon/*` in `App.tsx`. No routes, sidebars, or auth flows outside that namespace change.
+1. Let platform admins see the full profile of a user from the User Management module (currently the drawer only shows name/email/status/role/login history).
+2. When a user sets a `company` value on their profile, automatically ensure a matching row exists in `crm_companies`, and link the profile to it.
 
-## Scope of this plan
+## 1. Profile details in the admin drawer
 
-Build 0A → 0F → 0G in one pass. Frontend-only, deterministic in-memory canonical repository. No new Supabase tables — 0G explicitly says data comes from a repository overlay driven by the scenario selector.
+Extend `src/components/users/UserDetailDrawer.tsx`:
 
-## Structure
+- Extend `UserRow` and the list query in `src/pages/settings/UserManagement.tsx` to also fetch profile fields already in the `profiles` table: `first_name`, `last_name`, `phone`, `job_title`, `department`, `company`, `location`, `time_zone`, `preferred_language`, `preferred_contact_method`, `working_location_type`, `office_site`, `hybrid_days`, `ooo_enabled`, `ooo_start`, `ooo_end`, `user_category`, `must_change_password`, `profile_completed_at`.
+- Add a read-only **Profile details** section in the drawer (above "Platform role") that renders these as a two-column label/value grid, grouped:
+  - Identity: first/last name, display name, job title, department, company
+  - Contact & location: phone, preferred contact method, working location type, office site, hybrid days, location, time zone, preferred language
+  - Status flags: user category, profile completed, must change password, OOO window
+- Empty values render as `—`. No editing in this pass (admin edit UI is out of scope unless requested).
 
-```text
-src/silicon/
-  domain/
-    types.ts              # entity type definitions (0A)
-    ids.ts                # branded IDs
-  data/
-    canonical/            # seed data (0B)
-      tenants.ts, portfolios.ts, programs.ts, ips.ts
-      requirements.ts, specifications.ts
-      modules.ts, interfaces.ts, registers.ts
-      tests.ts, regressions.ts, coverage.ts
-      formal.ts, static.ts, defects.ts
-      aiAnalyses.ts, changes.ts, milestones.ts, signoffs.ts
-      people.ts, teams.ts
-    scenarios/            # 0C: 4 scenario overlays
-      baselineGreen.ts, regression.ts, aiRootCause.ts, fixValidated.ts
-      index.ts            # applyScenario(entity, scenarioId)
-    personas.ts           # 0D: 4-5 personas incl. priya-nair
-    repository.ts         # 0E: typed selectors, memoized
-    index.ts              # public API
-  state/
-    SiliconStore.tsx      # 0G global state (Zustand or reducer)
-    persistence.ts        # localStorage sync
-    urlSync.ts            # deep-link query params
-    resetDemo.ts
-  components/             # 0G: 30+ reusable components
-    KpiCard.tsx, KpiTrendCard.tsx, StatusBadge.tsx,
-    ThresholdIndicator.tsx, EngineeringGauge.tsx,
-    TraceabilityMatrix.tsx, DependencyGraph.tsx,
-    LifecycleTimeline.tsx, RequirementCard.tsx,
-    SpecificationSectionCard.tsx, ModuleHierarchyTree.tsx,
-    InterfaceDiagram.tsx, RegisterMapTable.tsx,
-    RegressionHeatmap.tsx, FailureClusterCard.tsx,
-    CoverageProgressCard.tsx, CoverageSunburst.tsx,
-    FormalPropertyTable.tsx, StaticFindingTable.tsx,
-    WaveformPreview.tsx (lazy-loaded synthetic data),
-    LogEvidencePanel.tsx, CodeDiffViewer.tsx,
-    ChangeImpactGraph.tsx, SignoffGateCard.tsx,
-    MilestoneTimeline.tsx, ComputeQueueChart.tsx,
-    AIReasoningPanel.tsx, ConfidenceIndicator.tsx,
-    EvidenceCitationList.tsx, HumanApprovalPanel.tsx,
-    AuditTimeline.tsx, ScenarioTimelineControl.tsx,
-    ScreenContextPanel.tsx,
-    filters/FilterBar.tsx, filters/useFilters.ts
-    index.ts              # barrel; no page-specific seeds inside
-  shell/
-    SiliconLayout.tsx     # top bar (scenario, persona, time, reset), sidebar shell
-    ScenarioSelector.tsx
-    PersonaSelector.tsx
-    CommandPalette.tsx    # Ctrl/Cmd+K, arrow nav, Esc, Enter
-    EntityDetailDrawer.tsx (7 tabs; supports 16 entity types)
-    ResetDemoButton.tsx
-  pages/
-    FoundationStatus.tsx  # 0F + gallery, one example per component category
-    NotFoundSilicon.tsx
-  manifest.ts             # 0A–0G completion markers
-  README.md
-```
+## 2. Auto-create `crm_companies` from profile.company
 
-## Prompt 0A — domain types
-Type definitions for all 16 entity kinds plus supporting shapes (Coverage bins, EvidenceCitation, Confidence, ApprovalDecision, ScenarioId, PersonaId, FilterKey, etc.). Branded IDs (`RequirementId`, `DefectId`, …) so palette results and drawer routing are type-safe.
+Approach: database-side, so it works for all write paths (self-service profile update, admin edits, signup handler, imports).
 
-## Prompt 0B — canonical data
-One representative program (`tenant-panw-demo` → `portfolio-nsse` → `program-aegis-240` → `ip-ddmac-240`) with enough breadth to demonstrate every component:
-- 12–20 requirements across categories, ≥6 specification sections, ≥8 RTL modules with a hierarchy, 4 interfaces, register map with RO/RW/W1C examples, ≥30 tests, 3 regression suites with pass/fail/abort mix, formal property list (proven/failed/inconclusive/vacuous), static findings, ~10 defects with lifecycle states, AI analyses linking evidence, changes, 6 milestones, 4 sign-off gates, ~12 people incl. `person-priya-nair`, 4 teams.
-- Waveform bundle in a **separate file** (`waveformSamples.ts`) that is dynamically `import()`-ed only when `WaveformPreview` opens, labeled synthetic.
+New migration:
 
-## Prompt 0C — scenario overlays
-`baseline-green`, `t2-regression`, `t3-ai-rootcause`, `t4-fix-validated`. Each overlay is a pure function `(entity, scenarioId) => entity'` applied inside the repository selectors — pages never compute their own scenario math. Scenario selector on the top bar is the only mutation surface.
+- Add `public.profiles.company_id uuid references public.crm_companies(id) on delete set null` (nullable, indexed).
+- Create `public.sync_profile_company()` trigger function (`SECURITY DEFINER`, `search_path = public`):
+  - Runs `BEFORE INSERT OR UPDATE OF company ON public.profiles`.
+  - If `NEW.company` is null/blank → set `NEW.company_id = NULL`.
+  - Else: case-insensitive lookup `SELECT id FROM crm_companies WHERE lower(name) = lower(trim(NEW.company)) LIMIT 1`.
+  - If not found, insert a new `crm_companies` row with `name = trim(NEW.company)`, `company_type = 'Customer'` default, `status = true`, `priority = 'Medium'`, `lifecycle_stage = 'prospect'`, minimal defaults; capture id.
+  - Set `NEW.company_id` to the resolved id.
+- Attach trigger `trg_profiles_sync_company` on `public.profiles`.
+- Backfill: for each existing profile with non-null `company`, run the same resolve/insert logic and populate `company_id`.
 
-## Prompt 0D — personas
-`priya-nair` (verification lead, default), `chip-architect`, `dv-engineer`, `program-manager`, `signoff-reviewer`. Persona affects default filter chips, emphasis flags on cards, contextual tooltips, and which approval actions are available — never the canonical data.
+Notes:
+- `crm_companies` INSERT policy currently gates on admin/tenant membership. Because the trigger runs `SECURITY DEFINER` under a fixed owner, it bypasses RLS safely (only reachable via a profile write the user already owns).
+- Do not touch existing CRM UI. The new `company_id` is available for future linking but is not required in the frontend now.
 
-## Prompt 0E — repository
-Single `useRepository()` hook returning memoized, scenario-aware selectors: `getRequirement(id)`, `listRegressions({filters})`, `getEntity(kind, id)`, `searchIndex()`, etc. Selectors memoize on `(scenarioId, filters, args)`. No page imports canonical files directly.
+## 3. Surface the linked company in the admin drawer
 
-## Prompt 0F — Foundation Status page
-Route `/silicon`. Shows manifest of prompts 0A–0G, and — per 0G item 14 — a restrained gallery rendering one example of every shared component category using canonical data. Not a business dashboard.
+- In the drawer's Profile section, when `company_id` is present, render the company name as a link to `/crm/companies/{company_id}` (existing CRM route) with a small "View in CRM" affordance.
 
-## Prompt 0G — deliverables (the actual ask)
+## Files touched
 
-**Global state** (Zustand): `selectedTenantId`, `selectedPortfolioId`, `selectedProgramId`, `selectedIpId`, `selectedScenarioId`, `selectedPersonaId`, `selectedTime`, `selectedEntity`, `activeFilters`, `navigationState`, `drawerState`, `reducedMotionPreference`. Defaults per spec (`tenant-panw-demo`, …, `2026-07-14T15:30:00Z`). Persisted to `localStorage` under `silicon:state:v1`. `resetDemo()` restores defaults without touching canonical data.
+- `src/pages/settings/UserManagement.tsx` — expand profile select and `UserRow` shape.
+- `src/components/users/UserDetailDrawer.tsx` — add Profile details section + company link.
+- New migration — add `profiles.company_id`, trigger function, trigger, backfill.
 
-**Scenario + persona controls** — top-bar selectors bound to store; changing scenario re-derives all visible data via repository overlay.
+## Out of scope
 
-**Entity drawer** — 7 tabs (Summary, Relationships, Telemetry, History, Evidence, AI analysis, Audit). Renders per-tab content dispatched by entity kind. Same ID from any surface opens the same record.
-
-**Command palette** — Ctrl/Cmd+K. Local index over all entity kinds listed in item 5. Arrow keys + Enter. Result actions: open drawer or navigate to owning route inside `/silicon/*`.
-
-**Filter framework** — `useFilters()` + `<FilterBar/>`. Filters synchronize all components on a page via context. Filter state also lives in URL query.
-
-**Reusable components** — all 30+ from item 7, typed props only. Waveform preview lazy-loads synthetic data. AI reasoning panel structured per item 9 with no hidden CoT.
-
-**Tooltips** — per item 10, meaningful help on coverage KPI, regression counts, formal states, register access classes, scenario freeze behavior.
-
-**Deep links** — `?scenario=…&entity=<kind>:<id>&tab=…` reopens the exact same state.
-
-**Keyboard** — Ctrl/Cmd+K, Esc, arrows, Enter, Tab, visible focus rings.
-
-**Performance** — memoized selectors, virtualized tables (react-window on large lists), chart props stable so unrelated filter changes do not rerender.
-
-## Out of scope for this pass
-- Business pages beyond Foundation Status (explicit in item 1 of the prompt).
-- Any Supabase schema changes.
-- Any change to EOC, RunOps, CRM, NeuGAIN, or auth code.
-
-## Verification
-1. `/silicon` renders, gallery shows every component category with canonical data.
-2. Changing scenario updates KPI/regression/formal cards on the gallery.
-3. Ctrl+K opens palette; picking a requirement opens drawer at Summary; deep link `?entity=requirement:REQ-…&tab=evidence` reopens same tab.
-4. `localStorage.clear()` + reload → defaults restored. `Reset Demo` → defaults restored, canonical data intact.
-5. `tsgo` clean. Existing routes (`/`, `/app`, `/runops/*`, `/login`, etc.) unaffected.
-
-## Delivery note
-This is a large single-pass build (~40+ new files). I'll implement it in one message with parallel writes, keeping every file tight and typed. Nothing here touches the existing NeuGAIN/RunOps/auth code paths.
+- Editing profile fields from the admin drawer.
+- Merging/deduping existing `crm_companies` rows.
+- Tenant-scoping the auto-created company (created without `tenant_id`; admins can promote via existing CRM tools).
