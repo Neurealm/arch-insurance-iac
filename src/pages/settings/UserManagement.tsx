@@ -1105,11 +1105,12 @@ function LabeledSelect({
   return (
     <div>
       <div className="text-xs text-muted-foreground mb-1">{label}</div>
-      <Select value={value ?? ""} onValueChange={onChange}>
+      <Select value={value ? String(value) : "__none__"} onValueChange={(v) => onChange(v === "__none__" ? "" : v)}>
         <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
         <SelectContent>
           {options.map((o) => (
             <SelectItem key={o.value || "_none"} value={o.value || "__none__"}>{o.label}</SelectItem>
+
           ))}
         </SelectContent>
       </Select>
