@@ -728,9 +728,21 @@ export default function UserManagement() {
           )}
         </SheetContent>
       </Sheet>
+
+      <EditProfileDialog
+        open={editProfileOpen}
+        onOpenChange={setEditProfileOpen}
+        user={selected}
+        busy={actionBusy}
+        onSave={async (patch) => {
+          await runAction("Profile updated", () => invoke("update_profile", { user_id: selected!.id, patch }));
+          setEditProfileOpen(false);
+        }}
+      />
     </AppShell>
   );
 }
+
 
 function StatCard({ label, value, icon: Icon }: { label: string; value: number; icon: any }) {
   return (
