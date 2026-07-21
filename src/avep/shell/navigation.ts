@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   ScanSearch,
   Target,
+  FlaskConical,
   Binary,
   GitPullRequest,
   BadgeCheck,
