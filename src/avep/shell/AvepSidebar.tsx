@@ -55,7 +55,7 @@ export function AvepSidebar() {
                     color: "hsl(var(--avep-foreground-subtle))",
                   }}
                 >
-                  {group === "Plan" ? "Phase 1 - Engineering Definition" : group === "Design" ? "Build and Verify" : group}
+                  {group === "Plan" ? "Phase 1 - Engineering Definition" : group === "Design" ? "Phase 2 - Build and Verify" : group}
                 </div>
               )}
               <ul>
