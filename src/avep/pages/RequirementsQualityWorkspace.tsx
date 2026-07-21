@@ -43,7 +43,7 @@ function Badge({ tone = "neutral", children }: { tone?: Tone; children: React.Re
 }
 
 function Btn({ children, variant = "ghost", onClick, icon: Icon, title }:
-  { children: React.ReactNode; variant?: "primary" | "ghost" | "soft"; onClick?: () => void; icon?: React.ComponentType<{ className?: string }>; title?: string }) {
+  { children: React.ReactNode; variant?: "primary" | "ghost" | "soft"; onClick?: () => void; icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>; title?: string }) {
   const styles: Record<string, React.CSSProperties> = {
     primary: { background: "hsl(var(--avep-primary))", color: "hsl(var(--avep-primary-foreground))", border: "1px solid hsl(var(--avep-primary))" },
     soft:    { background: "hsl(var(--avep-primary-soft))", color: "hsl(var(--avep-primary))", border: "1px solid hsl(var(--avep-primary-soft))" },
@@ -182,7 +182,7 @@ function Kpi({ label, value, hint, tone = "info", suffix = "" }:
 }
 
 function SectionHeader({ icon: Icon, title, hint, right }:
-  { icon: React.ComponentType<{ className?: string }>; title: string; hint?: string; right?: React.ReactNode }) {
+  { icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; title: string; hint?: string; right?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between mb-2">
       <div className="flex items-center gap-2">
