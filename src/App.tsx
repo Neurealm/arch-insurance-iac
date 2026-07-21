@@ -50,6 +50,7 @@ import { SiliconLayout } from "./silicon/shell/SiliconLayout";
 import FoundationStatus from "./silicon/pages/FoundationStatus";
 import { AvepLayout } from "./avep/shell/AvepLayout";
 import { ModulePlaceholder } from "./avep/pages/ModulePlaceholder";
+import { ProgramWorkspace } from "./avep/pages/ProgramWorkspace";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
