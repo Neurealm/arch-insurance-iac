@@ -800,7 +800,8 @@ const App = () => (
             <Route path="rtl" element={<EngineeringSpecVerificationWorkspace />} />
             <Route path="design/rtl-generation" element={<RtlGenerationStudio />} />
             <Route path="design/change-impact" element={<RtlChangeImpactAnalysis />} />
-            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation", "/avep/design/change-impact"].includes(n.path)).map((n) => (
+            <Route path="verification/environment-builder" element={<VerificationEnvironmentBuilder />} />
+            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation", "/avep/design/change-impact", "/avep/verification/environment-builder"].includes(n.path)).map((n) => (
               <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
             ))}
           </Route>
