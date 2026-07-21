@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   FileCode2, GitBranch, ShieldCheck, AlertTriangle, CheckCircle2, XCircle,
   Cpu, Layers, ListChecks, FileText, Sparkles, Search, Download, GitCompare,
-  Play, ChevronRight, Info, Lock, Clock, Users, Activity, Zap, Eye, MessageSquare,
+  Play, ChevronRight, Info, Lock, Clock, Activity, MessageSquare,
 } from "lucide-react";
 
 /**
