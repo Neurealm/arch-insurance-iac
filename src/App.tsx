@@ -57,6 +57,7 @@ import EngineeringTraceabilityWorkspace from "./avep/pages/EngineeringTraceabili
 import LogicalArchitectureWorkspace from "./avep/pages/LogicalArchitectureWorkspace";
 import EngineeringSpecVerificationWorkspace from "./avep/pages/EngineeringSpecVerificationWorkspace";
 import RtlGenerationStudio from "./avep/pages/RtlGenerationStudio";
+import RtlChangeImpactAnalysis from "./avep/pages/RtlChangeImpactAnalysis";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
@@ -797,7 +798,8 @@ const App = () => (
             <Route path="architecture" element={<LogicalArchitectureWorkspace />} />
             <Route path="rtl" element={<EngineeringSpecVerificationWorkspace />} />
             <Route path="design/rtl-generation" element={<RtlGenerationStudio />} />
-            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation"].includes(n.path)).map((n) => (
+            <Route path="design/change-impact" element={<RtlChangeImpactAnalysis />} />
+            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation", "/avep/design/change-impact"].includes(n.path)).map((n) => (
               <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
             ))}
           </Route>
