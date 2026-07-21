@@ -700,14 +700,14 @@ function ArchitectureCanvas({
           const visible = drawn >= i;
           const isSel = selected === b.id;
           return (
-            <g key={b.id} opacity={visible ? 1 : 0} style={{ transition: "opacity 300ms" }}
+            <g key={b.id} opacity={visible ? 1 : 0}
               onClick={() => onSelect(b.id)}
               onDoubleClick={() => onOpen(b.id)}
               onKeyDown={(e) => e.key === "Enter" && onOpen(b.id)}
               tabIndex={0}
               role="button"
               aria-label={`${b.name} — ${b.role}`}
-              style={{ cursor: "pointer" }}
+              style={{ transition: "opacity 300ms", cursor: "pointer" }}
             >
               <rect x={b.x} y={b.y} width={b.w} height={b.h} rx="8"
                 fill="hsl(0 0% 100%)"
