@@ -998,13 +998,13 @@ function TraceabilityView({ selectedReq }: { selectedReq: string | null }) {
       <div className="rounded-md p-3 overflow-x-auto" style={surfaceMuted}>
         <div className="flex items-center gap-2 min-w-max">
           {chain.map((n, i) => (
-            <>
-              <div key={n.label} className="rounded-md px-2.5 py-1.5" style={{ background: "hsl(var(--avep-surface))", border }}>
+            <div key={n.label} className="flex items-center gap-2">
+              <div className="rounded-md px-2.5 py-1.5" style={{ background: "hsl(var(--avep-surface))", border }}>
                 <div style={{ fontSize: "10px", color: "hsl(var(--avep-foreground-subtle))", textTransform: "uppercase", letterSpacing: "var(--avep-tracking-wide)" }}>{n.kind}</div>
                 <div className="mt-0.5 font-semibold" style={{ fontFamily: "var(--avep-font-mono)", fontSize: "var(--avep-text-xs)" }}>{n.label}</div>
               </div>
               {i < chain.length - 1 && <ChevronRight className="h-3 w-3 shrink-0" style={{ color: "hsl(var(--avep-foreground-subtle))" }} />}
-            </>
+            </div>
           ))}
         </div>
       </div>
