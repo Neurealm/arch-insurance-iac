@@ -796,7 +796,8 @@ const App = () => (
             <Route path="specification" element={<EngineeringTraceabilityWorkspace />} />
             <Route path="architecture" element={<LogicalArchitectureWorkspace />} />
             <Route path="rtl" element={<EngineeringSpecVerificationWorkspace />} />
-            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl"].includes(n.path)).map((n) => (
+            <Route path="design/rtl-generation" element={<RtlGenerationStudio />} />
+            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation"].includes(n.path)).map((n) => (
               <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
             ))}
           </Route>
