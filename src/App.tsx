@@ -55,6 +55,7 @@ import RequirementsIntakeWorkspace from "./avep/pages/RequirementsIntakeWorkspac
 import RequirementsQualityWorkspace from "./avep/pages/RequirementsQualityWorkspace";
 import EngineeringTraceabilityWorkspace from "./avep/pages/EngineeringTraceabilityWorkspace";
 import LogicalArchitectureWorkspace from "./avep/pages/LogicalArchitectureWorkspace";
+import EngineeringSpecVerificationWorkspace from "./avep/pages/EngineeringSpecVerificationWorkspace";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
