@@ -38,7 +38,7 @@ export const AVEP_NAV: AvepNavItem[] = [
   { id: "specification",      label: "Engineering Traceability Workspace", path: "/avep/specification",  icon: FileText,        group: "Plan" },
 
   { id: "architecture",       label: "Logical Architecture Workspace", path: "/avep/architecture",     icon: Cpu,             group: "Design" },
-  { id: "rtl",                label: "RTL Engineering",       path: "/avep/rtl",                      icon: Code2,           group: "Design" },
+  { id: "rtl",                label: "Engineering Specification & Verification Workspace", path: "/avep/rtl", icon: Code2,           group: "Design" },
   { id: "registers",          label: "Registers",             path: "/avep/registers",                icon: Layers,          group: "Design" },
 
   { id: "verification-plan",  label: "Verification Planning", path: "/avep/verification-planning",    icon: ClipboardList,   group: "Verify" },
