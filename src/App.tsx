@@ -58,6 +58,7 @@ import LogicalArchitectureWorkspace from "./avep/pages/LogicalArchitectureWorksp
 import EngineeringSpecVerificationWorkspace from "./avep/pages/EngineeringSpecVerificationWorkspace";
 import RtlGenerationStudio from "./avep/pages/RtlGenerationStudio";
 import RtlChangeImpactAnalysis from "./avep/pages/RtlChangeImpactAnalysis";
+import VerificationEnvironmentBuilder from "./avep/pages/VerificationEnvironmentBuilder";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
