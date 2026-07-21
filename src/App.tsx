@@ -786,7 +786,8 @@ const App = () => (
           <Route path="/avep" element={<AvepLayout />}>
             <Route index element={<ModulePlaceholder />} />
             <Route path="program" element={<ProgramWorkspace />} />
-            {AVEP_NAV.filter((n) => n.path !== "/avep" && n.path !== "/avep/program").map((n) => (
+            <Route path="requirements" element={<RequirementsIntakeWorkspace />} />
+            {AVEP_NAV.filter((n) => n.path !== "/avep" && n.path !== "/avep/program" && n.path !== "/avep/requirements").map((n) => (
               <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
             ))}
           </Route>
