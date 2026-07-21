@@ -161,7 +161,7 @@ const tree: Node[] = [
     key: "ai-vlsi",
     label: "AI VLSI Engineering",
     icon: Sparkles2,
-    to: "/ai-vlsi-engineering",
+    to: "/avep/program",
   },
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
   
