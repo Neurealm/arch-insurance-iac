@@ -52,6 +52,7 @@ import { AvepLayout } from "./avep/shell/AvepLayout";
 import { ModulePlaceholder } from "./avep/pages/ModulePlaceholder";
 import { ProgramWorkspace } from "./avep/pages/ProgramWorkspace";
 import RequirementsIntakeWorkspace from "./avep/pages/RequirementsIntakeWorkspace";
+import RequirementsQualityWorkspace from "./avep/pages/RequirementsQualityWorkspace";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
@@ -787,7 +788,8 @@ const App = () => (
             <Route index element={<ModulePlaceholder />} />
             <Route path="program" element={<ProgramWorkspace />} />
             <Route path="requirements" element={<RequirementsIntakeWorkspace />} />
-            {AVEP_NAV.filter((n) => n.path !== "/avep" && n.path !== "/avep/program" && n.path !== "/avep/requirements").map((n) => (
+            <Route path="requirements-review" element={<RequirementsQualityWorkspace />} />
+            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review"].includes(n.path)).map((n) => (
               <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
             ))}
           </Route>

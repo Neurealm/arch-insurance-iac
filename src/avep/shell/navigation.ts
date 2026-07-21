@@ -35,6 +35,7 @@ export const AVEP_NAV: AvepNavItem[] = [
   { id: "program",            label: "Program & Portfolio",   path: "/avep/program",                  icon: FolderKanban,    group: "Plan" },
   { id: "requirements",       label: "Requirements",          path: "/avep/requirements",             icon: ListChecks,      group: "Plan" },
   { id: "specification",      label: "Specification",         path: "/avep/specification",            icon: FileText,        group: "Plan" },
+  { id: "requirements-review",label: "Requirements Review",   path: "/avep/requirements-review",      icon: ShieldCheck,     group: "Plan" },
 
   { id: "architecture",       label: "Architecture & IP",     path: "/avep/architecture",             icon: Cpu,             group: "Design" },
   { id: "rtl",                label: "RTL Engineering",       path: "/avep/rtl",                      icon: Code2,           group: "Design" },
