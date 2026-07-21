@@ -790,7 +790,8 @@ const App = () => (
             <Route path="program" element={<ProgramWorkspace />} />
             <Route path="requirements" element={<RequirementsIntakeWorkspace />} />
             <Route path="requirements-review" element={<RequirementsQualityWorkspace />} />
-            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review"].includes(n.path)).map((n) => (
+            <Route path="specification" element={<EngineeringTraceabilityWorkspace />} />
+            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification"].includes(n.path)).map((n) => (
               <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
             ))}
           </Route>
