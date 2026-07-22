@@ -163,6 +163,13 @@ const tree: Node[] = [
     icon: Sparkles2,
     to: "/avep/program",
   },
+  {
+    key: "neurealm-agentic",
+    label: "Agentic AI Studio",
+    icon: Bot,
+    to: "/neurealm-agentic-ai",
+    pill: "NEW",
+  },
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
   
   { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers" },
@@ -504,7 +511,7 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
 
 const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "PLATFORM",       keys: ["home", "ops"] },
-  { label: "DIGITAL TWINS",  keys: ["sre-practice", "runops-runbooks", "sead", "ai-vlsi"] },
+  { label: "DIGITAL TWINS",  keys: ["sre-practice", "runops-runbooks", "sead", "ai-vlsi", "neurealm-agentic"] },
   { label: "AI & DATA",      keys: ["sre-data-orch"] },
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "coworkers"] },
