@@ -333,7 +333,7 @@ export default function Overview() {
               <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50/60 px-4 py-3 flex items-center justify-center gap-2">
                 <Sparkles className="h-4 w-4 text-blue-700" />
                 <div className="text-sm font-semibold text-blue-900 text-center">
-                  AVEP Engineering Intelligence & Orchestration
+                  AVEP — evidence layer for DDMAC 3.2
                 </div>
               </div>
 
