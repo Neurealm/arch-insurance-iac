@@ -249,7 +249,6 @@ export default function Overview() {
           <div className="col-span-12 lg:col-span-10">
 
 
-            </div>
             <h1 className="mt-3 text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-tight">
               Connect Engineering Intent to <span className="text-blue-700">Evidence-Backed Advancement</span>
             </h1>
