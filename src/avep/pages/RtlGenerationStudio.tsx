@@ -193,7 +193,8 @@ const LINE_BADGES: Record<number, string[]> = {
 };
 
 const GENERATED_FILES = [
-  { path: "rtl/ddmac_descriptor_validator.sv", type: "SystemVerilog", lines: 92, status: "Generated", findings: 4 },
+  { path: "rtl/ddmac_descriptor_validator.sv", type: "SystemVerilog", lines: 98, status: "Generated", findings: 4 },
+  { path: "rtl/ddmac_descriptor_guard.sv",     type: "SystemVerilog", lines: 64, status: "Generated", findings: 0 },
   { path: "rtl/ddmac_error_capture.sv",        type: "SystemVerilog", lines: 118, status: "Generated", findings: 2 },
   { path: "rtl/ddmac_interrupt_logic.sv",      type: "SystemVerilog", lines: 174, status: "Generated", findings: 1 },
   { path: "rtl/ddmac_pkg.sv",                  type: "SV Package",    lines: 42, status: "Generated", findings: 0 },
@@ -202,7 +203,7 @@ const GENERATED_FILES = [
 ];
 
 const GEN_LOG = [
-  { t: "12:04:11", event: "Source context locked to rtl_baseline_3.2.17 @ feature/ddmac_descriptor_guard" },
+  { t: "12:04:11", event: "Source context locked to rtl_baseline_3.2.17 @ feature/descriptor-ring-fix off release/2.4" },
   { t: "12:04:12", event: "24 approved inputs loaded (18 requirements, 6 architecture, 4 interfaces, 12 registers)" },
   { t: "12:04:12", event: "1 unresolved requirement detected: REQ-DDMAC-143 (clarification pending)" },
   { t: "12:04:13", event: "Coding standards profile ddmac.rtl.v3 applied" },
