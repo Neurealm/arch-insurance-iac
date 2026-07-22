@@ -257,7 +257,8 @@ export default function Overview() {
           }}
         />
         <div className="relative max-w-[1600px] mx-auto px-6 pt-8 pb-10 grid grid-cols-12 gap-8">
-          <div className="col-span-12 lg:col-span-6">
+          <div className="col-span-12 lg:col-span-7">
+
             <div className="text-[11px] font-mono tracking-wider text-blue-700">AI-ENABLED SEMICONDUCTOR ENGINEERING · AVEP.P0.OVERVIEW.001</div>
             <h1 className="mt-3 text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-tight">
               Connect Engineering Intent to <span className="text-blue-700">Evidence-Backed Advancement</span>
@@ -324,10 +325,10 @@ export default function Overview() {
           </div>
 
           {/* Hero visual — AVEP layer over existing systems */}
-          <div className="col-span-12 lg:col-span-6 space-y-4">
+          <div className="col-span-12 lg:col-span-5 space-y-4">
             {/* Narrated intro video */}
-            <div className="mx-auto w-full max-w-[280px] rounded-xl border border-neutral-200 bg-neutral-950 overflow-hidden shadow-sm">
-              <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-800 bg-neutral-900">
+            <div className="ml-auto w-[220px] rounded-xl border border-neutral-200 bg-neutral-950 overflow-hidden shadow-sm">
+              <div className="flex items-center justify-between px-3 py-1.5 border-b border-neutral-800 bg-neutral-900">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
                   AVEP · Intro
                 </div>
@@ -344,6 +345,7 @@ export default function Overview() {
                 Your browser does not support the video tag.
               </video>
             </div>
+
 
             <div className="rounded-xl border border-neutral-200 bg-white/70 backdrop-blur p-4 relative">
 
