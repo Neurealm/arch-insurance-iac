@@ -801,8 +801,10 @@ const App = () => (
             <Route index element={<FoundationStatus />} />
           </Route>
           <Route path="/avep" element={<AvepLayout />}>
-            <Route index element={<ModulePlaceholder />} />
+            <Route index element={<Navigate to="/avep/overview" replace />} />
+            <Route path="overview" element={<Overview />} />
             <Route path="program" element={<ProgramWorkspace />} />
+            <Route path="context/engineering-context" element={<ProgramWorkspace />} />
             <Route path="requirements" element={<RequirementsIntakeWorkspace />} />
             <Route path="requirements-review" element={<RequirementsQualityWorkspace />} />
             <Route path="specification" element={<EngineeringTraceabilityWorkspace />} />
