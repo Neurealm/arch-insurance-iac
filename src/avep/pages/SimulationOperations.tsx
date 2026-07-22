@@ -418,7 +418,7 @@ export default function SimulationOperations() {
               Simulation Operations &amp; Regression Intelligence
             </h1>
             <p className="mt-1 max-w-2xl" style={{ fontSize: "var(--avep-text-sm)", color: "hsl(var(--avep-foreground-muted))" }}>
-              Orchestrate simulation execution, separate infrastructure from engineering failures, cluster duplicate signatures, identify new and intermittent failures, and recommend proportionate rerun scope. AVEP correlates; verification leadership decides.
+              Group failing seeds by signature, separate real defects from farm noise, and size reruns by the smallest evidence needed to confirm a fix. AVEP correlates; verification leadership decides.
             </p>
           </div>
 
