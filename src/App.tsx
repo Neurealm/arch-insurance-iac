@@ -68,6 +68,7 @@ import ReleasePackage from "./avep/pages/ReleasePackage";
 import AiGovernanceValue from "./avep/pages/AiGovernanceValue";
 import PhysicalDesignIntake from "./avep/pages/PhysicalDesignIntake";
 import EndToEndStory from "./avep/pages/EndToEndStory";
+import Overview from "./avep/pages/Overview";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
@@ -800,8 +801,10 @@ const App = () => (
             <Route index element={<FoundationStatus />} />
           </Route>
           <Route path="/avep" element={<AvepLayout />}>
-            <Route index element={<ModulePlaceholder />} />
+            <Route index element={<Navigate to="/avep/overview" replace />} />
+            <Route path="overview" element={<Overview />} />
             <Route path="program" element={<ProgramWorkspace />} />
+            <Route path="context/engineering-context" element={<ProgramWorkspace />} />
             <Route path="requirements" element={<RequirementsIntakeWorkspace />} />
             <Route path="requirements-review" element={<RequirementsQualityWorkspace />} />
             <Route path="specification" element={<EngineeringTraceabilityWorkspace />} />
@@ -819,7 +822,7 @@ const App = () => (
             <Route path="governance/ai-value" element={<AiGovernanceValue />} />
             <Route path="readiness/physical-design-intake" element={<PhysicalDesignIntake />} />
             <Route path="demo/end-to-end-story" element={<EndToEndStory />} />
-            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation", "/avep/design/change-impact", "/avep/verification/environment-builder", "/avep/verification/test-factory", "/avep/verification/simulation-operations", "/avep/verification/failure-diagnosis", "/avep/readiness/coverage-closure", "/avep/readiness/signoff", "/avep/readiness/release-package", "/avep/governance/ai-value", "/avep/readiness/physical-design-intake", "/avep/demo/end-to-end-story"].includes(n.path)).map((n) => (
+            {AVEP_NAV.filter((n) => !["/avep", "/avep/overview", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation", "/avep/design/change-impact", "/avep/verification/environment-builder", "/avep/verification/test-factory", "/avep/verification/simulation-operations", "/avep/verification/failure-diagnosis", "/avep/readiness/coverage-closure", "/avep/readiness/signoff", "/avep/readiness/release-package", "/avep/governance/ai-value", "/avep/readiness/physical-design-intake", "/avep/demo/end-to-end-story"].includes(n.path)).map((n) => (
               <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
             ))}
           </Route>
