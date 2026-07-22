@@ -100,14 +100,17 @@ const RTL_CODE = `module ddmac_descriptor_validator #(
     } validator_state_e;
 
     validator_state_e state_q, state_d;
+    logic [2:0]       err_code_q, err_code_d;
 
     logic length_error;
     logic privilege_error;
 
+    // REQ-DDMAC-142 — strict '>' (fixes DEF-DV-219; length == max is legal)
     assign length_error =
         desc_valid &&
         (desc_length > max_transfer_length);
 
+    // REQ-SEC-088 — privileged descriptors require priv_mode
     assign privilege_error =
         desc_valid &&
         privileged_request &&
@@ -115,25 +118,27 @@ const RTL_CODE = `module ddmac_descriptor_validator #(
 
     always_comb begin
         state_d     = state_q;
+        err_code_d  = err_code_q;
         desc_accept = 1'b0;
         desc_error  = 1'b0;
-        error_code  = 3'b000;
+        error_code  = err_code_q;
 
         unique case (state_q)
             IDLE: begin
                 if (desc_valid) begin
-                    state_d = VALIDATE;
+                    state_d    = VALIDATE;
+                    err_code_d = 3'b000;
                 end
             end
 
             VALIDATE: begin
                 if (length_error) begin
+                    err_code_d = 3'b001;
                     state_d    = REJECT;
-                    error_code = 3'b001;
                 end
                 else if (privilege_error) begin
+                    err_code_d = 3'b010;
                     state_d    = REJECT;
-                    error_code = 3'b010;
                 end
                 else begin
                     state_d = ACCEPT;
@@ -146,7 +151,9 @@ const RTL_CODE = `module ddmac_descriptor_validator #(
             end
 
             REJECT: begin
+                // REQ-DDMAC-143 — assert desc_error with latched error_code
                 desc_error = 1'b1;
+                error_code = err_code_q;
                 state_d    = IDLE;
             end
 
@@ -158,10 +165,12 @@ const RTL_CODE = `module ddmac_descriptor_validator #(
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            state_q <= IDLE;
+            state_q    <= IDLE;
+            err_code_q <= 3'b000;
         end
         else begin
-            state_q <= state_d;
+            state_q    <= state_d;
+            err_code_q <= err_code_d;
         end
     end
 
@@ -170,10 +179,17 @@ endmodule`;
 const RTL_LINES = RTL_CODE.split("\n");
 
 const LINE_BADGES: Record<number, string[]> = {
-  21: ["REQ-DDMAC-142"], 22: ["REQ-DDMAC-142"], 23: ["REQ-DDMAC-142", "REG:MAX_XFER_LEN"],
-  25: ["REQ-SEC-088"], 26: ["REQ-SEC-088"], 27: ["REQ-SEC-088"],
-  12: ["ARCH-FSM-04"], 40: ["ARCH-FSM-04"], 43: ["REQ-DDMAC-142"], 44: ["REQ-SEC-088"],
-  46: ["REQ-DDMAC-143"], 55: ["REQ-DDMAC-143"], 67: ["REQ-DDMAC-143"], 78: ["CLK-RST-01"],
+  10: ["REQ-SEC-088"],
+  12: ["REQ-DDMAC-143"],
+  16: ["ARCH-FSM-04"], 21: ["ARCH-FSM-04"],
+  23: ["ARCH-FSM-04"],
+  29: ["REQ-DDMAC-142"], 30: ["REQ-DDMAC-142"], 31: ["REQ-DDMAC-142"], 32: ["REQ-DDMAC-142", "REG:MAX_XFER_LEN"],
+  34: ["REQ-SEC-088"], 35: ["REQ-SEC-088"], 36: ["REQ-SEC-088"], 37: ["REQ-SEC-088"], 38: ["REQ-SEC-088"],
+  47: ["ARCH-FSM-04"],
+  56: ["REQ-DDMAC-142"], 57: ["REQ-DDMAC-142"], 58: ["REQ-DDMAC-142"],
+  60: ["REQ-SEC-088"], 61: ["REQ-SEC-088"], 62: ["REQ-SEC-088"],
+  74: ["REQ-DDMAC-143"], 75: ["REQ-DDMAC-143"], 76: ["REQ-DDMAC-143"], 77: ["REQ-DDMAC-143"],
+  87: ["CLK-RST-01"], 88: ["CLK-RST-01"], 89: ["CLK-RST-01"], 90: ["CLK-RST-01"],
 };
 
 const GENERATED_FILES = [
