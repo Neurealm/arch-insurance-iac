@@ -257,7 +257,8 @@ export default function Overview() {
           }}
         />
         <div className="relative max-w-[1600px] mx-auto px-6 pt-8 pb-10 grid grid-cols-12 gap-8">
-          <div className="col-span-12 lg:col-span-7">
+          <div className="col-span-12 lg:col-span-10">
+
 
             <div className="text-[11px] font-mono tracking-wider text-blue-700">AI-ENABLED SEMICONDUCTOR ENGINEERING · AVEP.P0.OVERVIEW.001</div>
             <h1 className="mt-3 text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-tight">
