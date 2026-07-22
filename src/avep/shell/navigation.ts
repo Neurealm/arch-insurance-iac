@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   ScanSearch,
   Target,
+  FlaskConical,
   Binary,
   GitPullRequest,
   BadgeCheck,
@@ -42,6 +43,7 @@ export const AVEP_NAV: AvepNavItem[] = [
   { id: "rtl-generation",     label: "RTL Generation Studio", path: "/avep/design/rtl-generation",     icon: Code2,           group: "Design" },
   { id: "change-impact",      label: "RTL Change Impact Analysis", path: "/avep/design/change-impact", icon: GitPullRequest,  group: "Design" },
   { id: "verification-env",   label: "Verification Environment Builder", path: "/avep/verification/environment-builder", icon: Layers, group: "Design" },
+  { id: "test-factory",       label: "Test, Stimulus, Assertion & Property Factory", path: "/avep/verification/test-factory", icon: FlaskConical, group: "Design" },
 
   { id: "verification-plan",  label: "Verification Planning", path: "/avep/verification-planning",    icon: ClipboardList,   group: "Verify" },
   { id: "simulation",         label: "Simulation",            path: "/avep/simulation",               icon: PlayCircle,      group: "Verify" },
