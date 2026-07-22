@@ -64,6 +64,7 @@ import SimulationOperations from "./avep/pages/SimulationOperations";
 import FailureDiagnosis from "./avep/pages/FailureDiagnosis";
 import CoverageClosureReadiness from "./avep/pages/CoverageClosureReadiness";
 import SignoffReadiness from "./avep/pages/SignoffReadiness";
+import ReleasePackage from "./avep/pages/ReleasePackage";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
@@ -811,7 +812,8 @@ const App = () => (
             <Route path="verification/failure-diagnosis" element={<FailureDiagnosis />} />
             <Route path="readiness/coverage-closure" element={<CoverageClosureReadiness />} />
             <Route path="readiness/signoff" element={<SignoffReadiness />} />
-            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation", "/avep/design/change-impact", "/avep/verification/environment-builder", "/avep/verification/test-factory", "/avep/verification/simulation-operations", "/avep/verification/failure-diagnosis", "/avep/readiness/coverage-closure", "/avep/readiness/signoff"].includes(n.path)).map((n) => (
+            <Route path="readiness/release-package" element={<ReleasePackage />} />
+            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation", "/avep/design/change-impact", "/avep/verification/environment-builder", "/avep/verification/test-factory", "/avep/verification/simulation-operations", "/avep/verification/failure-diagnosis", "/avep/readiness/coverage-closure", "/avep/readiness/signoff", "/avep/readiness/release-package"].includes(n.path)).map((n) => (
               <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
             ))}
           </Route>
