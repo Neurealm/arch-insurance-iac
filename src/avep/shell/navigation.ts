@@ -48,6 +48,7 @@ export const AVEP_NAV: AvepNavItem[] = [
   { id: "failure-diagnosis",  label: "Waveform Intelligence & Failure Diagnosis", path: "/avep/verification/failure-diagnosis", icon: Activity, group: "Design" },
 
   { id: "verification-plan",  label: "Coverage Closure & Verification Readiness", path: "/avep/readiness/coverage-closure", icon: ClipboardList,   group: "Verify" },
+  { id: "signoff-readiness",  label: "Signoff Readiness & Engineering Evidence", path: "/avep/readiness/signoff", icon: BadgeCheck,      group: "Verify" },
   { id: "simulation",         label: "Simulation",            path: "/avep/simulation",               icon: PlayCircle,      group: "Verify" },
   { id: "failure-triage",     label: "Failure Triage",        path: "/avep/failure-triage",           icon: AlertTriangle,   group: "Verify" },
   { id: "waveform",           label: "Waveform Debug",        path: "/avep/waveform-debug",           icon: Activity,        group: "Verify" },
