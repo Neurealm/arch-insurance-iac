@@ -1,5 +1,5 @@
-import { NavLink, useLocation } from "react-router-dom";
-import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { NavLink, useLocation, Link } from "react-router-dom";
+import { ChevronsLeft, ChevronsRight, Home } from "lucide-react";
 import { AVEP_NAV, AVEP_NAV_GROUPS } from "./navigation";
 import { useAvepShell } from "./ShellState";
 
