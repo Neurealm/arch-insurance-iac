@@ -52,6 +52,7 @@ export const AVEP_NAV: AvepNavItem[] = [
   { id: "release-package",    label: "Documentation & Validated Design Package", path: "/avep/readiness/release-package", icon: FileText,        group: "Verify" },
   { id: "ai-governance-value",label: "AI Governance, Engineering Learning & Value Realization", path: "/avep/governance/ai-value", icon: Gavel,           group: "Verify" },
   { id: "pd-intake",          label: "Physical-Design Intake Decision", path: "/avep/readiness/physical-design-intake", icon: BadgeCheck,      group: "Verify" },
+  { id: "end-to-end-story",   label: "End-to-End Engineering Decision Story", path: "/avep/demo/end-to-end-story", icon: Sparkles,        group: "Verify" },
   { id: "simulation",         label: "Simulation",            path: "/avep/simulation",               icon: PlayCircle,      group: "Verify" },
   { id: "failure-triage",     label: "Failure Triage",        path: "/avep/failure-triage",           icon: AlertTriangle,   group: "Verify" },
   { id: "waveform",           label: "Waveform Debug",        path: "/avep/waveform-debug",           icon: Activity,        group: "Verify" },
