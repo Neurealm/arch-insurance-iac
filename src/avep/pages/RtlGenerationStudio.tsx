@@ -61,13 +61,13 @@ const REUSED_PATTERNS = [
 ];
 
 const FINDINGS: Array<{ id: string; severity: Severity; category: string; message: string; lines: number[]; source?: string; }> = [
-  { id: "F-001", severity: "blocking", category: "Requirement Ambiguity", message: "REQ-DDMAC-143 does not define whether the two-cycle response begins at signal assertion, sampling, or completion of interface acceptance.", lines: [46, 55], source: "REQ-DDMAC-143" },
-  { id: "F-002", severity: "major",    category: "Clock Domain",         message: "priv_mode clock-domain ownership is not explicitly documented in the interface contract.", lines: [26, 44], source: "IF-APB-REG" },
-  { id: "F-003", severity: "major",    category: "Error Priority",       message: "Error code priority is inferred when both length and privilege violations occur simultaneously.", lines: [43, 50] },
-  { id: "F-004", severity: "advisory", category: "State Machine",        message: "State machine can be simplified, but the explicit VALIDATE state improves traceability and reviewability.", lines: [12, 15, 40, 48] },
-  { id: "F-005", severity: "advisory", category: "Coverage",             message: "Consider explicit coverage points for back-to-back invalid descriptors.", lines: [] },
-  { id: "F-006", severity: "major",    category: "Reset",                message: "Reset behavior in ACCEPT/REJECT states not asserted; recommend an SVA property.", lines: [78] },
-  { id: "F-007", severity: "advisory", category: "Naming",               message: "Consider prefixing error_code encodings with a package enum for reviewability.", lines: [43, 50] },
+  { id: "F-001", severity: "blocking", category: "Requirement Ambiguity", message: "REQ-DDMAC-143 does not define whether the two-cycle response begins at signal assertion, sampling, or completion of interface acceptance.", lines: [12, 74, 76], source: "REQ-DDMAC-143" },
+  { id: "F-002", severity: "major",    category: "Clock Domain",         message: "priv_mode clock-domain ownership is not explicitly documented in the APB register interface contract.", lines: [10, 34, 38], source: "IF-APB-REG" },
+  { id: "F-003", severity: "major",    category: "Error Priority",       message: "Error code priority is inferred (length_error over privilege_error) when both fire simultaneously; not stated in spec.", lines: [56, 57, 60, 61] },
+  { id: "F-004", severity: "advisory", category: "State Machine",        message: "State machine can be simplified, but the explicit VALIDATE state improves traceability and reviewability.", lines: [16, 21, 47, 55] },
+  { id: "F-005", severity: "advisory", category: "Coverage",             message: "Consider explicit coverage points for back-to-back invalid descriptors and the length == max boundary (cg_len_boundary.cross_at_max).", lines: [] },
+  { id: "F-006", severity: "major",    category: "Reset",                message: "Reset behavior for err_code_q and state_q not covered by an SVA property; recommend p_reset_returns_idle.", lines: [87, 88, 89, 90] },
+  { id: "F-007", severity: "advisory", category: "Naming",               message: "Consider replacing raw 3'b001 / 3'b010 error codes with a package enum (ddmac_err_e) for reviewability.", lines: [57, 61] },
 ];
 
 const ASSUMPTIONS = [
