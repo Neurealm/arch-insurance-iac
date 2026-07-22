@@ -326,12 +326,12 @@ export default function Overview() {
           {/* Hero visual — AVEP layer over existing systems */}
           <div className="col-span-12 lg:col-span-6 space-y-4">
             {/* Narrated intro video */}
-            <div className="rounded-xl border border-neutral-200 bg-neutral-950 overflow-hidden shadow-sm">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-800 bg-neutral-900">
+            <div className="mx-auto w-full max-w-[280px] rounded-xl border border-neutral-200 bg-neutral-950 overflow-hidden shadow-sm">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-800 bg-neutral-900">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
-                  AVEP · Narrated Introduction
+                  AVEP · Intro
                 </div>
-                <div className="text-[10px] font-mono text-blue-300">Avatar Briefing</div>
+                <div className="text-[10px] font-mono text-blue-300">Avatar</div>
               </div>
               <video
                 src={avatarVideo.url}
@@ -339,7 +339,7 @@ export default function Overview() {
                 playsInline
                 preload="metadata"
                 controlsList="nodownload"
-                className="w-full aspect-video bg-black"
+                className="w-full aspect-[9/16] object-cover bg-black"
               >
                 Your browser does not support the video tag.
               </video>
