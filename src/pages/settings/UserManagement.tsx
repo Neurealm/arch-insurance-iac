@@ -1044,7 +1044,7 @@ function EditProfileDialog({
                   { value: "email", label: "Email" },
                   { value: "phone", label: "Phone" },
                   { value: "sms", label: "SMS" },
-                  { value: "chat", label: "Chat" },
+                  { value: "push", label: "Push" },
                 ]}
               />
               <LabeledSelect
