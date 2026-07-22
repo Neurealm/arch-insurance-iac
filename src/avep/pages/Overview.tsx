@@ -325,10 +325,9 @@ export default function Overview() {
             </div>
           </div>
 
-          {/* Hero visual — AVEP layer over existing systems */}
-          <div className="col-span-12 lg:col-span-5 space-y-4">
-            {/* Narrated intro video */}
-            <div className="ml-auto w-[220px] rounded-xl border border-neutral-200 bg-neutral-950 overflow-hidden shadow-sm">
+          {/* Narrated intro video */}
+          <div className="col-span-12 lg:col-span-2">
+            <div className="w-full rounded-xl border border-neutral-200 bg-neutral-950 overflow-hidden shadow-sm">
               <div className="flex items-center justify-between px-3 py-1.5 border-b border-neutral-800 bg-neutral-900">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
                   AVEP · Intro
@@ -346,6 +345,11 @@ export default function Overview() {
                 Your browser does not support the video tag.
               </video>
             </div>
+          </div>
+
+          {/* Hero visual — AVEP layer over existing systems */}
+          <div className="col-span-12 space-y-4">
+
 
 
             <div className="rounded-xl border border-neutral-200 bg-white/70 backdrop-blur p-4 relative">
