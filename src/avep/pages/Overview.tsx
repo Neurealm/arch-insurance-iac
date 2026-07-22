@@ -326,7 +326,7 @@ export default function Overview() {
           <div className="col-span-12 lg:col-span-6">
             <div className="rounded-xl border border-neutral-200 bg-white/70 backdrop-blur p-4 relative">
               <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 text-center">
-                Engineering Intelligence, Traceability, Governance & Decision Orchestration
+                Context · Traceability · Evidence · Approval
               </div>
 
               {/* AVEP core */}
