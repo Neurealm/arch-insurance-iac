@@ -68,6 +68,7 @@ import ReleasePackage from "./avep/pages/ReleasePackage";
 import AiGovernanceValue from "./avep/pages/AiGovernanceValue";
 import PhysicalDesignIntake from "./avep/pages/PhysicalDesignIntake";
 import EndToEndStory from "./avep/pages/EndToEndStory";
+import Overview from "./avep/pages/Overview";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
