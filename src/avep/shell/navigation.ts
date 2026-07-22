@@ -53,20 +53,6 @@ export const AVEP_NAV: AvepNavItem[] = [
   { id: "ai-governance-value",label: "AI Governance, Engineering Learning & Value Realization", path: "/avep/governance/ai-value", icon: Gavel,           group: "Verify" },
   { id: "pd-intake",          label: "Physical-Design Intake Decision", path: "/avep/readiness/physical-design-intake", icon: BadgeCheck,      group: "Verify" },
   { id: "end-to-end-story",   label: "End-to-End Engineering Decision Story", path: "/avep/demo/end-to-end-story", icon: Sparkles,        group: "Verify" },
-  { id: "simulation",         label: "Simulation",            path: "/avep/simulation",               icon: PlayCircle,      group: "Verify" },
-  { id: "failure-triage",     label: "Failure Triage",        path: "/avep/failure-triage",           icon: AlertTriangle,   group: "Verify" },
-  { id: "waveform",           label: "Waveform Debug",        path: "/avep/waveform-debug",           icon: Activity,        group: "Verify" },
-  { id: "formal",             label: "Formal Verification",   path: "/avep/formal-verification",      icon: ShieldCheck,     group: "Verify" },
-  { id: "static",             label: "Static Analysis",       path: "/avep/static-analysis",          icon: ScanSearch,      group: "Verify" },
-  { id: "coverage",           label: "Coverage Closure",      path: "/avep/coverage-closure",         icon: Target,          group: "Verify" },
-  { id: "gls",                label: "Gate Level Simulation", path: "/avep/gate-level-simulation",    icon: Binary,          group: "Verify" },
-
-  { id: "ecn",                label: "Engineering Changes",   path: "/avep/engineering-changes",      icon: GitPullRequest,  group: "Deliver" },
-  { id: "signoff",            label: "Signoff",               path: "/avep/signoff",                  icon: BadgeCheck,      group: "Deliver" },
-
-  { id: "ai-engineering",     label: "AI Engineering",        path: "/avep/ai-engineering",           icon: Sparkles,        group: "Platform" },
-  { id: "compute",            label: "Compute",               path: "/avep/compute",                  icon: Server,          group: "Platform" },
-  { id: "governance",         label: "Governance",            path: "/avep/governance",               icon: Gavel,           group: "Platform" },
 ];
 
 export const AVEP_NAV_GROUPS = ["Plan", "Design", "Verify", "Deliver", "Platform"] as const;
