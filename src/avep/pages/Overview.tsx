@@ -195,7 +195,7 @@ const STORAGE_KEY = "avep-overview-audience";
 /* ---------- Guided introduction ---------- */
 const GUIDE = [
   { title: "The Problem",         copy: "Semiconductor teams already use sophisticated engineering tools. The challenge is preserving context, traceability, evidence, and decision continuity across them." },
-  { title: "The AVEP Layer",      copy: "AVEP operates across existing engineering systems as an intelligence, orchestration, traceability, and governance layer." },
+  { title: "The AVEP Layer",      copy: "AVEP sits alongside your EDA, source control, and defect tools. It records what each artifact depends on, whose approval it needs, and where the evidence lives — so a decision at RTL freeze can be traced back to the requirement it satisfies." },
   { title: "The Lifecycle",       copy: "The demonstration follows the lifecycle from controlled requirements through RTL, verification, readiness, and physical-design intake." },
   { title: "Evidence-Based AI",   copy: "Every AI-assisted output retains its inputs, version, methodology, evidence, confidence, limitations, and approval boundary." },
   { title: "Human Authority",     copy: "AVEP recommends and explains. Qualified engineers approve, reject, modify, or hold." },
