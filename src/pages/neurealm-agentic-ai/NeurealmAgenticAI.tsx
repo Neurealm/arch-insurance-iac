@@ -88,7 +88,10 @@ export default function NeurealmAgenticAI() {
 
         {/* Tab content */}
         <div className="max-w-[1600px] mx-auto px-6 py-6">
-          <Active onReadinessChange={setReadiness as any} />
+          {(() => {
+            const C = Active as any;
+            return <C onReadinessChange={setReadiness} />;
+          })()}
         </div>
       </div>
     </AppShell>
