@@ -45,6 +45,7 @@ export const AVEP_NAV: AvepNavItem[] = [
   { id: "verification-env",   label: "Verification Environment Builder", path: "/avep/verification/environment-builder", icon: Layers, group: "Design" },
   { id: "test-factory",       label: "Test, Stimulus, Assertion & Property Factory", path: "/avep/verification/test-factory", icon: FlaskConical, group: "Design" },
   { id: "sim-ops",            label: "Simulation Operations & Regression Intelligence", path: "/avep/verification/simulation-operations", icon: PlayCircle, group: "Design" },
+  { id: "failure-diagnosis",  label: "Waveform Intelligence & Failure Diagnosis", path: "/avep/verification/failure-diagnosis", icon: Activity, group: "Design" },
 
   { id: "verification-plan",  label: "Verification Planning", path: "/avep/verification-planning",    icon: ClipboardList,   group: "Verify" },
   { id: "simulation",         label: "Simulation",            path: "/avep/simulation",               icon: PlayCircle,      group: "Verify" },
