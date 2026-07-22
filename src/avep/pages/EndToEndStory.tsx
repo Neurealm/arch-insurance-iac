@@ -138,7 +138,7 @@ const CHAPTERS: Chapter[] = [
     ],
     narrationExec: "Verification build is compressed, but the trust in the checkers is treated as a separate approval.",
     narrationEng: "UVM environment dv_env_2.4 is generated with driver, monitor, scoreboard, reference model, 12 assertions, and 6 covergroups. Checker trust is separately reviewed.",
-    narrationDeep: "dv_env_2.4: uvm_agent(AXI), uvm_agent(APB), scoreboard w/ ref model ddmac_ref_c, 12 SVA (incl. p_length_boundary), 6 covergroups (cg_len_boundary cross max_xfer_len × desc_length).",
+    narrationDeep: "dv_env_2.4: uvm_agent(AXI), uvm_agent(APB), scoreboard w/ ref model ddmac_ref_model, 12 SVA (incl. p_length_boundary), 6 covergroups (cg_len_boundary cross max_xfer_len × desc_length).",
     duration: 65,
   },
   {
