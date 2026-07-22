@@ -234,17 +234,6 @@ export default function Overview() {
 
   return (
     <div className="min-h-screen bg-white text-neutral-900 pb-24">
-      {/* Simplified demo context bar */}
-      <div className="border-b border-neutral-200 bg-neutral-50">
-        <div className="max-w-[1600px] mx-auto px-6 py-2 flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] font-mono text-neutral-600">
-          <span><span className="text-neutral-400">Program</span> StrataShield Secure Processing SoC</span>
-          <span><span className="text-neutral-400">IP</span> DDMAC Packet Movement Engine</span>
-          <span><span className="text-neutral-400">Rev</span> DDMAC 3.2</span>
-          <span><span className="text-neutral-400">Demo scope</span> Requirements → Physical-Design Intake</span>
-          <span><span className="text-neutral-400">Scenario</span> AI-Assisted Engineering Decision</span>
-          <span className="ml-auto"><span className="text-neutral-400">Human authority</span> Preserved</span>
-        </div>
-      </div>
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -260,7 +249,6 @@ export default function Overview() {
           <div className="col-span-12 lg:col-span-10">
 
 
-            <div className="text-[11px] font-mono tracking-wider text-blue-700">AI-ENABLED SEMICONDUCTOR ENGINEERING · AVEP.P0.OVERVIEW.001</div>
             <h1 className="mt-3 text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-tight">
               Connect Engineering Intent to <span className="text-blue-700">Evidence-Backed Advancement</span>
             </h1>
