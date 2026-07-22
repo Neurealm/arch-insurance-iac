@@ -1,52 +1,44 @@
-
 ## Goal
 
-1. Let platform admins see the full profile of a user from the User Management module (currently the drawer only shows name/email/status/role/login history).
-2. When a user sets a `company` value on their profile, automatically ensure a matching row exists in `crm_companies`, and link the profile to it.
+Make every code example on `src/avep/pages/RtlGenerationStudio.tsx` technically correct and consistent with the canonical DDMAC scenario in `src/avep/data/canonical.ts` (defect DEF-DV-219: baseline used `length >= max_transfer_length`; fix changes it to `>`).
 
-## 1. Profile details in the admin drawer
+## Issues found (verified against file)
 
-Extend `src/components/users/UserDetailDrawer.tsx`:
+1. **Baseline/Proposed diff is inverted.** `BaselineDiff` (lines ~918-942) shows the *baseline* using the already-fixed `desc_length > max_transfer_length` and the *proposed* branch without the comparison at all. Per canonical: baseline must use the buggy `>=`, and the proposed must use the fixed `>` inside the VALIDATE state — that's the whole point of the DEF-DV-219 story this platform tells.
 
-- Extend `UserRow` and the list query in `src/pages/settings/UserManagement.tsx` to also fetch profile fields already in the `profiles` table: `first_name`, `last_name`, `phone`, `job_title`, `department`, `company`, `location`, `time_zone`, `preferred_language`, `preferred_contact_method`, `working_location_type`, `office_site`, `hybrid_days`, `ooo_enabled`, `ooo_start`, `ooo_end`, `user_category`, `must_change_password`, `profile_completed_at`.
-- Add a read-only **Profile details** section in the drawer (above "Platform role") that renders these as a two-column label/value grid, grouped:
-  - Identity: first/last name, display name, job title, department, company
-  - Contact & location: phone, preferred contact method, working location type, office site, hybrid days, location, time zone, preferred language
-  - Status flags: user category, profile completed, must change password, OOO window
-- Empty values render as `—`. No editing in this pass (admin edit UI is out of scope unless requested).
+2. **Baseline/proposed versions wrong.** Diff headers say `rtl_baseline_3.2.16` and `3.2.17-rc1`. Canonical baseline is `rtl_3.2.18` on `feature/descriptor-ring-fix` off `release/2.4`, run 4471. Update to `rtl_baseline_3.2.17` (pre-fix) → `3.2.18-rc1` (post-fix, matching `IP.ipVersion = "3.2.18"`), and note the branch.
 
-## 2. Auto-create `crm_companies` from profile.company
+3. **`error_code` deasserts when `desc_error` asserts** (real RTL bug in the shown module). `error_code` is only assigned inside the `VALIDATE` branch of `always_comb`; on the next cycle in `REJECT`, the top-of-block default `error_code = 3'b000` wins, so consumers see `desc_error=1` with `error_code=000`. Fix by either (a) registering `error_code` into a `err_code_q` and driving it in `REJECT`, or (b) re-asserting the appropriate `error_code` inside the `REJECT` branch based on registered `length_error_q` / `privilege_error_q`. Choose (a) — smaller, matches the "error latch" pattern already listed in `REUSED_PATTERNS`.
 
-Approach: database-side, so it works for all write paths (self-service profile update, admin edits, signup handler, imports).
+4. **`LINE_BADGES` line numbers don't match the RTL snippet.** Badges claim REQ-DDMAC-142 lives on snippet lines 21/22/23/41/43 — those are `} validator_state_e;`, blanks, and internal state lines. Correct mapping against the actual `RTL_CODE` split:
+   - REQ-DDMAC-142 (length compare) → snippet lines 28-30 (`assign length_error = desc_valid && (desc_length > max_transfer_length);`) and the VALIDATE branch that consumes it.
+   - REQ-SEC-088 (priv_mode) → port line 10 and `privilege_error` assign lines 32-35.
+   - REQ-DDMAC-143 (desc_error timing) → port line 12 and the `REJECT` branch that drives `desc_error`.
+   - ARCH-FSM-04 → typedef lines 16-21 and the `unique case` at line ~37.
+   - CLK-RST-01 → the `always_ff` reset block near lines 80-87.
+   Recompute after any RTL edits from item 3 so line numbers still match.
 
-New migration:
+5. **Traceability chain uses invented IDs.** `TraceabilityView` shows `ASSERT_DESC_LENGTH_001`, `TEST_DESC_OVERSIZE_017`, `COVER_DESC_ERROR_004`. Canonical names are `p_max_legal_length_accepted` (formal property), `test_desc_len_boundary_017` (directed test), `cg_len_boundary.cross_at_max` (coverage bin). Replace to match `HEADLINE_REQ.linkedFormal`, `linkedTests`, `linkedCoverBins` in `canonical.ts`.
 
-- Add `public.profiles.company_id uuid references public.crm_companies(id) on delete set null` (nullable, indexed).
-- Create `public.sync_profile_company()` trigger function (`SECURITY DEFINER`, `search_path = public`):
-  - Runs `BEFORE INSERT OR UPDATE OF company ON public.profiles`.
-  - If `NEW.company` is null/blank → set `NEW.company_id = NULL`.
-  - Else: case-insensitive lookup `SELECT id FROM crm_companies WHERE lower(name) = lower(trim(NEW.company)) LIMIT 1`.
-  - If not found, insert a new `crm_companies` row with `name = trim(NEW.company)`, `company_type = 'Customer'` default, `status = true`, `priority = 'Medium'`, `lifecycle_stage = 'prospect'`, minimal defaults; capture id.
-  - Set `NEW.company_id` to the resolved id.
-- Attach trigger `trg_profiles_sync_company` on `public.profiles`.
-- Backfill: for each existing profile with non-null `company`, run the same resolve/insert logic and populate `company_id`.
+6. **`unique case` + `default` is technically legal but redundant** and Verilator/DC will warn. Since every enum value is enumerated, drop the `default` arm and keep `unique case` (or switch to `unique0 case` if we want a safe fallback). Prefer: keep `default: state_d = IDLE;` but change `unique case` → `unique case` remains — actually cleanest is `case (state_q) inside` with `unique` prefix retained and default kept; document that this is intentional. Small polish, not a correctness bug.
 
-Notes:
-- `crm_companies` INSERT policy currently gates on admin/tenant membership. Because the trigger runs `SECURITY DEFINER` under a fixed owner, it bypasses RLS safely (only reachable via a profile write the user already owns).
-- Do not touch existing CRM UI. The new `company_id` is available for future linking but is not required in the frontend now.
+7. **Findings referencing lines that don't exist.** `F-006` points to line 78, which in the snippet is inside `endmodule`/EOF. Remap to the actual `always_ff` reset block after code changes.
 
-## 3. Surface the linked company in the admin drawer
+8. **Spec citations drift.** REQ text sources cite `FRS 3.2 §4.7.1` / `§4.7.4`; canonical uses `DDMAC MAS §4.7.3`. Update `REQUIREMENTS[].source` to match `HEADLINE_REQ.source` and `AMBIGUOUS_REQ` context.
 
-- In the drawer's Profile section, when `company_id` is present, render the company name as a link to `/crm/companies/{company_id}` (existing CRM route) with a small "View in CRM" affordance.
+9. **`GENERATED_FILES` missing `ddmac_descriptor_guard.sv`** (called out as added in 3.2.15 in `canonical.MODULES`). Add a row so the file list is consistent with the module hierarchy the rest of the platform shows.
 
-## Files touched
+## Edits (all in `src/avep/pages/RtlGenerationStudio.tsx`)
 
-- `src/pages/settings/UserManagement.tsx` — expand profile select and `UserRow` shape.
-- `src/components/users/UserDetailDrawer.tsx` — add Profile details section + company link.
-- New migration — add `profiles.company_id`, trigger function, trigger, backfill.
+- Rewrite the two `<pre>` blocks in `BaselineDiff` so the left is the pre-fix `>=` snippet inside a VALIDATE state, and the right is the post-fix `>` snippet with the SEC-088 priv branch; update the two title strings and version chips.
+- Update `RTL_CODE` to register `error_code` (`err_code_q`) and drive it from `REJECT`, keeping the `>` comparison. Add a one-line comment tagging `// REQ-DDMAC-142 — strict >, fixes DEF-DV-219`.
+- Recompute `LINE_BADGES` against the new `RTL_CODE` line numbers and update `REQUIREMENTS[].lines` and `FINDINGS[].lines` to match.
+- Rename traceability chain nodes in `TraceabilityView` to `p_max_legal_length_accepted`, `test_desc_len_boundary_017`, `cg_len_boundary.cross_at_max`, and set the anchor RTL file to `rtl/ddmac_descriptor_validator.sv` (already correct).
+- Update `REQUIREMENTS[].source` values to `DDMAC MAS §4.7.3` / `§4.7.4` per canonical.
+- Add `rtl/ddmac_descriptor_guard.sv` to `GENERATED_FILES`.
+- No changes to layout, styling, tabs, or interactions.
 
 ## Out of scope
 
-- Editing profile fields from the admin drawer.
-- Merging/deduping existing `crm_companies` rows.
-- Tenant-scoping the auto-created company (created without `tenant_id`; admins can promote via existing CRM tools).
+- Other AVEP pages (only this file was requested).
+- Canonical data file — treat it as source of truth; do not edit.

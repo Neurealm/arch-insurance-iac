@@ -17,10 +17,10 @@ const REQUIREMENTS: Array<{
   id: string; text: string; status: ReqStatus; priority: string; owner: string; source: string; classification?: string;
   lines?: number[];
 }> = [
-  { id: "REQ-DDMAC-142", text: "The descriptor engine shall reject descriptors whose payload length exceeds the configured maximum transfer length.", status: "approved", priority: "Safety critical", owner: "DMA Architecture", source: "FRS 3.2 §4.7.1", lines: [21, 22, 23, 41, 43] },
-  { id: "REQ-DDMAC-143", text: "The descriptor engine shall assert desc_error within two clock cycles following detection of an invalid descriptor.", status: "clarification", priority: "High", owner: "DMA Architecture", source: "FRS 3.2 §4.7.4", lines: [46, 55, 67] },
-  { id: "REQ-SEC-088",   text: "Privileged register writes shall be accepted only when priv_mode is asserted.", status: "approved", priority: "Security critical", owner: "Security Architecture", source: "Security Spec 2.1", classification: "Security", lines: [25, 26, 27, 44, 50] },
-  { id: "REQ-DDMAC-144", text: "Descriptor validation shall complete within three clock cycles under nominal load.", status: "approved", priority: "Performance", owner: "DMA Architecture", source: "FRS 3.2 §5.1", lines: [30, 40, 71] },
+  { id: "REQ-DDMAC-142", text: "The descriptor engine shall reject descriptors whose payload length exceeds the configured maximum transfer length (strict greater-than; length == max is legal).", status: "approved", priority: "Safety critical", owner: "DMA Architecture", source: "DDMAC MAS §4.7.3", lines: [29, 30, 31, 32, 56, 57, 58] },
+  { id: "REQ-DDMAC-143", text: "The descriptor engine shall assert desc_error within two clock cycles following detection of an invalid descriptor.", status: "clarification", priority: "High", owner: "DMA Architecture", source: "DDMAC MAS §4.7.4", lines: [12, 74, 75, 76, 77] },
+  { id: "REQ-SEC-088",   text: "Privileged descriptors shall be accepted only when priv_mode is asserted.", status: "approved", priority: "Security critical", owner: "Security Architecture", source: "DDMAC Security Spec 2.1 §3.2", classification: "Security", lines: [10, 34, 35, 36, 37, 38, 60, 61, 62] },
+  { id: "REQ-DDMAC-144", text: "Descriptor validation shall complete within three clock cycles under nominal load.", status: "approved", priority: "Performance", owner: "DMA Architecture", source: "DDMAC MAS §5.1", lines: [47, 55, 69] },
 ];
 
 const ARCH_SOURCES = [
