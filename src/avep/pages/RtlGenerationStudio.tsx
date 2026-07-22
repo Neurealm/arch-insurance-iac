@@ -17,10 +17,10 @@ const REQUIREMENTS: Array<{
   id: string; text: string; status: ReqStatus; priority: string; owner: string; source: string; classification?: string;
   lines?: number[];
 }> = [
-  { id: "REQ-DDMAC-142", text: "The descriptor engine shall reject descriptors whose payload length exceeds the configured maximum transfer length.", status: "approved", priority: "Safety critical", owner: "DMA Architecture", source: "FRS 3.2 §4.7.1", lines: [21, 22, 23, 41, 43] },
-  { id: "REQ-DDMAC-143", text: "The descriptor engine shall assert desc_error within two clock cycles following detection of an invalid descriptor.", status: "clarification", priority: "High", owner: "DMA Architecture", source: "FRS 3.2 §4.7.4", lines: [46, 55, 67] },
-  { id: "REQ-SEC-088",   text: "Privileged register writes shall be accepted only when priv_mode is asserted.", status: "approved", priority: "Security critical", owner: "Security Architecture", source: "Security Spec 2.1", classification: "Security", lines: [25, 26, 27, 44, 50] },
-  { id: "REQ-DDMAC-144", text: "Descriptor validation shall complete within three clock cycles under nominal load.", status: "approved", priority: "Performance", owner: "DMA Architecture", source: "FRS 3.2 §5.1", lines: [30, 40, 71] },
+  { id: "REQ-DDMAC-142", text: "The descriptor engine shall reject descriptors whose payload length exceeds the configured maximum transfer length (strict greater-than; length == max is legal).", status: "approved", priority: "Safety critical", owner: "DMA Architecture", source: "DDMAC MAS §4.7.3", lines: [29, 30, 31, 32, 56, 57, 58] },
+  { id: "REQ-DDMAC-143", text: "The descriptor engine shall assert desc_error within two clock cycles following detection of an invalid descriptor.", status: "clarification", priority: "High", owner: "DMA Architecture", source: "DDMAC MAS §4.7.4", lines: [12, 74, 75, 76, 77] },
+  { id: "REQ-SEC-088",   text: "Privileged descriptors shall be accepted only when priv_mode is asserted.", status: "approved", priority: "Security critical", owner: "Security Architecture", source: "DDMAC Security Spec 2.1 §3.2", classification: "Security", lines: [10, 34, 35, 36, 37, 38, 60, 61, 62] },
+  { id: "REQ-DDMAC-144", text: "Descriptor validation shall complete within three clock cycles under nominal load.", status: "approved", priority: "Performance", owner: "DMA Architecture", source: "DDMAC MAS §5.1", lines: [47, 55, 69] },
 ];
 
 const ARCH_SOURCES = [
@@ -61,13 +61,13 @@ const REUSED_PATTERNS = [
 ];
 
 const FINDINGS: Array<{ id: string; severity: Severity; category: string; message: string; lines: number[]; source?: string; }> = [
-  { id: "F-001", severity: "blocking", category: "Requirement Ambiguity", message: "REQ-DDMAC-143 does not define whether the two-cycle response begins at signal assertion, sampling, or completion of interface acceptance.", lines: [46, 55], source: "REQ-DDMAC-143" },
-  { id: "F-002", severity: "major",    category: "Clock Domain",         message: "priv_mode clock-domain ownership is not explicitly documented in the interface contract.", lines: [26, 44], source: "IF-APB-REG" },
-  { id: "F-003", severity: "major",    category: "Error Priority",       message: "Error code priority is inferred when both length and privilege violations occur simultaneously.", lines: [43, 50] },
-  { id: "F-004", severity: "advisory", category: "State Machine",        message: "State machine can be simplified, but the explicit VALIDATE state improves traceability and reviewability.", lines: [12, 15, 40, 48] },
-  { id: "F-005", severity: "advisory", category: "Coverage",             message: "Consider explicit coverage points for back-to-back invalid descriptors.", lines: [] },
-  { id: "F-006", severity: "major",    category: "Reset",                message: "Reset behavior in ACCEPT/REJECT states not asserted; recommend an SVA property.", lines: [78] },
-  { id: "F-007", severity: "advisory", category: "Naming",               message: "Consider prefixing error_code encodings with a package enum for reviewability.", lines: [43, 50] },
+  { id: "F-001", severity: "blocking", category: "Requirement Ambiguity", message: "REQ-DDMAC-143 does not define whether the two-cycle response begins at signal assertion, sampling, or completion of interface acceptance.", lines: [12, 74, 76], source: "REQ-DDMAC-143" },
+  { id: "F-002", severity: "major",    category: "Clock Domain",         message: "priv_mode clock-domain ownership is not explicitly documented in the APB register interface contract.", lines: [10, 34, 38], source: "IF-APB-REG" },
+  { id: "F-003", severity: "major",    category: "Error Priority",       message: "Error code priority is inferred (length_error over privilege_error) when both fire simultaneously; not stated in spec.", lines: [56, 57, 60, 61] },
+  { id: "F-004", severity: "advisory", category: "State Machine",        message: "State machine can be simplified, but the explicit VALIDATE state improves traceability and reviewability.", lines: [16, 21, 47, 55] },
+  { id: "F-005", severity: "advisory", category: "Coverage",             message: "Consider explicit coverage points for back-to-back invalid descriptors and the length == max boundary (cg_len_boundary.cross_at_max).", lines: [] },
+  { id: "F-006", severity: "major",    category: "Reset",                message: "Reset behavior for err_code_q and state_q not covered by an SVA property; recommend p_reset_returns_idle.", lines: [87, 88, 89, 90] },
+  { id: "F-007", severity: "advisory", category: "Naming",               message: "Consider replacing raw 3'b001 / 3'b010 error codes with a package enum (ddmac_err_e) for reviewability.", lines: [57, 61] },
 ];
 
 const ASSUMPTIONS = [
@@ -100,14 +100,17 @@ const RTL_CODE = `module ddmac_descriptor_validator #(
     } validator_state_e;
 
     validator_state_e state_q, state_d;
+    logic [2:0]       err_code_q, err_code_d;
 
     logic length_error;
     logic privilege_error;
 
+    // REQ-DDMAC-142 — strict '>' (fixes DEF-DV-219; length == max is legal)
     assign length_error =
         desc_valid &&
         (desc_length > max_transfer_length);
 
+    // REQ-SEC-088 — privileged descriptors require priv_mode
     assign privilege_error =
         desc_valid &&
         privileged_request &&
@@ -115,25 +118,27 @@ const RTL_CODE = `module ddmac_descriptor_validator #(
 
     always_comb begin
         state_d     = state_q;
+        err_code_d  = err_code_q;
         desc_accept = 1'b0;
         desc_error  = 1'b0;
-        error_code  = 3'b000;
+        error_code  = err_code_q;
 
         unique case (state_q)
             IDLE: begin
                 if (desc_valid) begin
-                    state_d = VALIDATE;
+                    state_d    = VALIDATE;
+                    err_code_d = 3'b000;
                 end
             end
 
             VALIDATE: begin
                 if (length_error) begin
+                    err_code_d = 3'b001;
                     state_d    = REJECT;
-                    error_code = 3'b001;
                 end
                 else if (privilege_error) begin
+                    err_code_d = 3'b010;
                     state_d    = REJECT;
-                    error_code = 3'b010;
                 end
                 else begin
                     state_d = ACCEPT;
@@ -146,7 +151,9 @@ const RTL_CODE = `module ddmac_descriptor_validator #(
             end
 
             REJECT: begin
+                // REQ-DDMAC-143 — assert desc_error with latched error_code
                 desc_error = 1'b1;
+                error_code = err_code_q;
                 state_d    = IDLE;
             end
 
@@ -158,10 +165,12 @@ const RTL_CODE = `module ddmac_descriptor_validator #(
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            state_q <= IDLE;
+            state_q    <= IDLE;
+            err_code_q <= 3'b000;
         end
         else begin
-            state_q <= state_d;
+            state_q    <= state_d;
+            err_code_q <= err_code_d;
         end
     end
 
@@ -170,14 +179,22 @@ endmodule`;
 const RTL_LINES = RTL_CODE.split("\n");
 
 const LINE_BADGES: Record<number, string[]> = {
-  21: ["REQ-DDMAC-142"], 22: ["REQ-DDMAC-142"], 23: ["REQ-DDMAC-142", "REG:MAX_XFER_LEN"],
-  25: ["REQ-SEC-088"], 26: ["REQ-SEC-088"], 27: ["REQ-SEC-088"],
-  12: ["ARCH-FSM-04"], 40: ["ARCH-FSM-04"], 43: ["REQ-DDMAC-142"], 44: ["REQ-SEC-088"],
-  46: ["REQ-DDMAC-143"], 55: ["REQ-DDMAC-143"], 67: ["REQ-DDMAC-143"], 78: ["CLK-RST-01"],
+  10: ["REQ-SEC-088"],
+  12: ["REQ-DDMAC-143"],
+  16: ["ARCH-FSM-04"], 21: ["ARCH-FSM-04"],
+  23: ["ARCH-FSM-04"],
+  29: ["REQ-DDMAC-142"], 30: ["REQ-DDMAC-142"], 31: ["REQ-DDMAC-142"], 32: ["REQ-DDMAC-142", "REG:MAX_XFER_LEN"],
+  34: ["REQ-SEC-088"], 35: ["REQ-SEC-088"], 36: ["REQ-SEC-088"], 37: ["REQ-SEC-088"], 38: ["REQ-SEC-088"],
+  47: ["ARCH-FSM-04"],
+  56: ["REQ-DDMAC-142"], 57: ["REQ-DDMAC-142"], 58: ["REQ-DDMAC-142"],
+  60: ["REQ-SEC-088"], 61: ["REQ-SEC-088"], 62: ["REQ-SEC-088"],
+  74: ["REQ-DDMAC-143"], 75: ["REQ-DDMAC-143"], 76: ["REQ-DDMAC-143"], 77: ["REQ-DDMAC-143"],
+  87: ["CLK-RST-01"], 88: ["CLK-RST-01"], 89: ["CLK-RST-01"], 90: ["CLK-RST-01"],
 };
 
 const GENERATED_FILES = [
-  { path: "rtl/ddmac_descriptor_validator.sv", type: "SystemVerilog", lines: 92, status: "Generated", findings: 4 },
+  { path: "rtl/ddmac_descriptor_validator.sv", type: "SystemVerilog", lines: 98, status: "Generated", findings: 4 },
+  { path: "rtl/ddmac_descriptor_guard.sv",     type: "SystemVerilog", lines: 64, status: "Generated", findings: 0 },
   { path: "rtl/ddmac_error_capture.sv",        type: "SystemVerilog", lines: 118, status: "Generated", findings: 2 },
   { path: "rtl/ddmac_interrupt_logic.sv",      type: "SystemVerilog", lines: 174, status: "Generated", findings: 1 },
   { path: "rtl/ddmac_pkg.sv",                  type: "SV Package",    lines: 42, status: "Generated", findings: 0 },
@@ -186,7 +203,7 @@ const GENERATED_FILES = [
 ];
 
 const GEN_LOG = [
-  { t: "12:04:11", event: "Source context locked to rtl_baseline_3.2.17 @ feature/ddmac_descriptor_guard" },
+  { t: "12:04:11", event: "Source context locked to rtl_baseline_3.2.17 @ feature/descriptor-ring-fix off release/2.4" },
   { t: "12:04:12", event: "24 approved inputs loaded (18 requirements, 6 architecture, 4 interfaces, 12 registers)" },
   { t: "12:04:12", event: "1 unresolved requirement detected: REQ-DDMAC-143 (clarification pending)" },
   { t: "12:04:13", event: "Coding standards profile ddmac.rtl.v3 applied" },
@@ -907,38 +924,39 @@ function BaselineDiff({ mode, onModeChange }: { mode: string; onModeChange: (m: 
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {(["Baseline · rtl_baseline_3.2.16", "Proposed · AI generated · 3.2.17-rc1"] as const).map((title, col) => (
+        {(["Baseline · rtl_3.2.17 (pre-fix, DEF-DV-219)", "Proposed · 3.2.18-rc1 · feature/descriptor-ring-fix"] as const).map((title, col) => (
           <div key={title} className="rounded-md overflow-hidden" style={{ border }}>
             <div className="px-3 py-1.5 border-b flex items-center justify-between"
                  style={{ borderColor: "hsl(var(--avep-border))", background: col === 0 ? "hsl(var(--avep-surface-muted))" : "hsl(var(--avep-primary-soft))" }}>
               <span className="font-semibold" style={{ fontSize: "var(--avep-text-xs)", fontFamily: "var(--avep-font-mono)" }}>{title}</span>
-              <Chip tone={col === 0 ? "neutral" : "ai"}>{col === 0 ? "Accepted" : "Proposal"}</Chip>
+              <Chip tone={col === 0 ? "fail" : "ai"}>{col === 0 ? "Buggy (>=)" : "Proposal (>)"}</Chip>
             </div>
             <pre className="p-2 overflow-auto" style={{ fontFamily: "var(--avep-font-mono)", fontSize: "10.5px", lineHeight: 1.5, maxHeight: 360 }}>
 {col === 0
-? `always_comb begin
-  desc_accept = desc_valid;
-  desc_error  = 1'b0;
-  error_code  = 3'b000;
-
-  if (desc_length > max_transfer_length) begin
-    desc_accept = 1'b0;
-    desc_error  = 1'b1;
-    error_code  = 3'b001;
-  end
-end`
-: `always_comb begin
-  state_d     = state_q;
-  desc_accept = 1'b0;
-  desc_error  = 1'b0;
-  error_code  = 3'b000;
-
-  unique case (state_q)
-    VALIDATE: begin
-      if (length_error)         error_code = 3'b001;
-      else if (privilege_error) error_code = 3'b010;   // + REQ-SEC-088
-    end
-  endcase
+? `// ddmac_descriptor_validator.sv:214  (baseline rtl_3.2.17)
+assign length_error =
+    desc_valid &&
+    (desc_length >= max_transfer_length);   // DEF-DV-219: inclusive
+                                            // rejects legal length == max
+// VALIDATE branch:
+if (length_error) begin
+  err_code_d = 3'b001;
+  state_d    = REJECT;
+end
+// (no privilege check in 3.2.17)`
+: `// ddmac_descriptor_validator.sv:214  (proposed 3.2.18-rc1)
+assign length_error =
+    desc_valid &&
+    (desc_length > max_transfer_length);    // REQ-DDMAC-142: strict '>'
+                                            // length == max is legal
+// VALIDATE branch:
+if (length_error) begin
+  err_code_d = 3'b001;                      // length violation
+  state_d    = REJECT;
+end
+else if (privilege_error) begin
+  err_code_d = 3'b010;                      // + REQ-SEC-088
+  state_d    = REJECT;
 end`}
             </pre>
           </div>
@@ -981,9 +999,9 @@ function TraceabilityView({ selectedReq }: { selectedReq: string | null }) {
     { label: "MAX_XFER_LEN",  kind: "Register" },
     { label: "ddmac_descriptor_validator.sv", kind: "RTL File" },
     { label: "length_error",  kind: "Signal" },
-    { label: "ASSERT_DESC_LENGTH_001", kind: "Assertion" },
-    { label: "TEST_DESC_OVERSIZE_017", kind: "Test" },
-    { label: "COVER_DESC_ERROR_004", kind: "Coverage" },
+    { label: "p_max_legal_length_accepted", kind: "Formal Property" },
+    { label: "test_desc_len_boundary_017", kind: "Test" },
+    { label: "cg_len_boundary.cross_at_max", kind: "Coverage Bin" },
   ];
   return (
     <div className="p-3 flex flex-col gap-3">
