@@ -263,11 +263,11 @@ const GATES_T2: Gate[] = [
     group: "Defect and Risk Control",
     state: "In Review",
     criteria: [
-      { text: "All high-severity defects closed or accepted", met: false, evidence: "DEF RTL 224 open" },
-      { text: "Validation evidence attached to closures", met: true, evidence: "DEF DV 219 validated" },
+      { text: "All high-severity defects closed or accepted", met: false, evidence: "DEF-RTL-224 open" },
+      { text: "Validation evidence attached to closures", met: true, evidence: "DEF-DV-219 validated" },
     ],
     evidence: [],
-    missing: ["Closure evidence for DEF RTL 224"],
+    missing: ["Closure evidence for DEF-RTL-224"],
     dependencies: ["G04", "G05"],
     blockers: ["BLK-003"],
     residualRisks: [],
@@ -414,19 +414,19 @@ const s = (v: string) => v;
 const MATRIX: MatrixRow[] = [
   { id: "REQ-DDMAC-142", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "Closed", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G01", state: "Closed" },
   { id: "REQ-DDMAC-143", requirement: "Approved+CLR", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Conditional", regression: "Passed", coverage: "Exclusion", defect: "—", waiver: "WVR FORMAL 006", docs: "Updated", approval: "Pending FL", repro: "Yes", gate: "G05", state: "Closed with Conditions" },
-  { id: "ARCH-RESET-017", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "RDC BLOCK", formal: "Pending", regression: "Targeted OK", coverage: "Closed", defect: "DEF RTL 224", waiver: "—", docs: "Draft", approval: "Not complete", repro: "Yes", gate: "G04", state: "Blocked" },
+  { id: "ARCH-RESET-017", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "RDC BLOCK", formal: "Pending", regression: "Targeted OK", coverage: "Closed", defect: "DEF-RTL-224", waiver: "—", docs: "Draft", approval: "Not complete", repro: "Yes", gate: "G04", state: "Blocked" },
   { id: "REQ-DDMAC-144", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "Closed", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G01", state: "Closed" },
   { id: "REQ-DDMAC-145", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "97.1%", defect: "—", waiver: "WVR COV 014", docs: "Sync", approval: "Pending", repro: "Yes", gate: "G07", state: "Closed with Conditions" },
-  { id: "REQ-DDMAC-146", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "DEF DV 219", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G09", state: "In Review" },
+  { id: "REQ-DDMAC-146", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "DEF-DV-219", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G09", state: "In Review" },
   { id: "REQ-DDMAC-147", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "Closed", waiver: "—", docs: "Draft", approval: "Pending", repro: "Yes", gate: "G12", state: "Evidence Missing" },
   { id: "REQ-DDMAC-148", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "—", waiver: "WVR LINT 023", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G10", state: "In Review" },
   { id: "REQ-DDMAC-149", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "Closed", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G06", state: "Closed" },
   { id: "REQ-DDMAC-150", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "CDC waived", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "—", waiver: "WVR CDC 019", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G04", state: "Blocked" },
   { id: "REQ-DDMAC-151", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Bounded", regression: "Passed", coverage: "Closed", defect: "—", waiver: "WVR FORMAL 006", docs: "Sync", approval: "Pending", repro: "Yes", gate: "G05", state: "Closed with Conditions" },
-  { id: "REQ-DDMAC-152", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "DEF TB 087", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G09", state: "In Review" },
+  { id: "REQ-DDMAC-152", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "DEF-TB-087", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G09", state: "In Review" },
   { id: "REQ-DDMAC-153", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "Closed", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G14", state: "Closed" },
   { id: "REQ-DDMAC-154", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "Closed", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G08", state: "Closed" },
-  { id: "REQ-DDMAC-155", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "DEF DOC 042", waiver: "—", docs: "Draft", approval: "Pending", repro: "Yes", gate: "G12", state: "Evidence Missing" },
+  { id: "REQ-DDMAC-155", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "DEF-DOC-042", waiver: "—", docs: "Draft", approval: "Pending", repro: "Yes", gate: "G12", state: "Evidence Missing" },
   { id: "REQ-DDMAC-156", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "Closed", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G02", state: "Closed" },
   { id: "REQ-DDMAC-157", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "Closed", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G03", state: "Closed" },
   { id: "REQ-DDMAC-158", requirement: "Approved", arch: "Aligned", rtl: "Implemented", static_: "Clean", formal: "Proven", regression: "Passed", coverage: "Closed", defect: "Closed", waiver: "—", docs: "Sync", approval: "Complete", repro: "Yes", gate: "G06", state: "Closed" },
@@ -448,10 +448,10 @@ void s;
 /* ---------- Defects, Risks, Waivers, Approvals ---------- */
 
 const DEFECTS = [
-  { id: "DEF RTL 224", severity: "High", state: "Open", impact: "Blocking", cause: "Missing synchronized reset deassertion on ddmac_core_clk", correction: "Insert 2-flop reset synchronizer with staged deassertion", validation: "RDC rerun, formal reset property, targeted regression", owner: "Maya Chen" },
-  { id: "DEF DV 219", severity: "High", state: "Validated, closure pending", impact: "Conditional", cause: "Scoreboard ordering ambiguity under back-pressure", correction: "Tightened ordering assertion + scoreboard refactor", validation: "10k-seed regression, dedicated stimulus set", owner: "Sofia Rodriguez" },
-  { id: "DEF DOC 042", severity: "Medium", state: "Open", impact: "Documentation", cause: "Register field encoding not documented in TRM", correction: "Update TRM section 4.7", validation: "Doc review", owner: "Priya Shah" },
-  { id: "DEF TB 087", severity: "Medium", state: "Accepted risk", impact: "Conditional", cause: "Testbench limitation for rare arbitration corner", correction: "Documented limitation; formal coverage substituted", validation: "Formal property + waiver", owner: "Sofia Rodriguez" },
+  { id: "DEF-RTL-224", severity: "High", state: "Open", impact: "Blocking", cause: "Missing synchronized reset deassertion on ddmac_core_clk", correction: "Insert 2-flop reset synchronizer with staged deassertion", validation: "RDC rerun, formal reset property, targeted regression", owner: "Maya Chen" },
+  { id: "DEF-DV-219", severity: "High", state: "Validated, closure pending", impact: "Conditional", cause: "Scoreboard ordering ambiguity under back-pressure", correction: "Tightened ordering assertion + scoreboard refactor", validation: "10k-seed regression, dedicated stimulus set", owner: "Sofia Rodriguez" },
+  { id: "DEF-DOC-042", severity: "Medium", state: "Open", impact: "Documentation", cause: "Register field encoding not documented in TRM", correction: "Update TRM section 4.7", validation: "Doc review", owner: "Priya Shah" },
+  { id: "DEF-TB-087", severity: "Medium", state: "Accepted risk", impact: "Conditional", cause: "Testbench limitation for rare arbitration corner", correction: "Documented limitation; formal coverage substituted", validation: "Formal property + waiver", owner: "Sofia Rodriguez" },
 ];
 
 const RISKS = [
@@ -726,7 +726,7 @@ export default function SignoffReadiness() {
           <Section title="Gate Dependency View" subtitle="Evidence chain from requirement to recommendation" icon={GitBranch}>
             <DependencyGraph />
             <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-neutral-600 md:grid-cols-4">
-              <div><span className="font-mono">REQ DDMAC 143</span> → PROP ERROR TIMING 023</div>
+              <div><span className="font-mono">REQ-DDMAC-143</span> → PROP-ERROR-TIMING-023</div>
               <div>→ FORMAL RUN 2026.07.21.09</div>
               <div>→ WVR FORMAL 006 (residual risk)</div>
               <div>→ Formal Lead approval → Gate G05</div>
@@ -794,7 +794,7 @@ export default function SignoffReadiness() {
                 <div><dt className="text-neutral-500">Module</dt><dd className="font-mono">ddmac_descriptor_validator</dd></div>
                 <div><dt className="text-neutral-500">Clock domain</dt><dd className="font-mono">ddmac_core_clk</dd></div>
                 <div><dt className="text-neutral-500">Finding</dt><dd className="font-mono">RDC-000422</dd></div>
-                <div><dt className="text-neutral-500">Defect</dt><dd className="font-mono">DEF RTL 224</dd></div>
+                <div><dt className="text-neutral-500">Defect</dt><dd className="font-mono">DEF-RTL-224</dd></div>
                 <div><dt className="text-neutral-500">Owner</dt><dd>Maya Chen</dd></div>
                 <div><dt className="text-neutral-500">Due</dt><dd>2026-07-24</dd></div>
                 <div><dt className="text-neutral-500">Escalation</dt><dd className="text-rose-700">Active</dd></div>
@@ -1169,14 +1169,14 @@ function Kv({ k, v }: { k: string; v: string }) {
 /* ---------- Dependency graph (SVG) ---------- */
 function DependencyGraph() {
   const nodes = [
-    { id: "REQ", x: 40, y: 40, label: "REQ DDMAC 143" },
+    { id: "REQ", x: 40, y: 40, label: "REQ-DDMAC-143" },
     { id: "ARCH", x: 40, y: 110, label: "ARCH RESET 017" },
     { id: "RTL", x: 220, y: 75, label: "RTL 3.2.18" },
     { id: "STATIC", x: 380, y: 30, label: "Static · RDC 422" },
     { id: "FORMAL", x: 380, y: 90, label: "Formal · run .09" },
     { id: "REG", x: 380, y: 150, label: "Regression 0051" },
     { id: "COV", x: 540, y: 60, label: "Coverage 017" },
-    { id: "DEF", x: 540, y: 130, label: "DEF RTL 224" },
+    { id: "DEF", x: 540, y: 130, label: "DEF-RTL-224" },
     { id: "WVR", x: 700, y: 30, label: "WVR FORMAL 006" },
     { id: "RISK", x: 700, y: 100, label: "Residual RSK-001" },
     { id: "APR", x: 700, y: 170, label: "Approvals 4/7" },
