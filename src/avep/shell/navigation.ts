@@ -55,4 +55,4 @@ export const AVEP_NAV: AvepNavItem[] = [
   { id: "end-to-end-story",   label: "End-to-End Engineering Decision Story", path: "/avep/demo/end-to-end-story", icon: Sparkles,        group: "Verify" },
 ];
 
-export const AVEP_NAV_GROUPS = ["Plan", "Design", "Verify", "Deliver", "Platform"] as const;
+export const AVEP_NAV_GROUPS = ["Plan", "Design", "Verify"] as const;
