@@ -133,14 +133,6 @@ const categories: Category[] = [
     agents: 9, deployed: 0,
     themes: ["compliance", "experience", "cost"],
   },
-  {
-    title: "IT Service Desk & ITSM",
-    desc: "Service desk triage, executive dashboards, and ITSM performance across incident, request, and change.",
-    to: "/itsm",
-    tone: "slate", icon: Headphones,
-    agents: 8, deployed: 0,
-    themes: ["experience", "mttr", "toil"],
-  },
 ];
 
 

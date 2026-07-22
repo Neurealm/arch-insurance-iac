@@ -64,7 +64,7 @@ const DeployCoworker = () => {
     } else if (target === "privileged-access") {
       nav("/coworkers/identity-access-management/privileged-access");
     } else {
-      nav("/operations");
+      nav("/coworkers");
     }
   };
 
