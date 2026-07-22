@@ -111,12 +111,12 @@ const HYPOTHESES: Hypothesis[] = [
       "All failing seeds exercise exact boundary length",
       "Below-max descriptors pass, above-max fail correctly",
       "Formal counterexample reproduces on seed 348921",
-      "DEF DV 173 shows 93% signature similarity",
+      "DEF-DV-173 shows 93% signature similarity",
       "Commit a8c31f7 aligns with regression start",
     ],
     contradict: ["Two failures contain simultaneous privilege violations"],
     missing: ["Complete waveforms for 7 cluster jobs"],
-    artifacts: ["ddmac_descriptor_validator.sv:214", "REQ DDMAC 142", "p_max_legal_length_accepted"],
+    artifacts: ["ddmac_descriptor_validator.sv:214", "REQ-DDMAC-142", "p_max_legal_length_accepted"],
     nextTest: "Directed length == max + regression targeted set",
     owner: "Maya Chen",
     review: "Under Review",
@@ -128,11 +128,11 @@ const HYPOTHESES: Hypothesis[] = [
     confidence: 61,
     support: ["Reference model expects ACCEPT at boundary"],
     contradict: [
-      "REQ DDMAC 142 supports reference-model interpretation",
+      "REQ-DDMAC-142 supports reference-model interpretation",
       "Independent formal check confirms requirement reading",
     ],
     missing: ["Independent source mapping for reference model"],
-    artifacts: ["ddmac_ref_model.sv", "REQ DDMAC 142"],
+    artifacts: ["ddmac_ref_model.sv", "REQ-DDMAC-142"],
     nextTest: "Cross-check reference model against requirement source",
     owner: "Aisha Rahman",
     review: "Pending",
@@ -144,8 +144,8 @@ const HYPOTHESES: Hypothesis[] = [
     confidence: 47,
     support: ["Some failures contain simultaneous privilege and length violations"],
     contradict: ["Pure boundary failures reproduce without privilege violation"],
-    missing: ["Error-priority clarification in REQ DDMAC 143"],
-    artifacts: ["REQ DDMAC 143", "arch_ddmac_error_model.md"],
+    missing: ["Error-priority clarification in REQ-DDMAC-143"],
+    artifacts: ["REQ-DDMAC-143", "arch_ddmac_error_model.md"],
     nextTest: "Split dual-error subset into FC-031b",
     owner: "Arun Patel",
     review: "Pending",
@@ -155,7 +155,7 @@ const HYPOTHESES: Hypothesis[] = [
     title: "Monitor sampling captures stale descriptor length",
     classification: "Testbench defect",
     confidence: 22,
-    support: ["Prior monitor sampling ambiguity noted in DEF DV 158"],
+    support: ["Prior monitor sampling ambiguity noted in DEF-DV-158"],
     contradict: ["desc_length stable across full handshake window in seed 348921"],
     missing: [],
     artifacts: ["ddmac_monitor.sv:88"],
@@ -195,12 +195,12 @@ const EVIDENCE: EvidenceRow[] = [
   { type: "Simulation log", state: "Complete", note: "compressed 2.1 MB" },
   { type: "Assertion evidence", state: "Complete", note: "1 failure, 0 vacuous" },
   { type: "RTL diff", state: "Complete", note: "commit a8c31f7 · 1 file · +1 / −1" },
-  { type: "Requirement mapping", state: "Complete", note: "REQ DDMAC 142, 143" },
+  { type: "Requirement mapping", state: "Complete", note: "REQ-DDMAC-142, 143" },
   { type: "Formal counterexample", state: "Complete", note: "aligned with seed 348921" },
-  { type: "Prior defect", state: "Complete", note: "DEF DV 173 · 93% similarity" },
+  { type: "Prior defect", state: "Complete", note: "DEF-DV-173 · 93% similarity" },
   { type: "Dual-error waveforms", state: "Partial", note: "3 of 7 waveforms captured" },
   { type: "Checker ordering evidence", state: "Partial", note: "1 scoreboard-ordering condition unexplored" },
-  { type: "Error-timing clarification", state: "Missing", note: "REQ DDMAC 143 origin unresolved" },
+  { type: "Error-timing clarification", state: "Missing", note: "REQ-DDMAC-143 origin unresolved" },
 ];
 
 const AUTHORITIES = [
@@ -277,7 +277,7 @@ export default function FailureDiagnosis() {
     "Synchronize waveform, logs, and assertions.",
     "Identify the first meaningful divergence (cycle 18,441).",
     "Trace the symptom back to the RTL expression.",
-    "Review requirement REQ DDMAC 142 and commit a8c31f7.",
+    "Review requirement REQ-DDMAC-142 and commit a8c31f7.",
     "Compare ranked hypotheses and alternatives.",
     "Review contradicting and missing evidence.",
     "Inspect the bounded proposed correction (2 lines).",
@@ -648,8 +648,8 @@ function FailureContextPanel({ isT0, isT3 }: { isT0: boolean; isT3: boolean }) {
     ["Signature", "len_ge_max_rejects_legal_boundary"],
     ["Module", "ddmac_descriptor_validator"],
     ["Suspect commit", "a8c31f7"],
-    ["Requirement", "REQ DDMAC 142"],
-    ["Prior defect", "DEF DV 173 (93% sim)"],
+    ["Requirement", "REQ-DDMAC-142"],
+    ["Prior defect", "DEF-DV-173 (93% sim)"],
     ["Owners", "Maya Chen · Sofia Rodriguez"],
     ["Triage", isT3 ? "Resolved (pending closure)" : "RTL Design Review"],
   ];
@@ -846,7 +846,7 @@ function TabBody(props: {
           title="Accepted baseline · rtl_baseline_3.2.17"
           path="ddmac_descriptor_validator.sv:212"
           lines={[
-            "// REQ DDMAC 142: reject only when length exceeds max",
+            "// REQ-DDMAC-142: reject only when length exceeds max",
             "assign length_error =",
             "    desc_valid &&",
             "    (desc_length > max_transfer_length);",
@@ -858,7 +858,7 @@ function TabBody(props: {
           title="Suspect candidate · commit a8c31f7"
           path="ddmac_descriptor_validator.sv:214"
           lines={[
-            "// REQ DDMAC 142",
+            "// REQ-DDMAC-142",
             "assign length_error =",
             "    desc_valid &&",
             "    (desc_length >= max_transfer_length); // ← inclusive, off by boundary",
@@ -867,12 +867,12 @@ function TabBody(props: {
           tone="bad"
         />
         <div className="md:col-span-2 flex flex-wrap gap-1.5 text-[11px]">
-          <MetaChip>Requirement: REQ DDMAC 142</MetaChip>
+          <MetaChip>Requirement: REQ-DDMAC-142</MetaChip>
           <MetaChip>Commit: a8c31f7</MetaChip>
           <MetaChip>Affected tests: 6</MetaChip>
           <MetaChip>Property: p_max_legal_length_accepted</MetaChip>
           <MetaChip>Coverage: cvp_len_at_max</MetaChip>
-          <MetaChip tone="warn">Prior defect similarity: 93% (DEF DV 173)</MetaChip>
+          <MetaChip tone="warn">Prior defect similarity: 93% (DEF-DV-173)</MetaChip>
         </div>
         <p className="md:col-span-2 text-[11px] text-slate-500">
           Source is read-only. AVEP does not automatically modify RTL. Use “Review Proposed Correction” to open a bounded change for qualified review.
@@ -899,7 +899,7 @@ function TabBody(props: {
           path="tb/ddmac_ref_model.sv:141"
           lines={[
             "if (desc.payload_length <= cfg.max_transfer_length)",
-            "    predict = ACCEPT; // REQ DDMAC 142 interpretation",
+            "    predict = ACCEPT; // REQ-DDMAC-142 interpretation",
             "else",
             "    predict = REJECT;",
           ]}
@@ -1000,10 +1000,10 @@ function TabBody(props: {
           </thead>
           <tbody>
             {[
-              ["a_max_legal", "REQ DDMAC 142", "Fail@18441", "CEX found", "OK", "Daniel Kim"],
-              ["a_above_max_rejected", "REQ DDMAC 142", "Pass", "Proven", "OK", "Daniel Kim"],
-              ["a_error_timing_2c", "REQ DDMAC 143", "Blocked", "Blocked", "Ambiguous spec", "Arun Patel"],
-              ["a_accept_reject_exclusive", "REQ DDMAC 142", "Pass", "Proven", "OK", "Daniel Kim"],
+              ["a_max_legal", "REQ-DDMAC-142", "Fail@18441", "CEX found", "OK", "Daniel Kim"],
+              ["a_above_max_rejected", "REQ-DDMAC-142", "Pass", "Proven", "OK", "Daniel Kim"],
+              ["a_error_timing_2c", "REQ-DDMAC-143", "Blocked", "Blocked", "Ambiguous spec", "Arun Patel"],
+              ["a_accept_reject_exclusive", "REQ-DDMAC-142", "Pass", "Proven", "OK", "Daniel Kim"],
             ].map((r) => (
               <tr key={r[0]} className="border-b border-slate-100">
                 {r.map((c, i) => (
@@ -1061,8 +1061,8 @@ function TabBody(props: {
   if (tab === "Requirements") {
     return (
       <div className="text-xs space-y-3">
-        <ReqBlock id="REQ DDMAC 142" text="The descriptor engine shall reject descriptors whose payload length exceeds the configured maximum transfer length." notes={["Equal to maximum is legal", "Greater than maximum is illegal"]} />
-        <ReqBlock id="REQ DDMAC 143" text="The descriptor engine shall assert desc_error within two cycles following detection of an invalid descriptor." notes={["Timing origin unresolved — blocking ambiguity"]} tone="warn" />
+        <ReqBlock id="REQ-DDMAC-142" text="The descriptor engine shall reject descriptors whose payload length exceeds the configured maximum transfer length." notes={["Equal to maximum is legal", "Greater than maximum is illegal"]} />
+        <ReqBlock id="REQ-DDMAC-143" text="The descriptor engine shall assert desc_error within two cycles following detection of an invalid descriptor." notes={["Timing origin unresolved — blocking ambiguity"]} tone="warn" />
       </div>
     );
   }
@@ -1079,13 +1079,13 @@ function TabBody(props: {
           <MetaChip tone="warn">Regression start REG-2026-07-21-0042</MetaChip>
         </div>
         <pre className="rounded bg-slate-950 text-slate-100 p-3 overflow-x-auto text-[11px] leading-relaxed">
-{`  // REQ DDMAC 142
+{`  // REQ-DDMAC-142
   assign length_error =
       desc_valid &&
 `}<span className="text-rose-400">{`-     (desc_length >  max_transfer_length);`}</span>{"\n"}
 <span className="text-emerald-300">{`+     (desc_length >= max_transfer_length);`}</span>
         </pre>
-        <p className="text-[11px] text-slate-500">Semantic summary: strictly-greater comparison changed to inclusive. Reviewer comment references “tightening boundary” — not aligned with REQ DDMAC 142.</p>
+        <p className="text-[11px] text-slate-500">Semantic summary: strictly-greater comparison changed to inclusive. Reviewer comment references “tightening boundary” — not aligned with REQ-DDMAC-142.</p>
       </div>
     );
   }
@@ -1114,7 +1114,7 @@ function TabBody(props: {
     <div className="text-xs space-y-2">
       <div className="rounded border border-slate-200 p-3">
         <div className="flex items-center justify-between">
-          <div className="font-semibold text-slate-900">DEF DV 173 · Boundary value incorrectly rejected</div>
+          <div className="font-semibold text-slate-900">DEF-DV-173 · Boundary value incorrectly rejected</div>
           <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">Similarity 93%</span>
         </div>
         <p className="mt-1 text-slate-600">Prior correction changed an inclusive rejection comparison to an exclusive comparison in the fragment aligner module.</p>
@@ -1311,7 +1311,7 @@ function AiEvidencePanel() {
                 "All failing seeds hit exact boundary",
                 "Below-max passes, above-max rejects",
                 "Formal CEX matches seed 348921",
-                "Prior defect DEF DV 173 (93%)",
+                "Prior defect DEF-DV-173 (93%)",
                 "Commit timing aligns with regression",
               ].map((s) => <li key={s} className="flex gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-600 mt-0.5 shrink-0" />{s}</li>)}
             </ul>
@@ -1381,14 +1381,14 @@ function DefectPanel() {
       <div className="px-4 py-3 border-b border-slate-200 flex items-center gap-2">
         <ShieldAlert className="w-4 h-4 text-rose-600" />
         <div className="text-sm font-semibold text-slate-900">Defect Lifecycle</div>
-        <span className="ml-auto text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">DEF DV 219</span>
+        <span className="ml-auto text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">DEF-DV-219</span>
       </div>
       <dl className="p-3 text-xs font-mono divide-y divide-slate-100">
         {[
           ["State", "Under Investigation"],
           ["Severity", "High"],
           ["Cluster", "FC-031"],
-          ["Requirement", "REQ DDMAC 142"],
+          ["Requirement", "REQ-DDMAC-142"],
           ["Suspect commit", "a8c31f7"],
           ["Root cause", "Pending confirmation"],
           ["Proposed correction", "In review"],
@@ -1450,7 +1450,7 @@ function AuthoritiesPanel({ rows, isT3 }: { rows: typeof AUTHORITIES; isT3: bool
 
 function FirstDivergence() {
   const stages = [
-    { label: "Requirement", value: "REQ DDMAC 142", ok: true },
+    { label: "Requirement", value: "REQ-DDMAC-142", ok: true },
     { label: "Configuration", value: "max=4096", ok: true },
     { label: "Transaction", value: "len=4096", ok: true },
     { label: "RTL expression", value: "len >= max", ok: false, tag: "Root condition" },
@@ -1533,7 +1533,7 @@ function ProposedCorrection() {
         />
       </div>
       <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px]">
-        <Info label="Requirement basis" value="REQ DDMAC 142" />
+        <Info label="Requirement basis" value="REQ-DDMAC-142" />
         <Info label="Assumptions" value="max_transfer_length stable during handshake" />
         <Info label="Expected effect" value="Restore acceptance at exact boundary" />
         <Info label="Affected modules" value="ddmac_descriptor_validator" />

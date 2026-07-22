@@ -66,16 +66,16 @@ const KPIS: { key: string; label: string; value: string; detail: string; filter?
 ];
 
 const MATRIX: MatrixRow[] = [
-  { req: "REQ DDMAC 142", type: "Cross",      pct: 96, gap: "Boundary equal-to-max transition",       cause: "Requires New Simulation",   recommendation: "Generate targeted boundary test",         improvement: "+1.8%",  owner: "Sofia Rodriguez", status: "Proposed",  module: "ddmac_descriptor_validator", reachable: "Yes" },
-  { req: "REQ DDMAC 143", type: "Functional", pct: 91, gap: "Error timing 2-cycle bin",                cause: "Specification Ambiguity",    recommendation: "Hold until architecture clarification",   improvement: "Unknown", owner: "Arun Patel",      status: "Blocked",   module: "ddmac_error_ctrl",           reachable: "Unknown" },
-  { req: "REQ DDMAC 144", type: "Branch",     pct: 97, gap: "priv_mode==DEBUG branch",                 cause: "Legitimate Exclusion",       recommendation: "Approve exclusion (debug tie-off)",       improvement: "0%",     owner: "Priya Shah",       status: "In Review", module: "ddmac_priv_gate",            reachable: "No" },
-  { req: "REQ DDMAC 145", type: "Toggle",     pct: 99, gap: "cfg_reserved[7] toggles",                 cause: "Dead Code",                  recommendation: "Confirm tie-off; propose exclusion",      improvement: "0%",     owner: "Maya Chen",        status: "Proposed",  module: "ddmac_cfg_regs",             reachable: "No" },
-  { req: "REQ DDMAC 146", type: "FSM",        pct: 100,gap: "—",                                       cause: "Reachable but Untested",     recommendation: "None",                                     improvement: "0%",     owner: "Maya Chen",        status: "Approved",  module: "ddmac_ctrl_fsm",             reachable: "Yes" },
-  { req: "REQ DDMAC 147", type: "Cross",      pct: 88, gap: "backpressure × boundary length",          cause: "Requires New Simulation",   recommendation: "Random burst with weighted boundaries",   improvement: "+1.2%",  owner: "Sofia Rodriguez", status: "Proposed",  module: "ddmac_arb",                  reachable: "Yes" },
-  { req: "REQ DDMAC 148", type: "Assertion",  pct: 95, gap: "a_desc_error_priority",                   cause: "Requires Formal Proof",      recommendation: "Bind formal property",                     improvement: "+1.0%",  owner: "Daniel Kim",       status: "Proposed",  module: "ddmac_error_ctrl",           reachable: "Yes" },
-  { req: "REQ SEC 088",   type: "Cross",      pct: 93, gap: "priv × reset interaction",                cause: "Requires New Simulation",   recommendation: "Randomized privilege plus reset sequence", improvement: "+2.4%",  owner: "Priya Shah",       status: "Proposed",  module: "ddmac_reset_ctrl",           reachable: "Yes" },
-  { req: "REQ SEC 089",   type: "Functional", pct: 92, gap: "Security recovery path",                  cause: "Requires Formal Proof",      recommendation: "Formal proof of recovery invariant",       improvement: "+1.1%",  owner: "Daniel Kim",       status: "Proposed",  module: "ddmac_sec_recovery",         reachable: "Yes" },
-  { req: "REQ SEC 090",   type: "Branch",     pct: 90, gap: "priv escalation branch",                  cause: "Model Deficiency",           recommendation: "Fix reference model priv table",           improvement: "+2.0%",  owner: "Aisha Rahman",     status: "In Review", module: "tb/sec_ref_model",           reachable: "Yes" },
+  { req: "REQ-DDMAC-142", type: "Cross",      pct: 96, gap: "Boundary equal-to-max transition",       cause: "Requires New Simulation",   recommendation: "Generate targeted boundary test",         improvement: "+1.8%",  owner: "Sofia Rodriguez", status: "Proposed",  module: "ddmac_descriptor_validator", reachable: "Yes" },
+  { req: "REQ-DDMAC-143", type: "Functional", pct: 91, gap: "Error timing 2-cycle bin",                cause: "Specification Ambiguity",    recommendation: "Hold until architecture clarification",   improvement: "Unknown", owner: "Arun Patel",      status: "Blocked",   module: "ddmac_error_ctrl",           reachable: "Unknown" },
+  { req: "REQ-DDMAC-144", type: "Branch",     pct: 97, gap: "priv_mode==DEBUG branch",                 cause: "Legitimate Exclusion",       recommendation: "Approve exclusion (debug tie-off)",       improvement: "0%",     owner: "Priya Shah",       status: "In Review", module: "ddmac_priv_gate",            reachable: "No" },
+  { req: "REQ-DDMAC-145", type: "Toggle",     pct: 99, gap: "cfg_reserved[7] toggles",                 cause: "Dead Code",                  recommendation: "Confirm tie-off; propose exclusion",      improvement: "0%",     owner: "Maya Chen",        status: "Proposed",  module: "ddmac_cfg_regs",             reachable: "No" },
+  { req: "REQ-DDMAC-146", type: "FSM",        pct: 100,gap: "—",                                       cause: "Reachable but Untested",     recommendation: "None",                                     improvement: "0%",     owner: "Maya Chen",        status: "Approved",  module: "ddmac_ctrl_fsm",             reachable: "Yes" },
+  { req: "REQ-DDMAC-147", type: "Cross",      pct: 88, gap: "backpressure × boundary length",          cause: "Requires New Simulation",   recommendation: "Random burst with weighted boundaries",   improvement: "+1.2%",  owner: "Sofia Rodriguez", status: "Proposed",  module: "ddmac_arb",                  reachable: "Yes" },
+  { req: "REQ-DDMAC-148", type: "Assertion",  pct: 95, gap: "a_desc_error_priority",                   cause: "Requires Formal Proof",      recommendation: "Bind formal property",                     improvement: "+1.0%",  owner: "Daniel Kim",       status: "Proposed",  module: "ddmac_error_ctrl",           reachable: "Yes" },
+  { req: "REQ-SEC-088",   type: "Cross",      pct: 93, gap: "priv × reset interaction",                cause: "Requires New Simulation",   recommendation: "Randomized privilege plus reset sequence", improvement: "+2.4%",  owner: "Priya Shah",       status: "Proposed",  module: "ddmac_reset_ctrl",           reachable: "Yes" },
+  { req: "REQ-SEC-089",   type: "Functional", pct: 92, gap: "Security recovery path",                  cause: "Requires Formal Proof",      recommendation: "Formal proof of recovery invariant",       improvement: "+1.1%",  owner: "Daniel Kim",       status: "Proposed",  module: "ddmac_sec_recovery",         reachable: "Yes" },
+  { req: "REQ-SEC-090",   type: "Branch",     pct: 90, gap: "priv escalation branch",                  cause: "Model Deficiency",           recommendation: "Fix reference model priv table",           improvement: "+2.0%",  owner: "Aisha Rahman",     status: "In Review", module: "tb/sec_ref_model",           reachable: "Yes" },
   { req: "REQ DMA 201",   type: "FSM",        pct: 100,gap: "—",                                       cause: "Reachable but Untested",     recommendation: "None",                                     improvement: "0%",     owner: "Maya Chen",        status: "Approved",  module: "dma_engine",                 reachable: "Yes" },
   { req: "REQ DMA 202",   type: "Cross",      pct: 87, gap: "wr × rd concurrency at max burst",        cause: "Requires New Simulation",   recommendation: "Weighted concurrency scenario",            improvement: "+1.6%",  owner: "Sofia Rodriguez", status: "Proposed",  module: "dma_engine",                 reachable: "Yes" },
   { req: "REQ DMA 203",   type: "Toggle",     pct: 98, gap: "burst_len[3:2] pairs",                    cause: "Requires New Simulation",   recommendation: "Directed toggle set",                      improvement: "+0.4%",  owner: "Sofia Rodriguez", status: "Proposed",  module: "dma_engine",                 reachable: "Yes" },
@@ -121,7 +121,7 @@ const HEAT_TYPES: CoverageType[] = ["Functional", "Branch", "Toggle", "FSM", "As
 
 const FORMAL_CANDIDATES = [
   { id: "p_max_legal_length_accepted",  reason: "Boundary comparison correctness",         difficulty: "Low",    depth: "8 cycles",  owner: "Daniel Kim", status: "Proposed" },
-  { id: "p_illegal_desc_rejected",      reason: "Negative-space closure of REQ DDMAC 142", difficulty: "Low",    depth: "10 cycles", owner: "Daniel Kim", status: "Proposed" },
+  { id: "p_illegal_desc_rejected",      reason: "Negative-space closure of REQ-DDMAC-142", difficulty: "Low",    depth: "10 cycles", owner: "Daniel Kim", status: "Proposed" },
   { id: "p_accept_reject_exclusive",    reason: "Response mutual exclusion",               difficulty: "Medium", depth: "16 cycles", owner: "Daniel Kim", status: "In Review" },
   { id: "p_reset_convergence",          reason: "Convergence after asynchronous reset",    difficulty: "Medium", depth: "24 cycles", owner: "Daniel Kim", status: "Proposed" },
   { id: "p_priv_protection_invariant",  reason: "Privilege escalation safety",             difficulty: "High",   depth: "32 cycles", owner: "Priya Shah", status: "Proposed" },
@@ -143,10 +143,10 @@ const EXCLUSIONS = [
 ];
 
 const PRIOR_DEFECTS = [
-  { id: "DEF DV 173", title: "Boundary defect (inclusive/exclusive)", similarity: 93, gap: "cvp_len_at_max",    tests: 6, assertions: 2 },
-  { id: "DEF DV 158", title: "Reset sequencing",                       similarity: 74, gap: "cvp_reset_inflight", tests: 4, assertions: 1 },
-  { id: "DEF DV 141", title: "Security privilege escalation",           similarity: 66, gap: "cvp_priv_escalate",  tests: 3, assertions: 2 },
-  { id: "DEF DV 129", title: "Interrupt coalescing timing",             similarity: 58, gap: "cvp_int_coalesce",   tests: 2, assertions: 1 },
+  { id: "DEF-DV-173", title: "Boundary defect (inclusive/exclusive)", similarity: 93, gap: "cvp_len_at_max",    tests: 6, assertions: 2 },
+  { id: "DEF-DV-158", title: "Reset sequencing",                       similarity: 74, gap: "cvp_reset_inflight", tests: 4, assertions: 1 },
+  { id: "DEF-DV-141", title: "Security privilege escalation",           similarity: 66, gap: "cvp_priv_escalate",  tests: 3, assertions: 2 },
+  { id: "DEF-DV-129", title: "Interrupt coalescing timing",             similarity: 58, gap: "cvp_int_coalesce",   tests: 2, assertions: 1 },
 ];
 
 const AUTHORITIES = [
@@ -732,7 +732,7 @@ function ImprovementPlanner({ option, onOption }: { option: "A" | "B" | "C" | "D
 
 function TraceabilityGraph() {
   const nodes = [
-    { x: 40,  y: 40,  label: "Requirement", sub: "REQ DDMAC 142" },
+    { x: 40,  y: 40,  label: "Requirement", sub: "REQ-DDMAC-142" },
     { x: 200, y: 40,  label: "Test",        sub: "test_desc_length_at_max" },
     { x: 360, y: 40,  label: "Assertion",   sub: "p_max_legal_length_accepted" },
     { x: 520, y: 40,  label: "Coverage Bin", sub: "cvp_len_at_max" },
@@ -793,11 +793,11 @@ function AiEvidencePanel() {
         <div>
           <div className="text-[10px] uppercase tracking-wide text-rose-700">Highest-risk gaps</div>
           <ul className="mt-0.5 space-y-0.5 text-[11px] font-mono">
-            <li>· Boundary transition (REQ DDMAC 142)</li>
-            <li>· Privilege × reset (REQ SEC 088)</li>
-            <li>· Concurrent error handling (REQ DDMAC 148)</li>
-            <li>· Error timing (REQ DDMAC 143 · blocked)</li>
-            <li>· Security recovery (REQ SEC 089)</li>
+            <li>· Boundary transition (REQ-DDMAC-142)</li>
+            <li>· Privilege × reset (REQ-SEC-088)</li>
+            <li>· Concurrent error handling (REQ-DDMAC-148)</li>
+            <li>· Error timing (REQ-DDMAC-143 · blocked)</li>
+            <li>· Security recovery (REQ-SEC-089)</li>
           </ul>
         </div>
         <div>

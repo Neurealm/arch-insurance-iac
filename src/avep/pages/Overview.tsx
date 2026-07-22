@@ -195,7 +195,7 @@ const STORAGE_KEY = "avep-overview-audience";
 /* ---------- Guided introduction ---------- */
 const GUIDE = [
   { title: "The Problem",         copy: "Semiconductor teams already use sophisticated engineering tools. The challenge is preserving context, traceability, evidence, and decision continuity across them." },
-  { title: "The AVEP Layer",      copy: "AVEP operates across existing engineering systems as an intelligence, orchestration, traceability, and governance layer." },
+  { title: "The AVEP Layer",      copy: "AVEP sits alongside your EDA, source control, and defect tools. It records what each artifact depends on, whose approval it needs, and where the evidence lives — so a decision at RTL freeze can be traced back to the requirement it satisfies." },
   { title: "The Lifecycle",       copy: "The demonstration follows the lifecycle from controlled requirements through RTL, verification, readiness, and physical-design intake." },
   { title: "Evidence-Based AI",   copy: "Every AI-assisted output retains its inputs, version, methodology, evidence, confidence, limitations, and approval boundary." },
   { title: "Human Authority",     copy: "AVEP recommends and explains. Qualified engineers approve, reject, modify, or hold." },
@@ -326,14 +326,14 @@ export default function Overview() {
           <div className="col-span-12 lg:col-span-6">
             <div className="rounded-xl border border-neutral-200 bg-white/70 backdrop-blur p-4 relative">
               <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 text-center">
-                Engineering Intelligence, Traceability, Governance & Decision Orchestration
+                Context · Traceability · Evidence · Approval
               </div>
 
               {/* AVEP core */}
               <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50/60 px-4 py-3 flex items-center justify-center gap-2">
                 <Sparkles className="h-4 w-4 text-blue-700" />
                 <div className="text-sm font-semibold text-blue-900 text-center">
-                  AVEP Engineering Intelligence & Orchestration
+                  AVEP — evidence layer for DDMAC 3.2
                 </div>
               </div>
 

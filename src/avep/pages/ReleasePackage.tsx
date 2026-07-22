@@ -297,7 +297,7 @@ const DRIFTS: Drift[] = [
     severity: "High",
     kind: "Conflicting value",
     finding: "Equal-to-maximum length is described as invalid.",
-    controlledSource: "REQ DDMAC 142 · RTL exclusive comparison",
+    controlledSource: "REQ-DDMAC-142 · RTL exclusive comparison",
     documentValue: "len ≥ MAX_XFER_LEN → reject",
     expectedValue: "len > MAX_XFER_LEN → reject",
     action: "Regenerate section and request architecture review",
@@ -432,7 +432,7 @@ const DV_SECTIONS: { title: string; supported: boolean; claim: string; evidence:
   { title: "Formal verification", supported: true, claim: "34 of 36 required properties proven; 2 bounded assumptions retained.", evidence: ["formal_run_2026.07.21.09", "WVR FORMAL 006"] },
   { title: "Static analysis", supported: true, claim: "Lint and CDC clean or waived; one blocking RDC under remediation.", evidence: ["static_run_2026.07.21.04", "BLK-003"] },
   { title: "Coverage closure", supported: true, claim: "Functional coverage 97.1% with dispositioned gaps.", evidence: ["COV-DDMAC-3.2-017"] },
-  { title: "Defect summary", supported: true, claim: "3 material defects: 1 blocking, 2 conditional.", evidence: ["DEF RTL 224", "DEF DV 219", "DEF TB 087"] },
+  { title: "Defect summary", supported: true, claim: "3 material defects: 1 blocking, 2 conditional.", evidence: ["DEF-RTL-224", "DEF-DV-219", "DEF-TB-087"] },
   { title: "Waivers", supported: true, claim: "8 active waivers, 2 pending final approval.", evidence: ["WVR FORMAL 006", "WVR COV 014"] },
   { title: "Known limitations", supported: false, claim: "One conditional timing interpretation documented.", evidence: [], warning: "Limitation entry missing — see DOC-DRIFT-021" },
   { title: "Residual risks", supported: true, claim: "6 residual risks with accountable owners and expirations.", evidence: ["RSK-001", "RSK-002", "RSK-003", "RSK-004", "RSK-005", "RSK-006"] },
@@ -741,7 +741,7 @@ export default function ReleasePackage() {
           <Section title="Package Dependency Graph" subtitle="From requirement to release approval" icon={GitBranch}>
             <PackageGraph />
             <p className="mt-2 text-[11px] text-neutral-600">
-              <span className="font-mono">REQ DDMAC 142</span> → Descriptor architecture → <span className="font-mono">ddmac_descriptor_validator</span> → Boundary regression → Formal property → DV report §7 → TRM §4.7 → Package manifest → Release approval
+              <span className="font-mono">REQ-DDMAC-142</span> → Descriptor architecture → <span className="font-mono">ddmac_descriptor_validator</span> → Boundary regression → Formal property → DV report §7 → TRM §4.7 → Package manifest → Release approval
             </p>
           </Section>
 
@@ -1117,7 +1117,7 @@ reproducibility:
 /* ---------- graph ---------- */
 function PackageGraph() {
   const nodes = [
-    { id: "REQ", x: 20, y: 40, label: "REQ DDMAC 142" },
+    { id: "REQ", x: 20, y: 40, label: "REQ-DDMAC-142" },
     { id: "ARCH", x: 180, y: 20, label: "Descriptor arch" },
     { id: "REG", x: 180, y: 90, label: "reg_model 3.2.18" },
     { id: "RTL", x: 340, y: 55, label: "RTL 3.2.18" },
