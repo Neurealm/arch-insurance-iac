@@ -64,6 +64,7 @@ import SimulationOperations from "./avep/pages/SimulationOperations";
 import FailureDiagnosis from "./avep/pages/FailureDiagnosis";
 import CoverageClosureReadiness from "./avep/pages/CoverageClosureReadiness";
 import SignoffReadiness from "./avep/pages/SignoffReadiness";
+import ReleasePackage from "./avep/pages/ReleasePackage";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
