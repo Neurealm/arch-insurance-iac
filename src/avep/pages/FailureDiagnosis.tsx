@@ -116,7 +116,7 @@ const HYPOTHESES: Hypothesis[] = [
     ],
     contradict: ["Two failures contain simultaneous privilege violations"],
     missing: ["Complete waveforms for 7 cluster jobs"],
-    artifacts: ["ddmac_descriptor_validator.sv:214", "REQ-DDMAC-142", "p_max_legal_length_accepted"],
+    artifacts: ["ddmac_descriptor_validator.sv:157", "REQ-DDMAC-142", "p_max_legal_length_accepted"],
     nextTest: "Directed length == max + regression targeted set",
     owner: "Maya Chen",
     review: "Under Review",
@@ -856,7 +856,7 @@ function TabBody(props: {
         />
         <SourceBlock
           title="Suspect candidate · commit a8c31f7"
-          path="ddmac_descriptor_validator.sv:214"
+          path="ddmac_descriptor_validator.sv:157"
           lines={[
             "// REQ-DDMAC-142",
             "assign length_error =",
@@ -1511,7 +1511,7 @@ function ProposedCorrection() {
       <div className="grid md:grid-cols-2 gap-3 text-xs">
         <SourceBlock
           title="Current (candidate)"
-          path="ddmac_descriptor_validator.sv:214"
+          path="ddmac_descriptor_validator.sv:157"
           lines={[
             "assign length_error =",
             "    desc_valid &&",
@@ -1522,7 +1522,7 @@ function ProposedCorrection() {
         />
         <SourceBlock
           title="Proposed (bounded)"
-          path="ddmac_descriptor_validator.sv:214"
+          path="ddmac_descriptor_validator.sv:157"
           lines={[
             "assign length_error =",
             "    desc_valid &&",

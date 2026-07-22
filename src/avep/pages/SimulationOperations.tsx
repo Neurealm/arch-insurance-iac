@@ -831,7 +831,7 @@ duplicates  : ${sel.raw - sel.tests}`}</pre>
 [ 42.400ns] UVM_INFO drv: send_length(max_len)              // boundary
 [ 43.200ns] UVM_ERROR mon: desc_accept=0, desc_error=1      // <-- first divergence
 [ 43.200ns] ASSERT   p_invalid_descriptor_not_accepted FAIL
-                    tb.dut.u_desc_guard : line 412
+                    tb.dut.u_desc_validator : line 157
 [ 43.200ns] UVM_INFO sb : txn_id=0x0142 expected=ACCEPT got=REJECT
 [ 44.000ns] UVM_INFO drv: send_length(max_len+1)            // illegal
 [ 44.800ns] UVM_INFO mon: desc_accept=0, desc_error=1        // OK
@@ -913,7 +913,7 @@ endproperty`}</pre>
                 <Meta label="Pull request" value="PR #4421 · descriptor_guard: max-len path" />
                 <Meta label="Files changed" value="rtl/ddmac_descriptor_validator.sv (+34/-11), rtl/ddmac_error_capture.sv (+8/-2)" mono />
                 <Meta label="Semantic diff" value="Boundary comparison changed from >= to >" />
-                <Meta label="Suspected line" value="rtl/ddmac_descriptor_validator.sv:412" mono />
+                <Meta label="Suspected line" value="rtl/ddmac_descriptor_validator.sv:157" mono />
                 <Meta label="Prior baseline behavior" value="Pass across 5,040 jobs on rtl_baseline_3.2.17" />
                 <Meta label="Change-impact link" value="AVEP.P2.RTL.002 · CIA-2026-0074" mono />
               </div>
