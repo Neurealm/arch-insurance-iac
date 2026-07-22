@@ -6,6 +6,7 @@ import {
   ClipboardList, BadgeCheck, Package, Gavel, FileText, Users, Server, Target,
   Info, RotateCcw, BookOpen, MapIcon,
 } from "lucide-react";
+import avatarVideo from "@/assets/avatar-video.mp4.asset.json";
 
 /* ------------------------------------------------------------------ */
 /* AVEP.P0.OVERVIEW.001 — AI VLSI Engineering Platform Overview        */
@@ -323,8 +324,29 @@ export default function Overview() {
           </div>
 
           {/* Hero visual — AVEP layer over existing systems */}
-          <div className="col-span-12 lg:col-span-6">
+          <div className="col-span-12 lg:col-span-6 space-y-4">
+            {/* Narrated intro video */}
+            <div className="rounded-xl border border-neutral-200 bg-neutral-950 overflow-hidden shadow-sm">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-800 bg-neutral-900">
+                <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
+                  AVEP · Narrated Introduction
+                </div>
+                <div className="text-[10px] font-mono text-blue-300">Avatar Briefing</div>
+              </div>
+              <video
+                src={avatarVideo.url}
+                controls
+                playsInline
+                preload="metadata"
+                controlsList="nodownload"
+                className="w-full aspect-video bg-black"
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+
             <div className="rounded-xl border border-neutral-200 bg-white/70 backdrop-blur p-4 relative">
+
               <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 text-center">
                 Context · Traceability · Evidence · Approval
               </div>
