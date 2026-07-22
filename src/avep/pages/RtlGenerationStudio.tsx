@@ -999,9 +999,9 @@ function TraceabilityView({ selectedReq }: { selectedReq: string | null }) {
     { label: "MAX_XFER_LEN",  kind: "Register" },
     { label: "ddmac_descriptor_validator.sv", kind: "RTL File" },
     { label: "length_error",  kind: "Signal" },
-    { label: "ASSERT_DESC_LENGTH_001", kind: "Assertion" },
-    { label: "TEST_DESC_OVERSIZE_017", kind: "Test" },
-    { label: "COVER_DESC_ERROR_004", kind: "Coverage" },
+    { label: "p_max_legal_length_accepted", kind: "Formal Property" },
+    { label: "test_desc_len_boundary_017", kind: "Test" },
+    { label: "cg_len_boundary.cross_at_max", kind: "Coverage Bin" },
   ];
   return (
     <div className="p-3 flex flex-col gap-3">
