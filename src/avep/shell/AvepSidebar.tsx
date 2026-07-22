@@ -42,8 +42,8 @@ export function AvepSidebar() {
       </div>
 
       <Link
-        to="/"
-        title={sidebarCollapsed ? "Back to homepage" : undefined}
+        to="/app"
+        title={sidebarCollapsed ? "NeuGAIN Command Center" : undefined}
         className="mx-2 mt-2 mb-1 flex items-center gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-black/[0.04]"
         style={{
           fontSize: "var(--avep-text-sm)",
@@ -52,7 +52,7 @@ export function AvepSidebar() {
         }}
       >
         <Home className="h-4 w-4 shrink-0" strokeWidth={2} />
-        {!sidebarCollapsed && <span className="truncate">Back to homepage</span>}
+        {!sidebarCollapsed && <span className="truncate">NeuGAIN Command Center</span>}
       </Link>
 
       <nav className="flex-1 overflow-y-auto py-2" role="navigation">
