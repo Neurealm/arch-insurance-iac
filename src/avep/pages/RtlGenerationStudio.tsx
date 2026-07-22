@@ -924,38 +924,39 @@ function BaselineDiff({ mode, onModeChange }: { mode: string; onModeChange: (m: 
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {(["Baseline · rtl_baseline_3.2.16", "Proposed · AI generated · 3.2.17-rc1"] as const).map((title, col) => (
+        {(["Baseline · rtl_3.2.17 (pre-fix, DEF-DV-219)", "Proposed · 3.2.18-rc1 · feature/descriptor-ring-fix"] as const).map((title, col) => (
           <div key={title} className="rounded-md overflow-hidden" style={{ border }}>
             <div className="px-3 py-1.5 border-b flex items-center justify-between"
                  style={{ borderColor: "hsl(var(--avep-border))", background: col === 0 ? "hsl(var(--avep-surface-muted))" : "hsl(var(--avep-primary-soft))" }}>
               <span className="font-semibold" style={{ fontSize: "var(--avep-text-xs)", fontFamily: "var(--avep-font-mono)" }}>{title}</span>
-              <Chip tone={col === 0 ? "neutral" : "ai"}>{col === 0 ? "Accepted" : "Proposal"}</Chip>
+              <Chip tone={col === 0 ? "fail" : "ai"}>{col === 0 ? "Buggy (>=)" : "Proposal (>)"}</Chip>
             </div>
             <pre className="p-2 overflow-auto" style={{ fontFamily: "var(--avep-font-mono)", fontSize: "10.5px", lineHeight: 1.5, maxHeight: 360 }}>
 {col === 0
-? `always_comb begin
-  desc_accept = desc_valid;
-  desc_error  = 1'b0;
-  error_code  = 3'b000;
-
-  if (desc_length > max_transfer_length) begin
-    desc_accept = 1'b0;
-    desc_error  = 1'b1;
-    error_code  = 3'b001;
-  end
-end`
-: `always_comb begin
-  state_d     = state_q;
-  desc_accept = 1'b0;
-  desc_error  = 1'b0;
-  error_code  = 3'b000;
-
-  unique case (state_q)
-    VALIDATE: begin
-      if (length_error)         error_code = 3'b001;
-      else if (privilege_error) error_code = 3'b010;   // + REQ-SEC-088
-    end
-  endcase
+? `// ddmac_descriptor_validator.sv:214  (baseline rtl_3.2.17)
+assign length_error =
+    desc_valid &&
+    (desc_length >= max_transfer_length);   // DEF-DV-219: inclusive
+                                            // rejects legal length == max
+// VALIDATE branch:
+if (length_error) begin
+  err_code_d = 3'b001;
+  state_d    = REJECT;
+end
+// (no privilege check in 3.2.17)`
+: `// ddmac_descriptor_validator.sv:214  (proposed 3.2.18-rc1)
+assign length_error =
+    desc_valid &&
+    (desc_length > max_transfer_length);    // REQ-DDMAC-142: strict '>'
+                                            // length == max is legal
+// VALIDATE branch:
+if (length_error) begin
+  err_code_d = 3'b001;                      // length violation
+  state_d    = REJECT;
+end
+else if (privilege_error) begin
+  err_code_d = 3'b010;                      // + REQ-SEC-088
+  state_d    = REJECT;
 end`}
             </pre>
           </div>
