@@ -78,99 +78,155 @@ const ASSUMPTIONS = [
 ];
 
 const RTL_CODE = `module ddmac_descriptor_validator #(
-    parameter int LEN_WIDTH = 16
+    parameter int unsigned LEN_WIDTH = 16
 ) (
     input  logic                 clk,
     input  logic                 rst_n,
+
     input  logic                 desc_valid,
     input  logic [LEN_WIDTH-1:0] desc_length,
     input  logic [LEN_WIDTH-1:0] max_transfer_length,
     input  logic                 privileged_request,
     input  logic                 priv_mode,
+
     output logic                 desc_accept,
     output logic                 desc_error,
     output logic [2:0]           error_code
 );
 
+    // ARCH-FSM-04
     typedef enum logic [1:0] {
-        IDLE,
-        VALIDATE,
-        ACCEPT,
-        REJECT
+        ST_IDLE,
+        ST_VALIDATE,
+        ST_RESPOND
     } validator_state_e;
 
-    validator_state_e state_q, state_d;
-    logic [2:0]       err_code_q, err_code_d;
+    // REQ-DDMAC-143
+    typedef enum logic [2:0] {
+        ERR_NONE          = 3'b000,
+        ERR_ZERO_LENGTH   = 3'b001,
+        ERR_LENGTH_LIMIT  = 3'b010,
+        ERR_PRIVILEGE     = 3'b011
+    } descriptor_error_e;
 
-    logic length_error;
-    logic privilege_error;
+    validator_state_e  state_q;
+    validator_state_e  state_d;
 
-    // REQ-DDMAC-142 — strict '>' (fixes DEF-DV-219; length == max is legal)
-    assign length_error =
-        desc_valid &&
-        (desc_length > max_transfer_length);
+    logic [LEN_WIDTH-1:0] desc_length_q;
+    logic [LEN_WIDTH-1:0] max_transfer_length_q;
+    logic                 privileged_request_q;
+    logic                 priv_mode_q;
 
-    // REQ-SEC-088 — privileged descriptors require priv_mode
-    assign privilege_error =
-        desc_valid &&
-        privileged_request &&
-        !priv_mode;
+    logic                 response_accept_q;
+    logic                 response_accept_d;
 
+    descriptor_error_e    response_error_q;
+    descriptor_error_e    response_error_d;
+
+    // -------------------------------------------------------------------------
+    // State transition and descriptor validation
+    // -------------------------------------------------------------------------
     always_comb begin
-        state_d     = state_q;
-        err_code_d  = err_code_q;
-        desc_accept = 1'b0;
-        desc_error  = 1'b0;
-        error_code  = err_code_q;
+        state_d           = state_q;
+        response_accept_d = response_accept_q;
+        response_error_d  = response_error_q;
 
         unique case (state_q)
-            IDLE: begin
+
+            ST_IDLE: begin
+                response_accept_d = 1'b0;
+                response_error_d  = ERR_NONE;
+
                 if (desc_valid) begin
-                    state_d    = VALIDATE;
-                    err_code_d = 3'b000;
+                    state_d = ST_VALIDATE;
                 end
             end
 
-            VALIDATE: begin
-                if (length_error) begin
-                    err_code_d = 3'b001;
-                    state_d    = REJECT;
+            ST_VALIDATE: begin
+                response_accept_d = 1'b0;
+                response_error_d  = ERR_NONE;
+
+                // REQ-DDMAC-142
+                // A zero-length descriptor is not a valid transfer.
+                if (desc_length_q == '0) begin
+                    response_error_d = ERR_ZERO_LENGTH;
                 end
-                else if (privilege_error) begin
-                    err_code_d = 3'b010;
-                    state_d    = REJECT;
+
+                // REQ-DDMAC-142
+                // REG:MAX_XFER_LEN
+                else if (desc_length_q > max_transfer_length_q) begin
+                    response_error_d = ERR_LENGTH_LIMIT;
                 end
+
+                // REQ-SEC-088
+                else if (privileged_request_q && !priv_mode_q) begin
+                    response_error_d = ERR_PRIVILEGE;
+                end
+
                 else begin
-                    state_d = ACCEPT;
+                    response_accept_d = 1'b1;
                 end
+
+                state_d = ST_RESPOND;
             end
 
-            ACCEPT: begin
-                desc_accept = 1'b1;
-                state_d     = IDLE;
-            end
-
-            REJECT: begin
-                // REQ-DDMAC-143 — assert desc_error with latched error_code
-                desc_error = 1'b1;
-                error_code = err_code_q;
-                state_d    = IDLE;
+            ST_RESPOND: begin
+                state_d = ST_IDLE;
             end
 
             default: begin
-                state_d = IDLE;
+                state_d           = ST_IDLE;
+                response_accept_d = 1'b0;
+                response_error_d  = ERR_NONE;
             end
+
         endcase
     end
 
+    // -------------------------------------------------------------------------
+    // Output response
+    //
+    // desc_accept and desc_error are one-cycle response pulses.
+    // error_code is valid only while desc_error is asserted.
+    // -------------------------------------------------------------------------
+    always_comb begin
+        desc_accept = 1'b0;
+        desc_error  = 1'b0;
+        error_code  = ERR_NONE;
+
+        if (state_q == ST_RESPOND) begin
+            desc_accept = response_accept_q;
+            desc_error  = !response_accept_q;
+            error_code  = response_error_q;
+        end
+    end
+
+    // -------------------------------------------------------------------------
+    // State, request capture, and response registers
+    // CLK-RST-01
+    // -------------------------------------------------------------------------
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            state_q    <= IDLE;
-            err_code_q <= 3'b000;
+            state_q                 <= ST_IDLE;
+            desc_length_q           <= '0;
+            max_transfer_length_q   <= '0;
+            privileged_request_q    <= 1'b0;
+            priv_mode_q             <= 1'b0;
+            response_accept_q       <= 1'b0;
+            response_error_q        <= ERR_NONE;
         end
         else begin
-            state_q    <= state_d;
-            err_code_q <= err_code_d;
+            state_q           <= state_d;
+            response_accept_q <= response_accept_d;
+            response_error_q  <= response_error_d;
+
+            // Capture all validation inputs from the same descriptor transaction.
+            if ((state_q == ST_IDLE) && desc_valid) begin
+                desc_length_q         <= desc_length;
+                max_transfer_length_q <= max_transfer_length;
+                privileged_request_q  <= privileged_request;
+                priv_mode_q           <= priv_mode;
+            end
         end
     end
 
