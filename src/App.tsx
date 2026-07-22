@@ -66,6 +66,7 @@ import CoverageClosureReadiness from "./avep/pages/CoverageClosureReadiness";
 import SignoffReadiness from "./avep/pages/SignoffReadiness";
 import ReleasePackage from "./avep/pages/ReleasePackage";
 import AiGovernanceValue from "./avep/pages/AiGovernanceValue";
+import PhysicalDesignIntake from "./avep/pages/PhysicalDesignIntake";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
@@ -815,7 +816,8 @@ const App = () => (
             <Route path="readiness/signoff" element={<SignoffReadiness />} />
             <Route path="readiness/release-package" element={<ReleasePackage />} />
             <Route path="governance/ai-value" element={<AiGovernanceValue />} />
-            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation", "/avep/design/change-impact", "/avep/verification/environment-builder", "/avep/verification/test-factory", "/avep/verification/simulation-operations", "/avep/verification/failure-diagnosis", "/avep/readiness/coverage-closure", "/avep/readiness/signoff", "/avep/readiness/release-package", "/avep/governance/ai-value"].includes(n.path)).map((n) => (
+            <Route path="readiness/physical-design-intake" element={<PhysicalDesignIntake />} />
+            {AVEP_NAV.filter((n) => !["/avep", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation", "/avep/design/change-impact", "/avep/verification/environment-builder", "/avep/verification/test-factory", "/avep/verification/simulation-operations", "/avep/verification/failure-diagnosis", "/avep/readiness/coverage-closure", "/avep/readiness/signoff", "/avep/readiness/release-package", "/avep/governance/ai-value", "/avep/readiness/physical-design-intake"].includes(n.path)).map((n) => (
               <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
             ))}
           </Route>
