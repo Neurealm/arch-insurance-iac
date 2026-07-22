@@ -1015,7 +1015,7 @@ function BaselineDiff({ mode, onModeChange }: { mode: string; onModeChange: (m: 
             </div>
             <pre className="p-2 overflow-auto" style={{ fontFamily: "var(--avep-font-mono)", fontSize: "10.5px", lineHeight: 1.5, maxHeight: 360 }}>
 {col === 0
-? `// ddmac_descriptor_validator.sv:214  (baseline rtl_3.2.17)
+? `// ddmac_descriptor_validator.sv:157  (baseline rtl_3.2.17)
 assign length_error =
     desc_valid &&
     (desc_length >= max_transfer_length);   // DEF-DV-219: inclusive
@@ -1026,7 +1026,7 @@ if (length_error) begin
   state_d    = REJECT;
 end
 // (no privilege check in 3.2.17)`
-: `// ddmac_descriptor_validator.sv:214  (proposed 3.2.18-rc1)
+: `// ddmac_descriptor_validator.sv:157  (proposed 3.2.18-rc1)
 assign length_error =
     desc_valid &&
     (desc_length > max_transfer_length);    // REQ-DDMAC-142: strict '>'

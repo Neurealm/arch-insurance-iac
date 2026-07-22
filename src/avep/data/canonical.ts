@@ -12,7 +12,7 @@
  *   Headline  : REQ-DDMAC-142 — reject descriptors whose payload length
  *               EXCEEDS the configured max_transfer_length (equal is legal).
  *   Defect    : DEF-DV-219 — inclusive comparison (>=) in
- *               ddmac_descriptor_validator.sv:214 rejected the legal
+ *               ddmac_descriptor_validator.sv:157 rejected the legal
  *               boundary case (length == max). Historical DEF-DV-181 was an
  *               analogous boundary defect in Queue Manager IP, lesson carried
  *               forward.
@@ -52,7 +52,7 @@ export const IP = {
   sramInstances: 6,
   sramTotalKb: 512,
   anchorRtlFile: "rtl/ddmac_descriptor_validator.sv",
-  anchorLine: 214,
+  anchorLine: 157,
   ipVersion: "3.2.18",
 } as const;
 
@@ -102,7 +102,7 @@ export const HEADLINE_DEFECT = {
   discoveredAt: "2026-07-14T15:24:11Z",
   requirementId: "REQ-DDMAC-142",
   moduleFile: "rtl/ddmac_descriptor_validator.sv",
-  faultLine: 214,
+  faultLine: 157,
   failingCycle: 18441,
   reproSeed: "0xA3F2C118",
   waveWindow: "cycles 18400-18480",
@@ -316,12 +316,12 @@ export const AI_ANALYSIS = {
     "cg_len_boundary.cross_at_max hit 0 times prior to this run.",
   ],
   hypothesis:
-    "ddmac_descriptor_validator.sv:214 uses `length >= max_transfer_length` where the requirement is strict `>`. Boundary case length == max is a legal descriptor and must not be rejected.",
+    "ddmac_descriptor_validator.sv:157 uses `length >= max_transfer_length` where the requirement is strict `>`. Boundary case length == max is a legal descriptor and must not be rejected.",
   confidence: 0.86,
   band: "high" as const,
   evidence: [
     "waveform: cycles 18420-18460, len_reject asserted while length == max_transfer_length",
-    "code: rtl/ddmac_descriptor_validator.sv:214 (comparison operator)",
+    "code: rtl/ddmac_descriptor_validator.sv:157 (comparison operator)",
     "spec: DDMAC MAS §4.7.3 — 'exceeds' is strictly greater-than",
     "historical: DEF-DV-181 (2025, Queue Manager IP) — analogous inclusive-boundary defect",
   ],
