@@ -249,7 +249,7 @@ export default function Overview() {
           <div className="col-span-12 lg:col-span-10">
 
 
-            <div className="text-[11px] font-mono tracking-wider text-blue-700">AI-ENABLED SEMICONDUCTOR ENGINEERING · AVEP.P0.OVERVIEW.001</div>
+            </div>
             <h1 className="mt-3 text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-tight">
               Connect Engineering Intent to <span className="text-blue-700">Evidence-Backed Advancement</span>
             </h1>
