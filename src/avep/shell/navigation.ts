@@ -32,7 +32,7 @@ export interface AvepNavItem {
 }
 
 export const AVEP_NAV: AvepNavItem[] = [
-  { id: "overview",           label: "Overview",              path: "/avep",                          icon: LayoutDashboard, group: "Plan" },
+  { id: "overview",           label: "Overview",              path: "/avep/overview",                 icon: LayoutDashboard, group: "Plan" },
   { id: "program",            label: "Program & Portfolio",   path: "/avep/program",                  icon: FolderKanban,    group: "Plan" },
   { id: "requirements",       label: "Requirements",          path: "/avep/requirements",             icon: ListChecks,      group: "Plan" },
   { id: "requirements-review",label: "Requirements Review",   path: "/avep/requirements-review",      icon: ShieldCheck,     group: "Plan" },
