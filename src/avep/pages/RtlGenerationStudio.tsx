@@ -931,12 +931,38 @@ function ProposedRtl({
 }
 
 function highlightSv(raw: string): string {
-  const esc = raw.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const kw = /\b(module|endmodule|parameter|int|input|output|logic|typedef|enum|always_comb|always_ff|posedge|negedge|begin|end|if|else|unique|case|endcase|default|assign)\b/g;
-  const num = /(\b\d+'[bhd][0-9a-fA-F_]+|\b\d+\b)/g;
-  return esc
-    .replace(kw, '<span style="color:hsl(222 78% 36%);font-weight:600">$1</span>')
-    .replace(num, '<span style="color:hsl(194 92% 32%)">$1</span>');
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const KEYWORDS = new Set([
+    "module","endmodule","parameter","int","unsigned","input","output","logic",
+    "typedef","enum","always_comb","always_ff","posedge","negedge","begin","end",
+    "if","else","unique","case","endcase","default","assign",
+  ]);
+  // Single tokenizer pass: comments, strings, sized literals, numbers, identifiers, other.
+  const token = /(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")|(\b\d+'[bhdBHD][0-9a-fA-F_xzXZ?]+)|(\b\d+\b)|([A-Za-z_][A-Za-z0-9_]*)|([^A-Za-z0-9_'"\/]+|.)/g;
+  let out = "";
+  let m: RegExpExecArray | null;
+  while ((m = token.exec(raw)) !== null) {
+    const [, comment, str, sized, num, ident, other] = m;
+    if (comment) {
+      out += `<span style="color:hsl(var(--avep-foreground-subtle));font-style:italic">${escapeHtml(comment)}</span>`;
+    } else if (str) {
+      out += `<span style="color:hsl(140 60% 30%)">${escapeHtml(str)}</span>`;
+    } else if (sized) {
+      out += `<span style="color:hsl(194 92% 32%)">${escapeHtml(sized)}</span>`;
+    } else if (num) {
+      out += `<span style="color:hsl(194 92% 32%)">${num}</span>`;
+    } else if (ident) {
+      if (KEYWORDS.has(ident)) {
+        out += `<span style="color:hsl(222 78% 36%);font-weight:600">${ident}</span>`;
+      } else {
+        out += ident;
+      }
+    } else if (other) {
+      out += escapeHtml(other);
+    }
+  }
+  return out;
 }
 
 function BaselineDiff({ mode, onModeChange }: { mode: string; onModeChange: (m: never) => void; }) {
