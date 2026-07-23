@@ -20,7 +20,7 @@ export default function AcceptInvitation() {
     }
     if (!token || status !== "idle") return;
     setStatus("accepting");
-    supabase.rpc("accept_invitation", { p_token: token }).then(({ data, error }) => {
+    supabase.rpc("accept_invitation", { _token: token }).then(({ data, error }) => {
       if (error) {
         setStatus("error");
         setMessage(error.message);
