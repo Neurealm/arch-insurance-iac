@@ -1,0 +1,81 @@
+name: BP1.1 Platform Foundation
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "supabase/**"
+      - "docs/bp1-1-*.md"
+      - "docs/bp1.1-*.md"
+      - "scripts/validate-bp1-1.sh"
+      - ".github/workflows/bp1-1-platform-foundation.yml"
+      - "package.json"
+      - "bun.lockb"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: bp1-1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: App validation (typecheck, lint, tests, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install deps
+        run: bun install --frozen-lockfile
+      - name: Type check
+        run: bunx tsgo --noEmit || bunx tsc --noEmit
+      - name: Lint
+        run: bun run lint
+      - name: Unit / component tests
+        run: bun run test
+      - name: Production build
+        run: bun run build
+
+  database:
+    name: BP1.1 SQL regression (disposable DB)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:15.6.1.115
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      # Local Supabase Postgres — never a shared or production DB.
+      PGPASSWORD: postgres
+      DB_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Apply migrations to disposable DB
+        run: |
+          set -euo pipefail
+          for f in supabase/migrations/*.sql; do
+            echo "Applying $f"
+            psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$f" > /dev/null
+          done
+      - name: BP1.1A regression
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/bp1_1a_regression.sql
+      - name: Platform security
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/bp1_1_platform_security.sql
+      - name: Tenant isolation
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/bp1_1_tenant_isolation.sql
+      - name: Invitations
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/bp1_1_invitations.sql
+      - name: Last-administrator
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/bp1_1_last_admin.sql
