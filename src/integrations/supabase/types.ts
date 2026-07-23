@@ -7058,6 +7058,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_invitation: { Args: { _token: string }; Returns: Json }
       admin_get_user_login_history: {
         Args: { _email?: string; _limit?: number; _user_id: string }
         Returns: {
@@ -7082,6 +7083,49 @@ export type Database = {
           session_id: string
           user_agent: string
         }[]
+      }
+      archive_tenant_role: { Args: { _role_id: string }; Returns: undefined }
+      assign_membership_role: {
+        Args: { _membership_id: string; _role_id: string }
+        Returns: string
+      }
+      assign_role_permission: {
+        Args: { _permission_code: string; _role_id: string }
+        Returns: undefined
+      }
+      bootstrap_tenant_default_roles: {
+        Args: { _actor: string; _tenant_id: string }
+        Returns: undefined
+      }
+      cancel_invitation: {
+        Args: { _invitation_id: string }
+        Returns: undefined
+      }
+      count_active_tenant_admins: {
+        Args: { _exclude_membership?: string; _tenant_id: string }
+        Returns: number
+      }
+      create_tenant_role: {
+        Args: {
+          _code: string
+          _description?: string
+          _name: string
+          _tenant_id: string
+        }
+        Returns: string
+      }
+      emit_audit_event: {
+        Args: {
+          _action_code: string
+          _after?: Json
+          _before?: Json
+          _metadata?: Json
+          _object_id: string
+          _object_type: string
+          _reason?: string
+          _tenant_id: string
+        }
+        Returns: string
       }
       etdm_auto_build_domains: {
         Args: { _master_domain_ids: string[]; _technology_id: string }
@@ -7297,6 +7341,14 @@ export type Database = {
         Args: { _ordered_ids: string[]; _technology_id: string }
         Returns: undefined
       }
+      get_current_access_context: {
+        Args: { _tenant_id?: string }
+        Returns: Json
+      }
+      has_permission: {
+        Args: { _permission_code: string; _tenant_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -7304,10 +7356,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      invite_member: {
+        Args: {
+          _email: string
+          _expires_in_days?: number
+          _role_codes?: string[]
+          _tenant_id: string
+        }
+        Returns: Json
+      }
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       is_user_approved: { Args: { _user_id: string }; Returns: boolean }
       is_valid_timezone: { Args: { _tz: string }; Returns: boolean }
       normalize_slug: { Args: { _s: string }; Returns: string }
+      provision_tenant: {
+        Args: {
+          _admin_user_id: string
+          _currency?: string
+          _name: string
+          _slug: string
+          _timezone?: string
+        }
+        Returns: Json
+      }
       record_user_login_event: {
         Args: {
           _action?: string
@@ -7320,6 +7391,18 @@ export type Database = {
           _user_id: string
         }
         Returns: string
+      }
+      remove_membership_role: {
+        Args: { _membership_id: string; _role_id: string }
+        Returns: undefined
+      }
+      remove_role_permission: {
+        Args: { _permission_code: string; _role_id: string }
+        Returns: undefined
+      }
+      resend_invitation: {
+        Args: { _expires_in_days?: number; _invitation_id: string }
+        Returns: Json
       }
       runops_advance_scenario: {
         Args: { _actor: string; _scenario_id: string }
@@ -7461,6 +7544,18 @@ export type Database = {
       }
       seed_user_defaults: {
         Args: { _email: string; _user_id: string }
+        Returns: undefined
+      }
+      set_membership_status: {
+        Args: {
+          _membership_id: string
+          _reason?: string
+          _status: Database["public"]["Enums"]["membership_status"]
+        }
+        Returns: Json
+      }
+      update_tenant_role: {
+        Args: { _description: string; _name: string; _role_id: string }
         Returns: undefined
       }
     }
