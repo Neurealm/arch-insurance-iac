@@ -14,21 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      _bp11a_diag: {
-        Row: {
-          k: string | null
-          v: string | null
-        }
-        Insert: {
-          k?: string | null
-          v?: string | null
-        }
-        Update: {
-          k?: string | null
-          v?: string | null
-        }
-        Relationships: []
-      }
       action_items: {
         Row: {
           answer_id: string
