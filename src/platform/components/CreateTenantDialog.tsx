@@ -7,12 +7,15 @@ import { useAccess } from "@/platform/access/AccessContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { sanitizeError } from "@/platform/components/States";
+import { CURRENCY_OPTIONS, TIMEZONE_OPTIONS } from "@/platform/data/tenantOptions";
+
 
 const schema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
