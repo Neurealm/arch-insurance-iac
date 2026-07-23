@@ -1,9 +1,14 @@
+import { useMemo, useRef, useState } from "react";
 import { Link2, CheckCircle2, Clock, XCircle, Search, Calendar, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { IntegrationDrawer } from "@/components/eoc/integrations/IntegrationDrawer";
+import { profiles, IntegrationStatus } from "@/components/eoc/integrations/profiles";
 
 type Status = "connected" | "progress" | "not";
-const integrations: { name: string; cat: string; status: Status; pct?: number }[] = [
+interface Integration { name: string; cat: string; status: Status; pct?: number }
+
+const initial: Integration[] = [
   { name: "ServiceNow", cat: "ITSM", status: "connected" },
   { name: "Datadog", cat: "Monitoring & Observability", status: "connected" },
   { name: "Splunk Enterprise", cat: "SIEM & Analytics", status: "connected" },
@@ -16,17 +21,17 @@ const integrations: { name: string; cat: string; status: Status; pct?: number }[
   { name: "PagerDuty", cat: "Incident Management", status: "not" },
   { name: "Slack", cat: "Collaboration", status: "connected" },
   { name: "Webhook Endpoints", cat: "Custom Integrations", status: "not" },
+  { name: "SolarWinds", cat: "Network & Infra Monitoring", status: "progress", pct: 50 },
+  { name: "Cribl", cat: "Data Pipeline", status: "progress", pct: 55 },
 ];
 
-const stats = [
-  { label: "Total Integrations", value: "12", sub: "Required: 10", icon: Link2, tone: "indigo" },
-  { label: "Connected", value: "8", sub: "67%", icon: CheckCircle2, tone: "healthy" },
-  { label: "In Progress", value: "2", sub: "17%", icon: Clock, tone: "warning" },
-  { label: "Not Connected", value: "2", sub: "16%", icon: XCircle, tone: "critical" },
-  { label: "Last Validation", value: "May 14, 2026 10:30 AM", sub: "View Details", icon: Calendar, tone: "muted" },
-];
+const toStatus = (s: IntegrationStatus): { status: Status; pct?: number } => {
+  if (s === "Connected") return { status: "connected" };
+  if (s === "Not Connected" || s === "Disabled" || s === "Authentication Failed" || s === "Permission Failed") return { status: "not" };
+  return { status: "progress", pct: 60 };
+};
 
-const toneMap: any = {
+const toneMap: Record<string, string> = {
   indigo: "bg-indigo/10 text-indigo",
   healthy: "bg-status-healthy-soft text-status-healthy",
   warning: "bg-status-warning-soft text-status-warning",
@@ -35,6 +40,34 @@ const toneMap: any = {
 };
 
 export function Step2Integrations() {
+  const [items, setItems] = useState<Integration[]>(initial);
+  const [query, setQuery] = useState("");
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const currentTrigger = useRef<HTMLButtonElement | null>(null);
+
+  const filtered = useMemo(
+    () => items.filter((i) => i.name.toLowerCase().includes(query.toLowerCase()) || i.cat.toLowerCase().includes(query.toLowerCase())),
+    [items, query],
+  );
+
+  const stats = [
+    { label: "Total Integrations", value: String(items.length), sub: "Required: 10", icon: Link2, tone: "indigo" },
+    { label: "Connected", value: String(items.filter((i) => i.status === "connected").length), sub: `${Math.round(items.filter((i) => i.status === "connected").length / items.length * 100)}%`, icon: CheckCircle2, tone: "healthy" },
+    { label: "In Progress", value: String(items.filter((i) => i.status === "progress").length), sub: `${Math.round(items.filter((i) => i.status === "progress").length / items.length * 100)}%`, icon: Clock, tone: "warning" },
+    { label: "Not Connected", value: String(items.filter((i) => i.status === "not").length), sub: `${Math.round(items.filter((i) => i.status === "not").length / items.length * 100)}%`, icon: XCircle, tone: "critical" },
+    { label: "Last Validation", value: "May 14, 2026 10:30 AM", sub: "View Details", icon: Calendar, tone: "muted" },
+  ];
+
+  const openFor = (name: string) => {
+    currentTrigger.current = triggerRefs.current[name] ?? null;
+    setOpenKey(name);
+  };
+
+  const onStatusChange = (key: string, next: IntegrationStatus) => {
+    setItems((prev) => prev.map((i) => i.name === key ? { ...i, ...toStatus(next) } : i));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
@@ -62,18 +95,18 @@ export function Step2Integrations() {
         <section className="col-span-12 lg:col-span-9 bg-card border border-border rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <div className="flex items-center gap-1 text-xs font-semibold">
-              <span className="px-3 py-1.5 rounded-lg bg-accent text-indigo">All Integrations (12)</span>
+              <span className="px-3 py-1.5 rounded-lg bg-accent text-indigo">All Integrations ({items.length})</span>
               <span className="px-3 py-1.5 rounded-lg text-muted-foreground hover:bg-secondary">Required (10)</span>
-              <span className="px-3 py-1.5 rounded-lg text-muted-foreground hover:bg-secondary">Optional (2)</span>
+              <span className="px-3 py-1.5 rounded-lg text-muted-foreground hover:bg-secondary">Optional ({items.length - 10})</span>
             </div>
             <div className="relative w-72">
               <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search integrations…" className="pl-9 h-9" />
+              <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search integrations…" className="pl-9 h-9" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {integrations.map((i) => (
+            {filtered.map((i) => (
               <div key={i.name} className="rounded-xl border border-border p-4 hover:shadow-[var(--shadow-md)] transition">
                 <div className="flex items-start gap-2 mb-3">
                   <div className="h-9 w-9 rounded-lg bg-secondary grid place-items-center text-xs font-bold text-foreground">
@@ -86,6 +119,9 @@ export function Step2Integrations() {
                 </div>
                 <StatusRow status={i.status} pct={i.pct} />
                 <button
+                  ref={(el) => { triggerRefs.current[i.name] = el; }}
+                  onClick={() => openFor(i.name)}
+                  aria-label={`${i.status === "connected" ? "Configure" : i.status === "progress" ? "Continue setup for" : "Connect"} ${i.name}`}
                   className={cn(
                     "mt-3 w-full h-8 rounded-lg text-xs font-semibold transition",
                     i.status === "connected" && "border border-border hover:bg-secondary",
@@ -122,6 +158,14 @@ export function Step2Integrations() {
           </div>
         </aside>
       </div>
+
+      <IntegrationDrawer
+        open={openKey !== null && !!profiles[openKey]}
+        profileKey={openKey}
+        onClose={() => setOpenKey(null)}
+        onStatusChange={onStatusChange}
+        triggerRef={currentTrigger as React.RefObject<HTMLElement>}
+      />
     </div>
   );
 }
