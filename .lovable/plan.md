@@ -59,22 +59,23 @@ Two housekeeping items (P3) are noted below; neither blocks review.
 - **D2-1** — Restore-point availability (Req 1) and build/typecheck/test execution (Req 16) cannot be confirmed from validation tools. Neither is a defect in the implementation; both require reviewer action to close out.
 
 **Priority 3 (documentation / minor code quality):**
-- **D3-1 — anon has table-level `SELECT` privilege on canonical tables.** All nine new tables show `has_table_privilege('anon','SELECT')=true`. RLS is enabled and no policy targets `anon`, so deny-by-default is enforced at the row level and no rows leak — but the grant does not match a strict least-privilege posture. Cosmetic only; behavior is safe.
-- **D3-2 — `docs/bp1-1a-test-evidence.md` reports impersonated trigger tests, but the tests are not re-runnable from the current tool surface.** The doc claims 13 constraint + 7 governance PASSes; validator cannot rerun. Add a repeatable script (SQL or Deno) so future reviewers can independently reproduce.
+- ~~**D3-1 — anon has table-level `SELECT` privilege on canonical tables.**~~ **CLOSED (BP1.1A Hardening Patch)** — `REVOKE SELECT` executed on all 9 canonical tables; `pg_catalog` confirms `has_table_privilege('anon', ...)` = `false` for each. `authenticated` and `service_role` grants retained. Deny-by-default RLS unchanged.
+- ~~**D3-2 — Tests not re-runnable from the current tool surface.**~~ **CLOSED (BP1.1A Hardening Patch)** — Repeatable, deterministic, CI-safe suite committed at `supabase/tests/bp1_1a_regression.sql`. Runs inside a single always-rolled-back transaction; covers grants, RLS, permission seed, cross-tenant integrity, duplicate protections, audit append-only, and profile-governance trigger presence. Referenced from `docs/bp1-1a-test-evidence.md`.
 
 ---
 
-## D. Correction Direction
+## D. Correction Direction (historical)
 
 - **D2-1 (Restore point):** Reviewer opens Edit History and confirms the `pre-bp1.1-foundation` bookmark is still pinned; no code fix.
-- **D2-1 (Build/test):** Trigger a build turn so the harness runs typecheck + Vite build; run `supabase--test_edge_functions` for any BP1.1A-touched edge functions (none observed, so this reduces to build+typecheck).
-- **D3-1:** In the next migration, `REVOKE SELECT ON public.<table> FROM anon;` for all 9 canonical tables (keep `authenticated` + `service_role` grants). Update `docs/bp1-1-platform-architecture.md` to record the tightened grant baseline.
-- **D3-2:** Commit an idempotent test script (e.g. `supabase/tests/bp1_1a_governance.sql` or a Deno test) that recreates the two service-role sessions used in the evidence doc and asserts the trigger errors; reference it from `docs/bp1-1a-test-evidence.md`.
+- **D2-1 (Build/test):** Trigger a build turn so the harness runs typecheck + Vite build; run `supabase--test_edge_functions` for any BP1.1A-touched edge functions (none observed).
+- **D3-1:** _Closed by hardening patch._
+- **D3-2:** _Closed by hardening patch._
 
 ---
 
 ## E. Final Status
 
-**Ready for Product Organization review** (subject to reviewer closing D2-1 by visually confirming the pinned restore point and running the build harness on the next turn).
+**Ready for Product Organization review** with both P3 findings closed by the BP1.1A Hardening Patch. D2-1 remains a reviewer-side confirmation only.
 
 *This validation does not declare the increment approved.*
+
