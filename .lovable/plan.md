@@ -1,43 +1,190 @@
-## BP1.1C Remediation — Read-Only Validation Report
 
-Scope: `src/platform/**`, `src/components/auth/PermissionRoute.tsx`, `src/App.tsx` route wiring. No implementation touched.
+# BP1.1D Validation Report (Read-Only)
 
-### Requirement Results
+This is a **read-only** validation. No code, schema, migrations, functions, policies, tests, workflows, configuration, docs, or data were modified. This report **does not approve** BP1.1D or BP1.1.
 
-| # | Requirement | Result | Evidence |
+---
+
+## 1. Overall result
+
+| Metric | Value |
+|---|---|
+| Passed gates | 8 |
+| Failed gates | 0 |
+| Blocked gates | 6 |
+| Priority 0 defects | 0 |
+| Priority 1 defects | 0 |
+| Priority 2 defects | 0 (1 mandatory blocked, tracked below) |
+| Priority 3 defects | 3 (documentation / debt) |
+
+## 2. Baseline & architecture preservation — PASS
+
+Confirmed by directory listing, docs (`docs/bp1.1-baseline.md`, `bp1-1-legacy-authorization-boundary.md`, `bp1-1-permission-model.md`) and injected schema summary:
+
+- All 10 canonical tables present (`profiles`, `tenants`, `memberships`, `permissions`, `tenant_roles`, `tenant_role_permissions`, `membership_roles`, `tenant_invitations`, `tenant_invitation_roles`, `audit_events`).
+- `public.roles` **does not exist** (no reference in schema listing).
+- `app_role`, `user_roles`, `is_platform_admin`, `has_role`, `handle_new_user` unchanged versus BP1.1B/C definitions in injected DB functions.
+- RunOps stack (`runops_*` tables + helpers + `runops_role`) preserved.
+- Authorization is by permission code (`has_permission`, `get_current_access_context`); `PermissionRoute` gates by code, never role name.
+- No duplicate authorization context; no future-package entities introduced by BP1.1D (delta is docs + tests + CI + one Vitest file).
+
+## 3. Implementation inventory (BP1.1D delta)
+
+| Category | Files |
+|---|---|
+| App code | `src/platform/components/States.test.tsx` (test only) |
+| Migrations | None |
+| SQL tests | `supabase/tests/bp1_1_platform_security.sql`, `bp1_1_tenant_isolation.sql`, `bp1_1_invitations.sql`, `bp1_1_last_admin.sql` (BP1.1A regression preserved) |
+| Unit / component tests | `src/platform/components/States.test.tsx` |
+| Integration / E2E tests | None (deferred, TD-05) |
+| Scripts | `scripts/validate-bp1-1.sh` |
+| CI workflows | `.github/workflows/bp1-1-platform-foundation.yml` |
+| Indexes / DB objects added | None |
+| Documentation | `bp1-1-operational-runbook.md`, `bp1-1-release-checklist.md`, `bp1-1-rollback-plan.md`, `bp1-1-production-readiness.md`, `bp1-1-technical-debt.md`, `bp1-1-release-notes.md`, refreshed `bp1-1-test-evidence.md` |
+
+## 4. Commands executed here
+
+| # | Command | Env | Exit | Pass | Fail | Skip | Notes |
+|---|---|---|---|---|---|---|---|
+| 1 | `tsgo --noEmit` | sandbox | 0 | — | — | — | Clean, no diagnostics |
+| 2 | `bun run test` (Vitest) | sandbox | 0 | 6 | 0 | 0 | 2 files: `example.test.ts`, `States.test.tsx` |
+| 3 | `security--run_security_scan` | Supabase | — | — | — | — | 58 findings, **all `warn`**; 0 Critical, 0 High |
+| 4 | `ls`/directory reads for CI, tests, docs, scripts | sandbox | 0 | — | — | — | Inventory confirmed |
+
+**Not executed here (blocked by plan-mode or environment):**
+
+- `bun run build` — plan-mode forbids state-changing execution.
+- `bun run lint` — same (writes cache); previously run successfully in BP1.1D build turn per prior report.
+- `psql -f supabase/tests/*.sql` — no `SUPABASE_DB_URL` in this sandbox; the SQL suites are authored but **have not been executed against a disposable DB**.
+- CI workflow run — file is authored and syntactically valid, but **no live run** has been recorded against the target repo.
+
+## 5. CI workflow inspection — PASS (author) / BLOCKED (execution)
+
+`.github/workflows/bp1-1-platform-foundation.yml` verified:
+
+- Triggers: PR (paths: `src/**`, `supabase/**`, BP1.1 docs, workflow, `package.json`, lockfile), push to `main`, manual dispatch. ✅
+- Package manager: Bun via `oven-sh/setup-bun@v2`. ✅
+- Steps: install → typecheck → lint → test → build. ✅
+- `database` job uses `supabase/postgres:15.6.1.115` service container (disposable). ✅
+- Applies every migration in `supabase/migrations/*.sql` in filename order. ✅
+- Runs all 5 SQL regression suites with `-v ON_ERROR_STOP=1`. ✅
+- No hard-coded credentials (uses `POSTGRES_PASSWORD=postgres` for the local container only). ✅
+- Any `psql` non-zero exit fails the job. ✅
+
+**BLOCKED:** No live green run captured. Per the validation standard, a workflow file without an executed successful run is not complete production-readiness evidence.
+
+## 6. Database security validation — BLOCKED (author-verified)
+
+SQL evidence is authored (`bp1_1_platform_security.sql` + `bp1_1_tenant_isolation.sql`), covering:
+
+- Anon EXECUTE revocation across 19 privileged RPCs.
+- SECURITY DEFINER `search_path` presence for every DEFINER function.
+- Anon `SELECT` denial on all 9 canonical tables.
+- `audit_events` append-only trigger presence.
+- RLS enabled on all tenant-owned tables.
+- Cross-tenant trigger rejection for `membership_roles`, `tenant_role_permissions`, `tenant_invitation_roles`.
+
+**Cross-checked statically against injected `db-functions`:** `is_platform_admin`, `is_user_approved`, `has_role`, `has_permission`, `get_current_access_context`, `emit_audit_event`, `count_active_tenant_admins`, `runops_*`, `tir_enforce_same_tenant`, `trp_enforce_same_tenant`, `membership_roles_enforce_same_tenant`, `audit_events_reject_mutation` all present with `SET search_path = 'public'`. `auth.uid()` resolution used, no browser-supplied actor IDs.
+
+**Status:** Author-verified via static inspection **PASS**; runtime execution against a disposable DB **BLOCKED**.
+
+## 7. Cross-tenant, last-admin, invitation, audit, profile, tenant-switch — BLOCKED (author-verified)
+
+The following mandatory suites exist and are author-verified but were **not executed** here:
+
+| Suite | File | Status |
+|---|---|---|
+| Cross-tenant isolation | `bp1_1_tenant_isolation.sql` | BLOCKED (needs DB) |
+| Last-administrator | `bp1_1_last_admin.sql` | BLOCKED (needs DB) |
+| Invitation lifecycle | `bp1_1_invitations.sql` | BLOCKED (needs DB) |
+| Audit immutability | `bp1_1a_regression.sql` (already covers) | BLOCKED (needs DB) |
+| Profile governance | `bp1_1a_regression.sql` (covers self-mutation) | BLOCKED (needs DB) |
+| Tenant-switch stale data | `AccessContext.tsx` cache-drop verified statically; runtime browser test not run | BLOCKED (no E2E harness — TD-05) |
+
+## 8. Frontend workflow validation — PARTIAL
+
+Static inspection of `PlatformLayout.tsx`, `PermissionRoute.tsx`, `AccessContext.tsx`, `MemberAdmin.tsx`, `RoleAdmin.tsx`, `AuditExplorer.tsx`, `AcceptInvitation.tsx`, `States.tsx`, `CreateTenantDialog.tsx` (from BP1.1C validation) confirms:
+
+- Route permission gating implemented via `PermissionRoute`.
+- Tenant switching cancels + removes tenant-scoped `["platform"]` query keys.
+- `ConfirmDialog` on Suspend / Reactivate / Deactivate (per BP1.1C final-patch validation).
+- Audit detail redacts `password|token|secret|invitation`.
+- Explicit invitation error states (`INVITATION_EXPIRED`, `INVITATION_ALREADY_ACCEPTED`, `INVITATION_EMAIL_MISMATCH`).
+- `LoadingState`, `EmptyState`, `ErrorState`, `ForbiddenState` are announced (`role="status"`, `role="alert"`); verified by executed Vitest run.
+
+Live persona-by-persona click-through was **not performed** in plan mode.
+
+## 9. Error handling & observability — PASS (static)
+
+- `sanitizeError()` strips PostgREST noise (executed test confirms).
+- `ErrorState` includes retry affordance; `ForbiddenState` links to `/app` and `/platform` for escape.
+- Audit payload redaction present in `AuditExplorer`.
+- No new logging vendor introduced.
+
+## 10. Performance & scale — PASS (static)
+
+- Members / invitations / audit use bounded pagination (`p_limit`, `p_offset` with `PAGE` const, verified in BP1.1C validation).
+- No client-side full-table loads for authorization.
+- Tenant switch: single-flight via query cancellation.
+- Load testing: **BLOCKED** (no environment).
+
+## 11. Accessibility — PARTIAL
+
+Confirmed via executed test + prior inspection:
+
+- `role="status"` on loading, `role="alert"` on errors.
+- `aria-label` on icon-only controls in audit table.
+- `Select` used for currency / timezone; native labels via `<Label htmlFor>`.
+
+Automated axe scan **not integrated** (TD-04 accepted).
+
+## 12. Production configuration — PASS (static)
+
+- No service-role key in client (`src/integrations/supabase/client.ts` uses publishable key from `import.meta.env`).
+- No secrets in source; `.env` git-ignored.
+- Callback URLs configuration-driven via edge functions.
+- Storage buckets: `evidence`, `etdm-assets` remain private per baseline.
+
+## 13. Documentation — PASS
+
+All 13 required BP1.1 docs present (`docs/bp1-1-*.md` set inventoried). Runbook covers all 13 required operational tasks and is written for someone other than the implementer. Rollback plan avoids destructive SQL against governed tables.
+
+## 14. Security scan result
+
+- 58 findings total, **100% `warn` level**.
+- 0 Critical, 0 High. ✅ BP1.1D introduces no Critical or High finding.
+- Warnings are the previously-dispositioned RunOps / ETDM SECURITY DEFINER functions callable by authenticated users (intended, see `bp1-1-security-disposition.md`) plus leaked-password protection (config item, deferred by baseline).
+
+## 15. Defects
+
+**Priority 0:** none.
+**Priority 1:** none.
+
+**Priority 2 (blocked, not failed):**
+
+| ID | Requirement | Status | Blocking |
 |---|---|---|---|
-| 1 | Tenant switching (cancellation, cache clear, permission refresh, no stale render) | PASS | `AccessContext.tsx` L80–92: `qc.cancelQueries({queryKey:["platform"]})` then `removeQueries` for context/members/invitations/roles/audit/home-summary before persisting new tenant; `contextQuery` keyed on `activeTenantId` re-fetches permissions; auto-repair L52–66 for suspended/removed memberships. |
-| 2 | Route authorization (PermissionRoute, forbidden, no URL bypass) | PASS | `components/auth/PermissionRoute.tsx` wraps `ProtectedRoute` + `PermissionGate` returning `ForbiddenState`; all five platform child routes guarded in `App.tsx` L842–846 (`tenant.view`, `members.view`, `roles.view`, `audit.view`, `tenant.view`). Platform-admin bypass via `hasPermission`. |
-| 3 | Create Tenant workflow | PASS | `CreateTenantDialog.tsx`: Zod validation (name/slug/tz/currency), `provision_tenant` RPC, refresh + auto-switch to new tenant on success, disabled state during pending. |
-| 4 | Member admin (invite, role assign, suspend, reactivate, deactivate, pagination, filtering, confirms, last-admin) | PARTIAL PASS | `MemberAdmin.tsx`: search + status filter + `PAGE=20` pagination with total_count (L138–147); Invite dialog with Zod + role checkboxes; role editor via `assign_/remove_membership_role`; Suspend/Reactivate/Deactivate via `set_membership_status`; Cancel-invitation wrapped in `ConfirmDialog`; last-admin friendly error string mapping. Defect P2-1: Suspend/Reactivate/Deactivate menu items fire immediately with no `ConfirmDialog` — spec calls for confirmation dialogs on destructive lifecycle actions. |
-| 5 | Role admin (editor, matrix, assignment, archive, read-only) | PASS | `RoleAdmin.tsx`: card grid with system/status badges; `Sheet`-based editor with grouped permission matrix; save meta + save perms via RPCs; archive gated by `ConfirmDialog` with member-count guard; system-protected and archived roles rendered read-only via `canManage && !is_system_protected` and disabled inputs. |
-| 6 | Platform Home refresh | PASS | `PlatformHome.tsx` keyed on `activeTenantId`; permission-scoped metric cards; loading/error/empty states via shared components. |
-| 7 | Tenant Settings validation | PASS | `TenantSettings.tsx`: Zod schema for name/slug/currency/tz, slug-change guarded by `ConfirmDialog`, `update_tenant` RPC, refresh + invalidate on success, disabled when lacking `tenant.update`. |
-| 8 | Profile page | PASS | `Profile.tsx`: editable subset with Zod caps; governed fields (approval/category/company/email) rendered read-only; single `profiles` update; success invalidation. |
-| 9 | Invitation acceptance states | PASS | `AcceptInvitation.tsx`: discriminated `State` with `auth_required`, `success`, `email_mismatch`, `expired`, `cancelled`, `already_accepted`, `not_found`, generic `error`; success path persists active tenant then navigates to `/platform`; sign-in preserves `next=` deep link. |
-| 10 | Audit Explorer filters | PASS | `AuditExplorer.tsx`: search + action + actor + object_type + from/to date range + reset; 25/page with total_count; JSON `before/after` passed through `redact()` for password/token/secret/etc keys before render. |
-| 11 | Accessibility improvements | PASS (minor) | `LoadingState` uses `role="status"`/`aria-live`; `ErrorState`/`ForbiddenState` `role="alert"`; audit filter fieldset labelled; every form field wired `htmlFor`/`aria-invalid`/`aria-describedby`; icon-only Buttons carry `aria-label` (member row menu, invite icon, archive). Defect P3-1: audit table rows use `tabIndex+role="button"` on `<tr>` — works but not semantic; consider a proper button. |
-| 12 | Regression (BP1.1A/B, RunOps, security) | PASS | No files under `src/runops`, `src/eoc`, `src/silicon`, or `supabase/functions` altered in this remediation window; no migration authored beyond BP1.1B set (latest migration timestamps precede remediation UI work); `provision_tenant`, `set_membership_status`, `list_authorized_tenants`, `get_current_access_context`, `update_tenant`, `assign_/remove_role_permission`, `archive_tenant_role`, `invite_/resend_/cancel_/accept_invitation` all continue to be invoked via `supabase.rpc` with anon-revoked signatures established in BP1.1B. |
+| D-P2-01 | Migration replay + full SQL regression against disposable DB (§ 4 rows 3–9, 12, 14–17 of validation standard) | Blocked — needs CI run or local `SUPABASE_DB_URL` | Yes for final approval |
 
-### Defects
+**Priority 3 (documentation / accepted debt):**
 
-**Priority 0** — none.
+- TD-01 Invitation-route `localStorage` coupling — accepted, documented.
+- TD-04 Automated a11y not integrated — accepted.
+- TD-05 No Playwright E2E harness — accepted.
 
-**Priority 1** — none.
+## 16. Evidence still required
 
-**Priority 2**
+1. Live successful run of `.github/workflows/bp1-1-platform-foundation.yml` — both `app` and `database` jobs green.
+2. Post-merge `security--run_security_scan` re-run showing 0 Critical / 0 High.
+3. Executed screenshots for the 25 UX evidence items in §16 of the validation prompt (persona-driven browser walkthrough).
 
-- **P2-1 Member lifecycle actions lack confirmation dialog.** `MemberAdmin.tsx` L216–226 fires Suspend/Reactivate/Deactivate directly from `DropdownMenuItem.onSelect` without `ConfirmDialog`. Spec requirement #4 lists "Confirmation dialogs" as a first-class check. Deactivate is destructive and irreversible from the UI — must be confirmed.
+## 17. Items to return to Product Organization
 
-**Priority 3**
+- This report.
+- `docs/bp1-1-production-readiness.md`, `bp1-1-release-checklist.md`, `bp1-1-rollback-plan.md`, `bp1-1-operational-runbook.md`, `bp1-1-technical-debt.md`, `bp1-1-release-notes.md`, `bp1-1-test-evidence.md`.
+- `.github/workflows/bp1-1-platform-foundation.yml` + first green-run URL (once available).
+- Executed SQL regression logs (once run against disposable DB).
 
-- **P3-1 Audit table row is a `<tr>` with `role="button"`.** `AuditExplorer.tsx` L124–127. Screen-reader semantics are ambiguous; prefer a nested button or `<tr>` + inline action button in the last column.
-- **P3-2 Success path in `AcceptInvitation.tsx` L72 writes `localStorage` directly** (`platform:activeTenant`) instead of going through `AccessContext.switchTenant`, so cache-clearing side effects are skipped for the first navigation. Cosmetic — next mount reconciles via `contextQuery`, but couples to internal storage key.
-- **P3-3 `MemberAdmin` invitations list is not paginated** (fetches up to 50). Fine at current volume; add pagination if invitation volume grows.
-- **P3-4 `CreateTenantDialog` timezone/currency are free-text.** Zod validates shape only; a datalist or Select would prevent typos before hitting the RPC.
+## 18. Final statement
 
-### Conclusion
-
-Not Ready for Product Organization Review
-
-Blocking: P2-1 (missing confirmation dialogs on member Suspend/Reactivate/Deactivate) contradicts requirement #4. Once wrapped in `ConfirmDialog` (component already exists and is used for invitation cancel and role archive), the remediation meets the BP1.1C bar.
+**BP1.1 validation is blocked because mandatory execution evidence is unavailable** — specifically, the disposable-DB SQL regression suite and at least one green CI run.
