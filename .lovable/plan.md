@@ -213,10 +213,15 @@ Present under `docs/`:
 
 ## 16. Blockers
 
-- **B1** Disposable-DB SQL regression suite not executed (needs CI run or local `SUPABASE_DB_URL`). Blocks BP1.1E.
-- **B2** First green run of `bp1-1-platform-foundation.yml` not captured. Blocks BP1.1E.
-- **B3** Post-merge `security--run_security_scan` showing 0 High/Critical not archived. Blocks BP1.1E.
-- **B4** 25 UX evidence screenshots (persona click-through) not captured. Blocks BP1.1E.
+- **B1** Disposable-DB SQL regression suite not executed (needs CI run or local `SUPABASE_DB_URL`). Blocks BP1.1E. Requires external execution — see `docs/bp1-1-external-execution-guide.md`.
+- **B2** First green run of `bp1-1-platform-foundation.yml` not captured. Blocks BP1.1E. Requires external execution (Lovable sandbox cannot dispatch GitHub Actions).
+- **B3** Post-merge `security--run_security_scan` showing 0 High/Critical, pinned to the release-candidate SHA, not archived. Blocks BP1.1E.
+- **B4** 25 UX evidence screenshots (persona click-through, UX-001 – UX-025 per `docs/bp1-1-ux-evidence-checklist.md`) not captured. Blocks BP1.1E.
+- **B5** Release-candidate branch + commit SHA not yet recorded in `docs/bp1-1-test-evidence.md`. Open until a maintainer executes evidence externally.
+- **B6** _Resolved_ — the authoritative 25-item UX evidence checklist is now committed at `docs/bp1-1-ux-evidence-checklist.md` (T-019).
+
+BP1.1E requires **external execution** by a maintainer with GitHub Actions dispatch rights, a disposable Postgres environment, and browser access for persona walkthroughs. No application, schema, migration, test, workflow, or CI-logic remediation patch is required.
+
 
 ## 17. Recommended Next Build Phase
 
@@ -255,6 +260,13 @@ Persona click-through screenshots (25 UX evidence items).
 Publish `docs/bp1-1-release-notes.md` for GA and close BP1.1.
 - **Files**: `docs/bp1-1-release-notes.md`, `docs/bp1-1-release-checklist.md`.
 - **Acceptance**: release notes stamped GA; checklist boxes ticked.
+
+#### T-019 · P0 · — · S · **Complete**
+BP1.1E evidence framework and external execution guide.
+- **Files**: `docs/bp1-1-ux-evidence-checklist.md` (new, UX-001 – UX-025), `docs/bp1-1-external-execution-guide.md` (new), `docs/evidence/bp1-1/README.md` (new), `docs/bp1-1-test-evidence.md` (rewritten as a fillable template), `docs/bp1-1-release-checklist.md` (evidence gates added).
+- **Acceptance**: authoritative UX checklist committed; external execution guide committed; evidence directory convention committed; test-evidence template ready for real values; release checklist has explicit unchecked gates for CI, SQL, security, UX, and independent validation. **Resolves B6.**
+- **Note**: this task closes the enablement gap only. Execution (T-001 – T-004) still requires a maintainer to run outside the Lovable sandbox per `docs/bp1-1-external-execution-guide.md`.
+
 
 ### In-flight Continuity
 
