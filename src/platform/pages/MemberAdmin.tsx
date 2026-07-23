@@ -161,8 +161,25 @@ export default function MemberAdmin() {
               ))}
             </ul>
           )}
+          {(() => {
+            const invTotal = Number(invitations.data?.[0]?.total_count ?? 0);
+            const invMax = Math.max(0, Math.ceil(invTotal / PAGE) - 1);
+            return (
+              <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                <div>{invTotal} invitation{invTotal === 1 ? "" : "s"}</div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" disabled={invPage === 0}
+                    onClick={() => setInvPage((p) => Math.max(0, p - 1))}>Prev</Button>
+                  <span>Page {invPage + 1} of {invMax + 1}</span>
+                  <Button size="sm" variant="outline" disabled={invPage >= invMax}
+                    onClick={() => setInvPage((p) => Math.min(invMax, p + 1))}>Next</Button>
+                </div>
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
+
     </div>
   );
 }
