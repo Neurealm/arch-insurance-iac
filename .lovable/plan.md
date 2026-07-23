@@ -132,4 +132,3 @@ Older (stale) warnings from the prior scan generation are considered superseded;
 ## I. Final Readiness Result
 
 **Ready for BP1.1 Build Prompt with documented mapping** — conditional on the amendments in section H being applied to the Build Prompt before you paste it.
-
