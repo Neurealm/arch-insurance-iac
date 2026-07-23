@@ -1,0 +1,11 @@
+# BP1.1 Technical Debt Register
+
+| ID | Item | Severity | Rationale | Owner | Target | Trigger | Risk if deferred |
+|---|---|---|---|---|---|---|---|
+| TD-01 | `AcceptInvitation` mounted outside `AccessProvider`; writes `platform:activeTenant` via `localStorage` before navigating to `/platform`. | Low | Server revalidates authorized tenants on next Platform mount; storage key is non-sensitive. Restructuring routing only to remove this coupling is disproportionate. | Platform | BP1.2 | Any change that makes the platform layout depend on client-supplied active tenant without re-validation. | Cosmetic — an unauthorized stored tenant is rejected at next mount. |
+| TD-02 | Super-admin bootstrap emails hard-coded in `handle_new_user`. | Low | Accepted for BP1.1 per baseline. | Platform | BP1.2 | Adding / removing a super admin. | Requires migration to change roster. |
+| TD-03 | RunOps tenants live in a separate `runops_tenants` table, not bridged to `public.tenants`. | Medium | Preserving RunOps behavior was a BP1.1 non-negotiable. | RunOps | Post-BP1.1 | First feature needing shared tenant identity across product + RunOps. | Divergent tenant concepts across the app. |
+| TD-04 | Automated accessibility (axe-core) not wired into CI. | Low | Manual a11y review completed for BP1.1 routes. | Platform | BP1.2 | Any new interactive component in `/platform`. | Regressions caught only by manual review. |
+| TD-05 | No Playwright E2E harness; component tests cover critical shells only. | Low | Vitest + Testing Library aligns with current project convention; adding Playwright was out of BP1.1D scope. | Platform | BP1.2 | Cross-tenant scenarios that need real browser navigation. | Route-level UX regressions may slip past unit tests. |
+| TD-06 | Migration replay currently runs only in CI; no local scratch DB script bundled. | Low | Local devs can point `SUPABASE_DB_URL` at their own Postgres and run `./scripts/validate-bp1-1.sh`. | Platform | Post-BP1.1 | Onboarding a new platform engineer. | Slower local iteration. |
+| TD-07 | ETDM / CRM / questionnaire share-link tables remain admin-gated pending BP1.2 tenant scoping. | Medium | Documented in `bp1.1-baseline.md`. | Platform | BP1.2 | First multi-tenant customer using ETDM. | Admin can see cross-customer catalog rows. |
