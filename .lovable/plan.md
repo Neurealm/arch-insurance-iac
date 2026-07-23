@@ -1,190 +1,351 @@
+# NeuGAIN — Living Implementation Plan
 
-# BP1.1D Validation Report (Read-Only)
-
-This is a **read-only** validation. No code, schema, migrations, functions, policies, tests, workflows, configuration, docs, or data were modified. This report **does not approve** BP1.1D or BP1.1.
+_Last regenerated from repository state. Supersedes the prior BP1.1D validation report._
 
 ---
 
-## 1. Overall result
+## 1. Executive Summary
 
-| Metric | Value |
-|---|---|
-| Passed gates | 8 |
-| Failed gates | 0 |
-| Blocked gates | 6 |
-| Priority 0 defects | 0 |
-| Priority 1 defects | 0 |
-| Priority 2 defects | 0 (1 mandatory blocked, tracked below) |
-| Priority 3 defects | 3 (documentation / debt) |
+NeuGAIN is a multi-tenant enterprise platform built on React 18 + Vite 5 + Tailwind v3 + shadcn/ui with a Supabase (Lovable Cloud) backend (project ref `esfpbiishpkvhlejnxzq`). It hosts several product modules on a shared platform foundation:
 
-## 2. Baseline & architecture preservation — PASS
+- **Platform Foundation (BP1.1 A–D)** — tenants, memberships, permissions, audit, invitations, admin UX.
+- **RunOps Digital Twin** — services, runbooks, incidents, executions, scenarios (Contoso profile).
+- **AVEP — AI VLSI Engineering Platform** — 21-route DDMAC descriptor-engine scenario spanning Plan → Build → Prove Readiness.
+- **Digital Coworkers** — ITSM Auto Ticket Categorization dashboard + 15 sub-pages, Neurealm Agentic AI Studio (10 tabs), plus role-specific coworker pages.
+- **Legacy modules** — ETDM, CRM, Questionnaires, Org taxonomy (still admin-gated, awaiting BP1.2 tenant scoping).
 
-Confirmed by directory listing, docs (`docs/bp1.1-baseline.md`, `bp1-1-legacy-authorization-boundary.md`, `bp1-1-permission-model.md`) and injected schema summary:
+BP1.1 has been _built_ (packages A/B/C/D) and _security-remediated_ against recent findings; however, mandatory _execution evidence_ for BP1.1D (CI green run + disposable-DB SQL regression) is still outstanding. That is the immediate release blocker.
 
-- All 10 canonical tables present (`profiles`, `tenants`, `memberships`, `permissions`, `tenant_roles`, `tenant_role_permissions`, `membership_roles`, `tenant_invitations`, `tenant_invitation_roles`, `audit_events`).
-- `public.roles` **does not exist** (no reference in schema listing).
-- `app_role`, `user_roles`, `is_platform_admin`, `has_role`, `handle_new_user` unchanged versus BP1.1B/C definitions in injected DB functions.
-- RunOps stack (`runops_*` tables + helpers + `runops_role`) preserved.
-- Authorization is by permission code (`has_permission`, `get_current_access_context`); `PermissionRoute` gates by code, never role name.
-- No duplicate authorization context; no future-package entities introduced by BP1.1D (delta is docs + tests + CI + one Vitest file).
+## 2. Current Build Status
 
-## 3. Implementation inventory (BP1.1D delta)
-
-| Category | Files |
-|---|---|
-| App code | `src/platform/components/States.test.tsx` (test only) |
-| Migrations | None |
-| SQL tests | `supabase/tests/bp1_1_platform_security.sql`, `bp1_1_tenant_isolation.sql`, `bp1_1_invitations.sql`, `bp1_1_last_admin.sql` (BP1.1A regression preserved) |
-| Unit / component tests | `src/platform/components/States.test.tsx` |
-| Integration / E2E tests | None (deferred, TD-05) |
-| Scripts | `scripts/validate-bp1-1.sh` |
-| CI workflows | `.github/workflows/bp1-1-platform-foundation.yml` |
-| Indexes / DB objects added | None |
-| Documentation | `bp1-1-operational-runbook.md`, `bp1-1-release-checklist.md`, `bp1-1-rollback-plan.md`, `bp1-1-production-readiness.md`, `bp1-1-technical-debt.md`, `bp1-1-release-notes.md`, refreshed `bp1-1-test-evidence.md` |
-
-## 4. Commands executed here
-
-| # | Command | Env | Exit | Pass | Fail | Skip | Notes |
-|---|---|---|---|---|---|---|---|
-| 1 | `tsgo --noEmit` | sandbox | 0 | — | — | — | Clean, no diagnostics |
-| 2 | `bun run test` (Vitest) | sandbox | 0 | 6 | 0 | 0 | 2 files: `example.test.ts`, `States.test.tsx` |
-| 3 | `security--run_security_scan` | Supabase | — | — | — | — | 58 findings, **all `warn`**; 0 Critical, 0 High |
-| 4 | `ls`/directory reads for CI, tests, docs, scripts | sandbox | 0 | — | — | — | Inventory confirmed |
-
-**Not executed here (blocked by plan-mode or environment):**
-
-- `bun run build` — plan-mode forbids state-changing execution.
-- `bun run lint` — same (writes cache); previously run successfully in BP1.1D build turn per prior report.
-- `psql -f supabase/tests/*.sql` — no `SUPABASE_DB_URL` in this sandbox; the SQL suites are authored but **have not been executed against a disposable DB**.
-- CI workflow run — file is authored and syntactically valid, but **no live run** has been recorded against the target repo.
-
-## 5. CI workflow inspection — PASS (author) / BLOCKED (execution)
-
-`.github/workflows/bp1-1-platform-foundation.yml` verified:
-
-- Triggers: PR (paths: `src/**`, `supabase/**`, BP1.1 docs, workflow, `package.json`, lockfile), push to `main`, manual dispatch. ✅
-- Package manager: Bun via `oven-sh/setup-bun@v2`. ✅
-- Steps: install → typecheck → lint → test → build. ✅
-- `database` job uses `supabase/postgres:15.6.1.115` service container (disposable). ✅
-- Applies every migration in `supabase/migrations/*.sql` in filename order. ✅
-- Runs all 5 SQL regression suites with `-v ON_ERROR_STOP=1`. ✅
-- No hard-coded credentials (uses `POSTGRES_PASSWORD=postgres` for the local container only). ✅
-- Any `psql` non-zero exit fails the job. ✅
-
-**BLOCKED:** No live green run captured. Per the validation standard, a workflow file without an executed successful run is not complete production-readiness evidence.
-
-## 6. Database security validation — BLOCKED (author-verified)
-
-SQL evidence is authored (`bp1_1_platform_security.sql` + `bp1_1_tenant_isolation.sql`), covering:
-
-- Anon EXECUTE revocation across 19 privileged RPCs.
-- SECURITY DEFINER `search_path` presence for every DEFINER function.
-- Anon `SELECT` denial on all 9 canonical tables.
-- `audit_events` append-only trigger presence.
-- RLS enabled on all tenant-owned tables.
-- Cross-tenant trigger rejection for `membership_roles`, `tenant_role_permissions`, `tenant_invitation_roles`.
-
-**Cross-checked statically against injected `db-functions`:** `is_platform_admin`, `is_user_approved`, `has_role`, `has_permission`, `get_current_access_context`, `emit_audit_event`, `count_active_tenant_admins`, `runops_*`, `tir_enforce_same_tenant`, `trp_enforce_same_tenant`, `membership_roles_enforce_same_tenant`, `audit_events_reject_mutation` all present with `SET search_path = 'public'`. `auth.uid()` resolution used, no browser-supplied actor IDs.
-
-**Status:** Author-verified via static inspection **PASS**; runtime execution against a disposable DB **BLOCKED**.
-
-## 7. Cross-tenant, last-admin, invitation, audit, profile, tenant-switch — BLOCKED (author-verified)
-
-The following mandatory suites exist and are author-verified but were **not executed** here:
-
-| Suite | File | Status |
+| Area | Phase | Status |
 |---|---|---|
-| Cross-tenant isolation | `bp1_1_tenant_isolation.sql` | BLOCKED (needs DB) |
-| Last-administrator | `bp1_1_last_admin.sql` | BLOCKED (needs DB) |
-| Invitation lifecycle | `bp1_1_invitations.sql` | BLOCKED (needs DB) |
-| Audit immutability | `bp1_1a_regression.sql` (already covers) | BLOCKED (needs DB) |
-| Profile governance | `bp1_1a_regression.sql` (covers self-mutation) | BLOCKED (needs DB) |
-| Tenant-switch stale data | `AccessContext.tsx` cache-drop verified statically; runtime browser test not run | BLOCKED (no E2E harness — TD-05) |
+| Platform Foundation BP1.1A (tables/audit/profile) | Shipped | ✅ |
+| Platform Foundation BP1.1B (permissions, provision_tenant, memberships) | Shipped | ✅ |
+| Platform Foundation BP1.1C + Final Patch (admin UX) | Shipped | ✅ |
+| Platform Foundation BP1.1D (hardening artifacts) | Shipped | ✅ |
+| BP1.1E — Release evidence & handoff | Not started | ⏳ Blocker |
+| RunOps shell + Contoso profile + digital twins | Shipped | ✅ |
+| RunOps `ConnectedOperationsProvider` (real integrations) | Planned | ⏸ |
+| AVEP shell + 21 workspaces (DDMAC scenario) | Shipped | ✅ |
+| AVEP scenario continuity pass | In progress | 🔄 |
+| Digital Coworkers — ITSM ATC dashboard + 15 sub-pages | Shipped | ✅ |
+| ITSM ATC sub-page data continuity | In progress | 🔄 |
+| Neurealm Agentic AI Studio (10 tabs) | Shipped | ✅ |
+| Integrations catalog (14 profiles + drawer) | Shipped | ✅ |
+| User Management — profile edit + `sync_profile_company` | Shipped | ✅ |
+| ETDM / CRM / Questionnaires — tenant scoping (BP1.2) | Planned | ⏸ |
+| RunOps ↔ public tenant bridge | Planned | ⏸ |
+| Playwright E2E harness | Planned | ⏸ |
+| Automated a11y (axe-core) in CI | Planned | ⏸ |
 
-## 8. Frontend workflow validation — PARTIAL
+## 3. Completed Work
 
-Static inspection of `PlatformLayout.tsx`, `PermissionRoute.tsx`, `AccessContext.tsx`, `MemberAdmin.tsx`, `RoleAdmin.tsx`, `AuditExplorer.tsx`, `AcceptInvitation.tsx`, `States.tsx`, `CreateTenantDialog.tsx` (from BP1.1C validation) confirms:
+### BP1.1A — Canonical Platform Data Foundation
+- Canonical tables: `profiles`, `tenants`, `memberships`, `permissions`, `tenant_roles`, `tenant_role_permissions`, `membership_roles`, `tenant_invitations`, `tenant_invitation_roles`, `audit_events`.
+- Explicit `GRANT`s in every migration; `anon` SELECT revoked on all 9 canonical tables.
+- `audit_events` append-only trigger (`audit_events_reject_mutation`).
+- Profile self-mutation governance (users can update self; admin fields restricted).
+- Regression: `supabase/tests/bp1_1a_regression.sql`.
 
-- Route permission gating implemented via `PermissionRoute`.
-- Tenant switching cancels + removes tenant-scoped `["platform"]` query keys.
-- `ConfirmDialog` on Suspend / Reactivate / Deactivate (per BP1.1C final-patch validation).
-- Audit detail redacts `password|token|secret|invitation`.
-- Explicit invitation error states (`INVITATION_EXPIRED`, `INVITATION_ALREADY_ACCEPTED`, `INVITATION_EMAIL_MISMATCH`).
-- `LoadingState`, `EmptyState`, `ErrorState`, `ForbiddenState` are announced (`role="status"`, `role="alert"`); verified by executed Vitest run.
+### BP1.1B — Tenant Authorization & Administrative Services
+- Permission model with `has_permission(user, tenant, permission)` as sole authz oracle.
+- Transactional `provision_tenant` RPC (creates tenant + admin membership + default roles atomically).
+- Membership lifecycle helpers: invite, suspend, reactivate, deactivate, role assignment.
+- Same-tenant enforcement triggers: `tir_enforce_same_tenant`, `trp_enforce_same_tenant`, `membership_roles_enforce_same_tenant`.
+- `count_active_tenant_admins` for last-admin safeguards.
+- All `SECURITY DEFINER` functions set `search_path = 'public'`; `anon` EXECUTE revoked on all 19 privileged RPCs.
 
-Live persona-by-persona click-through was **not performed** in plan mode.
+### BP1.1C + Final Patch — Platform Experience
+- `src/platform/access/AccessContext.tsx` — tenant switching with query cancellation + cache drop of `["platform"]` keys.
+- `src/components/auth/PermissionRoute.tsx` — permission-code route gating (never role name).
+- `src/platform/pages/`:
+  - `PlatformHome.tsx`, `MemberAdmin.tsx`, `RoleAdmin.tsx`, `AuditExplorer.tsx`, `TenantSettings.tsx`, `Profile.tsx`, `AcceptInvitation.tsx`.
+  - `MemberAdmin`: invite / suspend / reactivate / deactivate — all wrapped in `ConfirmDialog`; invitation pagination.
+  - `AuditExplorer`: filters + explicit "View" button; payload redaction of `password|token|secret|invitation`.
+  - `AcceptInvitation`: explicit error states (`INVITATION_EXPIRED`, `INVITATION_ALREADY_ACCEPTED`, `INVITATION_EMAIL_MISMATCH`).
+- `src/platform/components/CreateTenantDialog.tsx` — curated `Select` for currency/timezone via `src/platform/data/tenantOptions.ts`.
+- `src/platform/components/States.tsx` — `LoadingState`, `EmptyState`, `ErrorState`, `ForbiddenState` (a11y announced).
 
-## 9. Error handling & observability — PASS (static)
+### BP1.1D — Production Hardening
+- SQL regression suites: `bp1_1_platform_security.sql`, `bp1_1_tenant_isolation.sql`, `bp1_1_invitations.sql`, `bp1_1_last_admin.sql` (+ preserved `bp1_1a_regression.sql`).
+- `scripts/validate-bp1-1.sh` aggregate runner.
+- `.github/workflows/bp1-1-platform-foundation.yml` — app job (install/typecheck/lint/test/build) + database job (Supabase Postgres service, migration replay, all 5 SQL suites).
+- `src/platform/components/States.test.tsx` — component tests (6 passing).
+- Documentation set (see §14).
 
-- `sanitizeError()` strips PostgREST noise (executed test confirms).
-- `ErrorState` includes retry affordance; `ForbiddenState` links to `/app` and `/platform` for escape.
-- Audit payload redaction present in `AuditExplorer`.
-- No new logging vendor introduced.
+### Product Modules
+- **RunOps**: `src/runops/shell/*`, `providers/`, `scenario/`, `profiles/contosoProfile.ts`, `pages/`. Service Digital Twin cross-links to `RB-HC-014` runbook.
+- **AVEP** (`src/avep/`): shell + theme, `data/canonical.ts` DDMAC scenario, 21 pages including Overview, Program Workspace, Requirements Intake/Review, Traceability, Logical Architecture, Engineering Spec & Verification, RTL Generation Studio, RTL Change Impact, Verification Env Builder, Test Factory, Sim Ops, Waveform Intelligence & Failure Diagnosis, Coverage Closure, Signoff Readiness, Release Package, AI Governance, Physical-Design Intake, End-to-End Story.
+- **ITSM ATC** (`src/pages/itsm/`): `Itsm.tsx` catalog card + `AutoTicketCategorization.tsx` dashboard + 15 sub-pages via `AtcShell`.
+- **Neurealm Agentic AI Studio** (`src/pages/neurealm-agentic-ai/`): 10-tab module under Digital Coworkers.
+- **Integrations** (`src/components/eoc/integrations/`): 14 profiles + technical `IntegrationDrawer.tsx`.
+- **User Management** (`src/pages/settings/UserManagement.tsx`): profile cards + `EditProfileDialog` + `sync_profile_company` trigger.
 
-## 10. Performance & scale — PASS (static)
+### Security Remediations (recent findings)
+- Public / anon `EXECUTE` revoked on `SECURITY DEFINER` functions.
+- `user_login_events` INSERT restricted (spoofing fix).
+- Public questionnaire respondent validation moved to edge functions (`public-questionnaire-*`).
+- `is_platform_admin`, `is_user_approved`, `has_role` self-scoped unless caller is platform admin (`rls_helper_arbitrary_uid` fix).
+- Stakeholder register PII scoping documented.
+- Public bucket listing dispositioned.
 
-- Members / invitations / audit use bounded pagination (`p_limit`, `p_offset` with `PAGE` const, verified in BP1.1C validation).
-- No client-side full-table loads for authorization.
-- Tenant switch: single-flight via query cancellation.
-- Load testing: **BLOCKED** (no environment).
+## 4. In Progress Work
 
-## 11. Accessibility — PARTIAL
+- **BP1.1D execution evidence** — CI + SQL regression not yet executed against disposable DB.
+- **AVEP scenario continuity** — DDMAC scenario alignment across all 21 routes (`src/avep/data/canonical.ts`).
+- **ITSM ATC sub-page continuity** — KPIs/lists across the 15 sub-pages aligned to parent dashboard.
 
-Confirmed via executed test + prior inspection:
+## 5. Remaining Work
 
-- `role="status"` on loading, `role="alert"` on errors.
-- `aria-label` on icon-only controls in audit table.
-- `Select` used for currency / timezone; native labels via `<Label htmlFor>`.
+- **BP1.2** tenant-scoping migration for ETDM, CRM, Questionnaires, Questionnaire share-links (TD-07).
+- Bridge `runops_tenants` ↔ `public.tenants` (TD-03).
+- Externalize super-admin bootstrap roster from `handle_new_user` (TD-02).
+- Playwright E2E harness (TD-05).
+- Automated axe-core a11y in CI (TD-04).
+- Local scratch-DB bootstrap script (TD-06).
+- Remove `AcceptInvitation` `localStorage` coupling (TD-01).
+- Retire or archive `src/silicon/**` (superseded by `src/avep/**`).
+- AVEP Phase-4 Deliver module set.
+- `ConnectedOperationsProvider` real integrations (SolarWinds, Cribl, PagerDuty, etc.).
+- Master docs index.
 
-Automated axe scan **not integrated** (TD-04 accepted).
+## 6. Outstanding Technical Debt
 
-## 12. Production configuration — PASS (static)
+Copied and extended from `docs/bp1-1-technical-debt.md`:
 
-- No service-role key in client (`src/integrations/supabase/client.ts` uses publishable key from `import.meta.env`).
-- No secrets in source; `.env` git-ignored.
-- Callback URLs configuration-driven via edge functions.
-- Storage buckets: `evidence`, `etdm-assets` remain private per baseline.
-
-## 13. Documentation — PASS
-
-All 13 required BP1.1 docs present (`docs/bp1-1-*.md` set inventoried). Runbook covers all 13 required operational tasks and is written for someone other than the implementer. Rollback plan avoids destructive SQL against governed tables.
-
-## 14. Security scan result
-
-- 58 findings total, **100% `warn` level**.
-- 0 Critical, 0 High. ✅ BP1.1D introduces no Critical or High finding.
-- Warnings are the previously-dispositioned RunOps / ETDM SECURITY DEFINER functions callable by authenticated users (intended, see `bp1-1-security-disposition.md`) plus leaked-password protection (config item, deferred by baseline).
-
-## 15. Defects
-
-**Priority 0:** none.
-**Priority 1:** none.
-
-**Priority 2 (blocked, not failed):**
-
-| ID | Requirement | Status | Blocking |
+| ID | Item | Severity | Target |
 |---|---|---|---|
-| D-P2-01 | Migration replay + full SQL regression against disposable DB (§ 4 rows 3–9, 12, 14–17 of validation standard) | Blocked — needs CI run or local `SUPABASE_DB_URL` | Yes for final approval |
+| TD-01 | `AcceptInvitation` writes `platform:activeTenant` to localStorage before mounting `AccessProvider` | Low | BP1.2 |
+| TD-02 | Super-admin bootstrap emails hard-coded in `handle_new_user` | Low | BP1.2 |
+| TD-03 | `runops_tenants` not bridged to `public.tenants` | Medium | Post-BP1.1 |
+| TD-04 | Automated a11y (axe-core) not wired into CI | Low | BP1.2 |
+| TD-05 | No Playwright E2E harness | Low | BP1.2 |
+| TD-06 | Migration replay only in CI; no local scratch DB script | Low | Post-BP1.1 |
+| TD-07 | ETDM / CRM / questionnaire share-links remain admin-gated pending BP1.2 tenant scoping | Medium | BP1.2 |
+| TD-08 | `.lovable/plan.md` previously used as a validation scratchpad — this rewrite establishes it as the living plan | Low | Now |
+| TD-09 | `src/silicon/**` prototype superseded by `src/avep/**` — schedule archive/removal | Low | BP1.2 |
+| TD-10 | No master docs index; many long-lived snapshots under `docs/meridian-*` and `docs/bp1-1-*` | Low | BP1.2 |
 
-**Priority 3 (documentation / accepted debt):**
+## 7. Architecture Decisions
 
-- TD-01 Invitation-route `localStorage` coupling — accepted, documented.
-- TD-04 Automated a11y not integrated — accepted.
-- TD-05 No Playwright E2E harness — accepted.
+- **Authorization**: permission-based via `has_permission(user, tenant, permission)`. Role-name checks (`is_platform_admin`, `has_role`, `runops_has_role`) are legacy and must not spread.
+- **Role storage**: always in dedicated tables (`user_roles`, `tenant_roles`, `membership_roles`) — never on `profiles`/`users`. Never trust client-side/localStorage for role state.
+- **Grants**: every `CREATE TABLE public.*` migration includes explicit `GRANT`s in the same migration.
+- **Secrets**: anon key only in the browser; service-role only inside edge functions via `Deno.env`.
+- **Multi-tenant boundary**: RunOps preserved as an independent sub-domain (own tenant table) until BP1.2 unification.
+- **AVEP**: its own themed shell (`src/avep/theme/tokens.css`, `AvepLayout`) with independent navigation.
+- **Providers pattern**: `OperationsProvider` and `AiProvider` with Demo/Connected variants; pages MUST NOT import fixtures directly.
+- **No standalone Node/Python backend** — Supabase Postgres + Deno edge functions only.
+- **Product neutrality**: named orgs (Contoso, Meridian, Neurealm, etc.) and verticals are tenant/module fixtures, not product-core logic.
 
-## 16. Evidence still required
+## 8. Database Status
 
-1. Live successful run of `.github/workflows/bp1-1-platform-foundation.yml` — both `app` and `database` jobs green.
-2. Post-merge `security--run_security_scan` re-run showing 0 Critical / 0 High.
-3. Executed screenshots for the 25 UX evidence items in §16 of the validation prompt (persona-driven browser walkthrough).
+- ~100 tables in `public` (per injected schema summary): platform core, RunOps stack (`runops_*`), ETDM (`etdm_*`), CRM (`crm_*`), Questionnaires, Org taxonomy (`org_*`), user-notification, audit.
+- RLS enabled on all tenant-owned tables; canonical BP1.1 tables have explicit GRANTs.
+- Supabase linter / security scan: 58 warnings (all pre-dispositioned), 0 High, 0 Critical.
+- Migrations managed exclusively via the migration tool (never edited manually).
+- Storage buckets `evidence` and `etdm-assets` remain private per baseline.
 
-## 17. Items to return to Product Organization
+## 9. Frontend Status
 
-- This report.
-- `docs/bp1-1-production-readiness.md`, `bp1-1-release-checklist.md`, `bp1-1-rollback-plan.md`, `bp1-1-operational-runbook.md`, `bp1-1-technical-debt.md`, `bp1-1-release-notes.md`, `bp1-1-test-evidence.md`.
-- `.github/workflows/bp1-1-platform-foundation.yml` + first green-run URL (once available).
-- Executed SQL regression logs (once run against disposable DB).
+- Routing/entry: `src/App.tsx`, `src/main.tsx`, `src/pages/*`.
+- Guards: `ProtectedRoute`, `PermissionRoute`, `TenantAccessGuard`.
+- Platform shell: `src/platform/shell/PlatformLayout.tsx`.
+- RunOps shell: `src/runops/shell/*` (top bar, sidebar, right drawer, command palette, Nova panel).
+- AVEP shell: `src/avep/shell/*` — 21 routes wired.
+- Digital Coworkers dashboards: `src/pages/coworkers/*`, `src/pages/itsm/*`, `src/pages/neurealm-agentic-ai/*`.
+- Design tokens: `src/index.css` + `tailwind.config.ts` for the base; AVEP uses its own `src/avep/theme/tokens.css`.
+- State: TanStack Query for server data; Zustand in AVEP/silicon; React Context for scenario/persona/access.
+- Component tests: `src/platform/components/States.test.tsx` (6 passing) + example test.
 
-## 18. Final statement
+## 10. Backend Status
 
-**BP1.1 validation is blocked because mandatory execution evidence is unavailable** — specifically, the disposable-DB SQL regression suite and at least one green CI run.
+- Supabase Postgres + RLS as primary backend.
+- Edge functions (18) under `supabase/functions/`:
+  - `admin-delete-user`, `admin-reset-password`, `admin-set-platform-role`, `admin-set-tenant-membership`, `admin-users`
+  - `tenant-invite`, `tenant-signup`, `tenant-data-import`
+  - `public-questionnaire-get`, `public-questionnaire-save`, `public-questionnaire-upload`
+  - `auth-email-hook`, `process-email-queue`, `forgot-password`, `record-login`, `user-login-history`, `invite-user`
+- Email templates under `supabase/functions/_shared/email-templates/`.
+- `supabase/config.toml`: `forgot-password` has `verify_jwt = false`.
+
+## 11. Security Status
+
+- Latest scan: 58 warn, 0 High, 0 Critical.
+- Recent hardening: SECURITY DEFINER anon revocation, login-event spoofing fix, questionnaire respondent validation via edge functions, self-scoped `is_platform_admin`/`has_role`/`is_user_approved`.
+- Deferred by baseline: leaked-password protection (config item).
+- Legacy admin-only cross-tenant reads on ETDM/CRM/questionnaires — closed by BP1.2 (T-005).
+
+## 12. Testing Status
+
+- Vitest: 2 files (`src/test/example.test.ts`, `src/platform/components/States.test.tsx`) — 6/6 passing.
+- SQL regression: 5 suites authored in `supabase/tests/` — execution against disposable DB pending.
+- E2E: none (TD-05).
+- A11y automation: none (TD-04).
+- Typecheck: `tsgo --noEmit` clean at last run.
+
+## 13. CI/CD Status
+
+- `.github/workflows/bp1-1-platform-foundation.yml`:
+  - **app job** — Bun install → typecheck → lint → Vitest → build.
+  - **database job** — Supabase Postgres 15 service container, migration replay, all 5 SQL suites with `-v ON_ERROR_STOP=1`.
+- No other workflows detected.
+- **No green run recorded yet** — first execution is the BP1.1 release gate.
+
+## 14. Documentation Status
+
+Present under `docs/`:
+- BP1.1: `bp1-1-baseline.md`, `bp1.1-baseline.md`, `bp1-1-existing-asset-map.md`, `bp1-1-legacy-authorization-boundary.md`, `bp1-1-permission-model.md`, `bp1-1-platform-architecture.md`, `bp1-1-rls-matrix.md`, `bp1-1-security-disposition.md`, `bp1-1-operational-runbook.md`, `bp1-1-release-checklist.md`, `bp1-1-release-notes.md`, `bp1-1-rollback-plan.md`, `bp1-1-production-readiness.md`, `bp1-1-technical-debt.md`, `bp1-1-test-evidence.md`, `bp1-1a-test-evidence.md`, `bp1-1b-test-evidence.md`.
+- Meridian baseline snapshots: `docs/meridian-*.md`.
+- `docs/multi-tenant-verification-report.md`.
+- **Missing**: master `docs/README.md` index; per-module design docs for AVEP, RunOps, ATC, Neurealm.
+
+## 15. Known Risks
+
+- **R1** Missing execution evidence blocks BP1.1 final approval.
+- **R2** Legacy admin-gated catalogs (ETDM/CRM/questionnaires) are still cross-tenant readable to platform admins.
+- **R3** Divergent tenant identity (`runops_tenants` vs `public.tenants`) risks drift as new features touch both.
+- **R4** `src/silicon/**` duplication with `src/avep/**` invites accidental edits to the dead prototype.
+- **R5** No E2E coverage for tenant switch, invitation acceptance, or permission gating — regressions could ship undetected.
+- **R6** Super-admin roster in a code migration slows adding/removing admins.
+- **R7** Real integrations (SolarWinds, Cribl, PagerDuty) not connected — RunOps runs on Demo provider only.
+
+## 16. Blockers
+
+- **B1** Disposable-DB SQL regression suite not executed (needs CI run or local `SUPABASE_DB_URL`). Blocks BP1.1E.
+- **B2** First green run of `bp1-1-platform-foundation.yml` not captured. Blocks BP1.1E.
+- **B3** Post-merge `security--run_security_scan` showing 0 High/Critical not archived. Blocks BP1.1E.
+- **B4** 25 UX evidence screenshots (persona click-through) not captured. Blocks BP1.1E.
+
+## 17. Recommended Next Build Phase
+
+**BP1.1E — Release Evidence & Handoff**, followed by **BP1.2 — Legacy Catalog Tenant Scoping**.
+
+- **BP1.1E**: execute all authored evidence, capture persona screenshots, close blockers B1–B4, publish release notes for GA.
+- **BP1.2**: bring ETDM/CRM/questionnaires under `tenants` + `has_permission`; retire admin-only gating; bridge RunOps tenants.
+
+## 18. Prioritized Task Backlog
+
+Each task: **ID · Priority · Dependency · Effort · Status**.
+
+### BP1.1E — Release Evidence
+
+#### T-001 · P0 · — · S · Not started
+Run `.github/workflows/bp1-1-platform-foundation.yml` on `main` and capture the run URL.
+- **Files**: `.github/workflows/bp1-1-platform-foundation.yml`, `docs/bp1-1-test-evidence.md`.
+- **Acceptance**: both `app` and `database` jobs exit 0; run URL committed under `docs/bp1-1-test-evidence.md`.
+
+#### T-002 · P0 · T-001 · S · Not started
+Execute all `supabase/tests/*.sql` against disposable DB and archive logs.
+- **Files**: `supabase/tests/bp1_1a_regression.sql`, `bp1_1_platform_security.sql`, `bp1_1_tenant_isolation.sql`, `bp1_1_invitations.sql`, `bp1_1_last_admin.sql`; `docs/bp1-1-test-evidence.md`.
+- **Acceptance**: 5 suites exit 0 with `ON_ERROR_STOP=1`; logs attached to evidence doc.
+
+#### T-003 · P0 · — · S · Not started
+Post-merge security rescan confirming 0 High / 0 Critical.
+- **Files**: `docs/bp1-1-security-disposition.md`.
+- **Acceptance**: rescan snapshot (date + counts) committed.
+
+#### T-004 · P0 · T-001,T-002,T-003 · S · Not started
+Persona click-through screenshots (25 UX evidence items).
+- **Files**: `docs/bp1-1-test-evidence.md`.
+- **Acceptance**: all 25 items captured with screenshot + short caption.
+
+#### T-018 · P0 · T-001..T-004 · S · Not started
+Publish `docs/bp1-1-release-notes.md` for GA and close BP1.1.
+- **Files**: `docs/bp1-1-release-notes.md`, `docs/bp1-1-release-checklist.md`.
+- **Acceptance**: release notes stamped GA; checklist boxes ticked.
+
+### In-flight Continuity
+
+#### T-015 · P1 · — · M · In progress
+AVEP scenario continuity pass — DDMAC descriptor engine across all 21 routes.
+- **Files**: `src/avep/data/canonical.ts`, `src/avep/pages/**`.
+- **Acceptance**: KPIs, entity names, evidence IDs consistent across pages; visual review sign-off.
+
+#### T-016 · P1 · — · M · In progress
+ITSM Auto Ticket Categorization sub-page data continuity with parent dashboard.
+- **Files**: `src/pages/itsm/**` (dashboard + 15 sub-pages under `AtcShell`).
+- **Acceptance**: all 15 sub-pages reflect parent KPIs and shared entities; no orphan fixtures.
+
+### BP1.2 — Legacy Catalog Tenant Scoping
+
+#### T-005 · P1 · — · L · Not started
+Migrate `etdm_*`, `crm_*`, `questionnaires`, `questionnaire_*`, `stakeholder_registers` to be tenant-scoped with RLS via `has_permission`.
+- **Files**: new `supabase/migrations/*_bp1_2_tenant_scope.sql`; regression additions under `supabase/tests/`.
+- **Acceptance**: no cross-tenant admin reads; every touched table has explicit GRANTs; regression SQL passes.
+
+#### T-006 · P1 · T-005 · M · Not started
+Refactor frontend hooks/pages to use tenant-scoped queries.
+- **Files**: `src/hooks/crm/*`, `src/hooks/etdm/*`, `src/hooks/questionnaires/*`, `src/pages/crm/**`, `src/components/etdm/**`, `src/components/questionnaires/**`.
+- **Acceptance**: pages function per-tenant; Vitest suite + typecheck pass; no `is_platform_admin` gates remaining on these pages.
+
+#### T-007 · P1 · — · M · Not started
+Bridge `runops_tenants` ↔ `public.tenants` (TD-03).
+- **Files**: new migration + `src/runops/providers/*`, `src/runops/profiles/*`.
+- **Acceptance**: single tenant identity resolvable across product + RunOps; RunOps behavior preserved (Contoso scenarios green).
+
+### Test / A11y Automation
+
+#### T-008 · P1 · — · M · Not started
+Playwright E2E harness for tenant switch, invitation acceptance, permission gating (TD-05).
+- **Files**: `playwright.config.ts`, `e2e/**`, CI workflow addition.
+- **Acceptance**: 3 flows green in CI; Playwright job runs on PR.
+
+#### T-009 · P2 · T-008 · S · Not started
+Axe-core a11y automation in CI (TD-04).
+- **Files**: `vitest.config.ts` or new axe job; `e2e/**` if using Playwright axe.
+- **Acceptance**: axe run in CI; job fails on serious/critical violations.
+
+### Debt Burn-down
+
+#### T-010 · P2 · — · S · Not started
+Local scratch-DB bootstrap script (TD-06).
+- **Files**: `scripts/bootstrap-scratch-db.sh`.
+- **Acceptance**: one command produces a validated local DB; documented in `docs/bp1-1-operational-runbook.md`.
+
+#### T-011 · P2 · — · S · Not started
+Externalize super-admin bootstrap roster (TD-02).
+- **Files**: migration relocating roster into a config/permissions table; `handle_new_user` update.
+- **Acceptance**: adding/removing a super admin no longer requires a code migration.
+
+#### T-012 · P2 · — · S · Not started
+Remove `AcceptInvitation` `localStorage` coupling (TD-01).
+- **Files**: `src/platform/pages/AcceptInvitation.tsx`, `src/platform/access/AccessContext.tsx`.
+- **Acceptance**: no client-supplied active tenant crosses the provider boundary; server-side revalidation only.
+
+#### T-013 · P2 · — · S · Not started
+Archive or delete `src/silicon/**` prototype (TD-09).
+- **Files**: `src/silicon/**`, `src/App.tsx`.
+- **Acceptance**: no active route imports `silicon`; module removed or explicitly archived under `/archive` with a README.
+
+#### T-014 · P3 · — · S · Not started
+Master docs index and per-module design docs (TD-10).
+- **Files**: `docs/README.md`, new `docs/avep-*.md`, `docs/runops-*.md`, `docs/itsm-atc-*.md`.
+- **Acceptance**: single entry-point index links every doc; each module has at least one design doc.
+
+### Feature: Real Integrations
+
+#### T-017 · P2 · T-007 · L · Not started
+`ConnectedOperationsProvider` implementation for at least one real integration (SolarWinds / Cribl / PagerDuty).
+- **Files**: `src/runops/providers/ConnectedOperationsProvider.ts`, new edge function(s) under `supabase/functions/`.
+- **Acceptance**: at least one integration returns live data behind a feature flag; Demo provider remains default.
+
+## 19. Acceptance Criteria for Next Phase (BP1.1E)
+
+- CI workflow green on `main`; run URL committed.
+- 5 SQL suites executed 0-exit against disposable DB; logs archived in `docs/bp1-1-test-evidence.md`.
+- Post-merge security scan: 0 High / 0 Critical, snapshot committed.
+- 25 UX evidence items captured (screenshot + caption) in `docs/bp1-1-test-evidence.md`.
+- `docs/bp1-1-release-notes.md` published for GA; `docs/bp1-1-release-checklist.md` fully ticked.
+- No regressions: Vitest 6/6, typecheck clean, build clean.
+
+## 20. Recommended Build Order
+
+1. **T-001 → T-002 → T-003 → T-004 → T-018** — close BP1.1 release evidence and ship GA.
+2. In parallel: **T-015, T-016** — finish in-flight continuity work.
+3. **T-005 → T-006** — BP1.2 tenant scoping (migration first, then frontend refactor).
+4. **T-007 → T-017** — RunOps ↔ public tenant bridge, then first real integration.
+5. **T-008 → T-009** — E2E harness, then a11y automation stacked on it.
+6. **T-010, T-011, T-012, T-013** — debt burn-down (parallelizable).
+7. **T-014** — docs index and per-module design docs.
