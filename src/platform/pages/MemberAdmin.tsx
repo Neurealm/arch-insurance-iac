@@ -45,6 +45,7 @@ export default function MemberAdmin() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("all");
   const [page, setPage] = useState(0);
+  const [invPage, setInvPage] = useState(0);
 
   const members = useQuery({
     queryKey: ["platform", "members", activeTenantId, search, status, page],
@@ -63,16 +64,17 @@ export default function MemberAdmin() {
   });
 
   const invitations = useQuery({
-    queryKey: ["platform", "invitations", activeTenantId],
+    queryKey: ["platform", "invitations", activeTenantId, invPage],
     enabled: !!activeTenantId,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_tenant_invitations", {
-        p_tenant_id: activeTenantId!, p_status: null, p_limit: 50, p_offset: 0,
+        p_tenant_id: activeTenantId!, p_status: null, p_limit: PAGE, p_offset: invPage * PAGE,
       });
       if (error) throw error;
       return (data ?? []) as Invitation[];
     },
   });
+
 
   const roles = useQuery({
     queryKey: ["platform", "roles", activeTenantId],
