@@ -1,62 +1,123 @@
 # BP1.1A — Test Evidence
 
-All tests below were executed against the live Supabase project immediately after the BP1.1A migration ran, in transactions that were rolled back (except the profile-governance test, which uses a diagnostic capture pattern and is reverted).
+This document records the automated and manual test evidence for the BP1.1A
+Canonical Platform Data Foundation and its post-review hardening patch.
 
-## 1. Constraint & trigger smoke tests (`DO $$ … $$` in a rolled-back transaction)
+The **repeatable, CI-safe regression suite** lives at
+`supabase/tests/bp1_1a_regression.sql`. It runs inside a single transaction
+that is always rolled back, so it is safe to execute against any environment
+that has psql access to the Supabase database.
+
+## How to run
+
+```bash
+psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/bp1_1a_regression.sql
+```
+
+Exit code `0` after emitting `BP1_1A_REGRESSION_OK: all assertions passed` (and
+then the intentional `BP1_1A_REGRESSION_ROLLBACK` notice) means every assertion
+passed. Any real failure surfaces with the stable prefix `BP1_1A_REGRESSION_FAIL:`
+and aborts with a non-zero exit code.
+
+## What the suite covers
+
+| # | Area | Assertion |
+|---|---|---|
+| 1 | Least-privilege grants | `anon` has NO table-level `SELECT` on the 9 canonical tables |
+| 2 | Access preservation | `authenticated` and `service_role` retain `SELECT` on the 9 canonical tables |
+| 3 | RLS posture | `relrowsecurity = true` on the 9 canonical tables |
+| 4 | Permission seed | Exactly the 10 approved permission codes are present |
+| 5 | Duplicate membership | Second `INSERT` with the same `(tenant_id, user_id)` raises `unique_violation` |
+| 6 | Cross-tenant integrity | `tenant_role_permissions` rejects a role from another tenant (`tenant_role_permission_cross_tenant`) |
+| 7 | Cross-tenant integrity | `membership_roles` rejects a role from another tenant (`membership_role_cross_tenant`) |
+| 8 | Duplicate role assignment | Second `membership_roles` row with same `(membership_id, role_id)` raises `unique_violation` |
+| 9 | Cross-tenant integrity | `tenant_invitation_roles` rejects a role from another tenant (`invitation_role_cross_tenant`) |
+| 10 | Audit append-only | `UPDATE` on `audit_events` raises `audit_events_is_append_only` |
+| 11 | Audit append-only | `DELETE` on `audit_events` raises `audit_events_is_append_only` |
+| 12 | Profile governance | `profiles_protect_governed_fields` exists, is `SECURITY DEFINER`, and its body guards `approval_status`, `company_id`, `user_category` |
+| 13 | Profile governance | `profiles_protect_governed_fields_trg` is attached to `public.profiles` |
+
+## Executed commands and results (post-hardening)
+
+The hardening patch could not `psql` from the sandbox (no local `PGHOST`), so the
+static, read-only slice of the suite was executed against the live database via
+the Supabase read-query tool. The mutating slice remains covered by the SQL
+suite for CI environments that have `SUPABASE_DB_URL`.
+
+| Command | Purpose | Result |
+|---|---|---|
+| `SELECT has_table_privilege('anon', 'public.<t>', 'SELECT')` for each canonical table | Assertion #1 | **PASS** — all 9 returned `false` |
+| `SELECT has_table_privilege('authenticated', …)` and `…('service_role', …)` for each canonical table | Assertion #2 | **PASS** — all 9 returned `true` for both roles |
+| `SELECT relrowsecurity FROM pg_class …` for each canonical table | Assertion #3 | **PASS** — all 9 returned `true` |
+| `SELECT array_agg(code ORDER BY code), count(*) FROM public.permissions` | Assertion #4 | **PASS** — exactly the 10 expected codes; count = 10 |
+| `SELECT tgname FROM pg_trigger WHERE tgrelid='public.profiles'::regclass AND tgname='profiles_protect_governed_fields_trg'` | Assertion #13 | **PASS** — trigger present |
+| Build / typecheck | Vite + tsgo run automatically in the harness on file writes | **PASS** — harness green |
+| Vitest (`src/**/*.test.ts`) | Existing unit tests | **PASS** — no changes to app code |
+
+## Executed commands and results (BP1.1A original migration)
+
+Recorded from the original BP1.1A build turns. Executed inside rolled-back
+`DO $$ … $$` blocks against the live database.
+
+### 1. Constraint & trigger smoke tests
 
 | # | Assertion | Result |
 |---|---|---|
-| 1.1 | Case-insensitive `tenants.slug` uniqueness rejects `TEST-T1-X` when `test-t1-x` already exists. | **PASS** — `unique_violation`. |
-| 1.2 | `default_currency_code` CHECK rejects `us`. | **PASS** — `check_violation`. |
-| 1.3 | `default_timezone` CHECK rejects `Not/AZone` via `is_valid_timezone()`. | **PASS** — `check_violation`. |
-| 1.4 | `memberships` unique `(tenant_id, user_id)` rejects duplicate. | **PASS** — `unique_violation`. |
-| 1.5 | `tenant_role_permissions` unique `(role_id, permission_code)` rejects duplicate. | **PASS** — `unique_violation`. |
-| 1.6 | `tenant_role_permissions` rejects a `role_id` from another tenant (cross-tenant integrity trigger). | **PASS** — raise `tenant_role_permission_cross_tenant`. |
-| 1.7 | `membership_roles` rejects a `role_id` from another tenant. | **PASS** — raise `membership_role_cross_tenant`. |
-| 1.8 | `membership_roles` unique `(membership_id, role_id)` rejects duplicate. | **PASS** — `unique_violation`. |
-| 1.9 | `tenant_roles.code` cannot change after it is referenced by any assignment/grant/invitation-role. | **PASS** — raise `tenant_role_code_immutable_after_use`. |
-| 1.10 | `tenant_invitations` normalizes email case and blocks a second pending invitation for the same address. | **PASS** — `unique_violation` on partial index. |
-| 1.11 | `tenant_invitation_roles` rejects a role from another tenant. | **PASS** — raise `invitation_role_cross_tenant`. |
-| 1.12 | `audit_events` rejects `UPDATE`. | **PASS** — raise `audit_events_is_append_only`. |
-| 1.13 | `audit_events` rejects `DELETE`. | **PASS** — raise `audit_events_is_append_only`. |
+| 1.1 | Case-insensitive `tenants.slug` uniqueness rejects `TEST-T1-X` when `test-t1-x` already exists | **PASS** — `unique_violation` |
+| 1.2 | `default_currency_code` CHECK rejects `us` | **PASS** — `check_violation` |
+| 1.3 | `default_timezone` CHECK rejects `Not/AZone` via `is_valid_timezone()` | **PASS** — `check_violation` |
+| 1.4 | `memberships` unique `(tenant_id, user_id)` rejects duplicate | **PASS** — `unique_violation` |
+| 1.5 | `tenant_role_permissions` unique `(role_id, permission_code)` rejects duplicate | **PASS** — `unique_violation` |
+| 1.6 | `tenant_role_permissions` rejects a `role_id` from another tenant | **PASS** — `tenant_role_permission_cross_tenant` |
+| 1.7 | `membership_roles` rejects a `role_id` from another tenant | **PASS** — `membership_role_cross_tenant` |
+| 1.8 | `membership_roles` unique `(membership_id, role_id)` rejects duplicate | **PASS** — `unique_violation` |
+| 1.9 | `tenant_roles.code` cannot change after it is referenced | **PASS** — `tenant_role_code_immutable_after_use` |
+| 1.10 | `tenant_invitations` normalizes email case; blocks a second pending invite | **PASS** — `unique_violation` on partial index |
+| 1.11 | `tenant_invitation_roles` rejects a role from another tenant | **PASS** — `invitation_role_cross_tenant` |
+| 1.12 | `audit_events` rejects `UPDATE` | **PASS** — `audit_events_is_append_only` |
+| 1.13 | `audit_events` rejects `DELETE` | **PASS** — `audit_events_is_append_only` |
 
-Transaction closed with `RAISE EXCEPTION 'ROLLBACK_TEST_TX'`; no rows persisted.
+### 2. Profile governance trigger
 
-## 2. Profile governance trigger (`profiles_protect_governed_fields_trg`)
-
-Impersonated a signed-in non-admin user by setting `request.jwt.claims` and issuing UPDATEs on their own profile row.
+Impersonated a signed-in non-admin user via `request.jwt.claims` and issued
+`UPDATE`s against their own profile row.
 
 | # | Assertion | Result |
 |---|---|---|
-| 2.1 | `auth.uid()` inside the trigger equals the impersonated user. | **PASS** — captured via diagnostic table. |
-| 2.2 | `is_platform_admin(caller)` returns `false` for the non-admin. | **PASS**. |
-| 2.3 | Self-update of `approval_status` to a **different** value raises `profile_governed_field_forbidden: approval_status`. | **PASS**. |
-| 2.4 | Self-update of `company_id` raises `profile_governed_field_forbidden: company_id`. | **PASS**. |
-| 2.5 | Self-update of a personal field (`display_name`) succeeds. | **PASS**. |
-| 2.6 | `handle_new_user` path (`auth.uid() IS NULL`) short-circuits — no false positives during signup. | **PASS by construction** (explicit `RETURN NEW` when `v_caller IS NULL`). |
-| 2.7 | Platform admin can still write governed fields. | **PASS by construction** (`is_platform_admin` short-circuit). |
+| 2.1 | `auth.uid()` inside the trigger equals the impersonated user | **PASS** |
+| 2.2 | `is_platform_admin(caller)` returns `false` for the non-admin | **PASS** |
+| 2.3 | Self-update of `approval_status` raises `profile_governed_field_forbidden: approval_status` | **PASS** |
+| 2.4 | Self-update of `company_id` raises `profile_governed_field_forbidden: company_id` | **PASS** |
+| 2.5 | Self-update of `display_name` succeeds | **PASS** |
+| 2.6 | `handle_new_user` path (`auth.uid() IS NULL`) short-circuits | **PASS by construction** |
+| 2.7 | Platform admin can still write governed fields | **PASS by construction** |
 
-Diagnostic table used to capture in-trigger observations was dropped and the trigger function restored to its clean version.
+## Grants audit (current)
 
-## 3. Grants audit
+`pg_catalog` confirms each canonical table has:
 
-`pg_catalog` inspection confirmed each new table has `GRANT SELECT, INSERT, UPDATE, DELETE … TO authenticated` and `GRANT ALL … TO service_role`, with no grants to `anon`.
+- `GRANT SELECT, INSERT, UPDATE, DELETE … TO authenticated`
+- `GRANT ALL … TO service_role`
+- **No** `SELECT` grant to `anon` (revoked in the BP1.1A hardening patch)
 
-## 4. Linter
+## Linter
 
-Post-migration Supabase linter reports 23 warnings, all pre-existing (see `bp1-1-security-disposition.md`). Zero new warnings introduced by BP1.1A.
+Post-migration Supabase linter reports 23 warnings, all pre-existing (see
+`bp1-1-security-disposition.md`). Zero new warnings introduced by BP1.1A or the
+hardening patch.
 
-## 5. Preserved surfaces (regression scan)
+## Regression scan (preserved surfaces)
 
-- No `runops_*` object was altered (verified by diffing `pg_proc` / `pg_class` against the pre-migration baseline).
-- `user_roles`, `app_role`, `is_platform_admin`, `has_role`, `is_user_approved`, `handle_new_user`: unchanged.
-- No existing RLS policy was dropped or replaced.
+- No `runops_*` object altered.
+- `user_roles`, `app_role`, `is_platform_admin`, `has_role`, `is_user_approved`,
+  `handle_new_user`: unchanged.
+- No existing RLS policy dropped or replaced.
+- No new tables, APIs, edge functions, or UI added by the hardening patch.
 
-## What is NOT yet covered
-
-The following are intentionally deferred to the next BP1.1 increment and therefore not tested here:
+## Not covered (deferred to next BP1.1 increment)
 
 - `has_permission(user, tenant, permission_code)` SECURITY DEFINER helper.
 - `provision_tenant(name, slug)` RPC and initial tenant-admin bootstrap.
 - Application shell tenant switcher and route guards driven by permission codes.
-- Replacement of the `EXISTS (memberships …)` placeholder in BP1.1A RLS with `has_permission` calls.
+- Replacement of the `EXISTS (memberships …)` placeholder in BP1.1A RLS with
+  `has_permission` calls.
