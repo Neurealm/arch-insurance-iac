@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccess } from "@/platform/access/AccessContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
+import { LoadingState, ErrorState, EmptyState } from "@/platform/components/States";
 
 type Summary = {
   active_members: number | null;
@@ -18,7 +19,7 @@ type Summary = {
 export default function PlatformHome() {
   const { activeTenantId, activeTenant } = useAccess();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["platform", "home-summary", activeTenantId],
     enabled: !!activeTenantId,
     queryFn: async () => {
@@ -30,26 +31,27 @@ export default function PlatformHome() {
     },
   });
 
-  if (isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
-  if (error) return <div className="text-sm text-destructive">Failed to load: {(error as Error).message}</div>;
+  if (isLoading) return <LoadingState />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
   if (!data) return null;
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <MetricCard label="Active members" value={data.active_members} hidden={!data.permissions.members_view} />
-        <MetricCard label="Pending invitations" value={data.pending_invitations} hidden={!data.permissions.members_view} />
-        <MetricCard label="Active roles" value={data.active_roles} hidden={!data.permissions.roles_view} />
-      </div>
+      <section aria-labelledby="platform-home-heading">
+        <h2 id="platform-home-heading" className="sr-only">Workspace summary</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <MetricCard label="Active members" value={data.active_members} hidden={!data.permissions.members_view} />
+          <MetricCard label="Pending invitations" value={data.pending_invitations} hidden={!data.permissions.members_view} />
+          <MetricCard label="Active roles" value={data.active_roles} hidden={!data.permissions.roles_view} />
+        </div>
+      </section>
 
       {data.permissions.audit_view && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Recent audit events</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle className="text-sm font-medium">Recent audit events</CardTitle></CardHeader>
           <CardContent>
             {!data.recent_audit_events.length ? (
-              <p className="text-sm text-muted-foreground">No audit events recorded yet for {activeTenant?.name}.</p>
+              <EmptyState title="No audit events yet" description={`Nothing has been recorded for ${activeTenant?.name ?? "this workspace"}.`} />
             ) : (
               <ul className="divide-y divide-border text-sm">
                 {data.recent_audit_events.map((ev) => (

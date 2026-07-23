@@ -1,6 +1,6 @@
-import { Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAccess } from "@/platform/access/AccessContext";
+import { ForbiddenState, LoadingState } from "@/platform/components/States";
 
 /**
  * Route guard requiring both authentication and a specific permission code
@@ -10,39 +10,21 @@ import { useAccess } from "@/platform/access/AccessContext";
 export function PermissionRoute({
   permission,
   children,
-  redirectTo = "/platform",
 }: {
   permission: string;
   children: JSX.Element;
-  redirectTo?: string;
 }) {
   return (
     <ProtectedRoute>
-      <PermissionGate permission={permission} redirectTo={redirectTo}>
-        {children}
-      </PermissionGate>
+      <PermissionGate permission={permission}>{children}</PermissionGate>
     </ProtectedRoute>
   );
 }
 
-function PermissionGate({
-  permission,
-  redirectTo,
-  children,
-}: {
-  permission: string;
-  redirectTo: string;
-  children: JSX.Element;
-}) {
+function PermissionGate({ permission, children }: { permission: string; children: JSX.Element }) {
   const { loading, activeTenantId, hasPermission } = useAccess();
-  if (loading) {
-    return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading workspace…</div>;
-  }
-  if (!activeTenantId) {
-    return <Navigate to="/platform" replace />;
-  }
-  if (!hasPermission(permission)) {
-    return <Navigate to={redirectTo} replace />;
-  }
+  if (loading) return <LoadingState label="Checking access…" />;
+  if (!activeTenantId) return <ForbiddenState permission={permission} />;
+  if (!hasPermission(permission)) return <ForbiddenState permission={permission} />;
   return children;
 }

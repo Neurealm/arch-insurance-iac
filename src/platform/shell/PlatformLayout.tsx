@@ -3,6 +3,7 @@ import { AccessProvider, useAccess } from "@/platform/access/AccessContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { CreateTenantDialog } from "@/platform/components/CreateTenantDialog";
 
 const TABS: { to: string; label: string; permission?: string }[] = [
   { to: "/platform", label: "Home", permission: "tenant.view" },
@@ -10,6 +11,7 @@ const TABS: { to: string; label: string; permission?: string }[] = [
   { to: "/platform/roles", label: "Roles", permission: "roles.view" },
   { to: "/platform/audit", label: "Audit", permission: "audit.view" },
   { to: "/platform/settings", label: "Settings", permission: "tenant.view" },
+  { to: "/platform/profile", label: "Profile" },
 ];
 
 function Header() {
@@ -29,11 +31,17 @@ function Header() {
                 <SelectTrigger aria-label="Active workspace"><SelectValue placeholder="Select workspace" /></SelectTrigger>
                 <SelectContent>
                   {tenants.map((t) => (
-                    <SelectItem key={t.tenant_id} value={t.tenant_id}>{t.name}</SelectItem>
+                    <SelectItem key={t.tenant_id} value={t.tenant_id}>
+                      {t.name}
+                      {t.membership_status && t.membership_status !== "active" && !t.platform_admin && (
+                        <span className="ml-2 text-xs text-muted-foreground">({t.membership_status})</span>
+                      )}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+            {isPlatformAdmin && <CreateTenantDialog />}
           </div>
         </div>
         <nav className="flex flex-wrap gap-1" aria-label="Platform sections">
@@ -49,6 +57,7 @@ function Header() {
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`
               }
+              aria-current={({ isActive }: any) => (isActive ? "page" : undefined) as any}
             >
               {t.label}
             </NavLink>
@@ -60,24 +69,25 @@ function Header() {
 }
 
 function Shell() {
-  const { loading, tenants, activeTenantId } = useAccess();
+  const { loading, tenants, activeTenantId, isPlatformAdmin } = useAccess();
   if (loading && !activeTenantId) {
-    return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading workspace…</div>;
+    return <div className="min-h-dvh grid place-items-center text-muted-foreground">Loading workspace…</div>;
   }
   if (!tenants.length) {
     return (
-      <div className="min-h-screen grid place-items-center px-6 text-center">
-        <div className="max-w-md space-y-2">
+      <main className="min-h-dvh grid place-items-center px-6 text-center">
+        <div className="max-w-md space-y-3">
           <h2 className="text-lg font-semibold text-foreground">No workspaces available</h2>
           <p className="text-sm text-muted-foreground">
             You are signed in but have not been added to a tenant workspace. Ask an administrator to invite you.
           </p>
+          {isPlatformAdmin && <div className="pt-2"><CreateTenantDialog /></div>}
         </div>
-      </div>
+      </main>
     );
   }
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <Header />
       <main className="mx-auto max-w-7xl px-6 py-6">
         <Outlet />
