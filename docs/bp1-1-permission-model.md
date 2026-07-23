@@ -1,9 +1,9 @@
-# BP1.1A — Permission Model (Seed)
+# BP1.1 — Permission Model
 
-Authorization for BP1.1A tables uses two decision points:
+Authorization for canonical tenant tables uses two decision points:
 
-1. **Platform-wide short-circuit** — `public.is_platform_admin(auth.uid())`. Preserved from the legacy stack; every new policy grants platform admins full access.
-2. **Tenant membership check** — `EXISTS (memberships … status='active')`. This is the placeholder used by BP1.1A RLS. It will be **replaced** (not augmented) by `public.has_permission(_user_id, _tenant_id, _permission_code)` in the next increment. No policy in BP1.1A references role names, so the swap is a policy rewrite, not a data migration.
+1. **Platform-wide short-circuit** — `public.is_platform_admin(auth.uid())`. Preserved from the legacy stack; every canonical policy grants platform admins full access.
+2. **Permission evaluation** — `public.has_permission(auth.uid(), tenant_id, <code>)` (BP1.1B). Deny-by-default. Denies suspended memberships, deactivated memberships, and archived roles. No canonical policy names a role.
 
 ## Seeded permission codes
 
