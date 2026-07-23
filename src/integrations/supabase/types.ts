@@ -7385,11 +7385,11 @@ export type Database = {
           p_to?: string
         }
         Returns: {
-          action: string
+          action_code: string
           actor_email: string
-          actor_id: string
-          after_state: Json
-          before_state: Json
+          actor_user_id: string
+          after_values: Json
+          before_values: Json
           correlation_id: string
           event_id: string
           object_id: string
@@ -7403,11 +7403,11 @@ export type Database = {
       list_authorized_tenants: {
         Args: never
         Returns: {
-          default_currency: string
+          default_currency_code: string
           default_timezone: string
-          is_platform_admin: boolean
           membership_status: string
           name: string
+          platform_admin: boolean
           slug: string
           status: string
           tenant_id: string
@@ -7442,8 +7442,8 @@ export type Database = {
         Returns: {
           display_name: string
           email: string
-          invited_at: string
           joined_at: string
+          last_active_at: string
           membership_id: string
           roles: Json
           status: string
@@ -7456,7 +7456,7 @@ export type Database = {
         Returns: {
           code: string
           description: string
-          is_system: boolean
+          is_system_protected: boolean
           member_count: number
           name: string
           permission_codes: string[]
@@ -7652,7 +7652,7 @@ export type Database = {
       }
       update_tenant: {
         Args: {
-          p_default_currency: string
+          p_default_currency_code: string
           p_default_timezone: string
           p_name: string
           p_slug: string
