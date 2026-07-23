@@ -65,10 +65,12 @@
 ## Audit events
 
 - Every mutation is `INSERT` only; `audit_events_reject_mutation` trigger raises on `UPDATE` / `DELETE`. RLS additionally denies write outside of platform admins.
-- Reads restricted to platform admins in BP1.1A. Tenant-scoped reader policies arrive with `has_permission`.
+- BP1.1B: tenant-scoped reads are allowed to users holding `audit.view` on the row's tenant. Server-side helpers (`emit_audit_event`) fan out from every tenant/member/role/permission RPC.
 
 ## Interaction with legacy layer
 
-- `is_platform_admin(auth.uid())` is the short-circuit branch of every new SELECT/UPDATE policy — platform admins retain full visibility without a new membership.
-- Ordinary tenant reads/writes route through `EXISTS (memberships WHERE tenant_id = … AND user_id = auth.uid() AND status = 'active')` in BP1.1A. `has_permission` will replace these EXISTS predicates in the next increment without breaking the object graph.
-- RunOps remains its own authority island; no policy in BP1.1A references any `runops_*` object.
+- `is_platform_admin(auth.uid())` remains the short-circuit branch of every canonical policy — platform admins retain full visibility without any tenant membership.
+- BP1.1B: ordinary tenant reads/writes route through `public.has_permission(auth.uid(), tenant_id, <code>)`. No canonical policy names a role. Suspended memberships, deactivated memberships, and archived roles all resolve to false.
+- Provisioning is atomic: `provision_tenant` creates the tenant, seeds default roles (`tenant_admin`, `tenant_member`, `tenant_viewer`, `tenant_auditor`), assigns the first admin membership, and emits audit — all in one transaction.
+- Last-tenant-administrator safeguard triggers protect memberships, membership-role assignments, tenant-admin role status, and admin-required permissions. Pending invitations do not count; a platform admin without a membership does not count.
+- RunOps remains its own authority island; no BP1.1B policy references any `runops_*` object.
