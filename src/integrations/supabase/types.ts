@@ -7345,6 +7345,10 @@ export type Database = {
         Args: { _tenant_id?: string }
         Returns: Json
       }
+      get_platform_home_summary: {
+        Args: { p_tenant_id: string }
+        Returns: Json
+      }
       has_permission: {
         Args: { _permission_code: string; _tenant_id: string; _user_id: string }
         Returns: boolean
@@ -7368,6 +7372,98 @@ export type Database = {
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       is_user_approved: { Args: { _user_id: string }; Returns: boolean }
       is_valid_timezone: { Args: { _tz: string }; Returns: boolean }
+      list_audit_events: {
+        Args: {
+          p_action?: string
+          p_actor?: string
+          p_from?: string
+          p_limit?: number
+          p_object_type?: string
+          p_offset?: number
+          p_search?: string
+          p_tenant_id: string
+          p_to?: string
+        }
+        Returns: {
+          action: string
+          actor_email: string
+          actor_id: string
+          after_state: Json
+          before_state: Json
+          correlation_id: string
+          event_id: string
+          object_id: string
+          object_type: string
+          occurred_at: string
+          reason: string
+          source: string
+          total_count: number
+        }[]
+      }
+      list_authorized_tenants: {
+        Args: never
+        Returns: {
+          default_currency: string
+          default_timezone: string
+          is_platform_admin: boolean
+          membership_status: string
+          name: string
+          slug: string
+          status: string
+          tenant_id: string
+        }[]
+      }
+      list_tenant_invitations: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_status?: string
+          p_tenant_id: string
+        }
+        Returns: {
+          created_at: string
+          email: string
+          expires_at: string
+          invitation_id: string
+          invited_by: string
+          roles: Json
+          status: string
+          total_count: number
+        }[]
+      }
+      list_tenant_members: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_status?: string
+          p_tenant_id: string
+        }
+        Returns: {
+          display_name: string
+          email: string
+          invited_at: string
+          joined_at: string
+          membership_id: string
+          roles: Json
+          status: string
+          total_count: number
+          user_id: string
+        }[]
+      }
+      list_tenant_roles: {
+        Args: { p_include_archived?: boolean; p_tenant_id: string }
+        Returns: {
+          code: string
+          description: string
+          is_system: boolean
+          member_count: number
+          name: string
+          permission_codes: string[]
+          role_id: string
+          status: string
+        }[]
+      }
       normalize_slug: { Args: { _s: string }; Returns: string }
       provision_tenant: {
         Args: {
@@ -7553,6 +7649,33 @@ export type Database = {
           _status: Database["public"]["Enums"]["membership_status"]
         }
         Returns: Json
+      }
+      update_tenant: {
+        Args: {
+          p_default_currency: string
+          p_default_timezone: string
+          p_name: string
+          p_slug: string
+          p_tenant_id: string
+        }
+        Returns: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          default_currency_code: string
+          default_timezone: string
+          id: string
+          name: string
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenants"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_tenant_role: {
         Args: { _description: string; _name: string; _role_id: string }
