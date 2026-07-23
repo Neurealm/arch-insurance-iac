@@ -67,7 +67,7 @@ export default function Profile() {
       setErrors({});
       const patch: Record<string, any> = {};
       EDITABLE_KEYS.forEach((k) => { patch[k] = (parsed.data as any)[k] || null; });
-      const { error } = await supabase.from("profiles").update(patch).eq("user_id", user!.id);
+      const { error } = await supabase.from("profiles").update(patch as any).eq("user_id", user!.id);
       if (error) throw error;
     },
     onSuccess: () => {

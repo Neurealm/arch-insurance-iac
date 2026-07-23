@@ -114,7 +114,7 @@ export default function TenantSettings() {
         description={<>Changing the slug from <b>{originalSlug}</b> to <b>{values.slug}</b> may break bookmarks and external links.</>}
         confirmLabel="Change slug"
         destructive
-        onConfirm={() => save.mutateAsync()}
+        onConfirm={async () => { await save.mutateAsync(); }}
       />
     </>
   );

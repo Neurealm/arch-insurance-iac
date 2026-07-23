@@ -57,7 +57,7 @@ function Header() {
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`
               }
-              aria-current={({ isActive }: any) => (isActive ? "page" : undefined) as any}
+              
             >
               {t.label}
             </NavLink>
