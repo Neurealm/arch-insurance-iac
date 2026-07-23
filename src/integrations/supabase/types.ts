@@ -170,6 +170,65 @@ export type Database = {
           },
         ]
       }
+      audit_events: {
+        Row: {
+          action_code: string
+          actor_user_id: string | null
+          after_values: Json | null
+          before_values: Json | null
+          correlation_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          object_id: string | null
+          object_type: string
+          occurred_at: string
+          reason: string | null
+          source: string
+          tenant_id: string | null
+        }
+        Insert: {
+          action_code: string
+          actor_user_id?: string | null
+          after_values?: Json | null
+          before_values?: Json | null
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          object_id?: string | null
+          object_type: string
+          occurred_at?: string
+          reason?: string | null
+          source?: string
+          tenant_id?: string | null
+        }
+        Update: {
+          action_code?: string
+          actor_user_id?: string | null
+          after_values?: Json | null
+          before_values?: Json | null
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          object_id?: string | null
+          object_type?: string
+          occurred_at?: string
+          reason?: string | null
+          source?: string
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_activities: {
         Row: {
           company_id: string
@@ -1564,6 +1623,102 @@ export type Database = {
         }
         Relationships: []
       }
+      membership_roles: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          membership_id: string
+          role_id: string
+          tenant_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          membership_id: string
+          role_id: string
+          tenant_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          membership_id?: string
+          role_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_roles_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memberships: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deactivated_at: string | null
+          id: string
+          joined_at: string | null
+          last_active_at: string | null
+          status: Database["public"]["Enums"]["membership_status"]
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
+          id?: string
+          joined_at?: string | null
+          last_active_at?: string | null
+          status?: Database["public"]["Enums"]["membership_status"]
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
+          id?: string
+          joined_at?: string | null
+          last_active_at?: string | null
+          status?: Database["public"]["Enums"]["membership_status"]
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memberships_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nova_knowledge_base: {
         Row: {
           created_at: string
@@ -2113,6 +2268,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      permissions: {
+        Row: {
+          category: string
+          code: string
+          created_at: string
+          description: string
+          is_system: boolean
+          required_for_tenant_administration: boolean
+        }
+        Insert: {
+          category: string
+          code: string
+          created_at?: string
+          description: string
+          is_system?: boolean
+          required_for_tenant_administration?: boolean
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string
+          description?: string
+          is_system?: boolean
+          required_for_tenant_administration?: boolean
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -5957,6 +6139,243 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_invitation_roles: {
+        Row: {
+          assigned_at: string
+          invitation_id: string
+          role_id: string
+          tenant_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          invitation_id: string
+          role_id: string
+          tenant_id: string
+        }
+        Update: {
+          assigned_at?: string
+          invitation_id?: string
+          role_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invitation_roles_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_invitation_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_invitation_roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          normalized_email: string
+          status: Database["public"]["Enums"]["invitation_status"]
+          tenant_id: string
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invited_by?: string | null
+          normalized_email: string
+          status?: Database["public"]["Enums"]["invitation_status"]
+          tenant_id: string
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          normalized_email?: string
+          status?: Database["public"]["Enums"]["invitation_status"]
+          tenant_id?: string
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invitations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_role_permissions: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          permission_code: string
+          role_id: string
+          tenant_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          permission_code: string
+          role_id: string
+          tenant_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          permission_code?: string
+          role_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_role_permissions_permission_code_fkey"
+            columns: ["permission_code"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "tenant_role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_role_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_roles: {
+        Row: {
+          archived_at: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_system_protected: boolean
+          name: string
+          status: Database["public"]["Enums"]["tenant_role_status"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system_protected?: boolean
+          name: string
+          status?: Database["public"]["Enums"]["tenant_role_status"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system_protected?: boolean
+          name?: string
+          status?: Database["public"]["Enums"]["tenant_role_status"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          default_currency_code: string
+          default_timezone: string
+          id: string
+          name: string
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_currency_code?: string
+          default_timezone?: string
+          id?: string
+          name: string
+          slug: string
+          status?: Database["public"]["Enums"]["tenant_status"]
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_currency_code?: string
+          default_timezone?: string
+          id?: string
+          name?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["tenant_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tools_catalog: {
         Row: {
           category: string | null
@@ -6887,6 +7306,8 @@ export type Database = {
       }
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       is_user_approved: { Args: { _user_id: string }; Returns: boolean }
+      is_valid_timezone: { Args: { _tz: string }; Returns: boolean }
+      normalize_slug: { Args: { _s: string }; Returns: string }
       record_user_login_event: {
         Args: {
           _action?: string
@@ -7076,6 +7497,8 @@ export type Database = {
         | "Deprecated"
         | "End of Support"
         | "Retired"
+      invitation_status: "pending" | "accepted" | "expired" | "cancelled"
+      membership_status: "invited" | "active" | "suspended" | "deactivated"
       runops_approval_state:
         | "Pending"
         | "Approved"
@@ -7189,6 +7612,8 @@ export type Database = {
         | "Validating"
         | "Paused"
         | "Disabled"
+      tenant_role_status: "active" | "archived"
+      tenant_status: "active" | "suspended" | "archived"
       user_category: "neurealm_employee" | "customer"
     }
     CompositeTypes: {
@@ -7353,6 +7778,8 @@ export const Constants = {
         "End of Support",
         "Retired",
       ],
+      invitation_status: ["pending", "accepted", "expired", "cancelled"],
+      membership_status: ["invited", "active", "suspended", "deactivated"],
       runops_approval_state: [
         "Pending",
         "Approved",
@@ -7479,6 +7906,8 @@ export const Constants = {
         "Paused",
         "Disabled",
       ],
+      tenant_role_status: ["active", "archived"],
+      tenant_status: ["active", "suspended", "archived"],
       user_category: ["neurealm_employee", "customer"],
     },
   },
