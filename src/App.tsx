@@ -78,6 +78,8 @@ import PlatformRoles from "./platform/pages/RoleAdmin";
 import PlatformAudit from "./platform/pages/AuditExplorer";
 import PlatformTenantSettings from "./platform/pages/TenantSettings";
 import AcceptInvitation from "./platform/pages/AcceptInvitation";
+import PlatformProfile from "./platform/pages/Profile";
+import { PermissionRoute } from "./components/auth/PermissionRoute";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
 import CyberMasterDashboard from "./pages/practice-library/dashboards/cyber/CyberMasterDashboard.tsx";
@@ -837,11 +839,12 @@ const App = () => (
           <Route path="/neurealm-agentic-ai" element={<NeurealmAgenticAI />} />
           <Route path="/invitations/:token" element={<AcceptInvitation />} />
           <Route path="/platform" element={<PlatformLayout />}>
-            <Route index element={<PlatformHome />} />
-            <Route path="members" element={<PlatformMembers />} />
-            <Route path="roles" element={<PlatformRoles />} />
-            <Route path="audit" element={<PlatformAudit />} />
-            <Route path="settings" element={<PlatformTenantSettings />} />
+            <Route index element={<PermissionRoute permission="tenant.view"><PlatformHome /></PermissionRoute>} />
+            <Route path="members" element={<PermissionRoute permission="members.view"><PlatformMembers /></PermissionRoute>} />
+            <Route path="roles" element={<PermissionRoute permission="roles.view"><PlatformRoles /></PermissionRoute>} />
+            <Route path="audit" element={<PermissionRoute permission="audit.view"><PlatformAudit /></PermissionRoute>} />
+            <Route path="settings" element={<PermissionRoute permission="tenant.view"><PlatformTenantSettings /></PermissionRoute>} />
+            <Route path="profile" element={<PlatformProfile />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
