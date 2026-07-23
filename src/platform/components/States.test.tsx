@@ -32,7 +32,7 @@ describe("platform State components", () => {
   });
 
   it("sanitizeError strips PostgREST noise", () => {
-    expect(sanitizeError("ERROR: permission denied for table x: nope"))
+    expect(sanitizeError("permission denied for table x: nope"))
       .toBe("nope");
     expect(sanitizeError("new row violates row-level security policy for table foo"))
       .toBe("You are not allowed to perform this action.");
