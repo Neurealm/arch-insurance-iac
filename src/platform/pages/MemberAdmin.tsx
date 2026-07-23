@@ -45,6 +45,7 @@ export default function MemberAdmin() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("all");
   const [page, setPage] = useState(0);
+  const [invPage, setInvPage] = useState(0);
 
   const members = useQuery({
     queryKey: ["platform", "members", activeTenantId, search, status, page],
@@ -63,16 +64,17 @@ export default function MemberAdmin() {
   });
 
   const invitations = useQuery({
-    queryKey: ["platform", "invitations", activeTenantId],
+    queryKey: ["platform", "invitations", activeTenantId, invPage],
     enabled: !!activeTenantId,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_tenant_invitations", {
-        p_tenant_id: activeTenantId!, p_status: null, p_limit: 50, p_offset: 0,
+        p_tenant_id: activeTenantId!, p_status: null, p_limit: PAGE, p_offset: invPage * PAGE,
       });
       if (error) throw error;
       return (data ?? []) as Invitation[];
     },
   });
+
 
   const roles = useQuery({
     queryKey: ["platform", "roles", activeTenantId],
@@ -159,8 +161,25 @@ export default function MemberAdmin() {
               ))}
             </ul>
           )}
+          {(() => {
+            const invTotal = Number(invitations.data?.[0]?.total_count ?? 0);
+            const invMax = Math.max(0, Math.ceil(invTotal / PAGE) - 1);
+            return (
+              <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                <div>{invTotal} invitation{invTotal === 1 ? "" : "s"}</div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" disabled={invPage === 0}
+                    onClick={() => setInvPage((p) => Math.max(0, p - 1))}>Prev</Button>
+                  <span>Page {invPage + 1} of {invMax + 1}</span>
+                  <Button size="sm" variant="outline" disabled={invPage >= invMax}
+                    onClick={() => setInvPage((p) => Math.min(invMax, p + 1))}>Next</Button>
+                </div>
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
+
     </div>
   );
 }
@@ -169,6 +188,7 @@ function MemberRow({ member, roles, canManage, onDone }: {
   member: Member; roles: Role[]; canManage: boolean; onDone: () => void;
 }) {
   const [rolesOpen, setRolesOpen] = useState(false);
+  const [confirm, setConfirm] = useState<null | "active" | "suspended" | "deactivated">(null);
 
   const setStatus = useMutation({
     mutationFn: async (newStatus: "active" | "suspended" | "deactivated") => {
@@ -178,8 +198,41 @@ function MemberRow({ member, roles, canManage, onDone }: {
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Member updated"); onDone(); },
-    onError: (e) => toast.error(sanitizeError((e as Error).message)),
+    onError: (e) => {
+      const msg = sanitizeError((e as Error).message);
+      if (msg.toLowerCase().includes("last") && msg.toLowerCase().includes("admin"))
+        toast.error("This is the last administrator; assign another admin first.");
+      else toast.error(msg);
+    },
   });
+
+  const memberLabel = member.display_name || member.email || member.user_id;
+  const confirmCopy = {
+    active: {
+      title: "Reactivate member?",
+      confirmLabel: "Reactivate",
+      destructive: false,
+      description: (
+        <>Restore workspace access for <b>{memberLabel}</b>. Existing roles will resume immediately.</>
+      ),
+    },
+    suspended: {
+      title: "Suspend member?",
+      confirmLabel: "Suspend",
+      destructive: true,
+      description: (
+        <>Immediately revoke workspace access for <b>{memberLabel}</b>. This is reversible — you can reactivate them later.</>
+      ),
+    },
+    deactivated: {
+      title: "Deactivate member?",
+      confirmLabel: "Deactivate",
+      destructive: true,
+      description: (
+        <>Permanently deactivate <b>{memberLabel}</b>. This removes all role assignments and cannot be undone from this screen.</>
+      ),
+    },
+  } as const;
 
   return (
     <tr>
@@ -214,13 +267,13 @@ function MemberRow({ member, roles, canManage, onDone }: {
               <DropdownMenuItem onSelect={() => setRolesOpen(true)}>Edit roles…</DropdownMenuItem>
               <DropdownMenuSeparator />
               {member.status !== "active" && (
-                <DropdownMenuItem onSelect={() => setStatus.mutate("active")}>Reactivate</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setConfirm("active")}>Reactivate</DropdownMenuItem>
               )}
               {member.status === "active" && (
-                <DropdownMenuItem onSelect={() => setStatus.mutate("suspended")}>Suspend</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setConfirm("suspended")}>Suspend</DropdownMenuItem>
               )}
               {member.status !== "deactivated" && (
-                <DropdownMenuItem className="text-destructive" onSelect={() => setStatus.mutate("deactivated")}>
+                <DropdownMenuItem className="text-destructive" onSelect={() => setConfirm("deactivated")}>
                   Deactivate
                 </DropdownMenuItem>
               )}
@@ -229,10 +282,23 @@ function MemberRow({ member, roles, canManage, onDone }: {
         )}
         <EditRolesDialog open={rolesOpen} onOpenChange={setRolesOpen}
           member={member} roles={roles} onDone={onDone} />
+        {confirm && (
+          <ConfirmDialog
+            open={!!confirm}
+            onOpenChange={(o) => { if (!o) setConfirm(null); }}
+            title={confirmCopy[confirm].title}
+            description={confirmCopy[confirm].description}
+            confirmLabel={confirmCopy[confirm].confirmLabel}
+            destructive={confirmCopy[confirm].destructive}
+            onConfirm={async () => { await setStatus.mutateAsync(confirm); setConfirm(null); }}
+          />
+        )}
       </td>
     </tr>
   );
 }
+
+
 
 function EditRolesDialog({ open, onOpenChange, member, roles, onDone }: {
   open: boolean; onOpenChange: (o: boolean) => void; member: Member; roles: Role[]; onDone: () => void;

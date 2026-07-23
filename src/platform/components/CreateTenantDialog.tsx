@@ -7,12 +7,15 @@ import { useAccess } from "@/platform/access/AccessContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { sanitizeError } from "@/platform/components/States";
+import { CURRENCY_OPTIONS, TIMEZONE_OPTIONS } from "@/platform/data/tenantOptions";
+
 
 const schema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
@@ -81,11 +84,38 @@ export function CreateTenantDialog() {
             onChange={(v) => setValues((s) => ({ ...s, slug: v.toLowerCase() }))}
             hint="Used in URLs. Lowercase letters, numbers, hyphens." />
           <div className="grid grid-cols-2 gap-3">
-            <Field id="ct-tz" label="Timezone" value={values.timezone} err={errors.timezone}
-              onChange={(v) => setValues((s) => ({ ...s, timezone: v }))} hint="IANA (America/New_York)" />
-            <Field id="ct-cur" label="Currency" value={values.currency} err={errors.currency}
-              onChange={(v) => setValues((s) => ({ ...s, currency: v.toUpperCase() }))} hint="ISO 4217 (USD)" />
+            <div className="space-y-1">
+              <Label htmlFor="ct-tz">Timezone</Label>
+              <Select value={values.timezone} onValueChange={(v) => setValues((s) => ({ ...s, timezone: v }))}>
+                <SelectTrigger id="ct-tz" aria-invalid={!!errors.timezone}
+                  aria-describedby={errors.timezone ? "ct-tz-err" : "ct-tz-hint"}>
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent className="max-h-64">
+                  {TIMEZONE_OPTIONS.map((tz) => <SelectItem key={tz} value={tz}>{tz}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {errors.timezone
+                ? <p id="ct-tz-err" className="text-xs text-destructive">{errors.timezone}</p>
+                : <p id="ct-tz-hint" className="text-xs text-muted-foreground">IANA name.</p>}
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="ct-cur">Currency</Label>
+              <Select value={values.currency} onValueChange={(v) => setValues((s) => ({ ...s, currency: v.toUpperCase() }))}>
+                <SelectTrigger id="ct-cur" aria-invalid={!!errors.currency}
+                  aria-describedby={errors.currency ? "ct-cur-err" : "ct-cur-hint"}>
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent className="max-h-64">
+                  {CURRENCY_OPTIONS.map((c) => <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {errors.currency
+                ? <p id="ct-cur-err" className="text-xs text-destructive">{errors.currency}</p>
+                : <p id="ct-cur-hint" className="text-xs text-muted-foreground">ISO 4217.</p>}
+            </div>
           </div>
+
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={create.isPending}>Cancel</Button>

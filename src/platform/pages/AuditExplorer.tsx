@@ -117,14 +117,12 @@ export default function AuditExplorer() {
                 <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
                   <tr><th className="py-2 pr-4">When</th><th className="py-2 pr-4">Actor</th>
                     <th className="py-2 pr-4">Action</th><th className="py-2 pr-4">Object</th>
-                    <th className="py-2 pr-4">Source</th></tr>
+                    <th className="py-2 pr-4">Source</th>
+                    <th className="py-2 pr-4"><span className="sr-only">View</span></th></tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {events.data.map((e) => (
-                    <tr key={e.event_id} className="cursor-pointer hover:bg-muted/40"
-                      onClick={() => setSelected(e)}
-                      onKeyDown={(k) => { if (k.key === "Enter") setSelected(e); }}
-                      tabIndex={0} role="button" aria-label={`View event ${e.action_code}`}>
+                    <tr key={e.event_id} className="hover:bg-muted/40">
                       <td className="py-2 pr-4 text-xs text-muted-foreground whitespace-nowrap">
                         {format(new Date(e.occurred_at), "MMM d, HH:mm:ss")}
                       </td>
@@ -132,9 +130,16 @@ export default function AuditExplorer() {
                       <td className="py-2 pr-4 font-mono text-xs">{e.action_code}</td>
                       <td className="py-2 pr-4 text-xs">{e.object_type} · <span className="text-muted-foreground">{e.object_id.slice(0,8)}…</span></td>
                       <td className="py-2 pr-4"><Badge variant="outline">{e.source ?? "—"}</Badge></td>
+                      <td className="py-2 pr-4 text-right">
+                        <Button size="sm" variant="ghost" onClick={() => setSelected(e)}
+                          aria-label={`View event ${e.action_code} at ${format(new Date(e.occurred_at), "PPpp")}`}>
+                          View
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
+
               </table>
             </div>
           )}
