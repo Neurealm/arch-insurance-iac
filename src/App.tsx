@@ -71,6 +71,13 @@ import EndToEndStory from "./avep/pages/EndToEndStory";
 import Overview from "./avep/pages/Overview";
 import { AVEP_NAV } from "./avep/shell/navigation";
 import NeurealmAgenticAI from "./pages/neurealm-agentic-ai/NeurealmAgenticAI.tsx";
+import PlatformLayout from "./platform/shell/PlatformLayout";
+import PlatformHome from "./platform/pages/PlatformHome";
+import PlatformMembers from "./platform/pages/MemberAdmin";
+import PlatformRoles from "./platform/pages/RoleAdmin";
+import PlatformAudit from "./platform/pages/AuditExplorer";
+import PlatformTenantSettings from "./platform/pages/TenantSettings";
+import AcceptInvitation from "./platform/pages/AcceptInvitation";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
 import CyberMasterDashboard from "./pages/practice-library/dashboards/cyber/CyberMasterDashboard.tsx";
@@ -828,6 +835,14 @@ const App = () => (
             ))}
           </Route>
           <Route path="/neurealm-agentic-ai" element={<NeurealmAgenticAI />} />
+          <Route path="/invitations/:token" element={<AcceptInvitation />} />
+          <Route path="/platform" element={<PlatformLayout />}>
+            <Route index element={<PlatformHome />} />
+            <Route path="members" element={<PlatformMembers />} />
+            <Route path="roles" element={<PlatformRoles />} />
+            <Route path="audit" element={<PlatformAudit />} />
+            <Route path="settings" element={<PlatformTenantSettings />} />
+          </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
