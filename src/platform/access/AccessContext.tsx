@@ -67,10 +67,10 @@ export function AccessProvider({ children }: { children: ReactNode }) {
 
   const contextQuery = useQuery({
     queryKey: ["platform", "access-context", activeTenantId],
-    enabled: !!user && !!activeTenantId,
+    enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_current_access_context", {
-        _tenant_id: activeTenantId!,
+        _tenant_id: activeTenantId ?? undefined,
       });
       if (error) throw error;
       return data as any;
