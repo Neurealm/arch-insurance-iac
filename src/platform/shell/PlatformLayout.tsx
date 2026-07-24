@@ -5,13 +5,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { CreateTenantDialog } from "@/platform/components/CreateTenantDialog";
 
-const TABS: { to: string; label: string; permission?: string }[] = [
+const TABS: { to: string; label: string; permission?: string; adminOnly?: boolean }[] = [
   { to: "/platform", label: "Home", permission: "tenant.view" },
   { to: "/platform/members", label: "Members", permission: "members.view" },
   { to: "/platform/roles", label: "Roles", permission: "roles.view" },
   { to: "/platform/audit", label: "Audit", permission: "audit.view" },
   { to: "/platform/settings", label: "Settings", permission: "tenant.view" },
   { to: "/platform/profile", label: "Profile" },
+  { to: "/platform/test-hub", label: "Developer · Test Hub", adminOnly: true },
 ];
 
 function Header() {
