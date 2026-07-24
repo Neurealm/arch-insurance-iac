@@ -82,12 +82,14 @@ export function AccessProvider({ children }: { children: ReactNode }) {
     // Cancel and drop every tenant-scoped query before switching to avoid
     // stale-data flashes and back-button leakage.
     await qc.cancelQueries({ queryKey: ["platform"] });
+    await qc.cancelQueries({ queryKey: ["commercial"] });
     qc.removeQueries({ queryKey: ["platform", "access-context"] });
     qc.removeQueries({ queryKey: ["platform", "members"] });
     qc.removeQueries({ queryKey: ["platform", "invitations"] });
     qc.removeQueries({ queryKey: ["platform", "roles"] });
     qc.removeQueries({ queryKey: ["platform", "audit"] });
     qc.removeQueries({ queryKey: ["platform", "home-summary"] });
+    qc.removeQueries({ queryKey: ["commercial"] });
     persistTenant(tenantId, setActiveTenantId);
   }, [activeTenantId, qc]);
 

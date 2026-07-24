@@ -80,6 +80,12 @@ import PlatformTenantSettings from "./platform/pages/TenantSettings";
 import AcceptInvitation from "./platform/pages/AcceptInvitation";
 import PlatformProfile from "./platform/pages/Profile";
 import PlatformTestHub from "./platform/pages/TestHub";
+import CommercialLayout from "./commercial/shell/CommercialLayout";
+import CommercialOverview from "./commercial/pages/CommercialOverview";
+import CommercialProgram from "./commercial/pages/CommercialProgram";
+import CommercialScenarios from "./commercial/pages/CommercialScenarios";
+import CommercialPortfolio from "./commercial/pages/CommercialPortfolio";
+import CommercialSources from "./commercial/pages/CommercialSources";
 import { PermissionRoute } from "./components/auth/PermissionRoute";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
@@ -847,6 +853,13 @@ const App = () => (
             <Route path="settings" element={<PermissionRoute permission="tenant.view"><PlatformTenantSettings /></PermissionRoute>} />
             <Route path="profile" element={<PlatformProfile />} />
             <Route path="test-hub" element={<PlatformTestHub />} />
+          </Route>
+          <Route path="/commercial" element={<CommercialLayout />}>
+            <Route index element={<PermissionRoute permission="commercial.view"><CommercialOverview /></PermissionRoute>} />
+            <Route path="program" element={<PermissionRoute permission="commercial.view"><CommercialProgram /></PermissionRoute>} />
+            <Route path="scenarios" element={<PermissionRoute permission="commercial.view"><CommercialScenarios /></PermissionRoute>} />
+            <Route path="portfolio" element={<PermissionRoute permission="commercial.view"><CommercialPortfolio /></PermissionRoute>} />
+            <Route path="sources" element={<PermissionRoute permission="commercial.view"><CommercialSources /></PermissionRoute>} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
