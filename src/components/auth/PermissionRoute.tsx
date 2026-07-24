@@ -22,8 +22,9 @@ export function PermissionRoute({
 }
 
 function PermissionGate({ permission, children }: { permission: string; children: JSX.Element }) {
-  const { loading, activeTenantId, hasPermission } = useAccess();
+  const { loading, activeTenantId, hasPermission, isPlatformAdmin } = useAccess();
   if (loading) return <LoadingState label="Checking access…" />;
+  if (isPlatformAdmin) return children;
   if (!activeTenantId) return <ForbiddenState permission={permission} />;
   if (!hasPermission(permission)) return <ForbiddenState permission={permission} />;
   return children;
