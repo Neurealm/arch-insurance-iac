@@ -7596,6 +7596,7 @@ export type Database = {
         Args: { _permission_code: string; _role_id: string }
         Returns: undefined
       }
+      bootstrap_commercial_workspace: { Args: never; Returns: Json }
       bootstrap_tenant_default_roles: {
         Args: { _actor: string; _tenant_id: string }
         Returns: undefined
