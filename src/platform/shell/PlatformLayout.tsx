@@ -1,69 +1,129 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { AccessProvider, useAccess } from "@/platform/access/AccessContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { CreateTenantDialog } from "@/platform/components/CreateTenantDialog";
+import {
+  Home,
+  Users,
+  ShieldCheck,
+  ClipboardList,
+  Settings as SettingsIcon,
+  UserCircle2,
+  FlaskConical,
+  ChevronRight,
+} from "lucide-react";
+import type { ComponentType } from "react";
 
-const TABS: { to: string; label: string; permission?: string; adminOnly?: boolean }[] = [
-  { to: "/platform", label: "Home", permission: "tenant.view" },
-  { to: "/platform/members", label: "Members", permission: "members.view" },
-  { to: "/platform/roles", label: "Roles", permission: "roles.view" },
-  { to: "/platform/audit", label: "Audit", permission: "audit.view" },
-  { to: "/platform/settings", label: "Settings", permission: "tenant.view" },
-  { to: "/platform/profile", label: "Profile" },
-  { to: "/platform/test-hub", label: "Developer · Test Hub", adminOnly: true },
+type NavItem = {
+  to: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  permission?: string;
+  adminOnly?: boolean;
+  end?: boolean;
+};
+
+const NAV: NavItem[] = [
+  { to: "/platform", label: "Platform Home", icon: Home, permission: "tenant.view", end: true },
+  { to: "/platform/members", label: "Members", icon: Users, permission: "members.view" },
+  { to: "/platform/roles", label: "Roles", icon: ShieldCheck, permission: "roles.view" },
+  { to: "/platform/audit", label: "Audit", icon: ClipboardList, permission: "audit.view" },
+  { to: "/platform/settings", label: "Settings", icon: SettingsIcon, permission: "tenant.view" },
+  { to: "/platform/profile", label: "Profile", icon: UserCircle2 },
+  { to: "/platform/test-hub", label: "Platform Test Hub", icon: FlaskConical, adminOnly: true },
 ];
 
-function Header() {
-  const { tenants, activeTenantId, switchTenant, activeTenant, isPlatformAdmin, hasPermission } = useAccess();
+function Sidebar() {
+  const { isPlatformAdmin, hasPermission } = useAccess();
+  const items = NAV.filter(
+    (t) => (!t.permission || hasPermission(t.permission)) && (!t.adminOnly || isPlatformAdmin),
+  );
   return (
-    <header className="border-b border-border bg-card">
-      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">Platform Administration</div>
-            <h1 className="text-xl font-semibold text-foreground">{activeTenant?.name ?? "Select a workspace"}</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            {isPlatformAdmin && <Badge variant="secondary">Platform Admin</Badge>}
-            <div className="min-w-[240px]">
-              <Select value={activeTenantId ?? undefined} onValueChange={(v) => switchTenant(v)}>
-                <SelectTrigger aria-label="Active workspace"><SelectValue placeholder="Select workspace" /></SelectTrigger>
-                <SelectContent>
-                  {tenants.map((t) => (
-                    <SelectItem key={t.tenant_id} value={t.tenant_id}>
-                      {t.name}
-                      {t.membership_status && t.membership_status !== "active" && !t.platform_admin && (
-                        <span className="ml-2 text-xs text-muted-foreground">({t.membership_status})</span>
-                      )}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {isPlatformAdmin && <CreateTenantDialog />}
-          </div>
+    <aside className="w-60 shrink-0 border-r border-border bg-card" aria-label="Platform navigation">
+      <div className="px-4 py-4 border-b border-border">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          NeuGAIN
         </div>
-        <nav className="flex flex-wrap gap-1" aria-label="Platform sections">
-          {TABS.filter((t) => (!t.permission || hasPermission(t.permission)) && (!t.adminOnly || isPlatformAdmin)).map((t) => (
+        <div className="text-sm font-semibold text-foreground">Platform</div>
+      </div>
+      <nav className="p-2 space-y-0.5">
+        <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Platform
+        </div>
+        {items.map((t) => {
+          const Icon = t.icon;
+          return (
             <NavLink
               key={t.to}
               to={t.to}
-              end={t.to === "/platform"}
+              end={t.end}
               className={({ isActive }) =>
-                `rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                `flex items-center gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition ${
                   isActive
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`
               }
-              
             >
-              {t.label}
+              <Icon className="h-4 w-4" />
+              <span className="truncate">{t.label}</span>
             </NavLink>
-          ))}
-        </nav>
+          );
+        })}
+      </nav>
+    </aside>
+  );
+}
+
+function Breadcrumb() {
+  const { pathname } = useLocation();
+  const item = NAV.find((n) => (n.end ? pathname === n.to : pathname === n.to || pathname.startsWith(n.to + "/")));
+  const label = item?.to === "/platform/test-hub" ? "Test Hub" : item?.label ?? "";
+  return (
+    <nav className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-label="Breadcrumb">
+      <span>Platform</span>
+      {label && label !== "Platform Home" && (
+        <>
+          <ChevronRight className="h-3 w-3" />
+          <span className="text-foreground">{label}</span>
+        </>
+      )}
+    </nav>
+  );
+}
+
+function Header() {
+  const { tenants, activeTenantId, switchTenant, activeTenant, isPlatformAdmin } = useAccess();
+  return (
+    <header className="border-b border-border bg-card">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3">
+        <div className="min-w-0">
+          <Breadcrumb />
+          <h1 className="mt-0.5 truncate text-lg font-semibold text-foreground">
+            {activeTenant?.name ?? "Select a workspace"}
+          </h1>
+        </div>
+        <div className="flex items-center gap-3">
+          {isPlatformAdmin && <Badge variant="secondary">Platform Admin</Badge>}
+          <div className="min-w-[240px]">
+            <Select value={activeTenantId ?? undefined} onValueChange={(v) => switchTenant(v)}>
+              <SelectTrigger aria-label="Active workspace"><SelectValue placeholder="Select workspace" /></SelectTrigger>
+              <SelectContent>
+                {tenants.map((t) => (
+                  <SelectItem key={t.tenant_id} value={t.tenant_id}>
+                    {t.name}
+                    {t.membership_status && t.membership_status !== "active" && !t.platform_admin && (
+                      <span className="ml-2 text-xs text-muted-foreground">({t.membership_status})</span>
+                    )}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {isPlatformAdmin && <CreateTenantDialog />}
+        </div>
       </div>
     </header>
   );
@@ -88,11 +148,14 @@ function Shell() {
     );
   }
   return (
-    <div className="min-h-dvh bg-background">
-      <Header />
-      <main className="mx-auto max-w-7xl px-6 py-6">
-        <Outlet />
-      </main>
+    <div className="min-h-dvh bg-background flex">
+      <Sidebar />
+      <div className="flex-1 min-w-0 flex flex-col">
+        <Header />
+        <main className="flex-1 mx-auto w-full max-w-7xl px-6 py-6">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
