@@ -40,6 +40,7 @@ const PAGES: PageDescriptor[] = [
   { name: "Audit", description: "Filter, inspect, and view audit event history with redacted payloads.", route: "/platform/audit", icon: ClipboardList, permission: "audit.view", requiresTenant: true, requiresAuth: true },
   { name: "Settings", description: "View and edit tenant metadata (name, currency, timezone, status).", route: "/platform/settings", icon: SettingsIcon, permission: "tenant.view", requiresTenant: true, requiresAuth: true },
   { name: "Profile", description: "Signed-in user profile: display name, email, password change.", route: "/platform/profile", icon: UserCircle2, requiresTenant: false, requiresAuth: true },
+  { name: "Commercial Overview", description: "NeuGAIN Commercial workspace: Project Momentous, gates, scenarios, and source register.", route: "/commercial", icon: Home, permission: "commercial.view", requiresTenant: true, requiresAuth: true, notes: "Requires membership in NeuGAIN Commercial tenant." },
 ];
 
 const APP_VERSION = "BP1.1";
