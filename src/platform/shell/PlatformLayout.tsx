@@ -131,10 +131,10 @@ function Header() {
 
 function Shell() {
   const { loading, tenants, activeTenantId, isPlatformAdmin } = useAccess();
-  if (loading && !activeTenantId) {
+  if (loading && !activeTenantId && !isPlatformAdmin) {
     return <div className="min-h-dvh grid place-items-center text-muted-foreground">Loading workspace…</div>;
   }
-  if (!tenants.length) {
+  if (!tenants.length && !isPlatformAdmin) {
     return (
       <main className="min-h-dvh grid place-items-center px-6 text-center">
         <div className="max-w-md space-y-3">
@@ -142,7 +142,6 @@ function Shell() {
           <p className="text-sm text-muted-foreground">
             You are signed in but have not been added to a tenant workspace. Ask an administrator to invite you.
           </p>
-          {isPlatformAdmin && <div className="pt-2"><CreateTenantDialog /></div>}
         </div>
       </main>
     );
