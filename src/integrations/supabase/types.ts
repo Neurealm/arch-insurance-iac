@@ -8150,6 +8150,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      seed_project_momentous_foundation: { Args: never; Returns: Json }
       seed_user_defaults: {
         Args: { _email: string; _user_id: string }
         Returns: undefined
