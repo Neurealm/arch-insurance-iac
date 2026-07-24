@@ -34,14 +34,19 @@ export default function PlatformHome() {
 
   if (!activeTenantId) {
     return (
-      <EmptyState
-        title={isPlatformAdmin ? "No workspace selected" : "No workspace available"}
-        description={
-          isPlatformAdmin
-            ? "Create a tenant workspace or select one from the switcher in the header to view its summary."
-            : "Ask an administrator to add you to a workspace."
-        }
-      />
+      <div className="space-y-4">
+        {isPlatformAdmin && (
+          <div className="flex justify-end"><CommercialBootstrapButton /></div>
+        )}
+        <EmptyState
+          title={isPlatformAdmin ? "No workspace selected" : "No workspace available"}
+          description={
+            isPlatformAdmin
+              ? "Create a tenant workspace or select one from the switcher in the header to view its summary."
+              : "Ask an administrator to add you to a workspace."
+          }
+        />
+      </div>
     );
   }
   if (isLoading) return <LoadingState />;
