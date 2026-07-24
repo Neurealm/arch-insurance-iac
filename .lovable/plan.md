@@ -4,7 +4,7 @@
 
 - BP1.1 — Platform Foundation — released (see BP1.1 docs; status unchanged by BP2.0).
 - BP2.0 — Commercial Architecture, Source Truth, and Scope Contract — **Built, Pending Independent Validation** (see `docs/commercial/architecture.md`, `docs/commercial/source-truth-register.md`, `docs/commercial/bp2-delivery-map.md`).
-- BP2.1 — Commercial Schema, RLS, Permissions, Roles — pending.
+- BP2.1 — Commercial Schema, RLS, Permissions, Roles — **Built, Pending Independent Validation** (see `supabase/tests/bp2_1_commercial_foundation.sql`, `docs/commercial/bp2-1-test-evidence.md`).
 - BP2.2 — Commercial Shell, Routes, Program CRUD — pending.
 - BP2.3 — Gate Model (G0 + G1..G4) and Evidence Register UI — pending.
 - BP2.4 — Account Universes and Accounts — pending.
