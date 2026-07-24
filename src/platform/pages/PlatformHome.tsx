@@ -17,7 +17,7 @@ type Summary = {
 };
 
 export default function PlatformHome() {
-  const { activeTenantId, activeTenant } = useAccess();
+  const { activeTenantId, activeTenant, isPlatformAdmin } = useAccess();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["platform", "home-summary", activeTenantId],
@@ -31,6 +31,18 @@ export default function PlatformHome() {
     },
   });
 
+  if (!activeTenantId) {
+    return (
+      <EmptyState
+        title={isPlatformAdmin ? "No workspace selected" : "No workspace available"}
+        description={
+          isPlatformAdmin
+            ? "Create a tenant workspace or select one from the switcher in the header to view its summary."
+            : "Ask an administrator to add you to a workspace."
+        }
+      />
+    );
+  }
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
   if (!data) return null;
