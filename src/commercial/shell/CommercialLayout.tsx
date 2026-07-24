@@ -12,6 +12,7 @@ import {
   BookOpen,
   ChevronRight,
   Shield,
+  ArrowLeft,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -34,6 +35,13 @@ function Sidebar() {
   return (
     <aside className="w-60 shrink-0 border-r border-border bg-card" aria-label="Commercial navigation">
       <div className="px-4 py-4 border-b border-border">
+        <Link
+          to="/app"
+          className="mb-3 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          NeuGAIN Command Center
+        </Link>
         <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           NeuGAIN
         </div>
