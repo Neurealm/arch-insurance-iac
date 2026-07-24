@@ -4,6 +4,7 @@ import { useAccess } from "@/platform/access/AccessContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { LoadingState, ErrorState, EmptyState } from "@/platform/components/States";
+import { CommercialBootstrapButton } from "@/platform/components/CommercialBootstrapButton";
 
 type Summary = {
   active_members: number | null;
