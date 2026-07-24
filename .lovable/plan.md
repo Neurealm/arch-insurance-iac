@@ -2,14 +2,16 @@
 
 ## Build Package Sequence
 
-- BP1.1 — Platform Foundation — released (see BP1.1 docs; status unchanged by BP2.0).
-- BP2.0 — Commercial Architecture, Source Truth, and Scope Contract — **Built, Pending Independent Validation** (see `docs/commercial/architecture.md`, `docs/commercial/source-truth-register.md`, `docs/commercial/bp2-delivery-map.md`).
-- BP2.1 — Commercial Schema, RLS, Permissions, Roles — **Built, Pending Independent Validation** (see `supabase/tests/bp2_1_commercial_foundation.sql`, `docs/commercial/bp2-1-test-evidence.md`).
-- BP2.2 — Commercial Workspace Bootstrap & Roles — **Built, Pending Independent Validation** (see `docs/commercial/bp2-2-test-evidence.md`; `public.bootstrap_commercial_workspace()`; `src/platform/components/CommercialBootstrapButton.tsx`).
-- BP2.3 — Gate Model (G0 + G1..G4) and Evidence Register UI — pending.
-- BP2.4 — Account Universes and Accounts — pending.
-- BP2.5 — Financial Scenarios and Opportunities — pending.
-- BP2.6 — Commercial Audit Slice, Reports, Release Hardening — pending.
+- BP1.1 — Platform Foundation — **Released, BP1.1E external execution evidence unresolved** (see `docs/bp1-1-external-execution-guide.md`).
+- BP2.0 — Commercial Architecture, Source Truth, and Scope Contract — **Built, Validated (GO)**.
+- BP2.1 — Commercial Schema, RLS, Permissions, Roles — **Built, Validated (GO)**.
+- BP2.2 — Commercial Workspace Bootstrap & Roles — **Built, Validated (GO)**.
+- BP2.3 — Commercial Shell & Navigation (5 routes) — **Built, Validated (GO)**.
+- BP2.4 — Project Momentous Program, Gates, Metrics, Sources — **Built, Validated (GO)**.
+- BP2.5 — Scenarios (Conservative/Base/Upside) + 69 Directional Assumptions — **Built, Validated (GO)**.
+- BP2.6 — Integrated Overview, Portfolio Foundation, Hardening, Docs — **Built, Pending Final Validation** (see `docs/commercial/bp2-build-evidence.md`, `operator-guide.md`, `known-limitations.md`).
+- BP2 overall — **Built, Pending Final Validation**.
+- Next future package — **Account import & financial calculation engine** (see `docs/commercial/known-limitations.md`).
 
 ---
 
