@@ -182,6 +182,12 @@ const tree: Node[] = [
     ],
   },
   {
+    key: "platform",
+    label: "Platform",
+    icon: ShieldCheck,
+    to: "/platform",
+  },
+  {
     key: "settings",
     label: "Settings",
     icon: Settings,
