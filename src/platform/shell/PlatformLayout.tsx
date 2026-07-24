@@ -46,7 +46,7 @@ function Header() {
           </div>
         </div>
         <nav className="flex flex-wrap gap-1" aria-label="Platform sections">
-          {TABS.filter((t) => !t.permission || hasPermission(t.permission)).map((t) => (
+          {TABS.filter((t) => (!t.permission || hasPermission(t.permission)) && (!t.adminOnly || isPlatformAdmin)).map((t) => (
             <NavLink
               key={t.to}
               to={t.to}
