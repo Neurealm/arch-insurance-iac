@@ -4,6 +4,7 @@ import { useAccess } from "@/platform/access/AccessContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { LoadingState, ErrorState, EmptyState } from "@/platform/components/States";
+import { CommercialBootstrapButton } from "@/platform/components/CommercialBootstrapButton";
 
 type Summary = {
   active_members: number | null;
@@ -33,14 +34,19 @@ export default function PlatformHome() {
 
   if (!activeTenantId) {
     return (
-      <EmptyState
-        title={isPlatformAdmin ? "No workspace selected" : "No workspace available"}
-        description={
-          isPlatformAdmin
-            ? "Create a tenant workspace or select one from the switcher in the header to view its summary."
-            : "Ask an administrator to add you to a workspace."
-        }
-      />
+      <div className="space-y-4">
+        {isPlatformAdmin && (
+          <div className="flex justify-end"><CommercialBootstrapButton /></div>
+        )}
+        <EmptyState
+          title={isPlatformAdmin ? "No workspace selected" : "No workspace available"}
+          description={
+            isPlatformAdmin
+              ? "Create a tenant workspace or select one from the switcher in the header to view its summary."
+              : "Ask an administrator to add you to a workspace."
+          }
+        />
+      </div>
     );
   }
   if (isLoading) return <LoadingState />;
@@ -49,6 +55,15 @@ export default function PlatformHome() {
 
   return (
     <div className="space-y-6">
+      {isPlatformAdmin && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card p-3">
+          <div className="text-sm">
+            <div className="font-medium text-foreground">Commercial workspace</div>
+            <p className="text-xs text-muted-foreground">Bootstrap or open the NeuGAIN Commercial tenant.</p>
+          </div>
+          <CommercialBootstrapButton />
+        </div>
+      )}
       <section aria-labelledby="platform-home-heading">
         <h2 id="platform-home-heading" className="sr-only">Workspace summary</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
