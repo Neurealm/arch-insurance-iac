@@ -12,6 +12,7 @@ import {
   BookOpen,
   ChevronRight,
   Shield,
+  ArrowLeft,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
