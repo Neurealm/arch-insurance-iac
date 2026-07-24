@@ -229,6 +229,509 @@ export type Database = {
           },
         ]
       }
+      commercial_accounts: {
+        Row: {
+          account_name: string
+          account_status: string
+          arr_amount: number | null
+          arr_currency: string | null
+          created_at: string
+          created_by: string | null
+          external_key: string
+          id: string
+          metadata: Json
+          partner_status: string
+          program_id: string
+          renewal_date: string | null
+          source_reference_id: string | null
+          source_status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          account_name: string
+          account_status?: string
+          arr_amount?: number | null
+          arr_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          external_key: string
+          id?: string
+          metadata?: Json
+          partner_status?: string
+          program_id: string
+          renewal_date?: string | null
+          source_reference_id?: string | null
+          source_status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          account_name?: string
+          account_status?: string
+          arr_amount?: number | null
+          arr_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          external_key?: string
+          id?: string
+          metadata?: Json
+          partner_status?: string
+          program_id?: string
+          renewal_date?: string | null
+          source_reference_id?: string | null
+          source_status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_accounts_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_accounts_source_reference_id_fkey"
+            columns: ["source_reference_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_source_references"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_program_metrics: {
+        Row: {
+          confidence: string
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          metric_code: string
+          metric_date: string | null
+          notes: string | null
+          numeric_value: number | null
+          program_id: string
+          source_reference_id: string | null
+          tenant_id: string
+          text_value: string | null
+          unit: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          confidence?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          metric_code: string
+          metric_date?: string | null
+          notes?: string | null
+          numeric_value?: number | null
+          program_id: string
+          source_reference_id?: string | null
+          tenant_id: string
+          text_value?: string | null
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          confidence?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          metric_code?: string
+          metric_date?: string | null
+          notes?: string | null
+          numeric_value?: number | null
+          program_id?: string
+          source_reference_id?: string | null
+          tenant_id?: string
+          text_value?: string | null
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_program_metrics_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_program_metrics_source_reference_id_fkey"
+            columns: ["source_reference_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_source_references"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_program_metrics_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_programs: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          current_gate_code: string | null
+          description: string | null
+          id: string
+          market_segment: string | null
+          metadata: Json
+          name: string
+          partner_name: string | null
+          source_status: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          current_gate_code?: string | null
+          description?: string | null
+          id?: string
+          market_segment?: string | null
+          metadata?: Json
+          name: string
+          partner_name?: string | null
+          source_status?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          current_gate_code?: string | null
+          description?: string | null
+          id?: string
+          market_segment?: string | null
+          metadata?: Json
+          name?: string
+          partner_name?: string | null
+          source_status?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_programs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_scenario_assumptions: {
+        Row: {
+          assumption_code: string
+          confidence: string
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          notes: string | null
+          numeric_value: number | null
+          scenario_id: string
+          source_reference_id: string | null
+          tenant_id: string
+          text_value: string | null
+          unit: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assumption_code: string
+          confidence?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          notes?: string | null
+          numeric_value?: number | null
+          scenario_id: string
+          source_reference_id?: string | null
+          tenant_id: string
+          text_value?: string | null
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assumption_code?: string
+          confidence?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          notes?: string | null
+          numeric_value?: number | null
+          scenario_id?: string
+          source_reference_id?: string | null
+          tenant_id?: string
+          text_value?: string | null
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_scenario_assumptions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_assumptions_source_reference_id_fkey"
+            columns: ["source_reference_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_source_references"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_assumptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_scenarios: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_baseline: boolean
+          name: string
+          program_id: string
+          source_status: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_baseline?: boolean
+          name: string
+          program_id: string
+          source_status?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_baseline?: boolean
+          name?: string
+          program_id?: string
+          source_status?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_scenarios_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenarios_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_source_references: {
+        Row: {
+          confidentiality: string
+          created_at: string
+          created_by: string | null
+          external_filename: string | null
+          id: string
+          notes: string | null
+          program_id: string
+          source_code: string
+          source_date: string | null
+          source_type: string
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          confidentiality?: string
+          created_at?: string
+          created_by?: string | null
+          external_filename?: string | null
+          id?: string
+          notes?: string | null
+          program_id: string
+          source_code: string
+          source_date?: string | null
+          source_type: string
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          confidentiality?: string
+          created_at?: string
+          created_by?: string | null
+          external_filename?: string | null
+          id?: string
+          notes?: string | null
+          program_id?: string
+          source_code?: string
+          source_date?: string | null
+          source_type?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_source_references_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_source_references_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_stage_gates: {
+        Row: {
+          account_scope_count: number | null
+          account_scope_label: string | null
+          created_at: string
+          created_by: string | null
+          economic_objective: string | null
+          gate_code: string
+          id: string
+          name: string
+          operating_objective: string | null
+          program_id: string
+          sequence_number: number
+          status: string
+          tenant_id: string
+          unlock_conditions: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          account_scope_count?: number | null
+          account_scope_label?: string | null
+          created_at?: string
+          created_by?: string | null
+          economic_objective?: string | null
+          gate_code: string
+          id?: string
+          name: string
+          operating_objective?: string | null
+          program_id: string
+          sequence_number: number
+          status?: string
+          tenant_id: string
+          unlock_conditions?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          account_scope_count?: number | null
+          account_scope_label?: string | null
+          created_at?: string
+          created_by?: string | null
+          economic_objective?: string | null
+          gate_code?: string
+          id?: string
+          name?: string
+          operating_objective?: string | null
+          program_id?: string
+          sequence_number?: number
+          status?: string
+          tenant_id?: string
+          unlock_conditions?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_stage_gates_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_stage_gates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_activities: {
         Row: {
           company_id: string
@@ -7100,6 +7603,14 @@ export type Database = {
       cancel_invitation: {
         Args: { _invitation_id: string }
         Returns: undefined
+      }
+      commercial_can_write: {
+        Args: { _permission_code: string; _tenant_id: string }
+        Returns: boolean
+      }
+      commercial_is_member_with_view: {
+        Args: { _tenant_id: string }
+        Returns: boolean
       }
       count_active_tenant_admins: {
         Args: { _exclude_membership?: string; _tenant_id: string }

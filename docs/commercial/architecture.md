@@ -200,3 +200,46 @@ BP2.0 and downstream BP2.x packages MUST NOT modify:
 | BP2.6 | Commercial Audit Slice, Reports, Release Hardening | BP2.5 | Audit views, program reports, RLS regression, release readiness |
 
 Each subsequent package requires independent validation before the next begins.
+
+---
+
+## Appendix A — BP2.1 Implemented Schema (delta vs §2 proposal)
+
+BP2.1 delivers a lean seven-table foundation. Later BP2.x packages will layer the remaining tables from §2.
+
+Tables created:
+
+| Table | Purpose |
+|---|---|
+| `commercial_programs` | Pursuit envelope (Project Momentous and future programs). Columns: `code`, `name`, `partner_name`, `market_segment`, `description`, `status`, `current_gate_code`, `source_status`, `metadata`. |
+| `commercial_stage_gates` | G0 + G1..G4 gate records per program. Columns: `gate_code`, `sequence_number`, `name`, `account_scope_label`, `account_scope_count`, `operating_objective`, `economic_objective`, `unlock_conditions` (JSONB), `status`. |
+| `commercial_scenarios` | Financial scenarios per program. Columns: `code`, `name`, `description`, `status`, `is_baseline`, `source_status`. |
+| `commercial_scenario_assumptions` | Assumption rows inside a scenario. Columns: `assumption_code`, `label`, `numeric_value`, `text_value`, `unit`, `confidence`, `source_reference_id`, `notes`. |
+| `commercial_program_metrics` | Program-level metrics. Columns: `metric_code`, `label`, `numeric_value`, `text_value`, `unit`, `metric_date`, `confidence`, `source_reference_id`, `notes`. |
+| `commercial_source_references` | Register of confidential source metadata (pointers only, no binary). Columns: `source_code`, `title`, `source_type`, `source_date`, `confidentiality`, `status`, `external_filename`, `notes`. |
+| `commercial_accounts` | Account records per program. Columns: `external_key`, `account_name`, `partner_status`, `arr_amount`, `arr_currency`, `renewal_date`, `account_status`, `source_status`, `source_reference_id`, `metadata`. |
+
+Permission codes seeded into `public.permissions`:
+
+- `commercial.view`
+- `commercial.program.manage`
+- `commercial.scenario.manage`
+- `commercial.assumption.manage`
+- `commercial.account.manage`
+- `commercial.source.manage`
+- `commercial.admin`
+
+Security helpers added (both `SECURITY DEFINER`, `search_path = public`, revoked from anon/PUBLIC):
+
+- `public.commercial_is_member_with_view(_tenant_id uuid) → boolean`
+- `public.commercial_can_write(_tenant_id uuid, _permission_code text) → boolean`
+
+Cross-tenant enforcement triggers (`commercial_enforce_same_tenant_*`) reject any child row whose `tenant_id` does not match its parent's `tenant_id` (program, scenario, or source reference).
+
+Reused BP1.1 primitives:
+
+- `public.tenants`, `public.memberships`, `public.tenant_roles`, `public.tenant_role_permissions`, `public.membership_roles`.
+- `public.has_permission`, `public.is_platform_admin`.
+- `public.audit_events` (writes will land here in later BP2.x packages).
+
+No `commercial_roles`, `commercial_memberships`, or Commercial-owned audit table was created. Zero business rows were seeded.
