@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAccess } from "@/platform/access/AccessContext";
 import { useAuth } from "@/context/AuthContext";
+import { CommercialBootstrapButton } from "@/platform/components/CommercialBootstrapButton";
 import { toast } from "@/hooks/use-toast";
 import {
   Copy,
