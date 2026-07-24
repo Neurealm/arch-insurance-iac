@@ -79,6 +79,7 @@ import PlatformAudit from "./platform/pages/AuditExplorer";
 import PlatformTenantSettings from "./platform/pages/TenantSettings";
 import AcceptInvitation from "./platform/pages/AcceptInvitation";
 import PlatformProfile from "./platform/pages/Profile";
+import PlatformTestHub from "./platform/pages/TestHub";
 import { PermissionRoute } from "./components/auth/PermissionRoute";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
@@ -845,6 +846,7 @@ const App = () => (
             <Route path="audit" element={<PermissionRoute permission="audit.view"><PlatformAudit /></PermissionRoute>} />
             <Route path="settings" element={<PermissionRoute permission="tenant.view"><PlatformTenantSettings /></PermissionRoute>} />
             <Route path="profile" element={<PlatformProfile />} />
+            <Route path="test-hub" element={<PlatformTestHub />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

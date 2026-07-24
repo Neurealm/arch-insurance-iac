@@ -5,13 +5,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { CreateTenantDialog } from "@/platform/components/CreateTenantDialog";
 
-const TABS: { to: string; label: string; permission?: string }[] = [
+const TABS: { to: string; label: string; permission?: string; adminOnly?: boolean }[] = [
   { to: "/platform", label: "Home", permission: "tenant.view" },
   { to: "/platform/members", label: "Members", permission: "members.view" },
   { to: "/platform/roles", label: "Roles", permission: "roles.view" },
   { to: "/platform/audit", label: "Audit", permission: "audit.view" },
   { to: "/platform/settings", label: "Settings", permission: "tenant.view" },
   { to: "/platform/profile", label: "Profile" },
+  { to: "/platform/test-hub", label: "Developer · Test Hub", adminOnly: true },
 ];
 
 function Header() {
@@ -45,7 +46,7 @@ function Header() {
           </div>
         </div>
         <nav className="flex flex-wrap gap-1" aria-label="Platform sections">
-          {TABS.filter((t) => !t.permission || hasPermission(t.permission)).map((t) => (
+          {TABS.filter((t) => (!t.permission || hasPermission(t.permission)) && (!t.adminOnly || isPlatformAdmin)).map((t) => (
             <NavLink
               key={t.to}
               to={t.to}
