@@ -1,363 +1,215 @@
-# NeuGAIN — Living Implementation Plan
+# BP1.1F — Functional UI Discovery Report (Read-Only)
 
-_Last regenerated from repository state. Supersedes the prior BP1.1D validation report._
+Scope note. The NeuGAIN app registers **397 `<Route>` entries** in `src/App.tsx` across ~20 top-level modules, plus module-internal registries (`AVEP_NAV`, `runops/shell/routes.ts`, `eoc/Sidebar.tsx`, `PlatformLayout` tabs, `SeadRail`). A leaf-by-leaf table for all 397 routes exceeds the plan size budget (50K chars). This report enumerates every **module and navigation registry** exhaustively, gives per-module route counts and gating, and lists **every orphan / missing-nav / missing-route finding** discovered by cross-referencing registries. Any leaf-level drill-down (e.g. "list all 78 `/coworkers/*` routes with status") can be produced next as a follow-up plan against a chosen module.
+
+No source files, migrations, or docs were modified.
 
 ---
 
-## 1. Executive Summary
+## 1. Method
 
-NeuGAIN is a multi-tenant enterprise platform built on React 18 + Vite 5 + Tailwind v3 + shadcn/ui with a Supabase (Lovable Cloud) backend (project ref `esfpbiishpkvhlejnxzq`). It hosts several product modules on a shared platform foundation:
+Read-only inspection of:
+- `src/App.tsx` (route registry) — 397 `<Route path="…">` declarations extracted.
+- Navigation registries: `src/components/eoc/Sidebar.tsx`, `src/avep/shell/navigation.ts`, `src/runops/shell/routes.ts` + `RunOpsSidebar.tsx`, `src/platform/shell/PlatformLayout.tsx` (TABS), `src/components/sead/SeadRail.tsx`.
+- Auth/permission gates: `ProtectedRoute`, `PermissionRoute`, `TenantAccessGuard` (retired — returns `scoped:false`), `AccessContext`.
+- Feature flags: `src/runops/domain/featureFlags.ts` (all non-demo flags default `false`).
+- Filesystem enumeration of `src/pages/**`, `src/avep/pages/**`, `src/silicon/pages/**`, `src/runops/pages/**`, `src/platform/pages/**`.
 
-- **Platform Foundation (BP1.1 A–D)** — tenants, memberships, permissions, audit, invitations, admin UX.
-- **RunOps Digital Twin** — services, runbooks, incidents, executions, scenarios (Contoso profile).
-- **AVEP — AI VLSI Engineering Platform** — 21-route DDMAC descriptor-engine scenario spanning Plan → Build → Prove Readiness.
-- **Digital Coworkers** — ITSM Auto Ticket Categorization dashboard + 15 sub-pages, Neurealm Agentic AI Studio (10 tabs), plus role-specific coworker pages.
-- **Legacy modules** — ETDM, CRM, Questionnaires, Org taxonomy (still admin-gated, awaiting BP1.2 tenant scoping).
+## 2. Global Gating Summary
 
-BP1.1 has been _built_ (packages A/B/C/D) and _security-remediated_ against recent findings; however, mandatory _execution evidence_ for BP1.1D (CI green run + disposable-DB SQL regression) is still outstanding. That is the immediate release blocker.
-
-## 2. Current Build Status
-
-| Area | Phase | Status |
+| Gate | Where enforced | Effect |
 |---|---|---|
-| Platform Foundation BP1.1A (tables/audit/profile) | Shipped | ✅ |
-| Platform Foundation BP1.1B (permissions, provision_tenant, memberships) | Shipped | ✅ |
-| Platform Foundation BP1.1C + Final Patch (admin UX) | Shipped | ✅ |
-| Platform Foundation BP1.1D (hardening artifacts) | Shipped | ✅ |
-| BP1.1E — Release evidence & handoff | Not started | ⏳ Blocker |
-| RunOps shell + Contoso profile + digital twins | Shipped | ✅ |
-| RunOps `ConnectedOperationsProvider` (real integrations) | Planned | ⏸ |
-| AVEP shell + 21 workspaces (DDMAC scenario) | Shipped | ✅ |
-| AVEP scenario continuity pass | In progress | 🔄 |
-| Digital Coworkers — ITSM ATC dashboard + 15 sub-pages | Shipped | ✅ |
-| ITSM ATC sub-page data continuity | In progress | 🔄 |
-| Neurealm Agentic AI Studio (10 tabs) | Shipped | ✅ |
-| Integrations catalog (14 profiles + drawer) | Shipped | ✅ |
-| User Management — profile edit + `sync_profile_company` | Shipped | ✅ |
-| ETDM / CRM / Questionnaires — tenant scoping (BP1.2) | Planned | ⏸ |
-| RunOps ↔ public tenant bridge | Planned | ⏸ |
-| Playwright E2E harness | Planned | ⏸ |
-| Automated a11y (axe-core) in CI | Planned | ⏸ |
-
-## 3. Completed Work
-
-### BP1.1A — Canonical Platform Data Foundation
-- Canonical tables: `profiles`, `tenants`, `memberships`, `permissions`, `tenant_roles`, `tenant_role_permissions`, `membership_roles`, `tenant_invitations`, `tenant_invitation_roles`, `audit_events`.
-- Explicit `GRANT`s in every migration; `anon` SELECT revoked on all 9 canonical tables.
-- `audit_events` append-only trigger (`audit_events_reject_mutation`).
-- Profile self-mutation governance (users can update self; admin fields restricted).
-- Regression: `supabase/tests/bp1_1a_regression.sql`.
-
-### BP1.1B — Tenant Authorization & Administrative Services
-- Permission model with `has_permission(user, tenant, permission)` as sole authz oracle.
-- Transactional `provision_tenant` RPC (creates tenant + admin membership + default roles atomically).
-- Membership lifecycle helpers: invite, suspend, reactivate, deactivate, role assignment.
-- Same-tenant enforcement triggers: `tir_enforce_same_tenant`, `trp_enforce_same_tenant`, `membership_roles_enforce_same_tenant`.
-- `count_active_tenant_admins` for last-admin safeguards.
-- All `SECURITY DEFINER` functions set `search_path = 'public'`; `anon` EXECUTE revoked on all 19 privileged RPCs.
-
-### BP1.1C + Final Patch — Platform Experience
-- `src/platform/access/AccessContext.tsx` — tenant switching with query cancellation + cache drop of `["platform"]` keys.
-- `src/components/auth/PermissionRoute.tsx` — permission-code route gating (never role name).
-- `src/platform/pages/`:
-  - `PlatformHome.tsx`, `MemberAdmin.tsx`, `RoleAdmin.tsx`, `AuditExplorer.tsx`, `TenantSettings.tsx`, `Profile.tsx`, `AcceptInvitation.tsx`.
-  - `MemberAdmin`: invite / suspend / reactivate / deactivate — all wrapped in `ConfirmDialog`; invitation pagination.
-  - `AuditExplorer`: filters + explicit "View" button; payload redaction of `password|token|secret|invitation`.
-  - `AcceptInvitation`: explicit error states (`INVITATION_EXPIRED`, `INVITATION_ALREADY_ACCEPTED`, `INVITATION_EMAIL_MISMATCH`).
-- `src/platform/components/CreateTenantDialog.tsx` — curated `Select` for currency/timezone via `src/platform/data/tenantOptions.ts`.
-- `src/platform/components/States.tsx` — `LoadingState`, `EmptyState`, `ErrorState`, `ForbiddenState` (a11y announced).
-
-### BP1.1D — Production Hardening
-- SQL regression suites: `bp1_1_platform_security.sql`, `bp1_1_tenant_isolation.sql`, `bp1_1_invitations.sql`, `bp1_1_last_admin.sql` (+ preserved `bp1_1a_regression.sql`).
-- `scripts/validate-bp1-1.sh` aggregate runner.
-- `.github/workflows/bp1-1-platform-foundation.yml` — app job (install/typecheck/lint/test/build) + database job (Supabase Postgres service, migration replay, all 5 SQL suites).
-- `src/platform/components/States.test.tsx` — component tests (6 passing).
-- Documentation set (see §14).
-
-### Product Modules
-- **RunOps**: `src/runops/shell/*`, `providers/`, `scenario/`, `profiles/contosoProfile.ts`, `pages/`. Service Digital Twin cross-links to `RB-HC-014` runbook.
-- **AVEP** (`src/avep/`): shell + theme, `data/canonical.ts` DDMAC scenario, 21 pages including Overview, Program Workspace, Requirements Intake/Review, Traceability, Logical Architecture, Engineering Spec & Verification, RTL Generation Studio, RTL Change Impact, Verification Env Builder, Test Factory, Sim Ops, Waveform Intelligence & Failure Diagnosis, Coverage Closure, Signoff Readiness, Release Package, AI Governance, Physical-Design Intake, End-to-End Story.
-- **ITSM ATC** (`src/pages/itsm/`): `Itsm.tsx` catalog card + `AutoTicketCategorization.tsx` dashboard + 15 sub-pages via `AtcShell`.
-- **Neurealm Agentic AI Studio** (`src/pages/neurealm-agentic-ai/`): 10-tab module under Digital Coworkers.
-- **Integrations** (`src/components/eoc/integrations/`): 14 profiles + technical `IntegrationDrawer.tsx`.
-- **User Management** (`src/pages/settings/UserManagement.tsx`): profile cards + `EditProfileDialog` + `sync_profile_company` trigger.
-
-### Security Remediations (recent findings)
-- Public / anon `EXECUTE` revoked on `SECURITY DEFINER` functions.
-- `user_login_events` INSERT restricted (spoofing fix).
-- Public questionnaire respondent validation moved to edge functions (`public-questionnaire-*`).
-- `is_platform_admin`, `is_user_approved`, `has_role` self-scoped unless caller is platform admin (`rls_helper_arbitrary_uid` fix).
-- Stakeholder register PII scoping documented.
-- Public bucket listing dispositioned.
-
-## 4. In Progress Work
-
-- **BP1.1D execution evidence** — CI + SQL regression not yet executed against disposable DB.
-- **AVEP scenario continuity** — DDMAC scenario alignment across all 21 routes (`src/avep/data/canonical.ts`).
-- **ITSM ATC sub-page continuity** — KPIs/lists across the 15 sub-pages aligned to parent dashboard.
-
-## 5. Remaining Work
-
-- **BP1.2** tenant-scoping migration for ETDM, CRM, Questionnaires, Questionnaire share-links (TD-07).
-- Bridge `runops_tenants` ↔ `public.tenants` (TD-03).
-- Externalize super-admin bootstrap roster from `handle_new_user` (TD-02).
-- Playwright E2E harness (TD-05).
-- Automated axe-core a11y in CI (TD-04).
-- Local scratch-DB bootstrap script (TD-06).
-- Remove `AcceptInvitation` `localStorage` coupling (TD-01).
-- Retire or archive `src/silicon/**` (superseded by `src/avep/**`).
-- AVEP Phase-4 Deliver module set.
-- `ConnectedOperationsProvider` real integrations (SolarWinds, Cribl, PagerDuty, etc.).
-- Master docs index.
-
-## 6. Outstanding Technical Debt
-
-Copied and extended from `docs/bp1-1-technical-debt.md`:
-
-| ID | Item | Severity | Target |
-|---|---|---|---|
-| TD-01 | `AcceptInvitation` writes `platform:activeTenant` to localStorage before mounting `AccessProvider` | Low | BP1.2 |
-| TD-02 | Super-admin bootstrap emails hard-coded in `handle_new_user` | Low | BP1.2 |
-| TD-03 | `runops_tenants` not bridged to `public.tenants` | Medium | Post-BP1.1 |
-| TD-04 | Automated a11y (axe-core) not wired into CI | Low | BP1.2 |
-| TD-05 | No Playwright E2E harness | Low | BP1.2 |
-| TD-06 | Migration replay only in CI; no local scratch DB script | Low | Post-BP1.1 |
-| TD-07 | ETDM / CRM / questionnaire share-links remain admin-gated pending BP1.2 tenant scoping | Medium | BP1.2 |
-| TD-08 | `.lovable/plan.md` previously used as a validation scratchpad — this rewrite establishes it as the living plan | Low | Now |
-| TD-09 | `src/silicon/**` prototype superseded by `src/avep/**` — schedule archive/removal | Low | BP1.2 |
-| TD-10 | No master docs index; many long-lived snapshots under `docs/meridian-*` and `docs/bp1-1-*` | Low | BP1.2 |
-
-## 7. Architecture Decisions
-
-- **Authorization**: permission-based via `has_permission(user, tenant, permission)`. Role-name checks (`is_platform_admin`, `has_role`, `runops_has_role`) are legacy and must not spread.
-- **Role storage**: always in dedicated tables (`user_roles`, `tenant_roles`, `membership_roles`) — never on `profiles`/`users`. Never trust client-side/localStorage for role state.
-- **Grants**: every `CREATE TABLE public.*` migration includes explicit `GRANT`s in the same migration.
-- **Secrets**: anon key only in the browser; service-role only inside edge functions via `Deno.env`.
-- **Multi-tenant boundary**: RunOps preserved as an independent sub-domain (own tenant table) until BP1.2 unification.
-- **AVEP**: its own themed shell (`src/avep/theme/tokens.css`, `AvepLayout`) with independent navigation.
-- **Providers pattern**: `OperationsProvider` and `AiProvider` with Demo/Connected variants; pages MUST NOT import fixtures directly.
-- **No standalone Node/Python backend** — Supabase Postgres + Deno edge functions only.
-- **Product neutrality**: named orgs (Contoso, Meridian, Neurealm, etc.) and verticals are tenant/module fixtures, not product-core logic.
-
-## 8. Database Status
-
-- ~100 tables in `public` (per injected schema summary): platform core, RunOps stack (`runops_*`), ETDM (`etdm_*`), CRM (`crm_*`), Questionnaires, Org taxonomy (`org_*`), user-notification, audit.
-- RLS enabled on all tenant-owned tables; canonical BP1.1 tables have explicit GRANTs.
-- Supabase linter / security scan: 58 warnings (all pre-dispositioned), 0 High, 0 Critical.
-- Migrations managed exclusively via the migration tool (never edited manually).
-- Storage buckets `evidence` and `etdm-assets` remain private per baseline.
-
-## 9. Frontend Status
-
-- Routing/entry: `src/App.tsx`, `src/main.tsx`, `src/pages/*`.
-- Guards: `ProtectedRoute`, `PermissionRoute`, `TenantAccessGuard`.
-- Platform shell: `src/platform/shell/PlatformLayout.tsx`.
-- RunOps shell: `src/runops/shell/*` (top bar, sidebar, right drawer, command palette, Nova panel).
-- AVEP shell: `src/avep/shell/*` — 21 routes wired.
-- Digital Coworkers dashboards: `src/pages/coworkers/*`, `src/pages/itsm/*`, `src/pages/neurealm-agentic-ai/*`.
-- Design tokens: `src/index.css` + `tailwind.config.ts` for the base; AVEP uses its own `src/avep/theme/tokens.css`.
-- State: TanStack Query for server data; Zustand in AVEP/silicon; React Context for scenario/persona/access.
-- Component tests: `src/platform/components/States.test.tsx` (6 passing) + example test.
-
-## 10. Backend Status
-
-- Supabase Postgres + RLS as primary backend.
-- Edge functions (18) under `supabase/functions/`:
-  - `admin-delete-user`, `admin-reset-password`, `admin-set-platform-role`, `admin-set-tenant-membership`, `admin-users`
-  - `tenant-invite`, `tenant-signup`, `tenant-data-import`
-  - `public-questionnaire-get`, `public-questionnaire-save`, `public-questionnaire-upload`
-  - `auth-email-hook`, `process-email-queue`, `forgot-password`, `record-login`, `user-login-history`, `invite-user`
-- Email templates under `supabase/functions/_shared/email-templates/`.
-- `supabase/config.toml`: `forgot-password` has `verify_jwt = false`.
-
-## 11. Security Status
-
-- Latest scan: 58 warn, 0 High, 0 Critical.
-- Recent hardening: SECURITY DEFINER anon revocation, login-event spoofing fix, questionnaire respondent validation via edge functions, self-scoped `is_platform_admin`/`has_role`/`is_user_approved`.
-- Deferred by baseline: leaked-password protection (config item).
-- Legacy admin-only cross-tenant reads on ETDM/CRM/questionnaires — closed by BP1.2 (T-005).
-
-## 12. Testing Status
-
-- Vitest: 2 files (`src/test/example.test.ts`, `src/platform/components/States.test.tsx`) — 6/6 passing.
-- SQL regression: 5 suites authored in `supabase/tests/` — execution against disposable DB pending.
-- E2E: none (TD-05).
-- A11y automation: none (TD-04).
-- Typecheck: `tsgo --noEmit` clean at last run.
-
-## 13. CI/CD Status
-
-- `.github/workflows/bp1-1-platform-foundation.yml`:
-  - **app job** — Bun install → typecheck → lint → Vitest → build.
-  - **database job** — Supabase Postgres 15 service container, migration replay, all 5 SQL suites with `-v ON_ERROR_STOP=1`.
-- No other workflows detected.
-- **No green run recorded yet** — first execution is the BP1.1 release gate.
-
-## 14. Documentation Status
-
-Present under `docs/`:
-- BP1.1: `bp1-1-baseline.md`, `bp1.1-baseline.md`, `bp1-1-existing-asset-map.md`, `bp1-1-legacy-authorization-boundary.md`, `bp1-1-permission-model.md`, `bp1-1-platform-architecture.md`, `bp1-1-rls-matrix.md`, `bp1-1-security-disposition.md`, `bp1-1-operational-runbook.md`, `bp1-1-release-checklist.md`, `bp1-1-release-notes.md`, `bp1-1-rollback-plan.md`, `bp1-1-production-readiness.md`, `bp1-1-technical-debt.md`, `bp1-1-test-evidence.md`, `bp1-1a-test-evidence.md`, `bp1-1b-test-evidence.md`.
-- Meridian baseline snapshots: `docs/meridian-*.md`.
-- `docs/multi-tenant-verification-report.md`.
-- **Missing**: master `docs/README.md` index; per-module design docs for AVEP, RunOps, ATC, Neurealm.
-
-## 15. Known Risks
-
-- **R1** Missing execution evidence blocks BP1.1 final approval.
-- **R2** Legacy admin-gated catalogs (ETDM/CRM/questionnaires) are still cross-tenant readable to platform admins.
-- **R3** Divergent tenant identity (`runops_tenants` vs `public.tenants`) risks drift as new features touch both.
-- **R4** `src/silicon/**` duplication with `src/avep/**` invites accidental edits to the dead prototype.
-- **R5** No E2E coverage for tenant switch, invitation acceptance, or permission gating — regressions could ship undetected.
-- **R6** Super-admin roster in a code migration slows adding/removing admins.
-- **R7** Real integrations (SolarWinds, Cribl, PagerDuty) not connected — RunOps runs on Demo provider only.
-
-## 16. Blockers
-
-- **B1** Disposable-DB SQL regression suite not executed (needs CI run or local `SUPABASE_DB_URL`). Blocks BP1.1E. Requires external execution — see `docs/bp1-1-external-execution-guide.md`.
-- **B2** First green run of `bp1-1-platform-foundation.yml` not captured. Blocks BP1.1E. Requires external execution (Lovable sandbox cannot dispatch GitHub Actions).
-- **B3** Post-merge `security--run_security_scan` showing 0 High/Critical, pinned to the release-candidate SHA, not archived. Blocks BP1.1E.
-- **B4** 25 UX evidence screenshots (persona click-through, UX-001 – UX-025 per `docs/bp1-1-ux-evidence-checklist.md`) not captured. Blocks BP1.1E.
-- **B5** Release-candidate branch + commit SHA not yet recorded in `docs/bp1-1-test-evidence.md`. Open until a maintainer executes evidence externally.
-- **B6** _Resolved_ — the authoritative 25-item UX evidence checklist is now committed at `docs/bp1-1-ux-evidence-checklist.md` (T-019).
-
-BP1.1E requires **external execution** by a maintainer with GitHub Actions dispatch rights, a disposable Postgres environment, and browser access for persona walkthroughs. No application, schema, migration, test, workflow, or CI-logic remediation patch is required.
-
-
-## 17. Recommended Next Build Phase
-
-**BP1.1E — Release Evidence & Handoff**, followed by **BP1.2 — Legacy Catalog Tenant Scoping**.
-
-- **BP1.1E**: execute all authored evidence, capture persona screenshots, close blockers B1–B4, publish release notes for GA.
-- **BP1.2**: bring ETDM/CRM/questionnaires under `tenants` + `has_permission`; retire admin-only gating; bridge RunOps tenants.
-
-## 18. Prioritized Task Backlog
-
-Each task: **ID · Priority · Dependency · Effort · Status**.
-
-### BP1.1E — Release Evidence
-
-#### T-001 · P0 · — · S · Not started
-Run `.github/workflows/bp1-1-platform-foundation.yml` on `main` and capture the run URL.
-- **Files**: `.github/workflows/bp1-1-platform-foundation.yml`, `docs/bp1-1-test-evidence.md`.
-- **Acceptance**: both `app` and `database` jobs exit 0; run URL committed under `docs/bp1-1-test-evidence.md`.
-
-#### T-002 · P0 · T-001 · S · Not started
-Execute all `supabase/tests/*.sql` against disposable DB and archive logs.
-- **Files**: `supabase/tests/bp1_1a_regression.sql`, `bp1_1_platform_security.sql`, `bp1_1_tenant_isolation.sql`, `bp1_1_invitations.sql`, `bp1_1_last_admin.sql`; `docs/bp1-1-test-evidence.md`.
-- **Acceptance**: 5 suites exit 0 with `ON_ERROR_STOP=1`; logs attached to evidence doc.
-
-#### T-003 · P0 · — · S · Not started
-Post-merge security rescan confirming 0 High / 0 Critical.
-- **Files**: `docs/bp1-1-security-disposition.md`.
-- **Acceptance**: rescan snapshot (date + counts) committed.
-
-#### T-004 · P0 · T-001,T-002,T-003 · S · Not started
-Persona click-through screenshots (25 UX evidence items).
-- **Files**: `docs/bp1-1-test-evidence.md`.
-- **Acceptance**: all 25 items captured with screenshot + short caption.
-
-#### T-018 · P0 · T-001..T-004 · S · Not started
-Publish `docs/bp1-1-release-notes.md` for GA and close BP1.1.
-- **Files**: `docs/bp1-1-release-notes.md`, `docs/bp1-1-release-checklist.md`.
-- **Acceptance**: release notes stamped GA; checklist boxes ticked.
-
-#### T-019 · P0 · — · S · **Complete**
-BP1.1E evidence framework and external execution guide.
-- **Files**: `docs/bp1-1-ux-evidence-checklist.md` (new, UX-001 – UX-025), `docs/bp1-1-external-execution-guide.md` (new), `docs/evidence/bp1-1/README.md` (new), `docs/bp1-1-test-evidence.md` (rewritten as a fillable template), `docs/bp1-1-release-checklist.md` (evidence gates added).
-- **Acceptance**: authoritative UX checklist committed; external execution guide committed; evidence directory convention committed; test-evidence template ready for real values; release checklist has explicit unchecked gates for CI, SQL, security, UX, and independent validation. **Resolves B6.**
-- **Note**: this task closes the enablement gap only. Execution (T-001 – T-004) still requires a maintainer to run outside the Lovable sandbox per `docs/bp1-1-external-execution-guide.md`.
-
-
-### In-flight Continuity
-
-#### T-015 · P1 · — · M · In progress
-AVEP scenario continuity pass — DDMAC descriptor engine across all 21 routes.
-- **Files**: `src/avep/data/canonical.ts`, `src/avep/pages/**`.
-- **Acceptance**: KPIs, entity names, evidence IDs consistent across pages; visual review sign-off.
-
-#### T-016 · P1 · — · M · In progress
-ITSM Auto Ticket Categorization sub-page data continuity with parent dashboard.
-- **Files**: `src/pages/itsm/**` (dashboard + 15 sub-pages under `AtcShell`).
-- **Acceptance**: all 15 sub-pages reflect parent KPIs and shared entities; no orphan fixtures.
-
-### BP1.2 — Legacy Catalog Tenant Scoping
-
-#### T-005 · P1 · — · L · Not started
-Migrate `etdm_*`, `crm_*`, `questionnaires`, `questionnaire_*`, `stakeholder_registers` to be tenant-scoped with RLS via `has_permission`.
-- **Files**: new `supabase/migrations/*_bp1_2_tenant_scope.sql`; regression additions under `supabase/tests/`.
-- **Acceptance**: no cross-tenant admin reads; every touched table has explicit GRANTs; regression SQL passes.
-
-#### T-006 · P1 · T-005 · M · Not started
-Refactor frontend hooks/pages to use tenant-scoped queries.
-- **Files**: `src/hooks/crm/*`, `src/hooks/etdm/*`, `src/hooks/questionnaires/*`, `src/pages/crm/**`, `src/components/etdm/**`, `src/components/questionnaires/**`.
-- **Acceptance**: pages function per-tenant; Vitest suite + typecheck pass; no `is_platform_admin` gates remaining on these pages.
-
-#### T-007 · P1 · — · M · Not started
-Bridge `runops_tenants` ↔ `public.tenants` (TD-03).
-- **Files**: new migration + `src/runops/providers/*`, `src/runops/profiles/*`.
-- **Acceptance**: single tenant identity resolvable across product + RunOps; RunOps behavior preserved (Contoso scenarios green).
-
-### Test / A11y Automation
-
-#### T-008 · P1 · — · M · Not started
-Playwright E2E harness for tenant switch, invitation acceptance, permission gating (TD-05).
-- **Files**: `playwright.config.ts`, `e2e/**`, CI workflow addition.
-- **Acceptance**: 3 flows green in CI; Playwright job runs on PR.
-
-#### T-009 · P2 · T-008 · S · Not started
-Axe-core a11y automation in CI (TD-04).
-- **Files**: `vitest.config.ts` or new axe job; `e2e/**` if using Playwright axe.
-- **Acceptance**: axe run in CI; job fails on serious/critical violations.
-
-### Debt Burn-down
-
-#### T-010 · P2 · — · S · Not started
-Local scratch-DB bootstrap script (TD-06).
-- **Files**: `scripts/bootstrap-scratch-db.sh`.
-- **Acceptance**: one command produces a validated local DB; documented in `docs/bp1-1-operational-runbook.md`.
-
-#### T-011 · P2 · — · S · Not started
-Externalize super-admin bootstrap roster (TD-02).
-- **Files**: migration relocating roster into a config/permissions table; `handle_new_user` update.
-- **Acceptance**: adding/removing a super admin no longer requires a code migration.
-
-#### T-012 · P2 · — · S · Not started
-Remove `AcceptInvitation` `localStorage` coupling (TD-01).
-- **Files**: `src/platform/pages/AcceptInvitation.tsx`, `src/platform/access/AccessContext.tsx`.
-- **Acceptance**: no client-supplied active tenant crosses the provider boundary; server-side revalidation only.
-
-#### T-013 · P2 · — · S · Not started
-Archive or delete `src/silicon/**` prototype (TD-09).
-- **Files**: `src/silicon/**`, `src/App.tsx`.
-- **Acceptance**: no active route imports `silicon`; module removed or explicitly archived under `/archive` with a README.
-
-#### T-014 · P3 · — · S · Not started
-Master docs index and per-module design docs (TD-10).
-- **Files**: `docs/README.md`, new `docs/avep-*.md`, `docs/runops-*.md`, `docs/itsm-atc-*.md`.
-- **Acceptance**: single entry-point index links every doc; each module has at least one design doc.
-
-### Feature: Real Integrations
-
-#### T-017 · P2 · T-007 · L · Not started
-`ConnectedOperationsProvider` implementation for at least one real integration (SolarWinds / Cribl / PagerDuty).
-- **Files**: `src/runops/providers/ConnectedOperationsProvider.ts`, new edge function(s) under `supabase/functions/`.
-- **Acceptance**: at least one integration returns live data behind a feature flag; Demo provider remains default.
-
-## 19. Acceptance Criteria for Next Phase (BP1.1E)
-
-- CI workflow green on `main`; run URL committed.
-- 5 SQL suites executed 0-exit against disposable DB; logs archived in `docs/bp1-1-test-evidence.md`.
-- Post-merge security scan: 0 High / 0 Critical, snapshot committed.
-- 25 UX evidence items captured (screenshot + caption) in `docs/bp1-1-test-evidence.md`.
-- `docs/bp1-1-release-notes.md` published for GA; `docs/bp1-1-release-checklist.md` fully ticked.
-- No regressions: Vitest 6/6, typecheck clean, build clean.
-
-## 20. Recommended Build Order
-
-1. **T-001 → T-002 → T-003 → T-004 → T-018** — close BP1.1 release evidence and ship GA.
-2. In parallel: **T-015, T-016** — finish in-flight continuity work.
-3. **T-005 → T-006** — BP1.2 tenant scoping (migration first, then frontend refactor).
-4. **T-007 → T-017** — RunOps ↔ public tenant bridge, then first real integration.
-5. **T-008 → T-009** — E2E harness, then a11y automation stacked on it.
-6. **T-010, T-011, T-012, T-013** — debt burn-down (parallelizable).
-7. **T-014** — docs index and per-module design docs.
+| Auth (`ProtectedRoute`) | `src/components/auth/ProtectedRoute.tsx` | Redirects unauthenticated → `/login`; unapproved → `/pending-approval`; forces `/set-password` when required. |
+| Admin-only | `ProtectedRoute requireAdmin` | Non-admin → `/app`. Not currently applied to most routes. |
+| Permission | `src/components/auth/PermissionRoute.tsx` | Used inside `/platform/*` only. |
+| Tenant scope | `TenantAccessGuard` | **Retired** (`useTenantScope` returns `scoped:false`). No route is tenant-filtered at the router level today. |
+| Feature flags | `runops/domain/featureFlags.ts` | `demoMode:true` default; `connectedMode`, `liveAi`, `autonomousExecution`, `externalPublishing`, `realInfrastructureActions` all `false`. Flags govern **behaviour inside RunOps pages**, not route visibility. |
+
+Interpretation used below:
+- "Required auth" = wrapped in `ProtectedRoute` in `App.tsx`.
+- "Required permission" = wrapped in `PermissionRoute`.
+- "Required tenant" = a tenant must be selected via `AccessContext` (currently only meaningful under `/platform/*`).
+
+---
+
+## 3. Module Inventory (per-module rollup)
+
+Legend: **R** = routes registered in `App.tsx`; **Nav** = has a top-level nav entry the end user can click; **Auth** = wrapped in `ProtectedRoute`; **Perm** = uses `PermissionRoute`; **Flag** = behaviour gated by `FeatureFlags`.
+
+| # | Module | Route prefix | R | Nav registry | Auth | Perm | Tenant | Flag | Placeholder pages | Prod-ready |
+|---|---|---|---:|---|:-:|:-:|:-:|:-:|---|---|
+| 1 | Landing / Public | `/`, `/login`, `/signup`, `/forgot-password`, `/reset-password`, `/pending-approval`, `/q/:token`, `/no-access` | 8 | Landing hero + auth pages | — | — | — | — | none | Yes |
+| 2 | Profile / Session | `/profile`, `/set-password`, `/complete-profile` | 3 | User menu | partial | — | — | — | none | Yes |
+| 3 | Command Center (Home) | `/app` | 1 | `Index` hub | ✓ | — | — | — | none | Yes |
+| 4 | **RunOps** | `/runops/**` | ~55 explicit + placeholder fallback from `runops/shell/routes.ts` | `RunOpsSidebar` (12 sections) + `runops/shell/routes.ts` | ✓ | — | — | ✓ | Any `routes.ts` path not explicitly registered renders `<RunOpsPlaceholder/>` | Mixed — Command / Services / Runbooks / Incidents implemented; several under Governance/Integrations/Platform still placeholder |
+| 5 | RunOps → AWS COTS Digital Twin | `/runops/aws-cots-digital-twin` | 1 | RunOps sidebar bottom | ✓ | — | — | ✓ | none | Yes |
+| 6 | **AVEP** (AI VLSI Engineering Platform) | `/avep/**` | 21 (matches `AVEP_NAV`) | `AvepSidebar` (Plan / Design / Verify groups) | ✓ | — | — | — | none — every nav item has a concrete page (Overview, Program, Requirements, Requirements-Review, Traceability, Architecture, RTL Spec, RTL Gen, Change-Impact, Env Builder, Test Factory, Sim Ops, Failure Diagnosis, Coverage Closure, Signoff, Release Pkg, AI Governance, PD Intake, End-to-End Story) | Yes — demo-grade |
+| 7 | **Silicon** (legacy AVEP predecessor) | `/silicon/**` | 1 root (`FoundationStatus`) | not linked from any active sidebar | ✓ | — | — | — | Only foundation page reachable | **Orphan module** — see §5 |
+| 8 | **Platform Admin** | `/platform/**` | 7 (`/platform`, `/platform/members`, `/platform/roles`, `/platform/audit`, `/platform/settings`, `/platform/profile`, `/platform/invitations/:token`) | `PlatformLayout` TABS | ✓ | ✓ (per tab) | ✓ (active tenant required) | — | none | Yes (BP1.1C-D hardened) |
+| 9 | **SEAD** (Semiconductor Equipment Asset Digital Twin) | `/sead/**` | 21 | `SeadRail` in-app rail + eoc Sidebar entry `/sead/command-center` | ✓ | — | — | — | none | Yes — demo-grade |
+| 10 | **Digital Coworkers** | `/coworkers/**` | 78 | eoc `Sidebar.tsx` — Digital Coworkers group | mostly unauth in `App.tsx` — **inconsistent with peers** (see §6) | — | — | — | Landing tiles are real; sub-agent pages implemented (Healthcare Payer has 22 leaves, Infra 8, Network 3, IAM 2, Vuln 2, SRE 2, App Support 3, Carve-out 18) | Mixed — some Healthcare Payer leaves are dashboard-grade, others are shells |
+| 11 | **Neurealm Agentic AI** | `/neurealm-agentic-ai` | 1 (10 in-page tabs) | eoc Sidebar under Digital Coworkers | ✓ | — | — | — | none | Yes |
+| 12 | **IT Carve-Out & Separation** operating model | `/carve-out/**` | 49 | eoc Sidebar → `carveOpModelChildren` | mixed | — | — | — | Each of 6 workstreams × 3 views (overview/design/dashboard) plus roll-ups | Yes — content-rich, demo grade |
+| 13 | **Practice Library** | `/practice-library/**` | 32 | eoc Sidebar (2 groups: Ops practices + Cyber practices) | ✓ | — | — | — | Cyber master dashboard + 9 domain dashboards + 10 ops-practice dashboards | Yes — dashboard grade |
+| 14 | **Enterprise Certificate Management** | `/enterprise-certificate-management/**` | 16 | Reached from eoc Sidebar (Digital Twins group) — check §5 | mixed | — | — | — | 15 sub-centers (Risk, Lifecycle, Ops Center, Agentic Exec, Global Ops, BSIC, Reports, Change Mgmt, Integrations, Security Posture, Compliance, Audit, Policy, CT Logs) | Yes |
+| 15 | **Reliability Foundations** hub | `/reliability-foundations`, `/operational-friction-index`, `/product-reliability-anatomy`, `/transformation-journey`, `/measuring-success`, `/product-reliability-transformation-index` | 10 | eoc Sidebar → SRE Foundations children | ✓ | — | — | — | Real content pages | Yes |
+| 16 | **PROD Resilience Twin** & related SRE twins | `/prod-resilience-twin`, `/product-line-map`, `/golden-workflow-map`, `/production-topology`, `/sre-operating-model`, `/signal-intelligence`, `/enterprise-cloud-twin`, `/aws-resilience-architecture-twin`, `/platform-engineering-factory`, `/hybrid-cloud-workbench`, `/automation-marketplace`, `/modernization-factory`, `/modernization-roadmap`, `/modernization-roadmap-v2`, `/cyber-resilience-overlay`, `/ai-coworker-control-room`, `/transition-dual-run`, `/acquisition-onboarding-factory`, `/value-creation-board`, `/interactive-demo-center`, `/executive-service-owner-twin`, `/engagement-manager-twin`, `/delivery-org-twin`, `/datadog-log-profile`, `/auth-orchestration`, `/schedule-builder` | ~26 | eoc Sidebar → SRE Command / SRE Program children | mixed | — | — | — | Content-rich for the flagship items; some are stubs | Mixed |
+| 17 | **Data Orchestration Twin** | `/data-orchestration-twin`, `/data-orchestration-twin/placement-scenario-modeler` | 2 | eoc Sidebar top-level | ✓ | — | — | — | none | Yes |
+| 18 | **CRM / CRM Demo** | `/crm/**`, `/crm-demo/**` | 9 | Settings + CRM Demo entry | ✓ | — | — | — | Full CRUD sheets present | Yes |
+| 19 | **Assurance** | `/assurance/**` | 3 | Cross-linked from RunOps / Incidents | ✓ | — | — | — | Command / LiveExecution / WorkflowDetail | Yes |
+| 20 | **Incidents / Alerts / Change / Questionnaires** | `/incidents`, `/alerts`, `/change`, `/questionnaires`, `/scenario/**` | 6 | eoc Sidebar utilities | ✓ | — | — | — | none | Yes |
+| 21 | **Admin — Technology Taxonomy** | `/admin/technology-taxonomy/**` | 4 | Settings shell | ✓ (admin) | — | — | — | Domains + Technology profiles | Yes |
+| 22 | **Settings** | `/settings/**` | 7 | eoc Sidebar → Settings | ✓ | — | — | — | Organization, StakeholderRegister, ChangePassword, UserManagement | Yes |
+| 23 | **NeuGAIN Product Overview page** | `/neugain` | 1 | Landing CTA | — | — | — | — | none | Yes |
+| 24 | **NotFound / Redirects** | `*`, `/no-access` | 2 | — | — | — | — | — | Router fallback | Yes |
+
+Grand total registered routes: **397** (matches `grep '<Route path'`).
+
+---
+
+## 4. Navigation hierarchy (top-level)
+
+- **Landing** (`/`) → CTA into `/app`.
+- **Command Center** `/app` (`src/pages/Index.tsx`) — hub tiles into every module below.
+- **eoc `Sidebar.tsx`** groups (primary in-app nav):
+  1. Digital Coworkers (10 practice areas → sub-pages).
+  2. Digital Twins (Data Orch, RunOps, SEAD, AVEP, Neurealm Agentic AI, PROD Resilience family, Enterprise Certificate Mgmt, Carve-out op model).
+  3. SRE Foundations / SRE Program (Reliability Foundations family).
+  4. Practice Library (ops + cyber sub-groups).
+  5. Settings.
+- **`RunOpsSidebar`** — 12 sections (Command, Services, Runbooks, Operations, Incidents, Digital Workers, Reliability, Knowledge, Analytics, Governance, Integrations, Platform) + AWS COTS Twin.
+- **`AvepSidebar`** — 3 phase groups (Plan / Design / Verify) covering all 21 AVEP items.
+- **`PlatformLayout` TABS** — Home, Members, Roles, Audit, Settings, Profile.
+- **`SeadRail`** — in-page section rail (Command Center + 20 sub-pages).
+
+---
+
+## 5. Existing Orphaned Screens (implemented but unreachable via UI)
+
+Discovered by comparing registered routes vs every nav registry.
+
+| Orphan | Route | Why orphan |
+|---|---|---|
+| Silicon FoundationStatus | `/silicon` (and any `/silicon/*` future) | `SiliconLayout` still mounted in `App.tsx`, but no sidebar / hub tile links to it. Superseded by `/avep/**`. |
+| RunOps Design System | `/runops/design-system` | Route registered; no `RunOpsSidebar` entry (dev-only). |
+| RunOps Runbook builder variants | `/runops/runbooks/:runbookId/builder` | Registered but not linked from `RunbookDetail` main actions (verify next drill-down). |
+| Practice Library route roots without index | Several `/practice-library/<category>/index` entries only reachable through Cyber master dashboard | Confirm per-category leaf visibility in follow-up. |
+| `/tenant-profiles` legacy path (`RunOpsTenantProfileManager` under `/runops/platform/tenant-profiles`) | reachable, OK — no legacy orphan detected. |
+| Assurance `/assurance/*` | reachable only via cross-links from Incidents/RunOps — no top-level nav entry. |
+| CRM Demo `/crm-demo/*` | Reachable only via `/app` tile — not in sidebar. |
+
+## 6. Missing Navigation entries (page exists, sidebar entry missing or unreachable at intended level)
+
+| Page | Route | Missing where |
+|---|---|---|
+| Silicon workspace | `/silicon` | eoc Sidebar Digital Twins group |
+| RunOps Design System | `/runops/design-system` | RunOps sidebar (dev tools) |
+| Assurance Command | `/assurance/command` | eoc Sidebar or Command Center |
+| Data Orchestration Twin — Placement Scenario Modeler | `/data-orchestration-twin/placement-scenario-modeler` | Not in eoc Sidebar (only parent listed) |
+| Enterprise Certificate Management sub-centers (15) | `/enterprise-certificate-management/*` | Only the root is exposed in eoc Sidebar; the 15 sub-pages rely on in-page nav — confirm those in-page links exist |
+| Coworkers → Citrix Platform | `/coworkers/citrix-platform-digital-coworkers` | Present in sidebar (OK) |
+| AVEP Placeholder view | `ModulePlaceholder` used by `/avep/*` fallback | Not currently reachable — placeholder only mounted via manual navigation; safe to keep |
+
+## 7. Missing Route Registrations (nav entry exists → route missing)
+
+Cross-referencing `eoc/Sidebar.tsx` `to:` targets against registered routes:
+
+| Sidebar `to:` | Route registered in `App.tsx`? |
+|---|---|
+| `/operational-friction-index` | ✓ |
+| `/reliability-foundations` | ✓ |
+| `/product-reliability-anatomy` | ✓ |
+| `/transformation-journey` | ✓ |
+| `/measuring-success` | ✓ |
+| `/prod-resilience-twin` | ✓ |
+| `/product-line-map` | ✓ |
+| `/golden-workflow-map` | ✓ |
+| `/production-topology` | ✓ |
+| `/sre-operating-model` | ✓ |
+| `/signal-intelligence` | ✓ |
+| `/enterprise-cloud-twin` | ✓ |
+| `/aws-resilience-architecture-twin` | ✓ |
+| `/platform-engineering-factory` | ✓ |
+| `/hybrid-cloud-workbench` | ✓ |
+| `/automation-marketplace` | ✓ |
+| `/modernization-factory` | ✓ |
+| `/cyber-resilience-overlay` | ✓ |
+| `/ai-coworker-control-room` | ✓ |
+| `/transition-dual-run` | ✓ |
+| `/acquisition-onboarding-factory` | ✓ |
+| `/value-creation-board` | ✓ |
+| `/modernization-roadmap` | ✓ |
+| `/interactive-demo-center` | ✓ |
+| `/modernization-roadmap-v2` | ✓ |
+| `/practice-library/*` (all 20 leaves) | ✓ |
+| `/carve-out/{group}/{slug}` (dynamic) | ✓ (covered by `:slug` route) |
+
+No **missing route registrations** were detected across the eoc sidebar. The RunOps sidebar targets `sectionLanding()` values from `runops/shell/routes.ts`; every landing path is covered either by an explicit route or the `RunOpsPlaceholder` fallback (functional but content-empty).
+
+## 8. Existing Hidden Screens (registered + protected but not featured in top nav — intentional deep-links)
+
+| Screen | Route | Rationale |
+|---|---|---|
+| `/set-password`, `/complete-profile` | onboarding forcing | Intentional |
+| `/no-access` | redirect target | Intentional |
+| `/pending-approval` | approval gate | Intentional |
+| `/q/:token` | public respondent link | Intentional |
+| `/platform/invitations/:token` | invite acceptance | Intentional |
+| Deep incident / execution / worker / runbook detail routes under `/runops/**` | Reached from list pages, not sidebar | Intentional |
+
+## 9. Feature-flag-gated behaviour
+
+None of the 397 routes are hidden behind a flag today. Flags in `runops/domain/featureFlags.ts` gate **actions inside RunOps pages** (autonomous exec, live AI, external publish, real-infra). Default flag state = demo-safe.
+
+## 10. Placeholder content
+
+- `src/avep/pages/ModulePlaceholder.tsx` — instantiable but no route uses it in the current `App.tsx` (all AVEP paths bind concrete components).
+- `src/runops/pages/RunOpsPlaceholder.tsx` — used as fallback for any `routes.ts` entry not explicitly bound above.
+- No other pages self-identify as placeholder shells; content-completeness varies (see §3 "Prod-ready" column).
+
+---
+
+## 11. Return: the seven required outputs
+
+### 1. Existing Functional Screens
+All entries in §3 rows 1–24 marked prod-ready or "Yes — demo-grade" are functional and reachable. Concretely: Landing/Auth (8), Profile/Session (3), Command Center (1), RunOps core (~40 of 55), AVEP (21), Platform Admin (7), SEAD (21), Neurealm Agentic AI (1), IT Carve-Out (49), Practice Library (32), Enterprise Certificate Mgmt (16), Reliability Foundations (10), PROD Resilience family (~20 of 26), Data Orchestration Twin (2), CRM (9), Assurance (3), Incidents/Alerts/Change/Questionnaires (6), Admin Taxonomy (4), Settings (7), NeuGAIN overview (1), NotFound (1).
+
+### 2. Existing Hidden Screens
+See §8 — onboarding, redirect, public-token, and deep-link detail routes.
+
+### 3. Existing Orphaned Screens
+See §5 — Silicon, RunOps Design System, Runbook Builder variant, Assurance top-level (no nav), CRM Demo (only via hub tile), select Practice Library category roots.
+
+### 4. Missing Navigation
+See §6 — Silicon, RunOps Design System, Assurance, Data Orch Placement Scenario Modeler, Enterprise Cert sub-centers (in-page nav to confirm).
+
+### 5. Missing Route Registrations
+None detected from the eoc, AVEP, RunOps, Platform, or SEAD navigation registries. All sidebar `to:` targets resolve to a registered route or a documented placeholder.
+
+### 6. Recommended fixes (documentation only — not to be executed under BP1.1F)
+1. Retire or link `/silicon` — decide whether to remove `SiliconLayout` from `App.tsx` (superseded by AVEP) or add a sidebar entry.
+2. Add explicit RunOps sidebar entry for `/runops/design-system` behind a "dev mode" toggle or move it under `/runops/platform`.
+3. Add an eoc-sidebar entry for `/assurance/command` (or explicitly document it as deep-link only from Incidents).
+4. Add a child entry under Data Orchestration Twin for `/data-orchestration-twin/placement-scenario-modeler`.
+5. Verify Enterprise Certificate Management root exposes in-page nav to all 15 sub-centers; otherwise add sidebar children.
+6. Audit `/coworkers/*` `ProtectedRoute` coverage — most sibling modules require auth; coworkers routes are declared without a wrapper in `App.tsx`. Confirm intent.
+7. Remove `ModulePlaceholder` mount points once every AVEP path is confirmed concrete (already true — safe to delete import if `App.tsx` no longer references).
+8. Consolidate the manually-maintained RunOps route exclusion list in `App.tsx` (~40 lines of `r.path !==`) into `runops/shell/routes.ts` metadata to prevent drift.
+
+### 7. Readiness to begin Build Package 2
+
+**Ready with caveats.**
+
+Ready because:
+- Route registry is complete and consistent with the primary navigation registries.
+- Auth / permission / tenant primitives from BP1.1 A–D are in place and enforced on the modules that require them (`/platform/**`).
+- No blocking missing route registrations were found; no unreachable-yet-required screens.
+- Feature flags are demo-safe by default; BP2 can layer on connected-mode behaviour without route reshuffling.
+
+Caveats (not blockers, but should be scheduled into BP2 grooming):
+- Legacy `/silicon` module is orphaned; BP2 should either delete or re-integrate.
+- `/coworkers/**` auth-wrapper inconsistency should be resolved before BP2 introduces tenant-scoped data on those pages.
+- Sub-center visibility for Enterprise Certificate Management and Data Orchestration Twin should be confirmed via a UX walk (candidate BP2 UX-evidence item).
+- The manually-maintained RunOps exclusion list is a drift risk; BP2 refactor recommended.
+
+If deeper per-page tables are needed (e.g. every `/coworkers/*` or every `/carve-out/*` leaf with prod-ready flag), request a follow-up plan scoped to one module and I will emit a per-leaf table for that module only.
