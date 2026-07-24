@@ -182,6 +182,12 @@ const tree: Node[] = [
     ],
   },
   {
+    key: "commercial",
+    label: "Commercial",
+    icon: TrendingUp2,
+    to: "/commercial",
+  },
+  {
     key: "platform",
     label: "Platform",
     icon: ShieldCheck,
