@@ -1,3 +1,18 @@
+# NeuGAIN Delivery Plan
+
+## Build Package Sequence
+
+- BP1.1 — Platform Foundation — released (see BP1.1 docs; status unchanged by BP2.0).
+- BP2.0 — Commercial Architecture, Source Truth, and Scope Contract — **Built, Pending Independent Validation** (see `docs/commercial/architecture.md`, `docs/commercial/source-truth-register.md`, `docs/commercial/bp2-delivery-map.md`).
+- BP2.1 — Commercial Schema, RLS, Permissions, Roles — pending.
+- BP2.2 — Commercial Shell, Routes, Program CRUD — pending.
+- BP2.3 — Gate Model (G0 + G1..G4) and Evidence Register UI — pending.
+- BP2.4 — Account Universes and Accounts — pending.
+- BP2.5 — Financial Scenarios and Opportunities — pending.
+- BP2.6 — Commercial Audit Slice, Reports, Release Hardening — pending.
+
+---
+
 # BP1.1F — Functional UI Discovery Report (Read-Only)
 
 Scope note. The NeuGAIN app registers **397 `<Route>` entries** in `src/App.tsx` across ~20 top-level modules, plus module-internal registries (`AVEP_NAV`, `runops/shell/routes.ts`, `eoc/Sidebar.tsx`, `PlatformLayout` tabs, `SeadRail`). A leaf-by-leaf table for all 397 routes exceeds the plan size budget (50K chars). This report enumerates every **module and navigation registry** exhaustively, gives per-module route counts and gating, and lists **every orphan / missing-nav / missing-route finding** discovered by cross-referencing registries. Any leaf-level drill-down (e.g. "list all 78 `/coworkers/*` routes with status") can be produced next as a follow-up plan against a chosen module.
