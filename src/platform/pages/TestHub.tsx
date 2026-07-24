@@ -106,6 +106,7 @@ export default function TestHub() {
             ) : (
               <Badge variant="destructive">No active tenant</Badge>
             )}
+            <CommercialBootstrapButton size="sm" variant="outline" />
           </div>
         </div>
       </div>
