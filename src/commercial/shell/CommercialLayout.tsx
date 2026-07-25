@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Shield,
   ArrowLeft,
+  Calculator,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -21,6 +22,7 @@ type NavItem = {
   label: string;
   icon: ComponentType<{ className?: string }>;
   end?: boolean;
+  section?: string;
 };
 
 const NAV: NavItem[] = [
@@ -29,6 +31,7 @@ const NAV: NavItem[] = [
   { to: "/commercial/scenarios", label: "Scenarios", icon: FlaskConical },
   { to: "/commercial/portfolio", label: "Portfolio", icon: Briefcase },
   { to: "/commercial/sources", label: "Sources", icon: BookOpen },
+  { to: "/commercial/model/revenue", label: "Revenue", icon: Calculator, section: "Model" },
 ];
 
 function Sidebar() {
