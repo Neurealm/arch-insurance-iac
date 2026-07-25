@@ -642,41 +642,21 @@ function computeCashScope(a: AssumptionMap, pnl: PnlSnapshot): ResultRow[] {
   };
 
   // ----- Y1 Quarterly detail (Base golden §7 shape, applied to all scenarios) -----
+  // BP3.4.1 correction: annual cost is divided evenly across four quarters; the
+  // configured Q1 travel front-load is added as an incremental Q1-only outflow
+  // (it is NOT subtracted from the accrual base before the divide).
   const fy1 = FISCAL_YEARS[0];
   const rev1 = pnl.revByFy[fy1];
   const cost1 = pnl.codByFy[fy1] + pnl.opexByFy[fy1];
   const accruedPerQ = rev1 / 4;
-  const baseCostPerQ = (cost1 - pnl.travelCodByFy[fy1] * q1TravelPct) / 4;
+  const baseCostPerQ = cost1 / 4;
   const q1Upfront = pnl.actFundByFy[fy1] * q1FundPct;
   const q1TravelLoad = pnl.travelCodByFy[fy1] * q1TravelPct;
-  // remaining travel spread over Q2-Q4 already implicit in baseCostPerQ recalc:
-  // baseCostPerQ = (cost1 - q1TravelLoad)/4  → travel only paid Q1
-
-  const cashInQ: number[] = [];
-  const cashOutQ: number[] = [];
-  const ncfQ: number[] = [];
-  const cumNcfQ: number[] = [];
-  let cum = 0;
-
-  for (let q = 0; q < 4; q++) {
-    const collect = q - lagQ >= 0 ? accruedPerQ : 0;
-    const upfront = q === 0 ? q1Upfront : 0;
-    const cIn = collect + upfront;
-    const cOut = q === 0 ? baseCostPerQ + q1TravelLoad : baseCostPerQ;
-    const ncf = cIn - cOut;
-    cum += ncf;
-    cashInQ.push(cIn); cashOutQ.push(cOut); ncfQ.push(ncf); cumNcfQ.push(cum);
-
-    const qLabel = `${fy1}-${QUARTERS[q]}`;
-    push("CASH-ACCRUED-REV", "cash_quarterly", "CASH-ACCRUED-REV", qLabel, q,
-      accruedPerQ, "USD",
-      { formula: "REV-TOTAL[Y1]/4", rev_total_y1: rev1, pnl_run_id: pnl.pnlRunId });
-    push("CASH-COLLECTED", "cash_quarterly", "CASH-COLLECTED", qLabel, q,
-      cIn, "USD",
-      { formula: "accrued[q-lagQ] + q1_upfront", lag_quarters: lagQ, pay_lag_days: payLagDays, collect, upfront });
+  // Q1 = baseCostPerQ + travel front-load ; Q2..Q4 = baseCostPerQ
+...
     push("CASH-COSTS-PAID", "cash_quarterly", "CASH-COSTS-PAID", qLabel, q,
       cOut, "USD",
-      { formula: q === 0 ? "(cost-travel)/4 + Q1_travel_load" : "(cost-travel)/4", base_cost_per_q: baseCostPerQ, q1_travel_load: q === 0 ? q1TravelLoad : 0 });
+      { formula: q === 0 ? "cost/4 + Q1_travel_load" : "cost/4", base_cost_per_q: baseCostPerQ, q1_travel_load: q === 0 ? q1TravelLoad : 0, q1_travel_frontload_pct: q1TravelPct, formula_version: "bp3.4.1" });
     push("CASH-NCF-QTR", "cash_quarterly", "CASH-NCF-QTR", qLabel, q,
       ncf, "USD",
       { formula: "CASH-COLLECTED - CASH-COSTS-PAID" });
