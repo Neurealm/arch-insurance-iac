@@ -7953,6 +7953,10 @@ export type Database = {
         }
         Returns: string
       }
+      commercial_model_run_persist_results_batch: {
+        Args: { _results: Json; _run_id: string }
+        Returns: number
+      }
       commercial_model_run_start: {
         Args: {
           _model_version_id: string
