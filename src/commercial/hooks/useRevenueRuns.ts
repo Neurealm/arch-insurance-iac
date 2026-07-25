@@ -28,10 +28,10 @@ export type ModelResult = {
   formula_code: string;
   fiscal_period: string;
   period_sequence: number;
-  value_numeric: string | null;
+  value_numeric: number | string | null;
   value_text: string | null;
   unit: string;
-  lineage_json: Record<string, unknown>;
+  lineage_json: unknown;
   is_approximation: boolean;
 };
 
