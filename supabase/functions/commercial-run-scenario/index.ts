@@ -84,8 +84,8 @@ function computeRevenueScope(a: AssumptionMap): ResultRow[] {
   const out: ResultRow[] = [];
 
   // Volume drivers
-  const cum: number[] = FISCAL_YEARS.map((_, i) =>
-    need(a, `ACT_RAMP_FY202${7 + i}`),
+  const cum: number[] = FISCAL_YEARS.map((fy) =>
+    need(a, `ACT_RAMP_${fy}`),
   );
   const newAct: number[] = cum.map((v, i) => (i === 0 ? v : v - cum[i - 1]));
   const convRebate = cum.map((v) => Math.round(v * need(a, "CONV_REBATE_PCT")));
@@ -95,9 +95,10 @@ function computeRevenueScope(a: AssumptionMap): ResultRow[] {
   const avgArr = need(a, "AVG_ARR_PER_CUSTOMER_MUSD");
   const incrPct = need(a, "INCR_ARR_GROWTH_PCT");
   const renewInfl = need(a, "RENEWAL_INFLUENCED_PCT");
-  const earPool = FISCAL_YEARS.map((_, i) =>
-    need(a, `EAR_POOL_FY202${7 + i}_MUSD`),
+  const earPool = FISCAL_YEARS.map((fy) =>
+    need(a, `EAR_POOL_${fy}_MUSD`),
   );
+
 
   const actArr = cum.map((v) => v * avgArr * 1_000_000);
   const incrArr = actArr.map((v) => v * incrPct);
