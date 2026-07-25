@@ -448,7 +448,161 @@ function computeRevenueScope(a: AssumptionMap): ResultRow[] {
   return out;
 }
 
-// ---------- HTTP handler ----------
+// ---------- P&L Scope Engine (BP3.3) ----------
+function computePnlScope(
+  a: AssumptionMap,
+  revTotalByFy: Record<string, number>,
+  revenueRunId: string,
+): ResultRow[] {
+  const out: ResultRow[] = [];
+
+  const push = (row: Omit<ResultRow, "period_sequence" | "fiscal_period"> & { fy: string; yi: number }) => {
+    const { fy, yi, ...rest } = row;
+    out.push({ ...rest, fiscal_period: fy, period_sequence: yi });
+  };
+
+  const codPerFy: number[] = [];
+  const opexPerFy: number[] = [];
+  const revPerFy: number[] = FISCAL_YEARS.map((fy) => revTotalByFy[fy]);
+
+  // Emit per-line COD rows + running totals
+  FISCAL_YEARS.forEach((fy, i) => {
+    let codSum = 0;
+    for (const code of COD_CODES) {
+      const key = `${code}_${fy}`;
+      const v = need(a, key);
+      codSum += v;
+      push({
+        fy, yi: i,
+        metric_code: `COD-${code.replace(/^COD_/, "")}`,
+        metric_group: "cost_of_delivery",
+        formula_code: "COD-LINE",
+        value_numeric: v,
+        unit: "USD",
+        lineage_json: { input: key, label: COD_LABELS[code] },
+      });
+    }
+    codPerFy.push(codSum);
+    push({
+      fy, yi: i,
+      metric_code: "COD-TOTAL",
+      metric_group: "cost_of_delivery_total",
+      formula_code: "COD-TOTAL",
+      value_numeric: codSum,
+      unit: "USD",
+      lineage_json: { formula: "SUM(COD_01..COD_11)", inputs_count: COD_CODES.length },
+    });
+
+    let opexSum = 0;
+    for (const code of OPEX_CODES) {
+      const key = `${code}_${fy}`;
+      const v = need(a, key);
+      opexSum += v;
+      push({
+        fy, yi: i,
+        metric_code: `OPEX-${code.replace(/^OPEX_/, "")}`,
+        metric_group: "operating_expense",
+        formula_code: "OPEX-LINE",
+        value_numeric: v,
+        unit: "USD",
+        lineage_json: { input: key, label: OPEX_LABELS[code] },
+      });
+    }
+    opexPerFy.push(opexSum);
+    push({
+      fy, yi: i,
+      metric_code: "OPEX-TOTAL",
+      metric_group: "operating_expense_total",
+      formula_code: "OPEX-TOTAL",
+      value_numeric: opexSum,
+      unit: "USD",
+      lineage_json: { formula: "SUM(OPEX_01..OPEX_10)", inputs_count: OPEX_CODES.length },
+    });
+
+    // Pod FTE memo
+    push({
+      fy, yi: i,
+      metric_code: "POD-FTE",
+      metric_group: "staffing",
+      formula_code: "POD-FTE",
+      value_numeric: need(a, `POD_FTE_${fy}`),
+      unit: "FTE",
+      lineage_json: { input: `POD_FTE_${fy}` },
+    });
+  });
+
+  // Derived P&L rows
+  FISCAL_YEARS.forEach((fy, i) => {
+    const rev = revPerFy[i];
+    const cod = codPerFy[i];
+    const opex = opexPerFy[i];
+    const gp = rev - cod;
+    const gmPct = rev !== 0 ? gp / rev : 0;
+    const ebitda = gp - opex;
+    const ebitdaPct = rev !== 0 ? ebitda / rev : 0;
+
+    push({
+      fy, yi: i,
+      metric_code: "PL-GROSS-PROFIT",
+      metric_group: "pnl",
+      formula_code: "PL-GROSS-PROFIT",
+      value_numeric: gp,
+      unit: "USD",
+      lineage_json: { formula: "REV-TOTAL - COD-TOTAL", rev_total: rev, cod_total: cod, revenue_run_id: revenueRunId },
+    });
+    push({
+      fy, yi: i,
+      metric_code: "PL-GROSS-MARGIN-PCT",
+      metric_group: "pnl",
+      formula_code: "PL-GROSS-MARGIN-PCT",
+      value_numeric: gmPct,
+      unit: "ratio",
+      lineage_json: { formula: "GROSS_PROFIT / REV-TOTAL", gross_profit: gp, rev_total: rev },
+    });
+    push({
+      fy, yi: i,
+      metric_code: "PL-EBITDA",
+      metric_group: "pnl",
+      formula_code: "PL-EBITDA",
+      value_numeric: ebitda,
+      unit: "USD",
+      lineage_json: { formula: "GROSS_PROFIT - OPEX-TOTAL", gross_profit: gp, opex_total: opex },
+    });
+    push({
+      fy, yi: i,
+      metric_code: "PL-EBITDA-MARGIN-PCT",
+      metric_group: "pnl",
+      formula_code: "PL-EBITDA-MARGIN-PCT",
+      value_numeric: ebitdaPct,
+      unit: "ratio",
+      lineage_json: { formula: "EBITDA / REV-TOTAL", ebitda, rev_total: rev },
+    });
+  });
+
+  // 5-year totals
+  const totalRow = (code: string, group: string, value: number, unit: string, lineage: Record<string, unknown>) =>
+    out.push({
+      metric_code: code, metric_group: group, formula_code: code,
+      fiscal_period: "FY2027-FY2031", period_sequence: 99,
+      value_numeric: value, unit, lineage_json: lineage,
+    });
+  const sum = (arr: number[]) => arr.reduce((s, v) => s + v, 0);
+  const totRev = sum(revPerFy);
+  const totCod = sum(codPerFy);
+  const totOpex = sum(opexPerFy);
+  const totGp = totRev - totCod;
+  const totEbitda = totGp - totOpex;
+  totalRow("COD-TOTAL", "cost_of_delivery_total", totCod, "USD", { total_mode: "SUM" });
+  totalRow("OPEX-TOTAL", "operating_expense_total", totOpex, "USD", { total_mode: "SUM" });
+  totalRow("PL-GROSS-PROFIT", "pnl", totGp, "USD", { formula: "SUM(FY GP)" });
+  totalRow("PL-GROSS-MARGIN-PCT", "pnl", totRev !== 0 ? totGp / totRev : 0, "ratio", { formula: "TOT_GP / TOT_REV" });
+  totalRow("PL-EBITDA", "pnl", totEbitda, "USD", { formula: "SUM(FY EBITDA)" });
+  totalRow("PL-EBITDA-MARGIN-PCT", "pnl", totRev !== 0 ? totEbitda / totRev : 0, "ratio", { formula: "TOT_EBITDA / TOT_REV" });
+
+  return out;
+}
+
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") {
