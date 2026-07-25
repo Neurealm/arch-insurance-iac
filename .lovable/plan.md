@@ -11,10 +11,49 @@
 - BP2.5 — Scenarios (Conservative/Base/Upside) + 69 Directional Assumptions — **Built, Validated (GO)**.
 - BP2.6 — Integrated Overview, Portfolio Foundation, Hardening, Docs — **Built, Pending Final Validation** (see `docs/commercial/bp2-build-evidence.md`, `operator-guide.md`, `known-limitations.md`).
 - BP2 overall — **Built, Validated (GO)**.
-- BP3.0 — Commercial Modeling Source, Formula, Precision & Golden Baseline Contract — **Built, Pending Independent Validation** (see `docs/commercial/bp3-model-contract.md`, `bp3-formula-catalog.md`, `bp3-source-cell-map.md`, `bp3-golden-output-baseline.md`, `bp3-delivery-map.md`).
-- BP3.1 — Commercial Model Runtime, Versioning, Run Persistence, RLS & Immutability — **Built, Pending Independent Validation** (see `docs/commercial/bp3-1-runtime-architecture.md`, `bp3-1-test-evidence.md`, `supabase/tests/bp3_1_model_runtime.sql`).
-- BP3.2 — Project Momentous Volume Driver & Revenue Calculation Engine — **Built, Pending Independent Validation** (see `docs/commercial/bp3-2-revenue-formulas.md`, `bp3-2-test-evidence.md`, `supabase/tests/bp3_2_revenue_engine.sql`, edge function `commercial-run-scenario`, page `/commercial/model/revenue`). Cost/OPEX/Cash/Sensitivity remain out of scope.
-- BP3.2.1 — Runtime Evidence Finalized — 3 completed runs (CONS/BASE/UPSIDE) against `PM-FIN-2026.1`, 34 inputs + 126 results per run, golden parity exact on VOL-* and REV-TOTAL 5-yr, idempotent reuse proven (0 new · 3 reused). PM-FIN-2026.1 remains Draft (activation deferred to BP3.8).
+- BP3.0 — Commercial Modeling Source, Formula, Precision & Golden Baseline Contract — **Completed, Validated (GO)**.
+- BP3.1 — Commercial Model Runtime, Versioning, Run Persistence, RLS & Immutability — **Completed, Validated (GO)**.
+- BP3.2 — Project Momentous Volume Driver & Revenue Calculation Engine — **Completed, Validated (GO)** (see `docs/commercial/bp3-2-revenue-formulas.md`, `bp3-2-test-evidence.md`, `supabase/tests/bp3_2_revenue_engine.sql`, edge function `commercial-run-scenario`, page `/commercial/model/revenue`).
+- BP3.2.1 — Runtime Evidence Finalized — 3 completed runs (CONS/BASE/UPSIDE) against `PM-FIN-2026.1`, 34 inputs + 126 results per run, golden parity exact (378/378), idempotent reuse proven (0 new · 3 reused). PM-FIN-2026.1 remains Draft (activation deferred to BP3.8).
+
+### BP3.2 COMPLETED AND VALIDATED
+
+- **Status:** Completed
+- **Independent Validation:** GO
+- **Validation Date:** 2026-07-25
+
+**Summary.** The Project Momentous Revenue Engine has been successfully implemented, runtime verified, independently validated, and accepted as the authoritative revenue modeling foundation for the Commercial Digital Twin.
+
+**Delivered Capabilities**
+- ✓ Server-authoritative revenue engine
+- ✓ Project Momentous revenue model
+- ✓ Volume-driver calculations
+- ✓ Revenue-stream calculations
+- ✓ Formula lineage
+- ✓ Runtime persistence
+- ✓ Deterministic input hashing
+- ✓ Idempotent execution
+- ✓ Golden-baseline parity (378 / 378)
+- ✓ Complete runtime evidence
+- ✓ Tenant isolation
+- ✓ Row-Level Security enforcement
+- ✓ Immutable completed runs
+- ✓ Source-aligned formula catalog
+- ✓ Persisted input snapshots
+- ✓ Persisted model results
+- ✓ Commercial Revenue workspace
+- ✓ Scenario execution
+- ✓ Historical execution audit
+
+**Deferred Items**
+- Model activation → BP3.8
+- Cost / COD Engine → BP3.3
+- Operating Expense Engine → BP3.3
+- Cash Flow → BP3.4
+- Sensitivity Analysis → BP3.7
+
+**Executive Summary.** BP3.2 establishes the first production-ready calculation engine within the NeuGAIN Commercial Digital Twin. Revenue calculations are now server-authoritative, source-aligned, deterministic, tenant-secure, runtime verified, and independently validated. Subsequent Build Packages extend this foundation with Cost, EBITDA, Cash Flow, Sensitivity Analysis, and Executive Decision Support while reusing the validated revenue engine rather than duplicating financial calculations.
+
 - BP3.3 — Engine — Scenario Summary, Cash/WC, Break-Even & Payback — **Not Started**.
 - BP3.4 — Engine — Sensitivity & Terms Interpretation — **Not Started**.
 - BP3.5 — Supabase Edge Function `commercial-run-scenario` + RLS wiring — **Not Started**.
