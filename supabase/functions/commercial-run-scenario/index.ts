@@ -817,9 +817,10 @@ Deno.serve(async (req: Request) => {
     return json({ error: "program_id and model_version_id are required" }, 400);
   }
   const runScope = (body.run_scope ?? "revenue").toLowerCase();
-  if (runScope !== "revenue" && runScope !== "pnl") {
-    return json({ error: "run_scope must be 'revenue' or 'pnl'" }, 400);
+  if (runScope !== "revenue" && runScope !== "pnl" && runScope !== "cash") {
+    return json({ error: "run_scope must be 'revenue', 'pnl', or 'cash'" }, 400);
   }
+
 
   // Resolve scenarios
   const scenarioIds =
