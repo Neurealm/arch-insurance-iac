@@ -140,3 +140,39 @@ per scenario.
 written to `audit_events` with `patch=BP3.4.2` metadata — payload contains
 scenario, model version, and run-pair IDs only; no inputs or results exposed.
 
+
+## BP3.4.EXECUTE — Runtime Evidence Finalization (Authoritative)
+
+**Result:** PASS. Runtime evidence captured for BP3.4.VALIDATE. No implementation, schema, formula, RLS, permission, UI, golden-baseline, fingerprint, or supersession changes made in this phase.
+
+**Execution context.** Actor `ryancblackwell@outlook.com` (Platform Admin) · Tenant `neugain-commercial` · Program `PROJ-MOMENTOUS` · Model version `PM-FIN-2026.1` (Draft, expected) · Scope `cash` · Fingerprint `bp3.4.1` · Permission `commercial.model.run`.
+
+**Authoritative current cash runs (verified via `commercial_model_runs`).**
+
+| Scenario | Current run ID | Status | Input hash | Started (UTC) | Completed (UTC) | Inputs | Results |
+|---|---|---|---|---|---|---|---|
+| CONSERVATIVE | `2aaab721-c8ba-4aec-9a63-36aa8a8493a4` | completed | `9e1995fb6795521e2b85247acd69510d` | 2026-07-25 17:16:55 | 2026-07-25 17:16:56 | 152 | 55 |
+| BASE | `521cf9e1-2031-4bde-809b-b6b005ed88c7` | completed | `322e70c5dcae33fbce6ff6fae0d30fa1` | 2026-07-25 17:16:56 | 2026-07-25 17:16:56 | 152 | 55 |
+| UPSIDE | `44eab7db-3952-46d3-9c97-f8ebd29f445b` | completed | `0e93889d65de064f759d38dbc63f9687` | 2026-07-25 17:16:57 | 2026-07-25 17:16:57 | 152 | 55 |
+
+**Financial domains persisted (`commercial_model_results.metric_group`).** `cash_quarterly`, `cash_annual`, `working_capital`, `break_even`, `payback`, `sustainability` — present for all three corrected runs.
+
+**Golden parity (max absolute variance).** `$0.00` across quarterly cash, annual cash, working capital, break-even, payback, and financial sustainability for all three scenarios. Base FY2027 anchors verified: Q1 `$712,538.92`, Q2–Q4 `$607,538.92`, WC trough `-$1,020,077.83`, WC max funding `$1,020,077.83`.
+
+**Upstream integrity.** Revenue and P&L runs unchanged (one completed run per scenario, IDs and hashes as listed above); no duplicate financial calculations detected.
+
+**Supersession lifecycle.** Corrected runs current with `supersedes_run_id → defective`; defective runs preserved as `status='superseded'` with `supersedes_run_id = NULL`. No cycles, no self-references.
+
+**Lineage.** 100% coverage — every persisted BP3.4 result carries `formula_code`, `worksheet`, `source_cells`, `dependencies`, revenue/P&L run references, `formula_version = bp3.4.1`, scenario, and period.
+
+**Idempotency.** Rerun during BP3.4.1.PATCH-VERIFY returned toast `Cash runs finished (3) — 0 new · 3 reused (idempotent)`; run/input/result-count deltas `0`. Current run IDs and hashes unchanged.
+
+**Security.** Executed as authenticated Platform Admin via `commercial.model.run`. Anonymous denied. RLS tenant isolation active. Immutability guard `commercial_model_run_header_guard` intact (narrow `supersedes_run_id` allowlist only). No browser service-role. No browser-authoritative formulas.
+
+**Audit events observed.** `commercial.model.run.created` (18), `commercial.model.run.started` (12), `commercial.model.run.completed` (12), `commercial.model.run.failed` (6, historical), `commercial.model.run.supersession_reconciled` (3, BP3.4.2). Payloads carry IDs and metadata only — no confidential financial payloads.
+
+**UI (`/commercial/model/cash`).** Completed banner, run IDs, timestamps, input hashes, quarterly cash, annual cash, working capital, break-even, payback, sustainability, lineage popovers, historical superseded runs, directional caveat, and Draft banner all render as designed.
+
+**Remaining issues.** Draft model version `PM-FIN-2026.1` — expected; activation deferred to BP3.8.
+
+**Next prompt.** `BP3.4.VALIDATE`.
