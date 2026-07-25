@@ -349,7 +349,7 @@ function MetricTable({
             {rows.map((r) => {
               const cells = FYS.map((fy) => findValue(results, run.id, r.code, fy));
               const total = findValue(results, run.id, r.code, TOTAL_PERIOD);
-              const lineage = cells[0]?.lineage_json ?? {};
+              const lineage = (cells[0]?.lineage_json ?? {}) as unknown;
               const isHighlight = highlightCode === r.code;
               return (
                 <TableRow key={r.code} className={isHighlight ? "font-semibold bg-muted/40" : ""}>
