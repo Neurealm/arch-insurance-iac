@@ -66,6 +66,58 @@ function checkCompleteness(m: AssumptionMap): string[] {
   return requiredKeys().filter((k) => !(k in m));
 }
 
+// ---------- P&L scope helpers (BP3.3) ----------
+const COD_CODES = [
+  "COD_01_POD_LEAD","COD_02_CS_LEAD","COD_03_SA","COD_04_HC_SME",
+  "COD_05_SVC_PRE","COD_06_L1L2","COD_07_DATA","COD_08_PMO",
+  "COD_09_DEL_LEAD","COD_09B_DEL_VAR","COD_10_TOOLS","COD_11_TRAVEL",
+] as const;
+const OPEX_CODES = [
+  "OPEX_01_GM","OPEX_02_ALLIANCE","OPEX_03_FIN","OPEX_04_LEGAL",
+  "OPEX_05_MKT","OPEX_06_TRAINING","OPEX_07_TRAVEL","OPEX_08_GA",
+  "OPEX_09_TOOLS","OPEX_10_RECRUIT",
+] as const;
+const COD_LABELS: Record<string, string> = {
+  COD_01_POD_LEAD: "1. Account Pod Lead",
+  COD_02_CS_LEAD: "2. Customer Success / Adoption Lead",
+  COD_03_SA: "3. Citrix Solution Architect",
+  COD_04_HC_SME: "4. Healthcare Workflow SME",
+  COD_05_SVC_PRE: "5. Services Attach / Pre-Sales Lead",
+  COD_06_L1L2: "6. L1/L2 Support Resources",
+  COD_07_DATA: "7. Data / RevOps Analyst",
+  COD_08_PMO: "8. Program Manager / PMO",
+  COD_09_DEL_LEAD: "9. Delivery Lead — MS (base FTE)",
+  COD_09B_DEL_VAR: "9b. Delivery Resources — MS (variable)",
+  COD_10_TOOLS: "10. Third-Party Tools & Infrastructure",
+  COD_11_TRAVEL: "11. Travel & Customer Workshops",
+};
+const OPEX_LABELS: Record<string, string> = {
+  OPEX_01_GM: "1. Executive Sponsor / Program GM",
+  OPEX_02_ALLIANCE: "2. Alliance Management",
+  OPEX_03_FIN: "3. Finance & Deal Operations",
+  OPEX_04_LEGAL: "4. Legal & Contracting",
+  OPEX_05_MKT: "5. Marketing / Customer Materials",
+  OPEX_06_TRAINING: "6. Training & Certification",
+  OPEX_07_TRAVEL: "7. Non-delivery Travel",
+  OPEX_08_GA: "8. G&A Allocation",
+  OPEX_09_TOOLS: "9. Internal Systems & Tooling",
+  OPEX_10_RECRUIT: "10. Recruiting / Hiring",
+};
+
+function pnlRequiredKeys(): string[] {
+  const keys: string[] = [];
+  for (const fy of FISCAL_YEARS) {
+    for (const c of COD_CODES) keys.push(`${c}_${fy}`);
+    for (const o of OPEX_CODES) keys.push(`${o}_${fy}`);
+    keys.push(`POD_FTE_${fy}`);
+  }
+  return keys;
+}
+function checkPnlCompleteness(m: AssumptionMap): string[] {
+  return pnlRequiredKeys().filter((k) => !(k in m));
+}
+
+
 
 // ---------- Engine ----------
 type ResultRow = {
