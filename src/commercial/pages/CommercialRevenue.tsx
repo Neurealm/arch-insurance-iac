@@ -29,7 +29,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { AlertTriangle, Info, Loader2, Play, Sigma } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Info, Loader2, Play, Sigma } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCommercialAccess } from "@/commercial/hooks/useCommercialAccess";
 import {
