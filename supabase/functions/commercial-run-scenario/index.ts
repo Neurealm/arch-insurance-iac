@@ -756,7 +756,7 @@ async function runOne(
     });
     if (cErr) throw new Error(cErr.message);
 
-    return { scenario_id, run_id, reused: false, metrics_written: rows.length };
+    return { scenario_id, run_id, reused: false, run_scope, metrics_written: rows.length };
   } catch (e) {
     const msg = (e as Error).message;
     await supabase.rpc("commercial_model_run_fail", {
@@ -770,10 +770,12 @@ async function runOne(
 
 function mapErrCode(msg: string): string {
   if (msg.startsWith("missing_assumption:")) return "MISSING_INPUT";
+  if (msg.startsWith("prerequisite_missing:")) return "PREREQUISITE_MISSING";
   if (msg.includes("permission_denied")) return "FORBIDDEN";
   if (msg.includes("model_version_not_found")) return "STALE_MODEL_VERSION";
   return "FORMULA_ERROR";
 }
+
 function mapErr(msg: string): string {
   return msg;
 }
