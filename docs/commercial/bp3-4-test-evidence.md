@@ -85,12 +85,58 @@ Anonymous execution remains denied, RLS tenant scoping active, completed
 runs/inputs/results immutable.
 
 ## Remaining issues
-1. **Supersession self-reference not reconciled.** Defective runs still
-   carry `supersedes_run_id = self` (the "temporary" self-reference from
-   the BP3.4.1 patch). Corrected runs have `supersedes_run_id = NULL`
-   instead of the defective run ID. This is a data-hygiene defect only —
-   `status='superseded'` correctly excludes the defective runs from
-   "current" selection, and corrected runs are current. A targeted
-   supersession-reconciliation migration is required before BP3.4 is
-   marked validated.
-2. Draft model version `PM-FIN-2026.1` — expected, deferred to BP3.8.
+1. Draft model version `PM-FIN-2026.1` — expected, deferred to BP3.8.
+
+## BP3.4.2 — Supersession Reference Reconciliation (Applied)
+
+**Root cause.** BP3.4.1 marked the three defective cash runs `status='superseded'`
+with a temporary `supersedes_run_id = self`, and left the corrected runs'
+`supersedes_run_id` `NULL`. The lifecycle direction is
+`corrected.supersedes_run_id = defective.id`; the defective row must not
+reference itself.
+
+**Previous invalid state.**
+
+| Scenario | Defective supersedes_run_id | Corrected supersedes_run_id |
+|---|---|---|
+| CONS | `e79ba517…` (self) | `NULL` |
+| BASE | `d225ea9f…` (self) | `NULL` |
+| UPSIDE | `93f33caf…` (self) | `NULL` |
+
+**Final valid state (verified).**
+
+| Scenario | Defective run | Defective status | Defective supersedes_run_id | Corrected run | Corrected status | Corrected supersedes_run_id |
+|---|---|---|---|---|---|---|
+| CONS | `e79ba517-4158-4516-8e37-62f09005139a` | superseded | `NULL` | `2aaab721-c8ba-4aec-9a63-36aa8a8493a4` | completed | `e79ba517-4158-4516-8e37-62f09005139a` |
+| BASE | `d225ea9f-5a77-44d5-bd81-5dc64d2da5f2` | superseded | `NULL` | `521cf9e1-2031-4bde-809b-b6b005ed88c7` | completed | `d225ea9f-5a77-44d5-bd81-5dc64d2da5f2` |
+| UPSIDE | `93f33caf-838f-4ee2-9b49-c3dfa671e43d` | superseded | `NULL` | `44eab7db-3952-46d3-9c97-f8ebd29f445b` | completed | `93f33caf-838f-4ee2-9b49-c3dfa671e43d` |
+
+**Migration.** `bp3.4.2_cash_run_supersession_reference_reconciliation`. Schema
+changed: **NO** (function body only). Runtime changed: **NO**. Rows updated: 6
+(3 defective self-reference clears + 3 corrected → defective links). Audit
+events: 3 (one per pair, `commercial.model.run.supersession_reconciled`).
+
+**Immutability handling.** `commercial_model_run_header_guard()` extended with
+a second narrowly scoped allowlist branch that permits `UPDATE`s on
+terminal-state rows **only** when `supersedes_run_id` is the sole changed
+column and every other column (id, tenant, program, scenario, model version,
+scope, status, input_hash, timestamps, error fields, created_by, created_at)
+is identical, and self-references are forbidden. Normal client update rights
+unchanged.
+
+**Idempotency.** Migration re-evaluates preconditions and only issues
+`UPDATE`s when current state differs from the desired state. Second execution
+would perform 0 updates.
+
+**Regression.** Corrected run IDs, input hashes (`9e1995fb…`, `322e70c5…`,
+`0e93889d…`), runtime fingerprint (`bp3.4.1`), 152 inputs / 55 results per
+corrected run, golden parity, lineage, revenue and P&L dependency run IDs —
+all unchanged. No result, input, lineage, hash, or timestamp changes.
+
+**Current-run selection.** `2aaab721… / 521cf9e1… / 44eab7db…` still returned
+per scenario.
+
+**Audit.** Three `commercial.model.run.supersession_reconciled` events
+written to `audit_events` with `patch=BP3.4.2` metadata — payload contains
+scenario, model version, and run-pair IDs only; no inputs or results exposed.
+
