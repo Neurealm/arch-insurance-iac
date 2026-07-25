@@ -54,7 +54,7 @@
 
 **Executive Summary.** BP3.2 establishes the first production-ready calculation engine within the NeuGAIN Commercial Digital Twin. Revenue calculations are now server-authoritative, source-aligned, deterministic, tenant-secure, runtime verified, and independently validated. Subsequent Build Packages extend this foundation with Cost, EBITDA, Cash Flow, Sensitivity Analysis, and Executive Decision Support while reusing the validated revenue engine rather than duplicating financial calculations.
 
-- BP3.3 — Engine — Scenario Summary, Cash/WC, Break-Even & Payback — **Not Started**.
+- BP3.3 — Engine — Cost of Delivery, OPEX, Gross Profit & EBITDA — **Build Complete, Validation Pending** (see `docs/commercial/bp3-3-pnl-formulas.md`, page `/commercial/model/pnl`, edge function `commercial-run-scenario` with `run_scope=pnl`). 115 assumptions/scenario seeded (345 total); pnl scope consumes the paired revenue run and emits 151 metric rows per scenario (COD lines + total, OPEX lines + total, PL-GROSS-PROFIT, PL-GROSS-MARGIN-PCT, PL-EBITDA, PL-EBITDA-MARGIN-PCT, POD-FTE staffing memo, with 5-yr totals). Runtime execution and golden-parity evidence collected in BP3.3.EXECUTE.
 - BP3.4 — Engine — Sensitivity & Terms Interpretation — **Not Started**.
 - BP3.5 — Supabase Edge Function `commercial-run-scenario` + RLS wiring — **Not Started**.
 - BP3.6 — Golden-diff Test Harness & CI Gate — **Not Started**.
