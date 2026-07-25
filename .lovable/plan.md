@@ -10,8 +10,17 @@
 - BP2.4 — Project Momentous Program, Gates, Metrics, Sources — **Built, Validated (GO)**.
 - BP2.5 — Scenarios (Conservative/Base/Upside) + 69 Directional Assumptions — **Built, Validated (GO)**.
 - BP2.6 — Integrated Overview, Portfolio Foundation, Hardening, Docs — **Built, Pending Final Validation** (see `docs/commercial/bp2-build-evidence.md`, `operator-guide.md`, `known-limitations.md`).
-- BP2 overall — **Built, Pending Final Validation**.
-- Next future package — **Account import & financial calculation engine** (see `docs/commercial/known-limitations.md`).
+- BP2 overall — **Built, Validated (GO)**.
+- BP3.0 — Commercial Modeling Source, Formula, Precision & Golden Baseline Contract — **Built, Pending Independent Validation** (see `docs/commercial/bp3-model-contract.md`, `bp3-formula-catalog.md`, `bp3-source-cell-map.md`, `bp3-golden-output-baseline.md`, `bp3-delivery-map.md`).
+- BP3.1 — Engine Schema, Run Governance & Permissions — **Not Started**.
+- BP3.2 — Deterministic TS Domain Engine (Volumes → EBITDA) — **Not Started**.
+- BP3.3 — Engine — Scenario Summary, Cash/WC, Break-Even & Payback — **Not Started**.
+- BP3.4 — Engine — Sensitivity & Terms Interpretation — **Not Started**.
+- BP3.5 — Supabase Edge Function `commercial-run-scenario` + RLS wiring — **Not Started**.
+- BP3.6 — Golden-diff Test Harness & CI Gate — **Not Started**.
+- BP3.7 — Commercial UI — Run controls, output panels, delta and sensitivity views — **Not Started**.
+- BP3.8 — Documentation, Operator Guide, Release Evidence & BP3 Completion — **Not Started**.
+- Carry-forward: BP1.1E external execution evidence remains unresolved (see `docs/bp1-1-external-execution-guide.md`).
 
 ---
 
