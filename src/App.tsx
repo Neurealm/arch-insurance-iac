@@ -89,6 +89,8 @@ import CommercialSources from "./commercial/pages/CommercialSources";
 import CommercialRevenue from "./commercial/pages/CommercialRevenue";
 import CommercialPnl from "./commercial/pages/CommercialPnl";
 import CommercialCash from "./commercial/pages/CommercialCash";
+import CommercialAssumptions from "./commercial/pages/CommercialAssumptions";
+import CommercialAssumptionChangeSet from "./commercial/pages/CommercialAssumptionChangeSet";
 
 
 import { PermissionRoute } from "./components/auth/PermissionRoute";
@@ -868,6 +870,8 @@ const App = () => (
             <Route path="model/revenue" element={<PermissionRoute permission="commercial.view"><CommercialRevenue /></PermissionRoute>} />
             <Route path="model/pnl" element={<PermissionRoute permission="commercial.view"><CommercialPnl /></PermissionRoute>} />
             <Route path="model/cash" element={<PermissionRoute permission="commercial.view"><CommercialCash /></PermissionRoute>} />
+            <Route path="model/assumptions" element={<PermissionRoute permission="commercial.view"><CommercialAssumptions /></PermissionRoute>} />
+            <Route path="model/assumptions/change-sets/:id" element={<PermissionRoute permission="commercial.view"><CommercialAssumptionChangeSet /></PermissionRoute>} />
 
 
           </Route>

@@ -311,6 +311,263 @@ export type Database = {
           },
         ]
       }
+      commercial_assumption_apply_log: {
+        Row: {
+          applied_at: string
+          applied_by: string | null
+          change_set_id: string
+          content_hash: string
+          id: string
+          impacted_scopes: string[]
+          model_version_id: string
+          program_id: string
+          scenario_ids: string[]
+          tenant_id: string
+        }
+        Insert: {
+          applied_at?: string
+          applied_by?: string | null
+          change_set_id: string
+          content_hash: string
+          id?: string
+          impacted_scopes: string[]
+          model_version_id: string
+          program_id: string
+          scenario_ids: string[]
+          tenant_id: string
+        }
+        Update: {
+          applied_at?: string
+          applied_by?: string | null
+          change_set_id?: string
+          content_hash?: string
+          id?: string
+          impacted_scopes?: string[]
+          model_version_id?: string
+          program_id?: string
+          scenario_ids?: string[]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_assumption_apply_log_change_set_id_fkey"
+            columns: ["change_set_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_assumption_change_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_apply_log_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_apply_log_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_apply_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_assumption_change_set_items: {
+        Row: {
+          assumption_code: string
+          change_set_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          impact_scopes: string[]
+          previous_value_numeric: number | null
+          previous_value_text: string | null
+          proposed_value_numeric: number | null
+          proposed_value_text: string | null
+          rationale: string | null
+          scenario_id: string
+          tenant_id: string
+          unit: string | null
+          updated_at: string
+          updated_by: string | null
+          validation_message: string | null
+          validation_status: string
+          value_type: string
+        }
+        Insert: {
+          assumption_code: string
+          change_set_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          impact_scopes?: string[]
+          previous_value_numeric?: number | null
+          previous_value_text?: string | null
+          proposed_value_numeric?: number | null
+          proposed_value_text?: string | null
+          rationale?: string | null
+          scenario_id: string
+          tenant_id: string
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          validation_message?: string | null
+          validation_status?: string
+          value_type?: string
+        }
+        Update: {
+          assumption_code?: string
+          change_set_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          impact_scopes?: string[]
+          previous_value_numeric?: number | null
+          previous_value_text?: string | null
+          proposed_value_numeric?: number | null
+          proposed_value_text?: string | null
+          rationale?: string | null
+          scenario_id?: string
+          tenant_id?: string
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          validation_message?: string | null
+          validation_status?: string
+          value_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_assumption_change_set_items_change_set_id_fkey"
+            columns: ["change_set_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_assumption_change_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_change_set_items_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_change_set_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_assumption_change_sets: {
+        Row: {
+          applied_at: string | null
+          applied_by: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          change_count: number
+          content_hash: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          model_version_id: string
+          program_id: string
+          source_change_set_id: string | null
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          validated_at: string | null
+          validated_by: string | null
+          validation_summary: Json
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          change_count?: number
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          model_version_id: string
+          program_id: string
+          source_change_set_id?: string | null
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_summary?: Json
+        }
+        Update: {
+          applied_at?: string | null
+          applied_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          change_count?: number
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          model_version_id?: string
+          program_id?: string
+          source_change_set_id?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_summary?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_assumption_change_sets_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_change_sets_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_change_sets_source_change_set_id_fkey"
+            columns: ["source_change_set_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_assumption_change_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_change_sets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commercial_model_results: {
         Row: {
           created_at: string
@@ -7907,9 +8164,54 @@ export type Database = {
         Args: { _invitation_id: string }
         Returns: undefined
       }
+      commercial_assumption_impact: {
+        Args: { _code: string }
+        Returns: string[]
+      }
       commercial_can_write: {
         Args: { _permission_code: string; _tenant_id: string }
         Returns: boolean
+      }
+      commercial_change_set_apply: {
+        Args: { _change_set_id: string }
+        Returns: Json
+      }
+      commercial_change_set_cancel: {
+        Args: { _change_set_id: string; _reason?: string }
+        Returns: undefined
+      }
+      commercial_change_set_compute_hash: {
+        Args: { _change_set_id: string }
+        Returns: string
+      }
+      commercial_change_set_create: {
+        Args: {
+          _description?: string
+          _model_version_id: string
+          _program_id: string
+          _tenant_id: string
+          _title: string
+        }
+        Returns: string
+      }
+      commercial_change_set_remove_item: {
+        Args: { _item_id: string }
+        Returns: undefined
+      }
+      commercial_change_set_upsert_item: {
+        Args: {
+          _assumption_code: string
+          _change_set_id: string
+          _proposed_value_numeric?: number
+          _proposed_value_text?: string
+          _rationale?: string
+          _scenario_id: string
+        }
+        Returns: string
+      }
+      commercial_change_set_validate: {
+        Args: { _change_set_id: string }
+        Returns: Json
       }
       commercial_compute_input_hash: {
         Args: {
@@ -7969,6 +8271,17 @@ export type Database = {
       commercial_model_run_supersede: {
         Args: { _run_id: string; _superseded_by: string }
         Returns: undefined
+      }
+      commercial_program_run_staleness: {
+        Args: { _program_id: string }
+        Returns: {
+          is_stale: boolean
+          last_apply_at: string
+          latest_completed_at: string
+          latest_run_id: string
+          run_scope: string
+          scenario_id: string
+        }[]
       }
       commercial_snapshot_scenario_assumptions: {
         Args: { _scenario_id: string }
