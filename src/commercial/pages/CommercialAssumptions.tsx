@@ -109,12 +109,27 @@ export default function CommercialAssumptions() {
       toast({ title: "Pick a change set", description: "Create or select a Draft change set first.", variant: "destructive" });
       return;
     }
+    if (draftSet && draftSet.status !== "draft") {
+      toast({ title: "Change set is locked", description: `Status is ${draftSet.status}. Only Draft sets accept new items.`, variant: "destructive" });
+      return;
+    }
     const key = `${a.scenario_id}:${a.assumption_code}`;
-    const raw = pending[key];
-    if (raw == null || raw === "") return;
+    const raw = (pending[key] ?? "").trim();
+    if (raw === "") {
+      toast({ title: "Enter a proposed value", description: `Provide a numeric proposed value for ${a.assumption_code} before adding.`, variant: "destructive" });
+      return;
+    }
     const numeric = Number(raw);
     if (!Number.isFinite(numeric)) {
       toast({ title: "Invalid value", description: "Numeric value required.", variant: "destructive" });
+      return;
+    }
+    if (a.numeric_value != null && numeric === a.numeric_value) {
+      toast({
+        title: "No change to stage",
+        description: "Enter a proposed value different from the current effective value.",
+        variant: "destructive",
+      });
       return;
     }
     try {
@@ -123,11 +138,19 @@ export default function CommercialAssumptions() {
         scenario_id: a.scenario_id,
         assumption_code: a.assumption_code,
         proposed_value_numeric: numeric,
-        rationale: rationale[key] ?? null,
+        rationale: rationale[key]?.trim() ? rationale[key].trim() : null,
       });
       toast({ title: "Added to change set", description: `${a.assumption_code} staged as ${numeric}` });
+      setPending((p) => {
+        const { [key]: _drop, ...rest } = p;
+        return rest;
+      });
+      setRationale((p) => {
+        const { [key]: _drop, ...rest } = p;
+        return rest;
+      });
     } catch (e: any) {
-      toast({ title: "Could not add change", description: e.message ?? String(e), variant: "destructive" });
+      toast({ title: "Could not add change", description: e?.message ?? String(e), variant: "destructive" });
     }
   };
 
