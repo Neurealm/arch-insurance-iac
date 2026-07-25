@@ -91,6 +91,8 @@ import CommercialPnl from "./commercial/pages/CommercialPnl";
 import CommercialCash from "./commercial/pages/CommercialCash";
 import CommercialAssumptions from "./commercial/pages/CommercialAssumptions";
 import CommercialAssumptionChangeSet from "./commercial/pages/CommercialAssumptionChangeSet";
+import CommercialCompare from "./commercial/pages/CommercialCompare";
+import CommercialCompareDetail from "./commercial/pages/CommercialCompareDetail";
 
 
 import { PermissionRoute } from "./components/auth/PermissionRoute";
