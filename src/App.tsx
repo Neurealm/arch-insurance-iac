@@ -874,6 +874,9 @@ const App = () => (
             <Route path="model/cash" element={<PermissionRoute permission="commercial.view"><CommercialCash /></PermissionRoute>} />
             <Route path="model/assumptions" element={<PermissionRoute permission="commercial.view"><CommercialAssumptions /></PermissionRoute>} />
             <Route path="model/assumptions/change-sets/:id" element={<PermissionRoute permission="commercial.view"><CommercialAssumptionChangeSet /></PermissionRoute>} />
+            <Route path="model/compare" element={<PermissionRoute permission="commercial.view"><CommercialCompare /></PermissionRoute>} />
+            <Route path="model/compare/:id" element={<PermissionRoute permission="commercial.view"><CommercialCompareDetail /></PermissionRoute>} />
+
 
 
           </Route>
