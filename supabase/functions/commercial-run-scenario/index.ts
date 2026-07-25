@@ -623,7 +623,7 @@ Deno.serve(async (req: Request) => {
   const { data: userData, error: userErr } = await supabase.auth.getUser();
   if (userErr || !userData?.user) return json({ error: "auth_required" }, 401);
 
-  let body: { program_id?: string; model_version_id?: string; scenario_ids?: string[] };
+  let body: { program_id?: string; model_version_id?: string; scenario_ids?: string[]; run_scope?: string };
   try {
     body = await req.json();
   } catch {
@@ -631,6 +631,10 @@ Deno.serve(async (req: Request) => {
   }
   if (!body.program_id || !body.model_version_id) {
     return json({ error: "program_id and model_version_id are required" }, 400);
+  }
+  const runScope = (body.run_scope ?? "revenue").toLowerCase();
+  if (runScope !== "revenue" && runScope !== "pnl") {
+    return json({ error: "run_scope must be 'revenue' or 'pnl'" }, 400);
   }
 
   // Resolve scenarios
@@ -649,12 +653,13 @@ Deno.serve(async (req: Request) => {
 
   const results: Array<Record<string, unknown>> = [];
   for (const scenarioId of scenarioIds) {
-    const runOutcome = await runOne(supabase, body.program_id, scenarioId, body.model_version_id);
+    const runOutcome = await runOne(supabase, body.program_id, scenarioId, body.model_version_id, runScope);
     results.push(runOutcome);
   }
 
-  return json({ runs: results }, 200);
+  return json({ runs: results, run_scope: runScope }, 200);
 });
+
 
 async function runOne(
   supabase: ReturnType<typeof createClient>,
