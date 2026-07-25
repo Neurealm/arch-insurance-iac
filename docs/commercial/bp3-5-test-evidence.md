@@ -142,3 +142,63 @@ Revenue (BP3.2), P&L (BP3.3), Cash (BP3.4) dashboards render current data; run c
 | Patch | Purpose | Status |
 |---|---|---|
 | BP3.5.7 | Cancel RPC aligned to canonical header (removed obsolete `cancel_reason`) | PASS (server) · Authenticated UI cancel pending |
+
+---
+
+## BP3.5.EXECUTE · Closure Evidence (Authoritative)
+
+**Result:** PASS — BP3.5 ready for `BP3.5.VALIDATE`.
+
+### Primary lifecycle (`1e3de4be-aa1b-493e-9967-92ecd3ce9521`)
+- draft → validated (2026-07-25 20:18:12Z) → applied (2026-07-25 20:25:48Z) by `04bd0a7f-…`.
+- change_count=1, content_hash=`ef0deba9…f14196` (validated == applied).
+- Apply log: 1 row, `scenario_ids={8298f1d7-…}`, `impacted_scopes={cash,pnl}`, same hash.
+- Audit: `created`, `validation_passed`, `applied` — canonical `action_code`/`object_type`/`object_id`/`metadata`.
+- Effective values: Conservative `COST_ESCALATOR_PCT`=0.031; Base=0.03; Upside=0.03.
+
+### Cancellation lifecycle (`443baaca-ec30-4705-b01e-2232c37bf9d7`)
+- draft → cancelled (2026-07-25 21:13:05Z) by `04bd0a7f-…`.
+- change_count=1, content_hash=`130dd356…` preserved; validated_at/applied_at null.
+- Item preserved (immutable): Conservative, `COST_ESCALATOR_PCT`, prev=0.031, prop=0.032, unit=ratio — proposed value never applied.
+- No apply-log row for cancelled set (total apply-log rows: 1).
+- Audit: `commercial.assumption.change_set.cancelled` with `metadata.prior_status=draft`, `reason="User cancelled"`.
+
+### Scope-aware readiness
+- Revenue: current. P&L: stale. Cash: stale.
+- Propagation: revenue→{revenue,pnl,cash}; pnl→{pnl,cash}; cash→{cash}.
+- UI banner lists exactly `cash, pnl`.
+
+### Automatic execution
+- Zero runs triggered by Apply or Cancel. Three user-triggered re-runs (revenue/pnl/cash) at 20:36 were operator-initiated post-Apply refreshes, not lifecycle side-effects. No runs after 21:13 cancellation.
+
+### Historical integrity
+- Revenue (BP3.2), P&L (BP3.3), Cash (BP3.4/BP3.4.1) runs, inputs, results, hashes, lineage, supersession, and fingerprint `bp3.4.1` unchanged. Golden parity preserved at $0.00 variance.
+
+### Conflict protection
+- Method: structural + prior integration (BP3.5.5 rollback proof). Apply RPC recomputes hash and reverts to draft on mismatch; no runtime re-simulation performed to avoid polluting closure evidence.
+
+### Immutability
+- Applied and Cancelled sets are terminal — lifecycle guard + RLS block direct mutation; RPCs enforce allowed-status transitions only.
+
+### Security
+- All lifecycle RPCs `SECURITY DEFINER`, `search_path=public`, `authenticated`-only EXECUTE; `PUBLIC`/`anon` revoked. Transaction-local marker `app.commercial_change_set_op` scopes header updates.
+
+### Model version
+- `PM-FIN-2026.1` remains **Draft** (activation deferred to BP3.8).
+
+### Consolidated patch history
+| Patch | Status |
+|---|---|
+| BP3.5.1 audit contract | PASS |
+| BP3.5.2 Add UX | PASS |
+| BP3.5.3 tenant derivation | PASS |
+| BP3.5.4 lifecycle guard | PASS |
+| BP3.5.5 apply-log canonical | PASS |
+| BP3.5.6 scope-aware staleness | PASS |
+| BP3.5.7 cancel canonical header | PASS |
+
+### Remaining deferred
+- PM-FIN-2026.1 activation → BP3.8.
+- BP3.6 Scenario Comparison — not started.
+- BP3.7 Sensitivity Analysis — not started.
+- BP3.8 lineage enrichment — backlog preserved.
