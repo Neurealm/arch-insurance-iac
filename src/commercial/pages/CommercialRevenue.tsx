@@ -29,7 +29,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { AlertTriangle, Info, Loader2, Play, Sigma } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Info, Loader2, Play, Sigma } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useCommercialAccess } from "@/commercial/hooks/useCommercialAccess";
 import {
@@ -158,7 +158,36 @@ export default function CommercialRevenue() {
   }
 
   const staleVersion = activeVersion.status !== "active";
-  const failedRun = data.runs.find((r) => r.status === "failed");
+
+  // Scenario- and model-version-scoped failure evaluation.
+  // A failed run only becomes a *current* blocker when no completed run for the
+  // same scenario+model version exists at a later timestamp. Otherwise it is a
+  // historical, superseded event surfaced in a disclosure — never as a red banner.
+  const scenarioFailedRuns = useMemo(() => {
+    if (!data || !currentScenario) return [] as ModelRun[];
+    return data.runs.filter(
+      (r) =>
+        r.scenario_id === currentScenario.id &&
+        r.model_version_id === activeVersion.id &&
+        r.status === "failed",
+    );
+  }, [data, currentScenario, activeVersion.id]);
+
+  const latestScenarioFailedRun = scenarioFailedRuns[0]; // runs are ordered created_at DESC
+  const latestFailedTs = latestScenarioFailedRun?.failed_at
+    ? Date.parse(latestScenarioFailedRun.failed_at)
+    : null;
+  const currentCompletedTs = currentRun?.completed_at
+    ? Date.parse(currentRun.completed_at)
+    : null;
+
+  const failureIsCurrent =
+    !!latestScenarioFailedRun &&
+    (!currentCompletedTs ||
+      (latestFailedTs !== null && latestFailedTs > currentCompletedTs));
+
+  const supersededFailure =
+    !!latestScenarioFailedRun && !failureIsCurrent ? latestScenarioFailedRun : null;
 
   const runNow = async () => {
     try {
@@ -214,21 +243,79 @@ export default function CommercialRevenue() {
       {staleVersion && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Stale model version</AlertTitle>
+          <AlertTitle>Draft model version — activation required</AlertTitle>
           <AlertDescription>
-            No active model version — showing the most recent draft ({activeVersion.version_code}).
-            Runs will use this draft.
+            {activeVersion.version_code} is <b>{activeVersion.status}</b>. Runs execute against
+            this draft for review; a governed activation workflow (see
+            <span className="mx-1 font-mono text-xs">docs/commercial/bp3-0-2-model-activation.md</span>)
+            is required before this version can be considered the authoritative baseline.
+            Calculations succeeding does not, by itself, activate the model.
           </AlertDescription>
         </Alert>
       )}
-      {failedRun && (
+
+      {failureIsCurrent && latestScenarioFailedRun && (
         <Alert variant="destructive">
-          <AlertTitle>A previous run failed</AlertTitle>
-          <AlertDescription>
-            {failedRun.error_code}: {failedRun.error_message}
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Current run failed — {currentScenario?.name}</AlertTitle>
+          <AlertDescription className="space-y-1">
+            <div>
+              <span className="font-mono text-xs">{latestScenarioFailedRun.error_code}</span>
+              {": "}
+              {latestScenarioFailedRun.error_message}
+            </div>
+            <div className="text-xs opacity-80">
+              Run {latestScenarioFailedRun.id.slice(0, 8)} · failed{" "}
+              {latestScenarioFailedRun.failed_at
+                ? new Date(latestScenarioFailedRun.failed_at).toLocaleString()
+                : "—"}
+            </div>
           </AlertDescription>
         </Alert>
       )}
+
+      {!failureIsCurrent && currentRun && (
+        <Alert>
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertTitle>Completed — {currentScenario?.name}</AlertTitle>
+          <AlertDescription className="text-xs">
+            Run {currentRun.id.slice(0, 8)} · completed{" "}
+            {currentRun.completed_at
+              ? new Date(currentRun.completed_at).toLocaleString()
+              : "—"}{" "}
+            · input hash <span className="font-mono">{currentRun.input_hash.slice(0, 16)}…</span>
+            {supersededFailure && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                  Historical run issue (superseded by this successful run)
+                </summary>
+                <div className="mt-1.5 space-y-0.5 border-l-2 border-muted pl-2">
+                  <div>
+                    Scenario: <span className="font-mono">{currentScenario?.code}</span>
+                  </div>
+                  <div>
+                    Failed run: <span className="font-mono">{supersededFailure.id.slice(0, 8)}</span>
+                  </div>
+                  <div>
+                    Failed at:{" "}
+                    {supersededFailure.failed_at
+                      ? new Date(supersededFailure.failed_at).toLocaleString()
+                      : "—"}
+                  </div>
+                  <div>
+                    Error: <span className="font-mono">{supersededFailure.error_code}</span> —{" "}
+                    {supersededFailure.error_message}
+                  </div>
+                  <div className="text-muted-foreground">
+                    A later successful run superseded this failure; no action required.
+                  </div>
+                </div>
+              </details>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
 
       {/* Run header */}
       <Card>
