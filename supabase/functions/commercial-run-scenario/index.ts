@@ -1,6 +1,7 @@
-// BP3.2 — Commercial revenue-scope run engine (Project Momentous)
-// Server-authoritative: implements VOL-* and REV-* domains only.
-// No costs, P&L, cash, or sensitivity are computed here.
+// BP3.2 / BP3.3 — Commercial run engine (Project Momentous)
+// Server-authoritative: implements VOL-*, REV-*, COD-*, OPEX-*, PL-* domains.
+// Cash and sensitivity remain out of scope.
+
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
