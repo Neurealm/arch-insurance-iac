@@ -666,6 +666,7 @@ async function runOne(
   program_id: string,
   scenario_id: string,
   model_version_id: string,
+  run_scope: string = "revenue",
 ) {
   // 1. Start (idempotent — reuses completed identical run)
   const { data: startRes, error: startErr } = await supabase.rpc(
@@ -674,13 +675,13 @@ async function runOne(
       _program_id: program_id,
       _scenario_id: scenario_id,
       _model_version_id: model_version_id,
-      _run_scope: "revenue",
+      _run_scope: run_scope,
     },
   );
   if (startErr) return { scenario_id, error: mapErr(startErr.message) };
   const run_id = (startRes as { run_id: string; reused: boolean }).run_id;
   const reused = (startRes as { reused: boolean }).reused;
-  if (reused) return { scenario_id, run_id, reused: true };
+  if (reused) return { scenario_id, run_id, reused: true, run_scope };
 
   try {
     // 2. Load assumptions (canonical values for engine)
@@ -691,21 +692,56 @@ async function runOne(
     if (aErr) throw new Error(aErr.message);
     const map = toMap(assumptions ?? []);
 
-    // 2b. Pre-run completeness check (fail fast, don't corrupt prior runs)
-    const missing = checkCompleteness(map);
-    if (missing.length > 0) {
-      throw new Error(`missing_assumption:${missing.join(",")}`);
+    // 3. Compute (per scope)
+    let rows: ResultRow[];
+    if (run_scope === "revenue") {
+      const missing = checkCompleteness(map);
+      if (missing.length > 0) throw new Error(`missing_assumption:${missing.join(",")}`);
+      rows = computeRevenueScope(map);
+    } else {
+      // pnl scope — requires completed revenue run for same scenario+version
+      const missing = checkPnlCompleteness(map);
+      if (missing.length > 0) throw new Error(`missing_assumption:${missing.join(",")}`);
+
+      const { data: revRun, error: rrErr } = await supabase
+        .from("commercial_model_runs")
+        .select("id")
+        .eq("scenario_id", scenario_id)
+        .eq("model_version_id", model_version_id)
+        .eq("run_scope", "revenue")
+        .eq("status", "completed")
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (rrErr) throw new Error(rrErr.message);
+      if (!revRun) throw new Error("prerequisite_missing:revenue_run_required");
+
+      const revenueRunId = revRun.id as string;
+      const { data: revRows, error: rrRowsErr } = await supabase
+        .from("commercial_model_results")
+        .select("fiscal_period, value_numeric")
+        .eq("run_id", revenueRunId)
+        .eq("metric_code", "REV-TOTAL");
+      if (rrRowsErr) throw new Error(rrRowsErr.message);
+
+      const revByFy: Record<string, number> = {};
+      for (const r of revRows ?? []) {
+        if (r.fiscal_period && r.fiscal_period !== "FY2027-FY2031") {
+          revByFy[r.fiscal_period as string] = Number(r.value_numeric);
+        }
+      }
+      for (const fy of FISCAL_YEARS) {
+        if (!(fy in revByFy)) throw new Error(`prerequisite_missing:REV-TOTAL_${fy}`);
+      }
+      rows = computePnlScope(map, revByFy, revenueRunId);
     }
-
-    // 3. Compute
-    const rows = computeRevenueScope(map);
-
 
     // 4. Mark running
     const { error: mrErr } = await supabase.rpc("commercial_model_run_mark_running", {
       _run_id: run_id,
     });
     if (mrErr) throw new Error(mrErr.message);
+
 
     // 5. Persist all results
     const { error: pErr } = await supabase.rpc(
