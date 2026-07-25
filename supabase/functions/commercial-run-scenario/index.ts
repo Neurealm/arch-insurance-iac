@@ -479,8 +479,15 @@ async function runOne(
     if (aErr) throw new Error(aErr.message);
     const map = toMap(assumptions ?? []);
 
+    // 2b. Pre-run completeness check (fail fast, don't corrupt prior runs)
+    const missing = checkCompleteness(map);
+    if (missing.length > 0) {
+      throw new Error(`missing_assumption:${missing.join(",")}`);
+    }
+
     // 3. Compute
     const rows = computeRevenueScope(map);
+
 
     // 4. Mark running
     const { error: mrErr } = await supabase.rpc("commercial_model_run_mark_running", {
