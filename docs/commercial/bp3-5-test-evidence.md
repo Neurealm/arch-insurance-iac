@@ -114,3 +114,31 @@ Revenue (BP3.2), P&L (BP3.3), Cash (BP3.4) dashboards render current data; run c
 - Cancellation runtime evidence not captured server-side (requires authenticated UI action).
 - `PM-FIN-2026.1` remains Draft — activation deferred to BP3.8.
 - BP3.6 / BP3.7 / BP3.8 not started.
+
+---
+
+## BP3.5.7 · Cancellation Contract Repair
+
+**Observed error:** `column "cancel_reason" of relation "commercial_assumption_change_sets" does not exist` when clicking Cancel on disposable change set `443baaca-ec30-4705-b01e-2232c37bf9d7` ("BP3.5 Cancellation Test", draft, 1 item, COST_ESCALATOR_PCT / Conservative, proposed 0.032).
+
+**Preflight rollback:** Failed transaction rolled back completely — status remained `draft`, `cancelled_by`/`cancelled_at` null, item present, effective value 0.031 unchanged, no audit event written, no run created, staleness unchanged.
+
+**Canonical header schema** (`commercial_assumption_change_sets`): lifecycle columns are `status`, `validated_by/at`, `applied_by/at`, `cancelled_by/at`, `updated_by/at`. **No `cancel_reason` column exists** — cancellation rationale belongs in `audit_events.reason` / `audit_events.metadata` per canonical audit contract (BP3.5.1).
+
+**Root cause:** `commercial_change_set_cancel(uuid, text)` updated a non-existent `cancel_reason` column, aborting the transaction. Reason argument had no canonical header persistence path.
+
+**Remediation:** Replaced `public.commercial_change_set_cancel` to:
+- Require `auth.uid()` (explicit `28000` on anonymous).
+- Update only canonical columns: `status='cancelled'`, `cancelled_by`, `cancelled_at`, `updated_by`, `updated_at`.
+- Persist `_reason` in `audit_events.metadata.reason` and `audit_events.reason` (canonical audit contract, no header duplication).
+- Preserve `SECURITY DEFINER`, `search_path=public`, permission gate `commercial.assumption.change.cancel`, transaction-local `app.commercial_change_set_op='server'` marker wrapping only the header UPDATE, allowed-status guard (`draft`/`validated` only — Applied and Cancelled remain terminal), and `authenticated`-only EXECUTE (PUBLIC/anon revoked).
+
+**Frontend consumer:** `CommercialAssumptionChangeSet.tsx` passes reason via `cancelMut.mutateAsync("User cancelled")` → `useCancelChangeSet` RPC arg; contract unchanged, no UI edit required.
+
+**Authenticated cancellation:** Deferred to browser action (`external_unmanaged` sandbox). Static verification confirms the deployed function definition satisfies all cancellation contract requirements.
+
+**Regression:** Applied change set `1e3de4be-…` unchanged; Conservative effective value remains 0.031; Base/Upside remain 0.030; scope-aware staleness unchanged (Revenue current, P&L stale, Cash stale); no new runs; PM-FIN-2026.1 remains Draft.
+
+| Patch | Purpose | Status |
+|---|---|---|
+| BP3.5.7 | Cancel RPC aligned to canonical header (removed obsolete `cancel_reason`) | PASS (server) · Authenticated UI cancel pending |
