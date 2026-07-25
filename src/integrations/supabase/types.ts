@@ -568,6 +568,36 @@ export type Database = {
           },
         ]
       }
+      commercial_metric_directionality: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          higher_is_favorable: boolean
+          metric_code: string
+          metric_group: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          higher_is_favorable: boolean
+          metric_code: string
+          metric_group: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          higher_is_favorable?: boolean
+          metric_code?: string
+          metric_group?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       commercial_model_results: {
         Row: {
           created_at: string
@@ -1080,6 +1110,234 @@ export type Database = {
           },
           {
             foreignKeyName: "commercial_scenario_assumptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_scenario_comparison_results: {
+        Row: {
+          absolute_variance: number | null
+          baseline_run_id: string | null
+          baseline_scenario_id: string
+          baseline_value: number | null
+          compared_run_id: string | null
+          compared_scenario_id: string
+          compared_value: number | null
+          comparison_id: string
+          comparison_rule: string
+          created_at: string
+          direction_reason: string | null
+          fiscal_period: string | null
+          id: string
+          lineage_refs: Json
+          metric_code: string
+          metric_group: string
+          percentage_variance: number | null
+          period_sequence: number | null
+          source_refs: Json
+          tenant_id: string
+          unit: string | null
+          variance_direction: string
+        }
+        Insert: {
+          absolute_variance?: number | null
+          baseline_run_id?: string | null
+          baseline_scenario_id: string
+          baseline_value?: number | null
+          compared_run_id?: string | null
+          compared_scenario_id: string
+          compared_value?: number | null
+          comparison_id: string
+          comparison_rule?: string
+          created_at?: string
+          direction_reason?: string | null
+          fiscal_period?: string | null
+          id?: string
+          lineage_refs?: Json
+          metric_code: string
+          metric_group: string
+          percentage_variance?: number | null
+          period_sequence?: number | null
+          source_refs?: Json
+          tenant_id: string
+          unit?: string | null
+          variance_direction?: string
+        }
+        Update: {
+          absolute_variance?: number | null
+          baseline_run_id?: string | null
+          baseline_scenario_id?: string
+          baseline_value?: number | null
+          compared_run_id?: string | null
+          compared_scenario_id?: string
+          compared_value?: number | null
+          comparison_id?: string
+          comparison_rule?: string
+          created_at?: string
+          direction_reason?: string | null
+          fiscal_period?: string | null
+          id?: string
+          lineage_refs?: Json
+          metric_code?: string
+          metric_group?: string
+          percentage_variance?: number | null
+          period_sequence?: number | null
+          source_refs?: Json
+          tenant_id?: string
+          unit?: string | null
+          variance_direction?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_scenario_comparison_result_baseline_scenario_id_fkey"
+            columns: ["baseline_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparison_result_compared_scenario_id_fkey"
+            columns: ["compared_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparison_results_baseline_run_id_fkey"
+            columns: ["baseline_run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparison_results_compared_run_id_fkey"
+            columns: ["compared_run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparison_results_comparison_id_fkey"
+            columns: ["comparison_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenario_comparisons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparison_results_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_scenario_comparisons: {
+        Row: {
+          archived_at: string | null
+          archived_by: string | null
+          baseline_scenario_id: string
+          compared_scenario_ids: string[]
+          content_hash: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          included_scopes: string[]
+          mode: string
+          model_version_id: string
+          program_id: string
+          saved_at: string | null
+          saved_by: string | null
+          source_run_manifest: Json
+          source_run_manifest_hash: string | null
+          stale_at_creation: boolean
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          warning_summary: Json
+        }
+        Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
+          baseline_scenario_id: string
+          compared_scenario_ids: string[]
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          included_scopes?: string[]
+          mode: string
+          model_version_id: string
+          program_id: string
+          saved_at?: string | null
+          saved_by?: string | null
+          source_run_manifest?: Json
+          source_run_manifest_hash?: string | null
+          stale_at_creation?: boolean
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_summary?: Json
+        }
+        Update: {
+          archived_at?: string | null
+          archived_by?: string | null
+          baseline_scenario_id?: string
+          compared_scenario_ids?: string[]
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          included_scopes?: string[]
+          mode?: string
+          model_version_id?: string
+          program_id?: string
+          saved_at?: string | null
+          saved_by?: string | null
+          source_run_manifest?: Json
+          source_run_manifest_hash?: string | null
+          stale_at_creation?: boolean
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_summary?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_scenario_comparisons_baseline_scenario_id_fkey"
+            columns: ["baseline_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparisons_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparisons_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparisons_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -8222,6 +8480,107 @@ export type Database = {
         Returns: Json
       }
       commercial_classify_impact: { Args: { _code: string }; Returns: string[] }
+      commercial_comparison_archive: {
+        Args: { _comparison_id: string }
+        Returns: undefined
+      }
+      commercial_comparison_assumptions: {
+        Args: { _comparison_id: string }
+        Returns: {
+          assumption_code: string
+          differs_from_baseline: boolean
+          is_baseline: boolean
+          label: string
+          numeric_value: number
+          scenario_id: string
+          text_value: string
+          unit: string
+        }[]
+      }
+      commercial_comparison_build_manifest: {
+        Args: { _comparison_id: string }
+        Returns: Json
+      }
+      commercial_comparison_calculate: {
+        Args: { _comparison_id: string }
+        Returns: {
+          absolute_variance: number
+          baseline_run_id: string
+          baseline_value: number
+          compared_run_id: string
+          compared_scenario_id: string
+          compared_value: number
+          direction_reason: string
+          fiscal_period: string
+          metric_code: string
+          metric_group: string
+          percentage_variance: number
+          period_sequence: number
+          unit: string
+          variance_direction: string
+        }[]
+      }
+      commercial_comparison_compute_hash: {
+        Args: { _comparison_id: string }
+        Returns: string
+      }
+      commercial_comparison_create: {
+        Args: {
+          _baseline_scenario_id: string
+          _compared_scenario_ids: string[]
+          _description?: string
+          _included_scopes: string[]
+          _mode: string
+          _model_version_id: string
+          _program_id: string
+          _title: string
+        }
+        Returns: string
+      }
+      commercial_comparison_list_selectable_runs: {
+        Args: {
+          _model_version_id: string
+          _program_id: string
+          _scenario_id: string
+          _scope: string
+        }
+        Returns: {
+          completed_at: string
+          input_hash: string
+          is_latest: boolean
+          run_id: string
+          run_scope: string
+          status: string
+        }[]
+      }
+      commercial_comparison_readiness: {
+        Args: { _comparison_id: string }
+        Returns: {
+          is_missing: boolean
+          is_stale: boolean
+          latest_apply_at: string
+          latest_completed_at: string
+          latest_run_id: string
+          scenario_id: string
+          scope: string
+        }[]
+      }
+      commercial_comparison_save: {
+        Args: { _comparison_id: string }
+        Returns: Json
+      }
+      commercial_comparison_update_draft: {
+        Args: {
+          _baseline_scenario_id?: string
+          _compared_scenario_ids?: string[]
+          _comparison_id: string
+          _description?: string
+          _included_scopes?: string[]
+          _mode?: string
+          _title?: string
+        }
+        Returns: undefined
+      }
       commercial_compute_input_hash: {
         Args: {
           _formula_catalog_version: string
