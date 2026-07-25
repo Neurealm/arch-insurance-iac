@@ -883,7 +883,7 @@ async function runOne(
       const missing = checkCompleteness(map);
       if (missing.length > 0) throw new Error(`missing_assumption:${missing.join(",")}`);
       rows = computeRevenueScope(map);
-    } else {
+    } else if (run_scope === "pnl") {
       // pnl scope — requires completed revenue run for same scenario+version
       const missing = checkPnlCompleteness(map);
       if (missing.length > 0) throw new Error(`missing_assumption:${missing.join(",")}`);
@@ -919,7 +919,81 @@ async function runOne(
         if (!(fy in revByFy)) throw new Error(`prerequisite_missing:REV-TOTAL_${fy}`);
       }
       rows = computePnlScope(map, revByFy, revenueRunId);
+    } else {
+      // cash scope — requires completed pnl run for same scenario+version
+      for (const k of ["PAY_LAG_DAYS", "Q1_ACT_FUND_TIMING_PCT", "Q1_TRAVEL_FRONTLOAD_PCT"]) {
+        if (!(k in map)) throw new Error(`missing_assumption:${k}`);
+      }
+      const { data: pnlRun, error: prErr } = await supabase
+        .from("commercial_model_runs")
+        .select("id")
+        .eq("scenario_id", scenario_id)
+        .eq("model_version_id", model_version_id)
+        .eq("run_scope", "pnl")
+        .eq("status", "completed")
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (prErr) throw new Error(prErr.message);
+      if (!pnlRun) throw new Error("prerequisite_missing:pnl_run_required");
+      const pnlRunId = pnlRun.id as string;
+      const codes = ["REV-TOTAL", "COD-TOTAL", "OPEX-TOTAL", "PL-EBITDA", "COD-11_TRAVEL", "REV-07-ACT-FUND"];
+      const { data: pnlRows, error: prRowsErr } = await supabase
+        .from("commercial_model_results")
+        .select("fiscal_period, metric_code, value_numeric")
+        .eq("run_id", pnlRunId)
+        .in("metric_code", codes);
+      if (prRowsErr) throw new Error(prRowsErr.message);
+
+      const bucket = (): Record<string, number> => ({});
+      const revByFy = bucket(), codByFy = bucket(), opexByFy = bucket(),
+        ebitdaByFy = bucket(), travelCodByFy = bucket(), actFundByFy = bucket();
+      for (const r of pnlRows ?? []) {
+        if (!r.fiscal_period || r.fiscal_period === "FY2027-FY2031") continue;
+        const fp = r.fiscal_period as string;
+        const v = Number(r.value_numeric);
+        if (r.metric_code === "REV-TOTAL") revByFy[fp] = v;
+        else if (r.metric_code === "COD-TOTAL") codByFy[fp] = v;
+        else if (r.metric_code === "OPEX-TOTAL") opexByFy[fp] = v;
+        else if (r.metric_code === "PL-EBITDA") ebitdaByFy[fp] = v;
+        else if (r.metric_code === "COD-11_TRAVEL") travelCodByFy[fp] = v;
+        else if (r.metric_code === "REV-07-ACT-FUND") actFundByFy[fp] = v;
+      }
+      // REV-TOTAL comes from the paired pnl run's persisted rows (pnl also carries it via computePnlScope? no — pnl doesn't emit REV-TOTAL rows).
+      // Pull REV-TOTAL + REV-07-ACT-FUND directly from the upstream revenue run.
+      if (Object.keys(revByFy).length === 0 || Object.keys(actFundByFy).length === 0) {
+        const { data: revRun2 } = await supabase
+          .from("commercial_model_runs")
+          .select("id")
+          .eq("scenario_id", scenario_id)
+          .eq("model_version_id", model_version_id)
+          .eq("run_scope", "revenue")
+          .eq("status", "completed")
+          .order("completed_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!revRun2) throw new Error("prerequisite_missing:revenue_run_required");
+        const { data: revRows2 } = await supabase
+          .from("commercial_model_results")
+          .select("fiscal_period, metric_code, value_numeric")
+          .eq("run_id", revRun2.id as string)
+          .in("metric_code", ["REV-TOTAL", "REV-07-ACT-FUND"]);
+        for (const r of revRows2 ?? []) {
+          if (!r.fiscal_period || r.fiscal_period === "FY2027-FY2031") continue;
+          const fp = r.fiscal_period as string;
+          const v = Number(r.value_numeric);
+          if (r.metric_code === "REV-TOTAL") revByFy[fp] = v;
+          else if (r.metric_code === "REV-07-ACT-FUND") actFundByFy[fp] = v;
+        }
+      }
+      for (const fy of FISCAL_YEARS) {
+        for (const [name, src] of [["REV-TOTAL", revByFy], ["COD-TOTAL", codByFy], ["OPEX-TOTAL", opexByFy], ["PL-EBITDA", ebitdaByFy], ["COD-11_TRAVEL", travelCodByFy], ["REV-07-ACT-FUND", actFundByFy]] as const) {
+          if (!(fy in src)) throw new Error(`prerequisite_missing:${name}_${fy}`);
+        }
+      }
+      rows = computeCashScope(map, { revByFy, codByFy, opexByFy, ebitdaByFy, travelCodByFy, actFundByFy, pnlRunId });
     }
+
 
     // 4. Mark running
     const { error: mrErr } = await supabase.rpc("commercial_model_run_mark_running", {
