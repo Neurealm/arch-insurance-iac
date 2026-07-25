@@ -33,8 +33,10 @@ const NAV: NavItem[] = [
   { to: "/commercial/sources", label: "Sources", icon: BookOpen },
   { to: "/commercial/model/revenue", label: "Revenue", icon: Calculator, section: "Model" },
   { to: "/commercial/model/pnl", label: "P&L (Cost & EBITDA)", icon: Calculator, section: "Model" },
+  { to: "/commercial/model/cash", label: "Cash & Sustainability", icon: Calculator, section: "Model" },
 
 ];
+
 
 function Sidebar() {
   return (
