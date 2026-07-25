@@ -8120,6 +8120,10 @@ export type Database = {
       }
     }
     Functions: {
+      _commercial_require_perm: {
+        Args: { _perm: string; _tenant_id: string }
+        Returns: undefined
+      }
       accept_invitation: { Args: { _token: string }; Returns: Json }
       admin_get_user_login_history: {
         Args: { _email?: string; _limit?: number; _user_id: string }
@@ -8177,7 +8181,7 @@ export type Database = {
         Returns: Json
       }
       commercial_change_set_cancel: {
-        Args: { _change_set_id: string; _reason?: string }
+        Args: { _change_set_id: string; _reason: string }
         Returns: undefined
       }
       commercial_change_set_compute_hash: {
@@ -8186,12 +8190,16 @@ export type Database = {
       }
       commercial_change_set_create: {
         Args: {
-          _description?: string
+          _description: string
           _model_version_id: string
           _program_id: string
           _tenant_id: string
           _title: string
         }
+        Returns: string
+      }
+      commercial_change_set_hash: {
+        Args: { _change_set_id: string }
         Returns: string
       }
       commercial_change_set_remove_item: {
@@ -8202,9 +8210,9 @@ export type Database = {
         Args: {
           _assumption_code: string
           _change_set_id: string
-          _proposed_value_numeric?: number
-          _proposed_value_text?: string
-          _rationale?: string
+          _proposed_value_numeric: number
+          _proposed_value_text: string
+          _rationale: string
           _scenario_id: string
         }
         Returns: string
@@ -8213,6 +8221,7 @@ export type Database = {
         Args: { _change_set_id: string }
         Returns: Json
       }
+      commercial_classify_impact: { Args: { _code: string }; Returns: string[] }
       commercial_compute_input_hash: {
         Args: {
           _formula_catalog_version: string
