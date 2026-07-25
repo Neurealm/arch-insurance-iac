@@ -95,7 +95,6 @@ export default function CommercialAssumptions() {
   if (!ctx.data?.program) {
     return (
       <EmptyState
-        icon={<ClipboardList className="h-8 w-8" />}
         title="Project Momentous not found in this workspace"
         description="Switch to the NeuGAIN Commercial tenant to access governed assumption editing."
       />
