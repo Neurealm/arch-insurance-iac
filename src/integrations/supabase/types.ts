@@ -311,6 +311,308 @@ export type Database = {
           },
         ]
       }
+      commercial_model_results: {
+        Row: {
+          created_at: string
+          fiscal_period: string | null
+          formula_code: string
+          id: string
+          is_approximation: boolean
+          lineage_json: Json
+          metric_code: string
+          metric_group: string
+          period_sequence: number | null
+          run_id: string
+          tenant_id: string
+          unit: string | null
+          value_numeric: number | null
+          value_text: string | null
+        }
+        Insert: {
+          created_at?: string
+          fiscal_period?: string | null
+          formula_code: string
+          id?: string
+          is_approximation?: boolean
+          lineage_json?: Json
+          metric_code: string
+          metric_group: string
+          period_sequence?: number | null
+          run_id: string
+          tenant_id: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          created_at?: string
+          fiscal_period?: string | null
+          formula_code?: string
+          id?: string
+          is_approximation?: boolean
+          lineage_json?: Json
+          metric_code?: string
+          metric_group?: string
+          period_sequence?: number | null
+          run_id?: string
+          tenant_id?: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_model_results_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_results_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_model_run_inputs: {
+        Row: {
+          assumption_code: string
+          confidence: string | null
+          created_at: string
+          id: string
+          input_sequence: number
+          run_id: string
+          scenario_id: string
+          source_reference_id: string | null
+          tenant_id: string
+          unit: string | null
+          value_numeric: number | null
+          value_text: string | null
+        }
+        Insert: {
+          assumption_code: string
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          input_sequence: number
+          run_id: string
+          scenario_id: string
+          source_reference_id?: string | null
+          tenant_id: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          assumption_code?: string
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          input_sequence?: number
+          run_id?: string
+          scenario_id?: string
+          source_reference_id?: string | null
+          tenant_id?: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_model_run_inputs_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_run_inputs_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_run_inputs_source_reference_id_fkey"
+            columns: ["source_reference_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_source_references"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_run_inputs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_model_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          error_code: string | null
+          error_message: string | null
+          failed_at: string | null
+          id: string
+          input_hash: string
+          model_version_id: string
+          program_id: string
+          run_scope: string
+          scenario_id: string
+          started_at: string | null
+          status: string
+          supersedes_run_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          failed_at?: string | null
+          id?: string
+          input_hash: string
+          model_version_id: string
+          program_id: string
+          run_scope: string
+          scenario_id: string
+          started_at?: string | null
+          status?: string
+          supersedes_run_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          failed_at?: string | null
+          id?: string
+          input_hash?: string
+          model_version_id?: string
+          program_id?: string
+          run_scope?: string
+          scenario_id?: string
+          started_at?: string | null
+          status?: string
+          supersedes_run_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_model_runs_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_runs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_runs_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_runs_supersedes_run_id_fkey"
+            columns: ["supersedes_run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_model_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          effective_from: string | null
+          formula_catalog_version: string
+          id: string
+          name: string
+          notes: string | null
+          program_id: string
+          source_file_name: string | null
+          source_fingerprint: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          version_code: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string | null
+          formula_catalog_version: string
+          id?: string
+          name: string
+          notes?: string | null
+          program_id: string
+          source_file_name?: string | null
+          source_fingerprint?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version_code: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string | null
+          formula_catalog_version?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          program_id?: string
+          source_file_name?: string | null
+          source_fingerprint?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_model_versions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commercial_program_metrics: {
         Row: {
           confidence: string
@@ -7609,9 +7911,64 @@ export type Database = {
         Args: { _permission_code: string; _tenant_id: string }
         Returns: boolean
       }
+      commercial_compute_input_hash: {
+        Args: {
+          _formula_catalog_version: string
+          _inputs: Json
+          _model_version_id: string
+          _run_scope: string
+          _scenario_id: string
+        }
+        Returns: string
+      }
       commercial_is_member_with_view: {
         Args: { _tenant_id: string }
         Returns: boolean
+      }
+      commercial_model_run_complete: {
+        Args: { _run_id: string }
+        Returns: undefined
+      }
+      commercial_model_run_fail: {
+        Args: { _error_code: string; _error_message: string; _run_id: string }
+        Returns: undefined
+      }
+      commercial_model_run_mark_running: {
+        Args: { _run_id: string }
+        Returns: undefined
+      }
+      commercial_model_run_persist_result: {
+        Args: {
+          _fiscal_period: string
+          _formula_code: string
+          _is_approximation: boolean
+          _lineage: Json
+          _metric_code: string
+          _metric_group: string
+          _period_sequence: number
+          _run_id: string
+          _unit: string
+          _value_numeric: number
+          _value_text: string
+        }
+        Returns: string
+      }
+      commercial_model_run_start: {
+        Args: {
+          _model_version_id: string
+          _program_id: string
+          _run_scope: string
+          _scenario_id: string
+        }
+        Returns: Json
+      }
+      commercial_model_run_supersede: {
+        Args: { _run_id: string; _superseded_by: string }
+        Returns: undefined
+      }
+      commercial_snapshot_scenario_assumptions: {
+        Args: { _scenario_id: string }
+        Returns: Json
       }
       count_active_tenant_admins: {
         Args: { _exclude_membership?: string; _tenant_id: string }
