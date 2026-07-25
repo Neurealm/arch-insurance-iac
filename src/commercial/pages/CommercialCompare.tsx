@@ -93,7 +93,7 @@ export default function CommercialCompare() {
             <CardHeader>
               <CardTitle>Model context</CardTitle>
               <CardDescription>
-                Program {program.name} · Model {version.name} · Status {version.status}
+                Program {program.name} · Model {version.version_code} · Status {version.status}
               </CardDescription>
             </CardHeader>
           </Card>
