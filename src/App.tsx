@@ -86,6 +86,7 @@ import CommercialProgram from "./commercial/pages/CommercialProgram";
 import CommercialScenarios from "./commercial/pages/CommercialScenarios";
 import CommercialPortfolio from "./commercial/pages/CommercialPortfolio";
 import CommercialSources from "./commercial/pages/CommercialSources";
+import CommercialRevenue from "./commercial/pages/CommercialRevenue";
 import { PermissionRoute } from "./components/auth/PermissionRoute";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
@@ -860,6 +861,7 @@ const App = () => (
             <Route path="scenarios" element={<PermissionRoute permission="commercial.view"><CommercialScenarios /></PermissionRoute>} />
             <Route path="portfolio" element={<PermissionRoute permission="commercial.view"><CommercialPortfolio /></PermissionRoute>} />
             <Route path="sources" element={<PermissionRoute permission="commercial.view"><CommercialSources /></PermissionRoute>} />
+            <Route path="model/revenue" element={<PermissionRoute permission="commercial.view"><CommercialRevenue /></PermissionRoute>} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

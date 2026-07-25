@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Shield,
   ArrowLeft,
+  Calculator,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -21,6 +22,7 @@ type NavItem = {
   label: string;
   icon: ComponentType<{ className?: string }>;
   end?: boolean;
+  section?: string;
 };
 
 const NAV: NavItem[] = [
@@ -29,6 +31,7 @@ const NAV: NavItem[] = [
   { to: "/commercial/scenarios", label: "Scenarios", icon: FlaskConical },
   { to: "/commercial/portfolio", label: "Portfolio", icon: Briefcase },
   { to: "/commercial/sources", label: "Sources", icon: BookOpen },
+  { to: "/commercial/model/revenue", label: "Revenue", icon: Calculator, section: "Model" },
 ];
 
 function Sidebar() {
@@ -51,28 +54,41 @@ function Sidebar() {
         <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Commercial
         </div>
-        {NAV.map((t) => {
-          const Icon = t.icon;
-          return (
-            <NavLink
-              key={t.to}
-              to={t.to}
-              end={t.end}
-              className={({ isActive }) =>
-                `flex items-center gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition ${
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`
-              }
-            >
-              <Icon className="h-4 w-4" />
-              <span className="truncate">{t.label}</span>
-            </NavLink>
-          );
-        })}
+        {NAV.filter((n) => !n.section).map((t) => (
+          <NavLinkItem key={t.to} item={t} />
+        ))}
+        {Array.from(new Set(NAV.filter((n) => n.section).map((n) => n.section!))).map((sec) => (
+          <div key={sec} className="pt-3">
+            <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              {sec}
+            </div>
+            {NAV.filter((n) => n.section === sec).map((t) => (
+              <NavLinkItem key={t.to} item={t} />
+            ))}
+          </div>
+        ))}
       </nav>
     </aside>
+  );
+}
+
+function NavLinkItem({ item }: { item: NavItem }) {
+  const Icon = item.icon;
+  return (
+    <NavLink
+      to={item.to}
+      end={item.end}
+      className={({ isActive }) =>
+        `flex items-center gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition ${
+          isActive
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+        }`
+      }
+    >
+      <Icon className="h-4 w-4" />
+      <span className="truncate">{item.label}</span>
+    </NavLink>
   );
 }
 

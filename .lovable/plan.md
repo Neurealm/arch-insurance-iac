@@ -13,7 +13,7 @@
 - BP2 overall — **Built, Validated (GO)**.
 - BP3.0 — Commercial Modeling Source, Formula, Precision & Golden Baseline Contract — **Built, Pending Independent Validation** (see `docs/commercial/bp3-model-contract.md`, `bp3-formula-catalog.md`, `bp3-source-cell-map.md`, `bp3-golden-output-baseline.md`, `bp3-delivery-map.md`).
 - BP3.1 — Commercial Model Runtime, Versioning, Run Persistence, RLS & Immutability — **Built, Pending Independent Validation** (see `docs/commercial/bp3-1-runtime-architecture.md`, `bp3-1-test-evidence.md`, `supabase/tests/bp3_1_model_runtime.sql`).
-- BP3.2 — Deterministic TS Domain Engine (Volumes → EBITDA) — **Not Started**.
+- BP3.2 — Project Momentous Volume Driver & Revenue Calculation Engine — **Built, Pending Independent Validation** (see `docs/commercial/bp3-2-revenue-formulas.md`, `bp3-2-test-evidence.md`, `supabase/tests/bp3_2_revenue_engine.sql`, edge function `commercial-run-scenario`, page `/commercial/model/revenue`). Cost/OPEX/Cash/Sensitivity remain out of scope.
 - BP3.3 — Engine — Scenario Summary, Cash/WC, Break-Even & Payback — **Not Started**.
 - BP3.4 — Engine — Sensitivity & Terms Interpretation — **Not Started**.
 - BP3.5 — Supabase Edge Function `commercial-run-scenario` + RLS wiring — **Not Started**.
