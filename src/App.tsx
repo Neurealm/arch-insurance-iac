@@ -87,6 +87,8 @@ import CommercialScenarios from "./commercial/pages/CommercialScenarios";
 import CommercialPortfolio from "./commercial/pages/CommercialPortfolio";
 import CommercialSources from "./commercial/pages/CommercialSources";
 import CommercialRevenue from "./commercial/pages/CommercialRevenue";
+import CommercialPnl from "./commercial/pages/CommercialPnl";
+
 import { PermissionRoute } from "./components/auth/PermissionRoute";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
