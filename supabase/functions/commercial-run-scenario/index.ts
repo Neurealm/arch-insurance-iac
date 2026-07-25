@@ -653,7 +653,29 @@ function computeCashScope(a: AssumptionMap, pnl: PnlSnapshot): ResultRow[] {
   const q1Upfront = pnl.actFundByFy[fy1] * q1FundPct;
   const q1TravelLoad = pnl.travelCodByFy[fy1] * q1TravelPct;
   // Q1 = baseCostPerQ + travel front-load ; Q2..Q4 = baseCostPerQ
-...
+
+  const cashInQ: number[] = [];
+  const cashOutQ: number[] = [];
+  const ncfQ: number[] = [];
+  const cumNcfQ: number[] = [];
+  let cum = 0;
+
+  for (let q = 0; q < 4; q++) {
+    const collect = q - lagQ >= 0 ? accruedPerQ : 0;
+    const upfront = q === 0 ? q1Upfront : 0;
+    const cIn = collect + upfront;
+    const cOut = q === 0 ? baseCostPerQ + q1TravelLoad : baseCostPerQ;
+    const ncf = cIn - cOut;
+    cum += ncf;
+    cashInQ.push(cIn); cashOutQ.push(cOut); ncfQ.push(ncf); cumNcfQ.push(cum);
+
+    const qLabel = `${fy1}-${QUARTERS[q]}`;
+    push("CASH-ACCRUED-REV", "cash_quarterly", "CASH-ACCRUED-REV", qLabel, q,
+      accruedPerQ, "USD",
+      { formula: "REV-TOTAL[Y1]/4", rev_total_y1: rev1, pnl_run_id: pnl.pnlRunId });
+    push("CASH-COLLECTED", "cash_quarterly", "CASH-COLLECTED", qLabel, q,
+      cIn, "USD",
+      { formula: "accrued[q-lagQ] + q1_upfront", lag_quarters: lagQ, pay_lag_days: payLagDays, collect, upfront });
     push("CASH-COSTS-PAID", "cash_quarterly", "CASH-COSTS-PAID", qLabel, q,
       cOut, "USD",
       { formula: q === 0 ? "cost/4 + Q1_travel_load" : "cost/4", base_cost_per_q: baseCostPerQ, q1_travel_load: q === 0 ? q1TravelLoad : 0, q1_travel_frontload_pct: q1TravelPct, formula_version: "bp3.4.1" });
