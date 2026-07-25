@@ -1,6 +1,7 @@
-// BP3.2 / BP3.3 — Commercial run engine (Project Momentous)
-// Server-authoritative: implements VOL-*, REV-*, COD-*, OPEX-*, PL-* domains.
-// Cash and sensitivity remain out of scope.
+// BP3.2 / BP3.3 / BP3.4 — Commercial run engine (Project Momentous)
+// Server-authoritative: implements VOL-*, REV-*, COD-*, OPEX-*, PL-*, CASH-*, WC-*,
+// BE-*, PB-*, SUS-* domains. Sensitivity remains out of scope (BP3.7).
+
 
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -602,6 +603,189 @@ function computePnlScope(
   return out;
 }
 
+// ---------- Cash / Break-even / Sustainability (BP3.4) ----------
+const QUARTERS = ["Q1", "Q2", "Q3", "Q4"] as const;
+
+type PnlSnapshot = {
+  revByFy: Record<string, number>;
+  codByFy: Record<string, number>;
+  opexByFy: Record<string, number>;
+  ebitdaByFy: Record<string, number>;
+  travelCodByFy: Record<string, number>;
+  actFundByFy: Record<string, number>;
+  pnlRunId: string;
+};
+
+function computeCashScope(a: AssumptionMap, pnl: PnlSnapshot): ResultRow[] {
+  const out: ResultRow[] = [];
+  const payLagDays = need(a, "PAY_LAG_DAYS");
+  const q1FundPct = need(a, "Q1_ACT_FUND_TIMING_PCT");
+  const q1TravelPct = need(a, "Q1_TRAVEL_FRONTLOAD_PCT");
+  // 60d → 2 mo → cash arrives ~2 quarters after accrual under end-of-quarter convention
+  const lagQ = Math.max(1, Math.round(payLagDays / 30));
+
+  const push = (
+    metric_code: string,
+    metric_group: string,
+    formula_code: string,
+    fiscal_period: string,
+    period_sequence: number,
+    value_numeric: number | null,
+    unit: string,
+    lineage_json: Record<string, unknown>,
+    value_text: string | null = null,
+  ) => {
+    out.push({
+      metric_code, metric_group, formula_code, fiscal_period, period_sequence,
+      value_numeric, value_text, unit, lineage_json,
+    });
+  };
+
+  // ----- Y1 Quarterly detail (Base golden §7 shape, applied to all scenarios) -----
+  const fy1 = FISCAL_YEARS[0];
+  const rev1 = pnl.revByFy[fy1];
+  const cost1 = pnl.codByFy[fy1] + pnl.opexByFy[fy1];
+  const accruedPerQ = rev1 / 4;
+  const baseCostPerQ = (cost1 - pnl.travelCodByFy[fy1] * q1TravelPct) / 4;
+  const q1Upfront = pnl.actFundByFy[fy1] * q1FundPct;
+  const q1TravelLoad = pnl.travelCodByFy[fy1] * q1TravelPct;
+  // remaining travel spread over Q2-Q4 already implicit in baseCostPerQ recalc:
+  // baseCostPerQ = (cost1 - q1TravelLoad)/4  → travel only paid Q1
+
+  const cashInQ: number[] = [];
+  const cashOutQ: number[] = [];
+  const ncfQ: number[] = [];
+  const cumNcfQ: number[] = [];
+  let cum = 0;
+
+  for (let q = 0; q < 4; q++) {
+    const collect = q - lagQ >= 0 ? accruedPerQ : 0;
+    const upfront = q === 0 ? q1Upfront : 0;
+    const cIn = collect + upfront;
+    const cOut = q === 0 ? baseCostPerQ + q1TravelLoad : baseCostPerQ;
+    const ncf = cIn - cOut;
+    cum += ncf;
+    cashInQ.push(cIn); cashOutQ.push(cOut); ncfQ.push(ncf); cumNcfQ.push(cum);
+
+    const qLabel = `${fy1}-${QUARTERS[q]}`;
+    push("CASH-ACCRUED-REV", "cash_quarterly", "CASH-ACCRUED-REV", qLabel, q,
+      accruedPerQ, "USD",
+      { formula: "REV-TOTAL[Y1]/4", rev_total_y1: rev1, pnl_run_id: pnl.pnlRunId });
+    push("CASH-COLLECTED", "cash_quarterly", "CASH-COLLECTED", qLabel, q,
+      cIn, "USD",
+      { formula: "accrued[q-lagQ] + q1_upfront", lag_quarters: lagQ, pay_lag_days: payLagDays, collect, upfront });
+    push("CASH-COSTS-PAID", "cash_quarterly", "CASH-COSTS-PAID", qLabel, q,
+      cOut, "USD",
+      { formula: q === 0 ? "(cost-travel)/4 + Q1_travel_load" : "(cost-travel)/4", base_cost_per_q: baseCostPerQ, q1_travel_load: q === 0 ? q1TravelLoad : 0 });
+    push("CASH-NCF-QTR", "cash_quarterly", "CASH-NCF-QTR", qLabel, q,
+      ncf, "USD",
+      { formula: "CASH-COLLECTED - CASH-COSTS-PAID" });
+    push("CASH-CUM-NCF-QTR", "cash_quarterly", "CASH-CUM-NCF-QTR", qLabel, q,
+      cum, "USD",
+      { formula: "SUM(CASH-NCF-QTR up to this q)" });
+  }
+  const peakTrough = Math.min(...cumNcfQ);
+  push("WC-PEAK-TROUGH-Y1", "working_capital", "WC-PEAK-TROUGH-Y1", fy1, 0,
+    peakTrough, "USD",
+    { formula: "MIN(CASH-CUM-NCF-QTR[Y1])", quarters: cumNcfQ });
+  push("WC-MAX-FUNDING", "working_capital", "WC-MAX-FUNDING", fy1, 0,
+    Math.max(0, -peakTrough), "USD",
+    { formula: "MAX(0, -WC-PEAK-TROUGH-Y1)" });
+
+  // ----- Annual cash (EBITDA proxy — matches golden §8 Cumulative EBITDA table) -----
+  let cumEbitda = 0;
+  let firstPositiveEbitdaFy: string | null = null;
+  let firstPositiveCumCashFy: string | null = null;
+  let paybackFy: string | null = null;
+  let negativeYears = 0;
+
+  FISCAL_YEARS.forEach((fy, i) => {
+    const ebitda = pnl.ebitdaByFy[fy];
+    cumEbitda += ebitda;
+    if (ebitda < 0) negativeYears++;
+    if (ebitda >= 0 && firstPositiveEbitdaFy === null) firstPositiveEbitdaFy = fy;
+    if (cumEbitda >= 0 && firstPositiveCumCashFy === null) firstPositiveCumCashFy = fy;
+    if (cumEbitda >= 0 && paybackFy === null) paybackFy = fy;
+
+    push("CASH-NCF-ANNUAL", "cash_annual", "CASH-NCF-ANNUAL", fy, i,
+      ebitda, "USD",
+      { formula: "PL-EBITDA (cash proxy per model contract §7)", ebitda, pnl_run_id: pnl.pnlRunId });
+    push("CASH-CUM-ANNUAL", "cash_annual", "CASH-CUM-ANNUAL", fy, i,
+      cumEbitda, "USD",
+      { formula: "SUM(CASH-NCF-ANNUAL[1..y])" });
+    push("CASH-CONVERSION", "cash_annual", "CASH-CONVERSION", fy, i,
+      pnl.revByFy[fy] !== 0 ? ebitda / pnl.revByFy[fy] : 0, "ratio",
+      { formula: "CASH-NCF-ANNUAL / REV-TOTAL", rev_total: pnl.revByFy[fy] });
+    push("WC-REQUIREMENT", "working_capital", "WC-REQUIREMENT", fy, i,
+      Math.max(0, -cumEbitda), "USD",
+      { formula: "MAX(0, -CASH-CUM-ANNUAL)" });
+  });
+
+  // 5-yr totals
+  const totNcf = FISCAL_YEARS.reduce((s, fy) => s + pnl.ebitdaByFy[fy], 0);
+  const totRev = FISCAL_YEARS.reduce((s, fy) => s + pnl.revByFy[fy], 0);
+  push("CASH-NCF-ANNUAL", "cash_annual", "CASH-NCF-ANNUAL", "FY2027-FY2031", 99,
+    totNcf, "USD", { formula: "SUM(FY EBITDA)" });
+  push("CASH-CUM-ANNUAL", "cash_annual", "CASH-CUM-ANNUAL", "FY2027-FY2031", 99,
+    cumEbitda, "USD", { formula: "Terminal cumulative cash" });
+  push("CASH-CONVERSION", "cash_annual", "CASH-CONVERSION", "FY2027-FY2031", 99,
+    totRev !== 0 ? totNcf / totRev : 0, "ratio", { formula: "TOT_NCF / TOT_REV" });
+
+  // ----- Break-even -----
+  push("BE-EBITDA-YEAR", "break_even", "BE-EBITDA-YEAR", "SCENARIO", 0,
+    firstPositiveEbitdaFy ? FISCAL_YEARS.indexOf(firstPositiveEbitdaFy as FY) + 1 : null,
+    "fy_index",
+    { formula: "first FY where PL-EBITDA >= 0", fy: firstPositiveEbitdaFy },
+    firstPositiveEbitdaFy);
+  push("BE-CASH-YEAR", "break_even", "BE-CASH-YEAR", "SCENARIO", 0,
+    firstPositiveCumCashFy ? FISCAL_YEARS.indexOf(firstPositiveCumCashFy as FY) + 1 : null,
+    "fy_index",
+    { formula: "first FY where CASH-CUM-ANNUAL >= 0", fy: firstPositiveCumCashFy },
+    firstPositiveCumCashFy);
+  push("BE-STATUS", "break_even", "BE-STATUS", "SCENARIO", 0,
+    null, "flag",
+    { formula: "categorical", ebitda_year: firstPositiveEbitdaFy, cash_year: firstPositiveCumCashFy },
+    firstPositiveEbitdaFy && firstPositiveCumCashFy ? "ACHIEVED" : "NOT_ACHIEVED");
+
+  // ----- Payback -----
+  const paybackIdx = paybackFy ? FISCAL_YEARS.indexOf(paybackFy as FY) : -1;
+  push("PB-YEAR", "payback", "PB-YEAR", "SCENARIO", 0,
+    paybackIdx >= 0 ? paybackIdx + 1 : null, "fy_index",
+    { formula: "first FY where CASH-CUM-ANNUAL >= 0", fy: paybackFy },
+    paybackFy);
+  push("PB-MONTHS", "payback", "PB-MONTHS", "SCENARIO", 0,
+    paybackIdx >= 0 ? (paybackIdx + 1) * 12 : null, "months",
+    { formula: "(payback_fy_index + 1) * 12", assumption: "linear within FY" });
+  push("PB-CUM-RECOVERY-TERMINAL", "payback", "PB-CUM-RECOVERY-TERMINAL",
+    FISCAL_YEARS[FISCAL_YEARS.length - 1], 4,
+    cumEbitda, "USD",
+    { formula: "Terminal CASH-CUM-ANNUAL" });
+
+  // ----- Financial Sustainability -----
+  const sustained = negativeYears === 0 && cumEbitda > 0;
+  const viable = cumEbitda > 0;
+  const status = sustained ? "SUSTAINED" : viable ? "VIABLE_WITH_DIPS" : "AT_RISK";
+  const modelHealth = sustained ? "HEALTHY" : viable ? "MONITOR" : "AT_RISK";
+  push("SUS-NEG-YEARS", "sustainability", "SUS-NEG-YEARS", "SCENARIO", 0,
+    negativeYears, "count",
+    { formula: "COUNT(EBITDA[y] < 0)" });
+  push("SUS-FUNDING-DEPENDENCY", "sustainability", "SUS-FUNDING-DEPENDENCY", "SCENARIO", 0,
+    Math.max(0, -cumEbitda), "USD",
+    { formula: "MAX(0, -Terminal CumCash) — min additional funding needed" });
+  push("SUS-STATUS", "sustainability", "SUS-STATUS", "SCENARIO", 0,
+    null, "flag",
+    { formula: "SUSTAINED if negative_years=0 & terminal>0 else VIABLE_WITH_DIPS if terminal>0 else AT_RISK",
+      negative_years: negativeYears, terminal_cum_cash: cumEbitda },
+    status);
+  push("SUS-MODEL-HEALTH", "sustainability", "SUS-MODEL-HEALTH", "SCENARIO", 0,
+    null, "flag",
+    { formula: "derived from SUS-STATUS" },
+    modelHealth);
+
+  return out;
+}
+
+
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -633,9 +817,10 @@ Deno.serve(async (req: Request) => {
     return json({ error: "program_id and model_version_id are required" }, 400);
   }
   const runScope = (body.run_scope ?? "revenue").toLowerCase();
-  if (runScope !== "revenue" && runScope !== "pnl") {
-    return json({ error: "run_scope must be 'revenue' or 'pnl'" }, 400);
+  if (runScope !== "revenue" && runScope !== "pnl" && runScope !== "cash") {
+    return json({ error: "run_scope must be 'revenue', 'pnl', or 'cash'" }, 400);
   }
+
 
   // Resolve scenarios
   const scenarioIds =
@@ -698,7 +883,7 @@ async function runOne(
       const missing = checkCompleteness(map);
       if (missing.length > 0) throw new Error(`missing_assumption:${missing.join(",")}`);
       rows = computeRevenueScope(map);
-    } else {
+    } else if (run_scope === "pnl") {
       // pnl scope — requires completed revenue run for same scenario+version
       const missing = checkPnlCompleteness(map);
       if (missing.length > 0) throw new Error(`missing_assumption:${missing.join(",")}`);
@@ -734,7 +919,81 @@ async function runOne(
         if (!(fy in revByFy)) throw new Error(`prerequisite_missing:REV-TOTAL_${fy}`);
       }
       rows = computePnlScope(map, revByFy, revenueRunId);
+    } else {
+      // cash scope — requires completed pnl run for same scenario+version
+      for (const k of ["PAY_LAG_DAYS", "Q1_ACT_FUND_TIMING_PCT", "Q1_TRAVEL_FRONTLOAD_PCT"]) {
+        if (!(k in map)) throw new Error(`missing_assumption:${k}`);
+      }
+      const { data: pnlRun, error: prErr } = await supabase
+        .from("commercial_model_runs")
+        .select("id")
+        .eq("scenario_id", scenario_id)
+        .eq("model_version_id", model_version_id)
+        .eq("run_scope", "pnl")
+        .eq("status", "completed")
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (prErr) throw new Error(prErr.message);
+      if (!pnlRun) throw new Error("prerequisite_missing:pnl_run_required");
+      const pnlRunId = pnlRun.id as string;
+      const codes = ["REV-TOTAL", "COD-TOTAL", "OPEX-TOTAL", "PL-EBITDA", "COD-11_TRAVEL", "REV-07-ACT-FUND"];
+      const { data: pnlRows, error: prRowsErr } = await supabase
+        .from("commercial_model_results")
+        .select("fiscal_period, metric_code, value_numeric")
+        .eq("run_id", pnlRunId)
+        .in("metric_code", codes);
+      if (prRowsErr) throw new Error(prRowsErr.message);
+
+      const bucket = (): Record<string, number> => ({});
+      const revByFy = bucket(), codByFy = bucket(), opexByFy = bucket(),
+        ebitdaByFy = bucket(), travelCodByFy = bucket(), actFundByFy = bucket();
+      for (const r of pnlRows ?? []) {
+        if (!r.fiscal_period || r.fiscal_period === "FY2027-FY2031") continue;
+        const fp = r.fiscal_period as string;
+        const v = Number(r.value_numeric);
+        if (r.metric_code === "REV-TOTAL") revByFy[fp] = v;
+        else if (r.metric_code === "COD-TOTAL") codByFy[fp] = v;
+        else if (r.metric_code === "OPEX-TOTAL") opexByFy[fp] = v;
+        else if (r.metric_code === "PL-EBITDA") ebitdaByFy[fp] = v;
+        else if (r.metric_code === "COD-11_TRAVEL") travelCodByFy[fp] = v;
+        else if (r.metric_code === "REV-07-ACT-FUND") actFundByFy[fp] = v;
+      }
+      // REV-TOTAL comes from the paired pnl run's persisted rows (pnl also carries it via computePnlScope? no — pnl doesn't emit REV-TOTAL rows).
+      // Pull REV-TOTAL + REV-07-ACT-FUND directly from the upstream revenue run.
+      if (Object.keys(revByFy).length === 0 || Object.keys(actFundByFy).length === 0) {
+        const { data: revRun2 } = await supabase
+          .from("commercial_model_runs")
+          .select("id")
+          .eq("scenario_id", scenario_id)
+          .eq("model_version_id", model_version_id)
+          .eq("run_scope", "revenue")
+          .eq("status", "completed")
+          .order("completed_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!revRun2) throw new Error("prerequisite_missing:revenue_run_required");
+        const { data: revRows2 } = await supabase
+          .from("commercial_model_results")
+          .select("fiscal_period, metric_code, value_numeric")
+          .eq("run_id", revRun2.id as string)
+          .in("metric_code", ["REV-TOTAL", "REV-07-ACT-FUND"]);
+        for (const r of revRows2 ?? []) {
+          if (!r.fiscal_period || r.fiscal_period === "FY2027-FY2031") continue;
+          const fp = r.fiscal_period as string;
+          const v = Number(r.value_numeric);
+          if (r.metric_code === "REV-TOTAL") revByFy[fp] = v;
+          else if (r.metric_code === "REV-07-ACT-FUND") actFundByFy[fp] = v;
+        }
+      }
+      for (const fy of FISCAL_YEARS) {
+        for (const [name, src] of [["REV-TOTAL", revByFy], ["COD-TOTAL", codByFy], ["OPEX-TOTAL", opexByFy], ["PL-EBITDA", ebitdaByFy], ["COD-11_TRAVEL", travelCodByFy], ["REV-07-ACT-FUND", actFundByFy]] as const) {
+          if (!(fy in src)) throw new Error(`prerequisite_missing:${name}_${fy}`);
+        }
+      }
+      rows = computeCashScope(map, { revByFy, codByFy, opexByFy, ebitdaByFy, travelCodByFy, actFundByFy, pnlRunId });
     }
+
 
     // 4. Mark running
     const { error: mrErr } = await supabase.rpc("commercial_model_run_mark_running", {
