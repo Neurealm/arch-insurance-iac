@@ -174,8 +174,9 @@ function computeRevenueScope(a: AssumptionMap): ResultRow[] {
   emitAnnual(
     { code: "VOL-CUM-ACT", formula: "VOL-CUM-ACT", group: "volume", unit: "accounts" },
     cum,
-    (i) => ({ input: `ACT_RAMP_FY202${7 + i}`, value: cum[i] }),
+    (i) => ({ input: `ACT_RAMP_${FISCAL_YEARS[i]}`, value: cum[i] }),
     "LAST",
+
   );
   emitAnnual(
     { code: "VOL-NEW-ACT", formula: "VOL-NEW-ACT", group: "volume", unit: "accounts" },
