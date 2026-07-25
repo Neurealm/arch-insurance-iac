@@ -33,9 +33,38 @@ function toMap(rows: Assumption[]): AssumptionMap {
 }
 
 function need(m: AssumptionMap, code: string): number {
+  if (!/^[A-Z0-9_]+_FY20\d{2}(_[A-Z]+)?$|^[A-Z0-9_]+$/.test(code)) {
+    throw new Error(`malformed_assumption_key:${code}`);
+  }
+  const fyMatch = code.match(/FY(\d+)/);
+  if (fyMatch && fyMatch[1].length !== 4) {
+    throw new Error(`malformed_assumption_key:${code}`);
+  }
   if (!(code in m)) throw new Error(`missing_assumption:${code}`);
   return m[code];
 }
+
+function requiredKeys(): string[] {
+  const keys: string[] = [
+    "CONV_REBATE_PCT","CONV_EXPAND_PCT","CONV_MS_PCT",
+    "AVG_ARR_PER_CUSTOMER_MUSD","INCR_ARR_GROWTH_PCT","RENEWAL_INFLUENCED_PCT",
+    "BASE_RENEWAL_REBATE_PCT","MARKETPLACE_MIX_PCT","MARKETPLACE_REBATE_PCT",
+    "NON_FLEX_MIX_PCT","NON_FLEX_EXPANSION_REBATE_PCT","FLEX_MIGRATION_REBATE_PCT",
+    "STRATEGIC_GROWTH_ACCEL_PCT","GROWTH_ACCEL_THRESHOLD_PCT","ARR_PROXY_GROWTH_SHARE_PCT",
+    "ACTIVATION_FUND_PER_ACCT_USD","MDF_COSELL_ANNUAL_USD","SUPPORT_READINESS_FUND_USD",
+    "MS_ANNUAL_REV_PER_ACCT_USD","PS_ONETIME_REV_PER_ACCT_USD","COST_ESCALATOR_PCT",
+  ];
+  for (const fy of FISCAL_YEARS) {
+    keys.push(`ACT_RAMP_${fy}`);
+    keys.push(`EAR_POOL_${fy}_MUSD`);
+  }
+  return keys;
+}
+
+function checkCompleteness(m: AssumptionMap): string[] {
+  return requiredKeys().filter((k) => !(k in m));
+}
+
 
 // ---------- Engine ----------
 type ResultRow = {
