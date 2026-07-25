@@ -24,7 +24,7 @@ export default function CommercialCompare() {
   const canCreate = isPlatformAdmin || hasPermission("commercial.comparison.create");
   const ctx = useAssumptionsContext(tenantId);
   const program = ctx.data?.program ?? null;
-  const version = ctx.data?.version ?? null;
+  const version = ctx.data?.draftVersion ?? null;
   const scenarios = ctx.data?.scenarios ?? [];
   const list = useComparisons(tenantId, program?.id ?? null);
   const create = useCreateComparison(tenantId);
