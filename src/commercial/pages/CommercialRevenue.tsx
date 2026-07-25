@@ -86,9 +86,9 @@ const fmtUsd = (v: number | null) =>
 const fmtCount = (v: number | null) =>
   v == null ? "—" : new Intl.NumberFormat("en-US").format(v);
 
-function num(v: string | null | undefined): number | null {
+function num(v: number | string | null | undefined): number | null {
   if (v == null) return null;
-  const n = Number(v);
+  const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : null;
 }
 
