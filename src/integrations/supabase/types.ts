@@ -9125,6 +9125,15 @@ export type Database = {
         }
         Returns: string
       }
+      commercial_sensitivity_reset_to_draft: {
+        Args: { _experiment_id: string; _reason?: string }
+        Returns: {
+          experiment_id: string
+          perturbations_removed: number
+          reset_at: string
+          status: string
+        }[]
+      }
       commercial_sensitivity_start_execution: {
         Args: { _experiment_id: string; _perturbations: Json }
         Returns: Json

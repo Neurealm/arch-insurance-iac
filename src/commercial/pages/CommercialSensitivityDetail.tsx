@@ -7,7 +7,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { AlertTriangle, ArrowLeft, Play, Archive } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Play, Archive, RotateCcw } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { LoadingState, EmptyState } from "@/platform/components/States";
 import { useCommercialAccess } from "@/commercial/hooks/useCommercialAccess";
 import { useAssumptionsContext } from "@/commercial/hooks/useAssumptionChangeSets";
@@ -15,6 +19,7 @@ import {
   useSensitivityExperiment,
   useExecuteSensitivity,
   useArchiveSensitivity,
+  useResetSensitivityToDraft,
   expandPerturbations,
 } from "@/commercial/hooks/useSensitivity";
 
@@ -33,7 +38,9 @@ export default function CommercialSensitivityDetail() {
   const detail = useSensitivityExperiment(tenantId, id ?? null);
   const execute = useExecuteSensitivity(tenantId);
   const archive = useArchiveSensitivity(tenantId);
+  const reset = useResetSensitivityToDraft(tenantId);
   const [executing, setExecuting] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
 
   const exp = detail.data?.header ?? null;
   const perts = detail.data?.perturbations ?? [];
@@ -75,6 +82,17 @@ export default function CommercialSensitivityDetail() {
     }
   };
 
+  const onReset = async () => {
+    if (!exp) return;
+    try {
+      await reset.mutateAsync({ experiment_id: exp.id, reason: "Recovery after failed sensitivity execution" });
+      toast({ title: "Reset to Draft", description: "Failed-attempt perturbations cleared." });
+      setResetOpen(false);
+    } catch (e) {
+      toast({ title: "Reset failed", description: (e as Error).message, variant: "destructive" });
+    }
+  };
+
   if (detail.isLoading) return <LoadingState label="Loading experiment…" />;
   if (!exp) return <EmptyState title="Experiment not found" />;
 
@@ -106,12 +124,35 @@ export default function CommercialSensitivityDetail() {
             {exp.status === "draft" && canExecute && (
               <Button onClick={onExecute} disabled={executing}><Play className="mr-1 h-4 w-4" />{executing ? "Executing…" : "Execute"}</Button>
             )}
+            {exp.status === "failed" && canExecute && (
+              <Button variant="destructive" onClick={() => setResetOpen(true)} disabled={reset.isPending}>
+                <RotateCcw className="mr-1 h-4 w-4" />{reset.isPending ? "Resetting…" : "Reset to Draft"}
+              </Button>
+            )}
             {exp.status !== "archived" && canArchive && (
               <Button variant="outline" onClick={onArchive}><Archive className="mr-1 h-4 w-4" />Archive</Button>
             )}
           </div>
         </div>
       </div>
+
+      <AlertDialog open={resetOpen} onOpenChange={setResetOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset failed experiment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will return &ldquo;{exp.title}&rdquo; to Draft and clear {perts.length} failed-attempt
+              perturbation{perts.length === 1 ? "" : "s"} so they can be regenerated on the next execution.
+              No completed sensitivity results or financial model runs will be changed, and the original
+              failure audit event is preserved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onReset}>Reset to Draft</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {exp.status === "failed" && (
         <Alert variant="destructive">
