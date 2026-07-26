@@ -1,7 +1,15 @@
 # BP3.5 · Governed Assumption Lifecycle — Runtime Evidence
 
-Status: **Runtime Executed · Pending Independent Validation (BP3.5.VALIDATE)**
-Model version: `PM-FIN-2026.1` — remains **Draft** (activation deferred to BP3.8).
+Status: **Completed and Validated (GO)**.
+
+> **Closeout status note — 2026-07-26.** BP3.5.VALIDATE returned **GO**. BP3 closeout
+> documentation has been authored and is pending closeout execution and final closeout
+> validation. See `docs/commercial/bp3-program-closeout.md` and
+> `docs/commercial/bp3-evidence-index.md`. The historical statement below — recorded while
+> PM-FIN-2026.1 was still Draft — is preserved as written. Current state: PM-FIN-2026.1
+> (`5097c3a9-021e-4b2c-9377-540a5d18ada6`) is **Active** as of 2026-07-26 21:18:52.696359+00.
+
+Model version (as recorded at the time of BP3.5 execution): `PM-FIN-2026.1` — remained **Draft** (activation deferred to BP3.8).
 
 ## Execution Context
 

@@ -1,6 +1,15 @@
 # BP3.1 — Commercial Model Runtime Architecture
 
-**Status**: Built, Pending Independent Validation
+**Status**: Completed and Validated (GO).
+
+> **Closeout status note — 2026-07-26.** BP3.1 independent validation returned **GO**.
+> This document also serves as the canonical BP3.1 assumption/runtime catalog. BP3 closeout
+> documentation has been authored and is pending closeout execution and final closeout
+> validation. See `docs/commercial/bp3-program-closeout.md`,
+> `docs/commercial/bp3-evidence-index.md`, and package evidence in
+> `docs/commercial/bp3-1-test-evidence.md`. The historical body below, including the seeded
+> **draft** state of PM-FIN-2026.1, is preserved as written; PM-FIN-2026.1 is now **active**
+> (`5097c3a9-021e-4b2c-9377-540a5d18ada6`, activated 2026-07-26 21:18:52.696359+00).
 
 ## Purpose
 
