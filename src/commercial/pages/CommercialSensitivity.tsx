@@ -26,7 +26,7 @@ export default function CommercialSensitivity() {
   const program = ctx.data?.program ?? null;
   const version = ctx.data?.draftVersion ?? null;
   const scenarios = ctx.data?.scenarios ?? [];
-  const assumptions = ctx.data?.effectiveAssumptions ?? [];
+  const assumptions = ctx.data?.assumptions ?? [];
   const baseline = useMemo(() => scenarios.find((s) => s.is_baseline) ?? scenarios[0], [scenarios]);
 
   const list = useSensitivityExperiments(tenantId, program?.id ?? null);
