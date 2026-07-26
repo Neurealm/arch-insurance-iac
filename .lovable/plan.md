@@ -9,7 +9,7 @@
 - **BP3.3** — Cost, Staffing, P&L, EBITDA — Completed & Validated.
 - **BP3.4** — Cash Flow, WC, Break-even, Payback, Sustainability — Completed & Validated (BP3.4.1 fingerprint).
 - **BP3.5** — Governed Assumption Editing — **Completed & Validated**.
-- **BP3.6** — Scenario Comparison Workspace — **Built; BP3.6.1 hashing + BP3.6.2 result-tenant patches applied; Runtime Execution pending authenticated Save verification**.
+- **BP3.6** — Scenario Comparison Workspace — **Built; BP3.6.1 hash + BP3.6.2 tenant + BP3.6.3 to_jsonb patches applied; Runtime Execution pending authenticated Save verification**.
 - **BP3.7** — Sensitivity Analysis — **Not Started**.
 - **BP3.8** — Activation / Lineage Enrichment — **Not Started**.
 
