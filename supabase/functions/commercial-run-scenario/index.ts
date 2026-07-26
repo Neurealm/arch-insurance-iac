@@ -809,12 +809,22 @@ Deno.serve(async (req: Request) => {
   const { data: userData, error: userErr } = await supabase.auth.getUser();
   if (userErr || !userData?.user) return json({ error: "auth_required" }, 401);
 
-  let body: { program_id?: string; model_version_id?: string; scenario_ids?: string[]; run_scope?: string };
+  // deno-lint-ignore no-explicit-any
+  let body: any;
   try {
     body = await req.json();
   } catch {
     return json({ error: "invalid_json" }, 400);
   }
+
+  // ---------- BP3.7 SENSITIVITY MODE ----------
+  // Isolated in-memory execution that persists to sensitivity tables (never mutates
+  // commercial_model_runs / commercial_model_results). Reuses computeRevenueScope /
+  // computePnlScope / computeCashScope — no formula duplication.
+  if (body.sensitivity && body.sensitivity.experiment_id && body.sensitivity.perturbation_id) {
+    return await runSensitivity(supabase, body);
+  }
+
   if (!body.program_id || !body.model_version_id) {
     return json({ error: "program_id and model_version_id are required" }, 400);
   }
@@ -823,8 +833,6 @@ Deno.serve(async (req: Request) => {
     return json({ error: "run_scope must be 'revenue', 'pnl', or 'cash'" }, 400);
   }
 
-
-  // Resolve scenarios
   const scenarioIds =
     body.scenario_ids && body.scenario_ids.length > 0
       ? body.scenario_ids
@@ -834,7 +842,7 @@ Deno.serve(async (req: Request) => {
             .select("id")
             .eq("program_id", body.program_id)
             .eq("status", "active")
-        ).data?.map((r) => r.id as string) ?? [];
+        ).data?.map((r: { id: string }) => r.id) ?? [];
 
   if (scenarioIds.length === 0) return json({ error: "no_scenarios" }, 404);
 
