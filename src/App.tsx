@@ -95,6 +95,8 @@ import CommercialCompare from "./commercial/pages/CommercialCompare";
 import CommercialCompareDetail from "./commercial/pages/CommercialCompareDetail";
 import CommercialSensitivity from "./commercial/pages/CommercialSensitivity";
 import CommercialSensitivityDetail from "./commercial/pages/CommercialSensitivityDetail";
+import CommercialRelease from "./commercial/pages/CommercialRelease";
+import CommercialReleaseDetail from "./commercial/pages/CommercialReleaseDetail";
 
 
 import { PermissionRoute } from "./components/auth/PermissionRoute";
@@ -880,6 +882,8 @@ const App = () => (
             <Route path="model/compare/:id" element={<PermissionRoute permission="commercial.view"><CommercialCompareDetail /></PermissionRoute>} />
             <Route path="model/sensitivity" element={<PermissionRoute permission="commercial.view"><CommercialSensitivity /></PermissionRoute>} />
             <Route path="model/sensitivity/:id" element={<PermissionRoute permission="commercial.view"><CommercialSensitivityDetail /></PermissionRoute>} />
+            <Route path="model/release" element={<PermissionRoute permission="commercial.view"><CommercialRelease /></PermissionRoute>} />
+            <Route path="model/release/:versionId" element={<PermissionRoute permission="commercial.view"><CommercialReleaseDetail /></PermissionRoute>} />
 
 
 

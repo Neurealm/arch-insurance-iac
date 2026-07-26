@@ -1,0 +1,12 @@
+REVOKE ALL ON FUNCTION public.commercial_change_set_active_version_guard() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.commercial_change_set_active_version_guard() FROM anon;
+REVOKE ALL ON FUNCTION public.commercial_change_set_active_version_guard() FROM authenticated;
+REVOKE ALL ON FUNCTION public.commercial_release_certification_guard() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.commercial_release_certification_guard() FROM anon;
+REVOKE ALL ON FUNCTION public.commercial_release_certification_guard() FROM authenticated;
+REVOKE ALL ON FUNCTION public.commercial_release_immutable_guard() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.commercial_release_immutable_guard() FROM anon;
+REVOKE ALL ON FUNCTION public.commercial_release_immutable_guard() FROM authenticated;
+REVOKE ALL ON FUNCTION public.commercial_model_version_guard() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.commercial_model_version_guard() FROM anon;
+REVOKE ALL ON FUNCTION public.commercial_model_version_guard() FROM authenticated;
