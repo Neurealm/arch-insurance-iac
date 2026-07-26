@@ -11,7 +11,7 @@
 - **BP3.5** — Governed Assumption Editing — **Completed & Validated**.
 - **BP3.6** — Scenario Comparison Workspace — **Built; Runtime Executed (three-way archived + pairwise saved); Pending Independent Validation**.
 - **BP3.7** — Sensitivity Analysis — **Built; Runtime Executed (5/5 perturbations completed, 1,660 persisted results, governed failed→draft recovery verified); Pending Independent Validation**. Deferred cosmetic BP3.7.4 (label formatting).
-- **BP3.8** — Governed Activation, Release Certification, Lineage, Production Handoff — **Built; Pending Runtime Execution & Independent Validation**.
+- **BP3.8** — Governed Activation, Release Certification, Lineage, Production Handoff — **Built; Runtime Executed (certification history 1 invalidated + 1 certified, PM-FIN-2026.1 activated, 22 lineage rows, single-active invariant held, zero automatic execution); Pending Independent Validation**. BP3.7.4 remains deferred.
 
 ## Persistent principles
 - No automatic model execution. Comparison never triggers Revenue/P&L/Cash re-runs.
