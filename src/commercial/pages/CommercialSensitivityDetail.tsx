@@ -38,7 +38,9 @@ export default function CommercialSensitivityDetail() {
   const detail = useSensitivityExperiment(tenantId, id ?? null);
   const execute = useExecuteSensitivity(tenantId);
   const archive = useArchiveSensitivity(tenantId);
+  const reset = useResetSensitivityToDraft(tenantId);
   const [executing, setExecuting] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
 
   const exp = detail.data?.header ?? null;
   const perts = detail.data?.perturbations ?? [];
