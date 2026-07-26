@@ -8,15 +8,18 @@
 | Program | Project Momentous (`877dcf86-24a4-443f-95bd-28e24952bb80`, code `PROJECT_MOMENTOUS`) |
 | Tenant | NeuGAIN Commercial (`d6e1f4a0-ef31-433e-825e-c2f6dc60cfbb`) |
 | Active model version | PM-FIN-2026.1 (`5097c3a9-021e-4b2c-9377-540a5d18ada6`) |
-| Closeout-document version | 1.0 |
+| Closeout-document version | 1.1 |
 | Authoring date | 2026-07-26 |
+| Closeout execution date | 2026-07-26 (`BP3.CLOSEOUT-EXECUTE`) |
 | Source audit decision | `CLOSEOUT_READY_WITH_WARNINGS` (BP3.CLOSEOUT-AUDIT) |
-| Current closeout status | **Closeout Documentation Authored, Pending Closeout Execution and Independent Validation** |
+| Source documentation result | `PASS` (BP3.CLOSEOUT-DOCUMENT) |
+| Current closeout status | **Closeout Execution Complete, Pending Independent Validation** |
 | Final validation | Pending — `BP3.CLOSEOUT-VALIDATE` has not been run |
 | Related evidence index | `docs/commercial/bp3-evidence-index.md` |
+| Closeout execution evidence | `docs/commercial/bp3-closeout-execution-evidence.md` |
 
 This document does not declare BP3 formally closed. Formal closure requires
-`BP3.CLOSEOUT-EXECUTE` followed by `BP3.CLOSEOUT-VALIDATE`.
+`BP3.CLOSEOUT-VALIDATE`.
 
 ## 2. Executive closeout summary
 
