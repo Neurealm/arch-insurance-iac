@@ -882,6 +882,8 @@ const App = () => (
             <Route path="model/compare/:id" element={<PermissionRoute permission="commercial.view"><CommercialCompareDetail /></PermissionRoute>} />
             <Route path="model/sensitivity" element={<PermissionRoute permission="commercial.view"><CommercialSensitivity /></PermissionRoute>} />
             <Route path="model/sensitivity/:id" element={<PermissionRoute permission="commercial.view"><CommercialSensitivityDetail /></PermissionRoute>} />
+            <Route path="model/release" element={<PermissionRoute permission="commercial.view"><CommercialRelease /></PermissionRoute>} />
+            <Route path="model/release/:versionId" element={<PermissionRoute permission="commercial.view"><CommercialReleaseDetail /></PermissionRoute>} />
 
 
 
