@@ -1,6 +1,13 @@
 # BP3.2 — Revenue Engine (Volume + Revenue only)
 
-**Status**: Built, pending independent validation.
+**Status**: Completed and Validated (GO).
+
+> **Closeout status note — 2026-07-26.** BP3.2.VALIDATE returned **GO** after BP3.2.1.PATCH
+> corrected the revenue string-concatenation defect and full golden parity was re-established.
+> BP3 closeout documentation has been authored and is pending closeout execution and final
+> closeout validation. See `docs/commercial/bp3-program-closeout.md`,
+> `docs/commercial/bp3-evidence-index.md`, and `docs/commercial/bp3-2-test-evidence.md`.
+> The historical body below is preserved unchanged.
 **Scope**: Formula catalog domains VOL-1..VOL-9 and REV-1..REV-13 only.
 **Out of scope**: Cost of Delivery, OPEX, EBITDA, Cash, Sensitivity — reserved for later BP3 packages.
 

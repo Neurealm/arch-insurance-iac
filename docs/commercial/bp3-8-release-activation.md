@@ -1,6 +1,16 @@
 # BP3.8 — Governed Model Activation, Release Lineage, Readiness Certification, and Production Handoff
 
-Status: **Built; Pending Runtime Execution and Independent Validation.**
+Status: **Completed and Validated (GO)**.
+
+> **Closeout status note — 2026-07-26.** BP3.8 runtime execution and BP3.8.VALIDATE are
+> complete; the decision was **GO**. This document is the canonical BP3.8 model-activation
+> design record. Runtime outcome: certification `86f09fd7-39f9-4994-bb09-a7ace339634c`
+> certified 2026-07-26 21:15:40.231941+00; activation `eefc6c50-b73f-41d3-8def-f6ff244000d9`
+> at 2026-07-26 21:18:52.696359+00; 22 release-lineage rows; no prior active version, so no
+> supersession occurred. BP3 closeout documentation has been authored and is pending closeout
+> execution and final closeout validation. See `docs/commercial/bp3-program-closeout.md`,
+> `docs/commercial/bp3-evidence-index.md`, and `docs/commercial/bp3-8-test-evidence.md`.
+> The historical design body below is preserved unchanged.
 
 ## 1. Purpose
 

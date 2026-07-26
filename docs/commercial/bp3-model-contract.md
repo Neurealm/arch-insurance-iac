@@ -2,7 +2,15 @@
 
 Authoritative source: `Neurealm_Citrix_Deal_PL_Model-revised.xlsx` (13 sheets).  
 Contract owner: Commercial calculation engine.  
-Status: **Built, Pending Independent Validation.**
+Status: **Completed and Validated (GO).**
+
+> **Closeout status note — 2026-07-26.** BP3.0.VALIDATE returned **GO**. The contract was
+> implemented by BP3.1–BP3.8 and is realized by the Active model version PM-FIN-2026.1
+> (`5097c3a9-021e-4b2c-9377-540a5d18ada6`, formula catalog `bp3.0-catalog-v1`, source
+> fingerprint `bp3.0-baseline`). BP3 closeout documentation has been authored and is pending
+> closeout execution and final closeout validation. See
+> `docs/commercial/bp3-program-closeout.md` and `docs/commercial/bp3-evidence-index.md`.
+> The contract body below is preserved unchanged.
 
 > **Data caveat (must appear on every derived surface):**  
 > Portfolio-level directional model. Account-level ARR, renewal dates, product

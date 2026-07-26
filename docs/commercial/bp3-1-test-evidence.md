@@ -1,6 +1,12 @@
 # BP3.1 — Test Evidence
 
-**Status**: Built, Pending Independent Validation
+**Status**: Completed and Validated (GO).
+
+> **Closeout status note — 2026-07-26.** BP3.1.VALIDATE returned **GO**. BP3 closeout
+> documentation has been authored and is pending closeout execution and final closeout
+> validation. See `docs/commercial/bp3-program-closeout.md` and
+> `docs/commercial/bp3-evidence-index.md`. The historical test evidence below is preserved
+> unchanged.
 
 ## Automated harness
 
