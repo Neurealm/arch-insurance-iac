@@ -1408,6 +1408,408 @@ export type Database = {
           },
         ]
       }
+      commercial_sensitivity_experiments: {
+        Row: {
+          archived_at: string | null
+          archived_by: string | null
+          assumption_code: string
+          baseline_run_manifest: Json
+          baseline_run_manifest_hash: string | null
+          baseline_scenario_id: string
+          completed_at: string | null
+          completed_by: string | null
+          content_hash: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          error_code: string | null
+          error_message: string | null
+          id: string
+          included_scopes: string[]
+          model_version_id: string
+          perturbation_config: Json
+          perturbation_strategy: string
+          program_id: string
+          stale_at_creation: boolean
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          warning_summary: Json
+        }
+        Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
+          assumption_code: string
+          baseline_run_manifest?: Json
+          baseline_run_manifest_hash?: string | null
+          baseline_scenario_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          included_scopes?: string[]
+          model_version_id: string
+          perturbation_config?: Json
+          perturbation_strategy: string
+          program_id: string
+          stale_at_creation?: boolean
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_summary?: Json
+        }
+        Update: {
+          archived_at?: string | null
+          archived_by?: string | null
+          assumption_code?: string
+          baseline_run_manifest?: Json
+          baseline_run_manifest_hash?: string | null
+          baseline_scenario_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          included_scopes?: string[]
+          model_version_id?: string
+          perturbation_config?: Json
+          perturbation_strategy?: string
+          program_id?: string
+          stale_at_creation?: boolean
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_summary?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_sensitivity_experiments_baseline_scenario_id_fkey"
+            columns: ["baseline_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_experiments_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_experiments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_experiments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_sensitivity_perturbations: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          experiment_id: string
+          id: string
+          input_hash: string | null
+          perturbation_index: number
+          perturbation_label: string
+          perturbed_value: number
+          runtime_fingerprint: string | null
+          started_at: string | null
+          status: string
+          temp_run_ids: Json
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          experiment_id: string
+          id?: string
+          input_hash?: string | null
+          perturbation_index: number
+          perturbation_label: string
+          perturbed_value: number
+          runtime_fingerprint?: string | null
+          started_at?: string | null
+          status?: string
+          temp_run_ids?: Json
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          experiment_id?: string
+          id?: string
+          input_hash?: string | null
+          perturbation_index?: number
+          perturbation_label?: string
+          perturbed_value?: number
+          runtime_fingerprint?: string | null
+          started_at?: string | null
+          status?: string
+          temp_run_ids?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_sensitivity_perturbations_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_perturbations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_sensitivity_results: {
+        Row: {
+          absolute_delta: number | null
+          baseline_value: number | null
+          created_at: string
+          direction_reason: string | null
+          elasticity: number | null
+          elasticity_reason: string | null
+          experiment_id: string
+          fiscal_period: string | null
+          id: string
+          impact_rank: number | null
+          metric_code: string
+          metric_group: string
+          percentage_delta: number | null
+          period_sequence: number | null
+          perturbation_id: string
+          perturbed_value: number | null
+          scope: string
+          tenant_id: string
+          unit: string | null
+          variance_direction: string
+        }
+        Insert: {
+          absolute_delta?: number | null
+          baseline_value?: number | null
+          created_at?: string
+          direction_reason?: string | null
+          elasticity?: number | null
+          elasticity_reason?: string | null
+          experiment_id: string
+          fiscal_period?: string | null
+          id?: string
+          impact_rank?: number | null
+          metric_code: string
+          metric_group: string
+          percentage_delta?: number | null
+          period_sequence?: number | null
+          perturbation_id: string
+          perturbed_value?: number | null
+          scope: string
+          tenant_id: string
+          unit?: string | null
+          variance_direction?: string
+        }
+        Update: {
+          absolute_delta?: number | null
+          baseline_value?: number | null
+          created_at?: string
+          direction_reason?: string | null
+          elasticity?: number | null
+          elasticity_reason?: string | null
+          experiment_id?: string
+          fiscal_period?: string | null
+          id?: string
+          impact_rank?: number | null
+          metric_code?: string
+          metric_group?: string
+          percentage_delta?: number | null
+          period_sequence?: number | null
+          perturbation_id?: string
+          perturbed_value?: number | null
+          scope?: string
+          tenant_id?: string
+          unit?: string | null
+          variance_direction?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_sensitivity_results_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_results_perturbation_id_fkey"
+            columns: ["perturbation_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_perturbations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_results_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_sensitivity_run_results: {
+        Row: {
+          created_at: string
+          fiscal_period: string | null
+          id: string
+          metric_code: string
+          metric_group: string
+          period_sequence: number | null
+          sensitivity_run_id: string
+          tenant_id: string
+          unit: string | null
+          value_numeric: number | null
+          value_text: string | null
+        }
+        Insert: {
+          created_at?: string
+          fiscal_period?: string | null
+          id?: string
+          metric_code: string
+          metric_group: string
+          period_sequence?: number | null
+          sensitivity_run_id: string
+          tenant_id: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          created_at?: string
+          fiscal_period?: string | null
+          id?: string
+          metric_code?: string
+          metric_group?: string
+          period_sequence?: number | null
+          sensitivity_run_id?: string
+          tenant_id?: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_sensitivity_run_results_sensitivity_run_id_fkey"
+            columns: ["sensitivity_run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_sensitivity_runs: {
+        Row: {
+          completed_at: string | null
+          error_code: string | null
+          error_message: string | null
+          experiment_id: string
+          id: string
+          input_hash: string
+          model_version_id: string
+          perturbation_id: string
+          run_scope: string
+          runtime_fingerprint: string
+          scenario_id: string
+          started_at: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          experiment_id: string
+          id?: string
+          input_hash: string
+          model_version_id: string
+          perturbation_id: string
+          run_scope: string
+          runtime_fingerprint: string
+          scenario_id: string
+          started_at?: string
+          status: string
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          experiment_id?: string
+          id?: string
+          input_hash?: string
+          model_version_id?: string
+          perturbation_id?: string
+          run_scope?: string
+          runtime_fingerprint?: string
+          scenario_id?: string
+          started_at?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_sensitivity_runs_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_runs_perturbation_id_fkey"
+            columns: ["perturbation_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_perturbations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commercial_source_references: {
         Row: {
           confidentiality: string
@@ -8650,6 +9052,93 @@ export type Database = {
           run_scope: string
           scenario_id: string
         }[]
+      }
+      commercial_sensitivity_archive: {
+        Args: { _experiment_id: string }
+        Returns: undefined
+      }
+      commercial_sensitivity_build_manifest: {
+        Args: { _experiment_id: string }
+        Returns: Json
+      }
+      commercial_sensitivity_compute_hash: {
+        Args: { _experiment_id: string }
+        Returns: string
+      }
+      commercial_sensitivity_create: {
+        Args: {
+          _assumption_code: string
+          _baseline_scenario_id: string
+          _description?: string
+          _included_scopes: string[]
+          _model_version_id: string
+          _perturbation_config: Json
+          _perturbation_strategy: string
+          _program_id: string
+          _title: string
+        }
+        Returns: string
+      }
+      commercial_sensitivity_fail: {
+        Args: {
+          _error_code: string
+          _error_message: string
+          _experiment_id: string
+        }
+        Returns: undefined
+      }
+      commercial_sensitivity_finalize: {
+        Args: { _experiment_id: string }
+        Returns: Json
+      }
+      commercial_sensitivity_list_baseline_runs: {
+        Args: {
+          _model_version_id: string
+          _program_id: string
+          _scenario_id: string
+          _scopes: string[]
+        }
+        Returns: {
+          completed_at: string
+          input_hash: string
+          run_id: string
+          scope: string
+        }[]
+      }
+      commercial_sensitivity_readiness: {
+        Args: { _experiment_id: string }
+        Returns: {
+          is_missing: boolean
+          is_stale: boolean
+          latest_completed_at: string
+          latest_run_id: string
+          scope: string
+        }[]
+      }
+      commercial_sensitivity_record_perturbation_run: {
+        Args: {
+          _input_hash: string
+          _perturbation_id: string
+          _results: Json
+          _run_scope: string
+          _runtime_fingerprint: string
+        }
+        Returns: string
+      }
+      commercial_sensitivity_start_execution: {
+        Args: { _experiment_id: string; _perturbations: Json }
+        Returns: Json
+      }
+      commercial_sensitivity_update_draft: {
+        Args: {
+          _description: string
+          _experiment_id: string
+          _included_scopes: string[]
+          _perturbation_config: Json
+          _perturbation_strategy: string
+          _title: string
+        }
+        Returns: undefined
       }
       commercial_snapshot_scenario_assumptions: {
         Args: { _scenario_id: string }
