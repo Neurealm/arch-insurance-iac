@@ -82,3 +82,13 @@
 
 ## Runtime execution — PENDING BP3.6.EXECUTE
 End-to-end test evidence (Draft → Save → Archive; hash stability; stale flag persistence) must be captured against a signed-in analyst session in BP3.6.EXECUTE.
+
+## BP3.6.1 — Snapshot Hashing Repair
+- **Observed error:** `function digest(text, unknown) does not exist` on Save Snapshot.
+- **Root cause:** `pgcrypto` is installed in schema `extensions`; BP3.6 Save + hash functions called unqualified `digest()` under `SET search_path=public`, so the overload was unresolvable and PostgreSQL reported the `text, unknown` signature error.
+- **Preflight rollback:** Failed Save rolled back atomically — comparison remained `draft`, `saved_by/saved_at` null, no snapshot rows, no manifest freeze, no audit event, no model run.
+- **Installed hash capability:** `pgcrypto` present in `extensions`; `extensions.digest(bytea, text)` available.
+- **Affected BP3.6 functions:** `public.commercial_comparison_compute_hash`, `public.commercial_comparison_save` (manifest hash line).
+- **Remediation:** Replaced both call sites with the canonical pattern `encode(extensions.digest(convert_to(<text>, 'UTF8'), 'sha256'::text), 'hex')`. RPC signatures, transaction ordering, permissions, and immutability guards unchanged. EXECUTE revoked from PUBLIC/anon, granted to `authenticated`.
+- **Sanity check:** `encode(extensions.digest(convert_to('test','UTF8'),'sha256'::text),'hex')` returns the canonical SHA-256 `9f86d081…0a08`.
+- **Authenticated Save verification:** Pending — requires browser action by an analyst on the existing Draft `BP3.6 Three-Way Runtime Test` to capture PASS evidence (comparison hash, manifest hash, snapshot row count, stale-at-creation, audit event).
