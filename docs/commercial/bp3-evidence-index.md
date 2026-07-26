@@ -259,7 +259,7 @@ No duplicate canonical document was created for an equivalent artifact.
 | `BP3.CLOSEOUT-AUDIT` | `CLOSEOUT_READY_WITH_WARNINGS` | 2026-07-26 | Audit report (chat record), `bp3-deferred-items.md` |
 | `BP3.CLOSEOUT-DOCUMENT` | `PASS` | 2026-07-26 | `bp3-program-closeout.md`, this index, `bp3-7-sensitivity.md`, `bp3-operational-handoff.md`, `bp3-deferred-items.md`, `bp3-closeout-plan-update-proposal.md` |
 | `BP3.CLOSEOUT-EXECUTE` | Complete | 2026-07-26 | `docs/commercial/bp3-closeout-execution-evidence.md`; `.lovable/plan.md` updated |
-| `BP3.CLOSEOUT-VALIDATE` | Pending | — | — |
+| `BP3.CLOSEOUT-VALIDATE` | **GO** | 2026-07-26 | `docs/commercial/bp3-closeout-validation-evidence.md` |
 
 ### 18.1 Current `.lovable/plan.md` BP3 status
 
@@ -268,4 +268,21 @@ No duplicate canonical document was created for an equivalent artifact.
 3. PM-FIN-2026.1 — Active; PM-FIN-2026.2 — Not created.
 4. BP3 Program Closeout Documentation — Complete.
 5. BP3 Program Closeout Execution — Complete (2026-07-26).
-6. BP3 Program Closeout Independent Validation — Pending.
+6. BP3 Program Closeout Independent Validation — Complete, decision GO (2026-07-26).
+7. BP3 Program — Closed. Next phase: Operational Support and Future Successor Planning.
+
+## 19. Final closeout validation
+
+| Field | Value |
+|---|---|
+| Stage | `BP3.CLOSEOUT-VALIDATE` |
+| Decision | GO |
+| Validation date | 2026-07-26 |
+| Validation evidence | `docs/commercial/bp3-closeout-validation-evidence.md` |
+| Final BP3 status | **Closed** |
+| Active release | PM-FIN-2026.1 (`5097c3a9-021e-4b2c-9377-540a5d18ada6`), Active; successor PM-FIN-2026.2 not created |
+| Operational handoff | `docs/commercial/bp3-operational-handoff.md` |
+| Deferred items still open | BP3.7.4, DEF-02, DEF-03, DEF-04, DEF-05, DEF-09 (all non-blocking) |
+| Deferred items closed | DEF-06, DEF-07, DEF-08 |
+
+All prior evidence references in sections 1–18 are preserved unchanged.
