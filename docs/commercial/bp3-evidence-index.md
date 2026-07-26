@@ -1,6 +1,6 @@
 # BP3 — Consolidated Evidence Index
 
-Status: Closeout Documentation Authored, Pending Closeout Execution and Independent Validation.
+Status: Closeout Execution Complete, Pending Independent Validation (closeout execution 2026-07-26).
 
 ## 1. How to use the index
 
@@ -33,7 +33,8 @@ historical document is preserved unchanged.
 | Closeout | `docs/commercial/bp3-program-closeout.md` | Authoritative |
 | Closeout | `docs/commercial/bp3-deferred-items.md` | Authoritative |
 | Closeout | `docs/commercial/bp3-operational-handoff.md` | Authoritative |
-| Closeout | `docs/commercial/bp3-closeout-plan-update-proposal.md` | Supporting (proposal only) |
+| Closeout | `docs/commercial/bp3-closeout-plan-update-proposal.md` | Supporting (proposal, with applied execution disposition) |
+| Closeout | `docs/commercial/bp3-closeout-execution-evidence.md` | Authoritative (closeout execution evidence) |
 | Operations | `docs/commercial/operator-guide.md` | Supporting |
 | Limitations | `docs/commercial/known-limitations.md` | Supporting |
 
@@ -253,7 +254,18 @@ No duplicate canonical document was created for an equivalent artifact.
 
 ## 18. Closeout-stage references
 
-1. `BP3.CLOSEOUT-AUDIT` — decision `CLOSEOUT_READY_WITH_WARNINGS` (complete).
-2. `BP3.CLOSEOUT-DOCUMENT` — this stage.
-3. `BP3.CLOSEOUT-EXECUTE` — pending; applies `bp3-closeout-plan-update-proposal.md`.
-4. `BP3.CLOSEOUT-VALIDATE` — pending.
+| Stage | Decision / result | Date | Evidence |
+|---|---|---|---|
+| `BP3.CLOSEOUT-AUDIT` | `CLOSEOUT_READY_WITH_WARNINGS` | 2026-07-26 | Audit report (chat record), `bp3-deferred-items.md` |
+| `BP3.CLOSEOUT-DOCUMENT` | `PASS` | 2026-07-26 | `bp3-program-closeout.md`, this index, `bp3-7-sensitivity.md`, `bp3-operational-handoff.md`, `bp3-deferred-items.md`, `bp3-closeout-plan-update-proposal.md` |
+| `BP3.CLOSEOUT-EXECUTE` | Complete | 2026-07-26 | `docs/commercial/bp3-closeout-execution-evidence.md`; `.lovable/plan.md` updated |
+| `BP3.CLOSEOUT-VALIDATE` | Pending | — | — |
+
+### 18.1 Current `.lovable/plan.md` BP3 status
+
+1. BP3.0 through BP3.8 — Completed and Validated (GO).
+2. BP3.7.4 — Deferred, non-blocking, presentation only.
+3. PM-FIN-2026.1 — Active; PM-FIN-2026.2 — Not created.
+4. BP3 Program Closeout Documentation — Complete.
+5. BP3 Program Closeout Execution — Complete (2026-07-26).
+6. BP3 Program Closeout Independent Validation — Pending.

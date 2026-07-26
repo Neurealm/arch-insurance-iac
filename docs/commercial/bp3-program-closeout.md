@@ -34,7 +34,7 @@ This document does not declare BP3 formally closed. Formal closure requires
 6. Historical evidence — failed runs, superseded runs, the invalidated certification,
    patch history, and prior validation decisions — is preserved unmodified.
 7. Successor version PM-FIN-2026.2 has **not** been created.
-8. Formal closeout still requires the Execute and Validate stages.
+8. Closeout execution is complete; formal closeout still requires the Validate stage.
 
 ## 3. Program scope
 
@@ -290,11 +290,35 @@ See `docs/commercial/bp3-operational-handoff.md`.
 
 ## 18. Closeout recommendation
 
-BP3 is ready for closeout execution and final closeout validation with documented
-non-blocking warnings. Closeout validation has **not** been performed.
+BP3 closeout execution is complete and BP3 is ready for final closeout validation with
+documented non-blocking warnings. Closeout validation has **not** been performed.
 
 ## 19. Next stages
 
-1. `BP3.CLOSEOUT-EXECUTE` — apply the plan update recorded in
-   `docs/commercial/bp3-closeout-plan-update-proposal.md`.
-2. `BP3.CLOSEOUT-VALIDATE` — independent validation of the closeout record.
+1. `BP3.CLOSEOUT-EXECUTE` — **complete** (2026-07-26); the plan update recorded in
+   `docs/commercial/bp3-closeout-plan-update-proposal.md` has been applied.
+2. `BP3.CLOSEOUT-VALIDATE` — **pending**; independent validation of the closeout record.
+
+## 20. Closeout execution record
+
+| Field | Value |
+|---|---|
+| Execution prompt | `BP3.CLOSEOUT-EXECUTE` |
+| Execution date and time | 2026-07-26 |
+| Source audit decision | `CLOSEOUT_READY_WITH_WARNINGS` |
+| Source documentation result | `PASS` |
+| `.lovable/plan.md` update status | Applied as approved (all proposed changes) |
+| BP3.0–BP3.8 reconciliation | Complete — every package recorded as Completed and Validated (GO) |
+| BP3.7.4 | Deferred, non-blocking (unchanged) |
+| Active release re-verification | PM-FIN-2026.1 Active; 1 active version; certification `86f09fd7-39f9-4994-bb09-a7ace339634c` certified; activation `eefc6c50-b73f-41d3-8def-f6ff244000d9` active; 22 lineage rows; all four release hashes unchanged |
+| Successor version | PM-FIN-2026.2 — Not created |
+| Deferred-item preservation | All nine items preserved; DEF-06, DEF-07 and DEF-08 advanced to "closeout execution verified, pending final closeout validation" |
+| Implementation change count | 0 |
+| Migration count | 0 |
+| Database mutation count | 0 |
+| Final closeout validation | Pending |
+| Next prompt | `BP3.CLOSEOUT-VALIDATE` |
+
+Detailed execution matrices are recorded in
+`docs/commercial/bp3-closeout-execution-evidence.md`. All prior sections and
+historical evidence in this document are preserved unchanged.

@@ -1,6 +1,6 @@
 # BP3 — Deferred-Item, Technical-Debt and Hardening Register
 
-Status: Closeout Documentation Authored, Pending Closeout Execution and Independent Validation.
+Status: Closeout Execution Complete, Pending Independent Validation. Every deferred item below is preserved; none is closed.
 Authoritative closeout record: `docs/commercial/bp3-program-closeout.md`.
 
 No item in this register is blocking. No item is closed. Items marked
@@ -111,7 +111,7 @@ No item in this register is blocking. No item is closed. Items marked
 | Identifier | DEF-06 |
 | Description | Expected artifact names ("BP3.1 Assumption Catalog", "BP3.8 Model Activation") differ from the canonical files that hold that content |
 | Priority | 3 |
-| Current state | Documentation authored, pending closeout execution verification |
+| Current state | Documentation authored and closeout execution verified, pending final closeout validation |
 | Release impact | None |
 | Security impact | None |
 | Data-integrity impact | None |
@@ -130,7 +130,7 @@ No item in this register is blocking. No item is closed. Items marked
 | Identifier | DEF-07 |
 | Description | Six BP3 documents carried "Pending Independent Validation" status headers after their packages had received GO |
 | Priority | 3 |
-| Current state | Documentation authored, pending closeout execution verification |
+| Current state | Status headers reconciled and closeout execution verified, pending final closeout validation |
 | Release impact | None |
 | Security impact | None |
 | Data-integrity impact | None — historical bodies preserved unchanged |
@@ -149,7 +149,7 @@ No item in this register is blocking. No item is closed. Items marked
 | Identifier | DEF-08 |
 | Description | No BP3-specific operational handoff, incident classification or escalation documentation existed |
 | Priority | 3 |
-| Current state | Documentation authored, pending closeout execution verification |
+| Current state | Operational handoff authored and closeout execution verified, pending final closeout validation |
 | Release impact | None |
 | Security impact | None |
 | Data-integrity impact | None |

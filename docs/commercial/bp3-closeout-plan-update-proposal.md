@@ -1,7 +1,10 @@
 # BP3 — Closeout Plan Update Proposal
 
-Status: **Proposal only.** `.lovable/plan.md` has **not** been modified by
-`BP3.CLOSEOUT-DOCUMENT`. These changes are to be applied during `BP3.CLOSEOUT-EXECUTE`.
+Status: **Applied as approved** during `BP3.CLOSEOUT-EXECUTE` on 2026-07-26. The original
+proposal body below is preserved unchanged; see §5 Execution Disposition.
+
+> Historical note: this document was authored as a proposal only. At the time of authoring,
+> `.lovable/plan.md` had not been modified by `BP3.CLOSEOUT-DOCUMENT`.
 
 Source evidence for every change: `docs/commercial/bp3-program-closeout.md`,
 `docs/commercial/bp3-evidence-index.md`, and the BP3.0–BP3.8 validation decisions.
@@ -42,3 +45,33 @@ If the plan update is rejected, revert `.lovable/plan.md` to its pre-execution c
 (the version current as of 2026-07-26, listing BP3.6–BP3.8 as pending independent validation).
 No other artifact depends on the plan text: the closeout record, evidence index and deferred-item
 register remain authoritative regardless of whether the plan update is applied.
+
+## 5. Execution disposition
+
+| Field | Value |
+|---|---|
+| Execution prompt | `BP3.CLOSEOUT-EXECUTE` |
+| Execution date | 2026-07-26 |
+| Result | **Applied as approved** |
+| Proposed changes applied | All 10 items in §1 |
+| Proposed changes not applied | None |
+| Reason for variance | None |
+| Rollback reference | §4 Rollback approach (unchanged and still valid) |
+| Final closeout validation | Pending |
+| Next prompt | `BP3.CLOSEOUT-VALIDATE` |
+
+### 5.1 Plan before and after summary
+
+| Aspect | Before | After |
+|---|---|---|
+| BP3.0 line | Absent | Present, Completed & Validated (GO) |
+| BP3.1–BP3.5 | Completed & Validated | Completed & Validated (GO), canonical package names |
+| BP3.6 / BP3.7 / BP3.8 | Built; runtime executed; pending independent validation | Completed & Validated (GO) with runtime identifiers |
+| BP3.7.4 | Deferred cosmetic note | Explicit nested deferred, non-blocking, presentation-only item |
+| Model version line | Abbreviated IDs | Full model-version, certification and activation IDs |
+| Successor version | Not stated | PM-FIN-2026.2 — Not created |
+| Closeout status | Not stated | Documentation Complete; Execution Complete; Independent Validation Pending |
+| Closeout references | Not stated | Links to closeout record, evidence index, operational handoff, deferred-item register |
+| Persistent principles | Present | Unchanged |
+
+No unrelated plan section was modified; the plan contains no non-BP3 section.
