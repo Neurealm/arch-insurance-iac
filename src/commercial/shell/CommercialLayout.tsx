@@ -36,6 +36,7 @@ const NAV: NavItem[] = [
   { to: "/commercial/model/cash", label: "Cash & Sustainability", icon: Calculator, section: "Model" },
   { to: "/commercial/model/assumptions", label: "Assumptions & Change Sets", icon: Calculator, section: "Model" },
   { to: "/commercial/model/compare", label: "Scenario Comparison", icon: Calculator, section: "Model" },
+  { to: "/commercial/model/sensitivity", label: "Sensitivity Analysis", icon: Calculator, section: "Model" },
 
 
 

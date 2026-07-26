@@ -809,12 +809,22 @@ Deno.serve(async (req: Request) => {
   const { data: userData, error: userErr } = await supabase.auth.getUser();
   if (userErr || !userData?.user) return json({ error: "auth_required" }, 401);
 
-  let body: { program_id?: string; model_version_id?: string; scenario_ids?: string[]; run_scope?: string };
+  // deno-lint-ignore no-explicit-any
+  let body: any;
   try {
     body = await req.json();
   } catch {
     return json({ error: "invalid_json" }, 400);
   }
+
+  // ---------- BP3.7 SENSITIVITY MODE ----------
+  // Isolated in-memory execution that persists to sensitivity tables (never mutates
+  // commercial_model_runs / commercial_model_results). Reuses computeRevenueScope /
+  // computePnlScope / computeCashScope — no formula duplication.
+  if (body.sensitivity && body.sensitivity.experiment_id && body.sensitivity.perturbation_id) {
+    return await runSensitivity(supabase, body);
+  }
+
   if (!body.program_id || !body.model_version_id) {
     return json({ error: "program_id and model_version_id are required" }, 400);
   }
@@ -823,8 +833,6 @@ Deno.serve(async (req: Request) => {
     return json({ error: "run_scope must be 'revenue', 'pnl', or 'cash'" }, 400);
   }
 
-
-  // Resolve scenarios
   const scenarioIds =
     body.scenario_ids && body.scenario_ids.length > 0
       ? body.scenario_ids
@@ -834,7 +842,7 @@ Deno.serve(async (req: Request) => {
             .select("id")
             .eq("program_id", body.program_id)
             .eq("status", "active")
-        ).data?.map((r) => r.id as string) ?? [];
+        ).data?.map((r: { id: string }) => r.id) ?? [];
 
   if (scenarioIds.length === 0) return json({ error: "no_scenarios" }, 404);
 
@@ -1046,4 +1054,159 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+// ============================================================================
+// BP3.7 — SENSITIVITY EXECUTION
+// Reuses computeRevenueScope / computePnlScope / computeCashScope with an
+// overridden assumption map. Persists to sensitivity tables only.
+// ============================================================================
+// deno-lint-ignore no-explicit-any
+async function runSensitivity(supabase: any, body: any) {
+  const { experiment_id, perturbation_id } = body.sensitivity;
+  try {
+    const { data: exp, error: eErr } = await supabase
+      .from("commercial_sensitivity_experiments")
+      .select("id, tenant_id, program_id, model_version_id, baseline_scenario_id, assumption_code, included_scopes, status")
+      .eq("id", experiment_id).maybeSingle();
+    if (eErr || !exp) return json({ error: "experiment_not_found" }, 404);
+    if (exp.status !== "running") return json({ error: `experiment_not_running:${exp.status}` }, 409);
+
+    const { data: pert, error: pErr } = await supabase
+      .from("commercial_sensitivity_perturbations")
+      .select("id, perturbation_index, perturbation_label, perturbed_value")
+      .eq("id", perturbation_id).eq("experiment_id", experiment_id).maybeSingle();
+    if (pErr || !pert) return json({ error: "perturbation_not_found" }, 404);
+
+    const { data: assumptions, error: aErr } = await supabase
+      .from("commercial_scenario_assumptions")
+      .select("assumption_code, numeric_value")
+      .eq("scenario_id", exp.baseline_scenario_id);
+    if (aErr) throw new Error(aErr.message);
+    const baseMap = toMap(assumptions ?? []);
+    const perturbedValue = Number(pert.perturbed_value);
+    const map: AssumptionMap = { ...baseMap, [exp.assumption_code]: perturbedValue };
+
+    const scopes: string[] = exp.included_scopes ?? ["revenue", "pnl", "cash"];
+    const fingerprint = `bp3.7|assumption=${exp.assumption_code}|value=${perturbedValue}`;
+    const inputHash = await sha256Hex(JSON.stringify({ scenario: exp.baseline_scenario_id, override: { [exp.assumption_code]: perturbedValue } }));
+
+    const runIds: Record<string, string> = {};
+    let revRows: ResultRow[] | null = null;
+    let pnlRows: ResultRow[] | null = null;
+
+    if (scopes.includes("revenue")) {
+      const missing = checkCompleteness(map);
+      if (missing.length > 0) throw new Error(`missing_assumption:${missing.join(",")}`);
+      revRows = computeRevenueScope(map);
+      const rid = await recordPerturbationRun(supabase, perturbation_id, "revenue", inputHash, fingerprint, revRows);
+      runIds.revenue = rid;
+    }
+
+    if (scopes.includes("pnl")) {
+      const missing = checkPnlCompleteness(map);
+      if (missing.length > 0) throw new Error(`missing_assumption:${missing.join(",")}`);
+      // derive REV-TOTAL per FY from revRows or fall back to persisted baseline revenue run
+      const revByFy: Record<string, number> = {};
+      const source = revRows ?? await loadBaselineRevenue(supabase, exp);
+      for (const r of source) {
+        if (r.metric_code === "REV-TOTAL" && r.fiscal_period && r.fiscal_period !== "FY2027-FY2031") {
+          revByFy[r.fiscal_period] = Number(r.value_numeric);
+        }
+      }
+      for (const fy of FISCAL_YEARS) if (!(fy in revByFy)) throw new Error(`prerequisite_missing:REV-TOTAL_${fy}`);
+      pnlRows = computePnlScope(map, revByFy, "sensitivity");
+      const rid = await recordPerturbationRun(supabase, perturbation_id, "pnl", inputHash, fingerprint, pnlRows);
+      runIds.pnl = rid;
+    }
+
+    if (scopes.includes("cash")) {
+      for (const k of ["PAY_LAG_DAYS", "Q1_ACT_FUND_TIMING_PCT", "Q1_TRAVEL_FRONTLOAD_PCT"]) {
+        if (!(k in map)) throw new Error(`missing_assumption:${k}`);
+      }
+      const bucket = (): Record<string, number> => ({});
+      const revByFy = bucket(), codByFy = bucket(), opexByFy = bucket(),
+        ebitdaByFy = bucket(), travelCodByFy = bucket(), actFundByFy = bucket();
+      const pnlSource = pnlRows ?? await loadBaselinePnl(supabase, exp);
+      const revSource = revRows ?? await loadBaselineRevenue(supabase, exp);
+      for (const r of pnlSource) {
+        if (!r.fiscal_period || r.fiscal_period === "FY2027-FY2031") continue;
+        const fp = r.fiscal_period; const v = Number(r.value_numeric);
+        if (r.metric_code === "COD-TOTAL") codByFy[fp] = v;
+        else if (r.metric_code === "OPEX-TOTAL") opexByFy[fp] = v;
+        else if (r.metric_code === "PL-EBITDA") ebitdaByFy[fp] = v;
+        else if (r.metric_code === "COD-11_TRAVEL") travelCodByFy[fp] = v;
+      }
+      for (const r of revSource) {
+        if (!r.fiscal_period || r.fiscal_period === "FY2027-FY2031") continue;
+        const fp = r.fiscal_period; const v = Number(r.value_numeric);
+        if (r.metric_code === "REV-TOTAL") revByFy[fp] = v;
+        else if (r.metric_code === "REV-07-ACT-FUND") actFundByFy[fp] = v;
+      }
+      for (const fy of FISCAL_YEARS) {
+        for (const [name, src] of [["REV-TOTAL", revByFy], ["COD-TOTAL", codByFy], ["OPEX-TOTAL", opexByFy], ["PL-EBITDA", ebitdaByFy], ["COD-11_TRAVEL", travelCodByFy], ["REV-07-ACT-FUND", actFundByFy]] as const) {
+          if (!(fy in src)) throw new Error(`prerequisite_missing:${name}_${fy}`);
+        }
+      }
+      const cashRows = computeCashScope(map, { revByFy, codByFy, opexByFy, ebitdaByFy, travelCodByFy, actFundByFy, pnlRunId: "sensitivity" });
+      const rid = await recordPerturbationRun(supabase, perturbation_id, "cash", inputHash, fingerprint, cashRows);
+      runIds.cash = rid;
+    }
+
+    return json({ ok: true, perturbation_id, run_ids: runIds, input_hash: inputHash, runtime_fingerprint: fingerprint }, 200);
+  } catch (e) {
+    const msg = (e as Error).message ?? String(e);
+    return json({ error: msg }, 400);
+  }
+}
+
+// deno-lint-ignore no-explicit-any
+async function recordPerturbationRun(supabase: any, perturbation_id: string, scope: string, inputHash: string, fingerprint: string, rows: ResultRow[]): Promise<string> {
+  const payload = rows.map((r) => ({
+    metric_code: r.metric_code,
+    metric_group: r.metric_group,
+    fiscal_period: r.fiscal_period,
+    period_sequence: r.period_sequence,
+    value_numeric: r.value_numeric === null ? "" : String(r.value_numeric),
+    value_text: r.value_text ?? null,
+    unit: r.unit,
+  }));
+  const { data, error } = await supabase.rpc("commercial_sensitivity_record_perturbation_run", {
+    _perturbation_id: perturbation_id,
+    _run_scope: scope,
+    _input_hash: inputHash,
+    _runtime_fingerprint: fingerprint,
+    _results: payload,
+  });
+  if (error) throw new Error(error.message);
+  return data as string;
+}
+
+// deno-lint-ignore no-explicit-any
+async function loadBaselineRevenue(supabase: any, exp: { program_id: string; model_version_id: string; baseline_scenario_id: string }): Promise<ResultRow[]> {
+  const { data: run } = await supabase.from("commercial_model_runs").select("id")
+    .eq("program_id", exp.program_id).eq("model_version_id", exp.model_version_id)
+    .eq("scenario_id", exp.baseline_scenario_id).eq("run_scope", "revenue").eq("status", "completed")
+    .order("completed_at", { ascending: false }).limit(1).maybeSingle();
+  if (!run) throw new Error("prerequisite_missing:baseline_revenue_run");
+  const { data } = await supabase.from("commercial_model_results")
+    .select("metric_code, metric_group, fiscal_period, period_sequence, value_numeric, value_text, unit")
+    .eq("run_id", run.id);
+  return (data ?? []) as ResultRow[];
+}
+// deno-lint-ignore no-explicit-any
+async function loadBaselinePnl(supabase: any, exp: { program_id: string; model_version_id: string; baseline_scenario_id: string }): Promise<ResultRow[]> {
+  const { data: run } = await supabase.from("commercial_model_runs").select("id")
+    .eq("program_id", exp.program_id).eq("model_version_id", exp.model_version_id)
+    .eq("scenario_id", exp.baseline_scenario_id).eq("run_scope", "pnl").eq("status", "completed")
+    .order("completed_at", { ascending: false }).limit(1).maybeSingle();
+  if (!run) throw new Error("prerequisite_missing:baseline_pnl_run");
+  const { data } = await supabase.from("commercial_model_results")
+    .select("metric_code, metric_group, fiscal_period, period_sequence, value_numeric, value_text, unit")
+    .eq("run_id", run.id);
+  return (data ?? []) as ResultRow[];
+}
+async function sha256Hex(s: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }

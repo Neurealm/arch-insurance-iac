@@ -93,6 +93,8 @@ import CommercialAssumptions from "./commercial/pages/CommercialAssumptions";
 import CommercialAssumptionChangeSet from "./commercial/pages/CommercialAssumptionChangeSet";
 import CommercialCompare from "./commercial/pages/CommercialCompare";
 import CommercialCompareDetail from "./commercial/pages/CommercialCompareDetail";
+import CommercialSensitivity from "./commercial/pages/CommercialSensitivity";
+import CommercialSensitivityDetail from "./commercial/pages/CommercialSensitivityDetail";
 
 
 import { PermissionRoute } from "./components/auth/PermissionRoute";
@@ -876,6 +878,8 @@ const App = () => (
             <Route path="model/assumptions/change-sets/:id" element={<PermissionRoute permission="commercial.view"><CommercialAssumptionChangeSet /></PermissionRoute>} />
             <Route path="model/compare" element={<PermissionRoute permission="commercial.view"><CommercialCompare /></PermissionRoute>} />
             <Route path="model/compare/:id" element={<PermissionRoute permission="commercial.view"><CommercialCompareDetail /></PermissionRoute>} />
+            <Route path="model/sensitivity" element={<PermissionRoute permission="commercial.view"><CommercialSensitivity /></PermissionRoute>} />
+            <Route path="model/sensitivity/:id" element={<PermissionRoute permission="commercial.view"><CommercialSensitivityDetail /></PermissionRoute>} />
 
 
 
