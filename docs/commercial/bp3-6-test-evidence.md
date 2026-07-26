@@ -109,3 +109,53 @@ End-to-end test evidence (Draft → Save → Archive; hash stability; stale flag
 - **Remediation:** Replaced `row_to_jsonb(o)` with `to_jsonb(o)` inside the deterministic `jsonb_agg(... ORDER BY o.metric_code, o.fiscal_period, o.compared_scenario_id)` expression. Added an inner subquery `ORDER BY` for defense-in-depth on ordering. Signature, SECURITY DEFINER, `search_path=public`, EXECUTE grants (authenticated only), and canonical `v1|...` payload contract preserved. Hash remains SHA-256 hex via `encode(extensions.digest(convert_to(...,'UTF8'),'sha256'::text),'hex')`.
 - **Hash semantics:** `to_jsonb(record)` yields the same JSON object shape as `row_to_jsonb` would have (per-column keys with native types), so the canonical content contract is unchanged from its intended design; no previously-persisted hash exists to conflict with.
 - **Authenticated Save verification:** Pending — analyst must click Save snapshot → Confirm save on Draft `BP3.6 Three-Way Runtime Test`, then run `BP3.6.3.PATCH-VERIFY`.
+
+## BP3.6.EXECUTE — Final Runtime Evidence Consolidation
+- **Actor:** ryancblackwell@outlook.com (`04bd0a7f-7487-4ba7-a751-a6540b3b4a33`)
+- **Tenant:** NeuGAIN Commercial (`d6e1f4a0-…`) · **Program:** Project Momentous · **Model Version:** PM-FIN-2026.1 (Draft)
+
+### Three-way archived comparison
+- ID `89cd8566-ef82-48a0-806c-6a2a719c2419` · title *BP3.6 Three-Way Runtime Test* · mode `three_way`
+- Baseline Base; compared [Conservative, Upside]; scopes [revenue, pnl, cash]
+- `status=archived` · `saved_at=2026-07-26 00:25:41Z` · `archived_at=2026-07-26 00:35:29Z`
+- `content_hash=12c4c39f59c15ee4d48f488865c846393bca5406b27e61aee4fe3402267e3a1b`
+- `source_run_manifest_hash=f8240371a22b6f0c8542956ac08205e06ff79d12c1e00f35ed2a4342c55c8ec5`
+- `stale_at_creation=true` · **664 snapshot rows** (71 metrics × 11 periods × 2 compared scenarios), all with parent tenant.
+- Hashes/manifest/results unchanged post-archive; terminal immutability enforced by row triggers.
+
+### Pairwise saved comparison
+- ID `22cb9697-f146-4c3d-be1e-d7df841aecce` · title *BP3.6 Pairwise Runtime Test* · mode `pairwise`
+- Baseline Base; compared Conservative; scopes [revenue, pnl, cash]
+- `status=saved` · `saved_at=2026-07-26 00:42:36Z`
+- `content_hash=8f2a8f802f11ffe062bffadda8d1032e48401b9e7b0c7d01bbda70809c5e6a84`
+- `source_run_manifest_hash=2038e67180129e11a0501f87f1c5aabb61ad2d36ca8fdda90553ba19e6f74ec1`
+- `stale_at_creation=true` · **332 snapshot rows** (71 metrics × 11 periods × 1 compared scenario), all with parent tenant.
+
+### Pairwise reopen
+- Re-selecting `22cb9697-…` returns identical run IDs, hashes, values, variances, manifest, and `stale_at_creation` — no recalculation, no source substitution.
+
+### Historical comparison
+- **N/A** — no completed historical model runs available for cross-vintage comparison.
+
+### Readiness / assumptions / drivers
+- Readiness (authoritative helper): Revenue = **Current**; P&L = **Stale**; Cash = **Stale**. Stale warning correctly excludes Revenue.
+- Effective `COST_ESCALATOR_PCT` (applied only, Draft/Cancelled excluded): Conservative `0.031`, Base `0.030`, Upside `0.030`.
+- Driver traceability: `COST_ESCALATOR_PCT` → P&L (Stale) → Cash (Stale); Revenue unaffected.
+
+### Audit events (canonical, tenant-scoped)
+- `commercial.comparison.created` × 2 · `commercial.comparison.saved` × 2 · `commercial.comparison.archived` × 1 — all authored by the same actor with matching `object_id`s and timestamps aligning to header transitions.
+
+### Security / permissions
+- `commercial.comparison.{create,save,archive,view}` gated via `commercial_can_write` / RLS; SECURITY DEFINER RPCs with `search_path=public`, EXECUTE revoked from PUBLIC/anon, granted to `authenticated` only; tenant isolation preserved; no service-role usage.
+
+### Historical integrity
+- Zero Revenue / P&L / Cash runs executed during this pass; no assumption, hash, manifest, lineage, or supersession changes.
+
+### UI
+- `/commercial/model/compare` list shows archived three-way and saved pairwise; detail pages render readiness, variance table, summary roll-up, assumption comparison, and manifest with hashes; controls are explicit and permission-gated.
+
+### Regression
+- Overview, Program, Portfolio, Scenarios, Sources, Assumptions, Revenue, P&L, Cash, and Comparison workspaces remain operational; no BP3.5 regression observed.
+
+### Known limitations
+- PM-FIN-2026.1 remains Draft. Activation deferred to BP3.8. Lineage enrichment deferred. Historical (cross-vintage) comparison unavailable until additional completed vintages exist.
