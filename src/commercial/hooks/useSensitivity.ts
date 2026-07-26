@@ -199,6 +199,24 @@ export function useArchiveSensitivity(tenantId: string | null) {
   });
 }
 
+export function useResetSensitivityToDraft(tenantId: string | null) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (v: { experiment_id: string; reason?: string | null }) => {
+      const { data, error } = await supabase.rpc("commercial_sensitivity_reset_to_draft", {
+        _experiment_id: v.experiment_id,
+        _reason: v.reason ?? null,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: commercialQueryKey(tenantId, "sensitivity") });
+      qc.invalidateQueries({ queryKey: commercialQueryKey(tenantId, "sensitivity-detail", v.experiment_id) });
+    },
+  });
+}
+
 // Helper: expand strategy + config into concrete perturbation values
 export function expandPerturbations(
   strategy: PerturbationStrategy,

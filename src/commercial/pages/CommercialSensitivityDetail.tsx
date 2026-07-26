@@ -7,7 +7,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { AlertTriangle, ArrowLeft, Play, Archive } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Play, Archive, RotateCcw } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { LoadingState, EmptyState } from "@/platform/components/States";
 import { useCommercialAccess } from "@/commercial/hooks/useCommercialAccess";
 import { useAssumptionsContext } from "@/commercial/hooks/useAssumptionChangeSets";
@@ -15,6 +19,7 @@ import {
   useSensitivityExperiment,
   useExecuteSensitivity,
   useArchiveSensitivity,
+  useResetSensitivityToDraft,
   expandPerturbations,
 } from "@/commercial/hooks/useSensitivity";
 
