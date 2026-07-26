@@ -598,6 +598,107 @@ export type Database = {
         }
         Relationships: []
       }
+      commercial_model_activations: {
+        Row: {
+          activated_at: string
+          activated_by: string | null
+          activation_reason: string
+          activation_snapshot: Json
+          blocking_failure_count: number
+          certification_hash: string | null
+          certification_id: string
+          id: string
+          lineage_summary: Json
+          manifest_hash: string | null
+          model_version_id: string
+          prior_activation_id: string | null
+          prior_active_version_id: string | null
+          program_id: string
+          readiness_hash: string | null
+          snapshot_hash: string | null
+          status: string
+          superseded_at: string | null
+          superseded_by_activation_id: string | null
+          tenant_id: string
+          warning_count: number
+        }
+        Insert: {
+          activated_at?: string
+          activated_by?: string | null
+          activation_reason: string
+          activation_snapshot?: Json
+          blocking_failure_count?: number
+          certification_hash?: string | null
+          certification_id: string
+          id?: string
+          lineage_summary?: Json
+          manifest_hash?: string | null
+          model_version_id: string
+          prior_activation_id?: string | null
+          prior_active_version_id?: string | null
+          program_id: string
+          readiness_hash?: string | null
+          snapshot_hash?: string | null
+          status?: string
+          superseded_at?: string | null
+          superseded_by_activation_id?: string | null
+          tenant_id: string
+          warning_count?: number
+        }
+        Update: {
+          activated_at?: string
+          activated_by?: string | null
+          activation_reason?: string
+          activation_snapshot?: Json
+          blocking_failure_count?: number
+          certification_hash?: string | null
+          certification_id?: string
+          id?: string
+          lineage_summary?: Json
+          manifest_hash?: string | null
+          model_version_id?: string
+          prior_activation_id?: string | null
+          prior_active_version_id?: string | null
+          program_id?: string
+          readiness_hash?: string | null
+          snapshot_hash?: string | null
+          status?: string
+          superseded_at?: string | null
+          superseded_by_activation_id?: string | null
+          tenant_id?: string
+          warning_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_model_activations_certification_id_fkey"
+            columns: ["certification_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_release_certifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_activations_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_activations_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_activations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commercial_model_results: {
         Row: {
           created_at: string
@@ -833,6 +934,9 @@ export type Database = {
       }
       commercial_model_versions: {
         Row: {
+          activated_at: string | null
+          activated_by: string | null
+          activation_id: string | null
           created_at: string
           created_by: string | null
           effective_from: string | null
@@ -844,12 +948,18 @@ export type Database = {
           source_file_name: string | null
           source_fingerprint: string | null
           status: string
+          superseded_at: string | null
+          superseded_by_version_id: string | null
+          supersedes_version_id: string | null
           tenant_id: string
           updated_at: string
           updated_by: string | null
           version_code: string
         }
         Insert: {
+          activated_at?: string | null
+          activated_by?: string | null
+          activation_id?: string | null
           created_at?: string
           created_by?: string | null
           effective_from?: string | null
@@ -861,12 +971,18 @@ export type Database = {
           source_file_name?: string | null
           source_fingerprint?: string | null
           status?: string
+          superseded_at?: string | null
+          superseded_by_version_id?: string | null
+          supersedes_version_id?: string | null
           tenant_id: string
           updated_at?: string
           updated_by?: string | null
           version_code: string
         }
         Update: {
+          activated_at?: string | null
+          activated_by?: string | null
+          activation_id?: string | null
           created_at?: string
           created_by?: string | null
           effective_from?: string | null
@@ -878,6 +994,9 @@ export type Database = {
           source_file_name?: string | null
           source_fingerprint?: string | null
           status?: string
+          superseded_at?: string | null
+          superseded_by_version_id?: string | null
+          supersedes_version_id?: string | null
           tenant_id?: string
           updated_at?: string
           updated_by?: string | null
@@ -1034,6 +1153,188 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "commercial_programs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_release_certifications: {
+        Row: {
+          blocking_failure_count: number
+          certified_at: string | null
+          certified_by: string | null
+          content_hash: string | null
+          control_count: number
+          created_at: string
+          created_by: string | null
+          id: string
+          invalidated_at: string | null
+          invalidated_by: string | null
+          invalidation_reason: string | null
+          manifest_hash: string | null
+          model_version_id: string
+          notes: string | null
+          pass_count: number
+          program_id: string
+          readiness_hash: string | null
+          readiness_snapshot: Json
+          release_manifest: Json
+          source_evidence: Json
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          warning_count: number
+        }
+        Insert: {
+          blocking_failure_count?: number
+          certified_at?: string | null
+          certified_by?: string | null
+          content_hash?: string | null
+          control_count?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invalidated_at?: string | null
+          invalidated_by?: string | null
+          invalidation_reason?: string | null
+          manifest_hash?: string | null
+          model_version_id: string
+          notes?: string | null
+          pass_count?: number
+          program_id: string
+          readiness_hash?: string | null
+          readiness_snapshot?: Json
+          release_manifest?: Json
+          source_evidence?: Json
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_count?: number
+        }
+        Update: {
+          blocking_failure_count?: number
+          certified_at?: string | null
+          certified_by?: string | null
+          content_hash?: string | null
+          control_count?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invalidated_at?: string | null
+          invalidated_by?: string | null
+          invalidation_reason?: string | null
+          manifest_hash?: string | null
+          model_version_id?: string
+          notes?: string | null
+          pass_count?: number
+          program_id?: string
+          readiness_hash?: string | null
+          readiness_snapshot?: Json
+          release_manifest?: Json
+          source_evidence?: Json
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_release_certifications_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_release_certifications_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_release_certifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_release_lineage: {
+        Row: {
+          certification_id: string
+          created_at: string
+          downstream_id: string | null
+          downstream_type: string
+          id: string
+          metric_code: string | null
+          model_version_id: string
+          relationship: string
+          scenario_id: string | null
+          scope: string | null
+          source_hash: string | null
+          target_hash: string | null
+          tenant_id: string
+          upstream_id: string | null
+          upstream_type: string
+        }
+        Insert: {
+          certification_id: string
+          created_at?: string
+          downstream_id?: string | null
+          downstream_type: string
+          id?: string
+          metric_code?: string | null
+          model_version_id: string
+          relationship: string
+          scenario_id?: string | null
+          scope?: string | null
+          source_hash?: string | null
+          target_hash?: string | null
+          tenant_id: string
+          upstream_id?: string | null
+          upstream_type: string
+        }
+        Update: {
+          certification_id?: string
+          created_at?: string
+          downstream_id?: string | null
+          downstream_type?: string
+          id?: string
+          metric_code?: string | null
+          model_version_id?: string
+          relationship?: string
+          scenario_id?: string | null
+          scope?: string | null
+          source_hash?: string | null
+          target_hash?: string | null
+          tenant_id?: string
+          upstream_id?: string | null
+          upstream_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_release_lineage_certification_id_fkey"
+            columns: ["certification_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_release_certifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_release_lineage_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_release_lineage_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -9042,6 +9343,22 @@ export type Database = {
         Args: { _run_id: string; _superseded_by: string }
         Returns: undefined
       }
+      commercial_model_version_activate: {
+        Args: {
+          _certification_id: string
+          _model_version_id: string
+          _reason: string
+        }
+        Returns: string
+      }
+      commercial_model_version_create_successor: {
+        Args: {
+          _model_version_id: string
+          _name?: string
+          _version_code: string
+        }
+        Returns: string
+      }
       commercial_program_run_staleness: {
         Args: { _program_id: string }
         Returns: {
@@ -9052,6 +9369,61 @@ export type Database = {
           run_scope: string
           scenario_id: string
         }[]
+      }
+      commercial_release_authoritative_runs: {
+        Args: { _model_version_id: string; _program_id: string }
+        Returns: {
+          completed_at: string
+          input_count: number
+          input_hash: string
+          result_count: number
+          run_id: string
+          run_scope: string
+          scenario_id: string
+          supersedes_run_id: string
+        }[]
+      }
+      commercial_release_build_manifest: {
+        Args: { _model_version_id: string }
+        Returns: Json
+      }
+      commercial_release_certification_certify: {
+        Args: { _certification_id: string; _note?: string }
+        Returns: string
+      }
+      commercial_release_certification_create: {
+        Args: { _model_version_id: string; _notes?: string }
+        Returns: string
+      }
+      commercial_release_certification_invalidate: {
+        Args: { _certification_id: string; _reason: string }
+        Returns: string
+      }
+      commercial_release_certification_refresh: {
+        Args: { _certification_id: string }
+        Returns: string
+      }
+      commercial_release_hash: { Args: { _payload: Json }; Returns: string }
+      commercial_release_readiness: {
+        Args: { _model_version_id: string }
+        Returns: {
+          actual_value: string
+          blocking: boolean
+          category: string
+          control_code: string
+          evidence_reference: string
+          expected_value: string
+          label: string
+          object_id: string
+          object_type: string
+          remediation_hint: string
+          severity: string
+          status: string
+        }[]
+      }
+      commercial_release_readiness_snapshot: {
+        Args: { _model_version_id: string }
+        Returns: Json
       }
       commercial_sensitivity_archive: {
         Args: { _experiment_id: string }
