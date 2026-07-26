@@ -1,11 +1,12 @@
 # BP3 — Deferred-Item, Technical-Debt and Hardening Register
 
-Status: Closeout Execution Complete, Pending Independent Validation. Every deferred item below is preserved; none is closed.
+Status: BP3 Program Closed and Independently Validated (2026-07-26, `BP3.CLOSEOUT-VALIDATE`, decision GO).
 Authoritative closeout record: `docs/commercial/bp3-program-closeout.md`.
 
-No item in this register is blocking. No item is closed. Items marked
-"Documentation authored, pending closeout execution verification" remain open until
-`BP3.CLOSEOUT-VALIDATE`.
+No item in this register is blocking. DEF-06, DEF-07 and DEF-08 are **closed** by BP3
+closeout documentation, operational-handoff documentation and independent closeout
+validation; their records are retained in full for history. All other items remain open,
+deferred and non-blocking.
 
 ---
 

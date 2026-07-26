@@ -13,8 +13,8 @@
 | Closeout execution date | 2026-07-26 (`BP3.CLOSEOUT-EXECUTE`) |
 | Source audit decision | `CLOSEOUT_READY_WITH_WARNINGS` (BP3.CLOSEOUT-AUDIT) |
 | Source documentation result | `PASS` (BP3.CLOSEOUT-DOCUMENT) |
-| Current closeout status | **Closeout Execution Complete, Pending Independent Validation** |
-| Final validation | Pending — `BP3.CLOSEOUT-VALIDATE` has not been run |
+| Current closeout status | **BP3 Program Closed and Independently Validated** |
+| Final validation | Complete — `BP3.CLOSEOUT-VALIDATE` returned **GO** on 2026-07-26 (`docs/commercial/bp3-closeout-validation-evidence.md`) |
 | Related evidence index | `docs/commercial/bp3-evidence-index.md` |
 | Closeout execution evidence | `docs/commercial/bp3-closeout-execution-evidence.md` |
 

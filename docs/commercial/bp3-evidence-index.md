@@ -1,6 +1,6 @@
 # BP3 — Consolidated Evidence Index
 
-Status: Closeout Execution Complete, Pending Independent Validation (closeout execution 2026-07-26).
+Status: BP3 Program Closed and Independently Validated (closeout execution 2026-07-26; independent closeout validation 2026-07-26, decision GO).
 
 ## 1. How to use the index
 
