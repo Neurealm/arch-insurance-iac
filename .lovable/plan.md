@@ -1,7 +1,7 @@
 # Program Status
 
 ## Model version
-- **PM-FIN-2026.1** — remains **Draft**.
+- **PM-FIN-2026.1** — **Active** (certified `86f09fd7…`, activated 2026-07-26 21:18:52 UTC, activation record `eefc6c50…`).
 
 ## Package status
 - **BP3.1** — Runtime Foundation — Completed & Validated.
