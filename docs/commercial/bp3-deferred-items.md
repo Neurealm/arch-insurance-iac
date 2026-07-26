@@ -1,11 +1,12 @@
 # BP3 — Deferred-Item, Technical-Debt and Hardening Register
 
-Status: Closeout Execution Complete, Pending Independent Validation. Every deferred item below is preserved; none is closed.
+Status: BP3 Program Closed and Independently Validated (2026-07-26, `BP3.CLOSEOUT-VALIDATE`, decision GO).
 Authoritative closeout record: `docs/commercial/bp3-program-closeout.md`.
 
-No item in this register is blocking. No item is closed. Items marked
-"Documentation authored, pending closeout execution verification" remain open until
-`BP3.CLOSEOUT-VALIDATE`.
+No item in this register is blocking. DEF-06, DEF-07 and DEF-08 are **closed** by BP3
+closeout documentation, operational-handoff documentation and independent closeout
+validation; their records are retained in full for history. All other items remain open,
+deferred and non-blocking.
 
 ---
 
@@ -111,7 +112,7 @@ No item in this register is blocking. No item is closed. Items marked
 | Identifier | DEF-06 |
 | Description | Expected artifact names ("BP3.1 Assumption Catalog", "BP3.8 Model Activation") differ from the canonical files that hold that content |
 | Priority | 3 |
-| Current state | Documentation authored and closeout execution verified, pending final closeout validation |
+| Current state | **Closed** by BP3 closeout documentation and independent closeout validation (2026-07-26) |
 | Release impact | None |
 | Security impact | None |
 | Data-integrity impact | None |
@@ -130,7 +131,7 @@ No item in this register is blocking. No item is closed. Items marked
 | Identifier | DEF-07 |
 | Description | Six BP3 documents carried "Pending Independent Validation" status headers after their packages had received GO |
 | Priority | 3 |
-| Current state | Status headers reconciled and closeout execution verified, pending final closeout validation |
+| Current state | **Closed** by BP3 closeout documentation and independent closeout validation (2026-07-26) |
 | Release impact | None |
 | Security impact | None |
 | Data-integrity impact | None — historical bodies preserved unchanged |
@@ -149,7 +150,7 @@ No item in this register is blocking. No item is closed. Items marked
 | Identifier | DEF-08 |
 | Description | No BP3-specific operational handoff, incident classification or escalation documentation existed |
 | Priority | 3 |
-| Current state | Operational handoff authored and closeout execution verified, pending final closeout validation |
+| Current state | **Closed** by BP3 operational-handoff documentation and independent closeout validation (2026-07-26) |
 | Release impact | None |
 | Security impact | None |
 | Data-integrity impact | None |
@@ -179,3 +180,27 @@ No item in this register is blocking. No item is closed. Items marked
 | Remediation recommendation | Populate `source_hash` with the run `input_hash` when writing run-related lineage rows |
 | Evidence reference | `docs/commercial/bp3-evidence-index.md` §13 |
 | Closure criteria | New lineage rows carry source hashes for all relationship types; historical rows remain unmodified |
+
+---
+
+## Final disposition — `BP3.CLOSEOUT-VALIDATE` (2026-07-26, decision GO)
+
+| Item | Final disposition |
+|---|---|
+| BP3.7.4 | Deferred, non-blocking (presentation only) |
+| DEF-02 | Deferred, non-blocking |
+| DEF-03 | Expected future lifecycle action |
+| DEF-04 | Not applicable for first activation |
+| DEF-05 | Optional security-hardening backlog |
+| DEF-06 | Closed by BP3 closeout documentation and validation |
+| DEF-07 | Closed by BP3 closeout documentation and validation |
+| DEF-08 | Closed by BP3 operational-handoff documentation and closeout validation |
+| DEF-09 | Optional lineage enrichment |
+
+One additional Priority 3 documentation observation was recorded during closeout
+validation and is tracked under DEF-07's category without reopening it:
+`docs/commercial/bp3-delivery-map.md` still lists BP3.0 as "Built, Pending Independent
+Validation". It is a superseded planning map, not a package-validation record, and the
+authoritative status is `docs/commercial/bp3-evidence-index.md` §4. Non-blocking.
+
+No closed record is deleted; closure criteria and history are preserved above.

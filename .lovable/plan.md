@@ -17,9 +17,11 @@
 - **BP3.8** — Release Certification, Activation, and Lineage — **Completed & Validated (GO)** (22 lineage rows; no prior active version, so no supersession occurred).
 
 ## Program closeout
+- **BP3 Program** — **Closed** (formally closed 2026-07-26 by `BP3.CLOSEOUT-VALIDATE`, decision **GO**).
 - **BP3 Program Closeout Documentation** — **Complete**.
 - **BP3 Program Closeout Execution** — **Complete** (2026-07-26; evidence `docs/commercial/bp3-closeout-execution-evidence.md`).
-- **BP3 Program Closeout Independent Validation** — **Pending** (`BP3.CLOSEOUT-VALIDATE`).
+- **BP3 Program Closeout Independent Validation** — **Complete — Decision GO** (2026-07-26; evidence `docs/commercial/bp3-closeout-validation-evidence.md`).
+- **Next phase** — Operational Support and Future Successor Planning.
 
 ### Closeout references
 - Closeout record — `docs/commercial/bp3-program-closeout.md`

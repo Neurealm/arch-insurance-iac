@@ -13,8 +13,8 @@
 | Closeout execution date | 2026-07-26 (`BP3.CLOSEOUT-EXECUTE`) |
 | Source audit decision | `CLOSEOUT_READY_WITH_WARNINGS` (BP3.CLOSEOUT-AUDIT) |
 | Source documentation result | `PASS` (BP3.CLOSEOUT-DOCUMENT) |
-| Current closeout status | **Closeout Execution Complete, Pending Independent Validation** |
-| Final validation | Pending — `BP3.CLOSEOUT-VALIDATE` has not been run |
+| Current closeout status | **BP3 Program Closed and Independently Validated** |
+| Final validation | Complete — `BP3.CLOSEOUT-VALIDATE` returned **GO** on 2026-07-26 (`docs/commercial/bp3-closeout-validation-evidence.md`) |
 | Related evidence index | `docs/commercial/bp3-evidence-index.md` |
 | Closeout execution evidence | `docs/commercial/bp3-closeout-execution-evidence.md` |
 
@@ -322,3 +322,34 @@ documented non-blocking warnings. Closeout validation has **not** been performed
 Detailed execution matrices are recorded in
 `docs/commercial/bp3-closeout-execution-evidence.md`. All prior sections and
 historical evidence in this document are preserved unchanged.
+
+## 21. Independent closeout validation record
+
+| Field | Value |
+|---|---|
+| Validation prompt | `BP3.CLOSEOUT-VALIDATE` |
+| Validation date | 2026-07-26 |
+| Decision | **GO** |
+| Active release | PM-FIN-2026.1 (`5097c3a9-021e-4b2c-9377-540a5d18ada6`), status `active`, activated 2026-07-26 21:18:52.696359+00 by `04bd0a7f-7487-4ba7-a751-a6540b3b4a33` |
+| Active-version count | 1 |
+| Final certification ID | `86f09fd7-39f9-4994-bb09-a7ace339634c` (certified; 22 controls, 21 pass, 1 warning, 0 blocking) |
+| Invalidated certification ID | `4bfd28b0-0d5c-4a1b-a670-66895150ee4b` (retained) |
+| Activation ID | `eefc6c50-b73f-41d3-8def-f6ff244000d9` (active; prior active version null) |
+| Readiness hash | `d99ed93efb041814fd00e24128546276e35f99096437fc3f2ea306f10fd8498d` — unchanged |
+| Release-manifest hash | `b76a08eed66bfbbfae339ad814630052d04974035bdbb3e5b193491445bc8413` — unchanged |
+| Certification content hash | `4884db6f9ece30145f40839176a844954ed4ce64a628bf5a2e9c98a0e3a40053` — unchanged |
+| Activation snapshot hash | `ccdfca07b94741384ac1bc5bf66ad2864553d04b3642782f7004793332781ce2` — unchanged |
+| Package validation summary | BP3.0–BP3.8 all Completed and Validated, decision GO; no package lacks validation evidence |
+| Runtime-drift result | Zero drift against both the BP3.8 validated baseline and the closeout-execute pre-execution baseline |
+| Documentation-consistency result | Pass — IDs, hashes and counts agree across all closeout documents and the living plan |
+| Operational-handoff result | Sufficient — all 25 required handoff controls documented; role-based ownership accepted |
+| Deferred-item disposition | BP3.7.4, DEF-02, DEF-03, DEF-04, DEF-05, DEF-09 remain open and non-blocking; DEF-06, DEF-07, DEF-08 closed |
+| Implementation changes | None |
+| Migration count | 0 |
+| Database mutation count | 0 |
+| Final BP3 status | **Closed** |
+
+Detailed validation matrices are recorded in
+`docs/commercial/bp3-closeout-validation-evidence.md`. Sections 1–20 above, including the
+closeout recommendation and the closeout execution record, are preserved unchanged as
+historical evidence.
