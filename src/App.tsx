@@ -93,6 +93,8 @@ import CommercialAssumptions from "./commercial/pages/CommercialAssumptions";
 import CommercialAssumptionChangeSet from "./commercial/pages/CommercialAssumptionChangeSet";
 import CommercialCompare from "./commercial/pages/CommercialCompare";
 import CommercialCompareDetail from "./commercial/pages/CommercialCompareDetail";
+import CommercialSensitivity from "./commercial/pages/CommercialSensitivity";
+import CommercialSensitivityDetail from "./commercial/pages/CommercialSensitivityDetail";
 
 
 import { PermissionRoute } from "./components/auth/PermissionRoute";
