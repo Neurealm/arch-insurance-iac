@@ -49,6 +49,14 @@ function Sidebar() {
         <div className="text-sm font-semibold text-foreground">Platform</div>
       </div>
       <nav className="p-2 space-y-0.5">
+        <NavLink
+          to="/app"
+          className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
+        >
+          <Home className="h-4 w-4" />
+          <span className="truncate">NeuGAIN Command Center</span>
+        </NavLink>
+        <div className="my-1 h-px bg-border" aria-hidden />
         <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Platform
         </div>
