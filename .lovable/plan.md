@@ -10,7 +10,7 @@
 - **BP3.4** — Cash Flow, WC, Break-even, Payback, Sustainability — Completed & Validated (BP3.4.1 fingerprint).
 - **BP3.5** — Governed Assumption Editing — **Completed & Validated**.
 - **BP3.6** — Scenario Comparison Workspace — **Built; Runtime Executed (three-way archived + pairwise saved); Pending Independent Validation**.
-- **BP3.7** — Sensitivity Analysis — **Not Started**.
+- **BP3.7** — Sensitivity Analysis — **Built; Runtime Executed (5/5 perturbations completed, 1,660 persisted results, governed failed→draft recovery verified); Pending Independent Validation**. Deferred cosmetic BP3.7.4 (label formatting).
 - **BP3.8** — Activation / Lineage Enrichment — **Not Started**.
 
 ## Persistent principles
