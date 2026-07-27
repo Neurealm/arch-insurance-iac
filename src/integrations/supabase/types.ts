@@ -590,6 +590,7 @@ export type Database = {
           description: string | null
           display_name: string
           fallback_locale: string
+          fallback_profile_id: string | null
           id: string
           is_default: boolean
           is_enabled: boolean
@@ -609,6 +610,7 @@ export type Database = {
           description?: string | null
           display_name: string
           fallback_locale?: string
+          fallback_profile_id?: string | null
           id?: string
           is_default?: boolean
           is_enabled?: boolean
@@ -628,6 +630,7 @@ export type Database = {
           description?: string | null
           display_name?: string
           fallback_locale?: string
+          fallback_profile_id?: string | null
           id?: string
           is_default?: boolean
           is_enabled?: boolean
@@ -642,6 +645,13 @@ export type Database = {
           volume?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "audio_speech_profiles_fallback_profile_id_fkey"
+            columns: ["fallback_profile_id"]
+            isOneToOne: false
+            referencedRelation: "audio_speech_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "audio_speech_profiles_tenant_id_fkey"
             columns: ["tenant_id"]
