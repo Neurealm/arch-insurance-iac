@@ -183,11 +183,12 @@ export function AudioEnrichmentButton({
       <Button
         type="button"
         variant={buttonVariant(displayVariant)}
-        size={compact ? "sm" : "default"}
-        className="min-h-11 gap-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        size="icon"
+        className="h-11 w-11 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         onClick={handlePrimary}
         disabled={primaryDisabled}
         aria-label={primaryAccessibleName}
+        title={isUnsupported ? label : primaryLabel}
         aria-busy={isLoading || undefined}
         data-cae-state={userState}
       >
@@ -196,7 +197,7 @@ export function AudioEnrichmentButton({
         ) : (
           <PrimaryIcon className={cn("h-4 w-4", isLoading && "animate-spin")} aria-hidden="true" />
         )}
-        <span>{isUnsupported ? label : primaryLabel}</span>
+        <span className="sr-only">{isUnsupported ? label : primaryLabel}</span>
       </Button>
 
       {isActive && (
@@ -213,7 +214,7 @@ export function AudioEnrichmentButton({
         </Button>
       )}
 
-      {showTranscript && (
+      {showTranscript && (isActive || isUnsupported) && (
         <Button
           type="button"
           variant="ghost"
@@ -252,8 +253,9 @@ export function AudioEnrichmentButton({
         {(userState === "error" || userState === "unavailable") && (
           <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
         )}
-        {statusMessage ?? STATE_TEXT[userState]}
+        {userState === "idle" ? "" : (statusMessage ?? STATE_TEXT[userState])}
       </span>
+
 
       <Dialog open={transcriptOpen} onOpenChange={setTranscriptOpen}>
         <DialogContent className="max-w-lg">

@@ -180,13 +180,13 @@ describe("CAE.105 rollout placements", () => {
     expect(spoken).toHaveLength(2);
   });
 
-  it("exposes the transcript for a placement without starting playback", async () => {
+  it("exposes the transcript for a placement while narration is active", async () => {
     const user = userEvent.setup();
     renderRollout();
-    const [transcriptButton] = screen.getAllByRole("button", { name: /transcript/i });
+    await user.click(screen.getAllByRole("button", { name: /^Hear More\. Play narration$/ })[0]);
+    const [transcriptButton] = await screen.findAllByRole("button", { name: /transcript/i });
     await user.click(transcriptButton);
     expect(await screen.findByText(`${PLACEMENTS[0].callId} transcript`)).toBeInTheDocument();
-    expect(spoken).toHaveLength(0);
   });
 
   it("a disabled placement resolves as unsupported context and never speaks", async () => {
