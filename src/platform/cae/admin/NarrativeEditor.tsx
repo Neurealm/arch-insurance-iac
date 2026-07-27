@@ -107,8 +107,18 @@ export default function NarrativeEditor() {
   const spokenText = form.speechText.trim() || form.sourceText;
   const words = countWords(spokenText);
   const duration = estimateDurationSeconds(spokenText, Number(profile?.rate ?? 1));
-  const tokens = useMemo(() => extractVariableTokens(`${form.sourceText} ${form.speechText}`), [form.sourceText, form.speechText]);
-  const knownTokens = new Set((variables.data ?? []).map((v) => v.variable_key));
+  const definitions = useMemo(() => variables.data ?? [], [variables.data]);
+  const registry = useMemo(() => buildRegistry(definitions), [definitions]);
+  const previewContext = useMemo<CaeVariableContext>(() => ({
+    tenantId: activeTenantId,
+    platform: {
+      tenantId: activeTenantId,
+      tenantName: activeTenant?.name ?? null,
+      moduleName: parsed?.moduleKey ?? narrative?.module_key ?? null,
+      pageName: form.name || narrative?.name || null,
+    },
+  }), [activeTenantId, activeTenant?.name, parsed?.moduleKey, narrative?.module_key, narrative?.name, form.name]);
+
 
   const callIdError = form.callId && !isValidCallId(form.callId)
     ? "Use the format CAE.MODULE.TOPIC.001."
