@@ -46,9 +46,9 @@ export function TranscriptPanel({
     >
       <header className="flex flex-wrap items-center gap-2">
         <FileText className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-        <h3 id={headingId} className="text-sm font-semibold text-foreground">
+        <h2 id={headingId} className="text-sm font-semibold text-foreground">
           {title?.trim() ? title : "Transcript"}
-        </h3>
+        </h2>
         {typeof estimatedDurationSeconds === "number" && estimatedDurationSeconds > 0 && (
           <span className="text-xs text-muted-foreground">
             Estimated listening time {formatDuration(estimatedDurationSeconds)}
