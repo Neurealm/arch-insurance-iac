@@ -39,8 +39,8 @@ export default function Settings() {
                 description="Manage the Domain records that describe how each Technology participates in the ETDM taxonomy." />
               <SettingsCard to="/crm" icon={Building2} title="Customer Relation Manager"
                 description="Manage customer companies, departments, teams, stakeholders, activities, and notes." />
-              <SettingsCard to="/commercial/administration" icon={Headphones} title="Contextual Audio Enrichment"
-                description="Manage module narration scripts, voices, and audio listening configuration." />
+              <SettingsCard to="/platform/audio" icon={Headphones} title="Contextual Audio Enrichment"
+                description="Manage module narration scripts, voices, placements, and audio listening configuration." />
 
 
             </>
