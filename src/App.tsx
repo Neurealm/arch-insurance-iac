@@ -894,6 +894,10 @@ const App = () => (
 
 
           </Route>
+          {/* Internal CAE component fixture — development builds only, never in navigation */}
+          {import.meta.env.DEV && (
+            <Route path="/_dev/cae-components" element={<CaeComponentFixture />} />
+          )}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
