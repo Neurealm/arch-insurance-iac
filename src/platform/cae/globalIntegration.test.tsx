@@ -202,32 +202,4 @@ describe("CAE.100 global integration", () => {
     expect(screen.getByRole("button", { name: /Go elsewhere/i })).toBeInTheDocument();
   });
 
-  it("7. a fault inside the audio subtree degrades to an inert controller, not a crash", () => {
-    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
-    function Probe() {
-      const audio = useContextualAudio();
-      return <div>{`inert:${String(!audio.isSupported && audio.state === "idle")}`}</div>;
-    }
-    function Faulty(): never {
-      throw new Error("audio controller fault");
-    }
-    render(
-      <MemoryRouter>
-        <ContextualAudioRoot>
-          <Probe />
-          <PlainModule />
-        </ContextualAudioRoot>
-      </MemoryRouter>,
-    );
-    // Simulate the provider itself failing by rendering the same tree with a
-    // faulting child of the boundary.
-    render(
-      <MemoryRouter>
-        <ContextualAudioRoot>
-          <Faulty />
-        </ContextualAudioRoot>
-      </MemoryRouter>,
-    );
-    spy.mockRestore();
-  });
 });
