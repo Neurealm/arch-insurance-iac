@@ -214,7 +214,7 @@ export function AudioEnrichmentButton({
         </Button>
       )}
 
-      {showTranscript && isActive && (
+      {showTranscript && (isActive || isUnsupported) && (
         <Button
           type="button"
           variant="ghost"
