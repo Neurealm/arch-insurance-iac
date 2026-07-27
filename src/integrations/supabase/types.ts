@@ -1019,6 +1019,68 @@ export type Database = {
           },
         ]
       }
+      commercial_narrations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          instructions: string
+          is_active: boolean
+          narration_key: string
+          script: string
+          speed: number
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+          voice: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          instructions?: string
+          is_active?: boolean
+          narration_key: string
+          script: string
+          speed?: number
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          voice?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          instructions?: string
+          is_active?: boolean
+          narration_key?: string
+          script?: string
+          speed?: number
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          voice?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_narrations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commercial_program_metrics: {
         Row: {
           confidence: string
