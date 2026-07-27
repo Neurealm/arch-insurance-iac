@@ -14,15 +14,20 @@ import {
 } from "@/components/ui/select";
 import { LoadingState, ErrorState, sanitizeError } from "@/platform/components/States";
 import { TranscriptPanel } from "../components/TranscriptPanel";
+import { VariablePreviewPanel } from "./VariablePreviewPanel";
+import { useVariableRegistry } from "../variables/useVariableRegistry";
+import { buildRegistry } from "../variables/registry";
+import type { CaeVariableContext } from "../variables/types";
 import {
   useNarratives, useNarrativeVersions, useSpeechProfiles, usePronunciationRules,
-  useVariableDefinitions, useCreateNarrative, useUpdateNarrative, useSaveDraftVersion,
+  useCreateNarrative, useUpdateNarrative, useSaveDraftVersion,
   useCreateDraftVersion,
 } from "./data";
 import {
-  countWords, estimateDurationSeconds, extractVariableTokens, formatDuration,
+  countWords, estimateDurationSeconds, formatDuration,
   isValidCallId, parseCallId, toRuntimeProfile, toRuntimeRules, useDraftPreview,
 } from "./helpers";
+
 
 const NONE = "__none__";
 const SCOPE_TYPES = ["page", "record", "section", "global"];
