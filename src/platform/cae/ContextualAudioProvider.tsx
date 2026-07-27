@@ -134,6 +134,10 @@ function readActiveTenant(): string | null {
 
 export function ContextualAudioProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const faulted = useContext(CaeFaultContext);
+  const enabled = useContextualAudioEnabled();
+  const inertValue = useMemo(() => createInertContextualAudioValue(), []);
+
 
   const [state, setState] = useState<CaePlaybackState>("idle");
   const [resolved, setResolved] = useState<CaeResolvedAudio | null>(null);
