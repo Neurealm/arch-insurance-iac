@@ -119,6 +119,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
 import ResetPassword from "./pages/auth/ResetPassword.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { ContextualAudioProvider } from "./platform/cae/ContextualAudioProvider.tsx";
+import CaeComponentFixture from "./platform/cae/dev/CaeComponentFixture.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
 import TechnologyTaxonomyPage from "./pages/admin/technology-taxonomy/TechnologyTaxonomyPage.tsx";
 import TechnologyProfilePage from "./pages/admin/technology-taxonomy/TechnologyProfilePage.tsx";
@@ -894,6 +895,10 @@ const App = () => (
 
 
           </Route>
+          {/* Internal CAE component fixture — development builds only, never in navigation */}
+          {import.meta.env.DEV && (
+            <Route path="/_dev/cae-components" element={<CaeComponentFixture />} />
+          )}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
