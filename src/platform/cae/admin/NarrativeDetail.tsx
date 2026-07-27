@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Pencil, Send, CheckCircle2, Upload, Archive, RotateCcw } from "lucide-react";
+import { ArrowLeft, Pencil, Archive, RotateCcw, GitCompare, History } from "lucide-react";
 import { useAccess } from "@/platform/access/AccessContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { ConfirmDialog } from "@/platform/components/ConfirmDialog";
 import { LoadingState, ErrorState, EmptyState, sanitizeError } from "@/platform/components/States";
 import { TranscriptPanel } from "../components/TranscriptPanel";
 import {
-  useNarratives, useNarrativeVersions, usePlacements, useSetVersionStatus,
-  useSetNarrativeStatus, useSpeechProfiles,
+  useNarratives, useNarrativeVersions, usePlacements, useSetNarrativeStatus, useSpeechProfiles,
 } from "./data";
+import {
+  AuditHistoryDialog, CompareVersionsDialog, VersionLifecycleActions, statusLabel,
+} from "./lifecycle";
 import { countWords, estimateDurationSeconds, extractVariableTokens, formatDuration } from "./helpers";
 
 export default function NarrativeDetail() {
@@ -24,8 +27,11 @@ export default function NarrativeDetail() {
   const versions = useNarrativeVersions(activeTenantId, narrativeId);
   const placements = usePlacements(activeTenantId);
   const profiles = useSpeechProfiles(activeTenantId);
-  const setVersionStatus = useSetVersionStatus();
   const setNarrativeStatus = useSetNarrativeStatus();
+
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [auditOpen, setAuditOpen] = useState(false);
+  const [retireOpen, setRetireOpen] = useState(false);
 
   const narrative = narratives.data?.find((n) => n.id === narrativeId) ?? null;
   const activeVersion = useMemo(
@@ -34,6 +40,8 @@ export default function NarrativeDetail() {
     [versions.data, narrative?.active_version_id],
   );
   const linkedPlacements = (placements.data ?? []).filter((p) => p.narrative_id === narrativeId);
+  const activePlacementCount = linkedPlacements.filter((p) => p.is_enabled).length;
+
 
   const transition = async (versionId: string, status: string) => {
     try {
