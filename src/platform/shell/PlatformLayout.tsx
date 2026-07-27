@@ -13,6 +13,11 @@ import {
   UserCircle2,
   FlaskConical,
   ChevronRight,
+  AudioLines,
+  Mic2,
+  MapPin,
+  BookA,
+  BarChart3,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -35,11 +40,21 @@ const NAV: NavItem[] = [
   { to: "/platform/test-hub", label: "Platform Test Hub", icon: FlaskConical, adminOnly: true },
 ];
 
+/** Contextual Audio Enrichment Manager — shared across every NeuGAIN.io module. */
+const AUDIO_NAV: NavItem[] = [
+  { to: "/platform/audio", label: "Narrative Library", icon: AudioLines, permission: "audio.view", end: true },
+  { to: "/platform/audio/profiles", label: "Speech Profiles", icon: Mic2, permission: "audio.view" },
+  { to: "/platform/audio/placements", label: "Placement Map", icon: MapPin, permission: "audio.view" },
+  { to: "/platform/audio/pronunciation", label: "Pronunciation Dictionary", icon: BookA, permission: "audio.view" },
+  { to: "/platform/audio/analytics", label: "Audio Analytics", icon: BarChart3, permission: "audio.analytics.view" },
+];
+
 function Sidebar() {
   const { isPlatformAdmin, hasPermission } = useAccess();
-  const items = NAV.filter(
-    (t) => (!t.permission || hasPermission(t.permission)) && (!t.adminOnly || isPlatformAdmin),
-  );
+  const allow = (t: NavItem) =>
+    (!t.permission || hasPermission(t.permission) || isPlatformAdmin) && (!t.adminOnly || isPlatformAdmin);
+  const items = NAV.filter(allow);
+  const audioItems = AUDIO_NAV.filter(allow);
   return (
     <aside className="w-60 shrink-0 border-r border-border bg-card" aria-label="Platform navigation">
       <div className="px-4 py-4 border-b border-border">
@@ -80,6 +95,34 @@ function Sidebar() {
             </NavLink>
           );
         })}
+        {audioItems.length > 0 && (
+          <>
+            <div className="my-1 h-px bg-border" aria-hidden />
+            <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Contextual Audio
+            </div>
+            {audioItems.map((t) => {
+              const Icon = t.icon;
+              return (
+                <NavLink
+                  key={t.to}
+                  to={t.to}
+                  end={t.end}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition ${
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`
+                  }
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="truncate">{t.label}</span>
+                </NavLink>
+              );
+            })}
+          </>
+        )}
       </nav>
     </aside>
   );
@@ -87,7 +130,7 @@ function Sidebar() {
 
 function Breadcrumb() {
   const { pathname } = useLocation();
-  const item = NAV.find((n) => (n.end ? pathname === n.to : pathname === n.to || pathname.startsWith(n.to + "/")));
+  const item = [...NAV, ...AUDIO_NAV].find((n) => (n.end ? pathname === n.to : pathname === n.to || pathname.startsWith(n.to + "/")));
   const label = item?.to === "/platform/test-hub" ? "Test Hub" : item?.label ?? "";
   return (
     <nav className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-label="Breadcrumb">
