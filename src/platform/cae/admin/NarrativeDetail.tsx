@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Pencil, Send, CheckCircle2, Upload, Archive, RotateCcw } from "lucide-react";
+import { ArrowLeft, Pencil, Archive, RotateCcw, GitCompare, History } from "lucide-react";
 import { useAccess } from "@/platform/access/AccessContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { ConfirmDialog } from "@/platform/components/ConfirmDialog";
 import { LoadingState, ErrorState, EmptyState, sanitizeError } from "@/platform/components/States";
 import { TranscriptPanel } from "../components/TranscriptPanel";
 import {
-  useNarratives, useNarrativeVersions, usePlacements, useSetVersionStatus,
-  useSetNarrativeStatus, useSpeechProfiles,
+  useNarratives, useNarrativeVersions, usePlacements, useSetNarrativeStatus, useSpeechProfiles,
 } from "./data";
+import {
+  AuditHistoryDialog, CompareVersionsDialog, VersionLifecycleActions, statusLabel,
+} from "./lifecycle";
 import { countWords, estimateDurationSeconds, extractVariableTokens, formatDuration } from "./helpers";
 
 export default function NarrativeDetail() {
@@ -24,8 +27,11 @@ export default function NarrativeDetail() {
   const versions = useNarrativeVersions(activeTenantId, narrativeId);
   const placements = usePlacements(activeTenantId);
   const profiles = useSpeechProfiles(activeTenantId);
-  const setVersionStatus = useSetVersionStatus();
   const setNarrativeStatus = useSetNarrativeStatus();
+
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [auditOpen, setAuditOpen] = useState(false);
+  const [retireOpen, setRetireOpen] = useState(false);
 
   const narrative = narratives.data?.find((n) => n.id === narrativeId) ?? null;
   const activeVersion = useMemo(
@@ -34,15 +40,9 @@ export default function NarrativeDetail() {
     [versions.data, narrative?.active_version_id],
   );
   const linkedPlacements = (placements.data ?? []).filter((p) => p.narrative_id === narrativeId);
+  const activePlacementCount = linkedPlacements.filter((p) => p.is_enabled).length;
 
-  const transition = async (versionId: string, status: string) => {
-    try {
-      await setVersionStatus.mutateAsync({ versionId, status });
-      toast.success(`Version moved to ${status.replace("_", " ")}`);
-    } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
-    }
-  };
+
 
   const narrativeTransition = async (status: "retired" | "restore") => {
     if (!narrativeId) return;
@@ -83,7 +83,13 @@ export default function NarrativeDetail() {
           <p className="font-mono text-xs text-muted-foreground">{narrative.call_id}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={narrative.status === "published" ? "default" : "secondary"}>{narrative.status}</Badge>
+          <Badge variant={narrative.status === "published" ? "default" : "secondary"}>{statusLabel(narrative.status)}</Badge>
+          <Button variant="outline" size="sm" onClick={() => setCompareOpen(true)} disabled={(versions.data ?? []).length < 2}>
+            <GitCompare className="h-4 w-4" aria-hidden="true" /><span>Compare versions</span>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setAuditOpen(true)}>
+            <History className="h-4 w-4" aria-hidden="true" /><span>Audit history</span>
+          </Button>
           {hasPermission("audio.narrative.author") && (
             <Button asChild variant="outline" size="sm">
               <Link to={`/platform/audio/narratives/${narrative.id}/edit`}>
@@ -92,8 +98,8 @@ export default function NarrativeDetail() {
             </Button>
           )}
           {hasPermission("audio.narrative.retire") && narrative.status !== "retired" && (
-            <Button variant="outline" size="sm" onClick={() => narrativeTransition("retired")}>
-              <Archive className="h-4 w-4" aria-hidden="true" /><span>Retire</span>
+            <Button variant="outline" size="sm" onClick={() => setRetireOpen(true)}>
+              <Archive className="h-4 w-4" aria-hidden="true" /><span>Retire narrative</span>
             </Button>
           )}
           {hasPermission("audio.narrative.author") && narrative.status === "retired" && (
@@ -103,6 +109,23 @@ export default function NarrativeDetail() {
           )}
         </div>
       </div>
+
+      <CompareVersionsDialog open={compareOpen} onOpenChange={setCompareOpen} versions={versions.data ?? []} />
+      <AuditHistoryDialog open={auditOpen} onOpenChange={setAuditOpen} narrativeId={narrativeId} />
+      <ConfirmDialog
+        open={retireOpen}
+        onOpenChange={setRetireOpen}
+        title={`Retire ${narrative.call_id}?`}
+        description={
+          activePlacementCount > 0
+            ? `${activePlacementCount} active placement${activePlacementCount === 1 ? "" : "s"} reference this narrative. Retiring disables them and runtime users will no longer receive audio.`
+            : "No active placements reference this narrative. Runtime users will no longer receive audio for this call ID."
+        }
+        confirmLabel="Retire narrative"
+        destructive
+        onConfirm={() => narrativeTransition("retired")}
+      />
+
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-1">
@@ -165,33 +188,21 @@ export default function NarrativeDetail() {
                 <TableBody>
                   {(versions.data ?? []).map((v) => (
                     <TableRow key={v.id}>
-                      <TableCell>v{v.version_no}</TableCell>
-                      <TableCell><Badge variant="secondary">{v.status.replace("_", " ")}</Badge></TableCell>
+                      <TableCell>
+                        v{v.version_no}
+                        {v.id === narrative.active_version_id && (
+                          <Badge className="ml-2" variant="default">active</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell><Badge variant="secondary">{statusLabel(v.status)}</Badge></TableCell>
                       <TableCell className="max-w-[240px] truncate text-xs">{v.change_summary ?? "—"}</TableCell>
                       <TableCell className="text-xs">{v.published_at ? new Date(v.published_at).toLocaleDateString() : "—"}</TableCell>
                       <TableCell>
-                        <div className="flex justify-end gap-1">
-                          {v.status === "draft" && hasPermission("audio.narrative.review") && (
-                            <Button size="sm" variant="outline" onClick={() => transition(v.id, "in_review")}>
-                              <Send className="h-3.5 w-3.5" aria-hidden="true" /><span>Review</span>
-                            </Button>
-                          )}
-                          {v.status === "in_review" && hasPermission("audio.narrative.approve") && (
-                            <Button size="sm" variant="outline" onClick={() => transition(v.id, "approved")}>
-                              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /><span>Approve</span>
-                            </Button>
-                          )}
-                          {v.status === "approved" && hasPermission("audio.narrative.publish") && (
-                            <Button size="sm" onClick={() => transition(v.id, "published")}>
-                              <Upload className="h-3.5 w-3.5" aria-hidden="true" /><span>Publish</span>
-                            </Button>
-                          )}
-                          {v.status === "published" && hasPermission("audio.narrative.retire") && (
-                            <Button size="sm" variant="outline" onClick={() => transition(v.id, "retired")}>
-                              <Archive className="h-3.5 w-3.5" aria-hidden="true" /><span>Retire</span>
-                            </Button>
-                          )}
-                        </div>
+                        <VersionLifecycleActions
+                          version={v}
+                          hasPermission={hasPermission}
+                          activePlacementCount={activePlacementCount}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
