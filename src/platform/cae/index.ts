@@ -9,7 +9,7 @@
 
 export { ContextualAudioProvider, useContextualAudio, useOptionalContextualAudio } from "./ContextualAudioProvider";
 export type { ContextualAudioValue, CaePlaybackState } from "./ContextualAudioProvider";
-export { ContextualAudioErrorBoundary } from "./ContextualAudioErrorBoundary";
+export { ContextualAudioErrorBoundary, ContextualAudioRoot } from "./ContextualAudioErrorBoundary";
 export { isContextualAudioEnabled, useContextualAudioEnabled, CAE_FLAG_STORAGE_KEY } from "./featureFlags";
 
 export { AudioEnrichmentButton } from "./components/AudioEnrichmentButton";
