@@ -12,18 +12,21 @@ describe("CAE telemetry (CAE.110)", () => {
 
   it("never throws when the analytics RPC rejects", async () => {
     (supabase.rpc as unknown as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("network down"));
-    await expect(recordAudioEvent("playback_started", { callId: "X" })).resolves.toBeUndefined();
+    expect(() => recordAudioEvent("playback_started", { callId: "X" })).not.toThrow();
+    await new Promise((r) => setTimeout(r, 0));
   });
 
   it("never throws when the analytics RPC returns an error payload", async () => {
     (supabase.rpc as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({ error: { message: "denied" } });
-    await expect(recordAudioEvent("playback_completed", { callId: "X" })).resolves.toBeUndefined();
+    expect(() => recordAudioEvent("playback_completed", { callId: "X" })).not.toThrow();
+    await new Promise((r) => setTimeout(r, 0));
   });
 
   it("sends only identifiers and counts, never narrative text", async () => {
     const rpc = supabase.rpc as unknown as ReturnType<typeof vi.fn>;
     rpc.mockResolvedValue({ error: null });
-    await recordAudioEvent("playback_started", { callId: "CAE.A", placementKey: "P", durationMs: 1200 });
+    recordAudioEvent("playback_started", { callId: "CAE.A", placementKey: "P", durationMs: 1200 });
+    await new Promise((r) => setTimeout(r, 0));
     const payload = JSON.stringify(rpc.mock.calls[0]?.[1] ?? {});
     expect(payload).not.toMatch(/transcript|resolved_text|narrative_text/i);
     expect(payload).toContain("CAE.A");
