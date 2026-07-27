@@ -1,23 +1,29 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Headphones, Volume2 } from "lucide-react";
+import { useNarration } from "@/commercial/hooks/useNarration";
+import { useCommercialAccess } from "@/commercial/hooks/useCommercialAccess";
 
 const FUNCTIONS_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/tts-speak`;
 
 export function PlayIntroductionButton({
-  text = "Hello, my name is Ryan.",
+  narrationKey = "commercial.overview.introduction",
   label = "Play Introduction",
 }: {
-  text?: string;
+  narrationKey?: string;
   label?: string;
 }) {
   const [busy, setBusy] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { data: narration, isLoading } = useNarration(narrationKey);
+  const { canManageProgram, canAdmin, isPlatformAdmin } = useCommercialAccess();
+  const showRecordId = Boolean(canManageProgram || canAdmin || isPlatformAdmin);
 
   const play = async () => {
-    if (busy) return;
+    if (busy || !narration) return;
     setBusy(true);
     let url: string | undefined;
     try {
@@ -31,7 +37,7 @@ export function PlayIntroductionButton({
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ narration_id: narration.id }),
       });
 
       if (!res.ok) {
@@ -59,16 +65,68 @@ export function PlayIntroductionButton({
     }
   };
 
+  const copyRecordId = async () => {
+    if (!narration) return;
+    try {
+      await navigator.clipboard.writeText(narration.id);
+      toast.success("Record ID copied");
+    } catch {
+      toast.error("Could not copy record ID");
+    }
+  };
+
+  const disabled = busy || isLoading || !narration;
+
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={play}
-      disabled={busy}
-      aria-label={label}
-      title={label}
-    >
-      {busy ? <Volume2 className="h-4 w-4 animate-pulse" /> : <Headphones className="h-4 w-4" />}
-    </Button>
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={play}
+              disabled={disabled}
+              aria-label={narration?.title ?? label}
+            >
+              {busy ? <Volume2 className="h-4 w-4 animate-pulse" /> : <Headphones className="h-4 w-4" />}
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" align="end" className="max-w-xs">
+          {!narration ? (
+            <div className="text-xs">
+              {isLoading ? "Loading narration…" : "No narration configured for this button."}
+            </div>
+          ) : (
+            <div className="space-y-1 text-xs">
+              <div className="font-medium">{narration.title}</div>
+              {showRecordId && (
+                <dl className="grid grid-cols-[auto_1fr] gap-x-2 font-mono text-[11px] text-muted-foreground">
+                  <dt>Key</dt>
+                  <dd className="truncate">{narration.narration_key}</dd>
+                  <dt>Table</dt>
+                  <dd>commercial_narrations</dd>
+                  <dt>Record</dt>
+                  <dd>
+                    <button
+                      type="button"
+                      onClick={copyRecordId}
+                      className="underline underline-offset-2 hover:text-foreground"
+                    >
+                      {narration.id}
+                    </button>
+                  </dd>
+                  <dt>Voice</dt>
+                  <dd>
+                    {narration.voice} · v{narration.version}
+                  </dd>
+                </dl>
+              )}
+            </div>
+          )}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
