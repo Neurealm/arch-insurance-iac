@@ -114,7 +114,12 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
   const requestRef = useRef(0);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const resolvedRef = useRef<CaeResolvedAudio | null>(null);
-  resolvedRef.current = resolved;
+
+  /** Single writer for the resolved payload: keeps state and ref in lockstep. */
+  const commitResolved = useCallback((next: CaeResolvedAudio | null) => {
+    resolvedRef.current = next;
+    setResolved(next);
+  }, []);
 
   /** Hard stop of any speech, regardless of who started it. */
   const cancelSpeech = useCallback(() => {
@@ -145,11 +150,11 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
     requestRef.current += 1;
     cancelSpeech();
     setActiveVoiceName(null);
-    setResolved(null);
+    commitResolved(null);
     setCallId(null);
     setError(null);
     setState("idle");
-  }, [cancelSpeech]);
+  }, [cancelSpeech, commitResolved]);
 
   // --- Voice list (may populate asynchronously) -----------------------------
   useEffect(() => {
@@ -238,7 +243,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
       cancelSpeech();
       setActiveVoiceName(null);
       setCallId(nextCallId);
-      setResolved(null);
+      commitResolved(null);
       setError(null);
       setState("loading");
 
@@ -250,7 +255,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
           setState("error");
           return null;
         }
-        setResolved(result);
+        commitResolved(result);
         setState("ready");
         return result;
       } catch (err) {
@@ -260,7 +265,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
         return null;
       }
     },
-    [cancelSpeech],
+    [cancelSpeech, commitResolved],
   );
 
   const speak = useCallback(
