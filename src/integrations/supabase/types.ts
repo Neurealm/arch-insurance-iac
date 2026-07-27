@@ -9724,6 +9724,10 @@ export type Database = {
         Returns: boolean
       }
       audio_can_view: { Args: { _tenant_id: string }; Returns: boolean }
+      audio_resolve_call: {
+        Args: { _call_id: string; _placement_key?: string }
+        Returns: Json
+      }
       bootstrap_commercial_workspace: { Args: never; Returns: Json }
       bootstrap_tenant_default_roles: {
         Args: { _actor: string; _tenant_id: string }
