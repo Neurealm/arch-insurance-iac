@@ -450,54 +450,78 @@ export type Database = {
       }
       audio_playback_events: {
         Row: {
+          audience: string | null
+          browser_capability: string | null
           browser_supported: boolean | null
           call_id: string | null
           char_count: number | null
           duration_ms: number | null
+          error_category: string | null
           error_code: string | null
           event_type: string
           id: string
           locale: string | null
+          module_key: string | null
           narrative_id: string | null
           narrative_version_id: string | null
           occurred_at: string
+          page_key: string | null
           placement_key: string | null
+          playback_state: string | null
+          section_key: string | null
           tenant_id: string
           user_id: string | null
+          version_no: number | null
           voice_name: string | null
         }
         Insert: {
+          audience?: string | null
+          browser_capability?: string | null
           browser_supported?: boolean | null
           call_id?: string | null
           char_count?: number | null
           duration_ms?: number | null
+          error_category?: string | null
           error_code?: string | null
           event_type: string
           id?: string
           locale?: string | null
+          module_key?: string | null
           narrative_id?: string | null
           narrative_version_id?: string | null
           occurred_at?: string
+          page_key?: string | null
           placement_key?: string | null
+          playback_state?: string | null
+          section_key?: string | null
           tenant_id: string
           user_id?: string | null
+          version_no?: number | null
           voice_name?: string | null
         }
         Update: {
+          audience?: string | null
+          browser_capability?: string | null
           browser_supported?: boolean | null
           call_id?: string | null
           char_count?: number | null
           duration_ms?: number | null
+          error_category?: string | null
           error_code?: string | null
           event_type?: string
           id?: string
           locale?: string | null
+          module_key?: string | null
           narrative_id?: string | null
           narrative_version_id?: string | null
           occurred_at?: string
+          page_key?: string | null
           placement_key?: string | null
+          playback_state?: string | null
+          section_key?: string | null
           tenant_id?: string
           user_id?: string | null
+          version_no?: number | null
           voice_name?: string | null
         }
         Relationships: [
@@ -9818,11 +9842,36 @@ export type Database = {
         Args: { _narrative_id: string; _status: string }
         Returns: undefined
       }
+      audio_analytics_overview: {
+        Args: { _days?: number; _tenant_id: string }
+        Returns: Json
+      }
       audio_can_manage: {
         Args: { _permission_code: string; _tenant_id: string }
         Returns: boolean
       }
       audio_can_view: { Args: { _tenant_id: string }; Returns: boolean }
+      audio_record_event: {
+        Args: {
+          _audience?: string
+          _browser_capability?: string
+          _call_id?: string
+          _char_count?: number
+          _duration_ms?: number
+          _error_category?: string
+          _error_code?: string
+          _event_type: string
+          _locale?: string
+          _module_key?: string
+          _page_key?: string
+          _placement_key?: string
+          _playback_state?: string
+          _section_key?: string
+          _version_no?: number
+          _voice_name?: string
+        }
+        Returns: boolean
+      }
       audio_resolve_call: {
         Args: { _call_id: string; _placement_key?: string }
         Returns: Json
