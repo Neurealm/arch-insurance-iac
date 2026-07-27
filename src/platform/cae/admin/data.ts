@@ -257,6 +257,60 @@ export function usePlaybackEvents(tenantId: string | null) {
   });
 }
 
+export type AudioAnalyticsOverview = {
+  status: "ok" | "unauthorized";
+  message?: string;
+  tenantId?: string;
+  windowDays?: number;
+  generatedAt?: string;
+  totals?: {
+    requested: number; started: number; paused: number; resumed: number;
+    stopped: number; completed: number; transcripts: number;
+    unavailable: number; unsupported: number; errors: number; total: number;
+  };
+  topNarratives?: Array<{
+    call_id: string; title: string | null; module_key: string | null;
+    starts: number; completes: number; stops: number; transcripts: number; errors: number;
+  }>;
+  byModulePage?: Array<{
+    module_key: string; page_key: string;
+    starts: number; completes: number; transcripts: number; errors: number;
+  }>;
+  brokenCalls?: Array<{ call_id: string; failures: number; last_seen: string; category: string }>;
+  unusedPlacements?: Array<{
+    placement_key: string; module_key: string; page_key: string | null;
+    call_id: string; title: string | null;
+  }>;
+  brokenPlacements?: Array<{
+    placement_key: string; module_key: string; page_key: string | null;
+    call_id: string; reason: string;
+  }>;
+  versionTrends?: Array<{
+    call_id: string; version_no: number; starts: number; completes: number;
+    stops: number; errors: number; last_seen: string;
+  }>;
+};
+
+/**
+ * Administrative analytics rollup. All aggregation, tenant scoping, and
+ * permission checking happen inside `audio_analytics_overview`; the browser
+ * only supplies the workspace it is already operating in and a time window.
+ */
+export function useAudioAnalyticsOverview(tenantId: string | null, days: number) {
+  return useQuery({
+    queryKey: [CAE_QK, "cae", "analytics-overview", tenantId, days],
+    enabled: !!tenantId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("audio_analytics_overview", {
+        _tenant_id: tenantId!,
+        _days: days,
+      } as never);
+      if (error) throw error;
+      return (data ?? { status: "unauthorized" }) as unknown as AudioAnalyticsOverview;
+    },
+  });
+}
+
 /* ----------------------------------------------------------------- writes */
 
 export function useCaeInvalidate() {
