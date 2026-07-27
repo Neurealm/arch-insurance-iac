@@ -1,25 +1,25 @@
-import React from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { CaeFaultContext } from "./featureFlags";
-import { ContextualAudioContext, createInertContextualAudioValue, ContextualAudioProvider } from "./ContextualAudioProvider";
+import {
+  ContextualAudioContext,
+  createInertContextualAudioValue,
+  ContextualAudioProvider,
+} from "./ContextualAudioProvider";
 
-type State = { hasError: boolean };
+type BoundaryProps = { children: React.ReactNode; onFault: (error: unknown) => void };
+type BoundaryState = { hasError: boolean };
 
 /**
- * Global error handling for Contextual Audio Enrichment.
+ * Catches faults raised anywhere inside the Contextual Audio subtree.
  *
- * Audio is an enrichment layer: a fault inside the audio controller must never
- * take down a NeuGAIN.io module. When the audio subtree throws, this boundary
- * hard-stops speech and re-renders the application WITHOUT the audio provider,
- * supplying an inert controller instead. Every page keeps rendering; only
- * narration is lost, and no further speech can start.
+ * On fault it renders nothing and notifies its owner, which then re-renders the
+ * application without the audio provider. Audio is an enrichment layer, so a
+ * fault must never take a NeuGAIN.io module down with it.
  */
-export class ContextualAudioErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  State
-> {
-  state: State = { hasError: false };
+export class ContextualAudioErrorBoundary extends React.Component<BoundaryProps, BoundaryState> {
+  state: BoundaryState = { hasError: false };
 
-  static getDerivedStateFromError(): State {
+  static getDerivedStateFromError(): BoundaryState {
     return { hasError: true };
   }
 
@@ -27,21 +27,16 @@ export class ContextualAudioErrorBoundary extends React.Component<
     try {
       window.speechSynthesis?.cancel();
     } catch {
-      /* engine may throw while cancelling; ignore */
+      /* the engine may throw while cancelling; ignore */
     }
     // eslint-disable-next-line no-console
     console.error("[CAE] contextual audio boundary caught error", error);
+    this.props.onFault(error);
   }
 
   render() {
-    if (!this.state.hasError) return this.props.children;
-    return (
-      <CaeFaultContext.Provider value={true}>
-        <ContextualAudioContext.Provider value={createInertContextualAudioValue()}>
-          {this.props.children}
-        </ContextualAudioContext.Provider>
-      </CaeFaultContext.Provider>
-    );
+    if (this.state.hasError) return null;
+    return this.props.children;
   }
 }
 
@@ -49,12 +44,26 @@ export class ContextualAudioErrorBoundary extends React.Component<
  * The single approved global mount for Contextual Audio Enrichment.
  *
  * Composes the boundary and the provider so application shells cannot get the
- * order wrong. On fault the provider is dropped entirely and consumers receive
- * an inert controller.
+ * order wrong. If the audio controller faults, the provider is dropped and every
+ * consumer receives an inert controller: pages keep rendering, nothing speaks.
  */
 export function ContextualAudioRoot({ children }: { children: React.ReactNode }) {
+  const [faulted, setFaulted] = useState(false);
+  const onFault = useCallback(() => setFaulted(true), []);
+  const inertValue = useMemo(() => createInertContextualAudioValue(), []);
+
+  if (faulted) {
+    return (
+      <CaeFaultContext.Provider value={true}>
+        <ContextualAudioContext.Provider value={inertValue}>
+          {children}
+        </ContextualAudioContext.Provider>
+      </CaeFaultContext.Provider>
+    );
+  }
+
   return (
-    <ContextualAudioErrorBoundary>
+    <ContextualAudioErrorBoundary onFault={onFault}>
       <ContextualAudioProvider>{children}</ContextualAudioProvider>
     </ContextualAudioErrorBoundary>
   );
