@@ -170,6 +170,12 @@ export function AudioEnrichmentButton({
 
   const PrimaryIcon = isLoading ? Loader2 : isPlaying ? Pause : isPaused ? Play : Headphones;
 
+  // Deployment control: when the capability is switched off, the affordance
+  // disappears entirely and no narration request is ever issued.
+  if (!audioEnabled) return null;
+
+
+
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
       <Button
