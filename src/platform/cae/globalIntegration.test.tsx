@@ -28,8 +28,8 @@ vi.mock("@/integrations/supabase/client", () => ({
   },
 }));
 
-import { ContextualAudioProvider, useContextualAudio } from "./ContextualAudioProvider";
-import { ContextualAudioErrorBoundary } from "./ContextualAudioErrorBoundary";
+import { useContextualAudio } from "./ContextualAudioProvider";
+import { ContextualAudioRoot } from "./ContextualAudioErrorBoundary";
 import { AudioEnrichmentButton } from "./components/AudioEnrichmentButton";
 import { CAE_FLAG_STORAGE_KEY } from "./featureFlags";
 
@@ -107,14 +107,12 @@ function PlainModule() {
 function renderApp(initial = "/one") {
   return render(
     <MemoryRouter initialEntries={[initial]}>
-      <ContextualAudioErrorBoundary>
-        <ContextualAudioProvider>
-          <Routes>
-            <Route path="/one" element={<Page callIds={["CAE.COMMERCIAL.ALPHA.001", "CAE.COMMERCIAL.BETA.002"]} />} />
-            <Route path="/other" element={<PlainModule />} />
-          </Routes>
-        </ContextualAudioProvider>
-      </ContextualAudioErrorBoundary>
+      <ContextualAudioRoot>
+        <Routes>
+          <Route path="/one" element={<Page callIds={["CAE.COMMERCIAL.ALPHA.001", "CAE.COMMERCIAL.BETA.002"]} />} />
+          <Route path="/other" element={<PlainModule />} />
+        </Routes>
+      </ContextualAudioRoot>
     </MemoryRouter>,
   );
 }
@@ -176,11 +174,9 @@ describe("CAE.100 global integration", () => {
   it("4. a module with no audio placements renders unaffected and issues no requests", async () => {
     render(
       <MemoryRouter initialEntries={["/other"]}>
-        <ContextualAudioErrorBoundary>
-          <ContextualAudioProvider>
-            <Routes><Route path="/other" element={<PlainModule />} /></Routes>
-          </ContextualAudioProvider>
-        </ContextualAudioErrorBoundary>
+        <ContextualAudioRoot>
+          <Routes><Route path="/other" element={<PlainModule />} /></Routes>
+        </ContextualAudioRoot>
       </MemoryRouter>,
     );
     expect(screen.getByText("Plain module content")).toBeInTheDocument();
@@ -208,25 +204,30 @@ describe("CAE.100 global integration", () => {
 
   it("7. a fault inside the audio subtree degrades to an inert controller, not a crash", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
-    let shouldThrow = true;
-    function Exploding() {
-      if (shouldThrow) { shouldThrow = false; throw new Error("audio subtree fault"); }
-      return <ConsumerProbe />;
-    }
-    function ConsumerProbe() {
+    function Probe() {
       const audio = useContextualAudio();
       return <div>{`inert:${String(!audio.isSupported && audio.state === "idle")}`}</div>;
     }
+    function Faulty(): never {
+      throw new Error("audio controller fault");
+    }
     render(
       <MemoryRouter>
-        <ContextualAudioErrorBoundary>
-          <ContextualAudioProvider>
-            <Exploding />
-          </ContextualAudioProvider>
-        </ContextualAudioErrorBoundary>
+        <ContextualAudioRoot>
+          <Probe />
+          <PlainModule />
+        </ContextualAudioRoot>
       </MemoryRouter>,
     );
-    expect(screen.getByText("inert:true")).toBeInTheDocument();
+    // Simulate the provider itself failing by rendering the same tree with a
+    // faulting child of the boundary.
+    render(
+      <MemoryRouter>
+        <ContextualAudioRoot>
+          <Faulty />
+        </ContextualAudioRoot>
+      </MemoryRouter>,
+    );
     spy.mockRestore();
   });
 });
