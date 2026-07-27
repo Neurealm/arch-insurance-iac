@@ -77,7 +77,41 @@ export type ContextualAudioValue = {
   isActive: (callId: string) => boolean;
 };
 
-const ContextualAudioContext = createContext<ContextualAudioValue | null>(null);
+export const ContextualAudioContext = createContext<ContextualAudioValue | null>(null);
+
+/**
+ * Inert controller used when audio is disabled by feature flag or when the
+ * global boundary has caught a fault. Every action is a safe no-op so that
+ * pages containing audio affordances keep rendering normally.
+ */
+export function createInertContextualAudioValue(): ContextualAudioValue {
+  return {
+    state: "idle",
+    callId: null,
+    title: null,
+    estimatedDurationSeconds: null,
+    transcript: null,
+    resolved: null,
+    isLoading: false,
+    isPlaying: false,
+    isPaused: false,
+    error: null,
+    errorStatus: null,
+    isSupported: false,
+    voices: [],
+    preferredVoiceName: null,
+    setPreferredVoiceName: () => {},
+    activeVoiceName: null,
+    load: async () => null,
+    play: async () => {},
+    pause: () => {},
+    resume: () => {},
+    stop: () => {},
+    restart: async () => {},
+    isActive: () => false,
+  };
+}
+
 
 const VOICE_STORAGE_KEY = "cae:preferredVoice";
 const TENANT_STORAGE_KEY = "platform:activeTenant";
