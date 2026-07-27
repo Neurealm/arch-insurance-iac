@@ -90,7 +90,18 @@ export async function resolveContextualAudio(
     _placement_key: placementKey ?? null,
   } as never);
 
-  if (error) throw error;
+  if (error) {
+    // A transport or authorization failure is a "nothing to play here" outcome,
+    // not an application fault: signed-out visitors and users without the
+    // narrative permission must see clear wording rather than a retry prompt.
+    const code = String((error as { code?: string }).code ?? "");
+    const message = String(error.message ?? "");
+    const denied =
+      code === "42501" ||
+      code === "PGRST301" ||
+      /401|403|jwt|permission denied|not authorized|unauthorized/i.test(message);
+    return fail(denied ? "unauthorized" : "narrative_unavailable");
+  }
 
   const payload = (data ?? null) as Record<string, unknown> | null;
   if (!payload || typeof payload.status !== "string") {

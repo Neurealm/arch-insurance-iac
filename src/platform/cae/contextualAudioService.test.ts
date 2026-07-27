@@ -163,4 +163,16 @@ describe("resolveContextualAudio", () => {
       caeQueryKey("tenant-b", "CAE.PLATFORM.HOME.001"),
     );
   });
+
+  it("reports a signed-out or permission-denied resolve as unauthorized", async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: { code: "42501", message: "permission denied for function audio_resolve_call" } });
+    const result = await resolveContextualAudio("CAE.COMMERCIAL.EBITDA.001");
+    expect(result.status).toBe("unauthorized");
+  });
+
+  it("reports a transport failure as unavailable rather than throwing", async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: { code: "", message: "network request failed" } });
+    const result = await resolveContextualAudio("CAE.COMMERCIAL.EBITDA.001");
+    expect(result.status).toBe("narrative_unavailable");
+  });
 });
