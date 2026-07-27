@@ -897,6 +897,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
         </LazyRouteBoundary>
+        </ContextualAudioProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
