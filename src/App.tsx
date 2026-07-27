@@ -119,6 +119,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
 import ResetPassword from "./pages/auth/ResetPassword.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { ContextualAudioProvider } from "./platform/cae/ContextualAudioProvider.tsx";
+import CaeComponentFixture from "./platform/cae/dev/CaeComponentFixture.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
 import TechnologyTaxonomyPage from "./pages/admin/technology-taxonomy/TechnologyTaxonomyPage.tsx";
 import TechnologyProfilePage from "./pages/admin/technology-taxonomy/TechnologyProfilePage.tsx";
