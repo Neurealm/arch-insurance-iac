@@ -202,7 +202,7 @@ function Shell() {
       <Sidebar />
       <div className="flex-1 min-w-0 flex flex-col">
         <Header />
-        <main className="flex-1 mx-auto w-full max-w-7xl px-6 py-6">
+        <main className="flex-1 w-full px-6 py-6">
           <Outlet />
         </main>
       </div>
