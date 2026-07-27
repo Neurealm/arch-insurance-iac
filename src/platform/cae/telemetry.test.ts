@@ -33,9 +33,11 @@ describe("CAE telemetry (CAE.110)", () => {
   });
 
   it("classifies failure statuses into stable diagnostic categories", () => {
-    expect(errorCategoryFromStatus("not_found")).toBeTruthy();
-    expect(errorCategoryFromStatus("forbidden")).toBeTruthy();
-    expect(errorCategoryFromStatus("not_found")).not.toEqual(errorCategoryFromStatus("forbidden"));
+    expect(errorCategoryFromStatus("narrative_not_found")).toBeTruthy();
+    expect(errorCategoryFromStatus("unauthorized")).toBeTruthy();
+    expect(errorCategoryFromStatus("narrative_not_found")).not.toEqual(
+      errorCategoryFromStatus("unauthorized"),
+    );
   });
 
   it("reports a browser capability class", () => {
