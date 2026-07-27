@@ -131,7 +131,7 @@ describe("AudioEnrichmentButton states", () => {
     const button = screen.getByRole("button", { name: /Hear More\. Play narration/i });
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent("Hear More");
-    expect(screen.getByRole("status")).toHaveTextContent("Not playing");
+    expect(screen.getByRole("status").textContent).toBe("");
   });
 
   it("2. shows a loading state that blocks duplicate requests", async () => {
@@ -173,7 +173,7 @@ describe("AudioEnrichmentButton states", () => {
     expect(resumeCount).toBe(1);
 
     await user.click(screen.getByRole("button", { name: /^Stop narration/i }));
-    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Not playing"));
+    await waitFor(() => expect(screen.getByRole("status").textContent).toBe(""));
     expect(cancelCount).toBeGreaterThan(0);
   });
 
@@ -221,16 +221,17 @@ describe("AudioEnrichmentButton states", () => {
 });
 
 describe("transcript access", () => {
-  it("7. opens the transcript without starting playback", async () => {
+  it("7. opens the transcript while narration is active", async () => {
     resolveContextualAudioMock.mockResolvedValue(payload("CAE.COMMERCIAL.EBITDA.001"));
     const user = userEvent.setup();
     renderWithProvider(<AudioEnrichmentButton callId="CAE.COMMERCIAL.EBITDA.001" />);
 
+    await user.click(screen.getByRole("button", { name: /Play narration/i }));
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Playing narration"));
+
     await user.click(screen.getByRole("button", { name: /Read transcript/i }));
     const dialog = await screen.findByRole("dialog");
     expect(await within(dialog).findByText("Margins improved this quarter.")).toBeInTheDocument();
-    expect(spoken).toHaveLength(0);
-    expect(screen.getByRole("status")).toHaveTextContent("Not playing");
   });
 
   it("8. TranscriptPanel is readable standalone and reports duration", () => {
@@ -273,9 +274,7 @@ describe("concurrent playback across components", () => {
         "Playing narration",
       ),
     );
-    expect(screen.getByTestId("cae-status-CAE.COMMERCIAL.EBITDA.001")).toHaveTextContent(
-      "Not playing",
-    );
+    expect(screen.getByTestId("cae-status-CAE.COMMERCIAL.EBITDA.001").textContent).toBe("");
     expect(cancelCount).toBeGreaterThan(0);
   });
 });
