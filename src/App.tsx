@@ -442,6 +442,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+        <ContextualAudioProvider>
         <LazyRouteBoundary>
         <Routes>
           <Route path="/" element={<Landing />} />
