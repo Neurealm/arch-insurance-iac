@@ -41,6 +41,9 @@ function Probe() {
 
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {});
+  // React rethrows boundary-handled errors to window in development; the
+  // boundary has already handled it, so it must not fail the test run.
+  window.addEventListener("error", (event) => event.preventDefault());
 });
 
 describe("CAE.100 global error handling", () => {
