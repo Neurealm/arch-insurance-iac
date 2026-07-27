@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/eoc/AppShell";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings as SettingsIcon, Network, ArrowRight, UserCog, KeyRound, ClipboardList, Database, Building2 } from "lucide-react";
+import { Settings as SettingsIcon, Network, ArrowRight, UserCog, KeyRound, ClipboardList, Database, Building2, Headphones } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
@@ -39,6 +39,8 @@ export default function Settings() {
                 description="Manage the Domain records that describe how each Technology participates in the ETDM taxonomy." />
               <SettingsCard to="/crm" icon={Building2} title="Customer Relation Manager"
                 description="Manage customer companies, departments, teams, stakeholders, activities, and notes." />
+              <SettingsCard to="/commercial/administration" icon={Headphones} title="Contextual Audio Enrichment"
+                description="Manage module narration scripts, voices, and audio listening configuration." />
 
 
             </>
