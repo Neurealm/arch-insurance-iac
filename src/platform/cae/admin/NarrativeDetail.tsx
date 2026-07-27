@@ -43,14 +43,6 @@ export default function NarrativeDetail() {
   const activePlacementCount = linkedPlacements.filter((p) => p.is_enabled).length;
 
 
-  const transition = async (versionId: string, status: string) => {
-    try {
-      await setVersionStatus.mutateAsync({ versionId, status });
-      toast.success(`Version moved to ${status.replace("_", " ")}`);
-    } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
-    }
-  };
 
   const narrativeTransition = async (status: "retired" | "restore") => {
     if (!narrativeId) return;
