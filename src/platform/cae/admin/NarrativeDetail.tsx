@@ -83,7 +83,13 @@ export default function NarrativeDetail() {
           <p className="font-mono text-xs text-muted-foreground">{narrative.call_id}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={narrative.status === "published" ? "default" : "secondary"}>{narrative.status}</Badge>
+          <Badge variant={narrative.status === "published" ? "default" : "secondary"}>{statusLabel(narrative.status)}</Badge>
+          <Button variant="outline" size="sm" onClick={() => setCompareOpen(true)} disabled={(versions.data ?? []).length < 2}>
+            <GitCompare className="h-4 w-4" aria-hidden="true" /><span>Compare versions</span>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setAuditOpen(true)}>
+            <History className="h-4 w-4" aria-hidden="true" /><span>Audit history</span>
+          </Button>
           {hasPermission("audio.narrative.author") && (
             <Button asChild variant="outline" size="sm">
               <Link to={`/platform/audio/narratives/${narrative.id}/edit`}>
@@ -92,8 +98,8 @@ export default function NarrativeDetail() {
             </Button>
           )}
           {hasPermission("audio.narrative.retire") && narrative.status !== "retired" && (
-            <Button variant="outline" size="sm" onClick={() => narrativeTransition("retired")}>
-              <Archive className="h-4 w-4" aria-hidden="true" /><span>Retire</span>
+            <Button variant="outline" size="sm" onClick={() => setRetireOpen(true)}>
+              <Archive className="h-4 w-4" aria-hidden="true" /><span>Retire narrative</span>
             </Button>
           )}
           {hasPermission("audio.narrative.author") && narrative.status === "retired" && (
@@ -103,6 +109,23 @@ export default function NarrativeDetail() {
           )}
         </div>
       </div>
+
+      <CompareVersionsDialog open={compareOpen} onOpenChange={setCompareOpen} versions={versions.data ?? []} />
+      <AuditHistoryDialog open={auditOpen} onOpenChange={setAuditOpen} narrativeId={narrativeId} />
+      <ConfirmDialog
+        open={retireOpen}
+        onOpenChange={setRetireOpen}
+        title={`Retire ${narrative.call_id}?`}
+        description={
+          activePlacementCount > 0
+            ? `${activePlacementCount} active placement${activePlacementCount === 1 ? "" : "s"} reference this narrative. Retiring disables them and runtime users will no longer receive audio.`
+            : "No active placements reference this narrative. Runtime users will no longer receive audio for this call ID."
+        }
+        confirmLabel="Retire narrative"
+        destructive
+        onConfirm={() => narrativeTransition("retired")}
+      />
+
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-1">
