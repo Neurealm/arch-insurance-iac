@@ -22,8 +22,9 @@ export default function CommercialAdministration() {
         <CardContent>
           <Button variant="outline">
             <Headphones className="mr-2 h-4 w-4" />
-            Module Listening
+            Contextual Audio Enrichment
           </Button>
+
         </CardContent>
       </Card>
     </div>
