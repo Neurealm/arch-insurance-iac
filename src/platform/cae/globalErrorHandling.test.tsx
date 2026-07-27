@@ -44,6 +44,7 @@ beforeEach(() => {
   // React rethrows boundary-handled errors to window in development; the
   // boundary has already handled it, so it must not fail the test run.
   window.addEventListener("error", (event) => event.preventDefault());
+  vi.stubGlobal("reportError", () => {});
 });
 
 describe("CAE.100 global error handling", () => {
