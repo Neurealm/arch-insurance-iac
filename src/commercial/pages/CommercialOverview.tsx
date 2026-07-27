@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/platform/components/States";
 import { DirectionalBanner } from "@/commercial/components/DirectionalBanner";
 import { SeedMomentousButton } from "@/commercial/components/SeedMomentousButton";
+import { PlayIntroductionButton } from "@/commercial/components/PlayIntroductionButton";
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, CircleDashed, Circle } from "lucide-react";
 
@@ -59,7 +60,12 @@ export default function CommercialOverview() {
       {/* 1 · Workspace & 2 · Program */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle className="text-base">Workspace</CardTitle></CardHeader>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Workspace</CardTitle>
+              <PlayIntroductionButton />
+            </div>
+          </CardHeader>
           <CardContent className="text-sm space-y-1">
             <div><span className="text-muted-foreground">Name:</span> {activeTenant?.name ?? "—"}</div>
             <div><span className="text-muted-foreground">Slug:</span> <span className="font-mono text-xs">{activeTenant?.slug ?? "—"}</span></div>
