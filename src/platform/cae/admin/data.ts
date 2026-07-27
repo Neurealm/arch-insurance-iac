@@ -66,6 +66,7 @@ export type SpeechProfileRow = {
   volume: number;
   is_default: boolean;
   is_enabled: boolean;
+  fallback_profile_id: string | null;
 };
 
 export type PlacementRow = {
@@ -173,7 +174,7 @@ export function useSpeechProfiles(tenantId: string | null) {
       const { data, error } = await supabase
         .from("audio_speech_profiles")
         .select(
-          "id, tenant_id, profile_key, display_name, description, locale, fallback_locale, preferred_voice_names, rate, pitch, volume, is_default, is_enabled",
+          "id, tenant_id, profile_key, display_name, description, locale, fallback_locale, preferred_voice_names, rate, pitch, volume, is_default, is_enabled, fallback_profile_id",
         )
         .eq("tenant_id", tenantId!)
         .order("display_name");
