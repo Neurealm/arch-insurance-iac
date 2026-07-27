@@ -181,6 +181,7 @@ export type Database = {
           created_by: string | null
           effective_end_at: string | null
           effective_start_at: string | null
+          estimated_duration_seconds: number | null
           id: string
           narrative_id: string
           published_at: string | null
@@ -206,6 +207,7 @@ export type Database = {
           created_by?: string | null
           effective_end_at?: string | null
           effective_start_at?: string | null
+          estimated_duration_seconds?: number | null
           id?: string
           narrative_id: string
           published_at?: string | null
@@ -231,6 +233,7 @@ export type Database = {
           created_by?: string | null
           effective_end_at?: string | null
           effective_start_at?: string | null
+          estimated_duration_seconds?: number | null
           id?: string
           narrative_id?: string
           published_at?: string | null
