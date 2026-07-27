@@ -34,9 +34,7 @@ export class ContextualAudioErrorBoundary extends React.Component<
   render() {
     if (!this.state.hasError) return this.props.children;
     return (
-      <ContextualAudioContext.Provider value={createInertContextualAudioValue()}>
-        {this.props.children}
-      </ContextualAudioContext.Provider>
+      <CaeFaultContext.Provider value>{this.props.children}</CaeFaultContext.Provider>
     );
   }
 }
