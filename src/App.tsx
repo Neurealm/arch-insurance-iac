@@ -920,6 +920,7 @@ const App = () => (
         </Routes>
         </LazyRouteBoundary>
         </ContextualAudioProvider>
+        </ContextualAudioErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
