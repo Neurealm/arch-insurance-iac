@@ -21,7 +21,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LoadingState, ErrorState, EmptyState, ForbiddenState, sanitizeError } from "@/platform/components/States";
+import { LoadingState, ErrorState, EmptyState, ForbiddenState, sanitizeError, errorMessage } from "@/platform/components/States";
 import {
   usePronunciationRules, useUpsertPronunciation, useDeletePronunciation,
   useSpeechProfiles, type PronunciationRow,
@@ -111,7 +111,7 @@ export default function PronunciationDictionary() {
       toast.success(draft.id ? "Rule updated" : "Rule created");
       setOpen(false);
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     }
   };
 
@@ -121,7 +121,7 @@ export default function PronunciationDictionary() {
       await remove.mutateAsync(pendingDelete.id);
       toast.success("Rule removed");
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     } finally {
       setPendingDelete(null);
     }

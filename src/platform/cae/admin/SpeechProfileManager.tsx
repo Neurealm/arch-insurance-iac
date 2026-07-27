@@ -18,7 +18,7 @@ import {
 import {
   Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { LoadingState, ErrorState, EmptyState, ForbiddenState, sanitizeError } from "@/platform/components/States";
+import { LoadingState, ErrorState, EmptyState, ForbiddenState, sanitizeError, errorMessage } from "@/platform/components/States";
 import {
   useSpeechProfiles, useUpsertSpeechProfile, usePronunciationRules, type SpeechProfileRow,
 } from "./data";
@@ -125,7 +125,7 @@ export default function SpeechProfileManager() {
       toast.success(draft.id ? "Profile updated" : "Profile created");
       setOpen(false);
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     }
   };
 

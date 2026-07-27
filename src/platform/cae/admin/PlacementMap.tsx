@@ -22,7 +22,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LoadingState, ErrorState, EmptyState, ForbiddenState, sanitizeError } from "@/platform/components/States";
+import { LoadingState, ErrorState, EmptyState, ForbiddenState, sanitizeError, errorMessage } from "@/platform/components/States";
 import {
   usePlacements, useNarratives, useUpsertPlacement, useDeletePlacement, type PlacementRow,
 } from "./data";
@@ -140,7 +140,7 @@ export default function PlacementMap() {
       toast.success(draft.id ? "Placement updated" : "Placement created");
       setOpen(false);
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     }
   };
 
@@ -150,7 +150,7 @@ export default function PlacementMap() {
       await remove.mutateAsync(pendingDelete.id);
       toast.success("Placement removed");
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     } finally {
       setPendingDelete(null);
     }

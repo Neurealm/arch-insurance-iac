@@ -10,7 +10,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { ConfirmDialog } from "@/platform/components/ConfirmDialog";
-import { LoadingState, ErrorState, EmptyState, sanitizeError } from "@/platform/components/States";
+import { LoadingState, ErrorState, EmptyState, sanitizeError, errorMessage } from "@/platform/components/States";
 import { TranscriptPanel } from "../components/TranscriptPanel";
 import {
   useNarratives, useNarrativeVersions, usePlacements, useSetNarrativeStatus, useSpeechProfiles,
@@ -50,7 +50,7 @@ export default function NarrativeDetail() {
       await setNarrativeStatus.mutateAsync({ narrativeId, status });
       toast.success(status === "retired" ? "Narrative retired" : "Narrative restored");
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     }
   };
 

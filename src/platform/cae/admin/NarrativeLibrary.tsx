@@ -17,7 +17,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { LoadingState, ErrorState, EmptyState, sanitizeError } from "@/platform/components/States";
+import { LoadingState, ErrorState, EmptyState, sanitizeError, errorMessage } from "@/platform/components/States";
 import {
   useNarratives, useNarrativeVersions, useSetNarrativeStatus, useDuplicateNarrative,
   useSetVersionStatus, type NarrativeRow,
@@ -99,7 +99,7 @@ export default function NarrativeLibrary() {
       await setStatusMutation.mutateAsync({ narrativeId: row.id, status: next });
       toast.success(next === "retired" ? `${row.call_id} retired` : `${row.call_id} restored`);
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     }
   };
 
@@ -293,7 +293,7 @@ function DuplicateDialog({ row, onClose }: { row: NarrativeRow | null; onClose: 
       onClose();
       navigate(`/platform/audio/narratives/${id}/edit`);
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     }
   };
 
@@ -342,7 +342,7 @@ function SubmitForReviewDialog({
       toast.success("Version submitted for review");
       onClose();
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     }
   };
 
