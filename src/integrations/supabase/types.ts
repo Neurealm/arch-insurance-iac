@@ -170,6 +170,540 @@ export type Database = {
           },
         ]
       }
+      audio_narrative_versions: {
+        Row: {
+          approved_at: string | null
+          approver_user_id: string | null
+          author_user_id: string | null
+          change_summary: string | null
+          content_hash: string | null
+          created_at: string
+          created_by: string | null
+          effective_end_at: string | null
+          effective_start_at: string | null
+          id: string
+          narrative_id: string
+          published_at: string | null
+          retired_at: string | null
+          reviewer_user_id: string | null
+          source_text: string
+          speech_markup: string | null
+          speech_profile_id: string | null
+          speech_text: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          version_no: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_user_id?: string | null
+          author_user_id?: string | null
+          change_summary?: string | null
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_end_at?: string | null
+          effective_start_at?: string | null
+          id?: string
+          narrative_id: string
+          published_at?: string | null
+          retired_at?: string | null
+          reviewer_user_id?: string | null
+          source_text: string
+          speech_markup?: string | null
+          speech_profile_id?: string | null
+          speech_text?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version_no: number
+        }
+        Update: {
+          approved_at?: string | null
+          approver_user_id?: string | null
+          author_user_id?: string | null
+          change_summary?: string | null
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_end_at?: string | null
+          effective_start_at?: string | null
+          id?: string
+          narrative_id?: string
+          published_at?: string | null
+          retired_at?: string | null
+          reviewer_user_id?: string | null
+          source_text?: string
+          speech_markup?: string | null
+          speech_profile_id?: string | null
+          speech_text?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version_no?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_narrative_versions_narrative_id_fkey"
+            columns: ["narrative_id"]
+            isOneToOne: false
+            referencedRelation: "audio_narratives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_narrative_versions_speech_profile_id_fkey"
+            columns: ["speech_profile_id"]
+            isOneToOne: false
+            referencedRelation: "audio_speech_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_narrative_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_narratives: {
+        Row: {
+          active_version_id: string | null
+          audience: string
+          call_id: string
+          created_at: string
+          created_by: string | null
+          default_locale: string
+          default_speech_profile_id: string | null
+          description: string | null
+          id: string
+          module_key: string
+          name: string
+          owner_user_id: string | null
+          scope_reference: string | null
+          scope_type: string
+          status: string
+          tenant_id: string
+          topic_key: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active_version_id?: string | null
+          audience?: string
+          call_id: string
+          created_at?: string
+          created_by?: string | null
+          default_locale?: string
+          default_speech_profile_id?: string | null
+          description?: string | null
+          id?: string
+          module_key: string
+          name: string
+          owner_user_id?: string | null
+          scope_reference?: string | null
+          scope_type?: string
+          status?: string
+          tenant_id: string
+          topic_key: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active_version_id?: string | null
+          audience?: string
+          call_id?: string
+          created_at?: string
+          created_by?: string | null
+          default_locale?: string
+          default_speech_profile_id?: string | null
+          description?: string | null
+          id?: string
+          module_key?: string
+          name?: string
+          owner_user_id?: string | null
+          scope_reference?: string | null
+          scope_type?: string
+          status?: string
+          tenant_id?: string
+          topic_key?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_narratives_active_version_fk"
+            columns: ["active_version_id"]
+            isOneToOne: false
+            referencedRelation: "audio_narrative_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_narratives_default_speech_profile_id_fkey"
+            columns: ["default_speech_profile_id"]
+            isOneToOne: false
+            referencedRelation: "audio_speech_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_narratives_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_placements: {
+        Row: {
+          audience: string
+          button_label: string | null
+          call_id: string
+          component_key: string | null
+          created_at: string
+          created_by: string | null
+          display_variant: string
+          id: string
+          is_enabled: boolean
+          module_key: string
+          narrative_id: string
+          page_key: string | null
+          placement_key: string
+          record_context_type: string | null
+          required_permission_code: string | null
+          route_pattern: string | null
+          section_key: string | null
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          audience?: string
+          button_label?: string | null
+          call_id: string
+          component_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_variant?: string
+          id?: string
+          is_enabled?: boolean
+          module_key: string
+          narrative_id: string
+          page_key?: string | null
+          placement_key: string
+          record_context_type?: string | null
+          required_permission_code?: string | null
+          route_pattern?: string | null
+          section_key?: string | null
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          audience?: string
+          button_label?: string | null
+          call_id?: string
+          component_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_variant?: string
+          id?: string
+          is_enabled?: boolean
+          module_key?: string
+          narrative_id?: string
+          page_key?: string | null
+          placement_key?: string
+          record_context_type?: string | null
+          required_permission_code?: string | null
+          route_pattern?: string | null
+          section_key?: string | null
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_placements_narrative_id_fkey"
+            columns: ["narrative_id"]
+            isOneToOne: false
+            referencedRelation: "audio_narratives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_placements_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_playback_events: {
+        Row: {
+          browser_supported: boolean | null
+          call_id: string | null
+          char_count: number | null
+          duration_ms: number | null
+          error_code: string | null
+          event_type: string
+          id: string
+          locale: string | null
+          narrative_id: string | null
+          narrative_version_id: string | null
+          occurred_at: string
+          placement_key: string | null
+          tenant_id: string
+          user_id: string | null
+          voice_name: string | null
+        }
+        Insert: {
+          browser_supported?: boolean | null
+          call_id?: string | null
+          char_count?: number | null
+          duration_ms?: number | null
+          error_code?: string | null
+          event_type: string
+          id?: string
+          locale?: string | null
+          narrative_id?: string | null
+          narrative_version_id?: string | null
+          occurred_at?: string
+          placement_key?: string | null
+          tenant_id: string
+          user_id?: string | null
+          voice_name?: string | null
+        }
+        Update: {
+          browser_supported?: boolean | null
+          call_id?: string | null
+          char_count?: number | null
+          duration_ms?: number | null
+          error_code?: string | null
+          event_type?: string
+          id?: string
+          locale?: string | null
+          narrative_id?: string | null
+          narrative_version_id?: string | null
+          occurred_at?: string
+          placement_key?: string | null
+          tenant_id?: string
+          user_id?: string | null
+          voice_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_playback_events_narrative_id_fkey"
+            columns: ["narrative_id"]
+            isOneToOne: false
+            referencedRelation: "audio_narratives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_playback_events_narrative_version_id_fkey"
+            columns: ["narrative_version_id"]
+            isOneToOne: false
+            referencedRelation: "audio_narrative_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_playback_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_pronunciation_rules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_enabled: boolean
+          locale: string | null
+          match_text: string
+          match_type: string
+          module_key: string | null
+          priority: number
+          replacement_text: string
+          scope: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_enabled?: boolean
+          locale?: string | null
+          match_text: string
+          match_type?: string
+          module_key?: string | null
+          priority?: number
+          replacement_text: string
+          scope?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_enabled?: boolean
+          locale?: string | null
+          match_text?: string
+          match_type?: string
+          module_key?: string | null
+          priority?: number
+          replacement_text?: string
+          scope?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_pronunciation_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_speech_profiles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_name: string
+          fallback_locale: string
+          id: string
+          is_default: boolean
+          is_enabled: boolean
+          locale: string
+          pitch: number
+          preferred_voice_names: string[]
+          profile_key: string
+          rate: number
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          volume: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_name: string
+          fallback_locale?: string
+          id?: string
+          is_default?: boolean
+          is_enabled?: boolean
+          locale?: string
+          pitch?: number
+          preferred_voice_names?: string[]
+          profile_key: string
+          rate?: number
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          volume?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_name?: string
+          fallback_locale?: string
+          id?: string
+          is_default?: boolean
+          is_enabled?: boolean
+          locale?: string
+          pitch?: number
+          preferred_voice_names?: string[]
+          profile_key?: string
+          rate?: number
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          volume?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_speech_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_variable_definitions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_enabled: boolean
+          module_key: string
+          required_permission_code: string | null
+          resolver_key: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          value_type: string
+          variable_key: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          module_key: string
+          required_permission_code?: string | null
+          resolver_key: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          value_type?: string
+          variable_key: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          module_key?: string
+          required_permission_code?: string | null
+          resolver_key?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          value_type?: string
+          variable_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_variable_definitions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_events: {
         Row: {
           action_code: string
@@ -9182,6 +9716,11 @@ export type Database = {
         Args: { _permission_code: string; _role_id: string }
         Returns: undefined
       }
+      audio_can_manage: {
+        Args: { _permission_code: string; _tenant_id: string }
+        Returns: boolean
+      }
+      audio_can_view: { Args: { _tenant_id: string }; Returns: boolean }
       bootstrap_commercial_workspace: { Args: never; Returns: Json }
       bootstrap_tenant_default_roles: {
         Args: { _actor: string; _tenant_id: string }
