@@ -62,7 +62,25 @@ export function ForbiddenState({ permission }: { permission?: string }) {
 }
 
 /** Strips PostgREST/PG noise from server errors before showing to end users. */
+/**
+ * Extracts a readable message from anything thrown, including Supabase/PostgREST
+ * error objects (which are plain objects, so `String(err)` yields "[object Object]").
+ */
+export function errorMessage(err: unknown): string {
+  if (!err) return "Unexpected error.";
+  if (typeof err === "string") return err;
+  if (err instanceof Error) return err.message;
+  if (typeof err === "object") {
+    const e = err as { message?: unknown; details?: unknown; hint?: unknown; error_description?: unknown };
+    const parts = [e.message, e.details, e.hint, e.error_description]
+      .filter((p): p is string => typeof p === "string" && p.trim().length > 0);
+    if (parts.length) return parts[0];
+  }
+  return "Unexpected error.";
+}
+
 export function sanitizeError(message: string): string {
+
   if (!message) return "Unexpected error.";
   const stripped = message
     .replace(/^permission denied for [^:]+:\s*/i, "")

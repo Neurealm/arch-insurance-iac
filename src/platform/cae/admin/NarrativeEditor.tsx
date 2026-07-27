@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { LoadingState, ErrorState, sanitizeError } from "@/platform/components/States";
+import { LoadingState, ErrorState, sanitizeError, errorMessage } from "@/platform/components/States";
 import { TranscriptPanel } from "../components/TranscriptPanel";
 import { VariablePreviewPanel } from "./VariablePreviewPanel";
 import { useVariableRegistry } from "../variables/useVariableRegistry";
@@ -196,7 +196,7 @@ export default function NarrativeEditor() {
       toast.success("Draft saved");
       navigate(`/platform/audio/narratives/${narrativeId}`);
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     }
   };
 

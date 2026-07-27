@@ -23,7 +23,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { sanitizeError } from "@/platform/components/States";
+import { sanitizeError, errorMessage } from "@/platform/components/States";
 import {
   useCreateDraftFromVersion, useNarrativeAudit, useVersionTransition,
   type LifecycleAction, type VersionRow,
@@ -58,7 +58,7 @@ export function VersionLifecycleActions({
       toast.success(`Version v${version.version_no} → ${statusLabel(actionTarget(action))}`);
       onDone?.();
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     }
   };
 
@@ -68,7 +68,7 @@ export function VersionLifecycleActions({
       toast.success(`New draft created from v${version.version_no}`);
       onDone?.();
     } catch (err) {
-      toast.error(sanitizeError(err instanceof Error ? err.message : String(err)));
+      toast.error(sanitizeError(errorMessage(err)));
     }
   };
 
