@@ -19,6 +19,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useContextualAudio } from "../ContextualAudioProvider";
+import { useContextualAudioEnabled } from "../featureFlags";
 import { resolveContextualAudio } from "../contextualAudioService";
 import { TranscriptPanel } from "./TranscriptPanel";
 import { friendlyCaeMessage, useCaeCallState, type CaeUserState } from "./useCaeCallState";
