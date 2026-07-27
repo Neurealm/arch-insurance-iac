@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AudioEnrichmentButton } from "../components/AudioEnrichmentButton";
 import { AudioPlaybackControls } from "../components/AudioPlaybackControls";
@@ -58,7 +58,7 @@ export default function CaeComponentFixture() {
 
       <Card>
         <CardHeader>
-          <CardTitle asChild><h2 className="text-base font-semibold tracking-tight">Controller state</h2></CardTitle>
+          <h2 className="text-base font-semibold tracking-tight">Controller state</h2>
           <CardDescription>{supportBanner}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-1 text-sm text-muted-foreground">
@@ -72,7 +72,7 @@ export default function CaeComponentFixture() {
       {SCENARIOS.map((scenario) => (
         <Card key={scenario.key}>
           <CardHeader>
-            <CardTitle asChild><h2 className="text-base font-semibold tracking-tight">{scenario.title}</h2></CardTitle>
+            <h2 className="text-base font-semibold tracking-tight">{scenario.title}</h2>
             <CardDescription>
               {scenario.description} ({scenario.callId})
             </CardDescription>
@@ -86,7 +86,7 @@ export default function CaeComponentFixture() {
 
       <Card>
         <CardHeader>
-          <CardTitle asChild><h2 className="text-base font-semibold tracking-tight">4. Unsupported browser state</h2></CardTitle>
+          <h2 className="text-base font-semibold tracking-tight">4. Unsupported browser state</h2>
           <CardDescription>
             Removes SpeechSynthesis from this window to exercise the fallback path. Reload to
             restore.
@@ -114,7 +114,7 @@ export default function CaeComponentFixture() {
 
       <Card>
         <CardHeader>
-          <CardTitle asChild><h2 className="text-base font-semibold tracking-tight">5. Concurrent playback attempt</h2></CardTitle>
+          <h2 className="text-base font-semibold tracking-tight">5. Concurrent playback attempt</h2>
           <CardDescription>
             Two buttons target different narratives. Starting either one stops the other.
           </CardDescription>
@@ -127,7 +127,7 @@ export default function CaeComponentFixture() {
 
       <Card>
         <CardHeader>
-          <CardTitle asChild><h2 className="text-base font-semibold tracking-tight">6. Transcript access without playback</h2></CardTitle>
+          <h2 className="text-base font-semibold tracking-tight">6. Transcript access without playback</h2>
           <CardDescription>
             The transcript button resolves text independently of the speech controller.
           </CardDescription>
