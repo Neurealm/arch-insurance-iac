@@ -334,22 +334,14 @@ export default function NarrativeEditor() {
                 <span>Estimated listening time {formatDuration(duration)}</span>
               </div>
 
-              <div>
-                <span className="text-xs font-medium text-foreground">Dynamic variable tokens</span>
-                <div className="mt-1 flex flex-wrap gap-1.5">
-                  {tokens.length === 0 && <span className="text-xs text-muted-foreground">None referenced.</span>}
-                  {tokens.map((t) => (
-                    <Badge key={t} variant={knownTokens.has(t) ? "secondary" : "outline"}>
-                      {`{{${t}}}`}{knownTokens.has(t) ? "" : " · unregistered"}
-                    </Badge>
-                  ))}
-                </div>
-                {(variables.data ?? []).length > 0 && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Available: {(variables.data ?? []).map((v) => v.variable_key).join(", ")}
-                  </p>
-                )}
-              </div>
+              <VariablePreviewPanel
+                sourceText={form.sourceText}
+                spokenSource={spokenText}
+                registry={registry}
+                definitions={definitions}
+                context={previewContext}
+              />
+
 
               <div className="flex items-center gap-2">
                 <Button type="button" variant="outline" onClick={runPreview} disabled={!preview.isSupported || !spokenText.trim()}>
