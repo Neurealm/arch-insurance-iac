@@ -434,6 +434,74 @@ export function useSetVersionStatus() {
   });
 }
 
+/* ------------------------------------------------- CAE.080 lifecycle layer */
+
+export type LifecycleAction = "submit" | "approve" | "reject" | "publish" | "retire";
+
+export type AuditRow = {
+  id: string;
+  occurred_at: string;
+  action_code: string;
+  object_type: string;
+  object_id: string | null;
+  actor_user_id: string | null;
+  actor_name: string | null;
+  previous_status: string | null;
+  new_status: string | null;
+  version_no: number | null;
+  comment: string | null;
+};
+
+/**
+ * Governed lifecycle transition. Allowed transitions, permission checks,
+ * separation of duties and audit capture all happen inside the database.
+ */
+export function useVersionTransition() {
+  const invalidate = useCaeInvalidate();
+  return useMutation({
+    mutationFn: async (input: { versionId: string; action: LifecycleAction; comment?: string | null }) => {
+      const { data, error } = await supabase.rpc("audio_version_transition", {
+        _version_id: input.versionId,
+        _action: input.action,
+        _comment: input.comment ?? null,
+      });
+      if (error) throw error;
+      return data as unknown as { status: string; version_no: number };
+    },
+    onSuccess: invalidate,
+  });
+}
+
+/** Restore-as-new-draft / edit-published: never mutates the source version. */
+export function useCreateDraftFromVersion() {
+  const invalidate = useCaeInvalidate();
+  return useMutation({
+    mutationFn: async (input: { sourceVersionId: string; changeSummary?: string | null }) => {
+      const { data, error } = await supabase.rpc("audio_version_create_draft_from", {
+        _source_version_id: input.sourceVersionId,
+        _change_summary: input.changeSummary ?? null,
+      });
+      if (error) throw error;
+      return data as unknown as string;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useNarrativeAudit(narrativeId: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: [CAE_QK, "cae", "audit", narrativeId ?? null],
+    enabled: !!narrativeId && enabled,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("audio_admin_narrative_audit", {
+        _narrative_id: narrativeId!,
+      });
+      if (error) throw error;
+      return (data ?? []) as AuditRow[];
+    },
+  });
+}
+
 export function useUpsertSpeechProfile() {
   const invalidate = useCaeInvalidate();
   return useMutation({
