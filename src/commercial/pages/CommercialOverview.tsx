@@ -8,6 +8,8 @@ import { EmptyState } from "@/platform/components/States";
 import { DirectionalBanner } from "@/commercial/components/DirectionalBanner";
 import { SeedMomentousButton } from "@/commercial/components/SeedMomentousButton";
 import { PlayIntroductionButton } from "@/commercial/components/PlayIntroductionButton";
+import { AudioEnrichmentButton } from "@/platform/cae";
+
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, CircleDashed, Circle } from "lucide-react";
 
