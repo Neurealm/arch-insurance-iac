@@ -23,6 +23,7 @@ import { useContextualAudioEnabled } from "../featureFlags";
 import { resolveContextualAudio } from "../contextualAudioService";
 import { TranscriptPanel } from "./TranscriptPanel";
 import { friendlyCaeMessage, useCaeCallState, type CaeUserState } from "./useCaeCallState";
+import { classifyBrowser, recordAudioEvent } from "../telemetry";
 
 export type AudioEnrichmentDisplayVariant = "default" | "outline" | "ghost" | "compact";
 
@@ -218,7 +219,16 @@ export function AudioEnrichmentButton({
           variant="ghost"
           size={compact ? "sm" : "default"}
           className="min-h-11 gap-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          onClick={() => setTranscriptOpen(true)}
+          onClick={() => {
+            // Only identifiers are reported: transcript content never leaves the page.
+            recordAudioEvent("transcript_opened", {
+              callId,
+              placementKey: placementId ?? null,
+              playbackState: userState,
+              browserCapability: classifyBrowser(),
+            });
+            setTranscriptOpen(true);
+          }}
           disabled={disabled}
           aria-label={`Read transcript: ${label}`}
         >
