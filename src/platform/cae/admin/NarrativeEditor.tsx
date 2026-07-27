@@ -14,15 +14,20 @@ import {
 } from "@/components/ui/select";
 import { LoadingState, ErrorState, sanitizeError } from "@/platform/components/States";
 import { TranscriptPanel } from "../components/TranscriptPanel";
+import { VariablePreviewPanel } from "./VariablePreviewPanel";
+import { useVariableRegistry } from "../variables/useVariableRegistry";
+import { buildRegistry } from "../variables/registry";
+import type { CaeVariableContext } from "../variables/types";
 import {
   useNarratives, useNarrativeVersions, useSpeechProfiles, usePronunciationRules,
-  useVariableDefinitions, useCreateNarrative, useUpdateNarrative, useSaveDraftVersion,
+  useCreateNarrative, useUpdateNarrative, useSaveDraftVersion,
   useCreateDraftVersion,
 } from "./data";
 import {
-  countWords, estimateDurationSeconds, extractVariableTokens, formatDuration,
+  countWords, estimateDurationSeconds, formatDuration,
   isValidCallId, parseCallId, toRuntimeProfile, toRuntimeRules, useDraftPreview,
 } from "./helpers";
+
 
 const NONE = "__none__";
 const SCOPE_TYPES = ["page", "record", "section", "global"];
@@ -53,13 +58,14 @@ export default function NarrativeEditor() {
   const { narrativeId } = useParams<{ narrativeId: string }>();
   const isNew = !narrativeId;
   const navigate = useNavigate();
-  const { activeTenantId } = useAccess();
+  const { activeTenantId, activeTenant } = useAccess();
 
   const narratives = useNarratives(activeTenantId);
   const versions = useNarrativeVersions(activeTenantId, narrativeId);
   const profiles = useSpeechProfiles(activeTenantId);
   const rules = usePronunciationRules(activeTenantId);
-  const variables = useVariableDefinitions(activeTenantId);
+  const variables = useVariableRegistry(activeTenantId);
+
 
   const createNarrative = useCreateNarrative();
   const updateNarrative = useUpdateNarrative();
@@ -101,8 +107,18 @@ export default function NarrativeEditor() {
   const spokenText = form.speechText.trim() || form.sourceText;
   const words = countWords(spokenText);
   const duration = estimateDurationSeconds(spokenText, Number(profile?.rate ?? 1));
-  const tokens = useMemo(() => extractVariableTokens(`${form.sourceText} ${form.speechText}`), [form.sourceText, form.speechText]);
-  const knownTokens = new Set((variables.data ?? []).map((v) => v.variable_key));
+  const definitions = useMemo(() => variables.data ?? [], [variables.data]);
+  const registry = useMemo(() => buildRegistry(definitions), [definitions]);
+  const previewContext = useMemo<CaeVariableContext>(() => ({
+    tenantId: activeTenantId,
+    platform: {
+      tenantId: activeTenantId,
+      tenantName: activeTenant?.name ?? null,
+      moduleName: parsed?.moduleKey ?? narrative?.module_key ?? null,
+      pageName: form.name || narrative?.name || null,
+    },
+  }), [activeTenantId, activeTenant?.name, parsed?.moduleKey, narrative?.module_key, narrative?.name, form.name]);
+
 
   const callIdError = form.callId && !isValidCallId(form.callId)
     ? "Use the format CAE.MODULE.TOPIC.001."
@@ -318,22 +334,14 @@ export default function NarrativeEditor() {
                 <span>Estimated listening time {formatDuration(duration)}</span>
               </div>
 
-              <div>
-                <span className="text-xs font-medium text-foreground">Dynamic variable tokens</span>
-                <div className="mt-1 flex flex-wrap gap-1.5">
-                  {tokens.length === 0 && <span className="text-xs text-muted-foreground">None referenced.</span>}
-                  {tokens.map((t) => (
-                    <Badge key={t} variant={knownTokens.has(t) ? "secondary" : "outline"}>
-                      {`{{${t}}}`}{knownTokens.has(t) ? "" : " · unregistered"}
-                    </Badge>
-                  ))}
-                </div>
-                {(variables.data ?? []).length > 0 && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Available: {(variables.data ?? []).map((v) => v.variable_key).join(", ")}
-                  </p>
-                )}
-              </div>
+              <VariablePreviewPanel
+                sourceText={form.sourceText}
+                spokenSource={spokenText}
+                registry={registry}
+                definitions={definitions}
+                context={previewContext}
+              />
+
 
               <div className="flex items-center gap-2">
                 <Button type="button" variant="outline" onClick={runPreview} disabled={!preview.isSupported || !spokenText.trim()}>

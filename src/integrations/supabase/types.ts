@@ -666,11 +666,17 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          display_format: string
+          display_name: string
           id: string
           is_enabled: boolean
+          missing_fallback: string
           module_key: string
+          required_context: string[]
           required_permission_code: string | null
           resolver_key: string
+          sensitivity: string
+          spoken_format: string
           tenant_id: string
           updated_at: string
           updated_by: string | null
@@ -681,11 +687,17 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          display_format?: string
+          display_name: string
           id?: string
           is_enabled?: boolean
+          missing_fallback?: string
           module_key: string
+          required_context?: string[]
           required_permission_code?: string | null
           resolver_key: string
+          sensitivity?: string
+          spoken_format?: string
           tenant_id: string
           updated_at?: string
           updated_by?: string | null
@@ -696,11 +708,17 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          display_format?: string
+          display_name?: string
           id?: string
           is_enabled?: boolean
+          missing_fallback?: string
           module_key?: string
+          required_context?: string[]
           required_permission_code?: string | null
           resolver_key?: string
+          sensitivity?: string
+          spoken_format?: string
           tenant_id?: string
           updated_at?: string
           updated_by?: string | null
@@ -9808,6 +9826,25 @@ export type Database = {
       audio_resolve_call: {
         Args: { _call_id: string; _placement_key?: string }
         Returns: Json
+      }
+      audio_variable_registry: {
+        Args: { _tenant_id?: string }
+        Returns: {
+          description: string
+          display_format: string
+          display_name: string
+          is_authorized: boolean
+          is_enabled: boolean
+          missing_fallback: string
+          module_key: string
+          required_context: string[]
+          required_permission_code: string
+          resolver_key: string
+          sensitivity: string
+          spoken_format: string
+          value_type: string
+          variable_key: string
+        }[]
       }
       audio_version_create_draft_from: {
         Args: { _change_summary?: string; _source_version_id: string }
