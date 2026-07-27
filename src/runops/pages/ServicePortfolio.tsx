@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { AudioEnrichmentButton } from "@/platform/cae";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -435,7 +436,11 @@ export default function ServicePortfolio() {
             readiness score.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <AudioEnrichmentButton
+            callId="CAE.RUNOPS.SERVICE_HEALTH.001"
+            placementId="CAE.PLACE.RUNOPS.SERVICES.HEALTH"
+          />
           <Badge variant="outline" className="border-slate-200 bg-slate-50 text-[11px]">Role: {ops.role}</Badge>
           <div className="inline-flex overflow-hidden rounded-md border border-slate-200">
             <button aria-pressed={view === "table"} onClick={() => setView("table")}

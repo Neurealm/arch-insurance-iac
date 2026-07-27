@@ -8,6 +8,8 @@ import { EmptyState } from "@/platform/components/States";
 import { DirectionalBanner } from "@/commercial/components/DirectionalBanner";
 import { SeedMomentousButton } from "@/commercial/components/SeedMomentousButton";
 import { PlayIntroductionButton } from "@/commercial/components/PlayIntroductionButton";
+import { AudioEnrichmentButton } from "@/platform/cae";
+
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, CircleDashed, Circle } from "lucide-react";
 
@@ -76,11 +78,18 @@ export default function CommercialOverview() {
 
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="text-base">Program</CardTitle>
-              {!program && !isLoading && <SeedMomentousButton />}
+              <div className="flex flex-wrap items-center gap-2">
+                <AudioEnrichmentButton
+                  callId="CAE.COMMERCIAL.DEAL_OVERVIEW.001"
+                  placementId="CAE.PLACE.COMMERCIAL.OVERVIEW.DEAL_SUMMARY"
+                />
+                {!program && !isLoading && <SeedMomentousButton />}
+              </div>
             </div>
           </CardHeader>
+
           <CardContent className="text-sm space-y-1">
             {isLoading ? (
               <div className="text-muted-foreground">Loading…</div>

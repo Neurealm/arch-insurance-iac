@@ -21,6 +21,7 @@ import type { ModelResult, ModelRun } from "@/commercial/hooks/useRevenueRuns";
 import { useCommercialPnlBundle, useTriggerPnlRun } from "@/commercial/hooks/usePnlRuns";
 import { LoadingState } from "@/platform/components/States";
 import { DirectionalBanner } from "@/commercial/components/DirectionalBanner";
+import { AudioEnrichmentButton } from "@/platform/cae";
 
 const FYS = ["FY2027", "FY2028", "FY2029", "FY2030", "FY2031"] as const;
 const TOTAL_PERIOD = "FY2027-FY2031";
@@ -188,7 +189,11 @@ export default function CommercialPnl() {
             calculations. Consumes the completed revenue run for the same scenario &amp; model version.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <AudioEnrichmentButton
+            callId="CAE.COMMERCIAL.EBITDA.001"
+            placementId="CAE.PLACE.COMMERCIAL.PNL.EBITDA"
+          />
           {!canRun && <Badge variant="secondary">View-only (missing commercial.model.run)</Badge>}
           <Button onClick={runNow} disabled={!canRun || trigger.isPending}>
             {trigger.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Play className="mr-1.5 h-4 w-4" />}
