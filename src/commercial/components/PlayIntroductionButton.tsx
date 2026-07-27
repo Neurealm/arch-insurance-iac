@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Headphones, Volume2 } from "lucide-react";
 
 const FUNCTIONS_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/tts-speak`;
 
@@ -59,8 +60,15 @@ export function PlayIntroductionButton({
   };
 
   return (
-    <Button variant="outline" size="sm" onClick={play} disabled={busy}>
-      {busy ? "Playing…" : label}
+    <Button
+      variant="outline"
+      size="icon"
+      onClick={play}
+      disabled={busy}
+      aria-label={label}
+      title={label}
+    >
+      {busy ? <Volume2 className="h-4 w-4 animate-pulse" /> : <Headphones className="h-4 w-4" />}
     </Button>
   );
 }
