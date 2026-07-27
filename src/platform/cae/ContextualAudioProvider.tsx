@@ -27,7 +27,7 @@ import {
   prepareSpeechText,
   selectVoice,
 } from "./speech";
-import type { CaeResolvedAudio } from "./types";
+import type { CaeFailureStatus, CaeResolvedAudio } from "./types";
 
 export type CaePlaybackState =
   | "idle"
@@ -55,6 +55,8 @@ export type ContextualAudioValue = {
   isPlaying: boolean;
   isPaused: boolean;
   error: string | null;
+  /** Machine readable failure reason, when the last resolution failed. */
+  errorStatus: CaeFailureStatus | null;
   /** False when the browser has no usable SpeechSynthesis implementation. */
   isSupported: boolean;
   /** Voices reported by the device (may populate asynchronously). */
@@ -103,6 +105,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
   const [resolved, setResolved] = useState<CaeResolvedAudio | null>(null);
   const [callId, setCallId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = useState<CaeFailureStatus | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [preferredVoiceName, setPreferredVoiceNameState] = useState<string | null>(
     typeof window === "undefined" ? null : readStoredVoice(),
@@ -153,6 +156,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
     commitResolved(null);
     setCallId(null);
     setError(null);
+    setErrorStatus(null);
     setState("idle");
   }, [cancelSpeech, commitResolved]);
 
@@ -245,6 +249,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
       setCallId(nextCallId);
       commitResolved(null);
       setError(null);
+      setErrorStatus(null);
       setState("loading");
 
       try {
@@ -252,6 +257,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
         if (token !== requestRef.current) return null;
         if (result.status !== "ok") {
           setError(result.message);
+          setErrorStatus(result.status);
           setState("error");
           return null;
         }
@@ -261,6 +267,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         if (token !== requestRef.current) return null;
         setError(err instanceof Error ? err.message : "Unable to load narration.");
+        setErrorStatus("narrative_unavailable");
         setState("error");
         return null;
       }
@@ -321,6 +328,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
       } catch {
         utteranceRef.current = null;
         setState("error");
+        setErrorStatus("invalid_speech_configuration");
         setError("The browser speech engine refused to start.");
       }
     },
@@ -392,6 +400,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
       isPlaying: state === "playing",
       isPaused: state === "paused",
       error,
+      errorStatus,
       isSupported,
       voices,
       preferredVoiceName,
@@ -410,6 +419,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
       callId,
       resolved,
       error,
+      errorStatus,
       isSupported,
       voices,
       preferredVoiceName,
