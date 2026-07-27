@@ -164,6 +164,8 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
   const resolvedRef = useRef<CaeResolvedAudio | null>(null);
   /** Wall-clock start of the active utterance, used for duration telemetry only. */
   const startedAtRef = useRef<number | null>(null);
+  /** Mirror of `state` for callbacks that must not re-create on every change. */
+  const stateRef = useRef<CaePlaybackState>("idle");
   /** Placement key of the active request, so telemetry can attribute usage. */
   const placementRef = useRef<string | null>(null);
 
@@ -483,15 +485,14 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
     } catch {
       /* ignore */
     }
-    setState((prev) => {
-      if (prev !== "playing") return prev;
+    if (stateRef.current === "playing") {
       recordAudioEvent("playback_paused", {
         ...contextFromResolved(resolvedRef.current),
         placementKey: placementRef.current,
         playbackState: "paused",
       });
-      return "paused";
-    });
+    }
+    setState((prev) => (prev === "playing" ? "paused" : prev));
   }, []);
 
   const resume = useCallback(() => {
@@ -502,15 +503,14 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
     } catch {
       /* ignore */
     }
-    setState((prev) => {
-      if (prev !== "paused") return prev;
+    if (stateRef.current === "paused") {
       recordAudioEvent("playback_resumed", {
         ...contextFromResolved(resolvedRef.current),
         placementKey: placementRef.current,
         playbackState: "playing",
       });
-      return "playing";
-    });
+    }
+    setState((prev) => (prev === "paused" ? "playing" : prev));
   }, []);
 
   const restart = useCallback(async () => {
@@ -520,6 +520,10 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
     cancelSpeech();
     speak(payload, requestRef.current);
   }, [cancelSpeech, speak]);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const isActive = useCallback(
     (candidate: string) => callId === candidate && (state === "playing" || state === "paused"),
