@@ -80,6 +80,13 @@ import PlatformTenantSettings from "./platform/pages/TenantSettings";
 import AcceptInvitation from "./platform/pages/AcceptInvitation";
 import PlatformProfile from "./platform/pages/Profile";
 import PlatformTestHub from "./platform/pages/TestHub";
+import CaeNarrativeLibrary from "./platform/cae/admin/NarrativeLibrary";
+import CaeNarrativeDetail from "./platform/cae/admin/NarrativeDetail";
+import CaeNarrativeEditor from "./platform/cae/admin/NarrativeEditor";
+import CaeSpeechProfileManager from "./platform/cae/admin/SpeechProfileManager";
+import CaePlacementMap from "./platform/cae/admin/PlacementMap";
+import CaePronunciationDictionary from "./platform/cae/admin/PronunciationDictionary";
+import CaeAudioAnalytics from "./platform/cae/admin/AudioAnalytics";
 import CommercialLayout from "./commercial/shell/CommercialLayout";
 import CommercialOverview from "./commercial/pages/CommercialOverview";
 import CommercialProgram from "./commercial/pages/CommercialProgram";
@@ -871,6 +878,14 @@ const App = () => (
             <Route path="settings" element={<PermissionRoute permission="tenant.view"><PlatformTenantSettings /></PermissionRoute>} />
             <Route path="profile" element={<PlatformProfile />} />
             <Route path="test-hub" element={<PlatformTestHub />} />
+            <Route path="audio" element={<PermissionRoute permission="audio.view"><CaeNarrativeLibrary /></PermissionRoute>} />
+            <Route path="audio/narratives/new" element={<PermissionRoute permission="audio.narrative.author"><CaeNarrativeEditor /></PermissionRoute>} />
+            <Route path="audio/narratives/:narrativeId" element={<PermissionRoute permission="audio.view"><CaeNarrativeDetail /></PermissionRoute>} />
+            <Route path="audio/narratives/:narrativeId/edit" element={<PermissionRoute permission="audio.narrative.author"><CaeNarrativeEditor /></PermissionRoute>} />
+            <Route path="audio/profiles" element={<PermissionRoute permission="audio.view"><CaeSpeechProfileManager /></PermissionRoute>} />
+            <Route path="audio/placements" element={<PermissionRoute permission="audio.view"><CaePlacementMap /></PermissionRoute>} />
+            <Route path="audio/pronunciation" element={<PermissionRoute permission="audio.view"><CaePronunciationDictionary /></PermissionRoute>} />
+            <Route path="audio/analytics" element={<PermissionRoute permission="audio.analytics.view"><CaeAudioAnalytics /></PermissionRoute>} />
           </Route>
           <Route path="/commercial" element={<CommercialLayout />}>
             <Route index element={<PermissionRoute permission="commercial.view"><CommercialOverview /></PermissionRoute>} />
