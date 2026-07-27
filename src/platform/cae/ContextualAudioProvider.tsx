@@ -470,9 +470,14 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
     ],
   );
 
+  // Deployment control and global fault handling both degrade to an inert
+  // controller: consumers keep rendering, nothing resolves, nothing speaks.
+  const exposed = faulted || !enabled ? inertValue : value;
+
   return (
-    <ContextualAudioContext.Provider value={value}>{children}</ContextualAudioContext.Provider>
+    <ContextualAudioContext.Provider value={exposed}>{children}</ContextualAudioContext.Provider>
   );
+
 }
 
 export function useContextualAudio(): ContextualAudioValue {
