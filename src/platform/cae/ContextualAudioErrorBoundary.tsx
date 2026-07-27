@@ -1,5 +1,6 @@
 import React from "react";
 import { CaeFaultContext } from "./featureFlags";
+import { ContextualAudioContext, createInertContextualAudioValue, ContextualAudioProvider } from "./ContextualAudioProvider";
 
 type State = { hasError: boolean };
 
@@ -7,9 +8,10 @@ type State = { hasError: boolean };
  * Global error handling for Contextual Audio Enrichment.
  *
  * Audio is an enrichment layer: a fault inside the audio controller must never
- * take down a NeuGAIN.io module. If anything in the provider subtree throws,
- * this boundary hard-stops speech and re-renders the application with an inert
- * audio controller, so every page keeps working without narration.
+ * take down a NeuGAIN.io module. When the audio subtree throws, this boundary
+ * hard-stops speech and re-renders the application WITHOUT the audio provider,
+ * supplying an inert controller instead. Every page keeps rendering; only
+ * narration is lost, and no further speech can start.
  */
 export class ContextualAudioErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -34,7 +36,26 @@ export class ContextualAudioErrorBoundary extends React.Component<
   render() {
     if (!this.state.hasError) return this.props.children;
     return (
-      <CaeFaultContext.Provider value={true}><span>FALLBACK</span>{this.props.children}</CaeFaultContext.Provider>
+      <CaeFaultContext.Provider value={true}>
+        <ContextualAudioContext.Provider value={createInertContextualAudioValue()}>
+          {this.props.children}
+        </ContextualAudioContext.Provider>
+      </CaeFaultContext.Provider>
     );
   }
+}
+
+/**
+ * The single approved global mount for Contextual Audio Enrichment.
+ *
+ * Composes the boundary and the provider so application shells cannot get the
+ * order wrong. On fault the provider is dropped entirely and consumers receive
+ * an inert controller.
+ */
+export function ContextualAudioRoot({ children }: { children: React.ReactNode }) {
+  return (
+    <ContextualAudioErrorBoundary>
+      <ContextualAudioProvider>{children}</ContextualAudioProvider>
+    </ContextualAudioErrorBoundary>
+  );
 }
