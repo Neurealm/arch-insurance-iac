@@ -21,8 +21,8 @@ import { LoadingState, ErrorState, EmptyState, sanitizeError } from "@/platform/
 import {
   useNarratives, useNarrativeVersions, useSetNarrativeStatus, useDuplicateNarrative,
   useSetVersionStatus, type NarrativeRow,
-} from "../admin/data";
-import { isValidCallId } from "../admin/helpers";
+} from "./data";
+import { isValidCallId } from "./helpers";
 
 const ANY = "__any__";
 
