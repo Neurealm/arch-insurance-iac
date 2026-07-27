@@ -11,11 +11,10 @@ implement speech, resolution, caching, or authorisation logic of their own.
 ```tsx
 <BrowserRouter>
   <AuthProvider>
-    <ContextualAudioErrorBoundary>
-      <ContextualAudioProvider>
-        <Routes>…</Routes>
-      </ContextualAudioProvider>
-    </ContextualAudioErrorBoundary>
+    <ContextualAudioRoot>
+      <Routes>…</Routes>
+    </ContextualAudioRoot>
+
   </AuthProvider>
 </BrowserRouter>
 ```
