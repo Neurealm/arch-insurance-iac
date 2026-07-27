@@ -267,7 +267,8 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         if (token !== requestRef.current) return null;
         setError(err instanceof Error ? err.message : "Unable to load narration.");
-        setErrorStatus("narrative_unavailable");
+        // Unexpected exceptions stay untyped so the UI shows generic, friendly copy.
+        setErrorStatus(null);
         setState("error");
         return null;
       }
