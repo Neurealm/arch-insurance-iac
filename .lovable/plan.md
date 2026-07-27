@@ -1,35 +1,58 @@
-# Program Status
+## Goal
 
-## Model version
-- **PM-FIN-2026.1** — **Active** (model version `5097c3a9-021e-4b2c-9377-540a5d18ada6`, certification `86f09fd7-39f9-4994-bb09-a7ace339634c`, activation `eefc6c50-b73f-41d3-8def-f6ff244000d9`, activated 2026-07-26 21:18:52 UTC).
-- Successor version **PM-FIN-2026.2** — **Not created** (create only when the next governed model change is required).
+Today the spoken words are a hardcoded default in `PlayIntroductionButton.tsx` ("Hello, my name is Ryan."), sent straight to the `tts-speak` edge function. You want the script (plus voice/tone settings) stored in the database, pulled at click time, and you want to see which database record drives a given button.
 
-## Package status
-- **BP3.0** — Contract and Golden Baseline — **Completed & Validated (GO)**.
-- **BP3.1** — Assumption Catalog and Runtime Foundation — **Completed & Validated (GO)**.
-- **BP3.2** — Revenue Engine — **Completed & Validated (GO)**.
-- **BP3.3** — P&L Engine — **Completed & Validated (GO)**.
-- **BP3.4** — Cash and Sustainability Engine — **Completed & Validated (GO)** (BP3.4.1 fingerprint).
-- **BP3.5** — Governed Assumption Lifecycle — **Completed & Validated (GO)**.
-- **BP3.6** — Scenario Comparison — **Completed & Validated (GO)** (comparisons `22cb9697-f146-4c3d-be1e-d7df841aecce`, `89cd8566-ef82-48a0-806c-6a2a719c2419`).
-- **BP3.7** — Sensitivity Analysis — **Completed & Validated (GO)** (experiment `e2b3499e-a96a-4fd2-8aeb-b8b0fb8fffb9`, 5 perturbations, 15 sensitivity runs, 1,660 results).
-  - **BP3.7.4** — Perturbation percentage-label formatting — **Deferred** (non-blocking, presentation only).
-- **BP3.8** — Release Certification, Activation, and Lineage — **Completed & Validated (GO)** (22 lineage rows; no prior active version, so no supersession occurred).
+## What gets built
 
-## Program closeout
-- **BP3 Program** — **Closed** (formally closed 2026-07-26 by `BP3.CLOSEOUT-VALIDATE`, decision **GO**).
-- **BP3 Program Closeout Documentation** — **Complete**.
-- **BP3 Program Closeout Execution** — **Complete** (2026-07-26; evidence `docs/commercial/bp3-closeout-execution-evidence.md`).
-- **BP3 Program Closeout Independent Validation** — **Complete — Decision GO** (2026-07-26; evidence `docs/commercial/bp3-closeout-validation-evidence.md`).
-- **Next phase** — Operational Support and Future Successor Planning.
+### 1. Narration table
 
-### Closeout references
-- Closeout record — `docs/commercial/bp3-program-closeout.md`
-- Evidence index — `docs/commercial/bp3-evidence-index.md`
-- Operational handoff — `docs/commercial/bp3-operational-handoff.md`
-- Deferred-item register — `docs/commercial/bp3-deferred-items.md`
+New table `commercial_narrations`, tenant-scoped like the other commercial tables:
 
-## Persistent principles
-- No automatic model execution. Comparison never triggers Revenue/P&L/Cash re-runs.
-- Historical runs, hashes, lineage, and supersession mappings are immutable.
-- Activation is metadata-only and never mutates historical runs or results.
+| Field | Purpose |
+| --- | --- |
+| `narration_key` | Stable handle a button references, e.g. `commercial.overview.introduction` |
+| `title` | Human label for the future admin module |
+| `script` | The full spoken text |
+| `voice` | TTS voice (default `onyx`) |
+| `instructions` | Delivery/tone prompt (e.g. "warm, professional, unhurried") |
+| `speed` | Playback rate |
+| `is_active`, `version` | Lets you retire or revise scripts without deleting |
+
+Access rules: members of the workspace can read active narrations; only Commercial writers/admins can create or edit them. The edge function reads with elevated access.
+
+Seed one row containing the current introduction script — the exact wording is yours to give me; otherwise I'll seed the existing line and you can edit the record.
+
+### 2. Button pulls from the database
+
+- `PlayIntroductionButton` takes a `narrationKey` instead of raw `text`, and loads the record via a new `useNarration` hook.
+- On click it sends the narration record's id to `tts-speak`; the function looks the row up server-side and uses its `script`, `voice`, `instructions`, and `speed`. This keeps the script authoritative in the database rather than trusting whatever the browser sends.
+- If no record is found the button is disabled with a tooltip explaining that no narration is configured.
+
+### 3. "Record ID" hover affordance
+
+Hovering the listen button shows a tooltip with:
+
+```text
+Narration: Workspace Introduction
+Key:    commercial.overview.introduction
+Table:  commercial_narrations
+Record: 8f2c1a9e-…  (click to copy)
+Voice:  onyx · v1
+```
+
+Clicking the id copies the UUID so you can find the row directly in the backend. Shown to Commercial admins/platform admins only, so end users don't see internals.
+
+### 4. Groundwork for the admin module
+
+The table, key convention, and versioning fields are designed so a later "Narration Studio" screen can list, edit, preview, and version scripts with no schema change. No admin UI is built in this pass.
+
+## Technical notes
+
+- Migration creates `commercial_narrations` with GRANTs, RLS, tenant-isolation trigger, and `updated_at` trigger, matching existing `commercial_*` patterns.
+- `tts-speak` gains input validation (`narration_id` UUID or `narration_key` + tenant), a service-role lookup, and returns 404 when the narration is missing or inactive. Raw `text` input is dropped so scripts can't be injected client-side.
+- Tooltip uses the existing shadcn `Tooltip` primitives; admin check reuses `useCommercialAccess`.
+- No change to audio playback (still MP3 blob fetch, which is already verified working).
+
+## Open item
+
+Send me the full narration script and any voice direction, and I'll seed it as the first record; otherwise the existing one-liner is seeded as a placeholder.
