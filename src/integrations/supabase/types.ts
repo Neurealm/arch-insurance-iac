@@ -9780,6 +9780,22 @@ export type Database = {
           version_count: number
         }[]
       }
+      audio_admin_narrative_audit: {
+        Args: { _narrative_id: string }
+        Returns: {
+          action_code: string
+          actor_name: string
+          actor_user_id: string
+          comment: string
+          id: string
+          new_status: string
+          object_id: string
+          object_type: string
+          occurred_at: string
+          previous_status: string
+          version_no: number
+        }[]
+      }
       audio_admin_set_narrative_status: {
         Args: { _narrative_id: string; _status: string }
         Returns: undefined
@@ -9791,6 +9807,14 @@ export type Database = {
       audio_can_view: { Args: { _tenant_id: string }; Returns: boolean }
       audio_resolve_call: {
         Args: { _call_id: string; _placement_key?: string }
+        Returns: Json
+      }
+      audio_version_create_draft_from: {
+        Args: { _change_summary?: string; _source_version_id: string }
+        Returns: string
+      }
+      audio_version_transition: {
+        Args: { _action: string; _comment?: string; _version_id: string }
         Returns: Json
       }
       bootstrap_commercial_workspace: { Args: never; Returns: Json }
