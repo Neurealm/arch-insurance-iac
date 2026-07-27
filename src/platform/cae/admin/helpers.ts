@@ -133,8 +133,7 @@ export function useDraftPreview() {
       const voices = await loadVoices();
       const utterance = new SpeechSynthesisUtterance(prepared);
       const voice = selectVoice(voices, {
-        preferredVoiceName: null,
-        profileVoiceNames: profile?.preferredVoiceNames ?? [],
+        preferredVoiceNames: profile?.preferredVoiceNames ?? [],
         locale: profile?.locale ?? "en-US",
         fallbackLocale: profile?.fallbackLocale ?? "en",
       });
