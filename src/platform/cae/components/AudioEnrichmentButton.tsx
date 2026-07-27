@@ -19,6 +19,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useContextualAudio } from "../ContextualAudioProvider";
+import { useContextualAudioEnabled } from "../featureFlags";
 import { resolveContextualAudio } from "../contextualAudioService";
 import { TranscriptPanel } from "./TranscriptPanel";
 import { friendlyCaeMessage, useCaeCallState, type CaeUserState } from "./useCaeCallState";
@@ -66,7 +67,9 @@ export function AudioEnrichmentButton({
   disabled = false,
   className,
 }: AudioEnrichmentButtonProps) {
+  const audioEnabled = useContextualAudioEnabled();
   const audio = useContextualAudio();
+
   const userState = useCaeCallState(callId);
   const headingId = useId();
 
@@ -167,6 +170,12 @@ export function AudioEnrichmentButton({
         : `${label}. Play narration`;
 
   const PrimaryIcon = isLoading ? Loader2 : isPlaying ? Pause : isPaused ? Play : Headphones;
+
+  // Deployment control: when the capability is switched off, the affordance
+  // disappears entirely and no narration request is ever issued.
+  if (!audioEnabled) return null;
+
+
 
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>

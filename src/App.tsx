@@ -125,7 +125,7 @@ import Signup from "./pages/auth/Signup.tsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
 import ResetPassword from "./pages/auth/ResetPassword.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
-import { ContextualAudioProvider } from "./platform/cae/ContextualAudioProvider.tsx";
+import { ContextualAudioRoot } from "./platform/cae/ContextualAudioErrorBoundary.tsx";
 import CaeComponentFixture from "./platform/cae/dev/CaeComponentFixture.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
 import TechnologyTaxonomyPage from "./pages/admin/technology-taxonomy/TechnologyTaxonomyPage.tsx";
@@ -451,7 +451,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-        <ContextualAudioProvider>
+        <ContextualAudioRoot>
         <LazyRouteBoundary>
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -918,7 +918,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
         </LazyRouteBoundary>
-        </ContextualAudioProvider>
+        </ContextualAudioRoot>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
