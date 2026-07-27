@@ -9719,6 +9719,61 @@ export type Database = {
         Args: { _permission_code: string; _role_id: string }
         Returns: undefined
       }
+      audio_admin_create_narrative: {
+        Args: {
+          _audience?: string
+          _call_id: string
+          _change_summary?: string
+          _default_locale?: string
+          _description?: string
+          _estimated_duration_seconds?: number
+          _module_key: string
+          _name: string
+          _scope_reference?: string
+          _scope_type?: string
+          _source_text?: string
+          _speech_profile_id?: string
+          _speech_text?: string
+          _tenant_id: string
+          _topic_key: string
+        }
+        Returns: string
+      }
+      audio_admin_duplicate_narrative: {
+        Args: { _narrative_id: string; _new_call_id: string; _new_name: string }
+        Returns: string
+      }
+      audio_admin_list_narratives: {
+        Args: { _tenant_id: string }
+        Returns: {
+          active_version_id: string
+          active_version_no: number
+          audience: string
+          call_id: string
+          default_locale: string
+          description: string
+          enabled_placement_count: number
+          id: string
+          module_key: string
+          name: string
+          owner_name: string
+          owner_user_id: string
+          placement_count: number
+          scope_reference: string
+          scope_type: string
+          speech_profile_id: string
+          speech_profile_name: string
+          status: string
+          tenant_id: string
+          topic_key: string
+          updated_at: string
+          version_count: number
+        }[]
+      }
+      audio_admin_set_narrative_status: {
+        Args: { _narrative_id: string; _status: string }
+        Returns: undefined
+      }
       audio_can_manage: {
         Args: { _permission_code: string; _tenant_id: string }
         Returns: boolean
