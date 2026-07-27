@@ -141,13 +141,13 @@ describe("CAE.105 rollout placements", () => {
 
   it("renders one Hear More control per placement", () => {
     renderRollout();
-    expect(screen.getAllByRole("button", { name: /Hear More/i })).toHaveLength(PLACEMENTS.length);
+    expect(screen.getAllByRole("button", { name: "Hear More" })).toHaveLength(PLACEMENTS.length);
   });
 
   it("plays, pauses, resumes and stops a placement narrative", async () => {
     const user = userEvent.setup();
     renderRollout();
-    const [first] = screen.getAllByRole("button", { name: /Hear More/i });
+    const [first] = screen.getAllByRole("button", { name: "Hear More" });
     await user.click(first);
     await waitFor(() => expect(spoken).toHaveLength(1));
     expect(resolveMock).toHaveBeenCalledWith(PLACEMENTS[0].callId, PLACEMENTS[0].placementId);
@@ -165,7 +165,7 @@ describe("CAE.105 rollout placements", () => {
   it("plays only one placement narrative at a time and stops on navigation", async () => {
     const user = userEvent.setup();
     renderRollout();
-    const buttons = screen.getAllByRole("button", { name: /Hear More/i });
+    const buttons = screen.getAllByRole("button", { name: "Hear More" });
     await user.click(buttons[0]);
     await waitFor(() => expect(spoken).toHaveLength(1));
     await user.click(buttons[1]);
@@ -196,7 +196,7 @@ describe("CAE.105 rollout placements", () => {
     });
     const user = userEvent.setup();
     renderRollout();
-    const [first] = screen.getAllByRole("button", { name: /Hear More/i });
+    const [first] = screen.getAllByRole("button", { name: "Hear More" });
     await user.click(first);
     await waitFor(() => expect(resolveMock).toHaveBeenCalled());
     expect(spoken).toHaveLength(0);
@@ -206,7 +206,7 @@ describe("CAE.105 rollout placements", () => {
     resolveMock.mockResolvedValue({ status: "unauthorized", message: "You do not have access to this narrative." });
     const user = userEvent.setup();
     renderRollout();
-    await user.click(screen.getAllByRole("button", { name: /Hear More/i })[2]);
+    await user.click(screen.getAllByRole("button", { name: "Hear More" })[2]);
     await waitFor(() => expect(resolveMock).toHaveBeenCalledWith(PLACEMENTS[2].callId, PLACEMENTS[2].placementId));
     expect(spoken).toHaveLength(0);
   });
