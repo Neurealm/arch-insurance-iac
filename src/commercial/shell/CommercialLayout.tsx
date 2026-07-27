@@ -14,6 +14,8 @@ import {
   Shield,
   ArrowLeft,
   Calculator,
+  Settings,
+
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -38,10 +40,9 @@ const NAV: NavItem[] = [
   { to: "/commercial/model/compare", label: "Scenario Comparison", icon: Calculator, section: "Model" },
   { to: "/commercial/model/sensitivity", label: "Sensitivity Analysis", icon: Calculator, section: "Model" },
   { to: "/commercial/model/release", label: "Release & Activation", icon: Shield, section: "Model" },
-
-
-
+  { to: "/commercial/administration", label: "Administration", icon: Settings, section: "Administration" },
 ];
+
 
 
 function Sidebar() {
