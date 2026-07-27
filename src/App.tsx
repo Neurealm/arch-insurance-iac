@@ -451,6 +451,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+        <ContextualAudioErrorBoundary>
         <ContextualAudioProvider>
         <LazyRouteBoundary>
         <Routes>
