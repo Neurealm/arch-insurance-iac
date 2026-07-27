@@ -1,3 +1,5 @@
+import { createContext } from "react";
+
 /**
  * Contextual Audio Enrichment — deployment control.
  *
@@ -43,3 +45,10 @@ export function isContextualAudioEnabled(): boolean {
 export function useContextualAudioEnabled(): boolean {
   return isContextualAudioEnabled();
 }
+
+/**
+ * Set to true by the global error boundary after an audio fault. The provider
+ * reads it and degrades to an inert controller for the rest of the session.
+ * Declared here (a dependency-free module) to avoid a provider/boundary cycle.
+ */
+export const CaeFaultContext = createContext(false);

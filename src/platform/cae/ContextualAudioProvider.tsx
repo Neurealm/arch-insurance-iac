@@ -28,6 +28,7 @@ import {
   selectVoice,
 } from "./speech";
 import type { CaeFailureStatus, CaeResolvedAudio } from "./types";
+import { CaeFaultContext, useContextualAudioEnabled } from "./featureFlags";
 
 export type CaePlaybackState =
   | "idle"
