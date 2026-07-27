@@ -58,13 +58,14 @@ export default function NarrativeEditor() {
   const { narrativeId } = useParams<{ narrativeId: string }>();
   const isNew = !narrativeId;
   const navigate = useNavigate();
-  const { activeTenantId } = useAccess();
+  const { activeTenantId, activeTenant } = useAccess();
 
   const narratives = useNarratives(activeTenantId);
   const versions = useNarrativeVersions(activeTenantId, narrativeId);
   const profiles = useSpeechProfiles(activeTenantId);
   const rules = usePronunciationRules(activeTenantId);
-  const variables = useVariableDefinitions(activeTenantId);
+  const variables = useVariableRegistry(activeTenantId);
+
 
   const createNarrative = useCreateNarrative();
   const updateNarrative = useUpdateNarrative();
