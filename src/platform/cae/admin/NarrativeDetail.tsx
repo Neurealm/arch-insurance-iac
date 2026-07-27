@@ -165,33 +165,21 @@ export default function NarrativeDetail() {
                 <TableBody>
                   {(versions.data ?? []).map((v) => (
                     <TableRow key={v.id}>
-                      <TableCell>v{v.version_no}</TableCell>
-                      <TableCell><Badge variant="secondary">{v.status.replace("_", " ")}</Badge></TableCell>
+                      <TableCell>
+                        v{v.version_no}
+                        {v.id === narrative.active_version_id && (
+                          <Badge className="ml-2" variant="default">active</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell><Badge variant="secondary">{statusLabel(v.status)}</Badge></TableCell>
                       <TableCell className="max-w-[240px] truncate text-xs">{v.change_summary ?? "—"}</TableCell>
                       <TableCell className="text-xs">{v.published_at ? new Date(v.published_at).toLocaleDateString() : "—"}</TableCell>
                       <TableCell>
-                        <div className="flex justify-end gap-1">
-                          {v.status === "draft" && hasPermission("audio.narrative.review") && (
-                            <Button size="sm" variant="outline" onClick={() => transition(v.id, "in_review")}>
-                              <Send className="h-3.5 w-3.5" aria-hidden="true" /><span>Review</span>
-                            </Button>
-                          )}
-                          {v.status === "in_review" && hasPermission("audio.narrative.approve") && (
-                            <Button size="sm" variant="outline" onClick={() => transition(v.id, "approved")}>
-                              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /><span>Approve</span>
-                            </Button>
-                          )}
-                          {v.status === "approved" && hasPermission("audio.narrative.publish") && (
-                            <Button size="sm" onClick={() => transition(v.id, "published")}>
-                              <Upload className="h-3.5 w-3.5" aria-hidden="true" /><span>Publish</span>
-                            </Button>
-                          )}
-                          {v.status === "published" && hasPermission("audio.narrative.retire") && (
-                            <Button size="sm" variant="outline" onClick={() => transition(v.id, "retired")}>
-                              <Archive className="h-3.5 w-3.5" aria-hidden="true" /><span>Retire</span>
-                            </Button>
-                          )}
-                        </div>
+                        <VersionLifecycleActions
+                          version={v}
+                          hasPermission={hasPermission}
+                          activePlacementCount={activePlacementCount}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
