@@ -66,7 +66,9 @@ export function AudioEnrichmentButton({
   disabled = false,
   className,
 }: AudioEnrichmentButtonProps) {
+  const audioEnabled = useContextualAudioEnabled();
   const audio = useContextualAudio();
+
   const userState = useCaeCallState(callId);
   const headingId = useId();
 
