@@ -1,58 +1,20 @@
-## Goal
+## What's happening
 
-Today the spoken words are a hardcoded default in `PlayIntroductionButton.tsx` ("Hello, my name is Ryan."), sent straight to the `tts-speak` edge function. You want the script (plus voice/tone settings) stored in the database, pulled at click time, and you want to see which database record drives a given button.
+Clicking **Approve** does call the database, but the `audio_version_transition` function rejects it: v2 and v3 of `CAE.COMMERCIAL.DEAL_OVERVIEW.001` were authored by the signed-in user, and the separation-of-duties rule blocks an author from approving their own version. The failure is shown as `[object Object]` because the Supabase error object isn't an `Error` instance, so the toast stringifies it badly — making it look like nothing happened.
 
-## What gets built
+## Fix
 
-### 1. Narration table
+1. **Database migration** — update `audio_version_transition`:
+   - Keep separation of duties for regular reviewers.
+   - Add an exemption: if the caller is a platform admin (or tenant owner/admin), they may approve a version they authored.
+   - Record the exemption in the audit event metadata (`self_approved: true`) so governance evidence stays intact.
 
-New table `commercial_narrations`, tenant-scoped like the other commercial tables:
+2. **Error surfacing (frontend)** — in `src/platform/cae/admin/lifecycle.tsx`, extract the message from Supabase error objects (`error.message` / `details` / `hint`) instead of `String(err)`, so any future rejection shows readable wording rather than `[object Object]`. Apply the same to the narrative-level actions in `NarrativeDetail.tsx`.
 
-| Field | Purpose |
-| --- | --- |
-| `narration_key` | Stable handle a button references, e.g. `commercial.overview.introduction` |
-| `title` | Human label for the future admin module |
-| `script` | The full spoken text |
-| `voice` | TTS voice (default `onyx`) |
-| `instructions` | Delivery/tone prompt (e.g. "warm, professional, unhurried") |
-| `speed` | Playback rate |
-| `is_active`, `version` | Lets you retire or revise scripts without deleting |
-
-Access rules: members of the workspace can read active narrations; only Commercial writers/admins can create or edit them. The edge function reads with elevated access.
-
-Seed one row containing the current introduction script — the exact wording is yours to give me; otherwise I'll seed the existing line and you can edit the record.
-
-### 2. Button pulls from the database
-
-- `PlayIntroductionButton` takes a `narrationKey` instead of raw `text`, and loads the record via a new `useNarration` hook.
-- On click it sends the narration record's id to `tts-speak`; the function looks the row up server-side and uses its `script`, `voice`, `instructions`, and `speed`. This keeps the script authoritative in the database rather than trusting whatever the browser sends.
-- If no record is found the button is disabled with a tooltip explaining that no narration is configured.
-
-### 3. "Record ID" hover affordance
-
-Hovering the listen button shows a tooltip with:
-
-```text
-Narration: Workspace Introduction
-Key:    commercial.overview.introduction
-Table:  commercial_narrations
-Record: 8f2c1a9e-…  (click to copy)
-Voice:  onyx · v1
-```
-
-Clicking the id copies the UUID so you can find the row directly in the backend. Shown to Commercial admins/platform admins only, so end users don't see internals.
-
-### 4. Groundwork for the admin module
-
-The table, key convention, and versioning fields are designed so a later "Narration Studio" screen can list, edit, preview, and version scripts with no schema change. No admin UI is built in this pass.
+3. **Verify** — after the migration, approve v2 in the UI and confirm the row moves to `approved`, the version list refreshes, and an audit entry is written.
 
 ## Technical notes
 
-- Migration creates `commercial_narrations` with GRANTs, RLS, tenant-isolation trigger, and `updated_at` trigger, matching existing `commercial_*` patterns.
-- `tts-speak` gains input validation (`narration_id` UUID or `narration_key` + tenant), a service-role lookup, and returns 404 when the narration is missing or inactive. Raw `text` input is dropped so scripts can't be injected client-side.
-- Tooltip uses the existing shadcn `Tooltip` primitives; admin check reuses `useCommercialAccess`.
-- No change to audio playback (still MP3 blob fetch, which is already verified working).
-
-## Open item
-
-Send me the full narration script and any voice direction, and I'll seed it as the first record; otherwise the existing one-liner is seeded as a placeholder.
+- Function is `SECURITY DEFINER` with `search_path = public`; only the SoD guard block changes.
+- Admin check uses the existing `is_platform_admin`/tenant-role helpers already used elsewhere in the CAE layer.
+- No table/RLS changes; list refresh already works via query invalidation.
