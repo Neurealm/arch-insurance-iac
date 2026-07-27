@@ -29,6 +29,12 @@ import {
 } from "./speech";
 import type { CaeFailureStatus, CaeResolvedAudio } from "./types";
 import { CaeFaultContext, useContextualAudioEnabled } from "./featureFlags";
+import {
+  classifyBrowser,
+  contextFromResolved,
+  errorCategoryFromStatus,
+  recordAudioEvent,
+} from "./telemetry";
 
 export type CaePlaybackState =
   | "idle"
@@ -156,6 +162,10 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
   const requestRef = useRef(0);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const resolvedRef = useRef<CaeResolvedAudio | null>(null);
+  /** Wall-clock start of the active utterance, used for duration telemetry only. */
+  const startedAtRef = useRef<number | null>(null);
+  /** Placement key of the active request, so telemetry can attribute usage. */
+  const placementRef = useRef<string | null>(null);
 
   /** Single writer for the resolved payload: keeps state and ref in lockstep. */
   const commitResolved = useCallback((next: CaeResolvedAudio | null) => {
@@ -181,8 +191,19 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const stop = useCallback(() => {
+    const wasSpeaking = utteranceRef.current !== null;
+    const elapsed = startedAtRef.current ? Date.now() - startedAtRef.current : null;
     requestRef.current += 1;
     cancelSpeech();
+    startedAtRef.current = null;
+    if (wasSpeaking) {
+      recordAudioEvent("playback_stopped", {
+        ...contextFromResolved(resolvedRef.current),
+        placementKey: placementRef.current,
+        playbackState: "stopped",
+        durationMs: elapsed,
+      });
+    }
     setActiveVoiceName(null);
     setState((prev) => (prev === "idle" || prev === "error" ? prev : "ready"));
   }, [cancelSpeech]);
@@ -284,12 +305,23 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
       requestRef.current += 1;
       const token = requestRef.current;
       cancelSpeech();
+      startedAtRef.current = null;
+      placementRef.current = placementKey ?? null;
       setActiveVoiceName(null);
       setCallId(nextCallId);
       commitResolved(null);
       setError(null);
       setErrorStatus(null);
       setState("loading");
+
+      // Telemetry is fire-and-forget and is never awaited: resolution and
+      // playback proceed identically whether or not analytics succeeds.
+      recordAudioEvent("playback_requested", {
+        callId: nextCallId,
+        placementKey: placementKey ?? null,
+        playbackState: "loading",
+        browserCapability: classifyBrowser(),
+      });
 
       try {
         const result = await resolveContextualAudio(nextCallId, placementKey ?? null);
@@ -298,6 +330,12 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
           setError(result.message);
           setErrorStatus(result.status);
           setState("error");
+          recordAudioEvent("narrative_unavailable", {
+            callId: nextCallId,
+            placementKey: placementKey ?? null,
+            playbackState: "error",
+            errorCategory: errorCategoryFromStatus(result.status),
+          });
           return null;
         }
         commitResolved(result);
@@ -309,6 +347,12 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
         // Unexpected exceptions stay untyped so the UI shows generic, friendly copy.
         setErrorStatus(null);
         setState("error");
+        recordAudioEvent("playback_error", {
+          callId: nextCallId,
+          placementKey: placementKey ?? null,
+          playbackState: "error",
+          errorCategory: "resolution_exception",
+        });
         return null;
       }
     },
@@ -321,6 +365,12 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
       if (!synth) {
         // Unsupported browsers keep the transcript available for reading.
         setState("ready");
+        recordAudioEvent("unsupported_browser", {
+          ...contextFromResolved(payload),
+          placementKey: placementRef.current,
+          playbackState: "ready",
+          browserCapability: "speech_unsupported",
+        });
         return;
       }
 
@@ -348,28 +398,59 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
       }
       setActiveVoiceName(voice?.name ?? null);
 
+      const telemetryBase = {
+        ...contextFromResolved(payload),
+        placementKey: placementRef.current,
+        voiceName: voice?.name ?? null,
+      };
+
       utterance.onend = () => {
         if (token !== requestRef.current) return;
+        const elapsed = startedAtRef.current ? Date.now() - startedAtRef.current : null;
         utteranceRef.current = null;
+        startedAtRef.current = null;
         setActiveVoiceName(null);
         setState("ended");
+        recordAudioEvent("playback_completed", {
+          ...telemetryBase,
+          playbackState: "ended",
+          durationMs: elapsed,
+        });
       };
       utterance.onerror = () => {
         if (token !== requestRef.current) return;
         utteranceRef.current = null;
+        startedAtRef.current = null;
         setActiveVoiceName(null);
         setState("ready");
+        recordAudioEvent("playback_error", {
+          ...telemetryBase,
+          playbackState: "error",
+          errorCategory: "speech_engine_error",
+        });
       };
 
       utteranceRef.current = utterance;
       setState("playing");
       try {
         synth.speak(utterance);
+        startedAtRef.current = Date.now();
+        recordAudioEvent("playback_started", {
+          ...telemetryBase,
+          playbackState: "playing",
+          browserCapability: "speech_supported",
+        });
       } catch {
         utteranceRef.current = null;
+        startedAtRef.current = null;
         setState("error");
         setErrorStatus("invalid_speech_configuration");
         setError("The browser speech engine refused to start.");
+        recordAudioEvent("playback_error", {
+          ...telemetryBase,
+          playbackState: "error",
+          errorCategory: "speech_engine_refused",
+        });
       }
     },
     [preferredVoiceName, voices],
@@ -382,6 +463,7 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
         // Same narrative re-selected: cancel and restart, never overlap.
         requestRef.current += 1;
         cancelSpeech();
+        placementRef.current = placementKey ?? placementRef.current;
         speak(already, requestRef.current);
         return;
       }
@@ -401,7 +483,15 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
     } catch {
       /* ignore */
     }
-    setState((prev) => (prev === "playing" ? "paused" : prev));
+    setState((prev) => {
+      if (prev !== "playing") return prev;
+      recordAudioEvent("playback_paused", {
+        ...contextFromResolved(resolvedRef.current),
+        placementKey: placementRef.current,
+        playbackState: "paused",
+      });
+      return "paused";
+    });
   }, []);
 
   const resume = useCallback(() => {
@@ -412,7 +502,15 @@ export function ContextualAudioProvider({ children }: { children: ReactNode }) {
     } catch {
       /* ignore */
     }
-    setState((prev) => (prev === "paused" ? "playing" : prev));
+    setState((prev) => {
+      if (prev !== "paused") return prev;
+      recordAudioEvent("playback_resumed", {
+        ...contextFromResolved(resolvedRef.current),
+        placementKey: placementRef.current,
+        playbackState: "playing",
+      });
+      return "playing";
+    });
   }, []);
 
   const restart = useCallback(async () => {
