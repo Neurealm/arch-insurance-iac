@@ -1,5 +1,5 @@
 import React from "react";
-import { ContextualAudioContext, createInertContextualAudioValue } from "./ContextualAudioProvider";
+import { CaeFaultContext } from "./featureFlags";
 
 type State = { hasError: boolean };
 
