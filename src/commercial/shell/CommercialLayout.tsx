@@ -14,6 +14,8 @@ import {
   Shield,
   ArrowLeft,
   Calculator,
+  Settings,
+
 } from "lucide-react";
 import type { ComponentType } from "react";
 
