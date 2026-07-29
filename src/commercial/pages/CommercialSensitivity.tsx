@@ -129,7 +129,7 @@ export default function CommercialSensitivity() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" data-guide-target="sensitivity-range">
                 <Label>Strategy</Label>
                 <Select value={strategy} onValueChange={(v) => setStrategy(v as PerturbationStrategy)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -152,8 +152,9 @@ export default function CommercialSensitivity() {
                 <Input value={values} onChange={(e) => setValues(e.target.value)} />
               </div>
             )}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5" data-guide-target="sensitivity-outcome">
               <Label>Included Scopes</Label>
+
               <div className="flex gap-4">
                 {SCOPES.map((s) => (
                   <label key={s} className="flex items-center gap-2 text-sm">
