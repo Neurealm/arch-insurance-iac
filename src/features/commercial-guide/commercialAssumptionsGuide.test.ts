@@ -42,7 +42,8 @@ describe("CDT-COMMERCIAL-GUIDE-ASSUMPTIONS", () => {
   });
 
   it("documents only the real change-set lifecycle statuses", () => {
-    expect(DETAIL_SRC).toContain('"draft" | "validated" | "applied" | "cancelled"'.replace(/"/g, '"'));
+    const HOOK_SRC = readFileSync("src/commercial/hooks/useAssumptionChangeSets.ts", "utf8");
+    expect(HOOK_SRC).toContain('"draft" | "validated" | "applied" | "cancelled"');
     const text = JSON.stringify(commercialAssumptionsGuide).toLowerCase();
     for (const real of ["draft", "validated", "applied", "cancelled"]) {
       expect(text).toContain(real);
