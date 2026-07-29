@@ -892,6 +892,8 @@ const App = () => (
           <Route path="/commercial" element={<CommercialLayout />}>
             <Route index element={<PermissionRoute permission="commercial.view"><CommercialOverview /></PermissionRoute>} />
             <Route path="program" element={<PermissionRoute permission="commercial.view"><CommercialProgram /></PermissionRoute>} />
+            <Route path="program-timeline" element={<PermissionRoute permission="commercial.view"><CommercialProgramTimeline /></PermissionRoute>} />
+
             <Route path="scenarios" element={<PermissionRoute permission="commercial.view"><CommercialScenarios /></PermissionRoute>} />
             <Route path="portfolio" element={<PermissionRoute permission="commercial.view"><CommercialPortfolio /></PermissionRoute>} />
             <Route path="sources" element={<PermissionRoute permission="commercial.view"><CommercialSources /></PermissionRoute>} />
