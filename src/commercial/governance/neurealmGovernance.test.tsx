@@ -8,7 +8,7 @@ describe("Neurealm Governance (prototype)", () => {
   it("renders header, summary, operating model, phases, forums, RACI, registers and notice", () => {
     render(<CommercialNeurealmGovernance />);
 
-    expect(screen.getByRole("heading", { name: "Neurealm Governance", level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Governance", level: 1 })).toBeInTheDocument();
     expect(
       screen.getByText(/Internal governance framework supporting Day 0, Day 1, and Day 2 operations/i),
     ).toBeInTheDocument();
