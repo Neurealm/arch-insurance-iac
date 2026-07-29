@@ -230,7 +230,7 @@ export default function CommercialSensitivityDetail() {
         </TabsContent>
 
         <TabsContent value="results">
-          <Card>
+          <Card data-guide-target="sensitivity-results">
             <CardHeader><CardTitle>All Results</CardTitle><CardDescription>{results.length} row(s)</CardDescription></CardHeader>
             <CardContent>
               {results.length === 0 ? <p className="text-sm text-muted-foreground">No results.</p> : (
