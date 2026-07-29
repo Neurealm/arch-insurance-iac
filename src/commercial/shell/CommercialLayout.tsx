@@ -4,6 +4,8 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CommercialGuideButton } from "@/features/commercial-guide/CommercialGuideButton";
+import { CommercialGuideRoot } from "@/features/commercial-guide/CommercialGuideRoot";
 import {
   LayoutDashboard,
   Rocket,
