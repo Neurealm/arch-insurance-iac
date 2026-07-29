@@ -13,7 +13,7 @@ describe("Staffing & Resources", () => {
     expect(screen.getByRole("heading", { name: /Neurealm Staffing & Resources/i })).toBeInTheDocument();
     expect(screen.getByText(/Critical Role Coverage/i)).toBeInTheDocument();
     expect(screen.getByText(/Capacity and Demand Gaps/i)).toBeInTheDocument();
-    expect(screen.getByText(/Resource Risks/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Resource Risks/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Prototype Staffing View/i)).toBeInTheDocument();
   });
 });
