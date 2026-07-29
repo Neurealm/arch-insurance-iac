@@ -91,7 +91,7 @@ export function RoleStaffingTable({
   const n = (v: number) => fte(v * factor).toFixed(1);
 
   return (
-    <Card>
+    <Card className="flex h-full flex-col">
       <CardHeader className="pb-3">
         <SectionHeading
           title="Role Staffing Plan"
@@ -123,8 +123,8 @@ export function RoleStaffingTable({
           }
         />
       </CardHeader>
-      <CardContent className="p-0">
-        <div className="max-h-[560px] overflow-auto">
+      <CardContent className="flex min-h-0 flex-1 flex-col p-0">
+        <div className="min-h-0 flex-1 overflow-auto">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-card">
               <TableRow>

@@ -156,7 +156,7 @@ export default function CommercialStaffingResources() {
         onSelect={(card) => setSelectedCard((prev) => (prev === card.id ? null : card.id))}
       />
 
-      <div className="grid items-start gap-6 xl:grid-cols-[2fr_1fr]">
+      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
         <RoleStaffingTable
           roles={filteredRoles}
           totals={totals}
