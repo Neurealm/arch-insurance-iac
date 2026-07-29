@@ -2,6 +2,7 @@ import type { CommercialGuideContent } from "../types";
 import { buildFallbackGuide } from "./fallback";
 import { COMMERCIAL_GUIDE_PAGES } from "./pages/registry";
 import { commercialOverviewGuide } from "./pages/commercialOverview";
+import { commercialProgramGuide } from "./pages/commercialProgram";
 
 /**
  * Central typed guide registry.
@@ -12,7 +13,9 @@ import { commercialOverviewGuide } from "./pages/commercialOverview";
  */
 const PAGE_CONTENT: Record<string, CommercialGuideContent> = {
   "commercial-overview": commercialOverviewGuide,
+  "commercial-program": commercialProgramGuide,
 };
+
 
 export const COMMERCIAL_GUIDE_REGISTRY: CommercialGuideContent[] = COMMERCIAL_GUIDE_PAGES.map(
   (page) => PAGE_CONTENT[page.pageId] ?? buildFallbackGuide(page),
