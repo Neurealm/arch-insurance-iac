@@ -75,14 +75,14 @@ export default function CommercialAssumptionChangeSet() {
         </Button>
       </div>
 
-      <Card>
+      <Card data-guide-target="change-set-detail">
         <CardHeader>
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
               <CardTitle>{header.title}</CardTitle>
               <CardDescription>{header.description ?? "No rationale provided."}</CardDescription>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap" data-guide-target="change-set-status">
               <Badge className={STATUS_COLORS[header.status]} variant="outline">{header.status}</Badge>
               <Badge variant="outline">{header.change_count} items</Badge>
               {header.content_hash && <code className="text-xs text-muted-foreground">{header.content_hash.slice(0, 12)}…</code>}
@@ -90,7 +90,7 @@ export default function CommercialAssumptionChangeSet() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-2 md:grid-cols-2 text-xs text-muted-foreground">
+          <div className="grid gap-2 md:grid-cols-2 text-xs text-muted-foreground" data-guide-target="change-set-audit">
             <div>Created: {new Date(header.created_at).toLocaleString()}</div>
             <div>Updated: {new Date(header.updated_at).toLocaleString()}</div>
             {header.validated_at && <div>Validated: {new Date(header.validated_at).toLocaleString()}</div>}
@@ -99,14 +99,14 @@ export default function CommercialAssumptionChangeSet() {
           </div>
 
           {header.status === "draft" && summary.errs > 0 && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" data-guide-target="change-set-validation">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>{summary.errs} validation error(s)</AlertTitle>
               <AlertDescription>Fix the flagged items before this change set can be validated.</AlertDescription>
             </Alert>
           )}
           {header.status === "validated" && (
-            <Alert>
+            <Alert data-guide-target="change-set-impact">
               <CheckCircle2 className="h-4 w-4" />
               <AlertTitle>Validated · ready to apply</AlertTitle>
               <AlertDescription>
@@ -116,7 +116,7 @@ export default function CommercialAssumptionChangeSet() {
             </Alert>
           )}
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2" data-guide-target="change-set-actions">
             {header.status === "draft" && (
               <Button
                 size="sm"
@@ -213,7 +213,7 @@ export default function CommercialAssumptionChangeSet() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card data-guide-target="change-set-current-proposed">
         <CardHeader>
           <CardTitle className="text-base">
             Proposed changes ({items.length}) · <span className="text-emerald-600">ok {summary.ok}</span> ·{" "}

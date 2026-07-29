@@ -156,7 +156,7 @@ export default function CommercialAssumptions() {
 
   return (
     <div className="space-y-6 p-6">
-      <header className="space-y-1">
+      <header className="space-y-1" data-guide-target="assumptions-summary">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-semibold text-foreground">Governed Assumption Editing</h1>
           {draftVersion?.status === "draft" && <Badge variant="outline">Draft model version · {draftVersion.version_code}</Badge>}
@@ -168,7 +168,7 @@ export default function CommercialAssumptions() {
       </header>
 
       {staleScopes.size > 0 && (
-        <Alert>
+        <Alert data-guide-target="assumptions-staleness">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Model runs are stale</AlertTitle>
           <AlertDescription>
@@ -178,7 +178,7 @@ export default function CommercialAssumptions() {
       )}
 
       {/* Change set panel */}
-      <Card>
+      <Card data-guide-target="change-sets-list">
         <CardHeader>
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
@@ -235,13 +235,13 @@ export default function CommercialAssumptions() {
       </Card>
 
       {/* Filters */}
-      <Card>
+      <Card data-guide-target="assumptions-register">
         <CardHeader>
           <CardTitle className="text-base">Browse effective assumptions</CardTitle>
           <CardDescription>Effective values resolve from <code>commercial_scenario_assumptions</code> — the same source consumed by the calculation runtime.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3" data-guide-target="assumptions-filters">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-muted-foreground" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search code or label…" className="w-[260px]" />
@@ -265,7 +265,7 @@ export default function CommercialAssumptions() {
             </Select>
             <span className="text-xs text-muted-foreground">{filtered.length} of {assumptions.length}</span>
           </div>
-          <div className="overflow-auto max-h-[520px] border rounded-md">
+          <div className="overflow-auto max-h-[520px] border rounded-md" data-guide-target="assumptions-proposed-entry">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -326,7 +326,7 @@ export default function CommercialAssumptions() {
               </TableBody>
             </Table>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground" data-guide-target="assumptions-permissions">
             Validation and application permissions: {canValidate ? "✓ validate" : "✗ validate"} · {canApply ? "✓ apply" : "✗ apply"}. Historical model runs
             are never mutated by an apply — new runs must be executed explicitly on the Revenue / P&L / Cash pages.
           </p>
