@@ -197,7 +197,7 @@ export default function CommercialSensitivityDetail() {
         </TabsContent>
 
         <TabsContent value="tornado">
-          <Card>
+          <Card data-guide-target="sensitivity-tornado">
             <CardHeader><CardTitle>Tornado (Top 25 by |Δ%|)</CardTitle><CardDescription>Ranked absolute impact of the perturbed assumption on downstream metrics.</CardDescription></CardHeader>
             <CardContent>
               {tornadoRows.length === 0 ? <p className="text-sm text-muted-foreground">No results yet.</p> : (
