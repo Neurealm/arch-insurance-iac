@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolveGuideForRoute } from "@/features/commercial-guide/content";
 import { commercialOverviewGuide } from "@/features/commercial-guide/content/pages/commercialOverview";
-import { searchGuide, guideToPlainText } from "@/features/commercial-guide/guideText";
+import { searchGuide } from "@/features/commercial-guide/guideText";
 
 const PAGE_SRC = readFileSync("src/commercial/pages/CommercialOverview.tsx", "utf8");
 
