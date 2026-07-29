@@ -29,13 +29,13 @@ describe("CDT-COMMERCIAL-GUIDE-OVERVIEW", () => {
   });
 
   it("does not describe sections that are absent from the page", () => {
-    const text = guideToPlainText(commercialOverviewGuide).toLowerCase();
-    // These live only in knownGaps / negative statements, never as a documented section.
     const sectionTitles = commercialOverviewGuide.sections.map((s) => s.title.toLowerCase()).join(" | ");
     for (const absent of ["scenario selector", "cash health", "staffing readiness", "risk register", "recent changes"]) {
       expect(sectionTitles).not.toContain(absent);
     }
-    expect(text).toContain("no cash or sustainability indicator on overview");
+    const gaps = commercialOverviewGuide.dataQuality.knownGaps.join(" ").toLowerCase();
+    expect(gaps).toContain("no cash or sustainability indicator on overview");
+    expect(gaps).toContain("no staffing or capacity readiness tile");
   });
 
   it("related page routes are registered commercial routes", () => {
