@@ -132,7 +132,7 @@ export default function CommercialStaffingResources() {
   };
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-6 pb-10">
       <StaffingHeader
         scenario={scenario}
         onScenarioChange={(s) => {
@@ -156,7 +156,7 @@ export default function CommercialStaffingResources() {
         onSelect={(card) => setSelectedCard((prev) => (prev === card.id ? null : card.id))}
       />
 
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+      <div className="grid items-start gap-6 xl:grid-cols-[2fr_1fr]">
         <RoleStaffingTable
           roles={filteredRoles}
           totals={totals}
@@ -196,7 +196,6 @@ export default function CommercialStaffingResources() {
           }}
         />
         <div className="space-y-6">
-
           <FunctionalAllocationChart
             factor={factor}
             onFilterFunction={(key) => {
@@ -219,7 +218,7 @@ export default function CommercialStaffingResources() {
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+      <div className="grid items-start gap-6 xl:grid-cols-[2fr_1fr]">
         <StaffingForecastChart
           factor={factor}
           scenario={scenario}
@@ -232,7 +231,6 @@ export default function CommercialStaffingResources() {
             }))
           }
         />
-
         <div className="space-y-6">
           <CriticalRoleCoverage
             roles={visibleCritical}
