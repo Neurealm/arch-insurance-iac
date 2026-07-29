@@ -107,6 +107,7 @@ import CommercialSensitivityDetail from "./commercial/pages/CommercialSensitivit
 import CommercialRelease from "./commercial/pages/CommercialRelease";
 import CommercialReleaseDetail from "./commercial/pages/CommercialReleaseDetail";
 import CommercialAdministration from "./commercial/pages/CommercialAdministration";
+import CommercialNeurealmGovernance from "./commercial/pages/CommercialNeurealmGovernance";
 
 
 
@@ -893,6 +894,7 @@ const App = () => (
             <Route index element={<PermissionRoute permission="commercial.view"><CommercialOverview /></PermissionRoute>} />
             <Route path="program" element={<PermissionRoute permission="commercial.view"><CommercialProgram /></PermissionRoute>} />
             <Route path="program-timeline" element={<PermissionRoute permission="commercial.view"><CommercialProgramTimeline /></PermissionRoute>} />
+            <Route path="neurealm-governance" element={<PermissionRoute permission="commercial.view"><CommercialNeurealmGovernance /></PermissionRoute>} />
 
             <Route path="scenarios" element={<PermissionRoute permission="commercial.view"><CommercialScenarios /></PermissionRoute>} />
             <Route path="portfolio" element={<PermissionRoute permission="commercial.view"><CommercialPortfolio /></PermissionRoute>} />

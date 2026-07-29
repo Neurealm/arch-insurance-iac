@@ -61,6 +61,27 @@ export default {
           "complete-soft": "hsl(var(--tl-complete-soft))",
           today: "hsl(var(--tl-today))",
         },
+        gv: {
+          navy: "hsl(var(--gv-navy))",
+          "navy-soft": "hsl(var(--gv-navy-soft))",
+          nav: "hsl(var(--gv-nav))",
+          blue: "hsl(var(--gv-blue))",
+          "blue-soft": "hsl(var(--gv-blue-soft))",
+          teal: "hsl(var(--gv-teal))",
+          "teal-soft": "hsl(var(--gv-teal-soft))",
+          purple: "hsl(var(--gv-purple))",
+          "purple-soft": "hsl(var(--gv-purple-soft))",
+          success: "hsl(var(--gv-success))",
+          "success-soft": "hsl(var(--gv-success-soft))",
+          warning: "hsl(var(--gv-warning))",
+          "warning-soft": "hsl(var(--gv-warning-soft))",
+          risk: "hsl(var(--gv-risk))",
+          "risk-soft": "hsl(var(--gv-risk-soft))",
+          canvas: "hsl(var(--gv-canvas))",
+          border: "hsl(var(--gv-border))",
+          "muted-text": "hsl(var(--gv-muted-text))",
+        },
+
         status: {
 
           healthy: "hsl(var(--status-healthy))",
