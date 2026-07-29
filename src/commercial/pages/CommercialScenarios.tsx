@@ -335,7 +335,9 @@ function ScenarioCard({ scenario }: { scenario: CommercialScenario }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-2 text-sm">
-        <p className="text-muted-foreground">{scenario.description}</p>
+        <p className="text-muted-foreground" data-guide-target="scenarios-rationale">
+          {scenario.description}
+        </p>
         <div className="flex flex-wrap gap-2 text-[11px]">
           <Badge variant="secondary" className="capitalize">
             {scenario.status}
