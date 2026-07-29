@@ -121,7 +121,7 @@ export default function CommercialOverview() {
         <>
           {/* 3 · Current gate */}
           {currentGate && (
-            <Card>
+            <Card data-guide-target="overview-current-gate">
               <CardHeader>
                 <div className="flex flex-wrap items-center gap-2">
                   <CardTitle className="text-base">Current Gate · {currentGate.gate_code}</CardTitle>
@@ -138,7 +138,7 @@ export default function CommercialOverview() {
           )}
 
           {/* 4 · Gate progression */}
-          <Card>
+          <Card data-guide-target="overview-gate-progression">
             <CardHeader><CardTitle className="text-base">Gate progression</CardTitle></CardHeader>
             <CardContent>
               <ol className="flex flex-wrap items-center gap-2">
