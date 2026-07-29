@@ -34,11 +34,13 @@ export default function CommercialProgram() {
 
   return (
     <div className="space-y-6">
-      <DirectionalBanner />
+      <div data-guide-target="program-context">
+        <DirectionalBanner />
+      </div>
 
-      <Card>
+      <Card data-guide-target="program-purpose">
         <CardHeader>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2" data-guide-target="program-approval-status">
             <CardTitle className="text-base">{program.name}</CardTitle>
             <Badge variant="outline" className="font-mono text-[11px]">{program.code}</Badge>
             <Badge variant="secondary" className="capitalize">{program.status}</Badge>
@@ -46,7 +48,7 @@ export default function CommercialProgram() {
           </div>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
-          <div className="text-muted-foreground">
+          <div className="text-muted-foreground" data-guide-target="program-scope">
             Partner: <span className="text-foreground">{program.partner_name}</span> · Segment:{" "}
             <span className="text-foreground">{program.market_segment}</span>
           </div>
@@ -57,9 +59,10 @@ export default function CommercialProgram() {
         </CardContent>
       </Card>
 
-      <div className="space-y-3">
+      <div className="space-y-3" data-guide-target="program-phases">
         <h2 className="text-sm font-semibold text-foreground">Operating Gates</h2>
-        <div className="space-y-3">
+        <div className="space-y-3" data-guide-target="program-gates">
+
           {gates.map((g) => (
             <Card key={g.id}>
               <CardHeader className="pb-3">
