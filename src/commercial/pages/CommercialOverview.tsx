@@ -163,7 +163,7 @@ export default function CommercialOverview() {
           </Card>
 
           {/* 5 · Four aggregate metrics */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div data-guide-target="overview-summary-metrics" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {metrics.map((m) => (
               <Card key={m.id}>
                 <CardHeader className="pb-2">
@@ -179,7 +179,7 @@ export default function CommercialOverview() {
 
           {/* 6 · Baseline scenario & 7 · Comparison summary */}
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+            <Card data-guide-target="overview-scenario-context">
               <CardHeader><CardTitle className="text-base">Baseline scenario</CardTitle></CardHeader>
               <CardContent className="text-sm space-y-1">
                 {baseline ? (
