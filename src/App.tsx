@@ -91,6 +91,7 @@ import CommercialLayout from "./commercial/shell/CommercialLayout";
 import CommercialOverview from "./commercial/pages/CommercialOverview";
 import CommercialProgram from "./commercial/pages/CommercialProgram";
 import CommercialProgramTimeline from "./commercial/pages/CommercialProgramTimeline";
+import CommercialStaffingResources from "./commercial/pages/CommercialStaffingResources";
 
 import CommercialScenarios from "./commercial/pages/CommercialScenarios";
 import CommercialPortfolio from "./commercial/pages/CommercialPortfolio";
@@ -894,6 +895,7 @@ const App = () => (
             <Route index element={<PermissionRoute permission="commercial.view"><CommercialOverview /></PermissionRoute>} />
             <Route path="program" element={<PermissionRoute permission="commercial.view"><CommercialProgram /></PermissionRoute>} />
             <Route path="program-timeline" element={<PermissionRoute permission="commercial.view"><CommercialProgramTimeline /></PermissionRoute>} />
+            <Route path="staffing-resources" element={<PermissionRoute permission="commercial.view"><CommercialStaffingResources /></PermissionRoute>} />
             <Route path="neurealm-governance" element={<PermissionRoute permission="commercial.view"><CommercialNeurealmGovernance /></PermissionRoute>} />
 
             <Route path="scenarios" element={<PermissionRoute permission="commercial.view"><CommercialScenarios /></PermissionRoute>} />

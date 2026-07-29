@@ -46,6 +46,7 @@ const NAV: NavItem[] = [
   { to: "/commercial/model/release", label: "Release & Activation", icon: Shield, section: "Model" },
   { to: "/commercial/neurealm-governance", label: "Governance", icon: Shield, section: "Governance & Delivery" },
   { to: "/commercial/program-timeline", label: "Timelines", icon: CalendarRange, section: "Governance & Delivery" },
+  { to: "/commercial/staffing-resources", label: "Staffing & Resources", icon: Users, section: "Governance & Delivery" },
   { to: "/commercial/administration", label: "Administration", icon: Settings, section: "Administration" },
 
 ];
