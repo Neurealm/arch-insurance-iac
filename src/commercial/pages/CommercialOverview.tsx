@@ -57,11 +57,13 @@ export default function CommercialOverview() {
 
   return (
     <div className="space-y-6">
-      <DirectionalBanner />
+      <div data-guide-target="overview-page-context">
+        <DirectionalBanner />
+      </div>
 
       {/* 1 · Workspace & 2 · Program */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card data-guide-target="overview-workspace-context">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Workspace</CardTitle>
@@ -76,7 +78,7 @@ export default function CommercialOverview() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-guide-target="overview-program-context">
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="text-base">Program</CardTitle>
@@ -119,7 +121,7 @@ export default function CommercialOverview() {
         <>
           {/* 3 · Current gate */}
           {currentGate && (
-            <Card>
+            <Card data-guide-target="overview-current-gate">
               <CardHeader>
                 <div className="flex flex-wrap items-center gap-2">
                   <CardTitle className="text-base">Current Gate · {currentGate.gate_code}</CardTitle>
@@ -136,7 +138,7 @@ export default function CommercialOverview() {
           )}
 
           {/* 4 · Gate progression */}
-          <Card>
+          <Card data-guide-target="overview-gate-progression">
             <CardHeader><CardTitle className="text-base">Gate progression</CardTitle></CardHeader>
             <CardContent>
               <ol className="flex flex-wrap items-center gap-2">
@@ -161,7 +163,7 @@ export default function CommercialOverview() {
           </Card>
 
           {/* 5 · Four aggregate metrics */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div data-guide-target="overview-summary-metrics" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {metrics.map((m) => (
               <Card key={m.id}>
                 <CardHeader className="pb-2">
@@ -177,7 +179,7 @@ export default function CommercialOverview() {
 
           {/* 6 · Baseline scenario & 7 · Comparison summary */}
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+            <Card data-guide-target="overview-scenario-context">
               <CardHeader><CardTitle className="text-base">Baseline scenario</CardTitle></CardHeader>
               <CardContent className="text-sm space-y-1">
                 {baseline ? (
@@ -195,7 +197,7 @@ export default function CommercialOverview() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card data-guide-target="overview-scenario-comparison">
               <CardHeader><CardTitle className="text-base">Scenario comparison</CardTitle></CardHeader>
               <CardContent className="text-sm">
                 {scenarios.length ? (
@@ -224,7 +226,7 @@ export default function CommercialOverview() {
           </div>
 
           {/* 8 · Source validation */}
-          <Card>
+          <Card data-guide-target="overview-source-validation">
             <CardHeader><CardTitle className="text-base">Source validation</CardTitle></CardHeader>
             <CardContent className="text-sm">
               <div className="mb-2 text-muted-foreground">
@@ -249,7 +251,7 @@ export default function CommercialOverview() {
 
           {/* 9 · Data readiness & 10 · Next actions */}
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+            <Card data-guide-target="overview-data-status">
               <CardHeader><CardTitle className="text-base">Data readiness</CardTitle></CardHeader>
               <CardContent>
                 <ul className="divide-y divide-border">
@@ -272,7 +274,7 @@ export default function CommercialOverview() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card data-guide-target="overview-next-actions">
               <CardHeader><CardTitle className="text-base">Recommended next actions</CardTitle></CardHeader>
               <CardContent>
                 <ol className="space-y-1.5 text-sm">
