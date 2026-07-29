@@ -172,7 +172,7 @@ export default function CommercialScenarios() {
     <div className="space-y-6">
       <DirectionalBanner />
 
-      <Alert>
+      <Alert data-guide-target="scenarios-summary">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle className="text-xs uppercase tracking-wide">Directional caveat</AlertTitle>
         <AlertDescription>
@@ -181,7 +181,7 @@ export default function CommercialScenarios() {
         </AlertDescription>
       </Alert>
 
-      <Alert variant="default" className="border-dashed">
+      <Alert variant="default" className="border-dashed" data-guide-target="scenarios-validation">
         <AlertDescription className="text-xs">
           Financial calculation engine planned for the next Commercial modeling package. No P&L,
           EBITDA, cash-flow, NPV, or payback outputs are computed here.
@@ -189,7 +189,7 @@ export default function CommercialScenarios() {
       </Alert>
 
       <div className="flex items-center justify-between">
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-muted-foreground" data-guide-target="scenarios-status">
           {canManageScenario ? "Editing enabled" : (
             <span className="inline-flex items-center gap-1">
               <Lock className="h-3 w-3" /> View-only (no scenario management permission)
@@ -201,7 +201,7 @@ export default function CommercialScenarios() {
             </span>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2" data-guide-target="scenarios-actions">
           <SeedScenariosButton />
           {canManageScenario && (
             <Button size="sm" onClick={() => save.mutate()} disabled={dirtyKeys.length === 0 || save.isPending}>
@@ -213,17 +213,18 @@ export default function CommercialScenarios() {
       </div>
 
       {/* Scenario cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4" data-guide-target="scenarios-cards">
         {scenarios.map((s) => (
           <ScenarioCard key={s.id} scenario={s} />
         ))}
       </div>
 
       {/* Activation ramp */}
-      <Card>
+      <Card data-guide-target="scenarios-detail">
         <CardHeader>
           <CardTitle className="text-sm">Activation Ramp (cumulative accounts)</CardTitle>
         </CardHeader>
+
         <CardContent className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
