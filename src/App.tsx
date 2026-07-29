@@ -90,6 +90,8 @@ import CaeAudioAnalytics from "./platform/cae/admin/AudioAnalytics";
 import CommercialLayout from "./commercial/shell/CommercialLayout";
 import CommercialOverview from "./commercial/pages/CommercialOverview";
 import CommercialProgram from "./commercial/pages/CommercialProgram";
+import CommercialProgramTimeline from "./commercial/pages/CommercialProgramTimeline";
+
 import CommercialScenarios from "./commercial/pages/CommercialScenarios";
 import CommercialPortfolio from "./commercial/pages/CommercialPortfolio";
 import CommercialSources from "./commercial/pages/CommercialSources";
