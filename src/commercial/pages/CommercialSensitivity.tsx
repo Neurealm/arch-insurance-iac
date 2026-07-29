@@ -81,12 +81,13 @@ export default function CommercialSensitivity() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4" data-guide-target="sensitivity-interpretation">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2"><Activity className="h-5 w-5" />Sensitivity Analysis</h1>
           <p className="text-sm text-muted-foreground">Perturb a single governed assumption to measure downstream impact across Revenue, P&amp;L, and Cash.</p>
         </div>
       </div>
+
 
       {canCreate && (
         <Card>
