@@ -21,6 +21,7 @@ const PAGE_CONTENT: Record<string, CommercialGuideContent> = {
   "commercial-portfolio": commercialPortfolioGuide,
   "commercial-sources": commercialSourcesGuide,
   "commercial-assumptions": commercialAssumptionsGuide,
+  "commercial-scenarios": commercialScenariosGuide,
 };
 
 
