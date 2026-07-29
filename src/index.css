@@ -218,3 +218,11 @@ All colors MUST be HSL.
 .sidebar-scroll:hover::-webkit-scrollbar-thumb {
   background-color: hsl(var(--sidebar-foreground) / 0.3);
 }
+
+/* Commercial Guide — "Show on Page" target highlight */
+.commercial-guide-highlight {
+  outline: 2px dashed hsl(var(--ring));
+  outline-offset: 4px;
+  border-radius: var(--radius);
+  scroll-margin-top: 6rem;
+}
