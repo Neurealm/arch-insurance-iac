@@ -17,6 +17,7 @@ import {
   CalendarRange,
 
   Settings,
+  Users,
 
 } from "lucide-react";
 import type { ComponentType } from "react";
