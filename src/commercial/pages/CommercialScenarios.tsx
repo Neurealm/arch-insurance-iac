@@ -259,8 +259,9 @@ export default function CommercialScenarios() {
       </Card>
 
       {/* Assumption groups */}
-      {GROUPS.map((g) => (
-        <Card key={g.title}>
+      {GROUPS.map((g, gi) => (
+        <Card key={g.title} data-guide-target={gi === 0 ? "scenarios-drivers" : undefined}>
+
           <CardHeader>
             <CardTitle className="text-sm">{g.title}</CardTitle>
           </CardHeader>
