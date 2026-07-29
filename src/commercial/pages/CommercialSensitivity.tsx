@@ -101,7 +101,7 @@ export default function CommercialSensitivity() {
                 <Label>Title</Label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Revenue Ramp ±10%" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" data-guide-target="sensitivity-baseline">
                 <Label>Baseline Scenario</Label>
                 <Select value={effectiveScenario} onValueChange={setScenarioId}>
                   <SelectTrigger><SelectValue placeholder="Select scenario" /></SelectTrigger>
