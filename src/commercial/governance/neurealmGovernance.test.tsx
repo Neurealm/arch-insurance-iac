@@ -35,11 +35,11 @@ describe("Neurealm Governance (prototype)", () => {
 
   it("recalculates Day 0 readiness when a checklist item is toggled", () => {
     render(<CommercialNeurealmGovernance />);
-    expect(screen.getByText("78%")).toBeInTheDocument();
+    expect(screen.getAllByText("78%").length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByLabelText("Baseline service metrics"));
     // 13 of 15 complete -> 87%
-    expect(screen.getByText("87%")).toBeInTheDocument();
+    expect(screen.getAllByText("87%").length).toBeGreaterThan(0);
   });
 
   it("approves a decision locally", () => {
