@@ -21,18 +21,20 @@ const READINESS: ReadinessRow[] = [
 export default function CommercialPortfolio() {
   return (
     <div className="space-y-6">
-      <DirectionalBanner />
+      <div data-guide-target="portfolio-context">
+        <DirectionalBanner />
+      </div>
 
-      <Card>
+      <Card data-guide-target="portfolio-summary">
         <CardHeader>
           <CardTitle className="text-base">No account records imported</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground" data-guide-target="portfolio-account-count">
             The current model represents a 104-account no-partner portfolio at an aggregate level.
             Account-level records have not yet been validated or imported.
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2" data-guide-target="portfolio-next-actions">
             <Button asChild variant="default" size="sm">
               <Link to="/commercial/sources">Review source requirements</Link>
             </Button>
@@ -48,14 +50,15 @@ export default function CommercialPortfolio() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card data-guide-target="portfolio-data-quality">
         <CardHeader>
           <CardTitle className="text-base">Data readiness</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-border" data-guide-target="portfolio-readiness">
             {READINESS.map((r) => (
               <li key={r.label} className="flex items-center justify-between gap-3 py-2 text-sm">
+
                 <div className="flex items-center gap-2 min-w-0">
                   {r.state === "known" ? (
                     <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden />
