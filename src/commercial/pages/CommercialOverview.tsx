@@ -197,7 +197,7 @@ export default function CommercialOverview() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card data-guide-target="overview-scenario-comparison">
               <CardHeader><CardTitle className="text-base">Scenario comparison</CardTitle></CardHeader>
               <CardContent className="text-sm">
                 {scenarios.length ? (
@@ -226,7 +226,7 @@ export default function CommercialOverview() {
           </div>
 
           {/* 8 · Source validation */}
-          <Card>
+          <Card data-guide-target="overview-source-validation">
             <CardHeader><CardTitle className="text-base">Source validation</CardTitle></CardHeader>
             <CardContent className="text-sm">
               <div className="mb-2 text-muted-foreground">
@@ -251,7 +251,7 @@ export default function CommercialOverview() {
 
           {/* 9 · Data readiness & 10 · Next actions */}
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+            <Card data-guide-target="overview-data-status">
               <CardHeader><CardTitle className="text-base">Data readiness</CardTitle></CardHeader>
               <CardContent>
                 <ul className="divide-y divide-border">
@@ -274,7 +274,7 @@ export default function CommercialOverview() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card data-guide-target="overview-next-actions">
               <CardHeader><CardTitle className="text-base">Recommended next actions</CardTitle></CardHeader>
               <CardContent>
                 <ol className="space-y-1.5 text-sm">
