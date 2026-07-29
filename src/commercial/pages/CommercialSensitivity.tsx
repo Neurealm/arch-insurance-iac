@@ -116,7 +116,7 @@ export default function CommercialSensitivity() {
               <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" data-guide-target="sensitivity-variable-selection">
                 <Label>Perturbed Assumption</Label>
                 <Select value={assumptionCode} onValueChange={setAssumptionCode}>
                   <SelectTrigger><SelectValue placeholder="Select assumption" /></SelectTrigger>
