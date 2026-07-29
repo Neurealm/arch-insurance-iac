@@ -194,7 +194,9 @@ export default function CommercialStaffingResources() {
             ]);
             markDirty("Planned role added locally.");
           }}
+        />
         <div className="space-y-6">
+
           <FunctionalAllocationChart
             factor={factor}
             onFilterFunction={(key) => {
@@ -230,7 +232,7 @@ export default function CommercialStaffingResources() {
             }))
           }
         />
-        />
+
         <div className="space-y-6">
           <CriticalRoleCoverage
             roles={visibleCritical}
