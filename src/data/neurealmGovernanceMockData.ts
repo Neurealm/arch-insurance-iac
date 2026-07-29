@@ -169,7 +169,7 @@ export interface GovernanceFilterState {
 }
 
 export const GOVERNANCE_META = {
-  title: "Neurealm Governance",
+  title: "Governance",
   subtitle: "Internal governance framework supporting Day 0, Day 1, and Day 2 operations",
   context: "Citrix Healthcare Operating Model Engagement",
   lastUpdated: "June 17, 2026 at 10:30 AM",
