@@ -107,7 +107,7 @@ import CommercialSensitivity from "./commercial/pages/CommercialSensitivity";
 import CommercialSensitivityDetail from "./commercial/pages/CommercialSensitivityDetail";
 import CommercialRelease from "./commercial/pages/CommercialRelease";
 import CommercialReleaseDetail from "./commercial/pages/CommercialReleaseDetail";
-import CommercialAdministration from "./commercial/pages/CommercialAdministration";
+
 import CommercialNeurealmGovernance from "./commercial/pages/CommercialNeurealmGovernance";
 
 
@@ -912,7 +912,7 @@ const App = () => (
             <Route path="model/sensitivity/:id" element={<PermissionRoute permission="commercial.view"><CommercialSensitivityDetail /></PermissionRoute>} />
             <Route path="model/release" element={<PermissionRoute permission="commercial.view"><CommercialRelease /></PermissionRoute>} />
             <Route path="model/release/:versionId" element={<PermissionRoute permission="commercial.view"><CommercialReleaseDetail /></PermissionRoute>} />
-            <Route path="administration" element={<PermissionRoute permission="commercial.view"><CommercialAdministration /></PermissionRoute>} />
+            
 
 
 
