@@ -5,6 +5,7 @@ import { commercialOverviewGuide } from "./pages/commercialOverview";
 import { commercialProgramGuide } from "./pages/commercialProgram";
 import { commercialPortfolioGuide } from "./pages/commercialPortfolio";
 import { commercialSourcesGuide } from "./pages/commercialSources";
+import { commercialAssumptionsGuide } from "./pages/commercialAssumptions";
 
 /**
  * Central typed guide registry.
@@ -18,6 +19,7 @@ const PAGE_CONTENT: Record<string, CommercialGuideContent> = {
   "commercial-program": commercialProgramGuide,
   "commercial-portfolio": commercialPortfolioGuide,
   "commercial-sources": commercialSourcesGuide,
+  "commercial-assumptions": commercialAssumptionsGuide,
 };
 
 
