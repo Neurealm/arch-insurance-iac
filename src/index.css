@@ -53,6 +53,30 @@ All colors MUST be HSL.
     --status-info: 215 90% 55%;
     --status-info-soft: 215 100% 96%;
 
+    /* Program timeline categories */
+    --tl-planning: 142 71% 36%;
+    --tl-planning-soft: 142 60% 92%;
+    --tl-build: 217 91% 60%;
+    --tl-build-soft: 217 92% 94%;
+    --tl-testing: 262 83% 58%;
+    --tl-testing-soft: 262 85% 95%;
+    --tl-deployment: 32 95% 44%;
+    --tl-deployment-soft: 36 92% 92%;
+    --tl-customer: 183 84% 36%;
+    --tl-customer-soft: 183 70% 92%;
+    --tl-commercial: 214 78% 20%;
+    --tl-commercial-soft: 214 45% 92%;
+    --tl-governance: 231 60% 45%;
+    --tl-governance-soft: 231 70% 94%;
+    --tl-readiness: 199 89% 40%;
+    --tl-readiness-soft: 199 85% 93%;
+    --tl-risk: 0 72% 51%;
+    --tl-risk-soft: 0 85% 95%;
+    --tl-complete: 152 60% 34%;
+    --tl-complete-soft: 152 60% 92%;
+    --tl-today: 221 83% 53%;
+
+
     /* AI / Digital coworkers */
     --ai: 265 85% 60%;
     --ai-soft: 265 100% 97%;

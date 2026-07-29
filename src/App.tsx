@@ -90,6 +90,8 @@ import CaeAudioAnalytics from "./platform/cae/admin/AudioAnalytics";
 import CommercialLayout from "./commercial/shell/CommercialLayout";
 import CommercialOverview from "./commercial/pages/CommercialOverview";
 import CommercialProgram from "./commercial/pages/CommercialProgram";
+import CommercialProgramTimeline from "./commercial/pages/CommercialProgramTimeline";
+
 import CommercialScenarios from "./commercial/pages/CommercialScenarios";
 import CommercialPortfolio from "./commercial/pages/CommercialPortfolio";
 import CommercialSources from "./commercial/pages/CommercialSources";
@@ -890,6 +892,8 @@ const App = () => (
           <Route path="/commercial" element={<CommercialLayout />}>
             <Route index element={<PermissionRoute permission="commercial.view"><CommercialOverview /></PermissionRoute>} />
             <Route path="program" element={<PermissionRoute permission="commercial.view"><CommercialProgram /></PermissionRoute>} />
+            <Route path="program-timeline" element={<PermissionRoute permission="commercial.view"><CommercialProgramTimeline /></PermissionRoute>} />
+
             <Route path="scenarios" element={<PermissionRoute permission="commercial.view"><CommercialScenarios /></PermissionRoute>} />
             <Route path="portfolio" element={<PermissionRoute permission="commercial.view"><CommercialPortfolio /></PermissionRoute>} />
             <Route path="sources" element={<PermissionRoute permission="commercial.view"><CommercialSources /></PermissionRoute>} />

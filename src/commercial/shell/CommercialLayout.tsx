@@ -14,6 +14,8 @@ import {
   Shield,
   ArrowLeft,
   Calculator,
+  CalendarRange,
+
   Settings,
 
 } from "lucide-react";
@@ -30,6 +32,8 @@ type NavItem = {
 const NAV: NavItem[] = [
   { to: "/commercial", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/commercial/program", label: "Program", icon: Rocket },
+  { to: "/commercial/program-timeline", label: "Program & Timeline", icon: CalendarRange },
+
   { to: "/commercial/scenarios", label: "Scenarios", icon: FlaskConical },
   { to: "/commercial/portfolio", label: "Portfolio", icon: Briefcase },
   { to: "/commercial/sources", label: "Sources", icon: BookOpen },
