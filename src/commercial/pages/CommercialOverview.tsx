@@ -57,11 +57,13 @@ export default function CommercialOverview() {
 
   return (
     <div className="space-y-6">
-      <DirectionalBanner />
+      <div data-guide-target="overview-page-context">
+        <DirectionalBanner />
+      </div>
 
       {/* 1 · Workspace & 2 · Program */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card data-guide-target="overview-workspace-context">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Workspace</CardTitle>
@@ -76,7 +78,7 @@ export default function CommercialOverview() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-guide-target="overview-program-context">
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="text-base">Program</CardTitle>
