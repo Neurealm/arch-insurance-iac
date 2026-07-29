@@ -112,7 +112,7 @@ export default function CommercialSensitivityDetail() {
           <div>
             <h1 className="text-2xl font-semibold">{exp.title}</h1>
             {exp.description && <p className="text-sm text-muted-foreground mt-1">{exp.description}</p>}
-            <div className="flex flex-wrap gap-2 mt-2 text-xs">
+            <div className="flex flex-wrap gap-2 mt-2 text-xs" data-guide-target="sensitivity-run-status">
               <Badge variant={exp.status === "completed" ? "default" : exp.status === "failed" ? "destructive" : "secondary"}>{exp.status}</Badge>
               <Badge variant="outline" className="font-mono">{exp.assumption_code}</Badge>
               <Badge variant="outline">baseline: {fmt(baselineValue, 6)}</Badge>
@@ -197,7 +197,7 @@ export default function CommercialSensitivityDetail() {
         </TabsContent>
 
         <TabsContent value="tornado">
-          <Card>
+          <Card data-guide-target="sensitivity-tornado">
             <CardHeader><CardTitle>Tornado (Top 25 by |Δ%|)</CardTitle><CardDescription>Ranked absolute impact of the perturbed assumption on downstream metrics.</CardDescription></CardHeader>
             <CardContent>
               {tornadoRows.length === 0 ? <p className="text-sm text-muted-foreground">No results yet.</p> : (
@@ -230,7 +230,7 @@ export default function CommercialSensitivityDetail() {
         </TabsContent>
 
         <TabsContent value="results">
-          <Card>
+          <Card data-guide-target="sensitivity-results">
             <CardHeader><CardTitle>All Results</CardTitle><CardDescription>{results.length} row(s)</CardDescription></CardHeader>
             <CardContent>
               {results.length === 0 ? <p className="text-sm text-muted-foreground">No results.</p> : (

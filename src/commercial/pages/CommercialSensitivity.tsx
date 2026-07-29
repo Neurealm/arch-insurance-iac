@@ -81,12 +81,13 @@ export default function CommercialSensitivity() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4" data-guide-target="sensitivity-interpretation">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2"><Activity className="h-5 w-5" />Sensitivity Analysis</h1>
           <p className="text-sm text-muted-foreground">Perturb a single governed assumption to measure downstream impact across Revenue, P&amp;L, and Cash.</p>
         </div>
       </div>
+
 
       {canCreate && (
         <Card>
@@ -100,7 +101,7 @@ export default function CommercialSensitivity() {
                 <Label>Title</Label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Revenue Ramp ±10%" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" data-guide-target="sensitivity-baseline">
                 <Label>Baseline Scenario</Label>
                 <Select value={effectiveScenario} onValueChange={setScenarioId}>
                   <SelectTrigger><SelectValue placeholder="Select scenario" /></SelectTrigger>
@@ -115,7 +116,7 @@ export default function CommercialSensitivity() {
               <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" data-guide-target="sensitivity-variable-selection">
                 <Label>Perturbed Assumption</Label>
                 <Select value={assumptionCode} onValueChange={setAssumptionCode}>
                   <SelectTrigger><SelectValue placeholder="Select assumption" /></SelectTrigger>
@@ -128,7 +129,7 @@ export default function CommercialSensitivity() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" data-guide-target="sensitivity-range">
                 <Label>Strategy</Label>
                 <Select value={strategy} onValueChange={(v) => setStrategy(v as PerturbationStrategy)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -151,8 +152,9 @@ export default function CommercialSensitivity() {
                 <Input value={values} onChange={(e) => setValues(e.target.value)} />
               </div>
             )}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5" data-guide-target="sensitivity-outcome">
               <Label>Included Scopes</Label>
+
               <div className="flex gap-4">
                 {SCOPES.map((s) => (
                   <label key={s} className="flex items-center gap-2 text-sm">
@@ -169,7 +171,7 @@ export default function CommercialSensitivity() {
         </Card>
       )}
 
-      <Card>
+      <Card data-guide-target="sensitivity-history">
         <CardHeader>
           <CardTitle>Experiments</CardTitle>
           <CardDescription>Draft experiments can be executed from the detail page.</CardDescription>
