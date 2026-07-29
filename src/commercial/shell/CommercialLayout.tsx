@@ -4,6 +4,8 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CommercialGuideButton } from "@/features/commercial-guide/CommercialGuideButton";
+import { CommercialGuideRoot } from "@/features/commercial-guide/CommercialGuideRoot";
 import {
   LayoutDashboard,
   Rocket,
@@ -140,6 +142,7 @@ function Header() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
+          <CommercialGuideButton />
           {isPlatformAdmin && <Badge variant="secondary">Platform Admin</Badge>}
           <div className="min-w-[240px]">
             <Select value={activeTenantId ?? undefined} onValueChange={(v) => switchTenant(v)}>
@@ -201,7 +204,9 @@ export default function CommercialLayout() {
   return (
     <ProtectedRoute>
       <AccessProvider>
-        <Shell />
+        <CommercialGuideRoot>
+          <Shell />
+        </CommercialGuideRoot>
       </AccessProvider>
     </ProtectedRoute>
   );
