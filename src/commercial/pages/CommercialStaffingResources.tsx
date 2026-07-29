@@ -157,42 +157,6 @@ export default function CommercialStaffingResources() {
       />
 
       <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
-        <StaffingForecastChart
-          factor={factor}
-          scenario={scenario}
-          activePhases={activePhases}
-          onSegmentSelect={(functionKey, phase) =>
-            setFilters((f) => ({
-              ...f,
-              functions: [functionKey],
-              phases: [phase],
-            }))
-          }
-        />
-        <div className="space-y-6">
-          <FunctionalAllocationChart
-            factor={factor}
-            onFilterFunction={(key) => {
-              setFilters((f) => ({ ...f, functions: [key] }));
-              toast.success(`Plan filtered to ${FUNCTION_LABELS[key] ?? key}.`);
-            }}
-          />
-          <ResourceHealthPanel onViewRisks={() => scrollTo("resource-risks")} />
-        </div>
-      </div>
-
-      <OperationalPhaseCards
-        factor={factor}
-        activePhases={activePhases}
-        onToggle={(phase: PhaseKey) =>
-          setFilters((f) => ({
-            ...f,
-            phases: f.phases.includes(phase) ? f.phases.filter((p) => p !== phase) : [...f.phases, phase],
-          }))
-        }
-      />
-
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
         <RoleStaffingTable
           roles={filteredRoles}
           totals={totals}
@@ -230,6 +194,42 @@ export default function CommercialStaffingResources() {
             ]);
             markDirty("Planned role added locally.");
           }}
+        <div className="space-y-6">
+          <FunctionalAllocationChart
+            factor={factor}
+            onFilterFunction={(key) => {
+              setFilters((f) => ({ ...f, functions: [key] }));
+              toast.success(`Plan filtered to ${FUNCTION_LABELS[key] ?? key}.`);
+            }}
+          />
+          <ResourceHealthPanel onViewRisks={() => scrollTo("resource-risks")} />
+        </div>
+      </div>
+
+      <OperationalPhaseCards
+        factor={factor}
+        activePhases={activePhases}
+        onToggle={(phase: PhaseKey) =>
+          setFilters((f) => ({
+            ...f,
+            phases: f.phases.includes(phase) ? f.phases.filter((p) => p !== phase) : [...f.phases, phase],
+          }))
+        }
+      />
+
+      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+        <StaffingForecastChart
+          factor={factor}
+          scenario={scenario}
+          activePhases={activePhases}
+          onSegmentSelect={(functionKey, phase) =>
+            setFilters((f) => ({
+              ...f,
+              functions: [functionKey],
+              phases: [phase],
+            }))
+          }
+        />
         />
         <div className="space-y-6">
           <CriticalRoleCoverage
