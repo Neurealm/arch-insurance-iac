@@ -112,7 +112,7 @@ export default function CommercialSensitivityDetail() {
           <div>
             <h1 className="text-2xl font-semibold">{exp.title}</h1>
             {exp.description && <p className="text-sm text-muted-foreground mt-1">{exp.description}</p>}
-            <div className="flex flex-wrap gap-2 mt-2 text-xs">
+            <div className="flex flex-wrap gap-2 mt-2 text-xs" data-guide-target="sensitivity-run-status">
               <Badge variant={exp.status === "completed" ? "default" : exp.status === "failed" ? "destructive" : "secondary"}>{exp.status}</Badge>
               <Badge variant="outline" className="font-mono">{exp.assumption_code}</Badge>
               <Badge variant="outline">baseline: {fmt(baselineValue, 6)}</Badge>
