@@ -26,27 +26,33 @@ export default function CommercialSources() {
 
   return (
     <div className="space-y-4">
-      <DirectionalBanner />
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <div data-guide-target="sources-context">
+        <DirectionalBanner />
+      </div>
+      <div
+        className="flex items-center gap-2 text-xs text-muted-foreground"
+        data-guide-target="sources-confidentiality"
+      >
         <Lock className="h-3.5 w-3.5" />
         Metadata only. Raw content, transcripts, spreadsheets, contact info, and credentials are never stored here.
       </div>
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2" data-guide-target="sources-registry">
         {sources.map((s) => (
-          <Card key={s.id}>
+          <Card key={s.id} data-guide-target="sources-record">
             <CardHeader className="pb-2">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2" data-guide-target="sources-identity">
                 <Badge variant="outline" className="font-mono text-[11px]">{s.source_code}</Badge>
                 <CardTitle className="text-sm">{s.title}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-2 text-xs">
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5" data-guide-target="sources-status">
                 <Badge variant="secondary" className="capitalize">{s.source_type.replace(/_/g, " ")}</Badge>
                 <Badge variant="outline" className="capitalize">{s.confidentiality}</Badge>
                 <Badge variant="outline" className="capitalize">{s.status}</Badge>
               </div>
-              {s.notes && <p className="text-muted-foreground">{s.notes}</p>}
+              {s.notes && <p className="text-muted-foreground" data-guide-target="sources-notes">{s.notes}</p>}
+
             </CardContent>
           </Card>
         ))}
