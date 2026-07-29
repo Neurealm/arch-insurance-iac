@@ -89,7 +89,7 @@ export function StaffingForecastChart({
     .join("; ");
 
   return (
-    <Card>
+    <Card className="self-start">
       <CardHeader className="pb-3">
         <SectionHeading
           title="Day 0, Day 1 and Day 2 Staffing Plan"
@@ -166,7 +166,7 @@ export function StaffingForecastChart({
                   </span>
                   <svg
                     viewBox="0 0 60 240"
-                    className="h-56 w-full max-w-[64px]"
+                    className="h-44 w-full max-w-[64px]"
                     role="img"
                     aria-label={`${c.label}: total ${c.total.toFixed(1)} FTEs`}
                   >
