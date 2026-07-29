@@ -6,6 +6,7 @@ import { commercialProgramGuide } from "./pages/commercialProgram";
 import { commercialPortfolioGuide } from "./pages/commercialPortfolio";
 import { commercialSourcesGuide } from "./pages/commercialSources";
 import { commercialAssumptionsGuide } from "./pages/commercialAssumptions";
+import { commercialScenariosGuide } from "./pages/commercialScenarios";
 
 /**
  * Central typed guide registry.
