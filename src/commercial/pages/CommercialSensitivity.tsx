@@ -171,7 +171,7 @@ export default function CommercialSensitivity() {
         </Card>
       )}
 
-      <Card>
+      <Card data-guide-target="sensitivity-history">
         <CardHeader>
           <CardTitle>Experiments</CardTitle>
           <CardDescription>Draft experiments can be executed from the detail page.</CardDescription>
