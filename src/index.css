@@ -76,6 +76,28 @@ All colors MUST be HSL.
     --tl-complete-soft: 152 60% 92%;
     --tl-today: 221 83% 53%;
 
+    /* Neurealm governance palette */
+    --gv-navy: 214 74% 16%;
+    --gv-navy-soft: 214 45% 94%;
+    --gv-nav: 213 88% 19%;
+    --gv-blue: 221 83% 53%;
+    --gv-blue-soft: 221 90% 96%;
+    --gv-teal: 183 83% 36%;
+    --gv-teal-soft: 183 70% 94%;
+    --gv-purple: 256 63% 57%;
+    --gv-purple-soft: 256 80% 96%;
+    --gv-success: 142 72% 36%;
+    --gv-success-soft: 142 60% 94%;
+    --gv-warning: 32 95% 44%;
+    --gv-warning-soft: 36 92% 94%;
+    --gv-risk: 0 72% 51%;
+    --gv-risk-soft: 0 85% 96%;
+    --gv-canvas: 214 43% 98%;
+    --gv-border: 216 30% 89%;
+    --gv-muted-text: 216 20% 45%;
+
+
+
 
     /* AI / Digital coworkers */
     --ai: 265 85% 60%;
