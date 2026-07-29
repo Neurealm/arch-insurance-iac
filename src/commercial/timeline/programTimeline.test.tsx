@@ -10,7 +10,7 @@ describe("Program & Customer Timelines (prototype)", () => {
         <CommercialProgramTimeline />
       </MemoryRouter>
     );
-    expect(screen.getByRole("heading", { name: /Program & Customer Timelines/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /^Timelines$/i })).toBeInTheDocument();
     expect(screen.getByText(/Program Duration/i)).toBeInTheDocument();
     expect(screen.getByText(/Neurealm Deliverables/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Operational Readiness/i).length).toBeGreaterThan(0);

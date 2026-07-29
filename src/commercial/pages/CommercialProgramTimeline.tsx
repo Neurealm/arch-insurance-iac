@@ -146,7 +146,7 @@ export default function CommercialProgramTimeline() {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Program &amp; Customer Timelines
+            Timelines
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Integrated schedule for commercial, customer, delivery, and operational readiness
