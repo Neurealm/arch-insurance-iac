@@ -30,7 +30,7 @@ export function GovernanceSummaryCards({
   onSelect: (card: GovernanceSummary) => void;
 }) {
   return (
-    <section aria-label="Governance health summary">
+    <section data-guide-target="governance-health" aria-label="Governance health summary">
       <h2 className="sr-only">Governance health summary</h2>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {cards.map((card) => {

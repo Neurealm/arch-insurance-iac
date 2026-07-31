@@ -23,7 +23,7 @@ export function ExecutiveAttentionPanel({
   const [draft, setDraft] = useState(summaryText);
 
   return (
-    <Card id="attention" className="border-l-4 border-l-gv-warning bg-gv-warning-soft/40">
+    <Card id="attention" data-guide-target="governance-executive-attention" className="border-l-4 border-l-gv-warning bg-gv-warning-soft/40">
       <CardHeader>
         <SectionHeading
           title="Executive Attention Required"

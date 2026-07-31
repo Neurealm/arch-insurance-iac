@@ -37,7 +37,7 @@ export function GovernanceCalendar({
   }, {});
 
   return (
-    <Card id="calendar">
+    <Card id="calendar" data-guide-target="governance-calendar">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CardHeader className="space-y-4">
           <SectionHeading

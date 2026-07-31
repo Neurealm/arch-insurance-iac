@@ -112,7 +112,7 @@ export function RaciSnapshot({ raci }: { raci: RaciAssignment[] }) {
   const [open, setOpen] = useState(false);
   return (
     <TooltipProvider delayDuration={150}>
-      <Card id="raci">
+      <Card id="raci" data-guide-target="governance-raci">
         <CardHeader className="space-y-3">
           <SectionHeading
             title="RACI Snapshot, Key Functions"
