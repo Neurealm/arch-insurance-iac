@@ -158,6 +158,7 @@ function Header() {
               <Link to="/platform"><Shield className="mr-1 h-4 w-4" />Platform</Link>
             </Button>
           )}
+          <CommercialGuideButton />
         </div>
       </div>
     </header>
