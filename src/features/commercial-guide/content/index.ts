@@ -8,6 +8,7 @@ import { commercialSourcesGuide } from "./pages/commercialSources";
 import { commercialAssumptionsGuide } from "./pages/commercialAssumptions";
 import { commercialScenariosGuide } from "./pages/commercialScenarios";
 import { commercialSensitivityGuide } from "./pages/commercialSensitivity";
+import { commercialRevenueGuide } from "./pages/commercialRevenue";
 
 /**
  * Central typed guide registry.
