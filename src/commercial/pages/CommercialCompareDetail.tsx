@@ -247,7 +247,8 @@ export default function CommercialCompareDetail() {
           </Card>
         </TabsContent>
         <TabsContent value="summary">
-          <Card>
+          <Card data-guide-target="comparison-financials">
+
             <CardHeader><CardTitle>Key metric roll-up</CardTitle></CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
               {summary.map((g) => (
