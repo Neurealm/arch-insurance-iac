@@ -62,7 +62,7 @@ describe("CDT-COMMERCIAL-GUIDE-SCENARIO-COMPARISON", () => {
     for (const token of ["pairwise", "three_way", "historical", "revenue", "pnl", "cash"]) {
       expect(LIST_SRC).toContain(token);
     }
-    for (const status of ["draft", "saved", "archived"]) {
+    for (const status of ["draft", "saved", "Archive"]) {
       expect(PAGE_SRC).toContain(status);
     }
     const body = JSON.stringify(commercialCompareGuide);
