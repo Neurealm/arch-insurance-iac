@@ -9,7 +9,7 @@ export function ResourceHealthPanel({ onViewRisks }: { onViewRisks: () => void }
   const [selected, setSelected] = useState<ResourceHealthMetric | null>(null);
 
   return (
-    <Card>
+    <Card data-guide-target="staffing-resource-health">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Resource Health</CardTitle>
       </CardHeader>

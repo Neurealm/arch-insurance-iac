@@ -21,7 +21,7 @@ export function ResourcePipeline({
   const filtered = items.filter((i) => sourceFilter === "all" || i.source === sourceFilter);
 
   return (
-    <Card>
+    <Card data-guide-target="staffing-pipeline">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Resource Pipeline</CardTitle>
       </CardHeader>

@@ -27,7 +27,7 @@ export function FunctionalAllocationChart({
   let cursor = 0;
 
   return (
-    <Card>
+    <Card data-guide-target="staffing-function-allocation">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">FTE Allocation by Function, Peak</CardTitle>
       </CardHeader>

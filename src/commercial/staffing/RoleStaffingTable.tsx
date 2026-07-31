@@ -91,7 +91,7 @@ export function RoleStaffingTable({
   const n = (v: number) => fte(v * factor).toFixed(1);
 
   return (
-    <Card className="flex h-full max-h-[640px] flex-col self-start">
+    <Card data-guide-target="staffing-role-plan" className="flex h-full max-h-[640px] flex-col self-start">
       <CardHeader className="pb-3">
         <SectionHeading
           title="Role Staffing Plan"

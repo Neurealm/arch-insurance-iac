@@ -33,7 +33,7 @@ export function ExecutiveStaffingAttention({
   };
 
   return (
-    <Card className="border-gv-warning/40 bg-gv-warning-soft/40">
+    <Card data-guide-target="staffing-executive-attention" className="border-gv-warning/40 bg-gv-warning-soft/40">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <AlertTriangle className="h-4 w-4 text-gv-warning" aria-hidden="true" />

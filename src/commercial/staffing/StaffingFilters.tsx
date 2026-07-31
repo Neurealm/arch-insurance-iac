@@ -229,7 +229,7 @@ export function StaffingFilterChips({
   if (chips.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2" aria-label="Active filters">
+    <div className="flex flex-wrap items-center gap-2" data-guide-target="staffing-filters" aria-label="Active filters">
       {chips.map((c) => (
         <Badge key={c.label} variant="outline" className="gap-1 font-normal">
           {c.label}

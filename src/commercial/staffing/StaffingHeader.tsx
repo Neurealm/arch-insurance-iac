@@ -86,7 +86,7 @@ export function StaffingHeader({
             )}
           </Button>
 
-          <div className="w-[168px]">
+          <div className="w-[168px]" data-guide-target="staffing-scenario">
             <Select value={scenario} onValueChange={(v) => onScenarioChange(v as ScenarioKey)}>
               <SelectTrigger aria-label="Staffing scenario" className="h-9">
                 <SelectValue />

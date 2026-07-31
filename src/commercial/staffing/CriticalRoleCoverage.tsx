@@ -20,7 +20,7 @@ export function CriticalRoleCoverage({
   const visible = showAll ? filtered : filtered.slice(0, 8);
 
   return (
-    <Card>
+    <Card data-guide-target="staffing-critical-roles">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Critical Role Coverage</CardTitle>
       </CardHeader>
