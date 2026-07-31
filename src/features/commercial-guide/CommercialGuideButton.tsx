@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useCommercialGuide } from "./CommercialGuideProvider";
 
 const TOOLTIP =
-  "Open page-specific commercial instructions, logic, responsibilities, and training. Shortcut: Shift + ?";
+  "Open page-specific guidance, commercial logic, responsibilities, workflows, interpretation, and training.";
 
 export function CommercialGuideButton({ buttonRef }: { buttonRef?: React.Ref<HTMLButtonElement> }) {
   const { guide, setOpen, hintVisible, dismissHint } = useCommercialGuide();
@@ -19,12 +19,14 @@ export function CommercialGuideButton({ buttonRef }: { buttonRef?: React.Ref<HTM
               ref={buttonRef}
               type="button"
               size="sm"
+              variant="outline"
               onClick={() => setOpen(true)}
               aria-haspopup="dialog"
-              className="shadow-sm"
+              aria-label="Open the Commercial Guide for this page"
+              className="border border-[#C7D2FE] bg-[#EEF2FF] text-[#312E81] shadow-none hover:border-[#A5B4FC] hover:bg-[#E0E7FF] hover:text-[#312E81]"
             >
-              <BookOpen className="mr-1.5 h-4 w-4" aria-hidden />
-              Commercial Guide
+              <BookOpen className="mr-1.5 h-4 w-4 text-[#4338CA]" aria-hidden />
+              📖 Learn About This Page
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="max-w-xs">
