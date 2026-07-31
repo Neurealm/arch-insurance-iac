@@ -16,7 +16,10 @@ type GuideState = {
   setReviewed: (value: boolean) => void;
   announce: (message: string) => void;
   announcement: string;
+  hintVisible: boolean;
+  dismissHint: () => void;
   showOnPage: (targetId: string, label: string) => void;
+
   walkthroughIndex: number | null;
   startWalkthrough: () => void;
   moveWalkthrough: (delta: number) => void;
