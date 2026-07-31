@@ -446,7 +446,7 @@ export const commercialTimelinesGuide: CommercialGuideContent = {
   relatedPages: [
     { pageId: "commercial-program", label: "Program", route: "/commercial/program", relationship: "Upstream" },
     { pageId: "commercial-governance", label: "Governance", route: "/commercial/neurealm-governance", relationship: "Companion" },
-    { pageId: "commercial-staffing", label: "Staffing & Resources", route: "/commercial/staffing", relationship: "Companion" },
+    { pageId: "commercial-staffing-resources", label: "Staffing & Resources", route: "/commercial/staffing-resources", relationship: "Companion" },
     { pageId: "commercial-pnl", label: "P&L, Cost & EBITDA", route: "/commercial/model/pnl", relationship: "Downstream" },
     { pageId: "commercial-cash", label: "Cash & Sustainability", route: "/commercial/model/cash", relationship: "Downstream" },
     { pageId: "commercial-overview", label: "Overview", route: "/commercial/overview", relationship: "Downstream" },
