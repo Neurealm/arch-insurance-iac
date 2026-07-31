@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export function TimelineLegend() {
   return (
-    <div className="space-y-3 rounded-lg border border-border bg-card p-4">
+    <div data-guide-target="timelines-legend" className="space-y-3 rounded-lg border border-border bg-card p-4">
       <ul className="flex flex-wrap gap-x-5 gap-y-2">
         {CATEGORY_LEGEND.map((l) => (
           <li key={l.category} className="flex items-center gap-2 text-xs text-muted-foreground">
