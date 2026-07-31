@@ -48,17 +48,20 @@ function collectRenderedTargets(): Map<string, string[]> {
 /** Static target values supplied to dynamic anchors from literal arrays. */
 function collectDynamicTargetValues(): Set<string> {
   const values = new Set<string>();
-  const files = [
-    "commercial/pages/CommercialRevenue.tsx",
-    "commercial/pages/CommercialPnl.tsx",
-    "commercial/pages/CommercialCash.tsx",
-    "commercial/pages/CommercialScenarios.tsx",
-    "data/programTimelineMockData.ts",
-  ];
-  for (const rel of files) {
-    const full = path.join(SRC, rel);
+  const files: string[] = [path.join(SRC, "data/programTimelineMockData.ts")];
+  const collect = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) collect(full);
+      else if (full.endsWith(".tsx")) files.push(full);
+    }
+  };
+  collect(path.join(SRC, "commercial"));
+  for (const full of files) {
     if (!fs.existsSync(full)) continue;
     const source = fs.readFileSync(full, "utf8");
+    // Anchors supplied through component props, e.g. targetId="revenue-base".
+    for (const m of source.matchAll(/(?:target|periodTarget)Id="([^"]+)"/g)) values.add(m[1]);
     for (const m of source.matchAll(/target(?:Id)?: "([^"]+)"/g)) values.add(m[1]);
     for (const m of source.matchAll(/periodTargetId: "([^"]+)"/g)) values.add(m[1]);
     for (const m of source.matchAll(/data-guide-target=\{[^}]*\?\s*"([^"]+)"/g)) values.add(m[1]);
