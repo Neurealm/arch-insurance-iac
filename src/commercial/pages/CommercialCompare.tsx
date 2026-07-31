@@ -186,7 +186,7 @@ export default function CommercialCompare() {
             </Card>
           )}
 
-          <Card>
+          <Card data-guide-target="comparison-saved">
             <CardHeader>
               <CardTitle>Comparisons</CardTitle>
               <CardDescription>Draft, Saved, and Archived comparison snapshots.</CardDescription>
