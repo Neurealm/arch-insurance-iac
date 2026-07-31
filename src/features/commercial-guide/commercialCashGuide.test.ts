@@ -44,7 +44,7 @@ describe("CDT-COMMERCIAL-GUIDE-CASH", () => {
   it("uses the exact registered page title and route", () => {
     expect(commercialCashGuide.pageTitle).toBe("Cash & Sustainability");
     expect(commercialCashGuide.route).toBe("/commercial/model/cash");
-    expect(PAGE_SRC).toContain("Cash Flow, Working Capital, Break-even &amp; Sustainability");
+    expect(PAGE_SRC).toContain("Cash Flow, Working Capital, Break-even & Sustainability");
   });
 
   it("declares only targets that exist on the page", () => {
