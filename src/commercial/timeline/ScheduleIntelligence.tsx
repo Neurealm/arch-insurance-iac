@@ -30,7 +30,7 @@ export function ScheduleIntelligence({ activities }: Props) {
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <Card>
+      <Card data-guide-target="timelines-intelligence">
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
           <CardTitle className="text-base">Schedule Intelligence</CardTitle>
           <CollapsibleTrigger asChild>
@@ -49,7 +49,7 @@ export function ScheduleIntelligence({ activities }: Props) {
                 <TabsTrigger value="insights">Insights</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="risks" className="mt-4 grid gap-3 md:grid-cols-3">
+              <TabsContent value="risks" data-guide-target="timelines-risks" className="mt-4 grid gap-3 md:grid-cols-3">
                 {SCHEDULE_RISKS.map((r) => (
                   <div key={r.id} className="rounded-lg border border-border p-3 text-sm">
                     <div className="flex items-start justify-between gap-2">
@@ -70,7 +70,7 @@ export function ScheduleIntelligence({ activities }: Props) {
                 ))}
               </TabsContent>
 
-              <TabsContent value="dependencies" className="mt-4 space-y-4 text-sm">
+              <TabsContent value="dependencies" data-guide-target="timelines-dependencies" className="mt-4 space-y-4 text-sm">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <Stat label="Total dependencies" value={DEPENDENCIES.length} />
                   <Stat label="Blocked activities" value={blocked.length} />
@@ -91,7 +91,7 @@ export function ScheduleIntelligence({ activities }: Props) {
                 </ul>
               </TabsContent>
 
-              <TabsContent value="insights" className="mt-4 space-y-3 text-sm">
+              <TabsContent value="insights" data-guide-target="timelines-insights" className="mt-4 space-y-3 text-sm">
                 <p className="text-xs text-muted-foreground">
                   Simulated insights generated from prototype rules. Not derived from live program data.
                 </p>

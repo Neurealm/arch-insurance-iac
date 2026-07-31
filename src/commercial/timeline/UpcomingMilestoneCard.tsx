@@ -16,7 +16,7 @@ interface Props {
 export function UpcomingMilestoneCard({ milestone, onViewDetails, onSendReminder }: Props) {
   const days = daysBetween(MOCK_TODAY, milestone.date);
   return (
-    <Card className="h-full">
+    <Card data-guide-target="timelines-upcoming" className="h-full">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <CalendarClock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />

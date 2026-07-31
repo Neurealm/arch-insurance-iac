@@ -112,6 +112,7 @@ export function IntegratedTimeline({
                 row.kind === "group" ? (
                   <button
                     key={`lg-${row.id}`}
+                    data-guide-target={`timelines-lane-${row.id}`}
                     type="button"
                     onClick={() => onToggleGroup(row.id)}
                     aria-expanded={!collapsedGroups.includes(row.id)}

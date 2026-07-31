@@ -143,7 +143,7 @@ export default function CommercialProgramTimeline() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <header className="flex flex-wrap items-start justify-between gap-4">
+      <header data-guide-target="timelines-context" className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Timelines
@@ -216,9 +216,9 @@ export default function CommercialProgramTimeline() {
       />
 
       {/* Section 2 — timeline workspace */}
-      <Card className={cn(fullScreen && "fixed inset-4 z-50 overflow-auto shadow-lg")}>
+      <Card data-guide-target="timelines-integrated" className={cn(fullScreen && "fixed inset-4 z-50 overflow-auto shadow-lg")}>
         <CardHeader className="gap-3 pb-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div data-guide-target="timelines-controls" className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="text-base">Integrated Timeline</CardTitle>
             <TimelineToolbar
               view={view}
@@ -262,7 +262,7 @@ export default function CommercialProgramTimeline() {
 
       {/* Sections 4 and 5 — milestones */}
       <div className="grid gap-6 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
+        <Card data-guide-target="timelines-milestones" className="xl:col-span-2">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Key Milestones</CardTitle>
           </CardHeader>
