@@ -296,7 +296,7 @@ export default function CommercialCompareDetail() {
         </TabsContent>
       </Tabs>
 
-      <Card>
+      <Card data-guide-target="comparison-lineage">
         <CardHeader><CardTitle>Source-run manifest</CardTitle></CardHeader>
         <CardContent>
           <div className="text-xs text-muted-foreground">Manifest hash: <code>{header.source_run_manifest_hash ?? "—"}</code></div>
