@@ -24,7 +24,7 @@ export function CapacityGapTable({
   const [selected, setSelected] = useState<CapacityGap | null>(null);
 
   return (
-    <Card>
+    <Card data-guide-target="staffing-capacity-gaps">
       <CardHeader className="pb-3">
         <SectionHeading
           title="Capacity and Demand Gaps"

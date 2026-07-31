@@ -13,7 +13,7 @@ export function OperationalPhaseCards({
   onToggle: (phase: PhaseKey) => void;
 }) {
   return (
-    <section aria-label="Operational phase staffing" className="grid gap-4 md:grid-cols-3">
+    <section data-guide-target="staffing-phase-cards" aria-label="Operational phase staffing" className="grid gap-4 md:grid-cols-3">
       {OPERATIONAL_PHASES.map((p) => {
         const active = activePhases.includes(p.key);
         return (

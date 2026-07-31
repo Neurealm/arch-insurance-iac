@@ -23,7 +23,7 @@ export function ResourceRiskTable({
   );
 
   return (
-    <Card id="resource-risks">
+    <Card id="resource-risks" data-guide-target="staffing-risks">
       <CardHeader className="pb-3">
         <SectionHeading
           title="Resource Risks"

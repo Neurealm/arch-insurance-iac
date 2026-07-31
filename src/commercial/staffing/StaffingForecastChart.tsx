@@ -89,7 +89,7 @@ export function StaffingForecastChart({
     .join("; ");
 
   return (
-    <Card>
+    <Card data-guide-target="staffing-forecast">
       <CardHeader className="pb-3">
         <SectionHeading
           title="Day 0, Day 1 and Day 2 Staffing Plan"

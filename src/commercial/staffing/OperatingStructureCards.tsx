@@ -14,7 +14,7 @@ export function OperatingStructureCards({
   const [selected, setSelected] = useState<OperatingStructure | null>(null);
 
   return (
-    <section aria-label="Staffing by operating structure" className="space-y-3">
+    <section data-guide-target="staffing-operating-structures" aria-label="Staffing by operating structure" className="space-y-3">
       <SectionHeading
         title="Staffing by Operating Structure"
         subtitle="How capability is organized across dedicated, phase-based, pooled and on demand models"

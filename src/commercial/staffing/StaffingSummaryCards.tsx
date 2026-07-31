@@ -13,7 +13,7 @@ export function StaffingSummaryCards({
   onSelect: (card: StaffingSummary) => void;
 }) {
   return (
-    <section aria-label="Executive staffing summary" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <section data-guide-target="staffing-summary" aria-label="Executive staffing summary" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       {cards.map((c) => (
         <Card
           key={c.id}
