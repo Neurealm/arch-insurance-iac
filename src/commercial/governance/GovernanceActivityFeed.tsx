@@ -11,7 +11,7 @@ export function GovernanceActivityFeed({ activity }: { activity: GovernanceActiv
   const rows = activity.filter((a) => category === "all" || a.category === category);
 
   return (
-    <Card id="activity">
+    <Card id="activity" data-guide-target="governance-activity">
       <CardHeader>
         <SectionHeading
           title="Recent Governance Activity"

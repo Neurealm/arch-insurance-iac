@@ -64,7 +64,7 @@ export function GovernanceRisksTable({
   );
 
   return (
-    <Card id="risks">
+    <Card id="risks" data-guide-target="governance-risks">
       <CardHeader className="space-y-4">
         <SectionHeading
           title="Top Risks and Issues"

@@ -69,7 +69,7 @@ export function GovernanceOperatingModel({
   onSelectTier: (id: string) => void;
 }) {
   return (
-    <Card id="operating-model">
+    <Card id="operating-model" data-guide-target="governance-tiers">
       <CardHeader>
         <SectionHeading
           title="Neurealm Governance Operating Model"

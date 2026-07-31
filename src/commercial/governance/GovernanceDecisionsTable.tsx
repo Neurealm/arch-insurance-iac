@@ -58,7 +58,7 @@ export function GovernanceDecisionsTable({
   }, [decisions, search, status, owner, sortAsc]);
 
   return (
-    <Card id="decisions">
+    <Card id="decisions" data-guide-target="governance-decisions">
       <CardHeader className="space-y-4">
         <SectionHeading
           title="Key Decisions"

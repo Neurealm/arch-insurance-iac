@@ -75,7 +75,7 @@ export function GovernanceForumsTable({
   );
 
   return (
-    <Card id="forums">
+    <Card id="forums" data-guide-target="governance-forums">
       <CardHeader className="space-y-4">
         <SectionHeading
           title="Governance Forums"

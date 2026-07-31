@@ -57,7 +57,7 @@ export function GovernanceKpiTable({
   }, [kpis, status, owner, sortAsc]);
 
   return (
-    <Card id="kpis">
+    <Card id="kpis" data-guide-target="governance-kpis">
       <CardHeader className="space-y-4">
         <SectionHeading
           title="Neurealm Governance KPIs"

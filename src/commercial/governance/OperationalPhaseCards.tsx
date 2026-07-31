@@ -24,7 +24,7 @@ export function OperationalPhaseCards({
   onOpenDetail: (phaseId: string) => void;
 }) {
   return (
-    <Card id="phases">
+    <Card id="phases" data-guide-target="governance-operational-focus">
       <CardHeader>
         <SectionHeading
           title="Day 0, Day 1 and Day 2 Operational Focus"
