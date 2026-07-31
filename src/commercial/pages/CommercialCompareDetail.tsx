@@ -97,7 +97,7 @@ export default function CommercialCompareDetail() {
           </div>
           {header.description && <p className="text-sm text-muted-foreground mt-1">{header.description}</p>}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2" data-guide-target="comparison-actions">
           {isDraft && canSave && (
             <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
               <DialogTrigger asChild>
