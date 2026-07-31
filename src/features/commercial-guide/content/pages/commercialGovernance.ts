@@ -59,14 +59,14 @@ export const commercialGovernanceGuide: CommercialGuideContent = {
   expectedOutcome:
     "Every material risk and decision has a named owner, an explicit due date, a routed forum and recorded rationale — and the downstream Commercial Module pages reflect what was decided.",
   lifecycleStages: [
-    "Deal Shaping",
+    "Opportunity Qualification",
     "Financial Modeling",
     "Commercial Structuring",
     "Executive Review",
     "Negotiation",
     "Mobilization",
     "Operations",
-    "Optimization",
+    "Continuous Improvement",
   ],
   prerequisites: [
     { id: "pre-1", label: "Defined governance tiers", detail: "Three tiers are established: Executive Steering Committee (Executive authority), Program Management Office (Program authority) and Delivery and Operations Pods (Operational authority)." },
@@ -263,12 +263,12 @@ export const commercialGovernanceGuide: CommercialGuideContent = {
   },
   downstreamImpacts: [
     { area: "Governance", effect: "This page is the record of authority, ownership and evidence for the engagement." },
-    { area: "Commercial", effect: "Commercial framework approval gates the commercial operating model and mobilisation funding." },
+    { area: "Revenue", effect: "Commercial framework approval gates the commercial operating model and mobilisation funding." },
     { area: "Cash", effect: "A delayed funding decision pushes mobilisation spend ahead of committed funding." },
     { area: "Staffing", effect: "The activation staffing plan decision determines when pods can be resourced." },
     { area: "Timeline", effect: "Day 0 readiness and gate evidence set when transition can proceed to Day 1." },
     { area: "Risk", effect: "Escalated risks become executive agenda items and can trigger risk acceptance at Tier 1." },
-    { area: "Release", effect: "Activation and release readiness depend on gate decisions recorded here." },
+    { area: "Activation", effect: "Activation and release readiness depend on gate decisions recorded here." },
     { area: "Customer outcomes", effect: "Customer Success Council actions and value-realization tracking flow from this governance cycle." },
   ],
   dataQuality: {
