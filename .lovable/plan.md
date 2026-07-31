@@ -1,23 +1,31 @@
-## Goal
+## Root cause (verified)
 
-Grant `vidur.suri@neurealm.com` and `amit.daga@neurealm.com` the **Commercial Administrator** role in the **NeuGAIN Commercial** workspace.
+The "Send invitation" error `function gen_random_bytes(integer) does not exist` comes from the database function `public.invite_member`.
 
-## Verified current state
+- `pgcrypto` is installed in the **`extensions`** schema (confirmed via `pg_extension`), not `public`.
+- `invite_member` is declared with `SET search_path TO 'public'`, so unqualified `gen_random_bytes(...)` and `digest(...)` can't be resolved — the call fails before any invitation row is written.
+- Same defect exists in two sibling functions, confirmed unqualified: `resend_invitation` and `accept_invitation`.
+- The commercial hashing functions (`commercial_release_hash`, `commercial_comparison_compute_hash`, `commercial_comparison_save`, `commercial_sensitivity_compute_hash`, `commercial_sensitivity_start_execution`) already call `extensions.digest(...)` — that's the correct pattern and they are unaffected.
 
-- Tenant `NeuGAIN Commercial` exists (slug `neugain-commercial`, id `d6e1f4a0-…`).
-- The role exists in that tenant: code `commercial_admin`, name "Commercial Administrator" (id `58503804-…`).
-- Neither `vidur.suri@neurealm.com` nor `amit.daga@neurealm.com` has an `auth.users` record or a `profiles` row — no account exists yet.
-- Roles are applied via `memberships` + `membership_roles` (this is how `nitin.naveen@neurealm.com` was granted the same role).
+## Fix
 
-Because no accounts exist, no membership row can be created for them today.
+One migration that recreates the three invitation functions with schema-qualified crypto calls, keeping all other logic, signatures, security, and permission checks byte-for-byte identical:
 
-## Plan (per your choice: prepare role assignment only)
+1. `public.invite_member` — `extensions.gen_random_bytes(32)`, `extensions.digest(...)`
+2. `public.resend_invitation` — same two substitutions
+3. `public.accept_invitation` — `extensions.digest(...)`
 
-1. **You onboard them** through the existing admin UI (Platform → Members / invitation flow) so each gets an `auth.users` account and a profile.
-2. **I then apply the role**: for each user, create an active `memberships` row in tenant `d6e1f4a0-…` (if not created by onboarding), and insert the matching `membership_roles` row pointing at role `58503804-…` (Commercial Administrator).
-3. **Verification**: query memberships + membership_roles for both emails and confirm each shows status `active` with `commercial_admin`, matching Nitin's configuration exactly.
+No signature changes, no new tables, no RLS/grant changes, no frontend changes.
 
-## Notes
+## Verification
 
-- No schema changes, no new tables, no code changes — data-only role assignment once the accounts exist.
-- If you'd prefer, I can also pre-create pending tenant invitations now so accepting automatically lands them in the Commercial workspace; say the word and I'll add that step.
+- Re-run the invitation for `amit.daga@neurealm.com` and `vidur.suri@neurealm.com` with the Commercial Administrator role selected.
+- Confirm a `pending` row appears in `tenant_invitations` for each, with the linked `commercial_admin` role in `tenant_invitation_roles`.
+
+## Note
+
+Once they accept, their memberships land in NeuGAIN Commercial with the Commercial Administrator role automatically — no separate role step needed.
+
+## Unrelated (not fixing unless you want)
+
+The console shows a React `forwardRef` warning from `DialogFooter` in `InviteMemberDialog`. It's cosmetic and unrelated to this failure.
