@@ -11,6 +11,7 @@ import { commercialSensitivityGuide } from "./pages/commercialSensitivity";
 import { commercialRevenueGuide } from "./pages/commercialRevenue";
 import { commercialPnlGuide } from "./pages/commercialPnl";
 import { commercialCompareGuide } from "./pages/commercialCompare";
+import { commercialCashGuide } from "./pages/commercialCash";
 
 /**
  * Central typed guide registry.
@@ -30,6 +31,7 @@ const PAGE_CONTENT: Record<string, CommercialGuideContent> = {
   "commercial-revenue": commercialRevenueGuide,
   "commercial-pnl": commercialPnlGuide,
   "commercial-compare": commercialCompareGuide,
+  "commercial-cash": commercialCashGuide,
 };
 
 
