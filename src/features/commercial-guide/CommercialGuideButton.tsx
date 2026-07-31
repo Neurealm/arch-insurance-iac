@@ -23,9 +23,9 @@ export function CommercialGuideButton({ buttonRef }: { buttonRef?: React.Ref<HTM
               onClick={() => setOpen(true)}
               aria-haspopup="dialog"
               aria-label="Open the Commercial Guide for this page"
-              className="border border-[#C7D2FE] bg-[#EEF2FF] text-[#312E81] shadow-none hover:border-[#A5B4FC] hover:bg-[#E0E7FF] hover:text-[#312E81]"
+              className="border border-amber-300 bg-gradient-to-b from-amber-100 to-amber-200 text-amber-900 shadow-sm ring-1 ring-amber-200/60 transition hover:border-amber-400 hover:from-amber-200 hover:to-amber-300 hover:text-amber-950"
             >
-              <BookOpen className="mr-1.5 h-4 w-4 text-[#4338CA]" aria-hidden />
+              <BookOpen className="mr-1.5 h-4 w-4 text-amber-700" aria-hidden />
               📖 Learn About This Page
             </Button>
           </TooltipTrigger>
