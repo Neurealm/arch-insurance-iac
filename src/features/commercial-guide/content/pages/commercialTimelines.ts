@@ -449,7 +449,7 @@ export const commercialTimelinesGuide: CommercialGuideContent = {
     { pageId: "commercial-staffing-resources", label: "Staffing & Resources", route: "/commercial/staffing-resources", relationship: "Companion" },
     { pageId: "commercial-pnl", label: "P&L, Cost & EBITDA", route: "/commercial/model/pnl", relationship: "Downstream" },
     { pageId: "commercial-cash", label: "Cash & Sustainability", route: "/commercial/model/cash", relationship: "Downstream" },
-    { pageId: "commercial-overview", label: "Overview", route: "/commercial/overview", relationship: "Downstream" },
+    { pageId: "commercial-overview", label: "Overview", route: "/commercial", relationship: "Downstream" },
   ],
 
   /* ---------------- Interpretation & training ---------------- */
