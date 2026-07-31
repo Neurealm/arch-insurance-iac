@@ -89,7 +89,7 @@ export default function CommercialCompare() {
         <EmptyState title="Project Momentous not initialized" description="Model version unavailable." />
       ) : (
         <>
-          <Card>
+          <Card data-guide-target="comparison-context">
             <CardHeader>
               <CardTitle>Model context</CardTitle>
               <CardDescription>
@@ -99,13 +99,14 @@ export default function CommercialCompare() {
           </Card>
 
           {canCreate && (
-            <Card>
+            <Card data-guide-target="comparison-selector">
               <CardHeader>
                 <CardTitle>New comparison</CardTitle>
                 <CardDescription>Draft a comparison. Snapshots persist only on Save.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2" data-guide-target="comparison-scenarios">
+
                   <div className="space-y-2">
                     <Label>Title</Label>
                     <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Q3 Base vs Conservative review" />
@@ -155,8 +156,9 @@ export default function CommercialCompare() {
                     </div>
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2" data-guide-target="comparison-scopes">
                   <Label>Scopes</Label>
+
                   <div className="flex flex-wrap gap-3">
                     {SCOPES.map((sc) => {
                       const checked = scopes.includes(sc);
@@ -172,8 +174,9 @@ export default function CommercialCompare() {
                     })}
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2" data-guide-target="comparison-recommendation">
                   <Label>Rationale (optional)</Label>
+
                   <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
                 </div>
                 <Button onClick={submit} disabled={create.isPending}>
@@ -183,7 +186,7 @@ export default function CommercialCompare() {
             </Card>
           )}
 
-          <Card>
+          <Card data-guide-target="comparison-saved">
             <CardHeader>
               <CardTitle>Comparisons</CardTitle>
               <CardDescription>Draft, Saved, and Archived comparison snapshots.</CardDescription>

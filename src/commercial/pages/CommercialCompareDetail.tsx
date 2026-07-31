@@ -97,7 +97,7 @@ export default function CommercialCompareDetail() {
           </div>
           {header.description && <p className="text-sm text-muted-foreground mt-1">{header.description}</p>}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2" data-guide-target="comparison-actions">
           {isDraft && canSave && (
             <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
               <DialogTrigger asChild>
@@ -160,7 +160,8 @@ export default function CommercialCompareDetail() {
         </div>
       </div>
 
-      <Card>
+      <Card data-guide-target="comparison-readiness">
+
         <CardHeader><CardTitle>Readiness</CardTitle><CardDescription>Per scenario × scope, sourced from the staleness helper.</CardDescription></CardHeader>
         <CardContent>
           {readiness.isLoading ? <LoadingState /> : (
@@ -207,7 +208,8 @@ export default function CommercialCompareDetail() {
           <TabsTrigger value="assumptions">Assumptions</TabsTrigger>
         </TabsList>
         <TabsContent value="metrics">
-          <Card>
+          <Card data-guide-target="comparison-deltas">
+
             <CardHeader>
               <CardTitle>Variance rows</CardTitle>
               <CardDescription>
@@ -245,7 +247,8 @@ export default function CommercialCompareDetail() {
           </Card>
         </TabsContent>
         <TabsContent value="summary">
-          <Card>
+          <Card data-guide-target="comparison-financials">
+
             <CardHeader><CardTitle>Key metric roll-up</CardTitle></CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
               {summary.map((g) => (
@@ -263,7 +266,8 @@ export default function CommercialCompareDetail() {
           </Card>
         </TabsContent>
         <TabsContent value="assumptions">
-          <Card>
+          <Card data-guide-target="comparison-drivers">
+
             <CardHeader><CardTitle>Effective assumption differences</CardTitle>
               <CardDescription>Applied values only — Draft and Cancelled proposals excluded.</CardDescription></CardHeader>
             <CardContent>
@@ -292,7 +296,7 @@ export default function CommercialCompareDetail() {
         </TabsContent>
       </Tabs>
 
-      <Card>
+      <Card data-guide-target="comparison-lineage">
         <CardHeader><CardTitle>Source-run manifest</CardTitle></CardHeader>
         <CardContent>
           <div className="text-xs text-muted-foreground">Manifest hash: <code>{header.source_run_manifest_hash ?? "—"}</code></div>
