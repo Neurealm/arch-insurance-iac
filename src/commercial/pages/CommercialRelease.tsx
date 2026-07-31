@@ -31,7 +31,7 @@ export default function CommercialRelease() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div data-guide-target="release-context">
         <h1 className="flex items-center gap-2 text-2xl font-semibold">
           <ShieldCheck className="h-5 w-5" />
           Model Release &amp; Activation
@@ -42,7 +42,7 @@ export default function CommercialRelease() {
         </p>
       </div>
 
-      <Alert>
+      <Alert data-guide-target="release-scope-note">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Directional model</AlertTitle>
         <AlertDescription>
@@ -51,10 +51,10 @@ export default function CommercialRelease() {
         </AlertDescription>
       </Alert>
 
-      <Card>
+      <Card data-guide-target="release-versions">
         <CardHeader>
           <CardTitle>Model versions</CardTitle>
-          <CardDescription>
+          <CardDescription data-guide-target="release-active">
             {active ? `Active version: ${active.version_code}` : "No active version for this program yet."}
           </CardDescription>
         </CardHeader>
@@ -94,7 +94,7 @@ export default function CommercialRelease() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card data-guide-target="release-activation-history">
         <CardHeader>
           <CardTitle>Activation history</CardTitle>
           <CardDescription>Immutable activation records for this program.</CardDescription>
