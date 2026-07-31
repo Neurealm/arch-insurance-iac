@@ -18,8 +18,10 @@ export function CommercialGuideRoot({ children }: { children: React.ReactNode })
   return (
     <CommercialGuideProvider guide={guide}>
       {children}
+      <CommercialGuideEdgeTab />
       <CommercialGuideDrawer />
       <CommercialWalkthrough />
+
     </CommercialGuideProvider>
   );
 }
