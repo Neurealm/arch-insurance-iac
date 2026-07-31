@@ -89,7 +89,7 @@ export default function CommercialCompare() {
         <EmptyState title="Project Momentous not initialized" description="Model version unavailable." />
       ) : (
         <>
-          <Card>
+          <Card data-guide-target="comparison-context">
             <CardHeader>
               <CardTitle>Model context</CardTitle>
               <CardDescription>
@@ -99,13 +99,14 @@ export default function CommercialCompare() {
           </Card>
 
           {canCreate && (
-            <Card>
+            <Card data-guide-target="comparison-selector">
               <CardHeader>
                 <CardTitle>New comparison</CardTitle>
                 <CardDescription>Draft a comparison. Snapshots persist only on Save.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2" data-guide-target="comparison-scenarios">
+
                   <div className="space-y-2">
                     <Label>Title</Label>
                     <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Q3 Base vs Conservative review" />
