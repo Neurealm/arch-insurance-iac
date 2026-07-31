@@ -165,7 +165,10 @@ export function CommercialGuideProvider({
     setReviewed,
     announce,
     announcement,
+    hintVisible,
+    dismissHint,
     showOnPage,
+
     walkthroughIndex,
     startWalkthrough,
     moveWalkthrough,
