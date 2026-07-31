@@ -2,6 +2,7 @@ export * from "./types";
 export { CommercialGuideProvider, useCommercialGuide } from "./CommercialGuideProvider";
 export { CommercialGuideButton } from "./CommercialGuideButton";
 export { CommercialGuideDrawer } from "./CommercialGuideDrawer";
+export { CommercialGuideEdgeTab } from "./CommercialGuideEdgeTab";
 export { CommercialWalkthrough } from "./CommercialWalkthrough";
 export { CommercialGuideRoot } from "./CommercialGuideRoot";
 export {
