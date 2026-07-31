@@ -174,8 +174,9 @@ export default function CommercialCompare() {
                     })}
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2" data-guide-target="comparison-recommendation">
                   <Label>Rationale (optional)</Label>
+
                   <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
                 </div>
                 <Button onClick={submit} disabled={create.isPending}>
