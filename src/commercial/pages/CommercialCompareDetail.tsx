@@ -266,7 +266,8 @@ export default function CommercialCompareDetail() {
           </Card>
         </TabsContent>
         <TabsContent value="assumptions">
-          <Card>
+          <Card data-guide-target="comparison-drivers">
+
             <CardHeader><CardTitle>Effective assumption differences</CardTitle>
               <CardDescription>Applied values only — Draft and Cancelled proposals excluded.</CardDescription></CardHeader>
             <CardContent>
