@@ -25,18 +25,18 @@ const QTRS = ["FY2027-Q1", "FY2027-Q2", "FY2027-Q3", "FY2027-Q4"] as const;
 const TOTAL_PERIOD = "FY2027-FY2031";
 
 const QTR_ROWS = [
-  { code: "CASH-ACCRUED-REV", label: "Accrued Revenue" },
-  { code: "CASH-COLLECTED", label: "Cash Collected" },
-  { code: "CASH-COSTS-PAID", label: "Cash Costs Paid" },
-  { code: "CASH-NCF-QTR", label: "Quarterly Net Cash Flow" },
-  { code: "CASH-CUM-NCF-QTR", label: "Cumulative NCF (Quarterly)" },
+  { code: "CASH-ACCRUED-REV", label: "Accrued Revenue", target: "cash-accrued" },
+  { code: "CASH-COLLECTED", label: "Cash Collected", target: "cash-inflows" },
+  { code: "CASH-COSTS-PAID", label: "Cash Costs Paid", target: "cash-outflows" },
+  { code: "CASH-NCF-QTR", label: "Quarterly Net Cash Flow", target: "cash-net" },
+  { code: "CASH-CUM-NCF-QTR", label: "Cumulative NCF (Quarterly)", target: "cash-cumulative" },
 ];
 
 const ANN_ROWS = [
-  { code: "CASH-NCF-ANNUAL", label: "Annual Net Cash (proxy = EBITDA)", fmt: "usd" as const },
-  { code: "CASH-CUM-ANNUAL", label: "Cumulative Cash", fmt: "usd" as const },
-  { code: "CASH-CONVERSION", label: "Cash Conversion", fmt: "pct" as const },
-  { code: "WC-REQUIREMENT", label: "Working Capital Requirement", fmt: "usd" as const },
+  { code: "CASH-NCF-ANNUAL", label: "Annual Net Cash (proxy = EBITDA)", fmt: "usd" as const, target: "cash-annual-net" },
+  { code: "CASH-CUM-ANNUAL", label: "Cumulative Cash", fmt: "usd" as const, target: "cash-annual-cumulative" },
+  { code: "CASH-CONVERSION", label: "Cash Conversion", fmt: "pct" as const, target: "cash-conversion" },
+  { code: "WC-REQUIREMENT", label: "Working Capital Requirement", fmt: "usd" as const, target: "cash-wc-requirement" },
 ];
 
 const fmtUsd = (v: number | null) =>
@@ -171,7 +171,7 @@ export default function CommercialCash() {
     <div className="space-y-6">
       <DirectionalBanner />
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4" data-guide-target="cash-context">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Model · Cash & Sustainability</div>
           <h1 className="text-2xl font-semibold">Project Momentous — Cash Flow, Working Capital, Break-even & Sustainability</h1>
@@ -211,13 +211,13 @@ export default function CommercialCash() {
         </Alert>
       )}
 
-      <Card>
+      <Card data-guide-target="cash-run-header">
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1">
             <CardTitle className="text-base">Run header</CardTitle>
             <CardDescription>Model version, scenario, upstream P&amp;L run, hash, and timestamp.</CardDescription>
           </div>
-          <div className="w-64">
+          <div className="w-64" data-guide-target="cash-scenario">
             <Select value={scenarioCode} onValueChange={setScenarioCode}>
               <SelectTrigger><SelectValue placeholder="Scenario" /></SelectTrigger>
               <SelectContent>
@@ -254,7 +254,7 @@ export default function CommercialCash() {
 
       {currentRun && (
         <>
-          <Card>
+          <Card data-guide-target="cash-timing">
             <CardHeader>
               <CardTitle className="text-base">Y1 Quarterly Cash Flow ({currentScenario?.code})</CardTitle>
               <CardDescription>Payment lag applied; activation-fund upfront in Q1; travel front-loaded to Q1 to launch pods.</CardDescription>
@@ -273,7 +273,7 @@ export default function CommercialCash() {
                     const cells = QTRS.map((q) => findValue(data.results, currentRun.id, r.code, q));
                     const lineage = cells[0]?.lineage_json ?? {};
                     return (
-                      <TableRow key={r.code}>
+                      <TableRow key={r.code} data-guide-target={r.target}>
                         <TableCell>
                           <div className="font-medium">{r.label}</div>
                           <div className="font-mono text-[10px] text-muted-foreground">{r.code}</div>
@@ -291,7 +291,7 @@ export default function CommercialCash() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card data-guide-target="cash-peak-need">
             <CardHeader>
               <CardTitle className="text-base">Working Capital (Y1)</CardTitle>
               <CardDescription>Peak cash trough and maximum funding requirement over the first fiscal year.</CardDescription>
@@ -302,7 +302,7 @@ export default function CommercialCash() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card data-guide-target="cash-summary">
             <CardHeader>
               <CardTitle className="text-base">Annual Cash Flow &amp; Cumulative Cash</CardTitle>
               <CardDescription>Annual net cash proxied by EBITDA (per model contract §7 — matches golden §8 cumulative EBITDA table).</CardDescription>
@@ -324,7 +324,7 @@ export default function CommercialCash() {
                     const lineage = cells[0]?.lineage_json ?? {};
                     const fmt = r.fmt === "pct" ? fmtPct : fmtUsd;
                     return (
-                      <TableRow key={r.code}>
+                      <TableRow key={r.code} data-guide-target={r.target}>
                         <TableCell>
                           <div className="font-medium">{r.label}</div>
                           <div className="font-mono text-[10px] text-muted-foreground">{r.code}</div>
@@ -344,7 +344,7 @@ export default function CommercialCash() {
           </Card>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+            <Card data-guide-target="cash-breakeven">
               <CardHeader>
                 <CardTitle className="text-base">Break-even</CardTitle>
                 <CardDescription>First year EBITDA and cumulative cash cross zero.</CardDescription>
@@ -356,7 +356,7 @@ export default function CommercialCash() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card data-guide-target="cash-payback">
               <CardHeader>
                 <CardTitle className="text-base">Payback</CardTitle>
                 <CardDescription>Time to recover invested capital.</CardDescription>
@@ -368,7 +368,7 @@ export default function CommercialCash() {
             </Card>
           </div>
 
-          <Card>
+          <Card data-guide-target="cash-sustainability">
             <CardHeader>
               <CardTitle className="text-base">Financial Sustainability</CardTitle>
               <CardDescription>Terminal cash position, negative-year count, funding dependency, and model health.</CardDescription>
