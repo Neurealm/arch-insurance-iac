@@ -160,7 +160,8 @@ export default function CommercialCompareDetail() {
         </div>
       </div>
 
-      <Card>
+      <Card data-guide-target="comparison-readiness">
+
         <CardHeader><CardTitle>Readiness</CardTitle><CardDescription>Per scenario × scope, sourced from the staleness helper.</CardDescription></CardHeader>
         <CardContent>
           {readiness.isLoading ? <LoadingState /> : (
