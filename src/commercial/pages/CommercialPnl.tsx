@@ -27,19 +27,19 @@ const FYS = ["FY2027", "FY2028", "FY2029", "FY2030", "FY2031"] as const;
 const TOTAL_PERIOD = "FY2027-FY2031";
 
 const COD_ROWS = [
-  { code: "COD-01_POD_LEAD", label: "1. Account Pod Lead" },
+  { code: "COD-01_POD_LEAD", label: "1. Account Pod Lead", target: "pnl-staffing-cost" },
   { code: "COD-02_CS_LEAD", label: "2. Customer Success / Adoption Lead" },
   { code: "COD-03_SA", label: "3. Citrix Solution Architect" },
   { code: "COD-04_HC_SME", label: "4. Healthcare Workflow SME" },
   { code: "COD-05_SVC_PRE", label: "5. Services Attach / Pre-Sales Lead" },
-  { code: "COD-06_L1L2", label: "6. L1/L2 Support Resources" },
+  { code: "COD-06_L1L2", label: "6. L1/L2 Support Resources", target: "pnl-support-cost" },
   { code: "COD-07_DATA", label: "7. Data / RevOps Analyst" },
   { code: "COD-08_PMO", label: "8. Program Manager / PMO" },
-  { code: "COD-09_DEL_LEAD", label: "9. Delivery Lead — MS (base FTE)" },
+  { code: "COD-09_DEL_LEAD", label: "9. Delivery Lead — MS (base FTE)", target: "pnl-delivery-cost" },
   { code: "COD-09B_DEL_VAR", label: "9b. Delivery Resources — MS (variable)" },
   { code: "COD-10_TOOLS", label: "10. Third-Party Tools & Infrastructure" },
   { code: "COD-11_TRAVEL", label: "11. Travel & Customer Workshops" },
-  { code: "COD-TOTAL", label: "TOTAL Cost of Delivery" },
+  { code: "COD-TOTAL", label: "TOTAL Cost of Delivery", target: "pnl-detail" },
 ];
 
 const OPEX_ROWS = [
@@ -47,20 +47,20 @@ const OPEX_ROWS = [
   { code: "OPEX-02_ALLIANCE", label: "2. Alliance Management" },
   { code: "OPEX-03_FIN", label: "3. Finance & Deal Operations" },
   { code: "OPEX-04_LEGAL", label: "4. Legal & Contracting" },
-  { code: "OPEX-05_MKT", label: "5. Marketing / Customer Materials" },
+  { code: "OPEX-05_MKT", label: "5. Marketing / Customer Materials", target: "pnl-marketing-cost" },
   { code: "OPEX-06_TRAINING", label: "6. Training & Certification" },
   { code: "OPEX-07_TRAVEL", label: "7. Non-delivery Travel" },
-  { code: "OPEX-08_GA", label: "8. G&A Allocation" },
+  { code: "OPEX-08_GA", label: "8. G&A Allocation", target: "pnl-shared-services" },
   { code: "OPEX-09_TOOLS", label: "9. Internal Systems & Tooling" },
   { code: "OPEX-10_RECRUIT", label: "10. Recruiting / Hiring" },
   { code: "OPEX-TOTAL", label: "TOTAL Operating Expenses" },
 ];
 
 const PL_ROWS = [
-  { code: "PL-GROSS-PROFIT", label: "Gross Profit", fmt: "usd" as const },
+  { code: "PL-GROSS-PROFIT", label: "Gross Profit", fmt: "usd" as const, target: "pnl-gross-profit" },
   { code: "PL-GROSS-MARGIN-PCT", label: "Gross Margin %", fmt: "pct" as const },
-  { code: "PL-EBITDA", label: "EBITDA", fmt: "usd" as const },
-  { code: "PL-EBITDA-MARGIN-PCT", label: "EBITDA Margin %", fmt: "pct" as const },
+  { code: "PL-EBITDA", label: "EBITDA", fmt: "usd" as const, target: "pnl-ebitda" },
+  { code: "PL-EBITDA-MARGIN-PCT", label: "EBITDA Margin %", fmt: "pct" as const, target: "pnl-margin" },
 ];
 
 const fmtUsd = (v: number | null) =>
@@ -180,7 +180,7 @@ export default function CommercialPnl() {
     <div className="space-y-6">
       <DirectionalBanner />
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4" data-guide-target="pnl-context">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Model · P&amp;L scope</div>
           <h1 className="text-2xl font-semibold">Project Momentous — Cost, OPEX &amp; EBITDA</h1>
@@ -224,13 +224,13 @@ export default function CommercialPnl() {
         </Alert>
       )}
 
-      <Card>
+      <Card data-guide-target="pnl-run-header">
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1">
             <CardTitle className="text-base">Run header</CardTitle>
             <CardDescription>Model version, scenario, upstream revenue run, hash, and timestamp.</CardDescription>
           </div>
-          <div className="w-64">
+          <div className="w-64" data-guide-target="pnl-scenario">
             <Select value={scenarioCode} onValueChange={setScenarioCode}>
               <SelectTrigger><SelectValue placeholder="Scenario" /></SelectTrigger>
               <SelectContent>
@@ -275,10 +275,12 @@ export default function CommercialPnl() {
           <MetricTable
             title="P&L summary — Gross Profit & EBITDA"
             description="Server-computed from the paired revenue run and this scenario's cost + OPEX inputs."
-            rows={PL_ROWS.map((r) => ({ code: r.code, label: r.label, unit: r.fmt === "pct" ? "ratio" : "USD", fmt: r.fmt }))}
+            rows={PL_ROWS.map((r) => ({ code: r.code, label: r.label, unit: r.fmt === "pct" ? "ratio" : "USD", fmt: r.fmt, target: r.target }))}
             results={data.results}
             run={currentRun}
             highlightCode="PL-EBITDA"
+            targetId="pnl-summary"
+            periodTargetId="pnl-by-period"
           />
           <MetricTable
             title="Cost of Delivery"
@@ -287,6 +289,7 @@ export default function CommercialPnl() {
             results={data.results}
             run={currentRun}
             highlightCode="COD-TOTAL"
+            targetId="pnl-costs"
           />
           <MetricTable
             title="Operating Expenses"
@@ -295,6 +298,7 @@ export default function CommercialPnl() {
             results={data.results}
             run={currentRun}
             highlightCode="OPEX-TOTAL"
+            targetId="pnl-opex"
           />
           <MetricTable
             title="Staffing memo"
@@ -302,6 +306,7 @@ export default function CommercialPnl() {
             rows={[{ code: "POD-FTE", label: "Total Pod FTE", unit: "FTE", fmt: "count" as const }]}
             results={data.results}
             run={currentRun}
+            targetId="pnl-staffing-memo"
           />
         </>
       )}
@@ -320,20 +325,22 @@ function Field({ label, value, sub }: { label: string; value: string; sub?: stri
 }
 
 function MetricTable({
-  title, description, rows, results, run, highlightCode,
+  title, description, rows, results, run, highlightCode, targetId, periodTargetId,
 }: {
   title: string;
   description: string;
-  rows: Array<{ code: string; label: string; unit: string; fmt: "usd" | "pct" | "count" }>;
+  rows: Array<{ code: string; label: string; unit: string; fmt: "usd" | "pct" | "count"; target?: string }>;
   results: ModelResult[];
   run: ModelRun;
   highlightCode?: string;
+  targetId?: string;
+  periodTargetId?: string;
 }) {
   const formatter = (fmt: "usd" | "pct" | "count") =>
     fmt === "usd" ? fmtUsd : fmt === "pct" ? fmtPct : fmtCount;
 
   return (
-    <Card>
+    <Card data-guide-target={targetId}>
       <CardHeader>
         <CardTitle className="text-base">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
@@ -341,7 +348,7 @@ function MetricTable({
       <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow data-guide-target={periodTargetId}>
               <TableHead>Metric</TableHead>
               {FYS.map((fy) => (
                 <TableHead key={fy} className="text-right">{fy}</TableHead>
@@ -360,7 +367,7 @@ function MetricTable({
               const isHighlight = highlightCode === r.code;
               const fmt = formatter(r.fmt);
               return (
-                <TableRow key={r.code} className={isHighlight ? "font-semibold bg-muted/40" : ""}>
+                <TableRow key={r.code} data-guide-target={r.target} className={isHighlight ? "font-semibold bg-muted/40" : ""}>
                   <TableCell>
                     <div className="font-medium">{r.label}</div>
                     <div className="font-mono text-[10px] text-muted-foreground">{r.code}</div>
