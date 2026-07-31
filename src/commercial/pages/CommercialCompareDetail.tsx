@@ -208,7 +208,8 @@ export default function CommercialCompareDetail() {
           <TabsTrigger value="assumptions">Assumptions</TabsTrigger>
         </TabsList>
         <TabsContent value="metrics">
-          <Card>
+          <Card data-guide-target="comparison-deltas">
+
             <CardHeader>
               <CardTitle>Variance rows</CardTitle>
               <CardDescription>
