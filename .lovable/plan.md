@@ -1,20 +1,23 @@
-## What's happening
+## Goal
 
-Clicking **Approve** does call the database, but the `audio_version_transition` function rejects it: v2 and v3 of `CAE.COMMERCIAL.DEAL_OVERVIEW.001` were authored by the signed-in user, and the separation-of-duties rule blocks an author from approving their own version. The failure is shown as `[object Object]` because the Supabase error object isn't an `Error` instance, so the toast stringifies it badly — making it look like nothing happened.
+Grant `vidur.suri@neurealm.com` and `amit.daga@neurealm.com` the **Commercial Administrator** role in the **NeuGAIN Commercial** workspace.
 
-## Fix
+## Verified current state
 
-1. **Database migration** — update `audio_version_transition`:
-   - Keep separation of duties for regular reviewers.
-   - Add an exemption: if the caller is a platform admin (or tenant owner/admin), they may approve a version they authored.
-   - Record the exemption in the audit event metadata (`self_approved: true`) so governance evidence stays intact.
+- Tenant `NeuGAIN Commercial` exists (slug `neugain-commercial`, id `d6e1f4a0-…`).
+- The role exists in that tenant: code `commercial_admin`, name "Commercial Administrator" (id `58503804-…`).
+- Neither `vidur.suri@neurealm.com` nor `amit.daga@neurealm.com` has an `auth.users` record or a `profiles` row — no account exists yet.
+- Roles are applied via `memberships` + `membership_roles` (this is how `nitin.naveen@neurealm.com` was granted the same role).
 
-2. **Error surfacing (frontend)** — in `src/platform/cae/admin/lifecycle.tsx`, extract the message from Supabase error objects (`error.message` / `details` / `hint`) instead of `String(err)`, so any future rejection shows readable wording rather than `[object Object]`. Apply the same to the narrative-level actions in `NarrativeDetail.tsx`.
+Because no accounts exist, no membership row can be created for them today.
 
-3. **Verify** — after the migration, approve v2 in the UI and confirm the row moves to `approved`, the version list refreshes, and an audit entry is written.
+## Plan (per your choice: prepare role assignment only)
 
-## Technical notes
+1. **You onboard them** through the existing admin UI (Platform → Members / invitation flow) so each gets an `auth.users` account and a profile.
+2. **I then apply the role**: for each user, create an active `memberships` row in tenant `d6e1f4a0-…` (if not created by onboarding), and insert the matching `membership_roles` row pointing at role `58503804-…` (Commercial Administrator).
+3. **Verification**: query memberships + membership_roles for both emails and confirm each shows status `active` with `commercial_admin`, matching Nitin's configuration exactly.
 
-- Function is `SECURITY DEFINER` with `search_path = public`; only the SoD guard block changes.
-- Admin check uses the existing `is_platform_admin`/tenant-role helpers already used elsewhere in the CAE layer.
-- No table/RLS changes; list refresh already works via query invalidation.
+## Notes
+
+- No schema changes, no new tables, no code changes — data-only role assignment once the accounts exist.
+- If you'd prefer, I can also pre-create pending tenant invitations now so accepting automatically lands them in the Commercial workspace; say the word and I'll add that step.
