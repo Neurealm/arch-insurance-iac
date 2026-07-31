@@ -60,18 +60,18 @@ const REV_BASE_ROWS = [
 ];
 
 const REV_STREAM_ROWS = [
-  { code: "REV-01-BASE-REB", label: "1. Enhanced base / influenced renewal rebate" },
+  { code: "REV-01-BASE-REB", label: "1. Enhanced base / influenced renewal rebate", target: "revenue-renewal" },
   { code: "REV-02-MKT-REB", label: "2. Marketplace / transacted rebate" },
-  { code: "REV-03-NFLEX-REB", label: "3. Non-Flex expansion rebate" },
+  { code: "REV-03-NFLEX-REB", label: "3. Non-Flex expansion rebate", target: "revenue-expansion" },
   { code: "REV-04-FLEX-REB", label: "4. Flex expansion / migration uplift rebate" },
   { code: "REV-05-GROWTH-ACCEL", label: "5. Strategic growth accelerator" },
   { code: "REV-06-GROWTH-SHARE", label: "6. Growth-share (Model 2)" },
-  { code: "REV-07-ACT-FUND", label: "7. Activation Fund" },
+  { code: "REV-07-ACT-FUND", label: "7. Activation Fund", target: "revenue-funding" },
   { code: "REV-08-MDF", label: "8. MDF / co-sell funding" },
   { code: "REV-09-SUP-READ", label: "9. Support Readiness Fund / retainer" },
-  { code: "REV-10-MS", label: "10. Managed-services revenue (services)" },
+  { code: "REV-10-MS", label: "10. Managed-services revenue (services)", target: "revenue-services" },
   { code: "REV-11-PS", label: "11. Professional-services revenue (services)" },
-  { code: "REV-TOTAL", label: "TOTAL Neurealm revenue" },
+  { code: "REV-TOTAL", label: "TOTAL Neurealm revenue", target: "revenue-detail" },
 ];
 
 const fmtUsd = (v: number | null) =>
@@ -222,7 +222,7 @@ export default function CommercialRevenue() {
     <div className="space-y-6">
       <DirectionalBanner />
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4" data-guide-target="revenue-context">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Model · Revenue scope</div>
           <h1 className="text-2xl font-semibold">Project Momentous — Revenue Engine</h1>
@@ -318,13 +318,13 @@ export default function CommercialRevenue() {
 
 
       {/* Run header */}
-      <Card>
+      <Card data-guide-target="revenue-summary">
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1">
             <CardTitle className="text-base">Run header</CardTitle>
             <CardDescription>Model version, scenario, hash, and timestamp for the displayed results.</CardDescription>
           </div>
-          <div className="w-64">
+          <div className="w-64" data-guide-target="revenue-by-scenario">
             <Select value={scenarioCode} onValueChange={setScenarioCode}>
               <SelectTrigger><SelectValue placeholder="Scenario" /></SelectTrigger>
               <SelectContent>
@@ -359,6 +359,7 @@ export default function CommercialRevenue() {
           <MetricTable
             title="Volume drivers"
             description="Account-count outputs (integer-rounded per workbook)."
+            targetId="revenue-drivers"
             rows={VOLUME_ROWS.map((r) => ({ ...r, unit: r.unit }))}
             results={data.results}
             run={currentRun}
@@ -367,6 +368,7 @@ export default function CommercialRevenue() {
           <MetricTable
             title="Revenue base"
             description="Intermediate ARR figures used by the revenue-stream formulas."
+            targetId="revenue-base"
             rows={REV_BASE_ROWS.map((r) => ({ ...r, unit: "USD" as const }))}
             results={data.results}
             run={currentRun}
@@ -375,6 +377,8 @@ export default function CommercialRevenue() {
           <MetricTable
             title="Revenue streams"
             description="Eleven Neurealm revenue lines plus the total. Services revenue is kept separate from license economics per BP3.0 rule 10."
+            targetId="revenue-by-stream"
+            periodTargetId="revenue-by-period"
             rows={REV_STREAM_ROWS.map((r) => ({ ...r, unit: "USD" as const }))}
             results={data.results}
             run={currentRun}
@@ -405,17 +409,21 @@ function MetricTable({
   run,
   format,
   highlightCode,
+  targetId,
+  periodTargetId,
 }: {
   title: string;
   description: string;
-  rows: Array<{ code: string; label: string; unit: string }>;
+  rows: Array<{ code: string; label: string; unit: string; target?: string }>;
   results: ModelResult[];
   run: ModelRun;
   format: (v: number | null) => string;
   highlightCode?: string;
+  targetId?: string;
+  periodTargetId?: string;
 }) {
   return (
-    <Card>
+    <Card data-guide-target={targetId}>
       <CardHeader>
         <CardTitle className="text-base">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
@@ -423,7 +431,7 @@ function MetricTable({
       <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow data-guide-target={periodTargetId}>
               <TableHead>Metric</TableHead>
               {FYS.map((fy) => (
                 <TableHead key={fy} className="text-right">{fy}</TableHead>
@@ -439,7 +447,11 @@ function MetricTable({
               const lineage = (cells[0]?.lineage_json ?? {}) as unknown;
               const isHighlight = highlightCode === r.code;
               return (
-                <TableRow key={r.code} className={isHighlight ? "font-semibold bg-muted/40" : ""}>
+                <TableRow
+                  key={r.code}
+                  data-guide-target={r.target}
+                  className={isHighlight ? "font-semibold bg-muted/40" : ""}
+                >
                   <TableCell>
                     <div className="font-medium">{r.label}</div>
                     <div className="font-mono text-[10px] text-muted-foreground">{r.code}</div>
