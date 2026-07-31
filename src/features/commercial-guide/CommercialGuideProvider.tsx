@@ -46,6 +46,8 @@ export function CommercialGuideProvider({
   const [reviewed, setReviewed] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
   const [walkthroughIndex, setWalkthroughIndex] = React.useState<number | null>(null);
+  // Session-only, module-wide: shown once per browser session, never persisted.
+  const [hintDismissed, setHintDismissed] = React.useState(false);
 
   const pageId = guide?.pageId;
   // Reset session state when the page changes.
@@ -58,7 +60,35 @@ export function CommercialGuideProvider({
     clearGuideHighlights();
   }, [pageId]);
 
+  const dismissHint = React.useCallback(() => setHintDismissed(true), []);
+  const hintVisible = Boolean(guide) && !hintDismissed && !open;
+
+  // Auto-dismiss the first-view hint.
+  React.useEffect(() => {
+    if (!hintVisible) return;
+    const t = window.setTimeout(() => setHintDismissed(true), 8000);
+    return () => window.clearTimeout(t);
+  }, [hintVisible]);
+
+  // Shift + ? opens the guide from anywhere in the Commercial module.
+  React.useEffect(() => {
+    if (!guide) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "?" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      const tag = el?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el?.isContentEditable) return;
+      e.preventDefault();
+      setHintDismissed(true);
+      setOpen((prev) => !prev);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [guide]);
+
   const announce = React.useCallback((message: string) => setAnnouncement(message), []);
+
+
 
   const toggleBookmark = React.useCallback((sectionId: string) => {
     setBookmarks((prev) =>
