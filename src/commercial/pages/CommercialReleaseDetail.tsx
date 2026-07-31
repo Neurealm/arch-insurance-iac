@@ -106,7 +106,7 @@ export default function CommercialReleaseDetail() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3" data-guide-target="release-version-header">
         <div>
           <Button asChild variant="ghost" size="sm" className="mb-1 -ml-2">
             <Link to="/commercial/model/release"><ArrowLeft className="mr-1 h-3.5 w-3.5" />Release workspace</Link>
@@ -126,14 +126,14 @@ export default function CommercialReleaseDetail() {
       </div>
 
       {blocking.length > 0 && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" data-guide-target="release-blocking">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>{blocking.length} blocking control{blocking.length === 1 ? "" : "s"} failing</AlertTitle>
           <AlertDescription>Activation is blocked until every blocking control passes.</AlertDescription>
         </Alert>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-4" data-guide-target="release-readiness-summary">
         {[
           { label: "Controls", value: controls.length },
           { label: "Passing", value: controls.filter((c) => c.status === "pass").length },
@@ -155,7 +155,7 @@ export default function CommercialReleaseDetail() {
           <TabsTrigger value="handoff">Handoff</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="readiness" className="space-y-4 pt-4">
+        <TabsContent value="readiness" className="space-y-4 pt-4" data-guide-target="release-readiness-controls">
           {readiness.isLoading && <LoadingState label="Evaluating controls…" />}
           {grouped.map(([category, list]) => (
             <Card key={category}>
@@ -197,7 +197,7 @@ export default function CommercialReleaseDetail() {
           {canCertify && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Certification actions</CardTitle>
+                <CardTitle className="text-base" data-guide-target="release-certification-actions">Certification actions</CardTitle>
                 <CardDescription>
                   Certification freezes a readiness snapshot and release manifest with deterministic hashes.
                 </CardDescription>
@@ -237,7 +237,7 @@ export default function CommercialReleaseDetail() {
           )}
 
           <Card>
-            <CardHeader><CardTitle className="text-base">Certifications</CardTitle></CardHeader>
+            <CardHeader data-guide-target="release-certifications"><CardTitle className="text-base">Certifications</CardTitle></CardHeader>
             <CardContent>
               {(certs.data ?? []).length === 0 ? (
                 <p className="text-sm text-muted-foreground">No certification has been created for this version.</p>
@@ -299,7 +299,7 @@ export default function CommercialReleaseDetail() {
         <TabsContent value="lineage" className="space-y-4 pt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Release lineage</CardTitle>
+              <CardTitle className="text-base" data-guide-target="release-lineage">Release lineage</CardTitle>
               <CardDescription>Upstream evidence bound to the latest certification snapshot.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -336,7 +336,7 @@ export default function CommercialReleaseDetail() {
         <TabsContent value="handoff" className="space-y-4 pt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Activation</CardTitle>
+              <CardTitle className="text-base" data-guide-target="release-activation">Activation</CardTitle>
               <CardDescription>
                 Activation requires a certified release with zero blocking failures. The previously active
                 version is superseded atomically.
@@ -359,7 +359,7 @@ export default function CommercialReleaseDetail() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Successor version</CardTitle>
+              <CardTitle className="text-base" data-guide-target="release-successor">Successor version</CardTitle>
               <CardDescription>Open a new draft version to continue modelling after activation.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -383,7 +383,7 @@ export default function CommercialReleaseDetail() {
           </Card>
 
           <Card>
-            <CardHeader><CardTitle className="text-base">Activation records</CardTitle></CardHeader>
+            <CardHeader data-guide-target="release-activation-records"><CardTitle className="text-base">Activation records</CardTitle></CardHeader>
             <CardContent>
               {(activations.data ?? []).filter((a) => a.model_version_id === version.id).length === 0 ? (
                 <p className="text-sm text-muted-foreground">This version has never been activated.</p>
