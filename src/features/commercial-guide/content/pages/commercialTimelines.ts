@@ -49,7 +49,7 @@ export const commercialTimelinesGuide: CommercialGuideContent = {
   ],
   prerequisites: [
     { id: "pre-1", label: "Program schedule", route: "/commercial/program", detail: "The customer-facing phase plan and deal dates this internal schedule must support." },
-    { id: "pre-2", label: "Governance cadence", route: "/commercial/governance", detail: "Forums, chairs and decision rights that approve gates and escalate slips." },
+    { id: "pre-2", label: "Governance cadence", route: "/commercial/neurealm-governance", detail: "Forums, chairs and decision rights that approve gates and escalate slips." },
     { id: "pre-3", label: "Staffing plan", route: "/commercial/staffing", detail: "Role coverage and ramp dates behind the enablement and support activities." },
     { id: "pre-4", label: "Transition plan", detail: "Knowledge transfer and readiness verification scope behind Service Transition Readiness." },
     { id: "pre-5", label: "Operational-readiness requirements", detail: "The acceptance checklist for support, monitoring, runbooks and transition." },
@@ -445,7 +445,7 @@ export const commercialTimelinesGuide: CommercialGuideContent = {
   ],
   relatedPages: [
     { pageId: "commercial-program", label: "Program", route: "/commercial/program", relationship: "Upstream" },
-    { pageId: "commercial-governance", label: "Governance", route: "/commercial/governance", relationship: "Companion" },
+    { pageId: "commercial-governance", label: "Governance", route: "/commercial/neurealm-governance", relationship: "Companion" },
     { pageId: "commercial-staffing", label: "Staffing & Resources", route: "/commercial/staffing", relationship: "Companion" },
     { pageId: "commercial-pnl", label: "P&L, Cost & EBITDA", route: "/commercial/model/pnl", relationship: "Downstream" },
     { pageId: "commercial-cash", label: "Cash & Sustainability", route: "/commercial/model/cash", relationship: "Downstream" },
