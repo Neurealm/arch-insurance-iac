@@ -1,31 +1,29 @@
-## Root cause (verified)
+## What exists today
 
-The "Send invitation" error `function gen_random_bytes(integer) does not exist` comes from the database function `public.invite_member`.
+The right-side guide panel is already built and mounted on every `/commercial/*` route (`CommercialLayout` → `CommercialGuideRoot`). The only way to open it is the small outline button labeled **Commercial Guide** in the page header, top-right — visible in your screenshot between the page title and the "Platform Admin" badge. Clicking it slides the guide drawer in from the right.
 
-- `pgcrypto` is installed in the **`extensions`** schema (confirmed via `pg_extension`), not `public`.
-- `invite_member` is declared with `SET search_path TO 'public'`, so unqualified `gen_random_bytes(...)` and `digest(...)` can't be resolved — the call fails before any invitation row is written.
-- Same defect exists in two sibling functions, confirmed unqualified: `resend_invitation` and `accept_invitation`.
-- The commercial hashing functions (`commercial_release_hash`, `commercial_comparison_compute_hash`, `commercial_comparison_save`, `commercial_sensitivity_compute_hash`, `commercial_sensitivity_start_execution`) already call `extensions.digest(...)` — that's the correct pattern and they are unaffected.
+Nothing is broken; it is just visually indistinguishable from the other header controls. This plan makes it obvious.
 
-## Fix
+## Changes (frontend/presentation only)
 
-One migration that recreates the three invitation functions with schema-qualified crypto calls, keeping all other logic, signatures, security, and permission checks byte-for-byte identical:
+1. **Promote the header button**
+   - Change `CommercialGuideButton` from `variant="outline"` to a filled/primary-toned button with the book icon, so it reads as the page's help affordance rather than a secondary control.
+   - Add the keyboard shortcut hint in the tooltip.
 
-1. `public.invite_member` — `extensions.gen_random_bytes(32)`, `extensions.digest(...)`
-2. `public.resend_invitation` — same two substitutions
-3. `public.accept_invitation` — `extensions.digest(...)`
+2. **Add a persistent right-edge "Guide" tab**
+   - A slim vertically-labeled tab pinned to the right edge of the viewport (mid-height), visible on all Commercial pages, that opens the same drawer.
+   - Hidden while the drawer is open and during a walkthrough; hidden on small screens; excluded from print.
+   - Purely a second trigger — reuses `useCommercialGuide().setOpen(true)`.
 
-No signature changes, no new tables, no RLS/grant changes, no frontend changes.
+3. **Keyboard shortcut**
+   - `Shift + ?` (and `Escape` to close, already handled by the Sheet) toggles the guide, registered in `CommercialGuideProvider` and ignored while typing in inputs.
 
-## Verification
+4. **One-time in-session hint**
+   - A small dismissible pointer near the header button on the first Commercial page view of a session ("Page-specific guidance lives here"), auto-dismissing after ~8s or on first open.
+   - Session state only, held in the existing provider — no localStorage, no backend, consistent with the current no-persistence rule.
 
-- Re-run the invitation for `amit.daga@neurealm.com` and `vidur.suri@neurealm.com` with the Commercial Administrator role selected.
-- Confirm a `pending` row appears in `tenant_invitations` for each, with the linked `commercial_admin` role in `tenant_invitation_roles`.
+## Technical notes
 
-## Note
-
-Once they accept, their memberships land in NeuGAIN Commercial with the Commercial Administrator role automatically — no separate role step needed.
-
-## Unrelated (not fixing unless you want)
-
-The console shows a React `forwardRef` warning from `DialogFooter` in `InviteMemberDialog`. It's cosmetic and unrelated to this failure.
+- Files touched: `src/features/commercial-guide/CommercialGuideButton.tsx`, `CommercialGuideProvider.tsx`, `CommercialGuideRoot.tsx`, plus one new `CommercialGuideEdgeTab.tsx`.
+- No changes to guide content, registry, routes, anchors, walkthrough logic, or any commercial data/calculations.
+- Existing 258 guide tests should continue to pass; the new tab/shortcut get light coverage in the cross-page test file.
