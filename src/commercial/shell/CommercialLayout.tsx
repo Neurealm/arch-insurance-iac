@@ -142,7 +142,6 @@ function Header() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          <CommercialGuideButton />
           {isPlatformAdmin && <Badge variant="secondary">Platform Admin</Badge>}
           <div className="min-w-[240px]">
             <Select value={activeTenantId ?? undefined} onValueChange={(v) => switchTenant(v)}>
@@ -159,6 +158,7 @@ function Header() {
               <Link to="/platform"><Shield className="mr-1 h-4 w-4" />Platform</Link>
             </Button>
           )}
+          <CommercialGuideButton />
         </div>
       </div>
     </header>
