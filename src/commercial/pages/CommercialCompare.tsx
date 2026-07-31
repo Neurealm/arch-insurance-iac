@@ -156,8 +156,9 @@ export default function CommercialCompare() {
                     </div>
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2" data-guide-target="comparison-scopes">
                   <Label>Scopes</Label>
+
                   <div className="flex flex-wrap gap-3">
                     {SCOPES.map((sc) => {
                       const checked = scopes.includes(sc);
