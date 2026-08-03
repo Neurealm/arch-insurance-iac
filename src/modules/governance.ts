@@ -31,9 +31,9 @@ function ruleRouteWithoutOwnership(): GovernanceFinding[] {
     .map((r) => ({
       ruleId: "route-without-module-ownership" as const,
       severity: "warning" as const,
-      subject: r.path,
+      subject: r.route.path,
       moduleId: null,
-      message: `Route ${r.path} is not claimed by any registered module, shared capability or platform capability.`,
+      message: `Route ${r.route.path} is not claimed by any registered module, shared capability or platform capability.`,
       remediation:
         "Add the route to an existing module manifest, or register the owning candidate module from the Stage 3 candidate list.",
     }));
