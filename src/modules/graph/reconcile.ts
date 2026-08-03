@@ -151,7 +151,8 @@ export function reconcileGraph(graph: CapabilityGraph = getPopulatedGraph().grap
   /* ---------------------------------------- duplicate node representations */
   const byFile = new Map<string, GraphNode[]>();
   for (const node of graph.nodes) {
-    if (!node.filePath) continue;
+    // A route legitimately carries the file path of the page it renders.
+    if (!node.filePath || node.type === "route") continue;
     byFile.set(node.filePath, [...(byFile.get(node.filePath) ?? []), node]);
   }
   for (const [file, nodes] of [...byFile.entries()].sort()) {
