@@ -119,8 +119,15 @@ const SEEDS: readonly CandidateSeed[] = [
     businessPurpose: "Reference library of delivery practices, patterns and playbooks.",
     sourcePatterns: [/^src\/pages\/practice-library\//],
     routePrefixes: ["/practice-library"],
-    majorCapabilities: ["Practice catalogue", "Practice detail pages"],
-    boundaryRisks: ["No database usage; entirely static content"],
+    majorCapabilities: [
+      "Practice catalogue",
+      "Practice detail pages",
+      "Practice dashboards, including IT Service Desk / ITSM and auto ticket categorization",
+    ],
+    boundaryRisks: [
+      "No database usage; entirely static content",
+      "Hosts the ITSM service-desk dashboards under /practice-library, so an ITSM module boundary would have to be carved out of this one",
+    ],
   },
   {
     id: "coworkers",
@@ -225,19 +232,6 @@ const SEEDS: readonly CandidateSeed[] = [
     boundaryRisks: [
       "Routes live under /admin, which reads as platform administration",
       "Maintains its own audit table instead of the platform audit stream",
-    ],
-  },
-  {
-    id: "itsm",
-    name: "IT Service Desk and ITSM",
-    businessPurpose:
-      "Service-desk operations surfaces including automated ticket categorization for a service desk manager.",
-    sourcePatterns: [/^src\/pages\/itsm\//],
-    routePrefixes: ["/itsm"],
-    majorCapabilities: ["Service desk coworker catalogue", "Auto ticket categorization operations"],
-    boundaryRisks: [
-      "Reached from the Digital Coworkers surface; boundary against `coworkers` undecided",
-      "No ITSM system integration exists",
     ],
   },
 ];
