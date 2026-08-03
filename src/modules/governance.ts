@@ -26,8 +26,8 @@ const LEVEL_ORDER = ["domain", "capability", "sub-capability", "feature"] as con
 
 function ruleRouteWithoutOwnership(): GovernanceFinding[] {
   const report = reconcileRoutes();
-  return report.rows
-    .filter((r) => r.ownership === "unowned")
+  return report.routes
+    .filter((r) => r.ownership === "unregistered")
     .map((r) => ({
       ruleId: "route-without-module-ownership" as const,
       severity: "warning" as const,
@@ -45,7 +45,8 @@ function rulePageWithoutRegistration(): GovernanceFinding[] {
     .filter(
       (i) =>
         i.implementationType === "page" &&
-        (i.classification === "unregistered-product-implementation" ||
+        (i.classification === "candidate-product-module" ||
+          i.classification === "existing-module-extension" ||
           i.classification === "unable-to-determine"),
     )
     .map((i) => ({
