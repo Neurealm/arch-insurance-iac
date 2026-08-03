@@ -354,8 +354,13 @@ export function populateCapabilityGraph(input: PopulateInput = {}): PopulatedGra
 
   /* ------------------------------------------------ implementation inventory */
   for (const item of [...IMPLEMENTATION_INVENTORY].sort((a, c) => a.ref.localeCompare(c.ref))) {
-    const type = INVENTORY_NODE_TYPE[item.implementationType];
-    if (!type) continue;
+    const mapped = INVENTORY_NODE_TYPE[item.implementationType];
+    if (!mapped) continue;
+    /* Duplicate-node reconciliation: one implementation file is one node. If the
+       file is already represented (typically as a route-backed page), reuse that
+       node instead of minting a second one under a different type. */
+    const existingType = (["page", "component", "service", "api"] as const).find((t) => b.has(`${t}:${item.ref}`));
+    const type = existingType ?? mapped;
     const classified = classificationByRef.get(item.ref);
     const declaringModule = modules.find((m) =>
       [...m.boundaries.pageIds, ...m.boundaries.componentRefs, ...m.boundaries.serviceRefs].includes(item.ref),
