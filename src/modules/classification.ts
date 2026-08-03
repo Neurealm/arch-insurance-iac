@@ -280,6 +280,10 @@ export function classifyUnregistered(
   const inventoryByRef = new Map(IMPLEMENTATION_INVENTORY.map((i) => [i.ref, i]));
   const routeByPath = new Map(APPLICATION_ROUTES.map((r) => [r.path, r]));
 
+  // The upstream inventory can list the same ref twice (for example a nav entry
+  // duplicated across two sidebars). Keep both rows but keep the ID unique.
+  const seenRefs = new Map<string, number>();
+
   const items: ClassifiedItem[] = report.items.map((item) => {
     const verdict = classifyOne(item, dupes);
     const isRoute = item.implementationType === "route";
@@ -288,7 +292,12 @@ export function classifyUnregistered(
     const inv = inventoryByRef.get(item.ref);
 
     return {
-      itemId: `${item.implementationType}:${item.ref}`,
+      itemId: (() => {
+        const base = `${item.implementationType}:${item.ref}`;
+        const seen = seenRefs.get(base) ?? 0;
+        seenRefs.set(base, seen + 1);
+        return seen === 0 ? base : `${base}#${seen + 1}`;
+      })(),
       ref: item.ref,
       filePath: isRoute ? route?.componentFile ?? null : isNav ? null : item.ref,
       implementationType: item.implementationType,
