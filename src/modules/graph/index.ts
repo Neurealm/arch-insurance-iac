@@ -24,3 +24,17 @@ export {
   type GraphDiff,
   type VersionInput,
 } from "./serialize";
+
+/* Stage 3.5.2 — population, reconciliation, orphan analysis and statistics. */
+export * from "./populationTypes";
+export {
+  populateCapabilityGraph,
+  getPopulatedGraph,
+  __resetPopulationCache,
+  POPULATION_GENERATOR,
+  type PopulateInput,
+} from "./populate";
+export { reconcileGraph, nodeDegrees } from "./reconcile";
+export { analyzeOrphans } from "./orphans";
+export { graphStatistics, graphStatisticsJson, connectedComponents, maxDepth } from "./statistics";
+export { buildSreGraphSlice, SRE_MODULE_ID } from "./sreSlice";
