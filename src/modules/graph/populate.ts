@@ -404,23 +404,33 @@ export function populateCapabilityGraph(input: PopulateInput = {}): PopulatedGra
       },
     });
 
-    /* A path-heuristic owner is not proof of ownership: hold it as a candidate. */
-    if (!declaringModule && classified?.likelyOwner && b.has(`module:${classified.likelyOwner}`)) {
+    /* A path heuristic is not proof of ownership: hold it as a candidate. */
+    const heuristicOwner =
+      classified?.likelyOwner && b.has(`module:${classified.likelyOwner}`)
+        ? classified.likelyOwner
+        : (modules.find((m) =>
+            m.boundaries.sourcePaths.some(
+              (p) => item.ref === p || item.ref.startsWith(p.replace(/\/\*+$/, "") + "/"),
+            ),
+          )?.identity.moduleId ?? null);
+
+    if (!declaringModule && heuristicOwner && b.has(`module:${heuristicOwner}`)) {
       b.candidate(
         inventoryNodeId,
         "BELONGS_TO",
-        `module:${classified.likelyOwner}`,
-        "Path heuristic suggests the module, but no manifest declares the file",
+        `module:${heuristicOwner}`,
+        "File sits inside the module source boundary but no manifest entry declares it",
         {
           sourceType: "unregistered-classification",
-          sourceId: classified.itemId,
+          sourceId: classified?.itemId ?? item.ref,
           sourcePath: item.ref,
           method: "source-path heuristic",
           classification: "weakly-inferred",
-          confidence: classified.confidence,
+          confidence: classified?.confidence ?? "low",
         },
       );
     }
+
 
 
 
