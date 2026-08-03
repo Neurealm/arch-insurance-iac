@@ -111,12 +111,15 @@ const candidateEdges: readonly CandidateEdge[] = [
     type: "USES",
     rationale: "Weak co-occurrence signal only.",
     provenance: {
-      source: "derived",
-      confidence: "low",
-      evidenceClassification: "weak",
+      sourceType: "fixture",
+      sourceId: "fixture:candidate",
+      sourcePath: null,
+      evidenceMethod: "co-occurrence",
+      evidenceClassification: "weakly-inferred",
+      evidenceStrength: null,
       validationState: "unvalidated",
-      evidence: ["fixture:candidate"],
-    } as CandidateEdge["provenance"],
+      confidence: "low",
+    },
   },
 ];
 
