@@ -105,8 +105,25 @@ class PopulationBuilder {
 
   constructor(base: CapabilityGraph) {
     for (const n of base.nodes) this.nodes.set(n.id, n);
-    for (const e of base.edges) this.edges.set(e.id, e);
+    /* Stage 3.5.1 projection facts are declared registry facts: stamp them with
+       provenance so every edge in the populated graph is traceable. */
+    for (const e of base.edges) {
+      this.edges.set(e.id, {
+        ...e,
+        attributes: {
+          sourceType: "module-manifest",
+          sourceId: e.from,
+          sourcePath: null,
+          evidenceMethod: "declared in the Stage 1–3 registries",
+          evidenceClassification: "declared",
+          evidenceStrength: null,
+          validationState: "validated",
+          ...e.attributes,
+        },
+      });
+    }
   }
+
 
   has(id: string): boolean {
     return this.nodes.has(id);
