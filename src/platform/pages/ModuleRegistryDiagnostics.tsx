@@ -165,7 +165,16 @@ export default function ModuleRegistryDiagnostics() {
             <UnregisteredPanel />
           </Suspense>
         </TabsContent>
+
+        {STAGE3_TABS.map((tab) => (
+          <TabsContent key={tab.value} value={tab.value} className="pt-4">
+            <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+              <Stage3Panel view={tab.view} />
+            </Suspense>
+          </TabsContent>
+        ))}
       </Tabs>
+
     </div>
   );
 }
