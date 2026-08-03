@@ -404,6 +404,26 @@ export function populateCapabilityGraph(input: PopulateInput = {}): PopulatedGra
       },
     });
 
+    /* A path-heuristic owner is not proof of ownership: hold it as a candidate. */
+    if (!declaringModule && classified?.likelyOwner && b.has(`module:${classified.likelyOwner}`)) {
+      b.candidate(
+        inventoryNodeId,
+        "BELONGS_TO",
+        `module:${classified.likelyOwner}`,
+        "Path heuristic suggests the module, but no manifest declares the file",
+        {
+          sourceType: "unregistered-classification",
+          sourceId: classified.itemId,
+          sourcePath: item.ref,
+          method: "source-path heuristic",
+          classification: "weakly-inferred",
+          confidence: classified.confidence,
+        },
+      );
+    }
+
+
+
     /* Customer-specific implementation is modelled as an extension, never as core. */
     if (classified?.classification === "customer-specific") {
       const extId = b.node({
