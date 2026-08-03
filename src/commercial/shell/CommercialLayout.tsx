@@ -35,7 +35,7 @@ type NavItem = {
 const NAV: NavItem[] = [
   { to: "/commercial", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/commercial/program", label: "Program", icon: Rocket },
-  { to: "/commercial/program-timeline", label: "Program & Timeline", icon: CalendarRange },
+  
 
   { to: "/commercial/scenarios", label: "Scenarios", icon: FlaskConical },
   { to: "/commercial/portfolio", label: "Portfolio", icon: Briefcase },
@@ -50,9 +50,17 @@ const NAV: NavItem[] = [
   { to: "/commercial/neurealm-governance", label: "Governance", icon: Shield, section: "Governance & Delivery" },
   { to: "/commercial/program-timeline", label: "Timelines", icon: CalendarRange, section: "Governance & Delivery" },
   { to: "/commercial/staffing-resources", label: "Staffing & Resources", icon: Users, section: "Governance & Delivery" },
-  
-
 ];
+
+// Parameterised drill-down screens. They have no standalone URL and are opened
+// from the parent screen, so they are listed for orientation only.
+const DETAIL_VIEWS: { label: string; from: string }[] = [
+  { label: "Change Set", from: "from Assumptions & Change Sets" },
+  { label: "Comparison", from: "from Scenario Comparison" },
+  { label: "Sensitivity Experiment", from: "from Sensitivity Analysis" },
+  { label: "Model Version", from: "from Release & Activation" },
+];
+
 
 
 
@@ -77,7 +85,7 @@ function Sidebar() {
           Commercial
         </div>
         {NAV.filter((n) => !n.section).map((t) => (
-          <NavLinkItem key={t.to} item={t} />
+          <NavLinkItem key={t.label} item={t} />
         ))}
         {Array.from(new Set(NAV.filter((n) => n.section).map((n) => n.section!))).map((sec) => (
           <div key={sec} className="pt-3">
@@ -85,11 +93,25 @@ function Sidebar() {
               {sec}
             </div>
             {NAV.filter((n) => n.section === sec).map((t) => (
-              <NavLinkItem key={t.to} item={t} />
+              <NavLinkItem key={t.label} item={t} />
             ))}
           </div>
         ))}
+        <div className="pt-3">
+          <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Detail views
+          </div>
+          <ul className="space-y-0.5">
+            {DETAIL_VIEWS.map((d) => (
+              <li key={d.label} className="px-2.5 py-1 text-xs text-muted-foreground/80">
+                <span className="font-medium text-muted-foreground">{d.label}</span>
+                <span className="block text-[10px] text-muted-foreground/70">{d.from}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </nav>
+
     </aside>
   );
 }
