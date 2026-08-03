@@ -31,13 +31,15 @@ function discover(): ModuleManifest[] {
   const modules = import.meta.glob<ManifestModule>("./**/module.manifest.ts", {
     eager: true,
   });
-  const found: ModuleManifest[] = [];
+  // A file may expose the same object as both a named and a default export;
+  // identity-dedupe so one file never registers a module twice.
+  const found = new Set<ModuleManifest>();
   for (const mod of Object.values(modules)) {
     for (const exported of Object.values(mod ?? {})) {
-      if (isManifest(exported)) found.push(exported);
+      if (isManifest(exported)) found.add(exported);
     }
   }
-  return found.sort((a, b) => a.identity.moduleId.localeCompare(b.identity.moduleId));
+  return [...found].sort((a, b) => a.identity.moduleId.localeCompare(b.identity.moduleId));
 }
 
 let cache: ModuleManifest[] | null = null;
