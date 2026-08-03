@@ -50,8 +50,17 @@ export function analyzeOrphans(graph: CapabilityGraph = getPopulatedGraph().grap
           (outgoing === undefined ? true : e.outgoing === outgoing),
       );
 
+    const unregistered = node.attributes.registered === false;
+
     if (edges.length === 0) {
-      push(node, "isolated", node.type === "persona", "No relationships of any kind.");
+      push(
+        node,
+        "isolated",
+        node.type === "persona" || unregistered,
+        unregistered
+          ? "Unregistered implementation: no manifest claims it, so no relationships exist yet (Stage 4 registration work)."
+          : "No relationships of any kind.",
+      );
       continue;
     }
     if (edges.every((e) => OWNERSHIP_EDGES.has(e.type))) {
