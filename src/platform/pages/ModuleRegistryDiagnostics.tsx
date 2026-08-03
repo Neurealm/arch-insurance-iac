@@ -77,12 +77,16 @@ export default function ModuleRegistryDiagnostics() {
       </div>
 
       <Tabs defaultValue="modules">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="modules">Modules</TabsTrigger>
           <TabsTrigger value="routes">Routes</TabsTrigger>
           <TabsTrigger value="findings">Findings</TabsTrigger>
           <TabsTrigger value="unregistered">Unregistered</TabsTrigger>
+          {STAGE3_TABS.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+          ))}
         </TabsList>
+
 
         <TabsContent value="modules" className="space-y-3 pt-4">
           {modules.map((m) => (
