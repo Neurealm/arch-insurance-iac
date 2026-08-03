@@ -10,6 +10,18 @@ import type { RouteOwnershipClass } from "@/modules/routeTypes";
 
 /** The unregistered report pulls in the full inventory — load it on demand. */
 const UnregisteredPanel = lazy(() => import("./ModuleRegistryUnregistered"));
+/** Stage 3 governance views: classification, candidates, registries, hierarchy. */
+const Stage3Panel = lazy(() => import("./ModuleRegistryStage3"));
+
+const STAGE3_TABS = [
+  { value: "classification", label: "Classification", view: "classification" },
+  { value: "candidates", label: "Candidates", view: "candidates" },
+  { value: "shared", label: "Shared", view: "shared" },
+  { value: "platform-capabilities", label: "Platform", view: "platform" },
+  { value: "capability-tree", label: "Capability tree", view: "capability-tree" },
+  { value: "governance", label: "Governance", view: "governance" },
+] as const;
+
 
 const OWNERSHIP_TONE: Record<RouteOwnershipClass, string> = {
   "module-owned": "bg-primary/10 text-primary border-primary/20",
