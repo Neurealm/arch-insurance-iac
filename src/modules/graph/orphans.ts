@@ -88,7 +88,14 @@ export function analyzeOrphans(graph: CapabilityGraph = getPopulatedGraph().grap
       }
       case "page": {
         if (!has("IMPLEMENTS", undefined, true)) {
-          push(node, "page-without-capability", false, "Page is not attributed to any capability.");
+          push(
+            node,
+            "page-without-capability",
+            unregistered || node.moduleId === null,
+            node.moduleId === null
+              ? "Page belongs to no registered module, so capability attribution is not yet possible."
+              : "Page is owned by a registered module but is not attributed to any capability.",
+          );
         }
         break;
       }
