@@ -1,34 +1,43 @@
-# Module Ownership Conflicts and Architectural Issues
+# Stage 2 — Ownership Conflicts
 
-Findings recorded during Stage 1. None is fixed in Stage 1; each is either
-resolved by an owner decision or by a later stage.
+Updates the Stage 1 conflict register with route-table evidence.
 
-## Ownership conflicts
+## Route-level conflicts: 0
 
-| ID | Conflict | Evidence | Disposition |
+No route is claimed by two module manifests. With one module registered this is
+a weak guarantee, but the detection rule (`invalid-route-ownership`) is
+implemented, tested and will fire in Stage 3 when modules with adjacent route
+families are registered.
+
+## Unowned shared assets: 4 (unchanged from Stage 1, now quantified)
+
+| Shared asset | SRE import sites | Other consumers | Status |
 |---|---|---|---|
-| OC-01 | `src/components/eoc/*` has no owner but is consumed by at least four page areas | 33 imports from `src/pages/prod-twin/` alone | Assign to Platform in Stage 3 |
-| OC-02 | Scenario / investigation / evidence contexts shared between SRE Practice and RunOps with no owner | `src/context/*Context.tsx` import sites | Assign to RunOps in Stage 3 |
-| OC-03 | `/data-orchestration-twin` sits in the SRE navigation region but is an independent route tree | `src/components/eoc/Sidebar.tsx` key `sre-data-orch`; nested routes in `src/App.tsx` | Unable to verify — owner decision required |
-| OC-04 | "SRE" appears in three unrelated places: SRE Practice, `/coworkers/site-reliability-engineering`, `/practice-library/observability-resilience-sre` | routes in `src/App.tsx` lines 560, 566, 805 | Explicitly excluded from the SRE manifest |
+| `src/components/eoc/*` | 33 | Sidebar, coworkers, practice library | No declared owner |
+| `src/context/ScenarioStateContext` + `src/components/scenario` | 1 (`/enterprise-cloud-twin`) | RunOps scenario screens | No declared owner |
+| `src/context/GuidedInvestigationContext` + `src/components/investigation` | 1 | RunOps investigation screens | No declared owner |
+| `src/context/EvidenceGraphContext` + `src/components/evidence` | 1 | RunOps evidence surfaces | No declared owner |
 
-## Architectural issues
+Each is declared in the SRE manifest as a `sharedDependency` with
+`primaryOwner: "unassigned"`, which the validator reports as
+`invalid-shared-capability-ownership` (severity `ownership-conflict`). This is
+correct behaviour: the framework surfaces the gap instead of silently assigning
+the asset to the only module that has been registered.
 
-| ID | Issue | Evidence |
-|---|---|---|
-| AI-01 | Module name/folder mismatch: "Site Resilience Engineering" implemented in `src/pages/prod-twin/` | directory listing |
-| AI-02 | No route namespace: 25 of 35 SRE routes are flat root paths | `src/App.tsx` 639–706 |
-| AI-03 | Duplicate capability surface: `/operational-friction-index` and `/product-reliability-transformation-index` render the same `OperationalFrictionIndex` component | `src/App.tsx` 639, 652 |
-| AI-04 | Duplicate nav labels: `sre-mrm` and `sre-mrm2` are both "Modernization Roadmap" | `src/components/eoc/Sidebar.tsx` |
-| AI-05 | Orphaned-from-navigation pages: `/executive-service-owner-twin`, `/delivery-org-twin`, `/engagement-manager-twin` are routed but absent from every nav group | `src/App.tsx` 707–709 |
-| AI-06 | No RBAC coverage for the SRE surface — no `sre.*` permission, no `PermissionRoute` wrapper | permission catalogue, route registrations |
-| AI-07 | Entire SRE surface is mock/static; no Supabase access anywhere under `src/pages/prod-twin/` | import scan |
-| AI-08 | `src/App.tsx` is a single ~900-line route registry with no module segmentation | file length |
-| AI-09 | Cross-module data fixtures live in a flat `src/data/` directory with no ownership metadata | directory listing |
-| AI-10 | Functionality that cannot currently be assigned to a module: the three `*-twin` routes in AI-05, plus `/data-orchestration-twin` | see OC-03 |
+## Ambiguous boundaries requiring an owner decision
 
-## Reporting
+| Item | Question |
+|---|---|
+| `/data-orchestration-twin/*` (64 items) | Part of the SRE module, or a peer module? Labelled "SRE Data Orchestration" in navigation, implemented as an independent route tree with its own layout. |
+| `/executive-service-owner-twin`, `/delivery-org-twin`, `/engagement-manager-twin` | Pages live in `src/pages/prod-twin/` but appear in no navigation group. Currently excluded from SRE. |
+| `src/hooks/*` (27 hooks) | Single folder mixing platform, commercial and CRM data access. No module can claim the folder without over-claiming. |
+| 25 edge functions | Platform-owned by default, or claimed by `commercial` / `cae`? |
 
-Stage 2 emits these findings automatically where they are machine-detectable
-(AI-03, AI-05, AI-10, OC-01, OC-02) through `validateRegistry()` once the
-application route table is supplied as a known-reference set.
+## Non-conflicts confirmed
+
+- No module claims a route that the router does not register (0 missing
+  references).
+- No module both includes and excludes the same item.
+- No duplicate module IDs or capability IDs.
+- The two `<computed>` route families are reported as `unable-to-verify`, not
+  assigned to a module by guesswork.

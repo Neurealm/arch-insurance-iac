@@ -43,3 +43,27 @@ findings.
 `validateRegistry({ routes, databaseEntities, workflows, permissions, sourcePaths })`.
 Any omitted list downgrades its rules to `unable-to-verify` rather than passing
 them silently — absence of evidence is never reported as validity.
+
+---
+
+## Stage 2 additions
+
+Route-table and inventory reconciliation added the following checks, all
+implemented in `src/modules/routeOwnership.ts` and `src/modules/inventory.ts`:
+
+| Rule | Severity | Meaning |
+|---|---|---|
+| `invalid-route-ownership` | `ownership-conflict` | Two manifests claim the same route path. |
+| `missing-referenced-file` | `missing-reference` | A manifest route or page is absent from the real route table / disk. |
+| `unregistered-implementation` | `warning` | A route, page or service belongs to no manifest. |
+| unresolvable route family | `unable-to-verify` | Route path is computed at runtime and cannot be statically resolved. |
+
+Evidence rules:
+
+- Platform chrome (auth, toasts, activity tracking, layout) never counts as
+  evidence of data backing for a page.
+- A shared React context or client store counts as `client-generated-state`,
+  never as a service.
+- `maxJustifiableStatus` is derived from the strongest evidence record; a
+  capability may not declare a status above that ceiling. `shared-service-backed`
+  maps to `mock`, not `partial`.

@@ -29,3 +29,23 @@ Confidence definitions:
 Only the SRE Practice module is registered in Stage 1
 (`src/modules/sre/module.manifest.ts`). The remaining modules are registered in
 Stage 3.
+
+---
+
+## Stage 2 update (route-table evidence)
+
+The map above was produced from folder and navigation inspection. Stage 2
+reconciled it against the extracted route table (436 route entries) and the
+implementation inventory (1,387 items):
+
+- Registered: `sre` only — 35 routes, 40 items, 2.9% coverage.
+- Platform-owned by policy: 28 routes. Shared: 12. Unregistered: 359.
+- Ownership conflicts between modules: 0. Manifest routes missing from the
+  router: 0. Unresolvable (computed) route families: 2 (`/avep`, `/runops`).
+- Candidate module clusters confirmed by path/folder analysis: `runops` (169
+  items), `commercial` (99), `coworkers` (85), `avep` (79), `practice-library`
+  (65), `sre-data-orchestration` (64), `cae` (34), `platform` (17); 632 items
+  had no reliable cluster signal.
+
+See `route-ownership-report.md`, `route-to-module-matrix.md` and
+`unregistered-implementation-report.md` for the underlying data.
