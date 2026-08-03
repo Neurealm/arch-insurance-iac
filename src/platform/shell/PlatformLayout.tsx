@@ -18,6 +18,7 @@ import {
   MapPin,
   BookA,
   BarChart3,
+  Boxes,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -38,6 +39,7 @@ const NAV: NavItem[] = [
   { to: "/platform/settings", label: "Settings", icon: SettingsIcon, permission: "tenant.view" },
   { to: "/platform/profile", label: "Profile", icon: UserCircle2 },
   { to: "/platform/test-hub", label: "Platform Test Hub", icon: FlaskConical, adminOnly: true },
+  { to: "/platform/modules", label: "Module Registry", icon: Boxes, adminOnly: true },
 ];
 
 /** Contextual Audio Enrichment Manager — shared across every NeuGAIN.io module. */
