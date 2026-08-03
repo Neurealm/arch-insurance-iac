@@ -13,7 +13,7 @@ export {
   GRAPH_GENERATOR,
   type BuildGraphInput,
 } from "./build";
-export { GraphQuery, queryGraph } from "./query";
+export { GraphQuery, queryGraph } from "./query/LegacyGraphQuery";
 export {
   computeGraphHash,
   deserializeGraph,

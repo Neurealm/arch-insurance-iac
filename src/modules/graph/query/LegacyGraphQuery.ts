@@ -15,7 +15,7 @@ import type {
   NodeFilter,
   TraversalHit,
   TraversalOptions,
-} from "./types";
+} from "../types";
 
 export class GraphQuery {
   private readonly nodesById = new Map<string, GraphNode>();
