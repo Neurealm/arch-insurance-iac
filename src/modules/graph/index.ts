@@ -71,3 +71,6 @@ export {
 /* Stage 3.5.3.2 — deterministic reasoning and analysis engine. */
 export * from "./reasoning/index";
 
+
+/* Stage 3.5.3.3 — deterministic intelligence and recommendation layer. */
+export * from "./intelligence/index";
