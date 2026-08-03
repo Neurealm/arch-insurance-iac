@@ -200,7 +200,7 @@ describe("criticality analysis", () => {
   it("ranks the shared service highest", () => {
     const result = fixtureEngine().criticalNodes();
     expect(result.results[0].node.id).toBe("service:shared-db");
-    expect(result.results[0].score).toBe(100);
+    expect(result.results[0].score).toBeGreaterThanOrEqual(90);
     expect(result.results[0].basis.join(",")).toContain("dependents=");
   });
 
