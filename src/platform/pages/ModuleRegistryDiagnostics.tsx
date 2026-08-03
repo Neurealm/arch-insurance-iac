@@ -10,6 +10,18 @@ import type { RouteOwnershipClass } from "@/modules/routeTypes";
 
 /** The unregistered report pulls in the full inventory — load it on demand. */
 const UnregisteredPanel = lazy(() => import("./ModuleRegistryUnregistered"));
+/** Stage 3 governance views: classification, candidates, registries, hierarchy. */
+const Stage3Panel = lazy(() => import("./ModuleRegistryStage3"));
+
+const STAGE3_TABS = [
+  { value: "classification", label: "Classification", view: "classification" },
+  { value: "candidates", label: "Candidates", view: "candidates" },
+  { value: "shared", label: "Shared", view: "shared" },
+  { value: "platform-capabilities", label: "Platform", view: "platform" },
+  { value: "capability-tree", label: "Capability tree", view: "capability-tree" },
+  { value: "governance", label: "Governance", view: "governance" },
+] as const;
+
 
 const OWNERSHIP_TONE: Record<RouteOwnershipClass, string> = {
   "module-owned": "bg-primary/10 text-primary border-primary/20",
@@ -65,12 +77,16 @@ export default function ModuleRegistryDiagnostics() {
       </div>
 
       <Tabs defaultValue="modules">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="modules">Modules</TabsTrigger>
           <TabsTrigger value="routes">Routes</TabsTrigger>
           <TabsTrigger value="findings">Findings</TabsTrigger>
           <TabsTrigger value="unregistered">Unregistered</TabsTrigger>
+          {STAGE3_TABS.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+          ))}
         </TabsList>
+
 
         <TabsContent value="modules" className="space-y-3 pt-4">
           {modules.map((m) => (
@@ -165,7 +181,16 @@ export default function ModuleRegistryDiagnostics() {
             <UnregisteredPanel />
           </Suspense>
         </TabsContent>
+
+        {STAGE3_TABS.map((tab) => (
+          <TabsContent key={tab.value} value={tab.value} className="pt-4">
+            <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+              <Stage3Panel view={tab.view} />
+            </Suspense>
+          </TabsContent>
+        ))}
       </Tabs>
+
     </div>
   );
 }
