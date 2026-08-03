@@ -85,7 +85,7 @@ function Sidebar() {
           Commercial
         </div>
         {NAV.filter((n) => !n.section).map((t) => (
-          <NavLinkItem key={t.to} item={t} />
+          <NavLinkItem key={t.label} item={t} />
         ))}
         {Array.from(new Set(NAV.filter((n) => n.section).map((n) => n.section!))).map((sec) => (
           <div key={sec} className="pt-3">
@@ -93,11 +93,25 @@ function Sidebar() {
               {sec}
             </div>
             {NAV.filter((n) => n.section === sec).map((t) => (
-              <NavLinkItem key={t.to} item={t} />
+              <NavLinkItem key={t.label} item={t} />
             ))}
           </div>
         ))}
+        <div className="pt-3">
+          <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Detail views
+          </div>
+          <ul className="space-y-0.5">
+            {DETAIL_VIEWS.map((d) => (
+              <li key={d.label} className="px-2.5 py-1 text-xs text-muted-foreground/80">
+                <span className="font-medium text-muted-foreground">{d.label}</span>
+                <span className="block text-[10px] text-muted-foreground/70">{d.from}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </nav>
+
     </aside>
   );
 }
