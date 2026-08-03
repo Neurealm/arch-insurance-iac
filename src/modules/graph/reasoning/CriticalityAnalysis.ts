@@ -272,11 +272,6 @@ export function analyzeSinglePointsOfFailure(
     }
     if (stranded.length === 0) continue;
 
-    const siblings = new Set<string>();
-    for (const edge of dependents) {
-      for (const alt of ctx.dependencyIn.get(edge.from) ?? []) siblings.add(alt.from);
-    }
-
     records.push({
       node,
       strandedNodeIds: [...new Set(stranded)].sort(),
