@@ -499,7 +499,8 @@ export function populateCapabilityGraph(input: PopulateInput = {}): PopulatedGra
           confidence: "high",
         },
       });
-      b.edge(pageId, "USES", depId, {
+      /* USES may not target a page; page-to-page imports are REFERENCES. */
+      b.edge(pageId, depType === "page" ? "REFERENCES" : "USES", depId, {
         sourceType: "sre-evidence-records",
         sourceId: record.ref,
         sourcePath: record.ref,
