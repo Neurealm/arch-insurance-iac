@@ -472,13 +472,14 @@ export function populateCapabilityGraph(input: PopulateInput = {}): PopulatedGra
        Platform chrome is deliberately excluded from capability evidence. */
     for (const dep of [...record.tracedDependencies].sort()) {
       if (record.platformChrome.includes(dep)) continue;
-      const depType: GraphNodeType = dep.includes("/hooks/")
-        ? "service"
-        : dep.includes("/data/") || dep.includes("/domain/")
+      const existingDepType = (["page", "component", "service", "api"] as const).find((t) => b.has(`${t}:${dep}`));
+      const depType: GraphNodeType =
+        existingDepType ??
+        (dep.includes("/hooks/") || dep.includes("/data/") || dep.includes("/domain/")
           ? "service"
           : dep.endsWith(".tsx")
             ? "component"
-            : "service";
+            : "service");
       const depId = b.node({
         type: depType,
         ref: dep,
