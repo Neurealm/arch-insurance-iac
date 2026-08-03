@@ -209,6 +209,8 @@ export const EDGE_ENDPOINT_POLICY: Readonly<
       "dashboard",
       "report",
       "service",
+      "shared-capability",
+      "platform-capability",
     ],
   },
   REPORTS_TO: {
