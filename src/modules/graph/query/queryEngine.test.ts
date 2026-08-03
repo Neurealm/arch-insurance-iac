@@ -283,7 +283,8 @@ describe("paths", () => {
   });
 
   it("returns an empty successful result when unreachable", () => {
-    const result = engine.findShortestPath("module:sre", "permission:platform.admin", { maxDepth: 1 });
+    const permission = engine.findByType("permission").results[0]!.id;
+    const result = engine.findShortestPath("module:sre", permission, { maxDepth: 1 });
     expect(result.success).toBe(true);
     expect(result.resultCount).toBe(0);
   });

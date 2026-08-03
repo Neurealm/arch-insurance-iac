@@ -103,7 +103,11 @@ export function traverse(
   const wantPaths = options.includePaths !== false;
 
   const hits: TraversalHitRecord[] = [];
-  const visited = new Set<string>([startId]);
+  const emitted = new Set<string>([startId]);
+  /* Depth-aware visitation: a node found again at a shallower depth is
+     re-expanded (but never re-emitted), so a depth-limited DFS reaches exactly
+     the same node set as a depth-limited BFS. */
+  const bestDepth = new Map<string, number>([[startId, 0]]);
   const usedEdgeTypes = new Set<GraphEdgeType>();
   let scannedEdgeCount = 0;
   let reachedDepth = 0;
@@ -130,19 +134,23 @@ export function traverse(
         }
         for (const step of stepsFrom(indexes, current.node.id, direction, edgeTypes, excluded, includeCandidates)) {
           scannedEdgeCount += 1;
-          if (visited.has(step.nextId)) continue;
+          const depth = current.depth + 1;
+          const seenAt = bestDepth.get(step.nextId);
+          if (seenAt !== undefined && seenAt <= depth) continue;
           const node = indexes.nodeById.get(step.nextId);
           if (!node) continue;
-          visited.add(step.nextId);
+          bestDepth.set(step.nextId, depth);
           usedEdgeTypes.add(step.edge.type);
-          const depth = current.depth + 1;
           reachedDepth = Math.max(reachedDepth, depth);
           const path: GraphPath = {
             nodeIds: [...current.path.nodeIds, node.id],
             edgeIds: [...current.path.edgeIds, step.edge.id],
             length: depth,
           };
-          emit(node, depth, path, step.edge.type);
+          if (!emitted.has(node.id)) {
+            emitted.add(node.id);
+            emit(node, depth, path, step.edge.type);
+          }
           next.push({ node, depth, path });
         }
       }
@@ -163,19 +171,23 @@ export function traverse(
       for (let i = steps.length - 1; i >= 0; i -= 1) {
         const step = steps[i];
         scannedEdgeCount += 1;
-        if (visited.has(step.nextId)) continue;
+        const depth = current.depth + 1;
+        const seenAt = bestDepth.get(step.nextId);
+        if (seenAt !== undefined && seenAt <= depth) continue;
         const node = indexes.nodeById.get(step.nextId);
         if (!node) continue;
-        visited.add(step.nextId);
+        bestDepth.set(step.nextId, depth);
         usedEdgeTypes.add(step.edge.type);
-        const depth = current.depth + 1;
         reachedDepth = Math.max(reachedDepth, depth);
         const path: GraphPath = {
           nodeIds: [...current.path.nodeIds, node.id],
           edgeIds: [...current.path.edgeIds, step.edge.id],
           length: depth,
         };
-        emit(node, depth, path, step.edge.type);
+        if (!emitted.has(node.id)) {
+          emitted.add(node.id);
+          emit(node, depth, path, step.edge.type);
+        }
         stack.push({ node, depth, path });
       }
     }
@@ -183,7 +195,7 @@ export function traverse(
 
   return {
     hits,
-    visitedNodeCount: visited.size,
+    visitedNodeCount: bestDepth.size,
     scannedEdgeCount,
     reachedDepth,
     edgeTypesTraversed: [...usedEdgeTypes].sort(),
