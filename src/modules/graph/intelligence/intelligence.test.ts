@@ -74,6 +74,8 @@ const nodes: GraphNode[] = [
   node("route:/alpha", "route", "alpha", { attributes: { route: "/alpha" } }),
   node("route:/orphan", "route", null, { attributes: { route: "/orphan" } }),
   node("persona:alpha-owner", "persona", "alpha"),
+  /* Isolated persona: an expected-by-design coverage gap. */
+  node("persona:unused", "persona", "alpha"),
   node("platform-capability:auth", "platform-capability", "platform"),
   node("component:lonely", "component", null),
   node("component:shared", "component", null),
@@ -349,8 +351,15 @@ describe("policy outcomes on the fixture graph", () => {
     for (const id of result.diagnostics.policiesWithoutRecommendations) {
       expect(produced.has(id)).toBe(false);
     }
+    const suppressed = new Set(
+      result.diagnostics.exclusions.map((e) => e.findingId.split(":")[0]),
+    );
     expect(
-      result.diagnostics.policiesWithoutRecommendations.length + produced.size,
+      new Set([
+        ...produced,
+        ...suppressed,
+        ...result.diagnostics.policiesWithoutRecommendations,
+      ]).size,
     ).toBe(INTELLIGENCE_POLICIES.length);
   });
 });
