@@ -13,7 +13,7 @@
 import { GRAPH_SCHEMA_VERSION, type CapabilityGraph, type GraphNode } from "./types";
 import type { SreGraphSlice } from "./populationTypes";
 import { getPopulatedGraph } from "./populate";
-import { queryGraph } from "./query";
+import { queryGraph } from "./query/LegacyGraphQuery";
 import { SRE_PAGE_EVIDENCE } from "../sre/evidence.generated";
 import { SRE_CAPABILITY_HIERARCHY } from "../sre/capabilityHierarchy";
 
