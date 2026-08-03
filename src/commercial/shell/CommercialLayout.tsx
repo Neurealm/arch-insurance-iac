@@ -50,9 +50,17 @@ const NAV: NavItem[] = [
   { to: "/commercial/neurealm-governance", label: "Governance", icon: Shield, section: "Governance & Delivery" },
   { to: "/commercial/program-timeline", label: "Timelines", icon: CalendarRange, section: "Governance & Delivery" },
   { to: "/commercial/staffing-resources", label: "Staffing & Resources", icon: Users, section: "Governance & Delivery" },
-  
-
 ];
+
+// Parameterised drill-down screens. They have no standalone URL and are opened
+// from the parent screen, so they are listed for orientation only.
+const DETAIL_VIEWS: { label: string; from: string }[] = [
+  { label: "Change Set", from: "from Assumptions & Change Sets" },
+  { label: "Comparison", from: "from Scenario Comparison" },
+  { label: "Sensitivity Experiment", from: "from Sensitivity Analysis" },
+  { label: "Model Version", from: "from Release & Activation" },
+];
+
 
 
 
