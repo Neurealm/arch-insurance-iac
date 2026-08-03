@@ -374,7 +374,7 @@ export function populateCapabilityGraph(input: PopulateInput = {}): PopulatedGra
           ? (classified.ownershipClassification as GraphOwnership)
           : "unassigned";
 
-    b.node({
+    const inventoryNodeId = b.node({
       type,
       ref: item.ref,
       label: item.ref.split("/").pop() ?? item.ref,
