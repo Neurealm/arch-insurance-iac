@@ -68,3 +68,6 @@ export {
   type RelationshipSemantics,
 } from "./query/index";
 
+/* Stage 3.5.3.2 — deterministic reasoning and analysis engine. */
+export * from "./reasoning/index";
+
