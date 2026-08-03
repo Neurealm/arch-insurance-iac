@@ -38,3 +38,33 @@ export { reconcileGraph, nodeDegrees } from "./reconcile";
 export { analyzeOrphans } from "./orphans";
 export { graphStatistics, graphStatisticsJson, connectedComponents, maxDepth } from "./statistics";
 export { buildSreGraphSlice, SRE_MODULE_ID } from "./sreSlice";
+
+/* Stage 3.5.3.1 — deterministic read-only query engine. */
+export {
+  GraphQueryEngine,
+  createQueryEngine,
+  getQueryEngine,
+  __resetQueryEngineCache,
+  GraphQueryError,
+  RELATIONSHIP_SEMANTICS,
+  DEPENDENCY_EDGE_TYPES,
+  IMPACT_EDGE_TYPES,
+  UNSUPPORTED_ATTRIBUTE_FIELDS,
+  type QueryEngineInput,
+  type QueryResult,
+  type QueryWarning,
+  type QueryMatchExplanation,
+  type QueryPerformance,
+  type QueryFilterSummary,
+  type TraversalSummary,
+  type NodeQueryFilters,
+  type NodeQueryOptions,
+  type TraversalQueryOptions,
+  type PathQueryOptions,
+  type SearchOptions,
+  type GraphPath,
+  type TraversalHitRecord,
+  type LabelledEdge,
+  type RelationshipSemantics,
+} from "./query/index";
+
