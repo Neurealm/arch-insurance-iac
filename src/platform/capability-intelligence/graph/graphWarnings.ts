@@ -58,7 +58,10 @@ const rank = (code: QueryWarningCode): number => {
   return i === -1 ? ORDER.length : i;
 };
 
-function copyFor(warning: QueryWarning, view: GraphView): { title: string; explanation: string; actions: string[] } {
+function copyFor(
+  warning: QueryWarning,
+  view: GraphView,
+): { title: string; explanation: string; actions: string[]; summary: string } {
   const direction = DIRECTION_LABELS[view.request.direction].toLowerCase();
   switch (warning.code) {
     case "depth-limit-reached":
@@ -70,6 +73,7 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
           "Narrow the relationship types to keep the view readable at greater depth",
           "Re-root on an entity nearer the edge of this view",
         ],
+        summary: `the view stops at depth ${view.request.depth} and may not show the complete relationship chain`,
       };
     case "results-truncated":
       return {
@@ -80,6 +84,7 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
           "Narrow the relationship types",
           "Explore one direction at a time",
         ],
+        summary: "the view is truncated for safety",
       };
     case "empty-result":
       return {
@@ -91,6 +96,7 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
           "Switch direction",
           "Include candidate relationships to preview weakly-inferred links",
         ],
+        summary: "the query returned no results",
       };
     case "candidate-relationships-included":
       return {
@@ -98,6 +104,7 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
         explanation:
           "Candidate relationships are weakly-inferred and non-canonical. They are drawn dashed and labelled, and never count towards the confirmed graph.",
         actions: ["Disable candidate relationships to see only confirmed structure"],
+        summary: "candidate relationships are included",
       };
     case "path-limit-reached":
       return {
@@ -105,6 +112,7 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
         explanation:
           "The query engine stopped enumerating paths at its safety limit. The relationships shown remain accurate.",
         actions: ["Reduce traversal depth", "Narrow the relationship types"],
+        summary: "the path enumeration limit was reached",
       };
     default:
       return {
@@ -112,28 +120,103 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
         explanation:
           "The graph query engine reported a condition affecting this view. The relationships shown remain read-only and unmodified.",
         actions: [],
+        summary: "the query engine reported a condition affecting this view",
       };
   }
 }
 
 /**
- * Presents the graph-view warnings. Pure: the view and its warnings are read,
- * never mutated, and no query is re-executed.
+ * Canonical identity of a warning for deduplication purposes. Every field the
+ * engine can vary is part of the identity, so two warnings collapse only when
+ * they are the same statement about the same thing: same code, same subject and
+ * same verbatim message. Two `depth-limit-reached` warnings about different
+ * subjects, or with different messages (different depths, limits or
+ * conditions), remain separate cards.
  */
-export function presentWarnings(view: GraphView): readonly PresentedWarning[] {
-  return view.warnings
-    .map((warning, index) => ({ warning, index }))
-    .sort((a, b) => rank(a.warning.code) - rank(b.warning.code) || a.index - b.index)
-    .map(({ warning, index }) => {
-      const copy = copyFor(warning, view);
-      return {
-        key: `${warning.code}:${warning.subject ?? ""}:${index}`,
-        code: warning.code,
-        title: copy.title,
-        explanation: copy.explanation,
-        actions: copy.actions,
-        detail: warning.message,
-        subject: warning.subject,
-      };
-    });
+export function graphWarningIdentity(warning: QueryWarning): string {
+  return JSON.stringify([warning.code, warning.subject ?? null, warning.message]);
 }
+
+export interface DeduplicatedWarning {
+  warning: QueryWarning;
+  /** Number of identical engine warnings collapsed into this entry. */
+  occurrences: number;
+  /** Index of the first occurrence in the engine's emission order. */
+  firstIndex: number;
+}
+
+/**
+ * Collapses identical engine warnings. A bidirectional traversal reports the
+ * same condition once per sub-query; those reports describe one condition, not
+ * two defects. Pure and non-mutating: the input array and its warning objects
+ * are only read.
+ */
+export function deduplicateGraphWarnings(
+  warnings: readonly QueryWarning[],
+): readonly DeduplicatedWarning[] {
+  const byIdentity = new Map<string, { warning: QueryWarning; occurrences: number; firstIndex: number }>();
+  warnings.forEach((warning, index) => {
+    const identity = graphWarningIdentity(warning);
+    const existing = byIdentity.get(identity);
+    if (existing) {
+      existing.occurrences += 1;
+      return;
+    }
+    byIdentity.set(identity, { warning, occurrences: 1, firstIndex: index });
+  });
+  return [...byIdentity.values()].sort(
+    (a, b) => rank(a.warning.code) - rank(b.warning.code) || a.firstIndex - b.firstIndex,
+  );
+}
+
+/**
+ * Presents the graph-view warnings: engine warnings mapped to reader-facing
+ * copy, identical reports consolidated, and ordered deterministically. Pure —
+ * the view and its warnings are read, never mutated, and no query is
+ * re-executed.
+ */
+export function presentGraphWarnings(view: GraphView): readonly PresentedWarning[] {
+  return deduplicateGraphWarnings(view.warnings).map(({ warning, occurrences }) => {
+    const copy = copyFor(warning, view);
+    return {
+      key: graphWarningIdentity(warning),
+      code: warning.code,
+      title: copy.title,
+      explanation: copy.explanation,
+      actions: copy.actions,
+      detail: warning.message,
+      subject: warning.subject,
+      occurrences,
+      summary: copy.summary,
+    };
+  });
+}
+
+/** Retained name for existing call sites. */
+export const presentWarnings = presentGraphWarnings;
+
+/**
+ * Builds the concise polite announcement for the current warning set. Returns
+ * an empty string when there is nothing to announce; the caller decides whether
+ * a transition from "some warnings" to "none" should announce the cleared
+ * message. Deduplicated input means one condition is announced once.
+ */
+export function summarizeGraphWarningsForAnnouncement(
+  warnings: readonly PresentedWarning[],
+): string {
+  if (warnings.length === 0) return "";
+  const sentence = (clause: string) => `${clause.charAt(0).toUpperCase()}${clause.slice(1)}.`;
+  if (warnings.length === 1) {
+    return `Graph warning. ${sentence(warnings[0].summary)}`;
+  }
+  const clauses = warnings.map((w) => w.summary);
+  const joined =
+    clauses.length === 2
+      ? `${clauses[0]} and ${clauses[1]}`
+      : `${clauses.slice(0, -1).join(", ")} and ${clauses[clauses.length - 1]}`;
+  return `Graph updated with ${warnings.length} warnings. ${sentence(joined)}`;
+}
+
+/** Announced once when a previously-warning view becomes warning-free. */
+export const GRAPH_WARNINGS_CLEARED_ANNOUNCEMENT = "Graph warnings cleared.";
+
