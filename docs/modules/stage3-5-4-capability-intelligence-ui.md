@@ -189,8 +189,45 @@ bunx vitest run src/modules/graph     # graph engine + determinism
 Drawer deep-linking, URL-encoded filters, page-size selector, shared command palette,
 shared KPI/filter-bar extraction, tablet/mobile redesign, in-shell nested 404.
 
-## Planned Stage 3.5.4.2
+## Stage 3.5.4.2 — Interactive Graph Explorer
 
-Interactive Graph Explorer: canvas visualisation with a deterministic layout over the
-same read-only snapshot, with simulation and change-plan workspaces remaining out of
-scope until separately approved.
+Full detail: `docs/modules/stage3-5-4-2-graph-explorer.md`. Summary:
+
+- **Route** — `/platform/capability-intelligence/graph`, lazy loaded from
+  `src/platform/capability-intelligence/routes.tsx`, inheriting `PlatformAdminRoute`
+  and the shared Capability Intelligence provider. Direct load and refresh supported.
+- **Screen architecture** — `pages/GraphExplorer.tsx` composes `RootEntityPicker`,
+  `GraphControls`, `GraphLegend`, the RunOps `TopologyCanvas`, `EdgeDetailPanel`,
+  `GraphContentsList` and the existing `EntityDrawer`.
+- **Initial-root policy** — `graph/initialRoot.ts`: registered capability with the
+  highest total degree, tie-broken by normalised label then canonical node id, with a
+  highest-degree connected-node fallback and an empty state when nothing is connected.
+  No hardcoded identifier.
+- **Traversal controls** — direction (dependencies / dependents / both), depth 1–3,
+  relationship-type filtering, candidate edges excluded unless explicitly enabled.
+- **Safety limits** — 120 visible nodes, 200 visible edges; truncation is deterministic
+  and reported in a live region.
+- **Layout** — `graph/graphLayout.ts`, a pure deterministic layered layout (dependencies
+  left, root centre, dependents right) with fixed spacing constants; no physics.
+- **React Flow** — reuses `src/runops/components/graphs.tsx` via a backward-compatible
+  extension (`animateHighlights`, `selectedEdgeIds`); no competing graph framework.
+- **Interaction** — node selection, neighbour highlighting, re-root, entity drawer, edge
+  selection with read-only detail and endpoint navigation, clear selection, fit view,
+  reset view. No editing of any kind.
+- **Cross-screen navigation** — `graph/exploreLink.ts` and
+  `components/ExploreRelationshipsLink.tsx` add an "Explore relationships" action to the
+  Capability Explorer table, the Entity Drawer and Recommendation cards with an affected
+  entity. The action is a router `Link` to `?root=<nodeId>`, so the provider stays
+  mounted and `analyzeGraph()` is not re-executed. The `root` query parameter is the
+  single source of truth for the root, giving browser back/forward support.
+- **Accessibility** — labelled controls, keyboard-usable root search, live counts and
+  truncation announcements, a non-canvas graph contents list, text markers alongside
+  colour, predictable drawer focus, reduced-motion support.
+- **Tests** — `graphExplorer.test.tsx` and `graphExplorerNavigation.test.tsx`;
+  repository total 762 passing.
+- **Determinism** — canonical graph hash `e889b604` unchanged before and after.
+
+### Remaining limitations
+
+Bounded views only (no whole-graph rendering), no persisted view state beyond the root
+parameter, no simulation or change-plan surfaces (deferred to later stages).
