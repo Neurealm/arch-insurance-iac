@@ -162,7 +162,9 @@ placeholder or mocked data is used anywhere in the UI.
 | --- | --- |
 | `capabilityIntelligence.test.tsx` | Analysis determinism, card provenance, filtering without source mutation, read-only query access |
 | `capabilityIntelligenceRouting.test.tsx` | Authorized access, unauthorized direct-URL block, child-route inheritance, forbidden component reuse, loading state, navigation/authorization consistency |
-| `capabilityIntelligenceApp.test.tsx` | Provider single-compute lifecycle, Overview data contracts and priority bands, precision and unavailable-state handling, registration framing, confidence labelling, Explorer filtering/paging/clamping/terminology/orphans/`aria-sort`, recommendation identity and status, expected-by-design distinction, drawer behaviour, orphan-definition parity |
+| `capabilityIntelligenceApp.test.tsx` | Provider single-compute lifecycle, Overview data contracts and priority bands, precision and unavailable-state handling, registration framing, confidence labelling, KPI semantic order (`dt` before `dd`, single `dd` per group, `aria-describedby` hint), recommendation-summary grid contract, Explorer filtering/paging/clamping/terminology/orphans/`aria-sort`, recommendation identity and status, expected-by-design distinction, drawer behaviour, orphan-definition parity |
+| `capabilityIntelligenceRouteIntegration.test.tsx` | Mounts the real `capabilityIntelligenceRoutes` element from `routes.tsx` (the same element `App.tsx` renders): unauthorized block on parent and both child routes, authorized entry, and provider lifecycle across actual link navigation Overview → Explorer → Recommendations → Overview with `analyzeGraph()` executing exactly once and hash `e889b604` stable |
+
 
 Validation commands:
 
