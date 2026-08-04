@@ -28,13 +28,20 @@ export function GraphContentsList({
   onSelectNode: (nodeId: string) => void;
   onSelectEdge: (edgeId: string) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  /*
+   * Stage 3.5.4.2.1 — expanded by default so the text equivalent is available
+   * without discovery. Purely local, non-persistent state.
+   */
+  const [open, setOpen] = useState(true);
 
   return (
     <section aria-labelledby="graph-contents-title" className="rounded border border-border">
-      <h3 id="graph-contents-title" className="sr-only">
+      <h3 id="graph-contents-title" className="px-3 pt-3 text-sm font-semibold text-foreground">
         Accessible graph contents
       </h3>
+      <p className="px-3 pb-1 pt-1 text-xs text-muted-foreground">
+        This table represents the same bounded entities and relationships shown in the visual graph.
+      </p>
       <Button
         type="button"
         variant="ghost"
