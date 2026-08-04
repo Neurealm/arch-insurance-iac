@@ -40,7 +40,7 @@ export function ExploreRelationshipsLink({
       )}
     >
       <Network aria-hidden="true" className="h-3.5 w-3.5" />
-      <span>Explore relationships</span>
+      <span>{linkText ?? "Explore relationships"}</span>
     </Link>
   );
 }
