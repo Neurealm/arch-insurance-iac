@@ -40,8 +40,8 @@ vi.mock("reactflow/dist/style.css", () => ({}));
 import { TopologyCanvas, WorkflowCanvas, CausalGraph, type GraphEdge, type GraphNode } from "@/runops/components/graphs";
 
 const nodes: GraphNode[] = [
-  { id: "a", label: "Service A", sublabel: "api", tone: "ok" },
-  { id: "b", label: "Service B", tone: "warn" },
+  { id: "a", label: "Service A", sublabel: "api", tone: "healthy" },
+  { id: "b", label: "Service B", tone: "warning" },
   { id: "c", label: "Service C" },
 ];
 
