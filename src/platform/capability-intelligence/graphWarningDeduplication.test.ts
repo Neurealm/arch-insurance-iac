@@ -269,3 +269,72 @@ describe("Stage 3.5.4.2.2 — announcement transitions", () => {
     expect(nextWarningAnnouncement(graphWarningSetSignature(once), twice).changed).toBe(false);
   });
 });
+
+/**
+ * Stage 3.5.4.3 copy correction — distinct truncation cards, one spoken clause.
+ *
+ * A node-limit truncation and an edge-limit truncation are separate engine
+ * warnings with different subjects and different verbatim messages, so they
+ * must remain two visible cards. The polite announcement, however, must not
+ * repeat "The view is truncated for safety" twice.
+ */
+describe("Stage 3.5.4.3 truncation announcement copy", () => {
+  const nodeTruncation: QueryWarning = {
+    code: "results-truncated",
+    message: "Truncated at 100 entities.",
+    subject: "nodes",
+  };
+  const edgeTruncation: QueryWarning = {
+    code: "results-truncated",
+    message: "Truncated at 200 relationships.",
+    subject: "edges",
+  };
+
+  it("keeps the entity-limit and relationship-limit warnings as two distinct cards", () => {
+    const presented = presentGraphWarnings(viewWith([nodeTruncation, edgeTruncation]));
+    expect(presented).toHaveLength(2);
+    expect(presented.map((w) => w.subject)).toEqual(["nodes", "edges"]);
+    expect(presented.every((w) => w.occurrences === 1)).toBe(true);
+    expect(presented.map((w) => w.detail)).toEqual([
+      "Truncated at 100 entities.",
+      "Truncated at 200 relationships.",
+    ]);
+  });
+
+  it("does not repeat the identical truncation clause in the announcement", () => {
+    const presented = presentGraphWarnings(viewWith([nodeTruncation, edgeTruncation]));
+    const announcement = summarizeGraphWarningsForAnnouncement(presented);
+    const occurrences = announcement.toLowerCase().split("truncated for safety").length - 1;
+    expect(occurrences).toBe(1);
+    expect(announcement).toBe(
+      "Graph updated with 2 warnings. The view is truncated for safety.",
+    );
+    expect(announcement).not.toContain(" and the view is truncated for safety");
+  });
+
+  it("still joins materially different clauses", () => {
+    const presented = presentGraphWarnings(viewWith([nodeTruncation, depthWarning]));
+    const announcement = summarizeGraphWarningsForAnnouncement(presented).toLowerCase();
+    expect(announcement).toContain("the view is truncated for safety");
+    expect(announcement).toContain("the view stops at depth 2");
+    expect(announcement).toContain(" and ");
+  });
+
+  it("collapses repeated clauses but keeps distinct ones when three warnings are present", () => {
+    const presented = presentGraphWarnings(
+      viewWith([nodeTruncation, edgeTruncation, depthWarning]),
+    );
+    expect(presented).toHaveLength(3);
+    const announcement = summarizeGraphWarningsForAnnouncement(presented);
+    expect(announcement.startsWith("Graph updated with 3 warnings.")).toBe(true);
+    expect(announcement.toLowerCase().split("truncated for safety").length - 1).toBe(1);
+    expect(announcement).toContain("the view stops at depth 2");
+  });
+
+  it("leaves warning identity and deduplication untouched", () => {
+    expect(graphWarningIdentity(nodeTruncation)).not.toBe(graphWarningIdentity(edgeTruncation));
+    const deduped = deduplicateGraphWarnings([nodeTruncation, edgeTruncation, nodeTruncation]);
+    expect(deduped).toHaveLength(2);
+    expect(deduped[0].occurrences).toBe(2);
+  });
+});

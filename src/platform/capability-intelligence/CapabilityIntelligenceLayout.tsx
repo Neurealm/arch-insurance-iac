@@ -8,7 +8,7 @@ const TABS = [
   { to: "/platform/capability-intelligence/explorer", label: "Capability Explorer" },
   { to: "/platform/capability-intelligence/recommendations", label: "Recommendation Center" },
   { to: "/platform/capability-intelligence/graph", label: "Graph Explorer" },
-
+  { to: "/platform/capability-intelligence/remediation", label: "Remediation Workspace" },
 ];
 
 function Header() {
