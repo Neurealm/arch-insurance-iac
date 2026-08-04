@@ -158,6 +158,14 @@ export function buildGraphView(
   }
   if (!rootNode) return emptyView(request, graphHash, "unknown-entity");
 
+  // An empty relationship-type selection means "show nothing", never "show
+  // everything". The query engine treats an empty filter list as unfiltered, so
+  // this case is decided here rather than delegated.
+  if (request.edgeTypes.length === 0) {
+    return emptyView(request, graphHash, "no-matching-relationships", rootNode);
+  }
+
+
   const warnings: QueryWarning[] = [];
   const discovered = new Map<string, Discovered>();
 

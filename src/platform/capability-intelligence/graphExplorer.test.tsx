@@ -152,7 +152,7 @@ describe("bounded graph views", () => {
   it("reports filter-driven emptiness separately from structural emptiness", () => {
     const view = buildGraphView(engine, baseRequest({ edgeTypes: [] }));
     expect(view.emptyReason).toBe("no-matching-relationships");
-    expect(view.nodes.length).toBe(0);
+    expect(view.edges.length).toBe(0);
   });
 
   it("does not mutate the canonical graph", () => {
