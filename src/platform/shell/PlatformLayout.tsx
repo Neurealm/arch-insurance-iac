@@ -40,6 +40,7 @@ const NAV: NavItem[] = [
   { to: "/platform/profile", label: "Profile", icon: UserCircle2 },
   { to: "/platform/test-hub", label: "Platform Test Hub", icon: FlaskConical, adminOnly: true },
   { to: "/platform/modules", label: "Module Registry", icon: Boxes, adminOnly: true },
+  { to: "/platform/capability-intelligence", label: "Capability Intelligence", icon: Network, adminOnly: true },
 ];
 
 /** Contextual Audio Enrichment Manager — shared across every NeuGAIN.io module. */
