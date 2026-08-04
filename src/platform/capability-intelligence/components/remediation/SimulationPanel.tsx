@@ -164,9 +164,8 @@ function SimulationOutcome({ result }: { result: SimulationResult }) {
           <CardTitle className="text-sm">Recommendation resolution</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <ResolutionGroup title="Resolved" items={result.resolvedRecommendations} />
-          <ResolutionGroup title="Partially resolved" items={result.partiallyResolvedRecommendations} />
-          <ResolutionGroup title="Still outstanding" items={result.unresolvedRecommendations} />
+          <ResolutionByClassification result={result} />
+
         </CardContent>
       </Card>
 
