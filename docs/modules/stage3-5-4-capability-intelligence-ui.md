@@ -10,6 +10,8 @@ and never triggers remediation.
 | --- | --- |
 | 3.5.4.1 | Initial application foundation: provider, Overview, Explorer, Recommendation Center, Entity Drawer, shared `PagedDataTable` and `StatusBadge` |
 | 3.5.4.1.1 | Foundation hardening: route authorization, priority-band correction, metric precision and context, registration-coverage framing, humanized confidence, recommendation identity/status, Explorer terminology and orphan visibility, table and KPI accessibility, application-level test coverage |
+| 3.5.4.1.2 | Final semantic and integration hardening: valid `dt`→`dd` KPI markup, integration tests against the real `App.tsx` route element, provider lifecycle across actual child-route navigation, balanced eight-tile recommendation-summary grid |
+
 
 ## Location
 
@@ -29,8 +31,14 @@ and never triggers remediation.
 ## Route authorization
 
 The complete route group is guarded by `PlatformAdminRoute` (exported from
-`src/components/auth/PermissionRoute.tsx`), applied to the parent route element in
-`src/App.tsx`, so every current and future nested route inherits it.
+`src/components/auth/PermissionRoute.tsx`). Since Stage 3.5.4.1.2 the group is defined
+once, in `src/platform/capability-intelligence/routes.tsx`, and exported as
+`capabilityIntelligenceRoutes`; `src/App.tsx` renders that element inside the existing
+`/platform` shell. Lazy loading, paths and the Platform layout are unchanged — the
+extraction exists so tests exercise the authoritative wiring instead of a copy that
+could drift. Every current and future nested route inherits the guard.
+
+
 
 - Authentication is delegated to the existing `ProtectedRoute`.
 - Authorization reads `isPlatformAdmin` from `AccessContext` — the same source that
