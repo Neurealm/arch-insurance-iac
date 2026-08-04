@@ -208,13 +208,19 @@ describe("Stage 3.5.4.3 — remediation route wiring", () => {
     expect(await screen.findByText("Remediation workspace")).toBeTruthy();
     await waitFor(() => expect(screen.getByTestId("stage-progress")).toBeTruthy(), { timeout: 20000 });
 
-    // Stage 1 is open, downstream stages are locked until a selection is made.
-    expect(screen.getByTestId("stage-recommendation").getAttribute("data-state")).toBe("available");
-    expect(screen.getByTestId("stage-proposal").getAttribute("data-state")).toBe("locked");
-    expect(screen.getByTestId("stage-simulation").getAttribute("data-state")).toBe("locked");
+    // A deterministic default recommendation opens the workspace, so stage 1 is
+    // complete; stages that need a simulation remain locked until one is run.
+    await waitFor(
+      () =>
+        expect(screen.getByTestId("stage-recommendation").getAttribute("data-state")).toBe(
+          "complete",
+        ),
+      { timeout: 20000 },
+    );
     expect(screen.getByTestId("stage-change-plan").getAttribute("data-state")).toBe("locked");
 
     // The read-only contract is stated on the surface itself.
     expect(screen.getByText(/no patch is ever applied/i)).toBeTruthy();
   }, 30000);
 });
+
