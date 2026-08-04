@@ -11,7 +11,7 @@
 
 import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
 import { Suspense, useEffect } from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
 
@@ -156,7 +156,7 @@ describe("Stage 3.5.4.2.1 — accessible graph contents", () => {
     renderGraph([graphPath]);
     await waitForGraph();
     const before = screen.getByTestId("graph-count-announcement").textContent;
-    await userEvent.click(screen.getByRole("radio", { name: /Dependencies/i }));
+    await userEvent.click(screen.getByTestId("graph-direction-dependencies"));
     await waitFor(() =>
       expect(screen.getByTestId("graph-count-announcement").textContent).not.toBe(before),
     );
@@ -285,12 +285,16 @@ describe("Stage 3.5.4.2.1 — re-root contract", () => {
 
     // Open the entity drawer, then re-root.
     await userEvent.click(screen.getByRole("button", { name: "Open entity detail" }));
+    expect(await screen.findByRole("dialog")).toBeTruthy();
     const mountsBefore = canvas.mounts;
-    await userEvent.click(screen.getByRole("button", { name: "Re-root here" }));
+    // The drawer is a modal, so the underlying action is queried as hidden.
+    fireEvent.click(screen.getByRole("button", { name: "Re-root here", hidden: true }));
 
     await waitFor(() =>
       expect(within(screen.getByTestId(`graph-contents-node-${target.id}`)).getByText("root")).toBeTruthy(),
     );
+    // Drawer closed by the re-root.
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     // Selection cleared: the selection action bar is gone.
     expect(screen.queryByRole("button", { name: "Open entity detail" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Clear selection" })).toBeNull();
@@ -317,7 +321,7 @@ describe("Stage 3.5.4.2.1 — browser history", () => {
     const rerootTo = async (id: string) => {
       const row = await screen.findByTestId(`graph-contents-node-${id}`);
       await userEvent.click(within(row).getAllByRole("button")[0]);
-      await userEvent.click(await screen.findByRole("button", { name: "Re-root here" }));
+      fireEvent.click(await screen.findByRole("button", { name: "Re-root here" }));
       await atRoot(id);
     };
 
