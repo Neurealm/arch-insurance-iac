@@ -11,11 +11,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCapabilityIntelligence } from "../CapabilityIntelligenceProvider";
+import type { GraphQueryEngine } from "@/modules/graph/query/index";
+import type { IntelligenceResult } from "@/modules/graph/intelligence/index";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/platform/components/StatusBadge";
 import { EmptyState } from "@/platform/components/States";
-import { GraphCanvas } from "@/runops/components/graphs";
+import { TopologyCanvas } from "@/runops/components/graphs";
 import { EntityDrawer } from "../components/EntityDrawer";
 import { EdgeDetailPanel } from "../components/EdgeDetailPanel";
 import { GraphContentsList } from "../components/GraphContentsList";
@@ -99,10 +101,23 @@ function emptyCopy(reason: GraphViewEmptyReason, view: GraphView): { title: stri
 }
 
 export default function GraphExplorer() {
-  const { engine, intelligence, graphHash } = useCapabilityIntelligence();
+  const { queryEngine, intelligence, graphHash } = useCapabilityIntelligence();
+  if (!queryEngine || !intelligence) return null;
+  return <GraphExplorerScreen engine={queryEngine} intelligence={intelligence} graphHash={graphHash ?? ""} />;
+}
+
+function GraphExplorerScreen({
+  engine,
+  intelligence,
+  graphHash,
+}: {
+  engine: GraphQueryEngine;
+  intelligence: IntelligenceResult;
+  graphHash: string;
+}) {
   const reducedMotion = usePrefersReducedMotion();
 
-  const initialRoot = useMemo(() => selectInitialRoot(engine), [engine]);
+  const initialRoot = useMemo(() => selectInitialRoot(engine.source), [engine]);
   const [rootId, setRootId] = useState<string | null>(initialRoot.nodeId);
   const [controls, setControls] = useState<GraphControlsState>(DEFAULT_CONTROLS);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -191,7 +206,7 @@ export default function GraphExplorer() {
                 onSelect={handleReroot}
               />
               <p className="text-[11px] text-muted-foreground">
-                Default root selected by policy: {initialRoot.rationale}
+                Default root selected by policy: {initialRoot.explanation}
               </p>
               <GraphControls
                 state={controls}
@@ -246,7 +261,7 @@ export default function GraphExplorer() {
                   </div>
                 </div>
               ) : (
-                <GraphCanvas
+                <TopologyCanvas
                   key={`${view.rootId}:${controls.direction}:${controls.depth}:${fitKey}`}
                   nodes={canvasNodes}
                   edges={canvasEdges}
