@@ -749,16 +749,13 @@ describe("Stage 3.5.3.4 — metrics, resolution and regression detection", () =>
       }),
     ]);
     const simulated = analyzeGraphSnapshot(graph, { lineageSampleLimit: 25 });
-    const regressions = (
-      await Promise.resolve(null),
-      (await import("./SimulationMetrics")).detectRegressions(baseline, simulated, "test")
-    );
+    const regressions = detectRegressions(baseline, simulated, "test");
     expect(regressions.some((r) => r.kind === "removed-required-evidence")).toBe(true);
   });
 
   it("34. never marks a recommendation resolved when its condition survives", () => {
     const baseline = analyzeGraphSnapshot(fixture, { lineageSampleLimit: 25 });
-    const resolutions = (await import("./SimulationMetrics")).classifyResolutions(baseline, baseline);
+    const resolutions = classifyResolutions(baseline, baseline);
     expect(resolutions.every((r) => r.classification === "unresolved")).toBe(true);
   });
 });
