@@ -128,11 +128,19 @@ interface CanvasProps {
   selectedNodeId?: string;
   highlightNodeIds?: ReadonlySet<string>;
   highlightEdgeIds?: ReadonlySet<string>;
+  /**
+   * Animate highlighted edges. Defaults to true for existing RunOps consumers;
+   * surfaces that must honour reduced-motion preferences pass false.
+   */
+  animateHighlights?: boolean;
+  /** Edges rendered with a selected treatment (static, never animated). */
+  selectedEdgeIds?: ReadonlySet<string>;
 }
 
 function Canvas({
   nodes, edges, height = 320, className, ariaLabel, mode,
   onNodeClick, onEdgeClick, selectedNodeId, highlightNodeIds, highlightEdgeIds,
+  animateHighlights = true, selectedEdgeIds,
 }: CanvasProps & { mode: "workflow" | "topology" | "causal" }) {
   const rfNodes = toRFNodes(nodes, mode).map((n) => {
     const isSelected = n.id === selectedNodeId;
@@ -149,12 +157,18 @@ function Canvas({
   });
   const rfEdges = toRFEdges(edges).map((e) => {
     const isHi = highlightEdgeIds?.has(e.id) ?? false;
+    const isSel = selectedEdgeIds?.has(e.id) ?? false;
     return {
       ...e,
-      animated: isHi,
-      style: { ...(e.style ?? {}), stroke: isHi ? "#4f46e5" : undefined, strokeWidth: isHi ? 2 : undefined },
+      animated: isHi && animateHighlights,
+      style: {
+        ...(e.style ?? {}),
+        stroke: isSel ? "#0f172a" : isHi ? "#4f46e5" : undefined,
+        strokeWidth: isSel ? 3 : isHi ? 2 : undefined,
+      },
     };
   });
+
   return (
     <div
       className={cn("rounded border border-slate-200 bg-white", className)}

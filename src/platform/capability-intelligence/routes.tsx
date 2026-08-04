@@ -17,6 +17,8 @@ const CapabilityIntelligenceLayout = lazy(() => import("./CapabilityIntelligence
 const CapabilityOverview = lazy(() => import("./pages/CapabilityOverview"));
 const CapabilityExplorer = lazy(() => import("./pages/CapabilityExplorer"));
 const RecommendationCenter = lazy(() => import("./pages/RecommendationCenter"));
+const GraphExplorer = lazy(() => import("./pages/GraphExplorer"));
+
 
 /** Path segment of the route group, relative to `/platform`. */
 export const CAPABILITY_INTELLIGENCE_PATH = "capability-intelligence";
@@ -36,5 +38,7 @@ export const capabilityIntelligenceRoutes = (
     <Route index element={<CapabilityOverview />} />
     <Route path="explorer" element={<CapabilityExplorer />} />
     <Route path="recommendations" element={<RecommendationCenter />} />
+    <Route path="graph" element={<GraphExplorer />} />
+
   </Route>
 );
