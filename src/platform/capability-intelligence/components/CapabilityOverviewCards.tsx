@@ -42,12 +42,13 @@ export function CapabilityOverviewCards({
         <h2 id="graph-scale" className="mb-2 text-sm font-semibold text-foreground">
           Graph scale
         </h2>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
           <Kpi label="Nodes" value={graph.nodeCount} />
           <Kpi label="Edges" value={graph.edgeCount} />
           <Kpi label="Candidate edges" value={graph.candidateEdgeCount} hint="Weakly inferred" />
           <Kpi label="Node types" value={Object.keys(statistics.nodesByType).length} />
-          <Kpi label="Unregistered nodes" value={statistics.unregisteredNodeCount ?? 0} />
+          <Kpi label="Unregistered nodes" value={statistics.totals.unregisteredNodes} />
+          <Kpi label="Orphan nodes" value={statistics.totals.orphanNodes} />
         </div>
       </section>
 
