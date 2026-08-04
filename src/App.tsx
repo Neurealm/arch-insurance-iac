@@ -117,7 +117,7 @@ import CommercialNeurealmGovernance from "./commercial/pages/CommercialNeurealmG
 
 
 
-import { PermissionRoute } from "./components/auth/PermissionRoute";
+import { PermissionRoute, PlatformAdminRoute } from "./components/auth/PermissionRoute";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
 import CyberMasterDashboard from "./pages/practice-library/dashboards/cyber/CyberMasterDashboard.tsx";
@@ -888,7 +888,7 @@ const App = () => (
             <Route path="profile" element={<PlatformProfile />} />
             <Route path="test-hub" element={<PlatformTestHub />} />
             <Route path="modules" element={<PlatformModuleRegistry />} />
-            <Route path="capability-intelligence" element={<CapabilityIntelligenceLayout />}>
+            <Route path="capability-intelligence" element={<PlatformAdminRoute><CapabilityIntelligenceLayout /></PlatformAdminRoute>}>
               <Route index element={<CapabilityOverview />} />
               <Route path="explorer" element={<CapabilityExplorer />} />
               <Route path="recommendations" element={<RecommendationCenter />} />

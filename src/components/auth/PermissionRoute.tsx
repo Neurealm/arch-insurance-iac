@@ -29,3 +29,25 @@ function PermissionGate({ permission, children }: { permission: string; children
   if (!hasPermission(permission)) return <ForbiddenState permission={permission} />;
   return children;
 }
+
+/**
+ * Route guard for Platform-administrator-only route groups. Reuses the same
+ * authorization source (`AccessContext`) and forbidden experience as
+ * `PermissionRoute`; there is no second authorization system. Applied to a
+ * parent route element it guards every nested child route as well.
+ */
+export function PlatformAdminRoute({ children }: { children: JSX.Element }) {
+  return (
+    <ProtectedRoute>
+      <PlatformAdminGate>{children}</PlatformAdminGate>
+    </ProtectedRoute>
+  );
+}
+
+export function PlatformAdminGate({ children }: { children: JSX.Element }) {
+  const { loading, isPlatformAdmin } = useAccess();
+  if (loading) return <LoadingState label="Checking access…" />;
+  if (!isPlatformAdmin) return <ForbiddenState permission="platform.admin" />;
+  return children;
+}
+

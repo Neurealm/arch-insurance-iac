@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { EmptyState } from "@/platform/components/States";
 import { StatusBadge } from "@/platform/components/StatusBadge";
+import { PRIORITY_HELP, SEVERITY_HELP, confidenceLabel, statusLabel } from "../presentation";
 import {
   PRIORITY_BANDS,
   RECOMMENDATION_CATEGORIES,
@@ -15,6 +16,7 @@ import {
 const ANY = "__any__";
 const SEVERITIES = ["critical", "warning", "advisory", "info"] as const;
 const CONFIDENCES = ["high", "medium", "low", "unable-to-verify"] as const;
+const STATUSES = ["open", "expected-by-design", "informational", "consolidated"] as const;
 
 /** Single advisory recommendation. Read-only: no approve, edit or execute. */
 export function RecommendationCard({
@@ -29,13 +31,28 @@ export function RecommendationCard({
     <Card data-testid="recommendation-card">
       <CardHeader className="pb-2">
         <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge value={r.priority} />
-          <StatusBadge value={r.severity} />
-          <StatusBadge value={r.category} tone="info" />
-          <StatusBadge value={`confidence: ${r.confidence}`} tone="neutral" />
-          <span className="ml-auto font-mono text-[11px] text-muted-foreground">
-            {r.policyId} · score {r.priorityScore}
+          <span title={PRIORITY_HELP} data-testid="recommendation-priority" data-priority={r.priority}>
+            <StatusBadge value={r.priority} label={`Priority: ${r.priority}`} />
           </span>
+          <span title={SEVERITY_HELP} data-testid="recommendation-severity" data-severity={r.severity}>
+            <StatusBadge value={r.severity} label={`Severity: ${r.severity}`} />
+          </span>
+          <span data-testid="recommendation-status" data-status={r.status}>
+            <StatusBadge value={r.status} label={`Status: ${statusLabel(r.status)}`} />
+          </span>
+          <StatusBadge value={r.category} tone="info" label={`Category: ${r.category}`} />
+          <StatusBadge value={r.confidence} tone="neutral" label={`Confidence: ${confidenceLabel(r.confidence)}`} />
+          {r.expectedByDesign && (
+            <span data-testid="expected-by-design">
+              <StatusBadge value="expected-by-design" label="Expected by design" />
+            </span>
+          )}
+          <span className="ml-auto font-mono text-[11px] text-muted-foreground" data-testid="recommendation-id">
+            {r.id}
+          </span>
+        </div>
+        <div className="font-mono text-[11px] text-muted-foreground">
+          {r.policyId} · score {r.priorityScore}
         </div>
         <CardTitle className="pt-1 text-sm">{r.title}</CardTitle>
       </CardHeader>
@@ -113,6 +130,7 @@ export function RecommendationList({
   const [category, setCategory] = useState<string>(ANY);
   const [severity, setSeverity] = useState<string>(ANY);
   const [confidence, setConfidence] = useState<string>(ANY);
+  const [status, setStatus] = useState<string>(ANY);
   const [limit, setLimit] = useState(20);
 
   const filtered = useMemo(() => {
@@ -123,17 +141,18 @@ export function RecommendationList({
         (category === ANY || r.category === category) &&
         (severity === ANY || r.severity === severity) &&
         (confidence === ANY || r.confidence === confidence) &&
+        (status === ANY || r.status === status) &&
         (!q ||
           r.title.toLowerCase().includes(q) ||
           r.summary.toLowerCase().includes(q) ||
           r.subject.toLowerCase().includes(q) ||
           r.policyId.toLowerCase().includes(q)),
     );
-  }, [recommendations, text, priority, category, severity, confidence]);
+  }, [recommendations, text, priority, category, severity, confidence, status]);
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-2 md:grid-cols-5">
+      <div className="grid gap-2 md:grid-cols-6">
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -144,9 +163,19 @@ export function RecommendationList({
         <Pick label="Category" value={category} onChange={setCategory} options={[...RECOMMENDATION_CATEGORIES]} />
         <Pick label="Severity" value={severity} onChange={setSeverity} options={[...SEVERITIES]} />
         <Pick label="Confidence" value={confidence} onChange={setConfidence} options={[...CONFIDENCES]} />
+        <Pick label="Status" value={status} onChange={setStatus} options={[...STATUSES]} />
       </div>
 
-      <div className="text-xs text-muted-foreground" data-testid="recommendation-count">
+      <p className="text-[11px] text-muted-foreground">
+        {PRIORITY_HELP} {SEVERITY_HELP}
+      </p>
+
+      <div
+        className="text-xs text-muted-foreground"
+        data-testid="recommendation-count"
+        role="status"
+        aria-live="polite"
+      >
         {filtered.length} of {recommendations.length} recommendations
       </div>
 
