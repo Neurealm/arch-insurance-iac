@@ -225,7 +225,52 @@ function SimulationOutcome({ result }: { result: SimulationResult }) {
   );
 }
 
+/** Canonical resolution classifications, in the engine's own vocabulary. */
+const RESOLUTION_CLASSIFICATIONS = [
+  ["resolved", "Resolved"],
+  ["partially-resolved", "Partially resolved"],
+  ["unresolved", "Unresolved"],
+  ["superseded", "Superseded"],
+  ["invalidated", "Invalidated"],
+  ["regressed", "Regressed"],
+] as const;
+
+/**
+ * Every classification the engine can emit, grouped from all three result
+ * buckets. A classification with no members is stated explicitly rather than
+ * silently omitted, so an operator can tell "none" from "not reported".
+ */
+function ResolutionByClassification({ result }: { result: SimulationResult }) {
+  const all = [
+    ...result.resolvedRecommendations,
+    ...result.partiallyResolvedRecommendations,
+    ...result.unresolvedRecommendations,
+  ];
+  return (
+    <div className="space-y-2" data-testid="resolution-classifications">
+      {RESOLUTION_CLASSIFICATIONS.map(([classification, title]) => {
+        const items = all.filter((r) => r.classification === classification);
+        return items.length === 0 ? (
+          <div
+            key={classification}
+            className="text-xs text-muted-foreground"
+            data-classification={classification}
+            data-count={0}
+          >
+            {title}: none
+          </div>
+        ) : (
+          <div key={classification} data-classification={classification} data-count={items.length}>
+            <ResolutionGroup title={title} items={items} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function ResolutionGroup({
+
   title,
   items,
 }: {
