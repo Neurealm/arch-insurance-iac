@@ -136,7 +136,63 @@ describe("Capability Intelligence — overview", () => {
     expect(screen.getByTestId("kpi-Analysis confidence").textContent).toBe(confidenceLabel(intelligence.confidence));
     expect(screen.getByTestId("confidence-raw").textContent).toContain(intelligence.confidence);
   });
+
+  /* ------------------------------------ Stage 3.5.4.1.2 — KPI semantics */
+
+  it("emits a valid description-list group per KPI with the term before its value", () => {
+    const { container } = renderOverview();
+    const groups = container.querySelectorAll("dl > div");
+    expect(groups.length).toBeGreaterThan(0);
+    for (const group of Array.from(groups)) {
+      const children = Array.from(group.children);
+      const dtIndex = children.findIndex((c) => c.tagName === "DT");
+      const ddIndex = children.findIndex((c) => c.tagName === "DD");
+      expect(dtIndex).toBeGreaterThanOrEqual(0);
+      expect(ddIndex).toBeGreaterThanOrEqual(0);
+      // Term must precede its definition in the accessibility tree.
+      expect(dtIndex).toBeLessThan(ddIndex);
+      // Exactly one definition value per term — supporting context is not a <dd>.
+      expect(group.querySelectorAll("dd").length).toBe(1);
+      expect(group.querySelectorAll("dt").length).toBe(1);
+    }
+  });
+
+  it("associates supporting context with the metric via aria-describedby, not a second dd", () => {
+    const { container } = renderOverview();
+    const value = screen.getByTestId("kpi-Candidate edges");
+    const describedBy = value.getAttribute("aria-describedby");
+    expect(describedBy).toBeTruthy();
+    const hint = container.querySelector(`#${CSS.escape(describedBy as string)}`);
+    expect(hint?.tagName).toBe("P");
+    expect(hint?.textContent).toBe("Weakly inferred relationships");
+    const term = value.previousElementSibling;
+    expect(term?.tagName).toBe("DT");
+    expect(term?.textContent).toBe("Candidate edges");
+  });
+
+  it("keeps every dl a direct term/value container (no stray dd outside a group)", () => {
+    const { container } = renderOverview();
+    for (const dd of Array.from(container.querySelectorAll("dd"))) {
+      expect(dd.parentElement?.parentElement?.tagName).toBe("DL");
+    }
+  });
+
+  /* --------------------------- Stage 3.5.4.1.2 — responsive grid balance */
+
+  it("balances the eight-tile recommendation summary across breakpoints", () => {
+    const { container } = renderOverview();
+    const section = container.querySelector('section[aria-labelledby="recommendation-summary"]');
+    const grid = section?.querySelector("dl");
+    expect(grid?.querySelectorAll("dl > div").length ?? section?.querySelectorAll("dl > div").length).toBe(8);
+    const cls = grid?.className ?? "";
+    expect(cls).toContain("grid-cols-2");
+    expect(cls).toContain("md:grid-cols-4");
+    expect(cls).toContain("2xl:grid-cols-8");
+    // Six-column layout produced two orphan tiles on the second row.
+    expect(cls).not.toContain("md:grid-cols-6");
+  });
 });
+
 
 describe("Capability Intelligence — explorer", () => {
   const renderExplorer = () => {

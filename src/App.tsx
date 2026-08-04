@@ -81,10 +81,8 @@ import AcceptInvitation from "./platform/pages/AcceptInvitation";
 import PlatformProfile from "./platform/pages/Profile";
 import PlatformTestHub from "./platform/pages/TestHub";
 const PlatformModuleRegistry = lazy(() => import("./platform/pages/ModuleRegistryDiagnostics"));
-const CapabilityIntelligenceLayout = lazy(() => import("./platform/capability-intelligence/CapabilityIntelligenceLayout"));
-const CapabilityOverview = lazy(() => import("./platform/capability-intelligence/pages/CapabilityOverview"));
-const CapabilityExplorer = lazy(() => import("./platform/capability-intelligence/pages/CapabilityExplorer"));
-const RecommendationCenter = lazy(() => import("./platform/capability-intelligence/pages/RecommendationCenter"));
+import { capabilityIntelligenceRoutes } from "./platform/capability-intelligence/routes";
+
 import CaeNarrativeLibrary from "./platform/cae/admin/NarrativeLibrary";
 import CaeNarrativeDetail from "./platform/cae/admin/NarrativeDetail";
 import CaeNarrativeEditor from "./platform/cae/admin/NarrativeEditor";
@@ -888,11 +886,8 @@ const App = () => (
             <Route path="profile" element={<PlatformProfile />} />
             <Route path="test-hub" element={<PlatformTestHub />} />
             <Route path="modules" element={<PlatformModuleRegistry />} />
-            <Route path="capability-intelligence" element={<PlatformAdminRoute><CapabilityIntelligenceLayout /></PlatformAdminRoute>}>
-              <Route index element={<CapabilityOverview />} />
-              <Route path="explorer" element={<CapabilityExplorer />} />
-              <Route path="recommendations" element={<RecommendationCenter />} />
-            </Route>
+            {capabilityIntelligenceRoutes}
+
             <Route path="audio" element={<PermissionRoute permission="audio.view"><CaeNarrativeLibrary /></PermissionRoute>} />
             <Route path="audio/narratives/new" element={<PermissionRoute permission="audio.narrative.author"><CaeNarrativeEditor /></PermissionRoute>} />
             <Route path="audio/narratives/:narrativeId" element={<PermissionRoute permission="audio.view"><CaeNarrativeDetail /></PermissionRoute>} />

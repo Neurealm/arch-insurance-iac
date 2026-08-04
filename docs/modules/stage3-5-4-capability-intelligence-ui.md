@@ -10,6 +10,8 @@ and never triggers remediation.
 | --- | --- |
 | 3.5.4.1 | Initial application foundation: provider, Overview, Explorer, Recommendation Center, Entity Drawer, shared `PagedDataTable` and `StatusBadge` |
 | 3.5.4.1.1 | Foundation hardening: route authorization, priority-band correction, metric precision and context, registration-coverage framing, humanized confidence, recommendation identity/status, Explorer terminology and orphan visibility, table and KPI accessibility, application-level test coverage |
+| 3.5.4.1.2 | Final semantic and integration hardening: valid `dt`→`dd` KPI markup, integration tests against the real `App.tsx` route element, provider lifecycle across actual child-route navigation, balanced eight-tile recommendation-summary grid |
+
 
 ## Location
 
@@ -29,8 +31,14 @@ and never triggers remediation.
 ## Route authorization
 
 The complete route group is guarded by `PlatformAdminRoute` (exported from
-`src/components/auth/PermissionRoute.tsx`), applied to the parent route element in
-`src/App.tsx`, so every current and future nested route inherits it.
+`src/components/auth/PermissionRoute.tsx`). Since Stage 3.5.4.1.2 the group is defined
+once, in `src/platform/capability-intelligence/routes.tsx`, and exported as
+`capabilityIntelligenceRoutes`; `src/App.tsx` renders that element inside the existing
+`/platform` shell. Lazy loading, paths and the Platform layout are unchanged — the
+extraction exists so tests exercise the authoritative wiring instead of a copy that
+could drift. Every current and future nested route inherits the guard.
+
+
 
 - Authentication is delegated to the existing `ProtectedRoute`.
 - Authorization reads `isPlatformAdmin` from `AccessContext` — the same source that
@@ -121,9 +129,16 @@ graph. Orphan state appears as a "Connectivity" column, a "Connectivity" filter
 
 ## Accessibility decisions
 
-- KPI tiles are description-list pairs (`dl`/`dt`/`dd`) with explicit
-  `aria-labelledby` and `aria-describedby`, so a screen reader associates each figure
-  with its label and supporting hint.
+- KPI tiles are description-list groups: each `dl > div` contains exactly one `<dt>`
+  (label) followed by one `<dd>` (value), with supporting context as a `<p>` linked from
+  the value through `aria-describedby`. Visual order (figure above caption) is restored
+  with flex `order-*` utilities, so the accessibility tree stays valid without ARIA
+  patches on `<dd>`. Zero, "Not available" and "Unable to verify" states still render
+  distinctly, and `data-testid="kpi-<label>"` identifiers are unchanged.
+- The recommendation summary renders eight tiles as `grid-cols-2 md:grid-cols-4
+  2xl:grid-cols-8` — full rows at every breakpoint and no narrow cards between 768 and
+  1024 px. Other KPI grids keep their six- and four-column layouts.
+
 - Sortable table headers expose `aria-sort`; result counts announce politely.
 - Recommendation result counts also announce politely.
 
@@ -147,7 +162,9 @@ placeholder or mocked data is used anywhere in the UI.
 | --- | --- |
 | `capabilityIntelligence.test.tsx` | Analysis determinism, card provenance, filtering without source mutation, read-only query access |
 | `capabilityIntelligenceRouting.test.tsx` | Authorized access, unauthorized direct-URL block, child-route inheritance, forbidden component reuse, loading state, navigation/authorization consistency |
-| `capabilityIntelligenceApp.test.tsx` | Provider single-compute lifecycle, Overview data contracts and priority bands, precision and unavailable-state handling, registration framing, confidence labelling, Explorer filtering/paging/clamping/terminology/orphans/`aria-sort`, recommendation identity and status, expected-by-design distinction, drawer behaviour, orphan-definition parity |
+| `capabilityIntelligenceApp.test.tsx` | Provider single-compute lifecycle, Overview data contracts and priority bands, precision and unavailable-state handling, registration framing, confidence labelling, KPI semantic order (`dt` before `dd`, single `dd` per group, `aria-describedby` hint), recommendation-summary grid contract, Explorer filtering/paging/clamping/terminology/orphans/`aria-sort`, recommendation identity and status, expected-by-design distinction, drawer behaviour, orphan-definition parity |
+| `capabilityIntelligenceRouteIntegration.test.tsx` | Mounts the real `capabilityIntelligenceRoutes` element from `routes.tsx` (the same element `App.tsx` renders): unauthorized block on parent and both child routes, authorized entry, and provider lifecycle across actual link navigation Overview → Explorer → Recommendations → Overview with `analyzeGraph()` executing exactly once and hash `e889b604` stable |
+
 
 Validation commands:
 
