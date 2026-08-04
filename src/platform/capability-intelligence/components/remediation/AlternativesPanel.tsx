@@ -33,11 +33,14 @@ export function AlternativesPanel({
   alternatives,
   comparison,
   busy,
+  stale,
   onCompare,
 }: {
   alternatives: readonly ChangeProposal[];
   comparison: AlternativeComparison | null;
   busy: boolean;
+  /** Inputs changed after this comparison ran. */
+  stale?: boolean;
   onCompare: () => void;
 }) {
   if (alternatives.length <= 1) {
@@ -55,9 +58,13 @@ export function AlternativesPanel({
         <Button onClick={onCompare} disabled={busy} data-testid="compare-alternatives">
           {busy ? "Comparing…" : comparison ? "Re-compare alternatives" : `Compare ${alternatives.length} alternatives`}
         </Button>
+        {stale && comparison && (
+          <StatusBadge value="stale" tone="warning" label="Inputs changed — re-compare to refresh" />
+        )}
         <p className="text-xs text-muted-foreground">
           Each alternative is simulated on its own isolated overlay.
         </p>
+
       </div>
 
       {comparison && !busy && (
