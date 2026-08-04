@@ -24,12 +24,15 @@ export function ChangePlanPanel({
   drift,
   canBuild,
   busy,
+  stale,
   onBuild,
 }: {
   plan: ChangePlan | null;
   drift: DriftReport | null;
   canBuild: boolean;
   busy: boolean;
+  /** Inputs changed after this plan was generated. */
+  stale?: boolean;
   onBuild: () => void;
 }) {
   return (
@@ -41,12 +44,21 @@ export function ChangePlanPanel({
         {!canBuild && (
           <p className="text-xs text-muted-foreground">Run a simulation first: plans are built from a simulation result.</p>
         )}
+        {stale && plan && (
+          <StatusBadge value="stale" tone="warning" label="Inputs changed — rebuild to refresh" />
+        )}
       </div>
+
+      <p className="text-xs text-muted-foreground">
+        This is a specification only. There is no approve, execute or apply action anywhere in this
+        workspace, and no patch is ever written to the repository.
+      </p>
 
       {plan && !busy && <PlanBody plan={plan} drift={drift} />}
     </div>
   );
 }
+
 
 function PlanBody({ plan, drift }: { plan: ChangePlan; drift: DriftReport | null }) {
   return (
