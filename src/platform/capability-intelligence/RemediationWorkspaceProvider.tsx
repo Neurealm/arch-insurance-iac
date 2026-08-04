@@ -225,11 +225,15 @@ export function RemediationWorkspaceProvider({
     (kind: NonNullable<RemediationWorkspaceValue["busy"]>, work: () => void) => {
       setBusy(kind);
       setError(null);
+      setFailedAction(null);
       const handle = setTimeout(() => {
         try {
           work();
         } catch (err) {
-          if (mounted.current) setError(err);
+          if (!mounted.current) return;
+          setError(err);
+          setFailedAction(kind);
+          setAnnouncement(`${kind} failed. ${err instanceof Error ? err.message : "Unknown error"}`);
         } finally {
           if (mounted.current) setBusy(null);
         }
@@ -238,6 +242,7 @@ export function RemediationWorkspaceProvider({
     },
     [],
   );
+
 
   const canonicalGraphHash = useMemo(() => getRemediationEngines().simulation.canonicalGraphHash, []);
 
