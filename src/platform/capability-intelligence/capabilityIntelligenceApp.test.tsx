@@ -38,6 +38,13 @@ const intelligence = getIntelligenceEngine().analyzeGraph();
 const statistics = graphStatistics();
 const orphanIds = buildOrphanIndex(engine.source);
 
+/**
+ * Stage 3.5.4.2 — the explorer table, drawer and recommendation cards now
+ * expose router links ("Explore relationships"), so they must render inside a
+ * router context.
+ */
+const renderRouted = (ui: React.ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>);
+
 const renderOverview = () =>
   render(
     <CapabilityOverviewCards
@@ -72,11 +79,7 @@ describe("Capability Intelligence — provider lifecycle", () => {
   it("keeps the compute count stable across explorer filtering, paging and drawer use", async () => {
     const before = __capabilityIntelligenceComputeCount();
     const user = userEvent.setup();
-    render(
-      <MemoryRouter>
-        <CapabilityExplorerTable engine={engine} onSelect={() => {}} />
-      </MemoryRouter>,
-    );
+    renderRouted(<CapabilityExplorerTable engine={engine} onSelect={() => {}} />);
     await user.type(screen.getByLabelText("Search entities"), "platform");
     await user.click(screen.getByLabelText("Next page"));
     expect(__capabilityIntelligenceComputeCount()).toBe(before);
@@ -197,7 +200,7 @@ describe("Capability Intelligence — overview", () => {
 describe("Capability Intelligence — explorer", () => {
   const renderExplorer = () => {
     const selected: string[] = [];
-    render(<CapabilityExplorerTable engine={engine} onSelect={(id) => selected.push(id)} />);
+    renderRouted(<CapabilityExplorerTable engine={engine} onSelect={(id) => selected.push(id)} />);
     return selected;
   };
 
@@ -268,7 +271,7 @@ describe("Capability Intelligence — recommendation center", () => {
   const sample = intelligence.recommendations.slice(0, 12);
 
   it("renders identifiers, statuses, priority and severity from the engine", () => {
-    render(<RecommendationList recommendations={sample} />);
+    renderRouted(<RecommendationList recommendations={sample} />);
     const cards = screen.getAllByTestId("recommendation-card");
     cards.forEach((card, i) => {
       const r = sample[i];
@@ -284,17 +287,17 @@ describe("Capability Intelligence — recommendation center", () => {
     const expected = intelligence.recommendations.filter((r) => r.expectedByDesign).slice(0, 3);
     const open = intelligence.recommendations.filter((r) => !r.expectedByDesign).slice(0, 3);
     if (expected.length) {
-      render(<RecommendationList recommendations={expected} />);
+      renderRouted(<RecommendationList recommendations={expected} />);
       expect(screen.getAllByTestId("expected-by-design").length).toBe(expected.length);
     }
-    const view = render(<RecommendationList recommendations={open} />);
+    const view = renderRouted(<RecommendationList recommendations={open} />);
     expect(within(view.container as HTMLElement).queryAllByTestId("expected-by-design").length).toBe(0);
   });
 
   it("filters by priority and category without mutating the source array", async () => {
     const user = userEvent.setup();
     const before = [...intelligence.recommendations.map((r) => r.id)];
-    render(<RecommendationList recommendations={intelligence.recommendations} />);
+    renderRouted(<RecommendationList recommendations={intelligence.recommendations} />);
     await user.click(screen.getByLabelText("Priority"));
     await user.click(await screen.findByRole("option", { name: "critical" }));
     const criticalCount = intelligence.recommendations.filter((r) => r.priority === "critical").length;
@@ -308,7 +311,7 @@ describe("Capability Intelligence — entity drawer", () => {
   const connectedId = engine.source.nodes.find((n) => !orphanIds.has(n.id))!.id;
 
   it("opens for a selected entity and renders canonical data", () => {
-    render(
+    renderRouted(
       <EntityDrawer nodeId={connectedId} engine={engine} intelligence={intelligence} onOpenChange={() => {}} />,
     );
     const node = engine.getNode(connectedId)!;
@@ -318,13 +321,13 @@ describe("Capability Intelligence — entity drawer", () => {
   });
 
   it("marks orphan entities in the drawer", () => {
-    render(<EntityDrawer nodeId={orphanId} engine={engine} intelligence={intelligence} onOpenChange={() => {}} />);
+    renderRouted(<EntityDrawer nodeId={orphanId} engine={engine} intelligence={intelligence} onOpenChange={() => {}} />);
     expect(screen.getByTestId("entity-connectivity").textContent).toContain("Orphan");
   });
 
   it("does not recompute the intelligence snapshot when opened", () => {
     const before = __capabilityIntelligenceComputeCount();
-    render(<EntityDrawer nodeId={connectedId} engine={engine} intelligence={intelligence} onOpenChange={() => {}} />);
+    renderRouted(<EntityDrawer nodeId={connectedId} engine={engine} intelligence={intelligence} onOpenChange={() => {}} />);
     expect(__capabilityIntelligenceComputeCount()).toBe(before);
   });
 });
