@@ -82,7 +82,9 @@ export function RecommendationCard({
                 <div className="text-xs font-semibold text-foreground">Supporting evidence</div>
                 <ul className="list-disc space-y-0.5 pl-5 text-xs text-muted-foreground">
                   {r.evidence.slice(0, 10).map((e, i) => (
-                    <li key={`${r.id}-ev-${i}`}>{typeof e === "string" ? e : e.detail ?? JSON.stringify(e)}</li>
+                    <li key={`${r.id}-ev-${i}`}>
+                      <span className="font-mono">{e.subject}</span> — {e.statement}
+                    </li>
                   ))}
                 </ul>
               </div>
