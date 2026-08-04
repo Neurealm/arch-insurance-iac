@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { getQueryEngine } from "@/modules/graph/query/index";
@@ -16,7 +17,7 @@ describe("Capability Intelligence UI", () => {
   });
 
   it("renders every recommendation card with priority and policy provenance", () => {
-    render(<RecommendationList recommendations={intelligence.recommendations.slice(0, 5)} />);
+    render(<MemoryRouter><RecommendationList recommendations={intelligence.recommendations.slice(0, 5)} /></MemoryRouter>);
     const cards = screen.getAllByTestId("recommendation-card");
     expect(cards.length).toBe(Math.min(5, intelligence.recommendations.length));
     for (const card of cards) {
@@ -27,7 +28,7 @@ describe("Capability Intelligence UI", () => {
   it("filters recommendations by free-text search without mutating source data", async () => {
     const user = userEvent.setup();
     const before = intelligence.recommendations.length;
-    render(<RecommendationList recommendations={intelligence.recommendations} />);
+    render(<MemoryRouter><RecommendationList recommendations={intelligence.recommendations} /></MemoryRouter>);
     await user.type(screen.getByLabelText("Search recommendations"), "zzz-no-match-zzz");
     expect(screen.getByTestId("recommendation-count").textContent).toContain(`0 of ${before}`);
     expect(intelligence.recommendations.length).toBe(before);
