@@ -13,7 +13,7 @@ import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
 import { Suspense, useEffect } from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
+import { BrowserRouter, MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
 
 const auth = {
   user: { id: "u1" },
@@ -87,6 +87,22 @@ beforeAll(() => {
 beforeEach(() => {
   canvas.mounts = 0;
 });
+
+/** Real browser history, so back and forward behave as they do in the app. */
+function renderGraphWithBrowserHistory(entry: string) {
+  window.history.replaceState(null, "", entry);
+  return render(
+    <BrowserRouter>
+      <Suspense fallback={<span>route-loading</span>}>
+        <Routes>
+          <Route path="/platform" element={<Outlet />}>
+            {capabilityIntelligenceRoutes}
+          </Route>
+        </Routes>
+      </Suspense>
+    </BrowserRouter>,
+  );
+}
 
 function renderGraph(initialEntries: string[]) {
   return render(
@@ -310,7 +326,7 @@ describe("Stage 3.5.4.2.1 — re-root contract", () => {
 describe("Stage 3.5.4.2.1 — browser history", () => {
   it("moves back and forward through explored roots", async () => {
     __resetCapabilityIntelligenceCache();
-    renderGraph([graphPath]);
+    renderGraphWithBrowserHistory(graphPath);
     await waitForGraph();
     const computeCount = __capabilityIntelligenceComputeCount();
 
