@@ -9,7 +9,7 @@
 
 import type { CapabilityGraph, GraphNode } from "../types";
 import type { ReasoningConfidence, ReasoningEvidence } from "../reasoning/index";
-import { getModules } from "../registry";
+import { getModules } from "../../registry";
 import { getCapabilityGraph } from "../build";
 import {
   createSimulationEngine,
