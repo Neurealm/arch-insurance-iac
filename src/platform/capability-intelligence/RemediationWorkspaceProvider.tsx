@@ -134,15 +134,32 @@ export interface RemediationWorkspaceValue {
   plan: ChangePlan | null;
   /** Drift of the built plan against the current canonical graph. */
   drift: DriftReport | null;
+  /**
+   * True when the inputs changed after a result was produced. The result is
+   * kept on screen — the engine is never rerun implicitly — but the operator
+   * is told it no longer describes the current selection.
+   */
+  simulationStale: boolean;
+  comparisonStale: boolean;
+  planStale: boolean;
 
   busy: null | "proposals" | "simulation" | "alternatives" | "plan";
   error: unknown;
+  /** The action that failed, so the UI can offer a scoped retry. */
+  failedAction: null | "proposals" | "simulation" | "alternatives" | "plan";
+  retry: () => void;
   /** Canonical graph hash observed by the engines. Never changes. */
   canonicalGraphHash: string;
+  /** How the current recommendation was chosen. */
+  selectionSource: RecommendationSelection["source"];
+  /** Set when the URL named a recommendation that does not exist. */
+  unknownRecommendationParam: string | null;
   /** Per-stage availability used to drive the progressive disclosure UI. */
   stageStates: Readonly<Record<RemediationStage, StageState>>;
   /** Furthest stage the operator may open. */
   activeStage: RemediationStage;
+  /** Politely announced workspace events (simulation complete, failures…). */
+  announcement: string;
 
   selectRecommendation: (recommendation: IntelligenceRecommendation | null) => void;
   selectProposal: (proposalId: string) => void;
@@ -158,8 +175,27 @@ const Ctx = createContext<RemediationWorkspaceValue | null>(null);
 
 /* -------------------------------------------------------------- provider */
 
-export function RemediationWorkspaceProvider({ children }: { children: ReactNode }) {
-  const [recommendation, setRecommendation] = useState<IntelligenceRecommendation | null>(null);
+export function RemediationWorkspaceProvider({
+  recommendations = [],
+  children,
+}: {
+  /** Canonical recommendation set from the Capability Intelligence provider. */
+  recommendations?: readonly IntelligenceRecommendation[];
+  children: ReactNode;
+}) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawParam = searchParams.get(RECOMMENDATION_PARAM);
+
+  // The selection is derived from the URL, never mirrored into state, so
+  // refresh, Back and Forward all resolve through exactly the same policy.
+  const selection = useMemo(
+    () => resolveRecommendationSelection(recommendations, rawParam),
+    [recommendations, rawParam],
+  );
+  const recommendation = selection.recommendation;
+  const unknownRecommendationParam =
+    selection.source === "parameter" ? null : selection.unknownParameter;
+
   const [proposals, setProposals] = useState<readonly ChangeProposal[]>([]);
   const [proposalId, setProposalId] = useState<string | null>(null);
   const [bindings, setBindings] = useState<ParameterBinding>({});
@@ -167,9 +203,14 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
   const [comparison, setComparison] = useState<AlternativeComparison | null>(null);
   const [plan, setPlan] = useState<ChangePlan | null>(null);
   const [drift, setDrift] = useState<DriftReport | null>(null);
+  const [stale, setStale] = useState({ simulation: false, comparison: false, plan: false });
   const [conflicts, setConflicts] = useState<readonly ProposalConflict[]>([]);
   const [busy, setBusy] = useState<RemediationWorkspaceValue["busy"]>(null);
   const [error, setError] = useState<unknown>(null);
+  const [failedAction, setFailedAction] =
+    useState<RemediationWorkspaceValue["failedAction"]>(null);
+  const [announcement, setAnnouncement] = useState("");
+
 
   const mounted = useRef(true);
   useEffect(() => {
