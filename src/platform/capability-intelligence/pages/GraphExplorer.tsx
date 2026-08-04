@@ -10,6 +10,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useCapabilityIntelligence } from "../CapabilityIntelligenceProvider";
 import type { GraphQueryEngine } from "@/modules/graph/query/index";
 import type { IntelligenceResult } from "@/modules/graph/intelligence/index";
@@ -27,6 +28,7 @@ import { RootEntityPicker } from "../components/RootEntityPicker";
 import { buildGraphView, neighborsWithinView } from "../graph/graphView";
 import { layoutGraphView } from "../graph/graphLayout";
 import { selectInitialRoot } from "../graph/initialRoot";
+import { GRAPH_ROOT_PARAM } from "../graph/exploreLink";
 import { toCanvasEdges, toCanvasNodes } from "../graph/reactFlowAdapter";
 import {
   DEFAULT_EDGE_TYPES,
@@ -118,7 +120,29 @@ function GraphExplorerScreen({
   const reducedMotion = usePrefersReducedMotion();
 
   const initialRoot = useMemo(() => selectInitialRoot(engine.source), [engine]);
-  const [rootId, setRootId] = useState<string | null>(initialRoot.nodeId);
+  /*
+   * A `?root=` parameter (written by the cross-screen "Explore relationships"
+   * action, or pasted/refreshed directly) wins over the deterministic default.
+   * The parameter is the single source of truth for the root, so browser back
+   * and forward move between explored roots.
+   */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedRoot = searchParams.get(GRAPH_ROOT_PARAM);
+  const rootId = requestedRoot ?? initialRoot.nodeId;
+  const setRootId = useCallback(
+    (next: string | null) => {
+      setSearchParams(
+        (params) => {
+          const nextParams = new URLSearchParams(params);
+          if (next) nextParams.set(GRAPH_ROOT_PARAM, next);
+          else nextParams.delete(GRAPH_ROOT_PARAM);
+          return nextParams;
+        },
+        { replace: false },
+      );
+    },
+    [setSearchParams],
+  );
   const [controls, setControls] = useState<GraphControlsState>(DEFAULT_CONTROLS);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
@@ -167,13 +191,13 @@ function GraphExplorerScreen({
   }, []);
 
   const handleReset = useCallback(() => {
-    setRootId(initialRoot.nodeId);
+    setRootId(null);
     setControls(DEFAULT_CONTROLS);
     setSelectedNodeId(null);
     setSelectedEdgeId(null);
     setDrawerNodeId(null);
     setFitKey((k) => k + 1);
-  }, [initialRoot.nodeId]);
+  }, [setRootId]);
 
   const rootLabel = view.rootNode?.label ?? rootId ?? "Select an entity";
   const canvasLabel = `Capability graph neighbourhood of ${rootLabel}. ${view.nodes.length} entities and ${view.edges.length} relationships, ${DIRECTION_LABELS[controls.direction].toLowerCase()}, depth ${controls.depth}. A text equivalent is available in the graph contents list below.`;
