@@ -26,6 +26,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   getSimulationEngine,
   type AlternativeComparison,
@@ -42,6 +43,14 @@ import {
   type GraphChangePlanEngine,
 } from "@/modules/graph/change-plan/index";
 import type { IntelligenceRecommendation } from "@/modules/graph/intelligence/index";
+import {
+  resolveRecommendationSelection,
+  type RecommendationSelection,
+} from "./remediation/recommendationSelection";
+
+/** URL contract for selecting the recommendation under remediation. */
+export const RECOMMENDATION_PARAM = "recommendation";
+
 
 /* -------------------------------------------------------------- workflow */
 
