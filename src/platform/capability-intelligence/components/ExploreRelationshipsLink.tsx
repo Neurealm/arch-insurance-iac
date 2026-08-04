@@ -17,11 +17,14 @@ export function ExploreRelationshipsLink({
   entityLabel,
   variant = "button",
   className,
+  linkText,
 }: {
   nodeId: string;
   entityLabel?: string;
   variant?: "button" | "inline";
   className?: string;
+  /** Optional visible text override, e.g. "Explore from X, plus 6 …". */
+  linkText?: string;
 }) {
   return (
     <Link
