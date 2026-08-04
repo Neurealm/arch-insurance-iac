@@ -200,6 +200,14 @@ export const presentWarnings = presentGraphWarnings;
  * an empty string when there is nothing to announce; the caller decides whether
  * a transition from "some warnings" to "none" should announce the cleared
  * message. Deduplicated input means one condition is announced once.
+ *
+ * Stage 3.5.4.3 copy correction: two warnings can legitimately be distinct
+ * cards (a node-limit truncation and an edge-limit truncation carry different
+ * subjects and different engine messages) while sharing one reader-facing
+ * clause. Repeating "the view is truncated for safety" twice in a spoken
+ * sentence tells a screen-reader user nothing extra, so identical clauses are
+ * spoken once. Card identity, deduplication and engine warnings are untouched;
+ * the warning count still reflects the number of visible cards.
  */
 export function summarizeGraphWarningsForAnnouncement(
   warnings: readonly PresentedWarning[],
@@ -209,7 +217,11 @@ export function summarizeGraphWarningsForAnnouncement(
   if (warnings.length === 1) {
     return `Graph warning. ${sentence(warnings[0].summary)}`;
   }
-  const clauses = warnings.map((w) => w.summary);
+  // Distinct clauses only, in first-appearance order.
+  const clauses = [...new Set(warnings.map((w) => w.summary))];
+  if (clauses.length === 1) {
+    return `Graph updated with ${warnings.length} warnings. ${sentence(clauses[0])}`;
+  }
   const joined =
     clauses.length === 2
       ? `${clauses[0]} and ${clauses[1]}`
