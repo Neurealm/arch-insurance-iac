@@ -7,6 +7,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { EmptyState } from "@/platform/components/States";
 import { StatusBadge } from "@/platform/components/StatusBadge";
 import { ExploreRelationshipsLink } from "./ExploreRelationshipsLink";
+import {
+  recommendationRootExplanation,
+  selectRecommendationGraphRoot,
+} from "../graph/recommendationRoot";
 import { PRIORITY_HELP, SEVERITY_HELP, confidenceLabel, statusLabel } from "../presentation";
 import {
   PRIORITY_BANDS,
@@ -23,11 +27,20 @@ const STATUSES = ["open", "expected-by-design", "informational", "consolidated"]
 export function RecommendationCard({
   recommendation,
   onSelectEntity,
+  isKnownNode,
+  nodeLabel,
 }: {
   recommendation: IntelligenceRecommendation;
   onSelectEntity?: (nodeId: string) => void;
+  /** Resolves whether an affected id exists in the current graph snapshot. */
+  isKnownNode?: (nodeId: string) => boolean;
+  nodeLabel?: (nodeId: string) => string;
 }) {
   const r = recommendation;
+  const rootSelection = selectRecommendationGraphRoot(
+    { subject: r.subject, nodeIds: r.affected.nodeIds },
+    isKnownNode ?? (() => true),
+  );
   return (
     <Card data-testid="recommendation-card">
       <CardHeader className="pb-2">
@@ -81,7 +94,17 @@ export function RecommendationCard({
             {r.affected.nodeIds.length > 8 && (
               <span className="text-[11px] text-muted-foreground">+{r.affected.nodeIds.length - 8} more</span>
             )}
-            <ExploreRelationshipsLink nodeId={r.affected.nodeIds[0]} entityLabel={r.title} variant="inline" />
+            {rootSelection.rootId && (
+              <ExploreRelationshipsLink
+                nodeId={rootSelection.rootId}
+                entityLabel={nodeLabel?.(rootSelection.rootId) ?? rootSelection.rootId}
+                variant="inline"
+                linkText={recommendationRootExplanation(
+                  rootSelection,
+                  nodeLabel?.(rootSelection.rootId) ?? rootSelection.rootId,
+                )}
+              />
+            )}
           </div>
         )}
         <Accordion type="single" collapsible>
@@ -123,9 +146,13 @@ export function RecommendationCard({
 export function RecommendationList({
   recommendations,
   onSelectEntity,
+  isKnownNode,
+  nodeLabel,
 }: {
   recommendations: readonly IntelligenceRecommendation[];
   onSelectEntity?: (nodeId: string) => void;
+  isKnownNode?: (nodeId: string) => boolean;
+  nodeLabel?: (nodeId: string) => string;
 }) {
   const [text, setText] = useState("");
   const [priority, setPriority] = useState<string>(ANY);
@@ -186,7 +213,13 @@ export function RecommendationList({
       ) : (
         <div className="space-y-3">
           {filtered.slice(0, limit).map((r) => (
-            <RecommendationCard key={r.id} recommendation={r} onSelectEntity={onSelectEntity} />
+            <RecommendationCard
+              key={r.id}
+              recommendation={r}
+              onSelectEntity={onSelectEntity}
+              isKnownNode={isKnownNode}
+              nodeLabel={nodeLabel}
+            />
           ))}
           {filtered.length > limit && (
             <Button variant="outline" size="sm" onClick={() => setLimit((l) => l + 20)}>
