@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { EmptyState } from "@/platform/components/States";
 import { StatusBadge } from "@/platform/components/StatusBadge";
+import { ExploreRelationshipsLink } from "./ExploreRelationshipsLink";
 import { PRIORITY_HELP, SEVERITY_HELP, confidenceLabel, statusLabel } from "../presentation";
 import {
   PRIORITY_BANDS,
@@ -80,6 +81,7 @@ export function RecommendationCard({
             {r.affected.nodeIds.length > 8 && (
               <span className="text-[11px] text-muted-foreground">+{r.affected.nodeIds.length - 8} more</span>
             )}
+            <ExploreRelationshipsLink nodeId={r.affected.nodeIds[0]} entityLabel={r.title} variant="inline" />
           </div>
         )}
         <Accordion type="single" collapsible>

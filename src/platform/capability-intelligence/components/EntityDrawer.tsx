@@ -7,6 +7,7 @@ import { EmptyState } from "@/platform/components/States";
 import type { GraphQueryEngine } from "@/modules/graph/query/index";
 import type { IntelligenceResult } from "@/modules/graph/intelligence/index";
 import { orphanIndexFor } from "../presentation";
+import { ExploreRelationshipsLink } from "./ExploreRelationshipsLink";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -60,6 +61,9 @@ export function EntityDrawer({
             <SheetHeader className="pr-6">
               <SheetTitle className="text-base">{node.label}</SheetTitle>
               <SheetDescription className="font-mono text-[11px]">{node.id}</SheetDescription>
+              <div className="pt-2">
+                <ExploreRelationshipsLink nodeId={node.id} entityLabel={node.label} />
+              </div>
             </SheetHeader>
             <ScrollArea className="mt-4 h-[calc(100dvh-8rem)] pr-4">
               <div className="space-y-5 pb-10">

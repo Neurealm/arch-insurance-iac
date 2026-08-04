@@ -7,6 +7,7 @@ import { PagedDataTable, type PagedColumn } from "@/platform/components/PagedDat
 import { StatusBadge } from "@/platform/components/StatusBadge";
 import { GRAPH_NODE_TYPES, type GraphNode, type GraphNodeType } from "@/modules/graph/types";
 import { orphanIndexFor } from "../presentation";
+import { ExploreRelationshipsLink } from "./ExploreRelationshipsLink";
 import type { GraphQueryEngine, NodeQueryFilters } from "@/modules/graph/query/index";
 
 const ANY = "__any__";
@@ -128,6 +129,11 @@ export function CapabilityExplorerTable({
       render: (n) => <StatusBadge value={registrationOf(n)} />,
     },
     { key: "confidence", header: "Confidence", sortable: true, render: (n) => <StatusBadge value={n.confidence} /> },
+    {
+      key: "actions",
+      header: "Relationships",
+      render: (n) => <ExploreRelationshipsLink nodeId={n.id} entityLabel={n.label} />,
+    },
   ];
 
   const reset = () => {
