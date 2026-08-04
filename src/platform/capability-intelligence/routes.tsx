@@ -18,6 +18,7 @@ const CapabilityOverview = lazy(() => import("./pages/CapabilityOverview"));
 const CapabilityExplorer = lazy(() => import("./pages/CapabilityExplorer"));
 const RecommendationCenter = lazy(() => import("./pages/RecommendationCenter"));
 const GraphExplorer = lazy(() => import("./pages/GraphExplorer"));
+const RemediationWorkspace = lazy(() => import("./pages/RemediationWorkspace"));
 
 
 /** Path segment of the route group, relative to `/platform`. */
@@ -39,6 +40,6 @@ export const capabilityIntelligenceRoutes = (
     <Route path="explorer" element={<CapabilityExplorer />} />
     <Route path="recommendations" element={<RecommendationCenter />} />
     <Route path="graph" element={<GraphExplorer />} />
-
+    <Route path="remediation" element={<RemediationWorkspace />} />
   </Route>
 );
