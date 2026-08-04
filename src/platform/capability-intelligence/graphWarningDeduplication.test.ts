@@ -13,6 +13,8 @@ import type { QueryWarning } from "@/modules/graph/query/index";
 import {
   GRAPH_WARNINGS_CLEARED_ANNOUNCEMENT,
   deduplicateGraphWarnings,
+  graphWarningSetSignature,
+  nextWarningAnnouncement,
   graphWarningIdentity,
   presentGraphWarnings,
   summarizeGraphWarningsForAnnouncement,
@@ -209,5 +211,61 @@ describe("Stage 3.5.4.2.2 — announcement summary", () => {
 
   it("exposes a single cleared message", () => {
     expect(GRAPH_WARNINGS_CLEARED_ANNOUNCEMENT).toBe("Graph warnings cleared.");
+  });
+});
+
+describe("Stage 3.5.4.2.2 — announcement transitions", () => {
+  const depthSet = presentGraphWarnings(viewWith([depthWarning, { ...depthWarning }]));
+  const twoSet = presentGraphWarnings(
+    viewWith([depthWarning, { code: "candidate-relationships-included", message: "Candidates." }]),
+  );
+
+  it("announces nothing on first render when there are no warnings", () => {
+    const next = nextWarningAnnouncement(null, []);
+    expect(next.changed).toBe(true);
+    expect(next.announcement).toBe("");
+  });
+
+  it("announces the summary when warnings first appear", () => {
+    const next = nextWarningAnnouncement(null, depthSet);
+    expect(next.changed).toBe(true);
+    expect(next.announcement).toBe(summarizeGraphWarningsForAnnouncement(depthSet));
+  });
+
+  it("does not re-announce an unchanged warning set", () => {
+    const signature = graphWarningSetSignature(depthSet);
+    const next = nextWarningAnnouncement(signature, depthSet);
+    expect(next.changed).toBe(false);
+    expect(next.announcement).toBe("");
+  });
+
+  it("re-announces when the warning set materially changes", () => {
+    const next = nextWarningAnnouncement(graphWarningSetSignature(depthSet), twoSet);
+    expect(next.changed).toBe(true);
+    expect(next.announcement).toContain("Graph updated with 2 warnings.");
+  });
+
+  it("announces the cleared message exactly once when warnings clear", () => {
+    const cleared = nextWarningAnnouncement(graphWarningSetSignature(depthSet), []);
+    expect(cleared.changed).toBe(true);
+    expect(cleared.announcement).toBe(GRAPH_WARNINGS_CLEARED_ANNOUNCEMENT);
+    // A subsequent render with the same (empty) set is silent.
+    const again = nextWarningAnnouncement(cleared.signature, []);
+    expect(again.changed).toBe(false);
+    expect(again.announcement).toBe("");
+  });
+
+  it("does not announce cleared for a view that never had warnings", () => {
+    const first = nextWarningAnnouncement(null, []);
+    expect(first.announcement).toBe("");
+    const second = nextWarningAnnouncement(first.signature, []);
+    expect(second.changed).toBe(false);
+  });
+
+  it("treats a duplicate-only change as no change at all", () => {
+    const once = presentGraphWarnings(viewWith([depthWarning]));
+    const twice = presentGraphWarnings(viewWith([depthWarning, { ...depthWarning }]));
+    expect(graphWarningSetSignature(once)).toBe(graphWarningSetSignature(twice));
+    expect(nextWarningAnnouncement(graphWarningSetSignature(once), twice).changed).toBe(false);
   });
 });
