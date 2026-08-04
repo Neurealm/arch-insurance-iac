@@ -60,20 +60,35 @@ filtering artefact is never presented as an orphan.
 
 ## Accessibility
 
-- The canvas carries a descriptive `aria-label` and is paired with a collapsible
-  **Graph contents** table listing every visible entity and relationship with
-  type, direction, registration and selection state.
+- The canvas carries a descriptive `aria-label` and is paired with a
+  **Graph contents** table, expanded by default and collapsible, listing every visible
+  entity and relationship with type, direction, registration and selection state. The
+  table, the canvas, the header badges and the polite count announcement all derive from
+  the same bounded graph-view result, so they cannot disagree.
 - Node type, root state, candidate state and selection are all conveyed as text,
   never by colour alone.
 - All controls are labelled and keyboard operable; edge animation is disabled
   under `prefers-reduced-motion`.
 
+## Stage 3.5.4.2.1 — transparency and integration hardening
+
+| Area | Behaviour |
+| --- | --- |
+| Traversal warnings | Every warning returned with the graph view is presented, with a title, plain-language explanation, suggested actions and the canonical warning code. No warning is invented, none is suppressed, and no additional query runs. |
+| Accessible contents | Expanded by default, described as the text equivalent of the canvas, and always in step with the canvas counts. |
+| Recommendation root | `graph/recommendationRoot.ts` prefers the recommendation subject when it resolves in the graph, otherwise the first affected entity that resolves, and reports the number of additional affected entities. When nothing resolves, no link is offered. |
+| Root parameter | Missing, empty and whitespace-only `?root=` values resolve to the deterministic initial root; non-empty values are never trimmed, so an unknown id stays in the explicit unknown-entity state. |
+| Re-root | Sets the root in the URL (a real history entry), clears node and edge selection, closes the entity drawer and refits the canvas. |
+
 ## Validation
 
-- 753/753 tests passing (`src/platform/capability-intelligence/graphExplorer.test.tsx`
-  adds 22 covering taxonomy completeness, root determinism, bounding, filtering,
-  candidate handling, empty-state diagnosis, layout stability, highlighting,
-  graph immutability and route registration).
+- 814/814 tests passing. Stage 3.5.4.2 added `graphExplorer.test.tsx` and
+  `graphExplorerNavigation.test.tsx`; Stage 3.5.4.2.1 adds
+  `graphExplorerHardening.test.ts` (warnings, edge-limit truncation, recommendation root
+  policy, root-parameter contract), `graphExplorerTransparency.test.tsx` (accessible
+  contents, count announcements, re-root contract, real browser history) and
+  `src/runops/components/runopsGraphRegression.test.tsx` (existing RunOps canvases are
+  unaffected by the `animateHighlights` and `selectedEdgeIds` extension).
 - Typecheck clean.
 - Canonical graph hash `e889b604` preserved — the explorer is strictly read-only.
 
