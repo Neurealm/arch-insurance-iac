@@ -102,7 +102,9 @@ export function CapabilityOverviewCards({
         <h2 id="recommendation-summary" className="mb-2 text-sm font-semibold text-foreground">
           Recommendation summary
         </h2>
-        <KpiGrid>
+        {/* Eight tiles: 2 → 4 → 8 keeps every card an equal width at each breakpoint. */}
+        <KpiGrid columns="md:grid-cols-4 2xl:grid-cols-8">
+
           <Kpi label="Recommendations" value={s.totalRecommendations} />
           <Kpi label="Findings" value={s.totalFindings} />
           <Kpi label="Critical" value={byPriority.critical} hint="Priority band" />
@@ -123,7 +125,9 @@ export function CapabilityOverviewCards({
           backlog reflects migration progress, not a platform fault: the graph and its measurements are valid, and some
           exclusions are intentional.
         </p>
-        <KpiGrid>
+        {/* Four tiles. */}
+        <KpiGrid columns="md:grid-cols-4">
+
           <Kpi
             label="Open coverage gaps"
             value={s.coverageGapCount.toLocaleString()}
