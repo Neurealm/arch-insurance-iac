@@ -177,7 +177,8 @@ bunx vitest run src/modules/graph     # graph engine + determinism
 
 ## Known limitations
 
-- No graph visualisation canvas in this iteration; relationships are shown as lists.
+- Stage 3.5.4.1 shipped without a graph visualisation canvas; the canvas arrived in
+  Stage 3.5.4.2 (Interactive Graph Explorer) and this limitation no longer applies.
 - Filters are client-side over the in-memory snapshot; there is no server-side paging.
 - The snapshot is computed once per session; a full page reload is required to pick up a
   regenerated graph.
@@ -221,10 +222,17 @@ Full detail: `docs/modules/stage3-5-4-2-graph-explorer.md`. Summary:
   mounted and `analyzeGraph()` is not re-executed. The `root` query parameter is the
   single source of truth for the root, giving browser back/forward support.
 - **Accessibility** — labelled controls, keyboard-usable root search, live counts and
-  truncation announcements, a non-canvas graph contents list, text markers alongside
-  colour, predictable drawer focus, reduced-motion support.
-- **Tests** — `graphExplorer.test.tsx` and `graphExplorerNavigation.test.tsx`;
-  repository total 762 passing.
+  truncation announcements, a graph contents list expanded by default that states the
+  same bounded entities and relationships as the canvas, text markers alongside colour,
+  predictable drawer focus, reduced-motion support.
+- **Transparency (Stage 3.5.4.2.1)** — traversal and query warnings raised by the query
+  engine are presented verbatim in `components/GraphWarningList.tsx` with a plain-language
+  explanation and suggested actions; the recommendation root policy lives in
+  `graph/recommendationRoot.ts`; empty and whitespace-only `?root=` parameters resolve to
+  the deterministic initial root.
+- **Tests** — `graphExplorer.test.tsx`, `graphExplorerNavigation.test.tsx`,
+  `graphExplorerHardening.test.ts`, `graphExplorerTransparency.test.tsx` and
+  `src/runops/components/runopsGraphRegression.test.tsx`; repository total 814 passing.
 - **Determinism** — canonical graph hash `e889b604` unchanged before and after.
 
 ### Remaining limitations

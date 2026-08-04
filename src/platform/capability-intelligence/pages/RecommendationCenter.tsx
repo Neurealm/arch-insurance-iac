@@ -14,6 +14,8 @@ export default function RecommendationCenter() {
       <RecommendationList
         recommendations={snapshot.intelligence.recommendations}
         onSelectEntity={setSelected}
+        isKnownNode={(id) => Boolean(snapshot.queryEngine.getNode(id))}
+        nodeLabel={(id) => snapshot.queryEngine.getNode(id)?.label ?? id}
       />
       <EntityDrawer
         nodeId={selected}

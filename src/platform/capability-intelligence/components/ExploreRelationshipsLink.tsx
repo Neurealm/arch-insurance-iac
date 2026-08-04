@@ -17,11 +17,14 @@ export function ExploreRelationshipsLink({
   entityLabel,
   variant = "button",
   className,
+  linkText,
 }: {
   nodeId: string;
   entityLabel?: string;
   variant?: "button" | "inline";
   className?: string;
+  /** Optional visible text override, e.g. "Explore from X, plus 6 …". */
+  linkText?: string;
 }) {
   return (
     <Link
@@ -37,7 +40,7 @@ export function ExploreRelationshipsLink({
       )}
     >
       <Network aria-hidden="true" className="h-3.5 w-3.5" />
-      <span>Explore relationships</span>
+      <span>{linkText ?? "Explore relationships"}</span>
     </Link>
   );
 }
