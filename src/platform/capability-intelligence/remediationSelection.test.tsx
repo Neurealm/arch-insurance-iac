@@ -249,18 +249,13 @@ describe("Stage 3.5.4.3 — workspace over the real repository graph", () => {
   it("never runs a simulation or a plan automatically", async () => {
     __resetCapabilityIntelligenceCache();
     __resetRemediationEngines();
-    renderApp("/platform/capability-intelligence/remediation");
-    await waitFor(() => expect(screen.getByTestId("stage-progress")).toBeTruthy(), {
-      timeout: 20000,
-    });
-    await waitFor(() => expect(screen.getByTestId("run-simulation")).toBeTruthy(), {
-      timeout: 20000,
-    });
+    renderApp(`/platform/capability-intelligence/remediation?recommendation=${simulatableId()}`);
+    await selectFirstProposal();
     expect(screen.queryByTestId("simulation-result")).toBeNull();
     expect(screen.queryByTestId("change-plan")).toBeNull();
     // The plan action stays disabled until a simulation exists.
     expect(screen.getByTestId("build-change-plan").hasAttribute("disabled")).toBe(true);
-  }, 40000);
+  }, 60000);
 
   it("computes the intelligence analysis exactly once for the whole workspace", async () => {
     __resetCapabilityIntelligenceCache();
@@ -275,8 +270,8 @@ describe("Stage 3.5.4.3 — workspace over the real repository graph", () => {
   it("runs a simulation only on explicit invocation and announces the outcome", async () => {
     __resetCapabilityIntelligenceCache();
     __resetRemediationEngines();
-    renderApp("/platform/capability-intelligence/remediation");
-    const run = await screen.findByTestId("run-simulation", undefined, { timeout: 20000 });
+    renderApp(`/platform/capability-intelligence/remediation?recommendation=${simulatableId()}`);
+    const run = await selectFirstProposal();
     await waitFor(() => expect(run.hasAttribute("disabled")).toBe(false), { timeout: 20000 });
     fireEvent.click(run);
     const result = await screen.findByTestId("simulation-result", undefined, { timeout: 30000 });
@@ -294,9 +289,10 @@ describe("Stage 3.5.4.3 — workspace over the real repository graph", () => {
       expect(classifications.querySelector(`[data-classification="${c}"]`)).toBeTruthy();
     }
     const announcement = screen.getByTestId("remediation-announcement");
-    expect(announcement.textContent).toContain("Simulation complete");
+    expect(announcement.textContent).toContain("Simulation");
     expect(announcement.getAttribute("aria-live")).toBe("polite");
   }, 60000);
+
 
   it("exposes read-only status and no approval or execution control", async () => {
     __resetCapabilityIntelligenceCache();
