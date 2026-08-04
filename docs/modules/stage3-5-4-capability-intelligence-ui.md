@@ -11,6 +11,9 @@ and never triggers remediation.
 | 3.5.4.1 | Initial application foundation: provider, Overview, Explorer, Recommendation Center, Entity Drawer, shared `PagedDataTable` and `StatusBadge` |
 | 3.5.4.1.1 | Foundation hardening: route authorization, priority-band correction, metric precision and context, registration-coverage framing, humanized confidence, recommendation identity/status, Explorer terminology and orphan visibility, table and KPI accessibility, application-level test coverage |
 | 3.5.4.1.2 | Final semantic and integration hardening: valid `dt`→`dd` KPI markup, integration tests against the real `App.tsx` route element, provider lifecycle across actual child-route navigation, balanced eight-tile recommendation-summary grid |
+| 3.5.4.2 | Interactive Graph Explorer: bounded neighbourhood traversal, deterministic layout, cross-screen "Explore relationships" navigation and the `?root=` deep-link contract |
+| 3.5.4.2.1 | Transparency and integration hardening: traversal-warning presentation, accessible graph contents expanded by default, recommendation root policy, `?root=` normalization, re-root contract, RunOps graph regression coverage |
+| 3.5.4.2.2 | Warning deduplication and accessibility closure: identical warnings reported by both traversal branches are consolidated into one card, and warning appearance, change and clearing are announced in a dedicated polite live region. The warning source remains the Query Engine — no engine warning emission, traversal semantics or taxonomy was changed. |
 
 
 ## Location

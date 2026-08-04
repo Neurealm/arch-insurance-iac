@@ -1,10 +1,17 @@
 /**
- * Stage 3.5.4.2.1 — presentation of traversal and query warnings.
+ * Stage 3.5.4.2.1 / 3.5.4.2.2 — presentation of traversal and query warnings.
  *
  * This module does NOT create a second warning system. It is a pure, read-only
  * presentation mapping over the warnings already emitted by the Stage 3.5.3.1
  * Query Engine and carried through the bounded graph-view result. Warning
  * codes, messages and subjects are used exactly as produced.
+ *
+ * Stage 3.5.4.2.2 adds presentation-layer deduplication and a concise
+ * announcement summary. Neither changes engine emission, traversal execution or
+ * the warning taxonomy: a bidirectional traversal legitimately reports the same
+ * condition from its upstream and downstream sub-queries, and this module
+ * consolidates those identical reports into a single card so the reader is not
+ * shown what looks like two separate defects.
  */
 
 import type { QueryWarning, QueryWarningCode } from "@/modules/graph/query/index";
@@ -12,7 +19,7 @@ import type { GraphView } from "./graphViewTypes";
 import { DIRECTION_LABELS, MAX_VISIBLE_EDGES, MAX_VISIBLE_NODES } from "./graphViewTypes";
 
 export interface PresentedWarning {
-  /** Stable key for rendering, derived from code + subject + ordinal. */
+  /** Stable key for rendering, derived from the full canonical warning identity. */
   key: string;
   /** Canonical engine warning code, surfaced verbatim in supporting detail. */
   code: QueryWarningCode;
@@ -23,7 +30,15 @@ export interface PresentedWarning {
   /** The verbatim engine message, kept as supporting detail. */
   detail: string;
   subject?: string;
+  /**
+   * How many identical engine warnings this card represents. Greater than one
+   * only when separate traversal branches reported the same condition.
+   */
+  occurrences: number;
+  /** Concise clause used by the polite announcement summary. */
+  summary: string;
 }
+
 
 /**
  * Deterministic display order. Warnings are grouped by importance to the
@@ -43,7 +58,10 @@ const rank = (code: QueryWarningCode): number => {
   return i === -1 ? ORDER.length : i;
 };
 
-function copyFor(warning: QueryWarning, view: GraphView): { title: string; explanation: string; actions: string[] } {
+function copyFor(
+  warning: QueryWarning,
+  view: GraphView,
+): { title: string; explanation: string; actions: string[]; summary: string } {
   const direction = DIRECTION_LABELS[view.request.direction].toLowerCase();
   switch (warning.code) {
     case "depth-limit-reached":
@@ -55,6 +73,7 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
           "Narrow the relationship types to keep the view readable at greater depth",
           "Re-root on an entity nearer the edge of this view",
         ],
+        summary: `the view stops at depth ${view.request.depth} and may not show the complete relationship chain`,
       };
     case "results-truncated":
       return {
@@ -65,6 +84,7 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
           "Narrow the relationship types",
           "Explore one direction at a time",
         ],
+        summary: "the view is truncated for safety",
       };
     case "empty-result":
       return {
@@ -76,6 +96,7 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
           "Switch direction",
           "Include candidate relationships to preview weakly-inferred links",
         ],
+        summary: "the query returned no results",
       };
     case "candidate-relationships-included":
       return {
@@ -83,6 +104,7 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
         explanation:
           "Candidate relationships are weakly-inferred and non-canonical. They are drawn dashed and labelled, and never count towards the confirmed graph.",
         actions: ["Disable candidate relationships to see only confirmed structure"],
+        summary: "candidate relationships are included",
       };
     case "path-limit-reached":
       return {
@@ -90,6 +112,7 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
         explanation:
           "The query engine stopped enumerating paths at its safety limit. The relationships shown remain accurate.",
         actions: ["Reduce traversal depth", "Narrow the relationship types"],
+        summary: "the path enumeration limit was reached",
       };
     default:
       return {
@@ -97,28 +120,136 @@ function copyFor(warning: QueryWarning, view: GraphView): { title: string; expla
         explanation:
           "The graph query engine reported a condition affecting this view. The relationships shown remain read-only and unmodified.",
         actions: [],
+        summary: "the query engine reported a condition affecting this view",
       };
   }
 }
 
 /**
- * Presents the graph-view warnings. Pure: the view and its warnings are read,
- * never mutated, and no query is re-executed.
+ * Canonical identity of a warning for deduplication purposes. Every field the
+ * engine can vary is part of the identity, so two warnings collapse only when
+ * they are the same statement about the same thing: same code, same subject and
+ * same verbatim message. Two `depth-limit-reached` warnings about different
+ * subjects, or with different messages (different depths, limits or
+ * conditions), remain separate cards.
  */
-export function presentWarnings(view: GraphView): readonly PresentedWarning[] {
-  return view.warnings
-    .map((warning, index) => ({ warning, index }))
-    .sort((a, b) => rank(a.warning.code) - rank(b.warning.code) || a.index - b.index)
-    .map(({ warning, index }) => {
-      const copy = copyFor(warning, view);
-      return {
-        key: `${warning.code}:${warning.subject ?? ""}:${index}`,
-        code: warning.code,
-        title: copy.title,
-        explanation: copy.explanation,
-        actions: copy.actions,
-        detail: warning.message,
-        subject: warning.subject,
-      };
-    });
+export function graphWarningIdentity(warning: QueryWarning): string {
+  return JSON.stringify([warning.code, warning.subject ?? null, warning.message]);
+}
+
+export interface DeduplicatedWarning {
+  warning: QueryWarning;
+  /** Number of identical engine warnings collapsed into this entry. */
+  occurrences: number;
+  /** Index of the first occurrence in the engine's emission order. */
+  firstIndex: number;
+}
+
+/**
+ * Collapses identical engine warnings. A bidirectional traversal reports the
+ * same condition once per sub-query; those reports describe one condition, not
+ * two defects. Pure and non-mutating: the input array and its warning objects
+ * are only read.
+ */
+export function deduplicateGraphWarnings(
+  warnings: readonly QueryWarning[],
+): readonly DeduplicatedWarning[] {
+  const byIdentity = new Map<string, { warning: QueryWarning; occurrences: number; firstIndex: number }>();
+  warnings.forEach((warning, index) => {
+    const identity = graphWarningIdentity(warning);
+    const existing = byIdentity.get(identity);
+    if (existing) {
+      existing.occurrences += 1;
+      return;
+    }
+    byIdentity.set(identity, { warning, occurrences: 1, firstIndex: index });
+  });
+  return [...byIdentity.values()].sort(
+    (a, b) => rank(a.warning.code) - rank(b.warning.code) || a.firstIndex - b.firstIndex,
+  );
+}
+
+/**
+ * Presents the graph-view warnings: engine warnings mapped to reader-facing
+ * copy, identical reports consolidated, and ordered deterministically. Pure —
+ * the view and its warnings are read, never mutated, and no query is
+ * re-executed.
+ */
+export function presentGraphWarnings(view: GraphView): readonly PresentedWarning[] {
+  return deduplicateGraphWarnings(view.warnings).map(({ warning, occurrences }) => {
+    const copy = copyFor(warning, view);
+    return {
+      key: graphWarningIdentity(warning),
+      code: warning.code,
+      title: copy.title,
+      explanation: copy.explanation,
+      actions: copy.actions,
+      detail: warning.message,
+      subject: warning.subject,
+      occurrences,
+      summary: copy.summary,
+    };
+  });
+}
+
+/** Retained name for existing call sites. */
+export const presentWarnings = presentGraphWarnings;
+
+/**
+ * Builds the concise polite announcement for the current warning set. Returns
+ * an empty string when there is nothing to announce; the caller decides whether
+ * a transition from "some warnings" to "none" should announce the cleared
+ * message. Deduplicated input means one condition is announced once.
+ */
+export function summarizeGraphWarningsForAnnouncement(
+  warnings: readonly PresentedWarning[],
+): string {
+  if (warnings.length === 0) return "";
+  const sentence = (clause: string) => `${clause.charAt(0).toUpperCase()}${clause.slice(1)}.`;
+  if (warnings.length === 1) {
+    return `Graph warning. ${sentence(warnings[0].summary)}`;
+  }
+  const clauses = warnings.map((w) => w.summary);
+  const joined =
+    clauses.length === 2
+      ? `${clauses[0]} and ${clauses[1]}`
+      : `${clauses.slice(0, -1).join(", ")} and ${clauses[clauses.length - 1]}`;
+  return `Graph updated with ${warnings.length} warnings. ${sentence(joined)}`;
+}
+
+/** Announced once when a previously-warning view becomes warning-free. */
+export const GRAPH_WARNINGS_CLEARED_ANNOUNCEMENT = "Graph warnings cleared.";
+
+
+/** Stable identity of a whole warning set, used to detect material changes. */
+export function graphWarningSetSignature(warnings: readonly PresentedWarning[]): string {
+  return warnings.map((w) => w.key).join("\u0000");
+}
+
+/**
+ * Decides what, if anything, to announce for a new warning set.
+ *
+ * `previousSignature` is `null` before the first warning state has been seen.
+ * An unchanged signature announces nothing at all (the live region keeps its
+ * previous text, so nothing is re-read), a non-empty set announces its concise
+ * summary, and a transition from warnings to none announces the cleared message
+ * exactly once — a view that never had warnings stays silent.
+ */
+export function nextWarningAnnouncement(
+  previousSignature: string | null,
+  warnings: readonly PresentedWarning[],
+): { changed: boolean; signature: string; announcement: string } {
+  const signature = graphWarningSetSignature(warnings);
+  if (previousSignature === signature) {
+    return { changed: false, signature, announcement: "" };
+  }
+  if (warnings.length > 0) {
+    return { changed: true, signature, announcement: summarizeGraphWarningsForAnnouncement(warnings) };
+  }
+  const hadWarnings = Boolean(previousSignature);
+  return {
+    changed: true,
+    signature,
+    announcement: hadWarnings ? GRAPH_WARNINGS_CLEARED_ANNOUNCEMENT : "",
+  };
 }

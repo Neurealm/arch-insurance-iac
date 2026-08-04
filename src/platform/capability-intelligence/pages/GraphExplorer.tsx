@@ -9,7 +9,7 @@
  * always opens from the same deterministic default.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useCapabilityIntelligence } from "../CapabilityIntelligenceProvider";
 import type { GraphQueryEngine } from "@/modules/graph/query/index";
@@ -25,7 +25,11 @@ import { GraphContentsList } from "../components/GraphContentsList";
 import { GraphControls, type GraphControlsState } from "../components/GraphControls";
 import { GraphLegend } from "../components/GraphLegend";
 import { GraphWarningList } from "../components/GraphWarningList";
-import { presentWarnings } from "../graph/graphWarnings";
+import {
+  graphWarningSetSignature,
+  nextWarningAnnouncement,
+  presentGraphWarnings,
+} from "../graph/graphWarnings";
 import { RootEntityPicker } from "../components/RootEntityPicker";
 import { buildGraphView, neighborsWithinView } from "../graph/graphView";
 import { layoutGraphView } from "../graph/graphLayout";
@@ -209,7 +213,30 @@ function GraphExplorerScreen({
     setFitKey((k) => k + 1);
   }, [setRootId]);
 
-  const warnings = useMemo(() => presentWarnings(view), [view]);
+  const warnings = useMemo(() => presentGraphWarnings(view), [view]);
+
+  /*
+   * Stage 3.5.4.2.2 — warning announcements. This region is separate from the
+   * count region so the two never overwrite each other: counts describe how
+   * much is visible, warnings describe why the view is bounded.
+   *
+   * The announcement is driven by the deduplicated warning identities, so it
+   * changes only when the warning state materially changes (root, direction,
+   * depth, relationship types, candidate inclusion, reset, emptiness,
+   * truncation). Pan, zoom, hover, focus, drawer state, fit-view and contents
+   * expand/collapse leave the identities untouched and are therefore silent,
+   * and an unchanged warning set is never re-announced.
+   */
+  const warningSignature = useMemo(() => graphWarningSetSignature(warnings), [warnings]);
+  const [warningAnnouncement, setWarningAnnouncement] = useState("");
+  const lastWarningSignature = useRef<string | null>(null);
+
+  useEffect(() => {
+    const next = nextWarningAnnouncement(lastWarningSignature.current, warnings);
+    if (!next.changed) return;
+    lastWarningSignature.current = next.signature;
+    setWarningAnnouncement(next.announcement);
+  }, [warningSignature, warnings]);
 
   /*
    * Count announcements derive from the same bounded graph-view result as the
@@ -308,6 +335,15 @@ function GraphExplorerScreen({
                 data-testid="graph-count-announcement"
               >
                 {countAnnouncement}
+              </div>
+
+              <div
+                aria-live="polite"
+                role="status"
+                className="sr-only"
+                data-testid="graph-warning-announcement"
+              >
+                {warningAnnouncement}
               </div>
 
               <GraphWarningList warnings={warnings} />
