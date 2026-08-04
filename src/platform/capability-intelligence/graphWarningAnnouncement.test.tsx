@@ -201,7 +201,7 @@ describe("Stage 3.5.4.2.2 — warning live region", () => {
     const beforeCount = countText();
 
     // Fit view (canvas remount), contents expand/collapse, hover and focus.
-    await userEvent.click(screen.getByRole("button", { name: /fit view/i }));
+    await userEvent.click(screen.getByRole("button", { name: /fit graph to view/i }));
     const toggle = screen.getByTestId("graph-contents-toggle");
     await userEvent.click(toggle);
     await userEvent.click(toggle);
