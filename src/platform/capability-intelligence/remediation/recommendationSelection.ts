@@ -130,9 +130,11 @@ export function resolveRecommendationSelection(
   return {
     recommendation: fallback,
     source: fallback ? "default" : "none",
-    unknownParameter: param && !fallback ? param : param ? param : null,
+    // Non-null only when a parameter was supplied and matched nothing.
+    unknownParameter: param ?? null,
   };
 }
+
 
 /** Deep-link path for a recommendation, used by the Recommendation Center. */
 export function remediationLinkFor(recommendationId: string): string {
