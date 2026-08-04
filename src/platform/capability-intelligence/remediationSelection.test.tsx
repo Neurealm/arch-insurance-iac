@@ -217,6 +217,31 @@ function renderApp(initial: string) {
 
 const canonicalRecommendations = () => computeCapabilityIntelligence().intelligence.recommendations;
 
+/**
+ * First real recommendation the engine can actually turn into a proposal.
+ * Deep-linking to it keeps the simulation tests on a live code path instead of
+ * whichever recommendation happens to win the default ordering.
+ */
+function simulatableId(): string {
+  const { simulation } = getRemediationEngines();
+  for (const r of canonicalRecommendations()) {
+    if (simulation.generateProposalFromRecommendation(r).length > 0) {
+      return encodeURIComponent(r.id);
+    }
+  }
+  throw new Error("no recommendation in the real graph yields a proposal");
+}
+
+/** Selects the first offered proposal and returns the enabled Run button. */
+async function selectFirstProposal(): Promise<HTMLElement> {
+  const options = await screen.findByTestId("proposal-options", undefined, { timeout: 20000 });
+  const button = options.querySelector("button");
+  if (!button) throw new Error("no proposal option rendered");
+  fireEvent.click(button);
+  return screen.findByTestId("run-simulation", undefined, { timeout: 20000 });
+}
+
+
 describe("Stage 3.5.4.3 — workspace over the real repository graph", () => {
   it("opens a deep-linked recommendation and reports no fallback", async () => {
     __resetCapabilityIntelligenceCache();
