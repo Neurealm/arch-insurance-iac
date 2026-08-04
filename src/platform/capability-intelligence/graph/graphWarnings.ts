@@ -220,3 +220,36 @@ export function summarizeGraphWarningsForAnnouncement(
 /** Announced once when a previously-warning view becomes warning-free. */
 export const GRAPH_WARNINGS_CLEARED_ANNOUNCEMENT = "Graph warnings cleared.";
 
+
+/** Stable identity of a whole warning set, used to detect material changes. */
+export function graphWarningSetSignature(warnings: readonly PresentedWarning[]): string {
+  return warnings.map((w) => w.key).join("\u0000");
+}
+
+/**
+ * Decides what, if anything, to announce for a new warning set.
+ *
+ * `previousSignature` is `null` before the first warning state has been seen.
+ * An unchanged signature announces nothing at all (the live region keeps its
+ * previous text, so nothing is re-read), a non-empty set announces its concise
+ * summary, and a transition from warnings to none announces the cleared message
+ * exactly once — a view that never had warnings stays silent.
+ */
+export function nextWarningAnnouncement(
+  previousSignature: string | null,
+  warnings: readonly PresentedWarning[],
+): { changed: boolean; signature: string; announcement: string } {
+  const signature = graphWarningSetSignature(warnings);
+  if (previousSignature === signature) {
+    return { changed: false, signature, announcement: "" };
+  }
+  if (warnings.length > 0) {
+    return { changed: true, signature, announcement: summarizeGraphWarningsForAnnouncement(warnings) };
+  }
+  const hadWarnings = Boolean(previousSignature);
+  return {
+    changed: true,
+    signature,
+    announcement: hadWarnings ? GRAPH_WARNINGS_CLEARED_ANNOUNCEMENT : "",
+  };
+}

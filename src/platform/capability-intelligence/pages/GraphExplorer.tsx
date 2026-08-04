@@ -26,9 +26,9 @@ import { GraphControls, type GraphControlsState } from "../components/GraphContr
 import { GraphLegend } from "../components/GraphLegend";
 import { GraphWarningList } from "../components/GraphWarningList";
 import {
-  GRAPH_WARNINGS_CLEARED_ANNOUNCEMENT,
+  graphWarningSetSignature,
+  nextWarningAnnouncement,
   presentGraphWarnings,
-  summarizeGraphWarningsForAnnouncement,
 } from "../graph/graphWarnings";
 import { RootEntityPicker } from "../components/RootEntityPicker";
 import { buildGraphView, neighborsWithinView } from "../graph/graphView";
@@ -227,19 +227,15 @@ function GraphExplorerScreen({
    * expand/collapse leave the identities untouched and are therefore silent,
    * and an unchanged warning set is never re-announced.
    */
-  const warningSignature = useMemo(() => warnings.map((w) => w.key).join("\u0000"), [warnings]);
+  const warningSignature = useMemo(() => graphWarningSetSignature(warnings), [warnings]);
   const [warningAnnouncement, setWarningAnnouncement] = useState("");
   const lastWarningSignature = useRef<string | null>(null);
 
   useEffect(() => {
-    if (lastWarningSignature.current === warningSignature) return;
-    const hadWarnings = Boolean(lastWarningSignature.current);
-    lastWarningSignature.current = warningSignature;
-    if (warnings.length > 0) {
-      setWarningAnnouncement(summarizeGraphWarningsForAnnouncement(warnings));
-    } else {
-      setWarningAnnouncement(hadWarnings ? GRAPH_WARNINGS_CLEARED_ANNOUNCEMENT : "");
-    }
+    const next = nextWarningAnnouncement(lastWarningSignature.current, warnings);
+    if (!next.changed) return;
+    lastWarningSignature.current = next.signature;
+    setWarningAnnouncement(next.announcement);
   }, [warningSignature, warnings]);
 
   /*
