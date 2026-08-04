@@ -26,6 +26,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   getSimulationEngine,
   type AlternativeComparison,
@@ -42,6 +43,14 @@ import {
   type GraphChangePlanEngine,
 } from "@/modules/graph/change-plan/index";
 import type { IntelligenceRecommendation } from "@/modules/graph/intelligence/index";
+import {
+  resolveRecommendationSelection,
+  type RecommendationSelection,
+} from "./remediation/recommendationSelection";
+
+/** URL contract for selecting the recommendation under remediation. */
+export const RECOMMENDATION_PARAM = "recommendation";
+
 
 /* -------------------------------------------------------------- workflow */
 
@@ -125,15 +134,32 @@ export interface RemediationWorkspaceValue {
   plan: ChangePlan | null;
   /** Drift of the built plan against the current canonical graph. */
   drift: DriftReport | null;
+  /**
+   * True when the inputs changed after a result was produced. The result is
+   * kept on screen — the engine is never rerun implicitly — but the operator
+   * is told it no longer describes the current selection.
+   */
+  simulationStale: boolean;
+  comparisonStale: boolean;
+  planStale: boolean;
 
   busy: null | "proposals" | "simulation" | "alternatives" | "plan";
   error: unknown;
+  /** The action that failed, so the UI can offer a scoped retry. */
+  failedAction: null | "proposals" | "simulation" | "alternatives" | "plan";
+  retry: () => void;
   /** Canonical graph hash observed by the engines. Never changes. */
   canonicalGraphHash: string;
+  /** How the current recommendation was chosen. */
+  selectionSource: RecommendationSelection["source"];
+  /** Set when the URL named a recommendation that does not exist. */
+  unknownRecommendationParam: string | null;
   /** Per-stage availability used to drive the progressive disclosure UI. */
   stageStates: Readonly<Record<RemediationStage, StageState>>;
   /** Furthest stage the operator may open. */
   activeStage: RemediationStage;
+  /** Politely announced workspace events (simulation complete, failures…). */
+  announcement: string;
 
   selectRecommendation: (recommendation: IntelligenceRecommendation | null) => void;
   selectProposal: (proposalId: string) => void;
@@ -149,8 +175,27 @@ const Ctx = createContext<RemediationWorkspaceValue | null>(null);
 
 /* -------------------------------------------------------------- provider */
 
-export function RemediationWorkspaceProvider({ children }: { children: ReactNode }) {
-  const [recommendation, setRecommendation] = useState<IntelligenceRecommendation | null>(null);
+export function RemediationWorkspaceProvider({
+  recommendations = [],
+  children,
+}: {
+  /** Canonical recommendation set from the Capability Intelligence provider. */
+  recommendations?: readonly IntelligenceRecommendation[];
+  children: ReactNode;
+}) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawParam = searchParams.get(RECOMMENDATION_PARAM);
+
+  // The selection is derived from the URL, never mirrored into state, so
+  // refresh, Back and Forward all resolve through exactly the same policy.
+  const selection = useMemo(
+    () => resolveRecommendationSelection(recommendations, rawParam),
+    [recommendations, rawParam],
+  );
+  const recommendation = selection.recommendation;
+  const unknownRecommendationParam =
+    selection.source === "parameter" ? null : selection.unknownParameter;
+
   const [proposals, setProposals] = useState<readonly ChangeProposal[]>([]);
   const [proposalId, setProposalId] = useState<string | null>(null);
   const [bindings, setBindings] = useState<ParameterBinding>({});
@@ -158,9 +203,14 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
   const [comparison, setComparison] = useState<AlternativeComparison | null>(null);
   const [plan, setPlan] = useState<ChangePlan | null>(null);
   const [drift, setDrift] = useState<DriftReport | null>(null);
+  const [stale, setStale] = useState({ simulation: false, comparison: false, plan: false });
   const [conflicts, setConflicts] = useState<readonly ProposalConflict[]>([]);
   const [busy, setBusy] = useState<RemediationWorkspaceValue["busy"]>(null);
   const [error, setError] = useState<unknown>(null);
+  const [failedAction, setFailedAction] =
+    useState<RemediationWorkspaceValue["failedAction"]>(null);
+  const [announcement, setAnnouncement] = useState("");
+
 
   const mounted = useRef(true);
   useEffect(() => {
@@ -175,11 +225,15 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
     (kind: NonNullable<RemediationWorkspaceValue["busy"]>, work: () => void) => {
       setBusy(kind);
       setError(null);
+      setFailedAction(null);
       const handle = setTimeout(() => {
         try {
           work();
         } catch (err) {
-          if (mounted.current) setError(err);
+          if (!mounted.current) return;
+          setError(err);
+          setFailedAction(kind);
+          setAnnouncement(`${kind} failed. ${err instanceof Error ? err.message : "Unknown error"}`);
         } finally {
           if (mounted.current) setBusy(null);
         }
@@ -188,6 +242,7 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
     },
     [],
   );
+
 
   const canonicalGraphHash = useMemo(() => getRemediationEngines().simulation.canonicalGraphHash, []);
 
@@ -229,25 +284,34 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
 
   /* -------------------------------------------------------------- actions */
 
+  /** Drops every downstream result. Used when the subject itself changes. */
   const resetDownstream = useCallback(() => {
     setSimulation(null);
     setComparison(null);
     setPlan(null);
     setDrift(null);
+    setStale({ simulation: false, comparison: false, plan: false });
   }, []);
 
-  const selectRecommendation = useCallback(
-    (next: IntelligenceRecommendation | null) => {
-      setRecommendation(next);
-      setProposalId(null);
-      setBindings({});
-      setProposals([]);
-      setConflicts([]);
-      resetDownstream();
-      if (!next) return;
+  /**
+   * Marks existing results as no longer describing the current inputs. The
+   * engines are never rerun implicitly — the operator decides when to spend
+   * the work again.
+   */
+  const markStale = useCallback(() => {
+    setStale((prev) => ({
+      simulation: prev.simulation || simulation !== null,
+      comparison: prev.comparison || comparison !== null,
+      plan: prev.plan || plan !== null,
+    }));
+  }, [simulation, comparison, plan]);
+
+  /** Generates the proposals for a recommendation. Explicitly invoked only. */
+  const generateProposals = useCallback(
+    (subject: IntelligenceRecommendation) => {
       defer("proposals", () => {
         const engine = getRemediationEngines().simulation;
-        const generated = engine.generateProposalFromRecommendation(next);
+        const generated = engine.generateProposalFromRecommendation(subject);
         if (!mounted.current) return;
         setProposals(generated);
         setConflicts(engine.inspectConflicts(generated));
@@ -256,8 +320,46 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
         if (generated.length === 1) setProposalId(generated[0].id);
       });
     },
-    [defer, resetDownstream],
+    [defer],
   );
+
+  /**
+   * Selecting a recommendation writes the canonical id to the URL. The
+   * selection itself is derived from the URL, so refresh, Back and Forward
+   * all reproduce the same workspace.
+   */
+  const selectRecommendation = useCallback(
+    (next: IntelligenceRecommendation | null) => {
+      setSearchParams(
+        (params) => {
+          const updated = new URLSearchParams(params);
+          if (next) updated.set(RECOMMENDATION_PARAM, next.id);
+          else updated.delete(RECOMMENDATION_PARAM);
+          return updated;
+        },
+        { replace: false },
+      );
+    },
+    [setSearchParams],
+  );
+
+  // The recommendation is URL-derived, so this effect fires exactly once per
+  // distinct selection (deep link, picker click, Back/Forward), never on an
+  // ordinary re-render. Every piece of dependent local state is cleared first.
+  const generatedFor = useRef<string | null>(null);
+  useEffect(() => {
+    const id = recommendation?.id ?? null;
+    if (generatedFor.current === id) return;
+    generatedFor.current = id;
+    setProposals([]);
+    setProposalId(null);
+    setBindings({});
+    setConflicts([]);
+    setError(null);
+    setFailedAction(null);
+    resetDownstream();
+    if (recommendation) generateProposals(recommendation);
+  }, [recommendation, generateProposals, resetDownstream]);
 
   const selectProposal = useCallback(
     (id: string) => {
@@ -277,15 +379,15 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
         }
         return { ...prev, [name]: value };
       });
-      resetDownstream();
+      markStale();
     },
-    [resetDownstream],
+    [markStale],
   );
 
   const clearBindings = useCallback(() => {
     setBindings({});
-    resetDownstream();
-  }, [resetDownstream]);
+    markStale();
+  }, [markStale]);
 
   const runSimulation = useCallback(() => {
     if (!selected) return;
@@ -296,6 +398,11 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
       setSimulation(result);
       setPlan(null);
       setDrift(null);
+      setStale({ simulation: false, comparison: false, plan: false });
+      setAnnouncement(
+        `Simulation complete. Band ${result.score.band}, score ${result.score.score}, ` +
+          `${result.regressions.length} regression${result.regressions.length === 1 ? "" : "s"}.`,
+      );
     });
   }, [defer, selected, bindings]);
 
@@ -308,6 +415,8 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
       });
       if (!mounted.current) return;
       setComparison(result);
+      setStale((prev) => ({ ...prev, comparison: false }));
+      setAnnouncement(`Alternative comparison complete. Verdict: ${result.verdict}.`);
     });
   }, [defer, alternatives, selected, bindings]);
 
@@ -320,25 +429,60 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
       if (!mounted.current) return;
       setPlan(built);
       setDrift(driftReport);
+      setStale((prev) => ({ ...prev, plan: false }));
+      setAnnouncement(
+        `Change plan preview generated. Status ${built.status}, ${built.steps.length} steps, ` +
+          `${built.blockers.length} blocker${built.blockers.length === 1 ? "" : "s"}.`,
+      );
     });
   }, [defer, simulation]);
 
+  /** Re-runs the action that failed, without changing any selection. */
+  const retry = useCallback(() => {
+    switch (failedAction) {
+      case "proposals":
+        if (recommendation) generateProposals(recommendation);
+        return;
+      case "simulation":
+        runSimulation();
+        return;
+      case "alternatives":
+        runAlternativeComparison();
+        return;
+      case "plan":
+        buildChangePlan();
+        return;
+      default:
+        setError(null);
+    }
+  }, [
+    failedAction,
+    recommendation,
+    generateProposals,
+    runSimulation,
+    runAlternativeComparison,
+    buildChangePlan,
+  ]);
+
   const reset = useCallback(() => {
-    setRecommendation(null);
     setProposals([]);
     setProposalId(null);
     setBindings({});
     setConflicts([]);
     setError(null);
+    setFailedAction(null);
+    setAnnouncement("");
     resetDownstream();
-  }, [resetDownstream]);
+    generatedFor.current = null;
+    selectRecommendation(null);
+  }, [resetDownstream, selectRecommendation]);
 
   /* -------------------------------------------------------- stage gating */
 
   const stageStates = useMemo<Readonly<Record<RemediationStage, StageState>>>(() => {
     const hasRecommendation = recommendation !== null;
     const hasProposal = selected !== null;
-    const hasSimulation = simulation !== null;
+    const hasSimulation = simulation !== null && !stale.simulation;
     return {
       recommendation: hasRecommendation ? "complete" : "available",
       proposal: !hasRecommendation ? "locked" : hasProposal ? "complete" : "available",
@@ -346,7 +490,8 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
       alternatives: !hasProposal ? "locked" : comparison ? "complete" : "available",
       "change-plan": !hasSimulation ? "locked" : plan ? "complete" : "available",
     };
-  }, [recommendation, selected, simulation, comparison, plan]);
+  }, [recommendation, selected, simulation, comparison, plan, stale.simulation]);
+
 
   const activeStage = useMemo<RemediationStage>(() => {
     if (plan) return "change-plan";
@@ -370,9 +515,17 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
       comparison,
       plan,
       drift,
+      simulationStale: stale.simulation,
+      comparisonStale: stale.comparison,
+      planStale: stale.plan,
       busy,
       error,
+      failedAction,
+      retry,
       canonicalGraphHash,
+      selectionSource: selection.source,
+      unknownRecommendationParam,
+      announcement,
       stageStates,
       activeStage,
       selectRecommendation,
@@ -397,10 +550,17 @@ export function RemediationWorkspaceProvider({ children }: { children: ReactNode
       comparison,
       plan,
       drift,
+      stale,
       busy,
       error,
+      failedAction,
+      retry,
       canonicalGraphHash,
+      selection.source,
+      unknownRecommendationParam,
+      announcement,
       stageStates,
+
       activeStage,
       selectRecommendation,
       selectProposal,

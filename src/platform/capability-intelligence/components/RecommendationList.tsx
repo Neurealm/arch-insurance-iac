@@ -1,4 +1,7 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { remediationLinkFor } from "../remediation/recommendationSelection";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -78,6 +81,17 @@ export function RecommendationCard({
             {r.affected.routeIds.length} routes · {r.affected.capabilityIds.length} capabilities
           </div>
           <div>Complexity: {r.remediation.complexity}</div>
+        </div>
+        <div>
+          {/* Advisory hand-off only: opens the planning workspace with this
+              recommendation pre-selected. Nothing is approved or executed. */}
+          <Button size="sm" variant="outline" asChild data-testid="evaluate-remediation">
+            <Link to={remediationLinkFor(r.id)}>
+              Evaluate remediation
+              <span className="sr-only"> for {r.title}</span>
+            </Link>
+          </Button>
+
         </div>
         {r.affected.nodeIds.length > 0 && (
           <div className="flex flex-wrap gap-1">

@@ -24,11 +24,14 @@ export function SimulationPanel({
   simulation,
   canRun,
   busy,
+  stale,
   onRun,
 }: {
   simulation: SimulationResult | null;
   canRun: boolean;
   busy: boolean;
+  /** Inputs changed after this result was produced. Never rerun implicitly. */
+  stale?: boolean;
   onRun: () => void;
 }) {
   return (
@@ -40,7 +43,21 @@ export function SimulationPanel({
         {!canRun && (
           <p className="text-xs text-muted-foreground">Select a proposal to enable simulation.</p>
         )}
+        {stale && simulation && (
+          <StatusBadge
+            value="stale"
+            tone="warning"
+            label="Inputs changed — re-run to refresh"
+          />
+        )}
       </div>
+
+      {stale && simulation && (
+        <p className="text-xs text-muted-foreground" data-testid="simulation-stale">
+          The parameters changed after this simulation ran. The result below still describes the
+          previous inputs; nothing was rerun automatically.
+        </p>
+      )}
 
       {busy && (
         <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
@@ -52,6 +69,7 @@ export function SimulationPanel({
     </div>
   );
 }
+
 
 function SimulationOutcome({ result }: { result: SimulationResult }) {
   const changed = result.metricDeltas.filter((d) => d.direction !== "unchanged");
@@ -146,9 +164,8 @@ function SimulationOutcome({ result }: { result: SimulationResult }) {
           <CardTitle className="text-sm">Recommendation resolution</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <ResolutionGroup title="Resolved" items={result.resolvedRecommendations} />
-          <ResolutionGroup title="Partially resolved" items={result.partiallyResolvedRecommendations} />
-          <ResolutionGroup title="Still outstanding" items={result.unresolvedRecommendations} />
+          <ResolutionByClassification result={result} />
+
         </CardContent>
       </Card>
 
@@ -208,7 +225,52 @@ function SimulationOutcome({ result }: { result: SimulationResult }) {
   );
 }
 
+/** Canonical resolution classifications, in the engine's own vocabulary. */
+const RESOLUTION_CLASSIFICATIONS = [
+  ["resolved", "Resolved"],
+  ["partially-resolved", "Partially resolved"],
+  ["unresolved", "Unresolved"],
+  ["superseded", "Superseded"],
+  ["invalidated", "Invalidated"],
+  ["regressed", "Regressed"],
+] as const;
+
+/**
+ * Every classification the engine can emit, grouped from all three result
+ * buckets. A classification with no members is stated explicitly rather than
+ * silently omitted, so an operator can tell "none" from "not reported".
+ */
+function ResolutionByClassification({ result }: { result: SimulationResult }) {
+  const all = [
+    ...result.resolvedRecommendations,
+    ...result.partiallyResolvedRecommendations,
+    ...result.unresolvedRecommendations,
+  ];
+  return (
+    <div className="space-y-2" data-testid="resolution-classifications">
+      {RESOLUTION_CLASSIFICATIONS.map(([classification, title]) => {
+        const items = all.filter((r) => r.classification === classification);
+        return items.length === 0 ? (
+          <div
+            key={classification}
+            className="text-xs text-muted-foreground"
+            data-classification={classification}
+            data-count={0}
+          >
+            {title}: none
+          </div>
+        ) : (
+          <div key={classification} data-classification={classification} data-count={items.length}>
+            <ResolutionGroup title={title} items={items} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function ResolutionGroup({
+
   title,
   items,
 }: {

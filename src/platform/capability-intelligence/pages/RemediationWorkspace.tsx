@@ -31,8 +31,10 @@ const STAGE_DESCRIPTION: Readonly<Record<RemediationStage, string>> = {
 
 /** Screen 4 — Simulation and Change Planning workspace. Planning-only. */
 export default function RemediationWorkspace() {
+  const { snapshot } = useCapabilityIntelligence();
+  if (!snapshot) return <EmptyState title="No analysis available" />;
   return (
-    <RemediationWorkspaceProvider>
+    <RemediationWorkspaceProvider recommendations={snapshot.intelligence.recommendations}>
       <WorkspaceBody />
     </RemediationWorkspaceProvider>
   );
@@ -48,12 +50,19 @@ function WorkspaceBody() {
 
   return (
     <div className="space-y-5">
+      {/* Single polite region for workspace events: simulation complete,
+          comparison complete, plan generated, and engine failures. */}
+      <p className="sr-only" role="status" aria-live="polite" data-testid="remediation-announcement">
+        {workspace.announcement}
+      </p>
+
       <Card>
         <CardHeader className="pb-2">
           <div className="flex flex-wrap items-center gap-2">
             <CardTitle className="text-base">Remediation workspace</CardTitle>
             <StatusBadge value="planning-only" tone="neutral" label="Planning only" />
             <StatusBadge value="deterministic" tone="neutral" label="Deterministic" />
+            <StatusBadge value="read-only" tone="neutral" label="Read only" />
             {workspace.recommendation && (
               <Button size="sm" variant="outline" className="ml-auto" onClick={workspace.reset}>
                 Start over
@@ -65,12 +74,23 @@ function WorkspaceBody() {
           <p>{READ_ONLY_NOTICE}</p>
           <p>{DETERMINISM_NOTICE}</p>
           <p className="font-mono text-[11px]">Canonical graph hash: {workspace.canonicalGraphHash}</p>
+          {workspace.selectionSource === "default" && workspace.recommendation && (
+            <p data-testid="selection-source">
+              {workspace.unknownRecommendationParam
+                ? `No recommendation matches “${workspace.unknownRecommendationParam}”. Showing the highest-priority recommendation instead.`
+                : "No recommendation was named in the link. Showing the highest-priority recommendation."}
+            </p>
+          )}
         </CardContent>
       </Card>
 
       <StageProgress />
 
-      {workspace.error != null && <ErrorState error={workspace.error} />}
+      {workspace.error != null && (
+        <div data-testid="workspace-error">
+          <ErrorState error={workspace.error} onRetry={workspace.retry} />
+        </div>
+      )}
 
       <Stage stage="recommendation">
         <RecommendationPicker
@@ -102,6 +122,7 @@ function WorkspaceBody() {
           simulation={workspace.simulation}
           canRun={workspace.proposal !== null}
           busy={workspace.busy === "simulation"}
+          stale={workspace.simulationStale}
           onRun={workspace.runSimulation}
         />
       </Stage>
@@ -111,6 +132,7 @@ function WorkspaceBody() {
           alternatives={workspace.alternatives}
           comparison={workspace.comparison}
           busy={workspace.busy === "alternatives"}
+          stale={workspace.comparisonStale}
           onCompare={workspace.runAlternativeComparison}
         />
       </Stage>
@@ -119,14 +141,16 @@ function WorkspaceBody() {
         <ChangePlanPanel
           plan={workspace.plan}
           drift={workspace.drift}
-          canBuild={workspace.simulation !== null}
+          canBuild={workspace.simulation !== null && !workspace.simulationStale}
           busy={workspace.busy === "plan"}
+          stale={workspace.planStale}
           onBuild={workspace.buildChangePlan}
         />
       </Stage>
     </div>
   );
 }
+
 
 /** Compact, accessible progress summary of the five-stage workflow. */
 function StageProgress() {
