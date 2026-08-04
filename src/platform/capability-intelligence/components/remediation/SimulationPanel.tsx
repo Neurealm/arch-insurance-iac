@@ -24,11 +24,14 @@ export function SimulationPanel({
   simulation,
   canRun,
   busy,
+  stale,
   onRun,
 }: {
   simulation: SimulationResult | null;
   canRun: boolean;
   busy: boolean;
+  /** Inputs changed after this result was produced. Never rerun implicitly. */
+  stale?: boolean;
   onRun: () => void;
 }) {
   return (
@@ -40,7 +43,21 @@ export function SimulationPanel({
         {!canRun && (
           <p className="text-xs text-muted-foreground">Select a proposal to enable simulation.</p>
         )}
+        {stale && simulation && (
+          <StatusBadge
+            value="stale"
+            tone="warning"
+            label="Inputs changed — re-run to refresh"
+          />
+        )}
       </div>
+
+      {stale && simulation && (
+        <p className="text-xs text-muted-foreground" data-testid="simulation-stale">
+          The parameters changed after this simulation ran. The result below still describes the
+          previous inputs; nothing was rerun automatically.
+        </p>
+      )}
 
       {busy && (
         <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
@@ -52,6 +69,7 @@ export function SimulationPanel({
     </div>
   );
 }
+
 
 function SimulationOutcome({ result }: { result: SimulationResult }) {
   const changed = result.metricDeltas.filter((d) => d.direction !== "unchanged");
