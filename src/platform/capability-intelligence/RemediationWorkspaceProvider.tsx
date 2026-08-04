@@ -1,0 +1,417 @@
+/**
+ * Stage 3.5.4.3 — Remediation Workspace provider.
+ *
+ * Local, route-scoped state for the Simulation and Change Planning workspace.
+ *
+ * Guarantees carried over from the engines this provider drives:
+ *  - Read-only. Nothing here mutates the canonical graph, the registries, the
+ *    manifests, the routes or any repository file. No patch is ever applied.
+ *  - Deterministic. Identical selections produce identical simulations and
+ *    identical plans; there is no clock, randomness, network or LLM involved.
+ *  - Engines execute only in response to an explicit user action, never during
+ *    render, and always off the commit path so the UI can paint a busy state.
+ *
+ * The provider deliberately does NOT create its own graph analysis: it reuses
+ * the process-wide simulation engine (which memoizes its baseline snapshot) and
+ * builds a change-plan engine on top of that same instance.
+ */
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  getSimulationEngine,
+  type AlternativeComparison,
+  type ChangeProposal,
+  type ParameterBinding,
+  type ProposalConflict,
+  type SimulationResult,
+  type ValidationResult,
+} from "@/modules/graph/simulation/index";
+import {
+  createChangePlanEngine,
+  type ChangePlan,
+  type DriftReport,
+  type GraphChangePlanEngine,
+} from "@/modules/graph/change-plan/index";
+import type { IntelligenceRecommendation } from "@/modules/graph/intelligence/index";
+
+/* -------------------------------------------------------------- workflow */
+
+export const REMEDIATION_STAGES = [
+  "recommendation",
+  "proposal",
+  "simulation",
+  "alternatives",
+  "change-plan",
+] as const;
+
+export type RemediationStage = (typeof REMEDIATION_STAGES)[number];
+
+export const REMEDIATION_STAGE_LABELS: Readonly<Record<RemediationStage, string>> = {
+  recommendation: "1. Recommendation",
+  proposal: "2. Proposal",
+  simulation: "3. Simulation",
+  alternatives: "4. Alternatives",
+  "change-plan": "5. Change plan",
+};
+
+export type StageState = "locked" | "available" | "complete";
+
+/* ------------------------------------------------------------ engine box */
+
+interface Engines {
+  simulation: ReturnType<typeof getSimulationEngine>;
+  plan: GraphChangePlanEngine;
+}
+
+let engineCache: Engines | null = null;
+
+/** Lazily builds the engine pair once per browser session. */
+export function getRemediationEngines(): Engines {
+  if (engineCache) return engineCache;
+  const simulation = getSimulationEngine();
+  engineCache = {
+    simulation,
+    plan: createChangePlanEngine({ simulationEngine: simulation }),
+  };
+  return engineCache;
+}
+
+/** Test hook: drops the memoized engine pair. */
+export function __resetRemediationEngines(): void {
+  engineCache = null;
+}
+
+/* ------------------------------------------------------------ value type */
+
+export interface RemediationWorkspaceValue {
+  /** Recommendation currently under remediation, or null. */
+  recommendation: IntelligenceRecommendation | null;
+  /** Proposals generated for that recommendation, deterministically ordered. */
+  proposals: readonly ChangeProposal[];
+  /** Proposal the operator is working with, after any parameter bindings. */
+  proposal: ChangeProposal | null;
+  /** Bindings supplied for the selected proposal. */
+  bindings: ParameterBinding;
+  /** Required parameters that still have no value. */
+  unresolvedParameters: readonly string[];
+  /** Static validation of the bound proposal. Recomputed on every binding. */
+  validation: ValidationResult | null;
+  /** Conflicts detected across the generated proposal set. */
+  conflicts: readonly ProposalConflict[];
+  /** Sibling proposals that are mutually exclusive with the selection. */
+  alternatives: readonly ChangeProposal[];
+  /** Result of the last executed simulation, if any. */
+  simulation: SimulationResult | null;
+  /** Result of the last executed alternative comparison, if any. */
+  comparison: AlternativeComparison | null;
+  /** Planned change specification derived from the simulation, if built. */
+  plan: ChangePlan | null;
+  /** Drift of the built plan against the current canonical graph. */
+  drift: DriftReport | null;
+
+  busy: null | "proposals" | "simulation" | "alternatives" | "plan";
+  error: unknown;
+  /** Canonical graph hash observed by the engines. Never changes. */
+  canonicalGraphHash: string;
+  /** Per-stage availability used to drive the progressive disclosure UI. */
+  stageStates: Readonly<Record<RemediationStage, StageState>>;
+  /** Furthest stage the operator may open. */
+  activeStage: RemediationStage;
+
+  selectRecommendation: (recommendation: IntelligenceRecommendation | null) => void;
+  selectProposal: (proposalId: string) => void;
+  setBinding: (name: string, value: string) => void;
+  clearBindings: () => void;
+  runSimulation: () => void;
+  runAlternativeComparison: () => void;
+  buildChangePlan: () => void;
+  reset: () => void;
+}
+
+const Ctx = createContext<RemediationWorkspaceValue | null>(null);
+
+/* -------------------------------------------------------------- provider */
+
+export function RemediationWorkspaceProvider({ children }: { children: ReactNode }) {
+  const [recommendation, setRecommendation] = useState<IntelligenceRecommendation | null>(null);
+  const [proposals, setProposals] = useState<readonly ChangeProposal[]>([]);
+  const [proposalId, setProposalId] = useState<string | null>(null);
+  const [bindings, setBindings] = useState<ParameterBinding>({});
+  const [simulation, setSimulation] = useState<SimulationResult | null>(null);
+  const [comparison, setComparison] = useState<AlternativeComparison | null>(null);
+  const [plan, setPlan] = useState<ChangePlan | null>(null);
+  const [drift, setDrift] = useState<DriftReport | null>(null);
+  const [conflicts, setConflicts] = useState<readonly ProposalConflict[]>([]);
+  const [busy, setBusy] = useState<RemediationWorkspaceValue["busy"]>(null);
+  const [error, setError] = useState<unknown>(null);
+
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  /** Runs an engine call off the commit path so the busy state paints first. */
+  const defer = useCallback(
+    (kind: NonNullable<RemediationWorkspaceValue["busy"]>, work: () => void) => {
+      setBusy(kind);
+      setError(null);
+      const handle = setTimeout(() => {
+        try {
+          work();
+        } catch (err) {
+          if (mounted.current) setError(err);
+        } finally {
+          if (mounted.current) setBusy(null);
+        }
+      }, 0);
+      return () => clearTimeout(handle);
+    },
+    [],
+  );
+
+  const canonicalGraphHash = useMemo(() => getRemediationEngines().simulation.canonicalGraphHash, []);
+
+  const selected = useMemo(
+    () => proposals.find((p) => p.id === proposalId) ?? null,
+    [proposals, proposalId],
+  );
+
+  /** The selection with the operator's parameter bindings applied. */
+  const bound = useMemo(() => {
+    if (!selected) return null;
+    if (Object.keys(bindings).length === 0) return selected;
+    try {
+      return getRemediationEngines().simulation.bind(selected, bindings);
+    } catch {
+      return selected;
+    }
+  }, [selected, bindings]);
+
+  const validation = useMemo(() => {
+    if (!bound) return null;
+    try {
+      return getRemediationEngines().simulation.validate(bound);
+    } catch {
+      return null;
+    }
+  }, [bound]);
+
+  const unresolvedParameters = useMemo(
+    () => (bound ? getRemediationEngines().simulation.unresolvedParameters(bound) : []),
+    [bound],
+  );
+
+  const alternatives = useMemo(() => {
+    if (!selected) return [];
+    const ids = new Set(selected.alternativeProposalIds);
+    return proposals.filter((p) => p.id === selected.id || ids.has(p.id));
+  }, [proposals, selected]);
+
+  /* -------------------------------------------------------------- actions */
+
+  const resetDownstream = useCallback(() => {
+    setSimulation(null);
+    setComparison(null);
+    setPlan(null);
+    setDrift(null);
+  }, []);
+
+  const selectRecommendation = useCallback(
+    (next: IntelligenceRecommendation | null) => {
+      setRecommendation(next);
+      setProposalId(null);
+      setBindings({});
+      setProposals([]);
+      setConflicts([]);
+      resetDownstream();
+      if (!next) return;
+      defer("proposals", () => {
+        const engine = getRemediationEngines().simulation;
+        const generated = engine.generateProposalFromRecommendation(next);
+        if (!mounted.current) return;
+        setProposals(generated);
+        setConflicts(engine.inspectConflicts(generated));
+        // Auto-select when the recommendation yields exactly one proposal:
+        // there is no decision to make and the operator would only click once.
+        if (generated.length === 1) setProposalId(generated[0].id);
+      });
+    },
+    [defer, resetDownstream],
+  );
+
+  const selectProposal = useCallback(
+    (id: string) => {
+      setProposalId(id);
+      setBindings({});
+      resetDownstream();
+    },
+    [resetDownstream],
+  );
+
+  const setBinding = useCallback(
+    (name: string, value: string) => {
+      setBindings((prev) => {
+        if (!value) {
+          const { [name]: _dropped, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [name]: value };
+      });
+      resetDownstream();
+    },
+    [resetDownstream],
+  );
+
+  const clearBindings = useCallback(() => {
+    setBindings({});
+    resetDownstream();
+  }, [resetDownstream]);
+
+  const runSimulation = useCallback(() => {
+    if (!selected) return;
+    defer("simulation", () => {
+      const engine = getRemediationEngines().simulation;
+      const result = engine.simulateProposal(selected, { parameters: { [selected.id]: bindings } });
+      if (!mounted.current) return;
+      setSimulation(result);
+      setPlan(null);
+      setDrift(null);
+    });
+  }, [defer, selected, bindings]);
+
+  const runAlternativeComparison = useCallback(() => {
+    if (alternatives.length === 0) return;
+    defer("alternatives", () => {
+      const engine = getRemediationEngines().simulation;
+      const result = engine.compareAlternatives(alternatives, {
+        parameters: selected ? { [selected.id]: bindings } : {},
+      });
+      if (!mounted.current) return;
+      setComparison(result);
+    });
+  }, [defer, alternatives, selected, bindings]);
+
+  const buildChangePlan = useCallback(() => {
+    if (!simulation) return;
+    defer("plan", () => {
+      const engines = getRemediationEngines();
+      const built = engines.plan.buildPlanFromSimulation(simulation);
+      const driftReport = engines.plan.detectDrift(built);
+      if (!mounted.current) return;
+      setPlan(built);
+      setDrift(driftReport);
+    });
+  }, [defer, simulation]);
+
+  const reset = useCallback(() => {
+    setRecommendation(null);
+    setProposals([]);
+    setProposalId(null);
+    setBindings({});
+    setConflicts([]);
+    setError(null);
+    resetDownstream();
+  }, [resetDownstream]);
+
+  /* -------------------------------------------------------- stage gating */
+
+  const stageStates = useMemo<Readonly<Record<RemediationStage, StageState>>>(() => {
+    const hasRecommendation = recommendation !== null;
+    const hasProposal = selected !== null;
+    const hasSimulation = simulation !== null;
+    return {
+      recommendation: hasRecommendation ? "complete" : "available",
+      proposal: !hasRecommendation ? "locked" : hasProposal ? "complete" : "available",
+      simulation: !hasProposal ? "locked" : hasSimulation ? "complete" : "available",
+      alternatives: !hasProposal ? "locked" : comparison ? "complete" : "available",
+      "change-plan": !hasSimulation ? "locked" : plan ? "complete" : "available",
+    };
+  }, [recommendation, selected, simulation, comparison, plan]);
+
+  const activeStage = useMemo<RemediationStage>(() => {
+    if (plan) return "change-plan";
+    if (simulation) return "change-plan";
+    if (selected) return "simulation";
+    if (recommendation) return "proposal";
+    return "recommendation";
+  }, [recommendation, selected, simulation, plan]);
+
+  const value = useMemo<RemediationWorkspaceValue>(
+    () => ({
+      recommendation,
+      proposals,
+      proposal: bound,
+      bindings,
+      unresolvedParameters,
+      validation,
+      conflicts,
+      alternatives,
+      simulation,
+      comparison,
+      plan,
+      drift,
+      busy,
+      error,
+      canonicalGraphHash,
+      stageStates,
+      activeStage,
+      selectRecommendation,
+      selectProposal,
+      setBinding,
+      clearBindings,
+      runSimulation,
+      runAlternativeComparison,
+      buildChangePlan,
+      reset,
+    }),
+    [
+      recommendation,
+      proposals,
+      bound,
+      bindings,
+      unresolvedParameters,
+      validation,
+      conflicts,
+      alternatives,
+      simulation,
+      comparison,
+      plan,
+      drift,
+      busy,
+      error,
+      canonicalGraphHash,
+      stageStates,
+      activeStage,
+      selectRecommendation,
+      selectProposal,
+      setBinding,
+      clearBindings,
+      runSimulation,
+      runAlternativeComparison,
+      buildChangePlan,
+      reset,
+    ],
+  );
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
+export function useRemediationWorkspace(): RemediationWorkspaceValue {
+  const ctx = useContext(Ctx);
+  if (!ctx) {
+    throw new Error("useRemediationWorkspace must be used inside <RemediationWorkspaceProvider>");
+  }
+  return ctx;
+}
