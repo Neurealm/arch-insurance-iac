@@ -40,7 +40,11 @@ export function GraphWarningList({ warnings }: { warnings: readonly PresentedWar
           <p className="mt-1 font-mono text-[10px] text-muted-foreground">
             {w.code}
             {w.subject ? ` · ${w.subject}` : ""} — {w.detail}
+            {w.occurrences > 1
+              ? ` · one condition, reported by ${w.occurrences} traversal branches`
+              : ""}
           </p>
+
         </div>
       ))}
     </section>
