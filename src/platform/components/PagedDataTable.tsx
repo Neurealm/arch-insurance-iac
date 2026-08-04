@@ -68,26 +68,34 @@ export function PagedDataTable<T>({
           {caption && <caption className="sr-only">{caption}</caption>}
           <TableHeader>
             <TableRow>
-              {columns.map((c) => (
-                <TableHead key={c.key} className={c.className}>
-                  {c.sortable && onSortChange ? (
-                    <button
-                      type="button"
-                      onClick={() => onSortChange(c.key)}
-                      className="inline-flex items-center gap-1 hover:text-foreground"
-                      aria-label={`Sort by ${c.header}`}
-                    >
-                      {c.header}
-                      <ChevronsUpDown className="h-3 w-3" aria-hidden />
-                      {sortKey === c.key && (
-                        <span className="text-[10px] uppercase">{sortDirection}</span>
-                      )}
-                    </button>
-                  ) : (
-                    c.header
-                  )}
-                </TableHead>
-              ))}
+              {columns.map((c) => {
+                const sorted = sortKey === c.key;
+                const ariaSort = c.sortable
+                  ? sorted
+                    ? sortDirection === "desc"
+                      ? "descending"
+                      : "ascending"
+                    : "none"
+                  : undefined;
+                return (
+                  <TableHead key={c.key} className={c.className} aria-sort={ariaSort}>
+                    {c.sortable && onSortChange ? (
+                      <button
+                        type="button"
+                        onClick={() => onSortChange(c.key)}
+                        className="inline-flex items-center gap-1 hover:text-foreground"
+                        aria-label={`Sort by ${c.header}`}
+                      >
+                        {c.header}
+                        <ChevronsUpDown className="h-3 w-3" aria-hidden />
+                        {sorted && <span className="text-[10px] uppercase">{sortDirection}</span>}
+                      </button>
+                    ) : (
+                      c.header
+                    )}
+                  </TableHead>
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -109,7 +117,7 @@ export function PagedDataTable<T>({
         </Table>
       </div>
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <div data-testid="paged-range">
+        <div data-testid="paged-range" role="status" aria-live="polite" aria-atomic="true">
           Showing {from}–{to} of {total}
         </div>
         <div className="flex items-center gap-2">
@@ -118,6 +126,7 @@ export function PagedDataTable<T>({
             variant="outline"
             onClick={() => onPageChange(Math.max(0, page - 1))}
             disabled={page === 0}
+            aria-disabled={page === 0}
             aria-label="Previous page"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -130,6 +139,7 @@ export function PagedDataTable<T>({
             variant="outline"
             onClick={() => onPageChange(Math.min(pageCount - 1, page + 1))}
             disabled={page >= pageCount - 1}
+            aria-disabled={page >= pageCount - 1}
             aria-label="Next page"
           >
             <ChevronRight className="h-4 w-4" />
@@ -139,3 +149,4 @@ export function PagedDataTable<T>({
     </div>
   );
 }
+

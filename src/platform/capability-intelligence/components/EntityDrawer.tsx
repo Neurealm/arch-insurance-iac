@@ -6,6 +6,7 @@ import { StatusBadge } from "@/platform/components/StatusBadge";
 import { EmptyState } from "@/platform/components/States";
 import type { GraphQueryEngine } from "@/modules/graph/query/index";
 import type { IntelligenceResult } from "@/modules/graph/intelligence/index";
+import { orphanIndexFor } from "../presentation";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -30,7 +31,9 @@ export function EntityDrawer({
   onOpenChange: (open: boolean) => void;
   onSelectEntity?: (nodeId: string) => void;
 }) {
+  const orphanIds = useMemo(() => orphanIndexFor(engine), [engine]);
   const node = nodeId ? engine.getNode(nodeId) : null;
+  const isOrphan = !!node && orphanIds.has(node.id);
 
   const detail = useMemo(() => {
     if (!node) return null;
@@ -66,13 +69,20 @@ export function EntityDrawer({
                     <StatusBadge value={node.ownership} />
                     <StatusBadge value={node.confidence} />
                     <StatusBadge value={node.source} tone="neutral" />
+                    <span data-testid="entity-connectivity">
+                      <StatusBadge
+                        value={isOrphan ? "orphan" : "connected"}
+                        tone={isOrphan ? "warning" : "neutral"}
+                        label={isOrphan ? "Orphan: no graph relationships" : "Connected"}
+                      />
+                    </span>
                   </div>
                   {node.description && <p className="text-sm text-muted-foreground">{node.description}</p>}
                   {node.filePath && <p className="font-mono text-[11px] text-muted-foreground">{node.filePath}</p>}
                 </Section>
 
                 <Separator />
-                <Section title="Owners">
+                <Section title="Owning module">
                   <p className="text-sm text-foreground">{node.moduleId ?? "Unassigned"}</p>
                 </Section>
 

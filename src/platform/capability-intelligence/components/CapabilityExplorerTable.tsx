@@ -6,6 +6,7 @@ import { EmptyState } from "@/platform/components/States";
 import { PagedDataTable, type PagedColumn } from "@/platform/components/PagedDataTable";
 import { StatusBadge } from "@/platform/components/StatusBadge";
 import { GRAPH_NODE_TYPES, type GraphNode, type GraphNodeType } from "@/modules/graph/types";
+import { orphanIndexFor } from "../presentation";
 import type { GraphQueryEngine, NodeQueryFilters } from "@/modules/graph/query/index";
 
 const ANY = "__any__";
@@ -36,10 +37,13 @@ export function CapabilityExplorerTable({
   const [ownership, setOwnership] = useState<string>(ANY);
   const [capability, setCapability] = useState<string>(ANY);
   const [registration, setRegistration] = useState<string>(ANY);
+  const [orphanState, setOrphanState] = useState<string>(ANY);
   const [confidence, setConfidence] = useState<string>(ANY);
   const [sortKey, setSortKey] = useState<SortKey>("label");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
+
+  const orphanIds = useMemo(() => orphanIndexFor(engine), [engine]);
 
   const owners = useMemo(() => {
     const set = new Set<string>();
@@ -74,6 +78,8 @@ export function CapabilityExplorerTable({
     if (capabilityScope) rows = rows.filter((n) => capabilityScope.has(n.id));
     if (registration !== ANY) rows = rows.filter((n) => registrationOf(n) === registration);
     if (confidence !== ANY) rows = rows.filter((n) => n.confidence === confidence);
+    if (orphanState !== ANY)
+      rows = rows.filter((n) => (orphanState === "orphan" ? orphanIds.has(n.id) : !orphanIds.has(n.id)));
     const dir = sortDirection === "asc" ? 1 : -1;
     rows.sort((a, b) => {
       const av = String(a[sortKey] ?? "");
@@ -81,7 +87,7 @@ export function CapabilityExplorerTable({
       return (av.localeCompare(bv) || a.id.localeCompare(b.id)) * dir;
     });
     return rows;
-  }, [engine, text, nodeType, owner, ownership, capabilityScope, registration, confidence, sortKey, sortDirection]);
+  }, [engine, text, nodeType, owner, ownership, capabilityScope, registration, confidence, orphanState, orphanIds, sortKey, sortDirection]);
 
   const safePage = Math.min(page, Math.max(0, Math.ceil(matched.length / PAGE_SIZE) - 1));
   const rows = matched.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
@@ -99,8 +105,23 @@ export function CapabilityExplorerTable({
       ),
     },
     { key: "type", header: "Type", sortable: true, render: (n) => <StatusBadge value={n.type} tone="info" /> },
-    { key: "moduleId", header: "Owner", sortable: true, render: (n) => n.moduleId ?? "—" },
-    { key: "ownership", header: "Ownership", sortable: true, render: (n) => <StatusBadge value={n.ownership} /> },
+    { key: "moduleId", header: "Owning module", sortable: true, render: (n) => n.moduleId ?? "—" },
+    {
+      key: "ownership",
+      header: "Ownership status",
+      sortable: true,
+      render: (n) => <StatusBadge value={n.ownership} />,
+    },
+    {
+      key: "orphan",
+      header: "Connectivity",
+      render: (n) => (
+        <StatusBadge
+          value={orphanIds.has(n.id) ? "orphan" : "connected"}
+          tone={orphanIds.has(n.id) ? "warning" : "neutral"}
+        />
+      ),
+    },
     {
       key: "registration",
       header: "Registration",
@@ -116,6 +137,7 @@ export function CapabilityExplorerTable({
     setOwnership(ANY);
     setCapability(ANY);
     setRegistration(ANY);
+    setOrphanState(ANY);
     setConfidence(ANY);
     setPage(0);
   };
@@ -142,9 +164,9 @@ export function CapabilityExplorerTable({
           aria-label="Search entities"
         />
         <Picker label="Node type" value={nodeType} onChange={setNodeType} options={[...GRAPH_NODE_TYPES]} reset={() => setPage(0)} />
-        <Picker label="Owner" value={owner} onChange={setOwner} options={owners} reset={() => setPage(0)} />
+        <Picker label="Owning module" value={owner} onChange={setOwner} options={owners} reset={() => setPage(0)} />
         <Picker
-          label="Module ownership"
+          label="Ownership status"
           value={ownership}
           onChange={setOwnership}
           options={["module-owned", "shared", "platform-owned", "customer-owned", "unassigned"]}
@@ -163,6 +185,13 @@ export function CapabilityExplorerTable({
           value={registration}
           onChange={setRegistration}
           options={[...REGISTRATION_OPTIONS]}
+          reset={() => setPage(0)}
+        />
+        <Picker
+          label="Connectivity"
+          value={orphanState}
+          onChange={setOrphanState}
+          options={["orphan", "connected"]}
           reset={() => setPage(0)}
         />
         <Picker
