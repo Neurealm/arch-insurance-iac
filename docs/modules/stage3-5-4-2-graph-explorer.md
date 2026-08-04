@@ -80,16 +80,90 @@ filtering artefact is never presented as an orphan.
 | Root parameter | Missing, empty and whitespace-only `?root=` values resolve to the deterministic initial root; non-empty values are never trimmed, so an unknown id stays in the explicit unknown-entity state. |
 | Re-root | Sets the root in the URL (a real history entry), clears node and edge selection, closes the entity drawer and refits the canvas. |
 
+## Stage 3.5.4.2.2 — warning deduplication and accessibility closure
+
+### Presentation-layer deduplication
+
+A bidirectional traversal runs an upstream and a downstream sub-query, and each
+may report the same condition. The engine is correct to emit both; showing two
+identical cards is not, because it reads as two separate defects.
+
+`graph/graphWarnings.ts` therefore consolidates warnings **in the presentation
+layer only**. Query Engine emission, traversal execution, canonical query
+results, the graph-view warning source data and the warning taxonomy are all
+unchanged.
+
+| Aspect | Behaviour |
+| --- | --- |
+| Identity | `graphWarningIdentity()` = canonical **code + subject + verbatim message**. Two warnings collapse only when all three match, so the same code about different entities, depths, limits or conditions stays separate. |
+| Ordering | Unchanged policy: truncation → depth → path → candidate relationships → empty result → any other code, ties broken by first emission index. |
+| Determinism | Identical input yields byte-identical output; semantically identical input collapses regardless of array order; the input array and its warning objects are never mutated. |
+| Preservation | Every unique warning survives, with its canonical code, verbatim message, subject, explanation and suggested actions intact. |
+| Consolidation detail | When a card represents more than one report, its supporting line ends with "one condition, reported by N traversal branches" — explicitly one condition, not N defects. |
+
+### Warning live region
+
+`data-testid="graph-warning-announcement"` is a `role="status" aria-live="polite"`
+region rendered next to the visible warning cards.
+
+- **One warning** — `Graph warning. The view stops at depth 2 and may not show the complete relationship chain.`
+- **Several warnings** — `Graph updated with 2 warnings. The view stops at depth 2 and may not show the complete relationship chain and candidate relationships are included.`
+- **Warnings clear** — `Graph warnings cleared.`, announced once; a view that never had warnings stays silent.
+
+`nextWarningAnnouncement()` compares the deduplicated warning-set signature, so
+the region changes only when the warning state materially changes: root,
+direction, depth, relationship filter, candidate inclusion, reset, empty-result
+and truncation. Pan, zoom, node and edge hover, focus movement, entity-drawer
+open/close, fit-view and contents expand/collapse leave the signature untouched
+and are therefore silent. Duplicate engine warnings announce one condition.
+
+### Two live regions, two purposes
+
+The graph-count region ("how much is visible") and the warning region ("why the
+view is bounded") are separate polite regions. Neither overwrites the other, and
+both derive from the same bounded graph-view result, so they cannot disagree.
+Full warning detail — title, explanation, suggested actions, canonical code,
+subject and verbatim message — remains visible in the cards; the announcement is
+a concise summary, never the only source of the information, and no warning
+meaning depends on colour.
+
+### Presentation utility
+
+All pure warning logic lives in `graph/graphWarnings.ts`: `presentGraphWarnings`,
+`deduplicateGraphWarnings`, `graphWarningIdentity`, `graphWarningSetSignature`,
+`summarizeGraphWarningsForAnnouncement` and `nextWarningAnnouncement`. It is
+React-free, deterministic, read-only and typed against the existing
+`QueryWarning` contract. No engine logic moved into the UI and no broader warning
+framework was introduced.
+
 ## Validation
 
-- 814/814 tests passing. Stage 3.5.4.2 added `graphExplorer.test.tsx` and
+- 853/853 tests passing. Stage 3.5.4.2 added `graphExplorer.test.tsx` and
   `graphExplorerNavigation.test.tsx`; Stage 3.5.4.2.1 adds
   `graphExplorerHardening.test.ts` (warnings, edge-limit truncation, recommendation root
   policy, root-parameter contract), `graphExplorerTransparency.test.tsx` (accessible
   contents, count announcements, re-root contract, real browser history) and
   `src/runops/components/runopsGraphRegression.test.tsx` (existing RunOps canvases are
-  unaffected by the `animateHighlights` and `selectedEdgeIds` extension).
+  unaffected by the `animateHighlights` and `selectedEdgeIds` extension). Stage
+  3.5.4.2.2 adds `graphWarningDeduplication.test.ts` (identity, collapse,
+  ordering, order independence, non-mutation, announcement summaries and
+  transitions) and `graphWarningAnnouncement.test.tsx` (live-region behaviour in
+  the real route, including silence for pan/fit-view, contents toggle, hover,
+  focus and drawer interactions).
 - Typecheck clean.
 - Canonical graph hash `e889b604` preserved — the explorer is strictly read-only.
 
-READY FOR GRAPH EXPLORER VALIDATION
+## Remaining limitations
+
+- Warning consolidation is presentation-only: the engine still emits one warning
+  per traversal branch, and any consumer reading `view.warnings` directly sees
+  the raw list.
+- Warnings cannot be acknowledged, dismissed, suppressed or persisted, and no
+  severity override exists. This is deliberate.
+- Count parity between the canvas, contents table and announcements is asserted
+  for the default view and control changes rather than for every combination of
+  depth, filter, candidate and truncation state; parity is structurally
+  guaranteed because all four derive from one memoized graph view.
+- No graph editing, simulation, change-plan or approval surface exists here.
+
+READY FOR FINAL GRAPH EXPLORER VALIDATION
