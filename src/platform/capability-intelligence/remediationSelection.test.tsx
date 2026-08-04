@@ -41,7 +41,10 @@ import {
   __capabilityIntelligenceComputeCount,
   computeCapabilityIntelligence,
 } from "@/platform/capability-intelligence/CapabilityIntelligenceProvider";
-import { __resetRemediationEngines } from "@/platform/capability-intelligence/RemediationWorkspaceProvider";
+import {
+  __resetRemediationEngines,
+  getRemediationEngines,
+} from "@/platform/capability-intelligence/RemediationWorkspaceProvider";
 
 beforeAll(() => {
   const proto = window.HTMLElement.prototype as unknown as Record<string, unknown>;
