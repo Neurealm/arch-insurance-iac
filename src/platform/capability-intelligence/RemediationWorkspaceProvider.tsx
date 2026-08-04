@@ -80,7 +80,15 @@ export function getRemediationEngines(): Engines {
   const simulation = getSimulationEngine();
   engineCache = {
     simulation,
-    plan: createChangePlanEngine({ simulationEngine: simulation }),
+    // The plan engine defaults to the unpopulated capability graph, whose hash
+    // differs from the populated graph every other Capability Intelligence
+    // surface reports. Bind it explicitly to the simulation engine's own graph
+    // so plan lineage, drift detection and the displayed canonical hash all
+    // refer to the same baseline.
+    plan: createChangePlanEngine({
+      simulationEngine: simulation,
+      graph: simulation.canonicalGraph,
+    }),
   };
   return engineCache;
 }
