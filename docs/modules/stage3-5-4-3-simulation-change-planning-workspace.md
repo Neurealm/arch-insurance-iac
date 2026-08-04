@@ -73,3 +73,55 @@ now states each distinct clause once.
   extended with the truncation announcement copy correction.
 - Clean typecheck (`tsconfig.app.json`).
 - Canonical graph hash unchanged by the stage.
+
+## Recommendation selection policy
+
+`src/platform/capability-intelligence/remediation/recommendationSelection.ts`
+owns the entire selection contract, so both the workspace and the Recommendation
+Center hand-off agree on it.
+
+Deep-link contract: `?recommendation=<canonical-recommendation-id>`.
+
+| Parameter state | Behaviour |
+| --- | --- |
+| Missing | Deterministic default |
+| Empty or whitespace | Deterministic default |
+| Percent-encoded | Decoded, then matched (a malformed escape is used verbatim rather than throwing) |
+| Known id | Selected |
+| Unknown id | Deterministic default, plus a visible notice naming the id that was not found |
+
+The deterministic default orders recommendations by canonical priority band,
+then priority score, then canonical severity, then affected-entity count, then
+the canonical identifier. No identifier is ever hardcoded, and the ordering is
+independent of input order. Changing the selected recommendation clears the
+proposal, bindings, validation, simulation, comparison and plan preview without
+re-running `analyzeGraph()`.
+
+The Recommendation Center renders an **Evaluate remediation** link on every
+recommendation card, pointing at the encoded deep link. It is a navigation
+hand-off only: nothing is approved, executed or persisted.
+
+## Resolution classifications
+
+The simulation panel reports all six engine classifications — resolved,
+partially resolved, unresolved, superseded, invalidated and regressed. A
+classification with no members is printed as `none` rather than omitted, so an
+operator can distinguish "the engine found none" from "the engine did not
+report on this".
+
+## Stale results
+
+Parameter, proposal or recommendation changes never re-simulate. Existing
+simulation, comparison and plan results are marked stale and kept visible with a
+warning, and the operator re-invokes explicitly.
+
+## Additional verification
+
+- `src/platform/capability-intelligence/remediationSelection.test.tsx` — the
+  selection policy (every tie break, input-order independence, empty set,
+  comparator antisymmetry), the full `?recommendation=` parameter matrix,
+  and real-graph workspace behaviour: deep link, unknown-id fallback notice,
+  no automatic simulation or plan generation, single intelligence computation,
+  explicit simulation with a polite announcement, all six resolution
+  classifications present, read-only status with no approve/reject/execute
+  control, and the labelled five-step workflow list.
