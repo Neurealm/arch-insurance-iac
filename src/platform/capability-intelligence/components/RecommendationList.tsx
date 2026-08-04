@@ -13,7 +13,7 @@ import {
 } from "@/modules/graph/intelligence/index";
 
 const ANY = "__any__";
-const SEVERITIES = ["critical", "high", "medium", "low", "info"] as const;
+const SEVERITIES = ["critical", "warning", "advisory", "info"] as const;
 const CONFIDENCES = ["high", "medium", "low", "unable-to-verify"] as const;
 
 /** Single advisory recommendation. Read-only: no approve, edit or execute. */
