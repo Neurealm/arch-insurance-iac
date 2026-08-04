@@ -1,10 +1,17 @@
 /**
- * Stage 3.5.4.2.1 — presentation of traversal and query warnings.
+ * Stage 3.5.4.2.1 / 3.5.4.2.2 — presentation of traversal and query warnings.
  *
  * This module does NOT create a second warning system. It is a pure, read-only
  * presentation mapping over the warnings already emitted by the Stage 3.5.3.1
  * Query Engine and carried through the bounded graph-view result. Warning
  * codes, messages and subjects are used exactly as produced.
+ *
+ * Stage 3.5.4.2.2 adds presentation-layer deduplication and a concise
+ * announcement summary. Neither changes engine emission, traversal execution or
+ * the warning taxonomy: a bidirectional traversal legitimately reports the same
+ * condition from its upstream and downstream sub-queries, and this module
+ * consolidates those identical reports into a single card so the reader is not
+ * shown what looks like two separate defects.
  */
 
 import type { QueryWarning, QueryWarningCode } from "@/modules/graph/query/index";
@@ -12,7 +19,7 @@ import type { GraphView } from "./graphViewTypes";
 import { DIRECTION_LABELS, MAX_VISIBLE_EDGES, MAX_VISIBLE_NODES } from "./graphViewTypes";
 
 export interface PresentedWarning {
-  /** Stable key for rendering, derived from code + subject + ordinal. */
+  /** Stable key for rendering, derived from the full canonical warning identity. */
   key: string;
   /** Canonical engine warning code, surfaced verbatim in supporting detail. */
   code: QueryWarningCode;
@@ -23,7 +30,15 @@ export interface PresentedWarning {
   /** The verbatim engine message, kept as supporting detail. */
   detail: string;
   subject?: string;
+  /**
+   * How many identical engine warnings this card represents. Greater than one
+   * only when separate traversal branches reported the same condition.
+   */
+  occurrences: number;
+  /** Concise clause used by the polite announcement summary. */
+  summary: string;
 }
+
 
 /**
  * Deterministic display order. Warnings are grouped by importance to the
