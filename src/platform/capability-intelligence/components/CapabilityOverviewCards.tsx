@@ -14,38 +14,42 @@ import type { QueryGraphMetadata } from "@/modules/graph/query/index";
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 /**
- * A single KPI rendered as a description-list pair so assistive technology
- * reads the label as the term and the figure as its definition.
+ * A single KPI rendered as a description-list group. The DOM order is
+ * `<dt>` (term) → `<dd>` (value) → supporting context, so assistive technology
+ * receives a valid term/definition pair; the visual order (large figure above
+ * its caption) is restored with flex ordering rather than invalid markup.
+ * Supporting context is a plain element associated through `aria-describedby`,
+ * never a second definition value.
  */
 function Kpi({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   const id = `kpi-${slug(label)}`;
   const hintId = hint ? `${id}-hint` : undefined;
   return (
-    <div className="rounded-lg border border-border bg-card px-4 py-3">
+    <div className="flex flex-col rounded-lg border border-border bg-card px-4 py-3">
+      <dt id={`${id}-label`} className="order-2 text-xs text-muted-foreground">
+        {label}
+      </dt>
       <dd
-        className="text-2xl font-semibold text-foreground"
+        className="order-1 text-2xl font-semibold text-foreground"
         data-testid={`kpi-${label}`}
-        aria-labelledby={`${id}-label`}
         aria-describedby={hintId}
       >
         {value}
       </dd>
-      <dt id={`${id}-label`} className="text-xs text-muted-foreground">
-        {label}
-      </dt>
       {hint && (
-        <dd id={hintId} className="mt-1 text-[11px] text-muted-foreground/80">
+        <p id={hintId} className="order-3 mt-1 text-[11px] text-muted-foreground/80">
           {hint}
-        </dd>
+        </p>
       )}
     </div>
   );
 }
 
 
-function KpiGrid({ children }: { children: React.ReactNode }) {
-  return <dl className="grid grid-cols-2 gap-3 md:grid-cols-6">{children}</dl>;
+function KpiGrid({ children, columns = "md:grid-cols-6" }: { children: React.ReactNode; columns?: string }) {
+  return <dl className={`grid grid-cols-2 gap-3 ${columns}`}>{children}</dl>;
 }
+
 
 /** Executive KPI grid for the Capability Intelligence overview screen. */
 export function CapabilityOverviewCards({
