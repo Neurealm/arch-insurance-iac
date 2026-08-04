@@ -78,3 +78,6 @@ export * from "./intelligence/index";
 /* Stage 3.5.3.4 — deterministic change simulation and remediation proposals. */
 export * from "./simulation/index";
 
+/* Stage 3.5.3.5 — controlled change plans and patch specifications. */
+export * from "./change-plan/index";
+
