@@ -886,11 +886,8 @@ const App = () => (
             <Route path="profile" element={<PlatformProfile />} />
             <Route path="test-hub" element={<PlatformTestHub />} />
             <Route path="modules" element={<PlatformModuleRegistry />} />
-            <Route path="capability-intelligence" element={<PlatformAdminRoute><CapabilityIntelligenceLayout /></PlatformAdminRoute>}>
-              <Route index element={<CapabilityOverview />} />
-              <Route path="explorer" element={<CapabilityExplorer />} />
-              <Route path="recommendations" element={<RecommendationCenter />} />
-            </Route>
+            {capabilityIntelligenceRoutes}
+
             <Route path="audio" element={<PermissionRoute permission="audio.view"><CaeNarrativeLibrary /></PermissionRoute>} />
             <Route path="audio/narratives/new" element={<PermissionRoute permission="audio.narrative.author"><CaeNarrativeEditor /></PermissionRoute>} />
             <Route path="audio/narratives/:narrativeId" element={<PermissionRoute permission="audio.view"><CaeNarrativeDetail /></PermissionRoute>} />
