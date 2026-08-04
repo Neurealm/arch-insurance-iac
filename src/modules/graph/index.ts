@@ -74,3 +74,7 @@ export * from "./reasoning/index";
 
 /* Stage 3.5.3.3 — deterministic intelligence and recommendation layer. */
 export * from "./intelligence/index";
+
+/* Stage 3.5.3.4 — deterministic change simulation and remediation proposals. */
+export * from "./simulation/index";
+
