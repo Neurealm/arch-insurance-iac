@@ -79,6 +79,17 @@ export function RecommendationCard({
           </div>
           <div>Complexity: {r.remediation.complexity}</div>
         </div>
+        <div>
+          {/* Advisory hand-off only: opens the planning workspace with this
+              recommendation pre-selected. Nothing is approved or executed. */}
+          <Button size="sm" variant="outline" asChild data-testid="evaluate-remediation">
+            <Link to={remediationLinkFor(r.id)}>
+              Evaluate remediation
+              <span className="sr-only"> for {r.title}</span>
+            </Link>
+          </Button>
+
+        </div>
         {r.affected.nodeIds.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {r.affected.nodeIds.slice(0, 8).map((id) => (
