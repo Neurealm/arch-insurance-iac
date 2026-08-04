@@ -129,9 +129,16 @@ graph. Orphan state appears as a "Connectivity" column, a "Connectivity" filter
 
 ## Accessibility decisions
 
-- KPI tiles are description-list pairs (`dl`/`dt`/`dd`) with explicit
-  `aria-labelledby` and `aria-describedby`, so a screen reader associates each figure
-  with its label and supporting hint.
+- KPI tiles are description-list groups: each `dl > div` contains exactly one `<dt>`
+  (label) followed by one `<dd>` (value), with supporting context as a `<p>` linked from
+  the value through `aria-describedby`. Visual order (figure above caption) is restored
+  with flex `order-*` utilities, so the accessibility tree stays valid without ARIA
+  patches on `<dd>`. Zero, "Not available" and "Unable to verify" states still render
+  distinctly, and `data-testid="kpi-<label>"` identifiers are unchanged.
+- The recommendation summary renders eight tiles as `grid-cols-2 md:grid-cols-4
+  2xl:grid-cols-8` — full rows at every breakpoint and no narrow cards between 768 and
+  1024 px. Other KPI grids keep their six- and four-column layouts.
+
 - Sortable table headers expose `aria-sort`; result counts announce politely.
 - Recommendation result counts also announce politely.
 
