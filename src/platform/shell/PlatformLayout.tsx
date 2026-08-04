@@ -19,6 +19,7 @@ import {
   BookA,
   BarChart3,
   Boxes,
+  Network,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
