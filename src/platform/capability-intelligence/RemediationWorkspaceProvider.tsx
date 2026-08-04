@@ -284,25 +284,34 @@ export function RemediationWorkspaceProvider({
 
   /* -------------------------------------------------------------- actions */
 
+  /** Drops every downstream result. Used when the subject itself changes. */
   const resetDownstream = useCallback(() => {
     setSimulation(null);
     setComparison(null);
     setPlan(null);
     setDrift(null);
+    setStale({ simulation: false, comparison: false, plan: false });
   }, []);
 
-  const selectRecommendation = useCallback(
-    (next: IntelligenceRecommendation | null) => {
-      setRecommendation(next);
-      setProposalId(null);
-      setBindings({});
-      setProposals([]);
-      setConflicts([]);
-      resetDownstream();
-      if (!next) return;
+  /**
+   * Marks existing results as no longer describing the current inputs. The
+   * engines are never rerun implicitly — the operator decides when to spend
+   * the work again.
+   */
+  const markStale = useCallback(() => {
+    setStale((prev) => ({
+      simulation: prev.simulation || simulation !== null,
+      comparison: prev.comparison || comparison !== null,
+      plan: prev.plan || plan !== null,
+    }));
+  }, [simulation, comparison, plan]);
+
+  /** Generates the proposals for a recommendation. Explicitly invoked only. */
+  const generateProposals = useCallback(
+    (subject: IntelligenceRecommendation) => {
       defer("proposals", () => {
         const engine = getRemediationEngines().simulation;
-        const generated = engine.generateProposalFromRecommendation(next);
+        const generated = engine.generateProposalFromRecommendation(subject);
         if (!mounted.current) return;
         setProposals(generated);
         setConflicts(engine.inspectConflicts(generated));
@@ -311,8 +320,46 @@ export function RemediationWorkspaceProvider({
         if (generated.length === 1) setProposalId(generated[0].id);
       });
     },
-    [defer, resetDownstream],
+    [defer],
   );
+
+  /**
+   * Selecting a recommendation writes the canonical id to the URL. The
+   * selection itself is derived from the URL, so refresh, Back and Forward
+   * all reproduce the same workspace.
+   */
+  const selectRecommendation = useCallback(
+    (next: IntelligenceRecommendation | null) => {
+      setSearchParams(
+        (params) => {
+          const updated = new URLSearchParams(params);
+          if (next) updated.set(RECOMMENDATION_PARAM, next.id);
+          else updated.delete(RECOMMENDATION_PARAM);
+          return updated;
+        },
+        { replace: false },
+      );
+    },
+    [setSearchParams],
+  );
+
+  // The recommendation is URL-derived, so this effect fires exactly once per
+  // distinct selection (deep link, picker click, Back/Forward), never on an
+  // ordinary re-render. Every piece of dependent local state is cleared first.
+  const generatedFor = useRef<string | null>(null);
+  useEffect(() => {
+    const id = recommendation?.id ?? null;
+    if (generatedFor.current === id) return;
+    generatedFor.current = id;
+    setProposals([]);
+    setProposalId(null);
+    setBindings({});
+    setConflicts([]);
+    setError(null);
+    setFailedAction(null);
+    resetDownstream();
+    if (recommendation) generateProposals(recommendation);
+  }, [recommendation, generateProposals, resetDownstream]);
 
   const selectProposal = useCallback(
     (id: string) => {
@@ -332,15 +379,15 @@ export function RemediationWorkspaceProvider({
         }
         return { ...prev, [name]: value };
       });
-      resetDownstream();
+      markStale();
     },
-    [resetDownstream],
+    [markStale],
   );
 
   const clearBindings = useCallback(() => {
     setBindings({});
-    resetDownstream();
-  }, [resetDownstream]);
+    markStale();
+  }, [markStale]);
 
   const runSimulation = useCallback(() => {
     if (!selected) return;
@@ -351,6 +398,11 @@ export function RemediationWorkspaceProvider({
       setSimulation(result);
       setPlan(null);
       setDrift(null);
+      setStale({ simulation: false, comparison: false, plan: false });
+      setAnnouncement(
+        `Simulation complete. Band ${result.score.band}, score ${result.score.score}, ` +
+          `${result.regressions.length} regression${result.regressions.length === 1 ? "" : "s"}.`,
+      );
     });
   }, [defer, selected, bindings]);
 
@@ -363,6 +415,8 @@ export function RemediationWorkspaceProvider({
       });
       if (!mounted.current) return;
       setComparison(result);
+      setStale((prev) => ({ ...prev, comparison: false }));
+      setAnnouncement(`Alternative comparison complete. Verdict: ${result.verdict}.`);
     });
   }, [defer, alternatives, selected, bindings]);
 
@@ -375,25 +429,60 @@ export function RemediationWorkspaceProvider({
       if (!mounted.current) return;
       setPlan(built);
       setDrift(driftReport);
+      setStale((prev) => ({ ...prev, plan: false }));
+      setAnnouncement(
+        `Change plan preview generated. Status ${built.status}, ${built.steps.length} steps, ` +
+          `${built.blockers.length} blocker${built.blockers.length === 1 ? "" : "s"}.`,
+      );
     });
   }, [defer, simulation]);
 
+  /** Re-runs the action that failed, without changing any selection. */
+  const retry = useCallback(() => {
+    switch (failedAction) {
+      case "proposals":
+        if (recommendation) generateProposals(recommendation);
+        return;
+      case "simulation":
+        runSimulation();
+        return;
+      case "alternatives":
+        runAlternativeComparison();
+        return;
+      case "plan":
+        buildChangePlan();
+        return;
+      default:
+        setError(null);
+    }
+  }, [
+    failedAction,
+    recommendation,
+    generateProposals,
+    runSimulation,
+    runAlternativeComparison,
+    buildChangePlan,
+  ]);
+
   const reset = useCallback(() => {
-    setRecommendation(null);
     setProposals([]);
     setProposalId(null);
     setBindings({});
     setConflicts([]);
     setError(null);
+    setFailedAction(null);
+    setAnnouncement("");
     resetDownstream();
-  }, [resetDownstream]);
+    generatedFor.current = null;
+    selectRecommendation(null);
+  }, [resetDownstream, selectRecommendation]);
 
   /* -------------------------------------------------------- stage gating */
 
   const stageStates = useMemo<Readonly<Record<RemediationStage, StageState>>>(() => {
     const hasRecommendation = recommendation !== null;
     const hasProposal = selected !== null;
-    const hasSimulation = simulation !== null;
+    const hasSimulation = simulation !== null && !stale.simulation;
     return {
       recommendation: hasRecommendation ? "complete" : "available",
       proposal: !hasRecommendation ? "locked" : hasProposal ? "complete" : "available",
@@ -401,7 +490,8 @@ export function RemediationWorkspaceProvider({
       alternatives: !hasProposal ? "locked" : comparison ? "complete" : "available",
       "change-plan": !hasSimulation ? "locked" : plan ? "complete" : "available",
     };
-  }, [recommendation, selected, simulation, comparison, plan]);
+  }, [recommendation, selected, simulation, comparison, plan, stale.simulation]);
+
 
   const activeStage = useMemo<RemediationStage>(() => {
     if (plan) return "change-plan";
