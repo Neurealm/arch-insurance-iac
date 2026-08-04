@@ -281,8 +281,10 @@ describe("Stage 3.5.4.3 — workspace over the real repository graph", () => {
     await selectFirstProposal();
     expect(screen.queryByTestId("simulation-result")).toBeNull();
     expect(screen.queryByTestId("change-plan")).toBeNull();
-    // The plan action stays disabled until a simulation exists.
-    expect(screen.getByTestId("build-change-plan").hasAttribute("disabled")).toBe(true);
+    // Plan generation stays out of reach until a simulation exists.
+    expect(screen.getByTestId("stage-change-plan").getAttribute("data-state")).toBe("locked");
+    expect(screen.queryByTestId("build-change-plan")).toBeNull();
+
   }, 60000);
 
   it("computes the intelligence analysis exactly once for the whole workspace", async () => {
