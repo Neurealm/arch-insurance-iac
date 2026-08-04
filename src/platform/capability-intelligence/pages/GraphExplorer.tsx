@@ -24,11 +24,13 @@ import { EdgeDetailPanel } from "../components/EdgeDetailPanel";
 import { GraphContentsList } from "../components/GraphContentsList";
 import { GraphControls, type GraphControlsState } from "../components/GraphControls";
 import { GraphLegend } from "../components/GraphLegend";
+import { GraphWarningList } from "../components/GraphWarningList";
+import { presentWarnings } from "../graph/graphWarnings";
 import { RootEntityPicker } from "../components/RootEntityPicker";
 import { buildGraphView, neighborsWithinView } from "../graph/graphView";
 import { layoutGraphView } from "../graph/graphLayout";
 import { selectInitialRoot } from "../graph/initialRoot";
-import { GRAPH_ROOT_PARAM } from "../graph/exploreLink";
+import { GRAPH_ROOT_PARAM, resolveRootParam } from "../graph/exploreLink";
 import { toCanvasEdges, toCanvasNodes } from "../graph/reactFlowAdapter";
 import {
   DEFAULT_EDGE_TYPES,
@@ -127,7 +129,12 @@ function GraphExplorerScreen({
    * and forward move between explored roots.
    */
   const [searchParams, setSearchParams] = useSearchParams();
-  const requestedRoot = searchParams.get(GRAPH_ROOT_PARAM);
+  /*
+   * An empty or whitespace-only parameter is treated as absent, so `?root=`
+   * and `?root=%20` resolve to the deterministic initial root exactly like a
+   * missing parameter. Non-empty values are never trimmed.
+   */
+  const requestedRoot = resolveRootParam(searchParams.get(GRAPH_ROOT_PARAM));
   const rootId = requestedRoot ?? initialRoot.nodeId;
   const setRootId = useCallback(
     (next: string | null) => {
@@ -182,13 +189,16 @@ function GraphExplorerScreen({
   }, []);
 
   /** Re-rooting keeps the controls but clears selection — the view has changed. */
-  const handleReroot = useCallback((nodeId: string) => {
-    setRootId(nodeId);
-    setSelectedNodeId(null);
-    setSelectedEdgeId(null);
-    setDrawerNodeId(null);
-    setFitKey((k) => k + 1);
-  }, []);
+  const handleReroot = useCallback(
+    (nodeId: string) => {
+      setRootId(nodeId);
+      setSelectedNodeId(null);
+      setSelectedEdgeId(null);
+      setDrawerNodeId(null);
+      setFitKey((k) => k + 1);
+    },
+    [setRootId],
+  );
 
   const handleReset = useCallback(() => {
     setRootId(null);
@@ -198,6 +208,22 @@ function GraphExplorerScreen({
     setDrawerNodeId(null);
     setFitKey((k) => k + 1);
   }, [setRootId]);
+
+  const warnings = useMemo(() => presentWarnings(view), [view]);
+
+  /*
+   * Count announcements derive from the same bounded graph-view result as the
+   * canvas, the summary badges and the accessible contents table. There is no
+   * separate count state, so the four can never disagree. The message changes
+   * only when the view changes — pan, zoom, hover, focus and drawer state do
+   * not affect it, so unchanged views are not re-announced.
+   */
+  const countAnnouncement = useMemo(
+    () =>
+      `Graph updated. ${view.nodes.length} entities and ${view.edges.length} relationships are visible.` +
+      (view.truncated ? " The view is truncated." : ""),
+    [view],
+  );
 
   const rootLabel = view.rootNode?.label ?? rootId ?? "Select an entity";
   const canvasLabel = `Capability graph neighbourhood of ${rootLabel}. ${view.nodes.length} entities and ${view.edges.length} relationships, ${DIRECTION_LABELS[controls.direction].toLowerCase()}, depth ${controls.depth}. A text equivalent is available in the graph contents list below.`;
@@ -274,6 +300,17 @@ function GraphExplorerScreen({
                   </p>
                 </div>
               )}
+
+              <div
+                aria-live="polite"
+                role="status"
+                className="sr-only"
+                data-testid="graph-count-announcement"
+              >
+                {countAnnouncement}
+              </div>
+
+              <GraphWarningList warnings={warnings} />
 
               {view.emptyReason ? (
                 <div className="py-8">
