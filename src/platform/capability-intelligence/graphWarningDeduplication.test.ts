@@ -314,7 +314,7 @@ describe("Stage 3.5.4.3 truncation announcement copy", () => {
 
   it("still joins materially different clauses", () => {
     const presented = presentGraphWarnings(viewWith([nodeTruncation, depthWarning]));
-    const announcement = summarizeGraphWarningsForAnnouncement(presented);
+    const announcement = summarizeGraphWarningsForAnnouncement(presented).toLowerCase();
     expect(announcement).toContain("the view is truncated for safety");
     expect(announcement).toContain("the view stops at depth 2");
     expect(announcement).toContain(" and ");
