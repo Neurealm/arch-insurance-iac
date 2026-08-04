@@ -15,6 +15,8 @@ import type { IntelligenceRecommendation } from "../intelligence/index";
 import {
   analyzeGraphSnapshot,
   bindParameters,
+  classifyResolutions,
+  detectRegressions,
   buildOverlay,
   bundleIdFor,
   compareMetrics,
