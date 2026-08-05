@@ -397,6 +397,7 @@ import SreLayout from "./pages/prod-twin/SreLayout.tsx";
 import NocLayout from "./pages/agentic-sre-noc/NocLayout.tsx";
 import NocPage from "./pages/agentic-sre-noc/NocPage.tsx";
 import GlobalOpticalOperationsCenter from "./pages/agentic-sre-noc/GlobalOpticalOperationsCenter.tsx";
+import CustomerServiceHealthExplorer from "./pages/agentic-sre-noc/CustomerServiceHealthExplorer.tsx";
 import RunOpsCommand from "./runops/pages/Command.tsx";
 import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
