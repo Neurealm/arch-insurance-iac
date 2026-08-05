@@ -355,7 +355,8 @@ export default function GlobalOpticalOperationsCenter() {
 
           />
           <p className="mt-2 text-[10.5px] text-slate-500">
-            Select a link to open its detail drawer. Terminal locations, routes and states are synthetic.
+            Select a link to open its detail drawer. Scroll to zoom, drag to pan when zoomed in. Terminal locations, routes and states are synthetic.
+
           </p>
         </Panel>
 
