@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { StatusBadge } from "@/platform/components/StatusBadge";
 import { confidenceLabel } from "../../presentation";
 import {
@@ -8,7 +9,15 @@ import {
   metricLabel,
   scoreBandTone,
   severityTone,
+  validationLabel,
+  validationTone,
 } from "../../remediationPresentation";
+import {
+  MAX_COMPARISON_ALTERNATIVES,
+  MIN_COMPARISON_ALTERNATIVES,
+  type AlternativeEligibility,
+  type EligibilityVerdict,
+} from "../../remediation/eligibility";
 import type { AlternativeComparison, ChangeProposal } from "@/modules/graph/simulation/index";
 
 const VERDICT_LABEL: Record<AlternativeComparison["verdict"], string> = {
@@ -24,23 +33,41 @@ const VERDICT_TONE: Record<AlternativeComparison["verdict"], "positive" | "info"
 };
 
 /**
- * Stage 4 — compare mutually exclusive remediation alternatives.
+ * Stage 6 — compare mutually exclusive remediation alternatives.
  *
- * The engine states plainly when no deterministic policy can choose between the
- * alternatives; the UI never breaks that tie on its own.
+ * Three separate concerns, deliberately kept apart:
+ *   display    — every alternative is shown, including ineligible ones;
+ *   selection  — the operator ticks which ones to compare (2–4);
+ *   execution  — the comparison engine runs only when every ticked alternative
+ *                passes the same eligibility contract simulation uses.
+ *
+ * The engine states plainly when no deterministic policy can choose between
+ * the alternatives; the UI never breaks that tie on its own.
  */
 export function AlternativesPanel({
   alternatives,
+  eligibility,
+  assessed,
+  selectedIds,
   comparison,
+  comparisonEligibility,
   busy,
   stale,
+  onAssess,
+  onToggle,
   onCompare,
 }: {
   alternatives: readonly ChangeProposal[];
+  eligibility: readonly AlternativeEligibility[];
+  assessed: boolean;
+  selectedIds: readonly string[];
   comparison: AlternativeComparison | null;
+  comparisonEligibility: EligibilityVerdict;
   busy: boolean;
   /** Inputs changed after this comparison ran. */
   stale?: boolean;
+  onAssess: () => void;
+  onToggle: (proposalId: string) => void;
   onCompare: () => void;
 }) {
   if (alternatives.length <= 1) {
@@ -52,23 +79,105 @@ export function AlternativesPanel({
     );
   }
 
+  const byId = new Map(eligibility.map((e) => [e.proposalId, e]));
+  const eligibleCount = eligibility.filter((e) => e.verdict.eligible).length;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="alternatives-stage" data-assessed={assessed}>
       <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={onCompare} disabled={busy} data-testid="compare-alternatives">
-          {busy ? "Comparing…" : comparison ? "Re-compare alternatives" : `Compare ${alternatives.length} alternatives`}
+        <Button onClick={onAssess} disabled={busy} data-testid="assess-alternatives">
+          {busy ? "Assessing…" : assessed ? "Re-assess alternatives" : `Assess ${alternatives.length} alternatives`}
+        </Button>
+        <Button
+          onClick={onCompare}
+          disabled={!comparisonEligibility.eligible || busy}
+          data-testid="compare-alternatives"
+        >
+          {comparison ? "Re-compare alternatives" : "Compare selected alternatives"}
         </Button>
         {stale && comparison && (
           <StatusBadge value="stale" tone="warning" label="Inputs changed — re-compare to refresh" />
         )}
-        <p className="text-xs text-muted-foreground">
-          Each alternative is simulated on its own isolated overlay.
-        </p>
-
       </div>
+
+      <p className="text-xs text-muted-foreground" data-testid="comparison-gate-reason">
+        {assessed
+          ? comparisonEligibility.reason
+          : `Assess the alternatives first: the comparison engine simulates each one, so every selected alternative must pass the same validation gate a single simulation does. Select between ${MIN_COMPARISON_ALTERNATIVES} and ${MAX_COMPARISON_ALTERNATIVES}.`}
+      </p>
+
+      {assessed && eligibleCount === 0 && (
+        <p className="text-xs text-muted-foreground" data-testid="no-eligible-alternatives">
+          None of these alternatives is comparable. Each is listed below with the engine's reason; no
+          alternative has been hidden.
+        </p>
+      )}
+
+      <ul className="space-y-2" data-testid="alternative-candidates">
+        {alternatives.map((alternative) => {
+          const state = byId.get(alternative.id);
+          const checked = selectedIds.includes(alternative.id);
+          const selectable = Boolean(state?.verdict.eligible);
+          return (
+            <li key={alternative.id}>
+              <Card
+                data-testid="alternative-candidate"
+                data-proposal={alternative.id}
+                data-eligible={selectable}
+              >
+                <CardContent className="space-y-2 p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Checkbox
+                      id={`alt-${alternative.id}`}
+                      checked={checked}
+                      disabled={!selectable || busy}
+                      onCheckedChange={() => onToggle(alternative.id)}
+                      aria-label={`Select ${alternative.id} for comparison`}
+                    />
+                    <label htmlFor={`alt-${alternative.id}`} className="text-xs font-medium text-foreground">
+                      {alternative.title}
+                    </label>
+                    <StatusBadge value={alternative.variant} tone="neutral" label={`Variant: ${alternative.variant}`} />
+                    {state?.validation ? (
+                      <StatusBadge
+                        value={state.validation.outcome}
+                        tone={validationTone(state.validation.outcome)}
+                        label={validationLabel(state.validation.outcome)}
+                      />
+                    ) : (
+                      <StatusBadge value="not-assessed" tone="neutral" label="Not assessed" />
+                    )}
+                    <StatusBadge
+                      value={alternative.incomplete ? "incomplete" : "parameters-resolved"}
+                      tone={alternative.incomplete ? "warning" : "positive"}
+                      label={alternative.incomplete ? "Parameters unresolved" : "Parameters resolved"}
+                    />
+                    <StatusBadge
+                      value={selectable ? "comparable" : "not-comparable"}
+                      tone={selectable ? "positive" : "critical"}
+                      label={selectable ? "Comparable" : "Not comparable"}
+                    />
+                  </div>
+                  {state && !state.verdict.eligible && (
+                    <p className="text-[11px] text-muted-foreground" data-testid="alternative-blocker">
+                      {state.verdict.reason}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </li>
+          );
+        })}
+      </ul>
 
       {comparison && !busy && (
         <div className="space-y-3" data-testid="alternative-comparison">
+          {stale && (
+            <p className="text-xs text-muted-foreground" data-testid="comparison-stale">
+              The inputs changed after this comparison ran. The result below still describes the
+              previous inputs; nothing was re-compared automatically.
+            </p>
+          )}
           <Card>
             <CardHeader className="pb-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -113,7 +222,7 @@ export function AlternativesPanel({
                           label={`Confidence: ${confidenceLabel(alt.confidence)}`}
                         />
                         <StatusBadge value={alt.complexity} tone="neutral" label={`Complexity: ${alt.complexity}`} />
-                        {preferred && <StatusBadge value="preferred" tone="positive" label="Preferred" />}
+                        {preferred && <StatusBadge value="preferred" tone="positive" label="Preferred by the engine" />}
                         <span className="ml-auto font-mono text-[11px] text-muted-foreground">
                           {alt.proposalId}
                         </span>

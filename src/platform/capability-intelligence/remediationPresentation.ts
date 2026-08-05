@@ -12,6 +12,7 @@ import type { StatusTone } from "@/platform/components/StatusBadge";
 
 const VALIDATION_TONE: Record<string, StatusTone> = {
   valid: "positive",
+  "valid-with-warnings": "positive",
   incomplete: "warning",
   conflicting: "warning",
   invalid: "critical",
@@ -22,6 +23,7 @@ export const validationTone = (outcome: string): StatusTone =>
 
 const VALIDATION_LABEL: Record<string, string> = {
   valid: "Valid — can be simulated",
+  "valid-with-warnings": "Valid with warnings — can be simulated",
   incomplete: "Incomplete — required parameters are unresolved",
   conflicting: "Conflicting — blocked by another proposed change",
   invalid: "Invalid — cannot be simulated",
@@ -29,6 +31,7 @@ const VALIDATION_LABEL: Record<string, string> = {
 
 export const validationLabel = (outcome: string): string =>
   VALIDATION_LABEL[outcome] ?? outcome;
+
 
 const BAND_TONE: Record<string, StatusTone> = {
   "strongly-recommended": "positive",

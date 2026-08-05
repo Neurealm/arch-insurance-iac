@@ -185,12 +185,15 @@ describe("Stage 3.5.4.3 — remediation route wiring", () => {
   it("declares exactly one remediation stage order", () => {
     expect([...REMEDIATION_STAGES]).toEqual([
       "recommendation",
-      "proposal",
+      "proposals",
+      "parameters",
+      "validation",
       "simulation",
       "alternatives",
       "change-plan",
     ]);
   });
+
 
   it("blocks an authenticated non-administrator", async () => {
     __resetCapabilityIntelligenceCache();

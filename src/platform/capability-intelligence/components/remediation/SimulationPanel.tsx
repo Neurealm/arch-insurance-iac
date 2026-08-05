@@ -13,6 +13,8 @@ import {
   severityTone,
 } from "../../remediationPresentation";
 import type { SimulationResult } from "@/modules/graph/simulation/index";
+import type { EligibilityVerdict } from "../../remediation/eligibility";
+
 
 /**
  * Stage 3 — run the proposal against an isolated overlay and read the outcome.
@@ -22,27 +24,35 @@ import type { SimulationResult } from "@/modules/graph/simulation/index";
  */
 export function SimulationPanel({
   simulation,
-  canRun,
+  eligibility,
   busy,
   stale,
   onRun,
 }: {
   simulation: SimulationResult | null;
-  canRun: boolean;
+  /** Engine-derived gate. The handler re-checks it independently. */
+  eligibility: EligibilityVerdict;
   busy: boolean;
   /** Inputs changed after this result was produced. Never rerun implicitly. */
   stale?: boolean;
   onRun: () => void;
 }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="simulation-stage" data-eligible={eligibility.eligible}>
       <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={onRun} disabled={!canRun || busy} data-testid="run-simulation">
+        <Button
+          onClick={onRun}
+          disabled={!eligibility.eligible || busy}
+          aria-describedby="simulation-gate-reason"
+          data-testid="run-simulation"
+        >
           {busy ? "Simulating…" : simulation ? "Re-run simulation" : "Run simulation"}
         </Button>
-        {!canRun && (
-          <p className="text-xs text-muted-foreground">Select a proposal to enable simulation.</p>
-        )}
+        <StatusBadge
+          value={eligibility.code}
+          tone={eligibility.eligible ? "positive" : "warning"}
+          label={eligibility.eligible ? "Eligible for simulation" : "Not eligible for simulation"}
+        />
         {stale && simulation && (
           <StatusBadge
             value="stale"
@@ -52,12 +62,24 @@ export function SimulationPanel({
         )}
       </div>
 
+      {/* The blocker is text, not disabled styling, and is programmatically
+          associated with the control it explains. */}
+      <p
+        id="simulation-gate-reason"
+        className="text-xs text-muted-foreground"
+        data-testid="simulation-gate-reason"
+        data-code={eligibility.code}
+      >
+        {eligibility.reason}
+      </p>
+
       {stale && simulation && (
         <p className="text-xs text-muted-foreground" data-testid="simulation-stale">
           The parameters changed after this simulation ran. The result below still describes the
           previous inputs; nothing was rerun automatically.
         </p>
       )}
+
 
       {busy && (
         <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
