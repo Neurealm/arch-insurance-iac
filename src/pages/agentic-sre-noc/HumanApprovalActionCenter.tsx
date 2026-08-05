@@ -9,14 +9,14 @@
  * and never performs a real operational action.
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { Fragment, useCallback, useMemo, useState } from "react";
 import {
   AlertTriangle, ArrowRightLeft, Bot, CheckCircle2, ChevronRight, CircleSlash,
   Clock, Download, Gauge, Lock, Maximize2, Minimize2, Pause, Play, Plus,
   RefreshCw, RotateCcw, Scale, ShieldAlert, ShieldCheck, SkipForward, Undo2,
   User, X,
 } from "lucide-react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Field, Panel, Select, ToolbarButton } from "./components/NocPrimitives";
 import { ServiceRouteGraph } from "./components/ServiceRouteGraph";
@@ -774,7 +774,7 @@ export default function HumanApprovalActionCenter() {
                     </tr>
                   )}
                   {group.rows.map((r) => (
-                    <>
+                    <Fragment key={r.id}>
                       <tr
                         key={r.id}
                         className={cn("cursor-pointer hover:bg-slate-50", r.id === selectedId && "bg-indigo-50/50")}
@@ -819,7 +819,7 @@ export default function HumanApprovalActionCenter() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   ))}
                 </tbody>
               ))}
@@ -1954,8 +1954,10 @@ export default function HumanApprovalActionCenter() {
         <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
           {drawer && (
             <div className="space-y-3">
-              <h2 className="text-[14px] font-semibold text-slate-900">{drawer.title}</h2>
-              {drawer.body && <p className="text-[12px] text-slate-600">{drawer.body}</p>}
+              <SheetTitle className="text-[14px] font-semibold text-slate-900">{drawer.title}</SheetTitle>
+              <SheetDescription className="text-[12px] text-slate-600">
+                {drawer.body ?? "Synthetic demonstration detail for the selected object."}
+              </SheetDescription>
               <div className="grid gap-2">
                 {drawer.rows.map(([k, v]) => <Field key={k} label={k} value={v} />)}
               </div>
