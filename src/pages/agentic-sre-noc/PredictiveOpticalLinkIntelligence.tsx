@@ -221,6 +221,58 @@ export default function PredictiveOpticalLinkIntelligence() {
   const spec = useMemo(() => Object.fromEntries(panelSpecs.map((p) => [p.id, p])), []);
   const loading = panelState === "loading";
 
+  /* ---------------------------- AIM-004 analytics --------------------------- */
+
+  const activeLinkId = selectedLink ?? DEFAULT_ANALYTICS_LINK_ID;
+  const analytics = useAnalyticsState(activeLinkId);
+  const [analyticsState, setAnalyticsState] = useState<AnalyticsPanelState>("ready");
+  const [metricDrawerOpen, setMetricDrawerOpen] = useState(false);
+  const [pipelineThresholdPct, setPipelineThresholdPct] = useState(80);
+  const [pushedThresholdPct, setPushedThresholdPct] = useState<number | null>(null);
+  const [chennaiPredictions, setChennaiPredictions] = useState<PredictionOverrides>({});
+  const [notice, setNotice] = useState<string>("");
+
+  const factorToFeatureId: Record<string, string> = useMemo(
+    () => ({
+      visibility: "visibility-distance-ratio",
+      fog: "atmospheric-attenuation-index",
+      humidity: "atmospheric-attenuation-index",
+      "link-margin": "optical-reserve-margin",
+      "degradation-rate": "link-degradation-rate",
+      attenuation: "atmospheric-attenuation-index",
+      "received-power": "optical-reserve-margin",
+      rain: "atmospheric-attenuation-index",
+      temperature: "atmospheric-attenuation-index",
+      wind: "atmospheric-attenuation-index",
+      historical: "historical-similarity-score",
+      other: "multi-signal-correlation",
+    }),
+    [],
+  );
+
+  const selectedRecord = useMemo(
+    () => highRiskLinkRecords.find((r) => r.linkId === activeLinkId) ?? null,
+    [activeLinkId],
+  );
+  const livePrediction = chennaiPredictions[activeLinkId] ?? null;
+  const selectedLinkRisk = selectedRecord?.riskScore ?? livePrediction?.riskProbability ?? 0.5;
+  const whatIfRisk = livePrediction && selectedRecord && Math.abs(livePrediction.riskProbability - selectedRecord.riskScore) > 0.001
+    ? livePrediction.riskProbability
+    : null;
+
+  const highlightFeatureId = analytics.factorKey ? factorToFeatureId[analytics.factorKey] ?? null : null;
+
+  const handleSelectLink = (linkId: string) => setSelectedLink(linkId);
+  const handleNotify = (message: string) => { setNotice(message); analytics.announce(message); };
+  const handleMetricDrawer = (key: string) => { analytics.selectMetric(key); setMetricDrawerOpen(true); };
+  const handleKpi = (key: string) => {
+    analytics.selectKpi(key);
+    if (key === "false-positive" || key === "lead-time" || key === "accuracy" || key === "services-protected") {
+      setMetricDrawerOpen(true);
+    }
+  };
+  const handleThresholdPush = (pct: number) => { setPushedThresholdPct(pct); setPipelineThresholdPct(pct); };
+
   const groupedFeatures = useMemo(() => {
     const groups = ["Optical", "Environmental", "Network and Service", "Historical and Context"] as const;
     return groups.map((g) => ({ group: g, items: modelFeatures.filter((f) => f.group === g) }));
@@ -334,8 +386,30 @@ export default function PredictiveOpticalLinkIntelligence() {
         <h2 className="sr-only">Model key performance indicators</h2>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {kpiMetrics.map((m) => (
-            <KpiCard key={m.key} {...m} loading={loading} />
+            <KpiCard
+              key={m.key}
+              {...m}
+              loading={loading}
+              selected={analytics.kpiKey === m.key}
+              onSelect={() => handleKpi(m.key)}
+            />
           ))}
+        </div>
+        <div className="mt-1.5 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => { analytics.resetKpi(); setMetricDrawerOpen(false); }}
+            className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10.5px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            Reset KPI Selection
+          </button>
+          <Select
+            label="Analytics state"
+            value={analyticsState}
+            options={["ready", "loading", "empty", "error"]}
+            onChange={(v) => setAnalyticsState(v as AnalyticsPanelState)}
+          />
+          <p aria-live="polite" className="text-[10.5px] text-slate-600">{analytics.announcement || notice}</p>
         </div>
       </section>
 
@@ -347,7 +421,13 @@ export default function PredictiveOpticalLinkIntelligence() {
           heightClass="xl:min-h-[480px]"
           className="xl:col-span-12"
         >
-          <PredictivePipeline />
+          <PredictivePipeline
+            externalLinkId={activeLinkId}
+            onLinkChange={setSelectedLink}
+            externalFeatureId={highlightFeatureId}
+            onThresholdChange={setPipelineThresholdPct}
+            externalThresholdPct={pushedThresholdPct}
+          />
         </PanelShell>
 
         <div className="space-y-3 xl:col-span-12">
@@ -358,6 +438,7 @@ export default function PredictiveOpticalLinkIntelligence() {
               onSelectLink={setSelectedLink}
               whatIfOpen={whatIfOpen}
               onWhatIfOpenChange={setWhatIfOpen}
+              onPredictionsChange={setChennaiPredictions}
             />
             <dl className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-4">
               {modelEvidence.map((e) => (
