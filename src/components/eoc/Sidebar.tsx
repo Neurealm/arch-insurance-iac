@@ -65,6 +65,24 @@ const carveOpModelChildren: Node[] = carveOutGroups.map((g) => ({
   })),
 }));
 
+const itsmChildren: Node[] = [
+  {
+    key: "exec-biz-ops",
+    label: "Executive & Business Operations",
+    icon: Briefcase,
+    children: [
+      { key: "ecc",   label: "Executive Command Center",                       to: "/itsm/exec-biz-ops/executive-command-center", icon: LayoutGrid },
+      { key: "bsh",   label: "Business Services (Service Portfolio & Health)", to: "/itsm/exec-biz-ops/business-services",        icon: Boxes },
+      { key: "cxjh",  label: "Customer Experience & Journey Health (XLA)",     to: "/itsm/exec-biz-ops/customer-experience",      icon: Smile },
+      { key: "slo",   label: "SLA / SLO / Error Budget Performance",           to: "/itsm/exec-biz-ops/sla-slo-error-budget",     icon: Target },
+      { key: "risk",  label: "Risk & Operational Exposure View",               to: "/itsm/exec-biz-ops/risk-exposure",            icon: ShieldX },
+    ],
+  },
+  { key: "incidents",  label: "Incidents",         icon: AlertTriangle, to: "/incidents", badge: "342", badgeTone: "critical" },
+  { key: "alerts",     label: "Alerts",            icon: Bell,          to: "/alerts",    badge: "1.5k", badgeTone: "critical" },
+  { key: "change",     label: "Change Management", icon: GitBranch,     to: "/change",    badge: "1.2k", badgeTone: "critical" },
+];
+
 
 const tree: Node[] = [
   {
