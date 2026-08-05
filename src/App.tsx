@@ -399,6 +399,7 @@ import NocPage from "./pages/agentic-sre-noc/NocPage.tsx";
 import GlobalOpticalOperationsCenter from "./pages/agentic-sre-noc/GlobalOpticalOperationsCenter.tsx";
 import TraditionalNocOperationsCenter from "./pages/operations/traditional-noc/GlobalOpticalOperationsCenter.tsx";
 import CustomerServiceHealthExplorer from "./pages/agentic-sre-noc/CustomerServiceHealthExplorer.tsx";
+import GlobalLinkHealthTwin from "./pages/agentic-sre-noc/GlobalLinkHealthTwin.tsx";
 import GlobalOpticalServiceTopology from "./pages/agentic-sre-noc/GlobalOpticalServiceTopology.tsx";
 import PredictiveLinkRiskCenter from "./pages/agentic-sre-noc/PredictiveLinkRiskCenter.tsx";
 import ActiveSituationRoom from "./pages/agentic-sre-noc/ActiveSituationRoom.tsx";
@@ -721,6 +722,7 @@ const App = () => (
 
             <Route index element={<GlobalOpticalOperationsCenter />} />
             <Route path="customer-service-health" element={<CustomerServiceHealthExplorer />} />
+            <Route path="global-link-health-twin" element={<GlobalLinkHealthTwin />} />
             <Route path="service-topology" element={<GlobalOpticalServiceTopology />} />
             <Route path="predictive-link-risk" element={<PredictiveLinkRiskCenter />} />
             <Route path="situation-room" element={<ActiveSituationRoom />} />
