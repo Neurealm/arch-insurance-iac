@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { OperatingGuide } from "../components/OperatingGuide";
 
 const metrics = [
@@ -24,7 +25,11 @@ function setup(overrides: Partial<React.ComponentProps<typeof OperatingGuide>> =
     onRunScenario: vi.fn(),
     ...overrides,
   };
-  render(<OperatingGuide {...props} />);
+  render(
+    <MemoryRouter>
+      <OperatingGuide {...props} />
+    </MemoryRouter>,
+  );
   return props;
 }
 
