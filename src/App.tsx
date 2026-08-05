@@ -403,6 +403,7 @@ import PredictiveLinkRiskCenter from "./pages/agentic-sre-noc/PredictiveLinkRisk
 import ActiveSituationRoom from "./pages/agentic-sre-noc/ActiveSituationRoom.tsx";
 import AgenticInvestigationWorkspace from "./pages/agentic-sre-noc/AgenticInvestigationWorkspace.tsx";
 import HumanApprovalActionCenter from "./pages/agentic-sre-noc/HumanApprovalActionCenter.tsx";
+import AutonomousRecoveryMonitor from "./pages/agentic-sre-noc/AutonomousRecoveryMonitor.tsx";
 import RunOpsCommand from "./runops/pages/Command.tsx";
 import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
@@ -708,7 +709,7 @@ const App = () => (
             <Route path="situation-room" element={<ActiveSituationRoom />} />
             <Route path="investigation" element={<AgenticInvestigationWorkspace />} />
             <Route path="approvals" element={<HumanApprovalActionCenter />} />
-            <Route path="recovery" element={<NocPage slug="recovery" />} />
+            <Route path="recovery" element={<AutonomousRecoveryMonitor />} />
             <Route path="slo-error-budget" element={<NocPage slug="slo-error-budget" />} />
             <Route path="executive-value" element={<NocPage slug="executive-value" />} />
           </Route>
