@@ -402,7 +402,7 @@ export default function GlobalOpticalOperationsCenter() {
           </OpsPanel>
 
           <OpsPanel className="lg:col-span-4" title="Leadership Attention Required" subtitle="Decisions requiring senior ownership now">
-            <ol className="space-y-2.5">
+            <ol className="max-h-[520px] space-y-2.5 overflow-y-auto pr-1">
               {leadershipActions
                 .filter((a) => filters.region === DEFAULT_FILTERS.region || a.region === filters.region)
                 .slice(0, 5)
