@@ -19,6 +19,17 @@ import { cn } from "@/lib/utils";
 import { Select, ToolbarButton } from "./components/NocPrimitives";
 import { PredictivePipeline } from "./pipeline/PredictivePipeline";
 import { ChennaiWorkspace } from "./chennai/ChennaiWorkspace";
+import { useAnalyticsState } from "./analytics/useAnalyticsState";
+import { OperationalModelPerformance } from "./analytics/OperationalModelPerformance";
+import { PredictiveFactorsChart } from "./analytics/PredictiveFactorsChart";
+import { FeatureImpactWaterfall } from "./analytics/FeatureImpactWaterfall";
+import { PredictionHorizonChart } from "./analytics/PredictionHorizonChart";
+import { HighRiskLinksTable } from "./analytics/HighRiskLinksTable";
+import { ThresholdTradeoffPanel } from "./analytics/ThresholdTradeoffPanel";
+import { AnalyticsMetricDrawer } from "./analytics/AnalyticsMetricDrawer";
+import { DEFAULT_ANALYTICS_LINK_ID, highRiskLinkRecords } from "./analytics/analyticsFixtures";
+import type { AnalyticsPanelState } from "./analytics/AnalyticsPrimitives";
+import type { PredictionOverrides } from "./chennai/chennaiGeojson";
 
 import {
   breadcrumb, featureContributions, forecastHorizons, governanceRecords, kpiMetrics,
@@ -49,20 +60,34 @@ function Sparkline({ points, tone }: { points: number[]; tone: string }) {
 }
 
 function KpiCard({
-  label, value, deltaLabel, direction, intent, sparkline, description, loading,
+  label, value, deltaLabel, direction, intent, sparkline, description, loading, selected, onSelect,
 }: {
   label: string; value: string; deltaLabel: string; direction: "up" | "down" | "flat";
   intent: "positive" | "negative" | "neutral"; sparkline: number[]; description: string; loading: boolean;
+  selected?: boolean; onSelect?: () => void;
 }) {
   const toneClass =
     intent === "positive" ? "text-emerald-700" : intent === "negative" ? "text-rose-700" : "text-slate-600";
   const stroke = intent === "positive" ? "#059669" : intent === "negative" ? "#e11d48" : "#64748b";
   return (
     <article
-      className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+      className={cn(
+        "rounded-lg border bg-white p-3 shadow-sm",
+        selected ? "border-blue-400 ring-1 ring-blue-300" : "border-slate-200",
+      )}
       aria-label={`${label}. ${description}`}
+      data-selected={selected ? "true" : "false"}
     >
-      <h3 className="text-[11.5px] font-medium text-slate-600">{label}</h3>
+      <h3 className="text-[11.5px] font-medium text-slate-600">
+        <button
+          type="button"
+          aria-pressed={Boolean(selected)}
+          onClick={onSelect}
+          className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        >
+          {label}
+        </button>
+      </h3>
       {loading ? (
         <>
           <div className="mt-2 h-6 w-20 animate-pulse rounded bg-slate-100" />
@@ -83,9 +108,10 @@ function KpiCard({
 }
 
 function PanelShell({
-  spec, state, heightClass, className, children,
+  spec, state, heightClass, className, functional, children,
 }: {
-  spec: PanelSpec; state: PanelState; heightClass: string; className?: string; children?: React.ReactNode;
+  spec: PanelSpec; state: PanelState; heightClass: string; className?: string; functional?: boolean;
+  children?: React.ReactNode;
 }) {
   const headingId = `pli-panel-${spec.id}`;
   const descId = `${headingId}-desc`;
@@ -103,7 +129,7 @@ function PanelShell({
           <p id={descId} className="text-[11px] text-slate-500">{spec.description}</p>
         </div>
         <span className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
-          Placeholder
+          {functional ? "Synthetic data" : "Placeholder"}
         </span>
       </header>
 
@@ -149,9 +175,11 @@ function PanelShell({
         {state === "ready" && (
           <div className="flex h-full flex-col">
             <div className="flex-1">{children}</div>
-            <p className="mt-2 border-t border-dashed border-slate-200 pt-1.5 text-[10.5px] text-slate-500">
-              Planned visual: {spec.visualType} · Target height {spec.desktopHeight} · Final graphics arrive in AIM-002.
-            </p>
+            {!functional && (
+              <p className="mt-2 border-t border-dashed border-slate-200 pt-1.5 text-[10.5px] text-slate-500">
+                Planned visual: {spec.visualType} · Target height {spec.desktopHeight} · Final graphics arrive in a later stage.
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -192,6 +220,58 @@ export default function PredictiveOpticalLinkIntelligence() {
   );
   const spec = useMemo(() => Object.fromEntries(panelSpecs.map((p) => [p.id, p])), []);
   const loading = panelState === "loading";
+
+  /* ---------------------------- AIM-004 analytics --------------------------- */
+
+  const activeLinkId = selectedLink ?? DEFAULT_ANALYTICS_LINK_ID;
+  const analytics = useAnalyticsState(activeLinkId);
+  const [analyticsState, setAnalyticsState] = useState<AnalyticsPanelState>("ready");
+  const [metricDrawerOpen, setMetricDrawerOpen] = useState(false);
+  const [pipelineThresholdPct, setPipelineThresholdPct] = useState(80);
+  const [pushedThresholdPct, setPushedThresholdPct] = useState<number | null>(null);
+  const [chennaiPredictions, setChennaiPredictions] = useState<PredictionOverrides>({});
+  const [notice, setNotice] = useState<string>("");
+
+  const factorToFeatureId: Record<string, string> = useMemo(
+    () => ({
+      visibility: "visibility-distance-ratio",
+      fog: "atmospheric-attenuation-index",
+      humidity: "atmospheric-attenuation-index",
+      "link-margin": "optical-reserve-margin",
+      "degradation-rate": "link-degradation-rate",
+      attenuation: "atmospheric-attenuation-index",
+      "received-power": "optical-reserve-margin",
+      rain: "atmospheric-attenuation-index",
+      temperature: "atmospheric-attenuation-index",
+      wind: "atmospheric-attenuation-index",
+      historical: "historical-similarity-score",
+      other: "multi-signal-correlation",
+    }),
+    [],
+  );
+
+  const selectedRecord = useMemo(
+    () => highRiskLinkRecords.find((r) => r.linkId === activeLinkId) ?? null,
+    [activeLinkId],
+  );
+  const livePrediction = chennaiPredictions[activeLinkId] ?? null;
+  const selectedLinkRisk = selectedRecord?.riskScore ?? livePrediction?.riskProbability ?? 0.5;
+  const whatIfRisk = livePrediction && selectedRecord && Math.abs(livePrediction.riskProbability - selectedRecord.riskScore) > 0.001
+    ? livePrediction.riskProbability
+    : null;
+
+  const highlightFeatureId = analytics.factorKey ? factorToFeatureId[analytics.factorKey] ?? null : null;
+
+  const handleSelectLink = (linkId: string) => setSelectedLink(linkId);
+  const handleNotify = (message: string) => { setNotice(message); analytics.announce(message); };
+  const handleMetricDrawer = (key: string) => { analytics.selectMetric(key); setMetricDrawerOpen(true); };
+  const handleKpi = (key: string) => {
+    analytics.selectKpi(key);
+    if (key === "false-positive" || key === "lead-time" || key === "accuracy" || key === "services-protected") {
+      setMetricDrawerOpen(true);
+    }
+  };
+  const handleThresholdPush = (pct: number) => { setPushedThresholdPct(pct); setPipelineThresholdPct(pct); };
 
   const groupedFeatures = useMemo(() => {
     const groups = ["Optical", "Environmental", "Network and Service", "Historical and Context"] as const;
@@ -304,10 +384,32 @@ export default function PredictiveOpticalLinkIntelligence() {
       {/* ------------------------------ KPI row ----------------------------- */}
       <section aria-label="Model key performance indicators">
         <h2 className="sr-only">Model key performance indicators</h2>
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+        <div data-testid="pli-kpis" className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {kpiMetrics.map((m) => (
-            <KpiCard key={m.key} {...m} loading={loading} />
+            <KpiCard
+              key={m.key}
+              {...m}
+              loading={loading}
+              selected={analytics.kpiKey === m.key}
+              onSelect={() => handleKpi(m.key)}
+            />
           ))}
+        </div>
+        <div className="mt-1.5 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => { analytics.resetKpi(); setMetricDrawerOpen(false); }}
+            className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10.5px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            Reset KPI Selection
+          </button>
+          <Select
+            label="Analytics state"
+            value={analyticsState}
+            options={["ready", "loading", "empty", "error"]}
+            onChange={(v) => setAnalyticsState(v as AnalyticsPanelState)}
+          />
+          <p aria-live="polite" className="text-[10.5px] text-slate-600">{analytics.announcement || notice}</p>
         </div>
       </section>
 
@@ -319,7 +421,13 @@ export default function PredictiveOpticalLinkIntelligence() {
           heightClass="xl:min-h-[480px]"
           className="xl:col-span-12"
         >
-          <PredictivePipeline />
+          <PredictivePipeline
+            externalLinkId={activeLinkId}
+            onLinkChange={setSelectedLink}
+            externalFeatureId={highlightFeatureId}
+            onThresholdChange={setPipelineThresholdPct}
+            externalThresholdPct={pushedThresholdPct}
+          />
         </PanelShell>
 
         <div className="space-y-3 xl:col-span-12">
@@ -330,6 +438,7 @@ export default function PredictiveOpticalLinkIntelligence() {
               onSelectLink={setSelectedLink}
               whatIfOpen={whatIfOpen}
               onWhatIfOpenChange={setWhatIfOpen}
+              onPredictionsChange={setChennaiPredictions}
             />
             <dl className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-4">
               {modelEvidence.map((e) => (
@@ -345,29 +454,66 @@ export default function PredictiveOpticalLinkIntelligence() {
           </PanelShell>
 
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <PanelShell spec={spec.performance} state={panelState} heightClass="min-h-[260px]">
-              <dl className="space-y-1">
-                {validationResults.map((v) => (
-                  <div key={v.key} className="flex items-baseline justify-between gap-2 border-b border-slate-100 py-0.5">
-                    <dt className="text-[11px] text-slate-600">{v.label}</dt>
-                    <dd className="text-[11.5px] font-semibold text-slate-900">{v.value}</dd>
-                  </div>
-                ))}
-              </dl>
+          <div data-testid="analytics-threshold" data-analytics-state={analyticsState} className="min-w-0">
+            <ThresholdTradeoffPanel
+              state={analytics}
+              pipelineThresholdPct={pipelineThresholdPct}
+              onThresholdChange={handleThresholdPush}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <PanelShell spec={spec.performance} state={panelState} heightClass="min-h-[300px]" functional>
+              <div data-testid="analytics-performance" data-analytics-state={analyticsState} className="min-w-0">
+                <OperationalModelPerformance
+                  state={analytics}
+                  panelState={analyticsState}
+                  onOpenMetricDrawer={handleMetricDrawer}
+                  onNotify={handleNotify}
+                />
+              </div>
             </PanelShell>
 
-            <PanelShell spec={spec.factors} state={panelState} heightClass="min-h-[260px]">
-              <ul className="space-y-1">
-                {featureContributions.map((f) => (
-                  <li key={f.feature} className="flex items-baseline justify-between gap-2 border-b border-slate-100 py-0.5">
-                    <span className="text-[11px] text-slate-600">{f.feature}</span>
-                    <span className="text-[11.5px] font-semibold text-slate-900">{f.weightPct}%</span>
-                  </li>
-                ))}
-              </ul>
+            <PanelShell spec={spec.factors} state={panelState} heightClass="min-h-[300px]" functional>
+              <div data-testid="analytics-factors" data-analytics-state={analyticsState} className="min-w-0">
+                <PredictiveFactorsChart
+                  state={analytics}
+                  selectedLinkId={activeLinkId}
+                  selectedLinkRisk={selectedLinkRisk}
+                  panelState={analyticsState}
+                  onFactorSelected={(key) => handleNotify(key ? `Factor ${key} selected.` : "Factor selection cleared.")}
+                  onNotify={handleNotify}
+                />
+              </div>
             </PanelShell>
           </div>
+
+          <PanelShell spec={spec.impact} state={panelState} heightClass="min-h-[320px]" functional>
+            <div data-testid="analytics-impact" data-analytics-state={analyticsState} className="min-w-0">
+              <FeatureImpactWaterfall
+                state={analytics}
+                selectedLinkId={activeLinkId}
+                selectedLinkRisk={selectedLinkRisk}
+                horizonLabel={`Next ${analytics.horizonHours} Hours`}
+                whatIfRisk={whatIfRisk}
+                panelState={analyticsState}
+                onFactorSelected={(key) => handleNotify(key ? `Factor ${key} selected.` : "Factor selection cleared.")}
+                onNotify={handleNotify}
+              />
+            </div>
+          </PanelShell>
+
+          <PanelShell spec={spec.highrisk} state={panelState} heightClass="min-h-[320px]" functional>
+            <div data-testid="analytics-highrisk" data-analytics-state={analyticsState} className="min-w-0">
+              <HighRiskLinksTable
+                state={analytics}
+                selectedLinkId={activeLinkId}
+                panelState={analyticsState}
+                onSelectLink={handleSelectLink}
+                onNotify={handleNotify}
+              />
+            </div>
+          </PanelShell>
         </div>
       </div>
 
@@ -402,8 +548,15 @@ export default function PredictiveOpticalLinkIntelligence() {
           <div className="mt-2"><Reserved label={`Reserved for ${trainingTab} visual`} /></div>
         </PanelShell>
 
-        <PanelShell spec={spec.horizon} state={panelState} heightClass="min-h-[260px]" className="xl:col-span-4">
-          <Reserved label="Reserved for confidence decay chart across the forecast horizon" />
+        <PanelShell spec={spec.horizon} state={panelState} heightClass="min-h-[300px]" className="xl:col-span-4" functional>
+          <div data-testid="analytics-horizon" data-analytics-state={analyticsState} className="min-w-0">
+            <PredictionHorizonChart
+              state={analytics}
+              selectedLinkId={activeLinkId}
+              panelState={analyticsState}
+              onNotify={handleNotify}
+            />
+          </div>
         </PanelShell>
 
         <PanelShell spec={spec.traditional} state={panelState} heightClass="min-h-[260px]" className="xl:col-span-3">
@@ -481,6 +634,13 @@ export default function PredictiveOpticalLinkIntelligence() {
           </ul>
         </PanelShell>
       </div>
+
+      <AnalyticsMetricDrawer
+        open={metricDrawerOpen}
+        metricKey={analytics.metricKey}
+        onClose={() => setMetricDrawerOpen(false)}
+        onSelectLink={handleSelectLink}
+      />
 
       {/* --------------------------- drawer shells -------------------------- */}
       {(explainOpen || whatIfOpen) && (

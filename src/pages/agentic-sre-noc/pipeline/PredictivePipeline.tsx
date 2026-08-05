@@ -44,10 +44,54 @@ const STAGE_TO_COLUMN: Record<PipelineStageKey, string> = {
 const PRODUCT_OPTIONS = ["All products", "Lightbridge Terminal", "Metro Backhaul", "Enterprise Access"];
 const REGION_OPTIONS = ["All regions", "India South", "India West", "Africa East", "Americas", "Europe"];
 
-export function PredictivePipeline() {
+export interface PredictivePipelineProps {
+  /** Selected link owned by the page, keeps analytics and pipeline in sync. */
+  externalLinkId?: string | null;
+  onLinkChange?: (linkId: string) => void;
+  /** Engineered feature to highlight when an analytics factor is selected. */
+  externalFeatureId?: string | null;
+  /** Reports the debounced confidence threshold to the analytics layer. */
+  onThresholdChange?: (thresholdPct: number) => void;
+  /** Threshold pushed from the analytics threshold-tradeoff control. */
+  externalThresholdPct?: number | null;
+}
+
+export function PredictivePipeline({
+  externalLinkId, onLinkChange, externalFeatureId, onThresholdChange, externalThresholdPct,
+}: PredictivePipelineProps = {}) {
   const s = usePipelineState();
   const [expanded, setExpanded] = React.useState(false);
   const [notice, setNotice] = React.useState<string | null>(null);
+
+  /* ---- synchronisation with page-level analytics state ---- */
+
+  const selectLink = s.selectLink;
+  const selectFeature = s.selectFeature;
+  const setThreshold = s.setThreshold;
+
+  React.useEffect(() => {
+    if (externalLinkId && externalLinkId !== s.selectedLinkId) selectLink(externalLinkId);
+  }, [externalLinkId, s.selectedLinkId, selectLink]);
+
+  React.useEffect(() => {
+    onLinkChange?.(s.selectedLinkId);
+  }, [s.selectedLinkId, onLinkChange]);
+
+  React.useEffect(() => {
+    if (externalFeatureId) selectFeature(externalFeatureId);
+  }, [externalFeatureId, selectFeature]);
+
+  React.useEffect(() => {
+    onThresholdChange?.(s.threshold);
+  }, [s.threshold, onThresholdChange]);
+
+  React.useEffect(() => {
+    if (typeof externalThresholdPct === "number" && externalThresholdPct !== s.thresholdInput) {
+      setThreshold(externalThresholdPct);
+    }
+    // Only react to the pushed value, never to local slider movement.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalThresholdPct]);
 
   const stageDetail = React.useMemo(
     () => pipelineStageDetails.find((d) => d.key === s.stage) ?? pipelineStageDetails[3],
