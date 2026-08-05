@@ -21,6 +21,7 @@ import {
   ServiceReliabilitySummary, SloErrorBudgetPanel,
 } from "./panels";
 import { Stage2WorkflowSection } from "./Stage2WorkflowSection";
+import { PRIMARY_ACTION_ID } from "@/data/agenticNocWorkflowData";
 import { linkStatusOverrides, useAgenticNocStore } from "@/stores/useAgenticNocStore";
 import {
   CUSTOMERS, REGIONS, SERVICES, TIME_RANGES, agenticActions, capacitySeries,
