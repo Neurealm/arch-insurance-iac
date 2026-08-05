@@ -133,6 +133,12 @@ const tree: Node[] = [
     ],
   },
   {
+    key: "agentic-sre-noc",
+    label: "Agentic SRE NOC",
+    icon: Activity,
+    to: "/agentic-sre-noc",
+  },
+  {
     key: "runops-runbooks",
     label: "Runbook Engineering",
     icon: Sparkles2,
