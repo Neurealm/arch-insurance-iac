@@ -730,7 +730,7 @@ export default function GlobalOpticalOperationsCenter() {
         </SheetContent>
       </Sheet>
 
-      <Sheet open={!!situation} onOpenChange={(o) => !o && setSelectedSituation(null)}>
+      <Sheet open={!!situation} onOpenChange={(o) => { if (!o) { setSelectedSituation(null); setSelectedLink(null); } }}>
         <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
           {situation && <SituationDrawer situation={situation} />}
         </SheetContent>
