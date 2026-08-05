@@ -132,73 +132,130 @@ export default function ProductionArchitecture() {
 
   /* ------------------------------- canvas -------------------------------- */
 
+  const coreColumns = columns
+    .map(([col, zones]) => [col, zones.filter((z) => z.zone.band === "core")] as const)
+    .filter(([, zones]) => zones.length > 0);
+  const crossZones = visibleZones.filter((z) => z.zone.band === "cross");
+
+  const zoneAccent: Record<string, { bar: string; title: string; ring: string }> = {
+    sources: { bar: "bg-sky-50", title: "text-sky-800", ring: "border-sky-200" },
+    ingestion: { bar: "bg-sky-50", title: "text-sky-800", ring: "border-sky-200" },
+    bus: { bar: "bg-amber-50", title: "text-amber-800", ring: "border-amber-200" },
+    processing: { bar: "bg-sky-50", title: "text-sky-800", ring: "border-sky-200" },
+    storage: { bar: "bg-sky-50", title: "text-sky-800", ring: "border-sky-200" },
+    twin: { bar: "bg-indigo-50", title: "text-indigo-800", ring: "border-indigo-200" },
+    analytics: { bar: "bg-violet-50", title: "text-violet-800", ring: "border-violet-200" },
+    agentic: { bar: "bg-violet-50", title: "text-violet-800", ring: "border-violet-200" },
+    reasoning: { bar: "bg-violet-50", title: "text-violet-800", ring: "border-violet-200" },
+    policy: { bar: "bg-amber-50", title: "text-amber-800", ring: "border-amber-200" },
+    action: { bar: "bg-emerald-50", title: "text-emerald-800", ring: "border-emerald-200" },
+    targets: { bar: "bg-emerald-50", title: "text-emerald-800", ring: "border-emerald-200" },
+    api: { bar: "bg-sky-50", title: "text-sky-800", ring: "border-sky-200" },
+    presentation: { bar: "bg-sky-50", title: "text-sky-800", ring: "border-sky-200" },
+    observability: { bar: "bg-slate-100", title: "text-slate-800", ring: "border-slate-200" },
+    governance: { bar: "bg-amber-50", title: "text-amber-800", ring: "border-amber-200" },
+    cloud: { bar: "bg-sky-50", title: "text-sky-800", ring: "border-sky-200" },
+    learning: { bar: "bg-violet-50", title: "text-violet-800", ring: "border-violet-200" },
+  };
+
+  const accentOf = (id: string) => zoneAccent[id] ?? { bar: "bg-slate-100", title: "text-slate-800", ring: "border-slate-200" };
+
+  const ComponentTile = ({ zone, c }: { zone: ArchZone; c: ArchComponent }) => {
+    const active = selected?.comp.id === c.id;
+    return (
+      <button
+        type="button"
+        onClick={() => selectComponent(zone, c)}
+        aria-pressed={active}
+        className={cn(
+          "w-full rounded-md border bg-white px-2 py-1.5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+          active ? "border-blue-400 bg-blue-50 ring-1 ring-blue-200" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50",
+        )}
+      >
+        <span className="block text-[11px] font-semibold leading-tight text-slate-900">{c.name}</span>
+        <span className="mt-0.5 block text-[10px] leading-snug text-slate-600">{c.role}</span>
+        <span className="mt-0.5 block text-[9.5px] leading-snug text-slate-400">
+          {cloudView === "Google Cloud Example" ? c.gcp : c.technology.slice(0, 3).join(" · ")}
+        </span>
+      </button>
+    );
+  };
+
+  const ZoneCard = ({ zone, comps, dim, emphasised, horizontal }: {
+    zone: ArchZone; comps: ArchComponent[]; dim: boolean; emphasised: boolean; horizontal?: boolean;
+  }) => {
+    const a = accentOf(zone.id);
+    return (
+      <section
+        aria-label={zone.title}
+        className={cn(
+          "overflow-hidden rounded-lg border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-opacity",
+          emphasised ? a.ring : "border-slate-200",
+          dim && "opacity-40",
+        )}
+      >
+        <header className={cn("flex items-baseline justify-between gap-2 px-2 py-1.5", a.bar)}>
+          <h3 className={cn("text-[10.5px] font-bold uppercase tracking-[0.06em]", a.title)}>{zone.title}</h3>
+          <span className="flex shrink-0 gap-1">{zone.flows.map((f) => <FlowLine key={f} kind={f} />)}</span>
+        </header>
+        <p className="border-b border-slate-100 px-2 py-1 text-[9.5px] leading-snug text-slate-500">{zone.purpose}</p>
+        <div className={cn("p-1.5", horizontal ? "grid grid-cols-2 gap-1.5 md:grid-cols-3 xl:grid-cols-5" : "space-y-1.5")}>
+          {comps.map((c) => <ComponentTile key={c.id} zone={zone} c={c} />)}
+          {comps.length === 0 && (
+            <p className="rounded border border-dashed border-slate-200 px-1.5 py-1 text-[10px] text-slate-400">
+              No components at this detail level
+            </p>
+          )}
+        </div>
+      </section>
+    );
+  };
+
   const canvas = (
-    <div className="overflow-x-auto">
-      <div className="flex min-w-[1180px] items-stretch gap-2">
-        {columns.map(([col, zones], ci) => (
-          <div key={col} className="flex flex-1 items-stretch gap-2">
-            <div className="flex min-w-[190px] flex-1 flex-col gap-2">
-              <div className="rounded-md bg-slate-100 px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wide text-slate-600">
-                {col}. {columnTitles[col]}
+    <div className="space-y-3">
+      <div className="overflow-x-auto pb-1">
+        <div className="flex min-w-[1240px] items-stretch gap-2">
+          {coreColumns.map(([col, zones], ci) => (
+            <div key={col} className="flex flex-1 items-stretch gap-2">
+              <div className="flex min-w-[195px] flex-1 flex-col gap-2">
+                <div className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                  {col}. {columnTitles[col]}
+                </div>
+                {zones.map(({ zone, comps, dim, emphasised }) => (
+                  <ZoneCard key={zone.id} zone={zone} comps={comps} dim={dim} emphasised={emphasised} />
+                ))}
               </div>
-              {zones.map(({ zone, comps, dim, emphasised }) => (
-                <section
-                  key={zone.id}
-                  aria-label={zone.title}
-                  className={cn(
-                    "rounded-lg border bg-white p-2 shadow-sm transition-opacity",
-                    emphasised ? "border-slate-300" : "border-slate-200",
-                    dim && "opacity-45",
-                    zone.band === "cross" && "border-dashed",
-                  )}
-                >
-                  <h3 className="text-[11.5px] font-semibold text-slate-900">{zone.title}</h3>
-                  <p className="mt-0.5 text-[10px] leading-snug text-slate-500">{zone.purpose}</p>
-                  <div className="mt-1.5 flex flex-wrap gap-1">
-                    {zone.flows.map((f) => <FlowLine key={f} kind={f} />)}
-                  </div>
-                  <ul className="mt-1.5 space-y-1">
-                    {comps.map((c) => {
-                      const active = selected?.comp.id === c.id;
-                      return (
-                        <li key={c.id}>
-                          <button
-                            type="button"
-                            onClick={() => selectComponent(zone, c)}
-                            aria-pressed={active}
-                            className={cn(
-                              "w-full rounded border px-1.5 py-1 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
-                              active ? "border-blue-400 bg-blue-50" : "border-slate-200 bg-white hover:bg-slate-50",
-                            )}
-                          >
-                            <span className="block text-[11px] font-medium text-slate-900">{c.name}</span>
-                            <span className="mt-0.5 block text-[10px] leading-snug text-slate-600">{c.role}</span>
-                            <span className="mt-0.5 block text-[9.5px] text-slate-500">
-                              {cloudView === "Google Cloud Example" ? c.gcp : c.technology.slice(0, 3).join(" · ")}
-                            </span>
-                          </button>
-                        </li>
-                      );
-                    })}
-                    {comps.length === 0 && (
-                      <li className="rounded border border-dashed border-slate-200 px-1.5 py-1 text-[10px] text-slate-400">
-                        No components at this detail level
-                      </li>
-                    )}
-                  </ul>
-                </section>
-              ))}
+              {ci < coreColumns.length - 1 && (
+                <div className="flex items-center" aria-hidden>
+                  <ChevronRight className="h-4 w-4 text-slate-300" />
+                </div>
+              )}
             </div>
-            {ci < columns.length - 1 && (
-              <div className="flex items-center" aria-hidden>
-                <ChevronRight className="h-4 w-4 text-slate-300" />
-              </div>
-            )}
-          </div>
+          ))}
+        </div>
+      </div>
+
+      {crossZones.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            Cross-cutting layers, applied across every zone above
+          </p>
+          {crossZones.map(({ zone, comps, dim, emphasised }) => (
+            <ZoneCard key={zone.id} zone={zone} comps={comps} dim={dim} emphasised={emphasised} horizontal />
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+        {flowTypes.map((f) => (
+          <span key={f.key} className={cn("inline-flex items-center gap-1.5 text-[10.5px] text-slate-600", !activeFlows.includes(f.key) && "opacity-40")}>
+            <FlowLine kind={f.key} />{f.label}
+          </span>
         ))}
       </div>
     </div>
   );
+
 
   return (
     <div className="min-h-screen bg-white">
