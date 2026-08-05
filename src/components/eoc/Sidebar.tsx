@@ -84,31 +84,9 @@ const tree: Node[] = [
     key: "sre-practice",
     label: "Site Resilience Engineering",
     icon: ShieldCheck,
-    children: [
-
-      
-      { key: "sre-cmd", label: "PROD Resilience Command Center", icon: Activity, to: "/prod-resilience-twin" },
-      { key: "sre-plm", label: "Client Product Line Map", icon: Package, to: "/product-line-map" },
-      { key: "sre-gwm", label: "Client Golden Workflow Map", icon: Workflow, to: "/golden-workflow-map" },
-      { key: "sre-topo", label: "Client Production Topology Digital Twin", icon: NetIcon, to: "/production-topology" },
-      { key: "sre-opmodel", label: "Client SRE Operating Model Cockpit", icon: Activity, to: "/sre-operating-model" },
-      { key: "sre-signal", label: "Signal Intelligence", icon: Activity, to: "/signal-intelligence" },
-      { key: "sre-ecdt", label: "Enterprise Cloud Application Digital Twin", icon: Cloud, to: "/enterprise-cloud-twin" },
-      { key: "sre-awsrat", label: "AWS Resilience Architecture Twin", icon: Cloud, to: "/aws-resilience-architecture-twin" },
-      { key: "sre-pef", label: "Platform Engineering & Golden Environment Factory", icon: Package, to: "/platform-engineering-factory" },
-      { key: "sre-hcw", label: "Hybrid Cloud, Data & Modernization Workbench", icon: Cloud, to: "/hybrid-cloud-workbench" },
-      { key: "sre-amp", label: "Product Reliability Automation Marketplace", icon: Boxes, to: "/automation-marketplace" },
-      { key: "sre-admf", label: "Application & Data Modernization Factory", icon: Cloud, to: "/modernization-factory" },
-      { key: "sre-cyber", label: "Cyber Resilience Overlay", icon: ShieldCheck, to: "/cyber-resilience-overlay" },
-      { key: "sre-aicr", label: "Automation & AI Digital Coworker Control Room", icon: Bot, to: "/ai-coworker-control-room" },
-      { key: "sre-tdr", label: "Transition & Dual-Run Command Center", icon: ArrowRightLeft, to: "/transition-dual-run" },
-      { key: "sre-aof", label: "Acquisition-to-SRE Onboarding Factory", icon: Rocket, to: "/acquisition-onboarding-factory" },
-      { key: "sre-vcb", label: "Value Creation & PE / Board Dashboard", icon: TrendingUp2, to: "/value-creation-board" },
-      { key: "sre-mrm", label: "Modernization Roadmap", icon: FileBarChart2, to: "/modernization-roadmap" },
-      { key: "sre-idc", label: "Interactive Demo Experience Center", icon: Sparkles2, to: "/interactive-demo-center" },
-      { key: "sre-mrm2", label: "Modernization Roadmap", icon: FileBarChart2, to: "/modernization-roadmap-v2" },
-    ],
+    to: "/prod-resilience-twin",
   },
+
   {
     key: "sre-data-orch",
     label: "SRE Data Orchestration",
