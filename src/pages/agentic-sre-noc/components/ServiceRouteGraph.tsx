@@ -25,11 +25,14 @@ const transportColor: Record<RouteEdge["transport"], string> = {
 
 const laneOffset: Record<RouteEdge["transport"], number> = {
   "Primary optical": 0,
-  "Alternate optical": -10,
-  "RF fallback": 10,
-  "Fiber backup": 20,
+  "Alternate optical": -7,
+  "RF fallback": 7,
+  "Fiber backup": 12,
   "Ethernet handoff": 0,
 };
+
+/** Fixture coordinates use y = 50; the canvas is short and wide, so shift up. */
+const Y_SHIFT = -37;
 
 interface Props {
   route: ServiceRoute;
@@ -45,11 +48,12 @@ export function ServiceRouteGraph({ route, selectedNodeId, selectedEdgeId, onSel
   return (
     <div className="w-full overflow-x-auto">
       <svg
-        viewBox="0 0 100 78"
-        className="h-[300px] w-full min-w-[760px]"
+        viewBox="0 0 100 30"
+        className="h-[280px] w-full min-w-[900px]"
         role="img"
         aria-label="End to end customer service route with nodes and transport paths"
       >
+        <g transform={`translate(0 ${Y_SHIFT})`}>
         {route.edges.map((e) => {
           const a = nodeById(e.from);
           const b = nodeById(e.to);
@@ -81,7 +85,7 @@ export function ServiceRouteGraph({ route, selectedNodeId, selectedEdgeId, onSel
                 opacity={e.state === "Active" ? 0.95 : 0.6}
               />
               {off !== 0 && (
-                <text x={mx} y={my + (off > 0 ? 2.6 : -1.4)} textAnchor="middle" fontSize={2.2} fill="#475569">
+                <text x={mx} y={my + (off > 0 ? 2.6 : -1.4)} textAnchor="middle" fontSize={1.5} fill="#475569">
                   {e.transport} · {e.state}
                 </text>
               )}
@@ -90,6 +94,8 @@ export function ServiceRouteGraph({ route, selectedNodeId, selectedEdgeId, onSel
           );
         })}
 
+        </g>
+        <g transform={`translate(0 ${Y_SHIFT})`}>
         {route.nodes.map((n) => {
           const sel = n.id === selectedNodeId;
           return (
@@ -103,25 +109,26 @@ export function ServiceRouteGraph({ route, selectedNodeId, selectedEdgeId, onSel
               className="cursor-pointer"
             >
               <rect
-                x={n.x - 6} y={n.y - 5} width={12} height={10} rx={1.4}
+                x={n.x - 6} y={n.y - 3.4} width={12} height={7} rx={1}
                 fill="#ffffff"
                 stroke={sel ? "#4f46e5" : "#cbd5e1"}
                 strokeWidth={sel ? 0.7 : 0.3}
               />
-              <circle cx={n.x} cy={n.y - 2.2} r={1.1} fill={healthColor[n.health]} />
-              <text x={n.x} y={n.y + 1.4} textAnchor="middle" fontSize={1.9} fill="#0f172a">
+              <circle cx={n.x} cy={n.y - 1.6} r={0.7} fill={healthColor[n.health]} />
+              <text x={n.x} y={n.y + 0.7} textAnchor="middle" fontSize={1.3} fill="#0f172a">
                 {n.type}
               </text>
-              <text x={n.x} y={n.y + 3.8} textAnchor="middle" fontSize={1.6} fill="#64748b">
+              <text x={n.x} y={n.y + 2.7} textAnchor="middle" fontSize={1.1} fill="#64748b">
                 {n.capacity}
               </text>
-              <text x={n.x} y={n.y - 6.4} textAnchor="middle" fontSize={1.8} fill="#334155">
-                {n.name.length > 26 ? `${n.name.slice(0, 25)}…` : n.name}
+              <text x={n.x} y={n.y - 4.6} textAnchor="middle" fontSize={1.25} fill="#334155">
+                {n.name.length > 22 ? `${n.name.slice(0, 21)}…` : n.name}
               </text>
               <title>{`${n.name} · ${n.owner} · ${n.health} · ${n.latency}`}</title>
             </g>
           );
         })}
+        </g>
       </svg>
 
       <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[10.5px] text-slate-600">
