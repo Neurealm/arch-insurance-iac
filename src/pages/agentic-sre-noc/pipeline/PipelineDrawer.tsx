@@ -10,7 +10,7 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function PipelineDrawer({
-  open, title, subtitle, onClose, children, testId,
+  open, title, subtitle, onClose, children, testId, wide,
 }: {
   open: boolean;
   title: string;
@@ -18,6 +18,8 @@ export function PipelineDrawer({
   onClose: () => void;
   children: React.ReactNode;
   testId?: string;
+  /** Wider desktop panel, used by the AIM-003 What-If and comparison panels. */
+  wide?: boolean;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
 
@@ -50,7 +52,8 @@ export function PipelineDrawer({
         tabIndex={-1}
         className={cn(
           "relative flex max-h-[85vh] w-full flex-col rounded-t-xl border border-slate-200 bg-white shadow-xl focus:outline-none",
-          "sm:max-h-none sm:h-full sm:w-[420px] sm:rounded-none sm:rounded-l-xl",
+          "sm:max-h-none sm:h-full sm:rounded-none sm:rounded-l-xl",
+          wide ? "sm:w-[560px] lg:w-[680px]" : "sm:w-[420px]",
         )}
       >
         <header className="flex items-start justify-between gap-2 border-b border-slate-200 px-4 py-2.5">
