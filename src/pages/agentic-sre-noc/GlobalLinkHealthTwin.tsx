@@ -21,7 +21,7 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Panel, Select, Field, ToolbarButton } from "./components/NocPrimitives";
-import { TwinMap, type TwinOverlays } from "./components/TwinMap";
+import { GlobalLinkHealthMap } from "./map/GlobalLinkHealthMap";
 import {
   activityEvents, chennaiScenario, coworkers, GLHT_LINK_TYPES, GLHT_PRODUCTS,
   GLHT_REGIONS, GLHT_SAVED_VIEWS, GLHT_TIME_RANGES, glhtKpis, incidentSummary,
@@ -83,12 +83,8 @@ export default function GlobalLinkHealthTwin() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   /* -------------------------------- map -------------------------------- */
-  const [zoom, setZoom] = useState(1);
-  const [mapView, setMapView] = useState<"geographic" | "topology" | "cluster">("geographic");
   const [fullScreenMap, setFullScreenMap] = useState(false);
-  const [overlays, setOverlays] = useState<TwinOverlays>({
-    weather: true, capacity: false, impact: true, maintenance: false, agents: false,
-  });
+
   const [playback, setPlayback] = useState(0);
 
   /* ------------------------------ drawers ------------------------------ */
@@ -207,7 +203,7 @@ export default function GlobalLinkHealthTwin() {
   const resetPage = () => {
     setRegion("All regions"); setProduct("All products"); setLinkType("All link types");
     setTimeRange("24h"); setStateFilter(null); setSeverityFilter(null); setStageFilter(null);
-    setPromptId(null); setSelectedRisk(null); setSimulated(null); setZoom(1); setMapView("geographic");
+    setPromptId(null); setSelectedRisk(null); setSimulated(null);
     resetScenario();
   };
 
@@ -215,36 +211,12 @@ export default function GlobalLinkHealthTwin() {
 
   const mapBlock = (
     <>
-      <div className="mb-2 flex flex-wrap items-center gap-1.5">
-        <ToolbarButton onClick={() => setZoom((z) => Math.min(4, z + 0.3))} title="Zoom in">+</ToolbarButton>
-        <ToolbarButton onClick={() => setZoom((z) => Math.max(0.8, z - 0.3))} title="Zoom out">−</ToolbarButton>
-        <ToolbarButton onClick={() => { setZoom(1); setRegion("All regions"); }} title="Reset map"><RotateCcw className="h-3.5 w-3.5" />Reset</ToolbarButton>
-        <ToolbarButton onClick={() => setFullScreenMap((f) => !f)} active={fullScreenMap} title="Full screen map"><Maximize2 className="h-3.5 w-3.5" />Full screen</ToolbarButton>
-        <span className="mx-1 h-4 w-px bg-slate-200" aria-hidden />
-        {(["geographic", "topology", "cluster"] as const).map((v) => (
-          <ToolbarButton key={v} onClick={() => setMapView(v)} active={mapView === v}>
-            {v === "geographic" ? "Geographic" : v === "topology" ? "Simplified topology" : "Cluster"}
-          </ToolbarButton>
-        ))}
-        <span className="mx-1 h-4 w-px bg-slate-200" aria-hidden />
-        {([["weather", "Weather"], ["capacity", "Capacity"], ["impact", "Customer impact"], ["maintenance", "Maintenance"], ["agents", "Agent activity"]] as const).map(([key, label]) => (
-          <ToolbarButton key={key} active={overlays[key]} onClick={() => setOverlays((o) => ({ ...o, [key]: !o[key] }))}>
-            {label}
-          </ToolbarButton>
-        ))}
-      </div>
-
-      <TwinMap
-        links={scenarioLinks}
-        callouts={callouts}
-        selectedId={selectedLink}
-        highlightRegion={stage ? "Chennai" : activePrompt?.focusRegion ?? (region !== "All regions" ? region : null)}
-        view={mapView}
-        overlays={overlays}
-        zoom={zoom}
-        onSelect={(id) => setSelectedLink(id)}
-        onSelectRegion={(r) => setRegion(r)}
+      <GlobalLinkHealthMap
+        title="Global link health map"
+        isFullScreen={fullScreenMap}
+        onToggleFullScreen={() => setFullScreenMap((f) => !f)}
       />
+
 
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10.5px] text-slate-600">
         {Object.entries(twinStateColors).map(([label, color]) => (
