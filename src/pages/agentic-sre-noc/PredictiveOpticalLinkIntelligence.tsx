@@ -190,14 +190,6 @@ function PanelShell({
   );
 }
 
-function Reserved({ label }: { label: string }) {
-  return (
-    <div className="flex h-full min-h-[80px] items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50/60 p-3 text-center text-[11px] text-slate-500">
-      {label}
-    </div>
-  );
-}
-
 /** Bottom governance strip item to lifecycle tab mapping. */
 const governanceTabTargets: Record<string, LifecycleTab> = {
   owner: "Governance",
@@ -222,7 +214,6 @@ export default function PredictiveOpticalLinkIntelligence() {
   const [region, setRegion] = useState<string>(regions[0]);
   const [product, setProduct] = useState<string>(products[0]);
   const [selectedLink, setSelectedLink] = useState<string | null>(null);
-  const [selectedStage, setSelectedStage] = useState<PipelineStageKey>("observe");
   const [lifecycleTab, setLifecycleTab] = useState<LifecycleTab>("Training Data");
   const [activeModelVersion, setActiveModelVersion] = useState<string>(ACTIVE_VERSION);
   const [explainOpen, setExplainOpen] = useState(false);
