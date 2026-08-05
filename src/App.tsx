@@ -691,6 +691,18 @@ const App = () => (
           <Route path="/executive-service-owner-twin" element={<ExecutiveServiceOwnerTwin />} />
           <Route path="/delivery-org-twin" element={<DeliveryOrgTwin />} />
           <Route path="/engagement-manager-twin" element={<EngagementManagerTwin />} />
+          <Route path="/agentic-sre-noc" element={<NocLayout />}>
+            <Route index element={<NocPage slug="" />} />
+            <Route path="customer-service-health" element={<NocPage slug="customer-service-health" />} />
+            <Route path="service-topology" element={<NocPage slug="service-topology" />} />
+            <Route path="predictive-link-risk" element={<NocPage slug="predictive-link-risk" />} />
+            <Route path="situation-room" element={<NocPage slug="situation-room" />} />
+            <Route path="investigation" element={<NocPage slug="investigation" />} />
+            <Route path="approvals" element={<NocPage slug="approvals" />} />
+            <Route path="recovery" element={<NocPage slug="recovery" />} />
+            <Route path="slo-error-budget" element={<NocPage slug="slo-error-budget" />} />
+            <Route path="executive-value" element={<NocPage slug="executive-value" />} />
+          </Route>
           <Route element={<SreLayout />}>
             <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
             <Route path="/product-line-map" element={<ProductLineMap />} />
