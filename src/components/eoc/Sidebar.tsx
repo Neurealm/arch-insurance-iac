@@ -414,13 +414,28 @@ function NavRecent({ tree, pathname }: { tree: Node[]; pathname: string }) {
     .map((path) => flat.find((f) => f.to === path))
     .filter((x): x is FlatItem => !!x)
     .slice(0, 4);
+  const [open, setOpen] = React.useState(() => {
+    try { return localStorage.getItem("eoc.recent.open") !== "0"; } catch { return true; }
+  });
+  const toggleOpen = () => setOpen((v) => {
+    const next = !v;
+    try { localStorage.setItem("eoc.recent.open", next ? "1" : "0"); } catch { /* ignore */ }
+    return next;
+  });
   if (items.length === 0) return null;
   return (
     <div className="pt-1">
-      <div className="px-3 pt-2 pb-1.5 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.16em] text-sidebar-foreground/45">
+      <button
+        type="button"
+        onClick={toggleOpen}
+        aria-expanded={open}
+        className="w-full px-3 pt-2 pb-1.5 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.16em] text-sidebar-foreground/45 hover:text-sidebar-foreground/70 transition-colors"
+      >
         <Clock className="h-2.5 w-2.5" /> RECENT
-      </div>
-      <div className="space-y-0.5">
+        <ChevronDown className={cn("h-3 w-3 ml-auto transition-transform", !open && "-rotate-90")} />
+      </button>
+      <div className={cn("space-y-0.5", !open && "hidden")}>
+
         {items.map((r) => {
           const Icon = r.icon;
           const active = pathMatches(pathname, r.to);
