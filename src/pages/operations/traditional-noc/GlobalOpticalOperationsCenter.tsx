@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  AlertTriangle, Download, Filter, Gauge, RefreshCw, Shield, X,
+  AlertTriangle, ChevronLeft, ChevronRight, Download, Filter, Gauge, RefreshCw, Shield, X,
 } from "lucide-react";
 import {
   Area, AreaChart, CartesianGrid, Legend, Line, ReferenceLine,
