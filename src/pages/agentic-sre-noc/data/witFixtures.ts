@@ -41,7 +41,8 @@ export const WIT_SAVED_VIEWS = [
 
 export type WeatherRiskState =
   | "Low" | "Moderate" | "High" | "Severe" | "No data"
-  | "Monitoring" | "Preventive action active" | "Risk mitigated";
+  | "Monitoring" | "Preventive action active" | "Risk mitigated"
+  | "Under watch" | "At risk";
 
 export const weatherRiskColors: Record<WeatherRiskState, string> = {
   Low: "#059669",
@@ -52,6 +53,8 @@ export const weatherRiskColors: Record<WeatherRiskState, string> = {
   Monitoring: "#2563eb",
   "Preventive action active": "#7c3aed",
   "Risk mitigated": "#0d9488",
+  "Under watch": "#0891b2",
+  "At risk": "#f97316",
 };
 
 /* ---------------------------------- KPIs --------------------------------- */
@@ -825,11 +828,11 @@ export const forecastSeries: ForecastPoint[] = [
   { time: "+6h", linksAffected: 28, linksAtRisk: 11, capacityImpact: 118, marginLoss: 2.6, attenuation: 4.4, throughputReduction: 9, fallbackDemand: 14, confidenceLow: 96, confidenceHigh: 142, annotation: "Preventive action window opens" },
   { time: "+12h", linksAffected: 46, linksAtRisk: 19, capacityImpact: 214, marginLoss: 4.1, attenuation: 6.2, throughputReduction: 18, fallbackDemand: 42, confidenceLow: 182, confidenceHigh: 248, annotation: "Degradation threshold crossed" },
   { time: "+18h", linksAffected: 58, linksAtRisk: 23, capacityImpact: 286, marginLoss: 4.7, attenuation: 6.8, throughputReduction: 24, fallbackDemand: 61, confidenceLow: 246, confidenceHigh: 322, annotation: "Customer impact threshold" },
-  { time: "+24h", linksAffected: 54, linksAtRisk: 21, capacityImpact: 262, marginLoss: 4.3, attenuation: 6.4, throughputReduction: 21, fallbackDemand: 56 },
-  { time: "+30h", linksAffected: 44, linksAtRisk: 16, capacityImpact: 198, marginLoss: 3.4, attenuation: 5.4, throughputReduction: 16, fallbackDemand: 38 },
-  { time: "+36h", linksAffected: 31, linksAtRisk: 10, capacityImpact: 132, marginLoss: 2.2, attenuation: 4.1, throughputReduction: 10, fallbackDemand: 21, annotation: "Agent action, monitoring reduced" },
-  { time: "+42h", linksAffected: 22, linksAtRisk: 6, capacityImpact: 78, marginLoss: 1.3, attenuation: 3.2, throughputReduction: 6, fallbackDemand: 9 },
-  { time: "+48h", linksAffected: 14, linksAtRisk: 3, capacityImpact: 41, marginLoss: 0.7, attenuation: 2.4, throughputReduction: 3, fallbackDemand: 2 },
+  { time: "+24h", linksAffected: 54, linksAtRisk: 21, capacityImpact: 262, marginLoss: 4.3, attenuation: 6.4, throughputReduction: 21, fallbackDemand: 56, confidenceLow: 224, confidenceHigh: 298 },
+  { time: "+30h", linksAffected: 44, linksAtRisk: 16, capacityImpact: 198, marginLoss: 3.4, attenuation: 5.4, throughputReduction: 16, fallbackDemand: 38, confidenceLow: 166, confidenceHigh: 230 },
+  { time: "+36h", linksAffected: 31, linksAtRisk: 10, capacityImpact: 132, marginLoss: 2.2, attenuation: 4.1, throughputReduction: 10, fallbackDemand: 21, confidenceLow: 104, confidenceHigh: 160, annotation: "Agent action, monitoring reduced" },
+  { time: "+42h", linksAffected: 22, linksAtRisk: 6, capacityImpact: 78, marginLoss: 1.3, attenuation: 3.2, throughputReduction: 6, fallbackDemand: 9, confidenceLow: 58, confidenceHigh: 98 },
+  { time: "+48h", linksAffected: 14, linksAtRisk: 3, capacityImpact: 41, marginLoss: 0.7, attenuation: 2.4, throughputReduction: 3, fallbackDemand: 2, confidenceLow: 28, confidenceHigh: 54 },
 ];
 
 export const impactBreakdown = [
