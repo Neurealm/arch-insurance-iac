@@ -16,7 +16,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { getCapabilityGraph } from "@/modules/graph/build";
+import { getPopulatedGraph } from "@/modules/graph/populate";
 import { createSimulationEngine } from "@/modules/graph/simulation/index";
 import {
   createChangePlanEngine,
@@ -29,9 +29,15 @@ import { summarizePlanBlockers } from "@/platform/capability-intelligence/remedi
 
 const CANONICAL_GRAPH_HASH = "e889b604";
 
-const graph = getCapabilityGraph();
+/**
+ * Stage 3.5.4.4 correction: the simulation engine reasons over the *populated*
+ * graph, so the plan engine must be bound to the same graph. Binding it to the
+ * unpopulated skeleton made the two disagree about what exists.
+ */
+const graph = getPopulatedGraph().graph;
 const simulation = createSimulationEngine();
 const planEngine = createChangePlanEngine({ graph, simulationEngine: simulation });
+
 
 /** Every plan the real graph can currently produce, measured once. */
 const realPlans: ChangePlan[] = (() => {
@@ -145,6 +151,18 @@ describe("Stage 3.5.4.3.1 — real-graph change-plan status evidence", () => {
   it("produces at least one plan, so the measurement below is not vacuous", () => {
     expect(realPlans.length).toBeGreaterThan(0);
   });
+
+  it("records the largest plan the real graph produces today: 26 steps and 26 patches", () => {
+    const largest = [...realPlans].sort((a, b) => b.steps.length - a.steps.length)[0];
+    // Measured against the canonical graph, not assumed. If the repository
+    // changes shape this is meant to fail loudly and be re-measured.
+    expect(largest.steps.length).toBe(26);
+    expect(largest.patches.length).toBe(26);
+    // Every step is specified by exactly one patch, which is why the two
+    // collections are the same size.
+    expect(largest.patches.length).toBe(largest.steps.length);
+  });
+
 
   it("records that every real plan is currently blocked, and states why", () => {
     const byStatus = new Map<string, number>();

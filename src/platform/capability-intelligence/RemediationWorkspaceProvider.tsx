@@ -1021,3 +1021,16 @@ export function useRemediationWorkspace(): RemediationWorkspaceValue {
   }
   return ctx;
 }
+
+/**
+ * Stage 3.5.4.4 — non-throwing accessor.
+ *
+ * The remediation route group now mounts one provider above both the workspace
+ * and the review readiness screen, so both children share a single session.
+ * Screens use this to detect an ancestor provider and avoid mounting a second
+ * one, which would silently fork the session state.
+ */
+export function useOptionalRemediationWorkspace(): RemediationWorkspaceValue | null {
+  return useContext(Ctx);
+}
+
