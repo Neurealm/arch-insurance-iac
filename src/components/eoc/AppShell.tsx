@@ -1,6 +1,7 @@
 import { ReactNode, useState } from "react";
 import { Menu, ShieldAlert } from "lucide-react";
 import { EocSidebar } from "./Sidebar";
+import { useInModuleShell } from "./ModuleShellContext";
 import { PersonaProvider } from "@/context/PersonaContext";
 import { usePageActivityTracker } from "@/hooks/usePageActivityTracker";
 
@@ -13,6 +14,19 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Mobile drawer open state. AppShell remounts per route, so this naturally
   // resets to closed on navigation (drawer auto-closes after picking a link).
   const [mobileOpen, setMobileOpen] = useState(false);
+  const inModuleShell = useInModuleShell();
+
+  // Inside a module shell (e.g. Site Resilience Engineering) the module layout
+  // already renders its own left navigation — render content only.
+  if (inModuleShell) {
+    return (
+      <>
+        <PageActivityTracker />
+        {children}
+      </>
+    );
+  }
+
 
   return (
     <PersonaProvider>
