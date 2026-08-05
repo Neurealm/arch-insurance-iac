@@ -147,8 +147,6 @@ export default function NocLayout() {
             </>
           )}
         </div>
-
-        </div>
         <Outlet />
       </main>
     </div>
