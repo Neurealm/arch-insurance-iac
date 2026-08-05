@@ -83,12 +83,8 @@ export default function GlobalLinkHealthTwin() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   /* -------------------------------- map -------------------------------- */
-  const [zoom, setZoom] = useState(1);
-  const [mapView, setMapView] = useState<"geographic" | "topology" | "cluster">("geographic");
   const [fullScreenMap, setFullScreenMap] = useState(false);
-  const [overlays, setOverlays] = useState<TwinOverlays>({
-    weather: true, capacity: false, impact: true, maintenance: false, agents: false,
-  });
+
   const [playback, setPlayback] = useState(0);
 
   /* ------------------------------ drawers ------------------------------ */
