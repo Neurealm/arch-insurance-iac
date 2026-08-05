@@ -166,8 +166,11 @@ export function calculateFeatureImpactWaterfall(input: WaterfallInput): Waterfal
 
   for (const record of records) {
     const contribution = round(record.contribution > 0 ? record.contribution * factor : record.contribution, 3);
+    // The cursor stays unclamped so a mid-sequence overshoot cannot silently
+    // discard later negative contributions; only the drawn bar is clamped.
     const start = clamp(cursor, 0, 1);
-    const end = clamp(cursor + contribution, 0, 1);
+    const raw = cursor + contribution;
+    const end = clamp(raw, 0, 1);
     bars.push({
       key: record.key,
       label: record.label,
@@ -178,7 +181,7 @@ export function calculateFeatureImpactWaterfall(input: WaterfallInput): Waterfal
       end,
       direction: contribution >= 0 ? "Increases risk" : "Reduces risk",
     });
-    cursor = end;
+    cursor = raw;
     runningSubtotal.push(round(end, 3));
   }
 
