@@ -175,6 +175,8 @@ const tree: Node[] = [
     to: "/avep/program",
   },
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
+  { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
+
 
   {
     key: "coworkers",
