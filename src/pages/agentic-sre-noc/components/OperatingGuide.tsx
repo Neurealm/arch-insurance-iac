@@ -190,6 +190,36 @@ export function OperatingGuide({
               })}
             </ol>
 
+            {/* Predictive Optical Protection entry point */}
+            <RouterLink
+              to="/agentic-sre-noc/global-link-health-twin/predictive-optical-link-intelligence"
+              data-testid="glht-guide-predictive-link"
+              className="group mt-2 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2 hover:border-blue-300 hover:bg-blue-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            >
+              <svg viewBox="0 0 96 44" className="h-11 w-24 shrink-0 rounded border border-slate-200 bg-white" role="img" aria-label="Predicted link risk rising ahead of impact">
+                <line x1="6" y1="36" x2="90" y2="36" stroke="#e2e8f0" strokeWidth="1" />
+                <polyline points="6,32 20,30 34,27 48,22" fill="none" stroke="#2563eb" strokeWidth="2" />
+                <polyline points="48,22 62,17 76,11 88,7" fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="3 3" />
+                <circle cx="48" cy="22" r="2.6" fill="#2563eb" />
+                <circle cx="88" cy="7" r="3" fill="#dc2626" />
+                <text x="6" y="12" fontSize="7" fill="#64748b">risk</text>
+              </svg>
+              <span className="min-w-0">
+                <span className="flex items-center gap-1.5">
+                  <span className="text-[11.5px] font-semibold text-slate-900">Predictive Optical Protection</span>
+                  <span className="rounded border border-blue-200 bg-blue-50 px-1 text-[9px] font-semibold text-blue-700">Model v2.4.1</span>
+                </span>
+                <span className="mt-0.5 block text-[10.5px] leading-snug text-slate-600">
+                  Predict link degradation before customer impact. 8,721 links modeled · 32 at risk · 5h 42m mean lead
+                  time · 94.1% accuracy.
+                </span>
+                <span className="mt-0.5 block text-[10.5px] font-medium text-blue-700 group-hover:underline">
+                  Open Predictive Optical Link Intelligence
+                </span>
+              </span>
+            </RouterLink>
+
+
             {detail && (
               <div className="mt-2 rounded border border-slate-200 bg-slate-50 p-2" data-testid="glht-guide-stage-detail">
                 <h4 className="text-[11.5px] font-semibold text-slate-900">
