@@ -400,6 +400,7 @@ import GlobalOpticalOperationsCenter from "./pages/agentic-sre-noc/GlobalOptical
 import CustomerServiceHealthExplorer from "./pages/agentic-sre-noc/CustomerServiceHealthExplorer.tsx";
 import GlobalOpticalServiceTopology from "./pages/agentic-sre-noc/GlobalOpticalServiceTopology.tsx";
 import PredictiveLinkRiskCenter from "./pages/agentic-sre-noc/PredictiveLinkRiskCenter.tsx";
+import ActiveSituationRoom from "./pages/agentic-sre-noc/ActiveSituationRoom.tsx";
 import RunOpsCommand from "./runops/pages/Command.tsx";
 import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
@@ -702,7 +703,7 @@ const App = () => (
             <Route path="customer-service-health" element={<CustomerServiceHealthExplorer />} />
             <Route path="service-topology" element={<GlobalOpticalServiceTopology />} />
             <Route path="predictive-link-risk" element={<PredictiveLinkRiskCenter />} />
-            <Route path="situation-room" element={<NocPage slug="situation-room" />} />
+            <Route path="situation-room" element={<ActiveSituationRoom />} />
             <Route path="investigation" element={<NocPage slug="investigation" />} />
             <Route path="approvals" element={<NocPage slug="approvals" />} />
             <Route path="recovery" element={<NocPage slug="recovery" />} />
