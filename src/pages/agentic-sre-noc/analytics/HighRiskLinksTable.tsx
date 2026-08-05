@@ -257,45 +257,34 @@ export function HighRiskLinksTable({
                           {state.pinnedLinkIds.includes(r.linkId) ? "★" : "☆"}
                         </button>
                       </td>
-                      {columns.map((c, i) =>
-                        i === 0 || c.key !== "linkId" ? (
-                          <td key={c.key} className="whitespace-nowrap px-1.5 py-0.5 text-slate-700">
-                            {c.key === "linkId" ? (
-                              <button
-                                type="button"
-                                onClick={() => { onSelectLink(r.linkId); onNotify(`${r.linkId} selected from Top High-Risk Links.`); }}
-                                aria-current={selected ? "true" : undefined}
-                                className="font-medium text-blue-700 underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                              >
-                                {r.linkId}
-                              </button>
-                            ) : c.key === "riskClass" ? (
-                              <span
-                                className={cn(
-                                  "font-medium",
-                                  r.riskClass === "High" && "text-rose-700",
-                                  r.riskClass === "Moderate" && "text-amber-700",
-                                  r.riskClass === "Low" && "text-emerald-700",
-                                )}
-                              >
-                                {r.riskClass}
-                              </span>
-                            ) : (
-                              cellValue(r, c.key)
-                            )}
-                          </td>
-                        ) : (
-                          <td key={c.key} className="whitespace-nowrap px-1.5 py-0.5 text-slate-700">
+                      {columns.map((c) => (
+                        <td key={c.key} className="whitespace-nowrap px-1.5 py-0.5 text-slate-700">
+                          {c.key === "linkId" ? (
                             <button
                               type="button"
                               onClick={() => { onSelectLink(r.linkId); onNotify(`${r.linkId} selected from Top High-Risk Links.`); }}
+                              aria-current={selected ? "true" : undefined}
                               className="font-medium text-blue-700 underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                             >
                               {r.linkId}
                             </button>
-                          </td>
-                        ),
-                      )}
+                          ) : c.key === "riskClass" ? (
+                            <span
+                              className={cn(
+                                "font-medium",
+                                r.riskClass === "High" && "text-rose-700",
+                                r.riskClass === "Moderate" && "text-amber-700",
+                                r.riskClass === "Low" && "text-emerald-700",
+                              )}
+                            >
+                              {r.riskClass}
+                            </span>
+                          ) : (
+                            cellValue(r, c.key)
+                          )}
+                        </td>
+                      ))}
+
                     </tr>
                   );
                 })}
