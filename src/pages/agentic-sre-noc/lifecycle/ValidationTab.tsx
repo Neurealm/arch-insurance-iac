@@ -30,6 +30,9 @@ export interface ValidationTabProps {
   explainabilityQuality: ExplainabilityQuality;
   region: string;
   product: string;
+  horizon?: string;
+  selectedLinkId?: string | null;
+  thresholdPct?: number;
   onNotify: (message: string) => void;
   onRetry: () => void;
 }
@@ -38,7 +41,7 @@ const segmentDimensions = ["All dimensions", ...Array.from(new Set(validationSeg
 
 export function ValidationTab({
   panelState, view, onViewChange, selectedSegmentId, onSelectSegment,
-  explainabilityQuality, region, product, onNotify, onRetry,
+  explainabilityQuality, region, product, horizon, selectedLinkId, thresholdPct, onNotify, onRetry,
 }: ValidationTabProps) {
   const [dimensionFilter, setDimensionFilter] = React.useState<string>("All dimensions");
 
@@ -62,6 +65,10 @@ export function ValidationTab({
 
   return (
     <div className="space-y-3" data-testid="lifecycle-tab-validation">
+      <p className="text-[10.5px] text-slate-600" data-testid="validation-scope">
+        Validation scope. Region {region}, product {product}, forecast horizon {horizon ?? "not set"},
+        confidence threshold {thresholdPct ?? 80} percent, selected link {selectedLinkId ?? "none"}.
+      </p>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-[13px] font-semibold text-slate-900">Model Validation Results</h3>
         <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Validation view">
@@ -216,7 +223,11 @@ export function ValidationTab({
           >
             <div className="max-h-60 space-y-1.5 overflow-auto pr-1">
               {explainabilityRecords.map((record) => (
-                <article key={record.id} className="rounded border border-slate-200 bg-slate-50/60 p-2">
+                <article
+                  key={record.id}
+                  data-selected={record.linkId === selectedLinkId ? "true" : "false"}
+                  className={`rounded border p-2 ${record.linkId === selectedLinkId ? "border-blue-300 bg-blue-50/60" : "border-slate-200 bg-slate-50/60"}`}
+                >
                   <header className="flex flex-wrap items-center justify-between gap-1">
                     <h5 className="text-[11px] font-semibold text-slate-900">{record.linkId}, {record.primaryFactor}</h5>
                     <span className="text-[10px] text-slate-500">{record.predictionId}, human {record.humanAgreement.toLowerCase()}</span>
