@@ -14,6 +14,8 @@ and never triggers remediation.
 | 3.5.4.2 | Interactive Graph Explorer: bounded neighbourhood traversal, deterministic layout, cross-screen "Explore relationships" navigation and the `?root=` deep-link contract |
 | 3.5.4.2.1 | Transparency and integration hardening: traversal-warning presentation, accessible graph contents expanded by default, recommendation root policy, `?root=` normalization, re-root contract, RunOps graph regression coverage |
 | 3.5.4.2.2 | Warning deduplication and accessibility closure: identical warnings reported by both traversal branches are consolidated into one card, and warning appearance, change and clearing are announced in a dedicated polite live region. The warning source remains the Query Engine — no engine warning emission, traversal semantics or taxonomy was changed. |
+| 3.5.4.3 | Simulation and Change Planning Workspace: the fifth screen. Deterministic default recommendation, `?recommendation=` deep-link contract, proposal and parameter surfaces, simulation results, alternative comparison and a read-only change-plan preview |
+| 3.5.4.3.1 | Workflow gating and evidence hardening: one canonical eligibility policy enforced in both UI state and action handlers, seven explicit stages with no automatic engine execution, narrowed `simultaneous-alternatives` conflict handling, measured real-graph plan-status evidence separated from clearly labelled fixtures, bounded rendering of steps/patches/blockers, and polite/assertive announcement separation |
 
 
 ## Location
@@ -29,6 +31,8 @@ and never triggers remediation.
 | Overview | `/platform/capability-intelligence` | Executive health: graph scale, registration coverage, orphan/unregistered inventory, recommendation distribution, graph hash provenance |
 | Capability Explorer | `.../explorer` | Paginated, filterable, sortable table over all graph nodes |
 | Recommendation Center | `.../recommendations` | Advisory recommendations with identity, status, evidence, remediation sequence and confidence rationale |
+| Interactive Graph Explorer | `.../graph` | Bounded neighbourhood traversal over the canonical graph with the `?root=` deep-link contract |
+| Remediation Workspace | `.../remediation` | Seven-stage, explicitly invoked simulation and change-planning workspace with the `?recommendation=` deep-link contract |
 | Entity Detail Drawer | overlay on both list screens | Identity, connectivity, owning module, registration, traceability, relationships, dependencies, dependents, lineage, reasoning findings and recommendations for one entity |
 
 ## Route authorization
@@ -65,8 +69,14 @@ buildCapabilityGraph -> populateCapabilityGraph
         \                        /
       CapabilityIntelligenceProvider   (memoised once per browser session)
                      |
-      Overview | Explorer | Recommendations | Drawer
+      Overview | Explorer | Recommendations | Graph | Remediation | Drawer
 ```
+
+`RemediationWorkspaceProvider` nests inside that provider on the Remediation
+route only. It owns workflow state and a memoized simulation/change-plan engine
+pair; the plan engine is bound explicitly to the simulation engine's populated
+graph so every surface reports the same canonical hash. It never re-runs
+`analyzeGraph()`.
 
 `CapabilityIntelligenceProvider` computes the snapshot exactly once and caches it in a
 module-level singleton, because `analyzeGraph()` is the heaviest synchronous call in
@@ -148,8 +158,10 @@ graph. Orphan state appears as a "Connectivity" column, a "Connectivity" filter
 ## Read-only guarantees
 
 - No mutation APIs are imported by any file under `src/platform/capability-intelligence/`.
-- No simulation or change-plan module is imported by the UI.
-- No approve, dismiss, edit, execute or export-to-write affordances exist.
+- The simulation and change-plan engines are imported only by the Remediation
+  Workspace, and only for in-memory planning: no patch is applied, no state is
+  persisted, and no repository, Supabase or graph mutation is possible.
+- No approve, reject, dismiss, edit, execute or export-to-write affordances exist.
 - Recommendations are labelled advisory; the UI surfaces a persistent `read-only` chip.
 - Every screen displays the graph content hash so any rendered figure is traceable to a
   specific graph snapshot.
@@ -166,6 +178,8 @@ placeholder or mocked data is used anywhere in the UI.
 | `capabilityIntelligence.test.tsx` | Analysis determinism, card provenance, filtering without source mutation, read-only query access |
 | `capabilityIntelligenceRouting.test.tsx` | Authorized access, unauthorized direct-URL block, child-route inheritance, forbidden component reuse, loading state, navigation/authorization consistency |
 | `capabilityIntelligenceApp.test.tsx` | Provider single-compute lifecycle, Overview data contracts and priority bands, precision and unavailable-state handling, registration framing, confidence labelling, KPI semantic order (`dt` before `dd`, single `dd` per group, `aria-describedby` hint), recommendation-summary grid contract, Explorer filtering/paging/clamping/terminology/orphans/`aria-sort`, recommendation identity and status, expected-by-design distinction, drawer behaviour, orphan-definition parity |
+| `remediationWorkspace.test.tsx`, `remediationSelection.test.tsx` | Stage 3.5.4.3: engine determinism and hash preservation, plan contracts, route authorization, the deterministic default recommendation, the full `?recommendation=` matrix and the labelled seven-step workflow list |
+| `remediationGating.test.tsx` (52), `remediationPlanStatus.test.tsx` (22) | Stage 3.5.4.3.1: explicit generation/validation lifecycles, simulation, comparison and change-plan eligibility gates enforced at handler level, announcement deduplication, measured real-graph plan-status evidence, labelled fixture statuses and `BoundedList` bounds |
 | `capabilityIntelligenceRouteIntegration.test.tsx` | Mounts the real `capabilityIntelligenceRoutes` element from `routes.tsx` (the same element `App.tsx` renders): unauthorized block on parent and both child routes, authorized entry, and provider lifecycle across actual link navigation Overview → Explorer → Recommendations → Overview with `analyzeGraph()` executing exactly once and hash `e889b604` stable |
 
 
@@ -187,11 +201,22 @@ bunx vitest run src/modules/graph     # graph engine + determinism
   regenerated graph.
 - Rate metrics show definitions rather than numerator/denominator pairs, which the
   engine does not currently expose.
+- Every change plan the real graph can currently produce is `blocked` (dominated by
+  `unresolved-artifact-mapping` and `unresolved-approval-role`); `draft` and
+  `ready-for-review` are demonstrated only through fixtures that are labelled
+  "Fixture — not derived from the repository graph".
+- Remediation workspace state is not persisted; a reload restarts the workflow.
+- No authenticated browser-based visual validation has been performed for the
+  Remediation Workspace.
 
 ## Deferred work
 
 Drawer deep-linking, URL-encoded filters, page-size selector, shared command palette,
 shared KPI/filter-bar extraction, tablet/mobile redesign, in-shell nested 404.
+
+Change review, approval, rejection and patch execution are deferred to
+Stage 3.5.4.4 (Change Review and Approval Experience) and are deliberately absent
+from every current screen.
 
 ## Stage 3.5.4.2 — Interactive Graph Explorer
 
@@ -235,10 +260,48 @@ Full detail: `docs/modules/stage3-5-4-2-graph-explorer.md`. Summary:
   the deterministic initial root.
 - **Tests** — `graphExplorer.test.tsx`, `graphExplorerNavigation.test.tsx`,
   `graphExplorerHardening.test.ts`, `graphExplorerTransparency.test.tsx` and
-  `src/runops/components/runopsGraphRegression.test.tsx`; repository total 814 passing.
+  `src/runops/components/runopsGraphRegression.test.tsx`.
 - **Determinism** — canonical graph hash `e889b604` unchanged before and after.
 
 ### Remaining limitations
 
 Bounded views only (no whole-graph rendering), no persisted view state beyond the root
 parameter, no simulation or change-plan surfaces (deferred to later stages).
+
+## Stage 3.5.4.3 / 3.5.4.3.1 — Remediation Workspace
+
+Full detail: `docs/modules/stage3-5-4-3-simulation-change-planning-workspace.md`.
+Application-level summary:
+
+- **Route** — `/platform/capability-intelligence/remediation`, lazy loaded from
+  `routes.tsx`, inheriting `PlatformAdminRoute`.
+- **Deep link** — `?recommendation=<canonical-recommendation-id>`. Missing, empty
+  and unknown identifiers fall back to the deterministic default recommendation;
+  an unknown identifier also shows a notice naming it.
+- **Deterministic default recommendation** — priority band, then priority score,
+  then severity, then affected-entity count, then identifier. Nothing hardcoded.
+- **Explicit proposal generation** — no proposal exists until the operator asks.
+- **Local parameter binding** — graph-derived candidates with support scores;
+  "Leave unresolved" is always available and yields an `incomplete` classification
+  rather than a guessed value. Bindings are in-memory only.
+- **Explicit validation** — the engine classification is the only thing that
+  authorises a simulation.
+- **Eligibility gating** — one canonical policy in `remediation/eligibility.ts`,
+  applied both to the controls and inside the action handlers, so a programmatic
+  call cannot bypass it.
+- **Simulation, alternatives comparison and change-plan preview** — each is a
+  separate explicit action; comparison accepts 2–4 eligible alternatives only.
+- **Stale-state behaviour** — changing an input marks dependent results stale and
+  keeps them visible with a warning; nothing re-executes automatically.
+- **Evidence separation** — real plans are marked repository-derived; fixture
+  plans carry "Fixture — not derived from the repository graph".
+- **Bounded collections** — steps, patches and blockers show 10 initially with the
+  true total stated and full expansion available.
+- **Read-only** — no approve, reject, execute, apply, persist or write path exists.
+- **Determinism** — canonical graph hash `e889b604` unchanged.
+
+## Verified totals (current)
+
+- Repository-wide: **968 tests across 56 files, all passing** (`bunx vitest run`).
+- Capability Intelligence focused suite: **266 tests across 14 files**.
+- Typecheck clean; canonical graph hash `e889b604`; `analyzeGraph()` executes once.
