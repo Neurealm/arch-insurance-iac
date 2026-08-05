@@ -759,6 +759,54 @@ export default function GlobalOpticalOperationsCenter() {
 
 /* ------------------------------- helpers ------------------------------- */
 
+type MetricCardConfig = React.ComponentProps<typeof OperationalMetricCard>;
+
+function MetricSlider({ cards }: { cards: MetricCardConfig[] }) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  const nudge = (direction: -1 | 1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction * (el.clientWidth / 2 + 12), behavior: "smooth" });
+  };
+
+  return (
+    <div className="relative h-full">
+      <div
+        ref={scrollerRef}
+        aria-label="Additional operational metrics"
+        className="flex h-full snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {cards.map((c) => (
+          <div key={c.title} className="w-[calc(50%-6px)] shrink-0 snap-start">
+            <OperationalMetricCard {...c} />
+          </div>
+        ))}
+      </div>
+      <SliderArrow side="left" onClick={() => nudge(-1)} />
+      <SliderArrow side="right" onClick={() => nudge(1)} />
+    </div>
+  );
+}
+
+function SliderArrow({ side, onClick }: { side: "left" | "right"; onClick: () => void }) {
+  const Icon = side === "left" ? ChevronLeft : ChevronRight;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={side === "left" ? "Show previous metrics" : "Show next metrics"}
+      className={cn(
+        "absolute top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white/95 p-1 text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+        side === "left" ? "left-1" : "right-1",
+      )}
+    >
+      <Icon className="h-4 w-4" aria-hidden />
+    </button>
+  );
+}
+
+
 function FilterSelect({
   label, value, options, onChange,
 }: { label: string; value: string; options: readonly string[]; onChange: (v: string) => void }) {
