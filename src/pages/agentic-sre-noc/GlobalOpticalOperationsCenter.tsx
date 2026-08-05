@@ -370,8 +370,17 @@ export default function GlobalOpticalOperationsCenter() {
             <button
               key={a.id}
               type="button"
-              onClick={() => setSelectedAgent(a.id)}
-              className="rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm transition-colors hover:border-indigo-300 hover:bg-slate-50"
+              onClick={() =>
+                a.name === "Global Link Health Agent"
+                  ? navigate("/agentic-sre-noc/global-link-health-twin")
+                  : setSelectedAgent(a.id)
+              }
+              className={cn(
+                "rounded-lg border p-3 text-left shadow-sm transition-colors hover:border-indigo-300 hover:bg-slate-50",
+                a.name === "Global Link Health Agent"
+                  ? "border-amber-300 bg-amber-50"
+                  : "border-slate-200 bg-white",
+              )}
             >
               <div className="flex items-start justify-between gap-2">
                 <span className="flex items-center gap-1.5 text-[12.5px] font-semibold text-slate-900">
