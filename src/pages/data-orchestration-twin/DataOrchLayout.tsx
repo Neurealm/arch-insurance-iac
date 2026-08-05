@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { Database, ArrowLeft, ArrowRight, ChevronsLeft, ChevronsRight, Circle } from "lucide-react";
+import { Database, Home, ArrowLeft, ArrowRight, ChevronsLeft, ChevronsRight, Circle } from "lucide-react";
 import { doPages, doGroups } from "./pages";
 import { cn } from "@/lib/utils";
 
