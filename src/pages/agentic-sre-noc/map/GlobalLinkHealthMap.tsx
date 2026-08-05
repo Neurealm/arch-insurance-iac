@@ -135,7 +135,7 @@ export function GlobalLinkHealthMap({
     try {
       // Neutral operational palette: white water, very light gray land.
       for (const layer of map.getStyle().layers ?? []) {
-        if (layer.type === "background") map.setPaintProperty(layer.id, "background-color", "#eef2f6");
+        if (layer.type === "background") map.setPaintProperty(layer.id, "background-color", "#ffffff");
         if (layer.id.includes("water")) {
           if (layer.type === "fill") map.setPaintProperty(layer.id, "fill-color", "#ffffff");
           if (layer.type === "line") map.setPaintProperty(layer.id, "line-color", "#ffffff");
