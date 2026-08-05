@@ -454,7 +454,7 @@ export function buildTopology(service: CustomerService): TopoGraph {
       id: "t-slo", label: `${service.name} SLO`, kind: "SLO", health: degraded ? "At risk" : "Healthy",
       risk: degraded ? "High" : "Low", owner: "Taara operations", capacity: "Not applicable", throughput: "Not applicable",
       latency: `< ${service.latencyObjectiveMs} ms`, state: service.sloStatus, freshness: "1 m ago",
-      agentActivity: "SLO Guardian tracking", customerImpact: `${service.errorBordgetLabel ?? service.errorBudgetPct}% error budget remaining`,
+      agentActivity: "SLO Guardian tracking", customerImpact: `${service.errorBudgetPct}% error budget remaining`,
       region, x: 34, y: 86, context: true,
       detail: [["Availability objective", `${service.availabilityObjective}%`], ["Latency objective", `< ${service.latencyObjectiveMs} ms`], ["Error budget", `${service.errorBudgetPct}%`]],
     }),
@@ -678,7 +678,7 @@ export interface OwnershipRow {
   incidentOwner: Owner;
   escalationOwner: string;
   changeApprover: Owner;
-  fieldSupport: Owner;
+  fieldSupport: string;
   gap: string;
 }
 
