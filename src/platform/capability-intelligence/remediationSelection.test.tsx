@@ -228,12 +228,16 @@ const canonicalRecommendations = () => computeCapabilityIntelligence().intellige
 function simulatableId(): string {
   const { simulation } = getRemediationEngines();
   for (const r of canonicalRecommendations()) {
-    if (simulation.generateProposalFromRecommendation(r).length > 0) {
+    const proposals = simulation.generateProposalFromRecommendation(r);
+    // Stage 3.5.4.3.1 gates simulation on the engine's own executable verdict,
+    // so the fixture recommendation must actually yield an executable proposal.
+    if (proposals.some((p) => simulation.validate(p).executable)) {
       return encodeURIComponent(r.id);
     }
   }
-  throw new Error("no recommendation in the real graph yields a proposal");
+  throw new Error("no recommendation in the real graph yields a simulatable proposal");
 }
+
 
 /** Selects the first offered proposal and returns the enabled Run button. */
 /**
