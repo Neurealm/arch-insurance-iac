@@ -103,7 +103,7 @@ describe("SRE Based Agentic NOC — Stage 2 workflows", () => {
 
   it("records failing validation and recommends rollback", () => {
     renderSection();
-    useAgenticNocStore.getState().startValidation();
+    fireEvent.click(screen.getByRole("button", { name: "Start validation" }));
     fireEvent.click(screen.getByRole("button", { name: "Record failing results" }));
     expect(screen.getByRole("alert")).toHaveTextContent(/required validation test failed/);
   });
