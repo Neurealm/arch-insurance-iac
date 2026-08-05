@@ -29,50 +29,9 @@ import {
 } from "./data/goocFixtures";
 
 /* ------------------------------ primitives ----------------------------- */
+// Panel, Select and Field now live in ./components/NocPrimitives so every
+// Agentic SRE NOC page shares one implementation.
 
-function Panel({
-  title, subtitle, action, children, className,
-}: { title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
-  return (
-    <section className={cn("rounded-xl border border-slate-200 bg-white shadow-sm", className)}>
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
-        <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-          {subtitle && <p className="text-[11.5px] text-slate-500">{subtitle}</p>}
-        </div>
-        {action}
-      </header>
-      <div className="p-4">{children}</div>
-    </section>
-  );
-}
-
-function Select({
-  label, value, options, onChange,
-}: { label: string; value: string; options: readonly string[]; onChange: (v: string) => void }) {
-  return (
-    <label className="flex items-center gap-1.5 text-[11px] text-slate-500">
-      <span className="sr-only sm:not-sr-only">{label}</span>
-      <select
-        aria-label={label}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[11.5px] text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      >
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
-    </label>
-  );
-}
-
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5">
-      <div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="text-[12px] font-medium text-slate-900">{value}</div>
-    </div>
-  );
-}
 
 function StatusDot({ status }: { status: LinkStatus }) {
   return <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: statusColors[status] }} aria-hidden />;
