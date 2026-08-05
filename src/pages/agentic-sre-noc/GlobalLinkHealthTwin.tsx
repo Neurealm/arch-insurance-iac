@@ -21,7 +21,7 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Panel, Select, Field, ToolbarButton } from "./components/NocPrimitives";
-import { TwinMap, type TwinOverlays } from "./components/TwinMap";
+import { GlobalLinkHealthMap } from "./map/GlobalLinkHealthMap";
 import {
   activityEvents, chennaiScenario, coworkers, GLHT_LINK_TYPES, GLHT_PRODUCTS,
   GLHT_REGIONS, GLHT_SAVED_VIEWS, GLHT_TIME_RANGES, glhtKpis, incidentSummary,
