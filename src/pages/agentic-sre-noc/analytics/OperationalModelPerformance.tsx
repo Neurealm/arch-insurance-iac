@@ -90,7 +90,7 @@ export function OperationalModelPerformance({
         <Filter label="Region" value={state.region} options={REGIONS} onChange={state.setRegion} />
         <Filter label="Product" value={state.product} options={PRODUCTS} onChange={state.setProduct} />
         <Filter
-          label="Forecast horizon"
+          label="Performance horizon"
           value={`${state.horizonHours} hours`}
           options={HORIZONS.map((h) => `${h} hours`)}
           onChange={(v) => state.setHorizonHours(Number.parseInt(v, 10))}

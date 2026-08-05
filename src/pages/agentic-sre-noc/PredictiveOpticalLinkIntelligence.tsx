@@ -454,55 +454,65 @@ export default function PredictiveOpticalLinkIntelligence() {
           </PanelShell>
 
 
-          <ThresholdTradeoffPanel
-            state={analytics}
-            pipelineThresholdPct={pipelineThresholdPct}
-            onThresholdChange={handleThresholdPush}
-          />
+          <div data-testid="analytics-threshold" data-analytics-state={analyticsState} className="min-w-0">
+            <ThresholdTradeoffPanel
+              state={analytics}
+              pipelineThresholdPct={pipelineThresholdPct}
+              onThresholdChange={handleThresholdPush}
+            />
+          </div>
 
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             <PanelShell spec={spec.performance} state={panelState} heightClass="min-h-[300px]" functional>
-              <OperationalModelPerformance
-                state={analytics}
-                panelState={analyticsState}
-                onOpenMetricDrawer={handleMetricDrawer}
-                onNotify={handleNotify}
-              />
+              <div data-testid="analytics-performance" data-analytics-state={analyticsState} className="min-w-0">
+                <OperationalModelPerformance
+                  state={analytics}
+                  panelState={analyticsState}
+                  onOpenMetricDrawer={handleMetricDrawer}
+                  onNotify={handleNotify}
+                />
+              </div>
             </PanelShell>
 
             <PanelShell spec={spec.factors} state={panelState} heightClass="min-h-[300px]" functional>
-              <PredictiveFactorsChart
-                state={analytics}
-                selectedLinkId={activeLinkId}
-                selectedLinkRisk={selectedLinkRisk}
-                panelState={analyticsState}
-                onFactorSelected={(key) => handleNotify(key ? `Factor ${key} selected.` : "Factor selection cleared.")}
-                onNotify={handleNotify}
-              />
+              <div data-testid="analytics-factors" data-analytics-state={analyticsState} className="min-w-0">
+                <PredictiveFactorsChart
+                  state={analytics}
+                  selectedLinkId={activeLinkId}
+                  selectedLinkRisk={selectedLinkRisk}
+                  panelState={analyticsState}
+                  onFactorSelected={(key) => handleNotify(key ? `Factor ${key} selected.` : "Factor selection cleared.")}
+                  onNotify={handleNotify}
+                />
+              </div>
             </PanelShell>
           </div>
 
           <PanelShell spec={spec.impact} state={panelState} heightClass="min-h-[320px]" functional>
-            <FeatureImpactWaterfall
-              state={analytics}
-              selectedLinkId={activeLinkId}
-              selectedLinkRisk={selectedLinkRisk}
-              horizonLabel={`Next ${analytics.horizonHours} Hours`}
-              whatIfRisk={whatIfRisk}
-              panelState={analyticsState}
-              onFactorSelected={(key) => handleNotify(key ? `Factor ${key} selected.` : "Factor selection cleared.")}
-              onNotify={handleNotify}
-            />
+            <div data-testid="analytics-impact" data-analytics-state={analyticsState} className="min-w-0">
+              <FeatureImpactWaterfall
+                state={analytics}
+                selectedLinkId={activeLinkId}
+                selectedLinkRisk={selectedLinkRisk}
+                horizonLabel={`Next ${analytics.horizonHours} Hours`}
+                whatIfRisk={whatIfRisk}
+                panelState={analyticsState}
+                onFactorSelected={(key) => handleNotify(key ? `Factor ${key} selected.` : "Factor selection cleared.")}
+                onNotify={handleNotify}
+              />
+            </div>
           </PanelShell>
 
           <PanelShell spec={spec.highrisk} state={panelState} heightClass="min-h-[320px]" functional>
-            <HighRiskLinksTable
-              state={analytics}
-              selectedLinkId={activeLinkId}
-              panelState={analyticsState}
-              onSelectLink={handleSelectLink}
-              onNotify={handleNotify}
-            />
+            <div data-testid="analytics-highrisk" data-analytics-state={analyticsState} className="min-w-0">
+              <HighRiskLinksTable
+                state={analytics}
+                selectedLinkId={activeLinkId}
+                panelState={analyticsState}
+                onSelectLink={handleSelectLink}
+                onNotify={handleNotify}
+              />
+            </div>
           </PanelShell>
         </div>
       </div>
@@ -539,12 +549,14 @@ export default function PredictiveOpticalLinkIntelligence() {
         </PanelShell>
 
         <PanelShell spec={spec.horizon} state={panelState} heightClass="min-h-[300px]" className="xl:col-span-4" functional>
-          <PredictionHorizonChart
-            state={analytics}
-            selectedLinkId={activeLinkId}
-            panelState={analyticsState}
-            onNotify={handleNotify}
-          />
+          <div data-testid="analytics-horizon" data-analytics-state={analyticsState} className="min-w-0">
+            <PredictionHorizonChart
+              state={analytics}
+              selectedLinkId={activeLinkId}
+              panelState={analyticsState}
+              onNotify={handleNotify}
+            />
+          </div>
         </PanelShell>
 
         <PanelShell spec={spec.traditional} state={panelState} heightClass="min-h-[260px]" className="xl:col-span-3">
