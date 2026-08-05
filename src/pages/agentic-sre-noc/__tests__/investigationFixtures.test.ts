@@ -30,8 +30,8 @@ describe("investigationFixtures", () => {
     expect(leading.id).toBe("hyp-fog");
     expect(leading.confidence).toBe(94);
     expect(leading.status).toBe("Leading Cause");
-    expect(causeHypotheses.filter((h) => h.status === "Eliminated")).toHaveLength(5);
-    expect(causeHypotheses.filter((h) => h.status === "Monitoring")).toHaveLength(2);
+    expect(causeHypotheses.filter((h) => h.status === "Eliminated")).toHaveLength(6);
+    expect(causeHypotheses.filter((h) => h.status === "Monitoring")).toHaveLength(1);
   });
 
   it("gives every hypothesis supporting and contradicting evidence", () => {
