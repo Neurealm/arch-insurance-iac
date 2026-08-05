@@ -109,7 +109,7 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
             qualityScore={state.datasetQualityScore}
             region={context.region}
             product={context.product}
-            onOpenProvenance={setProvenance}
+            onOpenProvenance={openProvenance}
             onNotify={state.announce}
             onRetry={onRetry}
           />
@@ -196,11 +196,13 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
           aria-modal="false"
           aria-label={`Provenance detail, ${provenance.source}`}
           data-testid="provenance-drawer"
-          className="mt-3 rounded-lg border border-blue-200 bg-white p-3"
+          ref={provenanceRef}
+          tabIndex={-1}
+          className="mt-3 rounded-lg border border-blue-200 bg-white p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
           <div className="flex items-start justify-between gap-2">
             <h4 className="text-[12px] font-semibold text-slate-900">{provenance.source}</h4>
-            <LifecycleButton onClick={() => setProvenance(null)}>Close</LifecycleButton>
+            <LifecycleButton onClick={closeProvenance}>Close</LifecycleButton>
           </div>
           <dl className="mt-1 grid grid-cols-1 gap-x-4 gap-y-0.5 text-[10.5px] sm:grid-cols-2">
             <div><dt className="inline text-slate-500">Owner. </dt><dd className="inline text-slate-800">{provenance.owner}</dd></div>
