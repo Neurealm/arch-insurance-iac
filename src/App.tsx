@@ -394,6 +394,8 @@ import DiscoveryConfidenceDemo from "./pages/crm-demo/DiscoveryConfidenceDemo.ts
 import PublicQuestionnaire from "./pages/PublicQuestionnaire.tsx";
 import RunOpsLayout from "./runops/shell/RunOpsLayout.tsx";
 import SreLayout from "./pages/prod-twin/SreLayout.tsx";
+import NocLayout from "./pages/agentic-sre-noc/NocLayout.tsx";
+import NocPage from "./pages/agentic-sre-noc/NocPage.tsx";
 import RunOpsCommand from "./runops/pages/Command.tsx";
 import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
