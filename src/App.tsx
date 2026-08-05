@@ -708,6 +708,15 @@ const App = () => (
           <Route element={<NocLayout />}>
             <Route path="/operations/traditional-noc/global-optical-operations" element={<TraditionalNocOperationsCenter />} />
           </Route>
+          <Route element={<SreAgenticNocLayout />}>
+            <Route path="/operations/sre-agentic-noc" element={<SreAgenticOpticalOperationsCenter />} />
+            <Route path="/operations/sre-agentic-noc/global-optical-operations" element={<SreAgenticOpticalOperationsCenter />} />
+            {sreNocNav
+              .filter((item) => item.to !== "/operations/sre-agentic-noc/global-optical-operations")
+              .map((item) => (
+                <Route key={item.to} path={item.to} element={<SreAgenticNocPlaceholder />} />
+              ))}
+          </Route>
           <Route path="/agentic-sre-noc" element={<NocLayout />}>
 
             <Route index element={<GlobalOpticalOperationsCenter />} />
