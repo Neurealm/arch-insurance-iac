@@ -454,6 +454,9 @@ export default function SreAgenticOpticalOperationsCenter() {
           )}
         </section>
 
+        {/* Stage 2 — active workflow surface */}
+        <Stage2WorkflowSection />
+
         {/* Row 4 */}
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
           <AgenticOperationalEventStream events={visibleEvents} loading={loading} className="lg:col-span-12" />
