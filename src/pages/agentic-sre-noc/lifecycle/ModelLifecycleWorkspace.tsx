@@ -19,6 +19,22 @@ import type { TrainingProvenanceRecord } from "./lifecycleTypes";
 export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext }) {
   const state = useLifecycleState(context);
   const [provenance, setProvenance] = React.useState<TrainingProvenanceRecord | null>(null);
+  const provenanceRef = React.useRef<HTMLDivElement | null>(null);
+  const provenanceTriggerRef = React.useRef<HTMLElement | null>(null);
+
+  const openProvenance = React.useCallback((record: TrainingProvenanceRecord) => {
+    provenanceTriggerRef.current = document.activeElement as HTMLElement | null;
+    setProvenance(record);
+  }, []);
+
+  const closeProvenance = React.useCallback(() => {
+    setProvenance(null);
+    provenanceTriggerRef.current?.focus?.();
+  }, []);
+
+  React.useEffect(() => {
+    if (provenance) provenanceRef.current?.focus();
+  }, [provenance]);
 
   const onRetry = React.useCallback(() => {
     state.setPanelState("ready");
@@ -41,7 +57,21 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
             Region {context.region}, product {context.product}, horizon {context.horizon}, threshold {context.thresholdPct} percent. {SYNTHETIC_NOTICE}
           </p>
         </div>
+        <label className="flex items-center gap-1 text-[10.5px] text-slate-600">
+          <span>Lifecycle state</span>
+          <select
+            aria-label="Lifecycle state"
+            value={state.panelState}
+            onChange={(event) => state.setPanelState(event.target.value as typeof state.panelState)}
+            className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10.5px] text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            {["ready", "loading", "empty", "error"].map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        </label>
       </header>
+
 
       <div
         role="tablist"
