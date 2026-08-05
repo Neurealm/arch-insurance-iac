@@ -405,6 +405,9 @@ import ActiveSituationRoom from "./pages/agentic-sre-noc/ActiveSituationRoom.tsx
 import AgenticInvestigationWorkspace from "./pages/agentic-sre-noc/AgenticInvestigationWorkspace.tsx";
 import HumanApprovalActionCenter from "./pages/agentic-sre-noc/HumanApprovalActionCenter.tsx";
 import AutonomousRecoveryMonitor from "./pages/agentic-sre-noc/AutonomousRecoveryMonitor.tsx";
+import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
+import SreAgenticOpticalOperationsCenter from "./pages/operations/sre-agentic-noc/SreAgenticOpticalOperationsCenter.tsx";
+import SreAgenticNocPlaceholder from "./pages/operations/sre-agentic-noc/SreAgenticNocPlaceholder.tsx";
 import RunOpsCommand from "./runops/pages/Command.tsx";
 import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
