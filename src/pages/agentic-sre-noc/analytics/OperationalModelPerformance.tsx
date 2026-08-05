@@ -87,7 +87,7 @@ export function OperationalModelPerformance({
   return (
     <div className="flex min-w-0 flex-col gap-2" data-testid="model-performance-panel">
       <div className="flex flex-wrap items-center gap-1.5">
-        <Filter label="Region" value={state.region} options={REGIONS} onChange={state.setRegion} />
+        <Filter label="Analytics region" value={state.region} options={REGIONS} onChange={state.setRegion} />
         <Filter label="Product" value={state.product} options={PRODUCTS} onChange={state.setProduct} />
         <Filter
           label="Performance horizon"
