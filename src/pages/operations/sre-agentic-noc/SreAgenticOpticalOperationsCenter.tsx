@@ -132,7 +132,15 @@ export default function SreAgenticOpticalOperationsCenter() {
   const terminalIds = useMemo(() => new Set(terminals.map((t) => t.id)), [terminals]);
 
   // Stage 2 workflow state can override live link status on the twin.
-  const statusOverrides = useAgenticNocStore(linkStatusOverrides);
+  const workflowActionState = useAgenticNocStore((s) => s.actionRuntimes[PRIMARY_ACTION_ID]?.state);
+  const workflowValidationState = useAgenticNocStore((s) => s.validationState);
+  const statusOverrides = useMemo(
+    () => linkStatusOverrides({
+      actionRuntimes: { [PRIMARY_ACTION_ID]: { state: workflowActionState } },
+      validationState: workflowValidationState,
+    } as never),
+    [workflowActionState, workflowValidationState],
+  );
 
   const links = useMemo(() => allLinks
     .map((l) => (statusOverrides[l.id] ? { ...l, status: statusOverrides[l.id] } : l))
