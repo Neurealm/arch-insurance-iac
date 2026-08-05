@@ -454,29 +454,56 @@ export default function PredictiveOpticalLinkIntelligence() {
           </PanelShell>
 
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <PanelShell spec={spec.performance} state={panelState} heightClass="min-h-[260px]">
-              <dl className="space-y-1">
-                {validationResults.map((v) => (
-                  <div key={v.key} className="flex items-baseline justify-between gap-2 border-b border-slate-100 py-0.5">
-                    <dt className="text-[11px] text-slate-600">{v.label}</dt>
-                    <dd className="text-[11.5px] font-semibold text-slate-900">{v.value}</dd>
-                  </div>
-                ))}
-              </dl>
+          <ThresholdTradeoffPanel
+            state={analytics}
+            pipelineThresholdPct={pipelineThresholdPct}
+            onThresholdChange={handleThresholdPush}
+          />
+
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <PanelShell spec={spec.performance} state={panelState} heightClass="min-h-[300px]" functional>
+              <OperationalModelPerformance
+                state={analytics}
+                panelState={analyticsState}
+                onOpenMetricDrawer={handleMetricDrawer}
+                onNotify={handleNotify}
+              />
             </PanelShell>
 
-            <PanelShell spec={spec.factors} state={panelState} heightClass="min-h-[260px]">
-              <ul className="space-y-1">
-                {featureContributions.map((f) => (
-                  <li key={f.feature} className="flex items-baseline justify-between gap-2 border-b border-slate-100 py-0.5">
-                    <span className="text-[11px] text-slate-600">{f.feature}</span>
-                    <span className="text-[11.5px] font-semibold text-slate-900">{f.weightPct}%</span>
-                  </li>
-                ))}
-              </ul>
+            <PanelShell spec={spec.factors} state={panelState} heightClass="min-h-[300px]" functional>
+              <PredictiveFactorsChart
+                state={analytics}
+                selectedLinkId={activeLinkId}
+                selectedLinkRisk={selectedLinkRisk}
+                panelState={analyticsState}
+                onFactorSelected={(key) => handleNotify(key ? `Factor ${key} selected.` : "Factor selection cleared.")}
+                onNotify={handleNotify}
+              />
             </PanelShell>
           </div>
+
+          <PanelShell spec={spec.impact} state={panelState} heightClass="min-h-[320px]" functional>
+            <FeatureImpactWaterfall
+              state={analytics}
+              selectedLinkId={activeLinkId}
+              selectedLinkRisk={selectedLinkRisk}
+              horizonLabel={`Next ${analytics.horizonHours} Hours`}
+              whatIfRisk={whatIfRisk}
+              panelState={analyticsState}
+              onFactorSelected={(key) => handleNotify(key ? `Factor ${key} selected.` : "Factor selection cleared.")}
+              onNotify={handleNotify}
+            />
+          </PanelShell>
+
+          <PanelShell spec={spec.highrisk} state={panelState} heightClass="min-h-[320px]" functional>
+            <HighRiskLinksTable
+              state={analytics}
+              selectedLinkId={activeLinkId}
+              panelState={analyticsState}
+              onSelectLink={handleSelectLink}
+              onNotify={handleNotify}
+            />
+          </PanelShell>
         </div>
       </div>
 
@@ -511,8 +538,13 @@ export default function PredictiveOpticalLinkIntelligence() {
           <div className="mt-2"><Reserved label={`Reserved for ${trainingTab} visual`} /></div>
         </PanelShell>
 
-        <PanelShell spec={spec.horizon} state={panelState} heightClass="min-h-[260px]" className="xl:col-span-4">
-          <Reserved label="Reserved for confidence decay chart across the forecast horizon" />
+        <PanelShell spec={spec.horizon} state={panelState} heightClass="min-h-[300px]" className="xl:col-span-4" functional>
+          <PredictionHorizonChart
+            state={analytics}
+            selectedLinkId={activeLinkId}
+            panelState={analyticsState}
+            onNotify={handleNotify}
+          />
         </PanelShell>
 
         <PanelShell spec={spec.traditional} state={panelState} heightClass="min-h-[260px]" className="xl:col-span-3">
@@ -590,6 +622,13 @@ export default function PredictiveOpticalLinkIntelligence() {
           </ul>
         </PanelShell>
       </div>
+
+      <AnalyticsMetricDrawer
+        open={metricDrawerOpen}
+        metricKey={analytics.metricKey}
+        onClose={() => setMetricDrawerOpen(false)}
+        onSelectLink={handleSelectLink}
+      />
 
       {/* --------------------------- drawer shells -------------------------- */}
       {(explainOpen || whatIfOpen) && (
