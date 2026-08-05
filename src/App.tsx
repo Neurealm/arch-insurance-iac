@@ -405,6 +405,9 @@ import ActiveSituationRoom from "./pages/agentic-sre-noc/ActiveSituationRoom.tsx
 import AgenticInvestigationWorkspace from "./pages/agentic-sre-noc/AgenticInvestigationWorkspace.tsx";
 import HumanApprovalActionCenter from "./pages/agentic-sre-noc/HumanApprovalActionCenter.tsx";
 import AutonomousRecoveryMonitor from "./pages/agentic-sre-noc/AutonomousRecoveryMonitor.tsx";
+import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
+import SreAgenticOpticalOperationsCenter from "./pages/operations/sre-agentic-noc/SreAgenticOpticalOperationsCenter.tsx";
+import SreAgenticNocPlaceholder from "./pages/operations/sre-agentic-noc/SreAgenticNocPlaceholder.tsx";
 import RunOpsCommand from "./runops/pages/Command.tsx";
 import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
@@ -704,6 +707,15 @@ const App = () => (
           <Route path="/engagement-manager-twin" element={<EngagementManagerTwin />} />
           <Route element={<NocLayout />}>
             <Route path="/operations/traditional-noc/global-optical-operations" element={<TraditionalNocOperationsCenter />} />
+          </Route>
+          <Route element={<SreAgenticNocLayout />}>
+            <Route path="/operations/sre-agentic-noc" element={<SreAgenticOpticalOperationsCenter />} />
+            <Route path="/operations/sre-agentic-noc/global-optical-operations" element={<SreAgenticOpticalOperationsCenter />} />
+            {sreNocNav
+              .filter((item) => item.to !== "/operations/sre-agentic-noc/global-optical-operations")
+              .map((item) => (
+                <Route key={item.to} path={item.to} element={<SreAgenticNocPlaceholder />} />
+              ))}
           </Route>
           <Route path="/agentic-sre-noc" element={<NocLayout />}>
 
