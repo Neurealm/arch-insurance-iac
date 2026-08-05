@@ -187,7 +187,7 @@ describe("GLHM-MAP-002 layers", () => {
   it("filters one optical-link source by status", () => {
     expect(linkLayers).toHaveLength(7);
     for (const layer of linkLayers) {
-      expect(layer.filter?.[0]).toBe("==");
+      expect((layer as { filter?: unknown[] }).filter?.[0]).toBe("==");
     }
     expect(linkLayerGroup("links-maintenance")).toBe("maintenance");
     expect(linkLayerGroup("links-down")).toBe("opticalLinks");
