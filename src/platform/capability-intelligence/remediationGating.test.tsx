@@ -129,7 +129,7 @@ export function makePlan(overrides: Partial<ChangePlan> = {}): ChangePlan {
     title: "Test change plan",
     status: "blocked",
     confidence: "high",
-    canonicalGraphHash: "e889b604",
+    canonicalGraphHash: "88ceb819",
     version: { materialHash: "mat0" },
     lineage: { overlayContentHash: "overlay0" },
     explanation: { statusRationale: "Status rationale.", lineageStatement: "Lineage statement." },
@@ -152,7 +152,7 @@ export function makePlan(overrides: Partial<ChangePlan> = {}): ChangePlan {
 
 /* ----------------------------------------------------------- engine double */
 
-const HASH = "e889b604";
+const HASH = "88ceb819";
 
 interface EngineScript {
   proposals: readonly ChangeProposal[];

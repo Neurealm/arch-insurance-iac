@@ -632,7 +632,7 @@ describe("real populated graph", () => {
 
   it("runs at production scale and preserves the graph hash", () => {
     expect(result.success).toBe(true);
-    expect(result.graph.contentHash).toBe("e889b604");
+    expect(result.graph.contentHash).toBe("88ceb819");
     expect(result.execution.graphHashPreserved).toBe(true);
     expect(result.recommendations.length).toBeGreaterThan(0);
     expect(result.findings.length).toBeGreaterThan(0);

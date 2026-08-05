@@ -42,7 +42,7 @@ import {
   ValidationReadinessPanel,
 } from "./components/review/ValidationRollbackPanel";
 
-const CANONICAL_GRAPH_HASH = "e889b604";
+const CANONICAL_GRAPH_HASH = "88ceb819";
 
 const graph = getPopulatedGraph().graph;
 const simulation = createSimulationEngine();

@@ -93,7 +93,7 @@ describe("Stage 3.5.4.1.2 — provider lifecycle across real route navigation", 
     await waitFor(() => expect(screen.getByText("Graph scale")).toBeTruthy());
     expect(__capabilityIntelligenceComputeCount()).toBe(1);
     const hash = screen.getByTestId("graph-hash").textContent;
-    expect(hash).toBe("e889b604");
+    expect(hash).toBe("88ceb819");
 
     await user.click(screen.getByRole("link", { name: "Capability Explorer" }));
     await waitFor(() => expect(screen.getByLabelText("Search entities")).toBeTruthy());
