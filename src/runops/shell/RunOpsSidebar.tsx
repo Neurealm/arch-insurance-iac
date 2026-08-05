@@ -22,6 +22,30 @@ const iconFor: Record<NavSection, LucideIcon> = {
   "Platform": Server,
 };
 
+/** Group labels mirroring the Site Resilience Engineering module shell. */
+const groupFor: Record<NavSection, string> = {
+  "Command": "Command",
+  "Services": "Service Operations",
+  "Runbooks": "Service Operations",
+  "Operations": "Service Operations",
+  "Incidents": "Service Operations",
+  "Digital Workers": "Automation & Intelligence",
+  "Reliability": "Automation & Intelligence",
+  "Knowledge": "Automation & Intelligence",
+  "Analytics": "Automation & Intelligence",
+  "Governance": "Governance & Platform",
+  "Integrations": "Governance & Platform",
+  "Platform": "Governance & Platform",
+};
+
+const NAV_GROUPS = [
+  "Command",
+  "Service Operations",
+  "Automation & Intelligence",
+  "Governance & Platform",
+];
+
+
 /** Determine which nav section is currently active from the pathname. */
 export function activeSectionForPath(pathname: string): NavSection | null {
   if (pathname === "/runops" || pathname === "/runops/" || pathname === "/runops/command") return "Command";
