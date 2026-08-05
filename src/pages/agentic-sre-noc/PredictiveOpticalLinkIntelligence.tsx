@@ -309,7 +309,7 @@ export default function PredictiveOpticalLinkIntelligence() {
       </section>
 
       {/* --------------------------- primary layout ------------------------- */}
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
+      <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-12">
         <PanelShell
           spec={spec.pipeline}
           state={panelState}
