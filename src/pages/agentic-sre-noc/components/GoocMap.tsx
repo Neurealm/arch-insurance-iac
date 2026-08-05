@@ -1,7 +1,8 @@
 // Global optical connectivity map — simplified equirectangular projection over
 // a synthetic land silhouette. Presentation only; all data is injected.
+// Supports cursor-anchored wheel zoom, drag-to-pan and keyboard selection.
 
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { statusColors, statusLabels, type OpticalLink } from "../data/goocFixtures";
 
@@ -20,7 +21,12 @@ interface Props {
   overlays: MapOverlays;
   zoom: number;
   onSelect: (id: string) => void;
+  /** Called when the user zooms from inside the map (wheel / pinch). */
+  onZoomChange?: (zoom: number) => void;
 }
+
+const MIN_ZOOM = 0.8;
+const MAX_ZOOM = 6;
 
 /** Very coarse continent silhouettes in 0-100 percentage space. */
 const LANDMASSES = [
@@ -33,7 +39,23 @@ const LANDMASSES = [
   "M82,66 L92,64 L94,74 L86,78 L82,72 Z",
 ];
 
-export function GoocMap({ links, selectedId, highlightId, view, overlays, zoom, onSelect }: Props) {
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+export function GoocMap({
+  links,
+  selectedId,
+  highlightId,
+  view,
+  overlays,
+  zoom,
+  onSelect,
+  onZoomChange,
+}: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
+
   const positioned = useMemo(() => {
     if (view === "geographic") return links;
     // Topology view: lay links out on a deterministic grid.
@@ -45,83 +67,199 @@ export function GoocMap({ links, selectedId, highlightId, view, overlays, zoom, 
     });
   }, [links, view]);
 
+  // Keep the visible area inside the map bounds (viewBox units).
+  const clampOffset = useCallback((x: number, y: number, z: number) => {
+    const span = Math.max(0, 100 * z - 100);
+    return { x: clamp(x, -span, 0), y: clamp(y, -span, 0) };
+  }, []);
+
+  // Reset the pan whenever the map is reset to its default zoom or the view flips.
+  useEffect(() => {
+    if (zoom <= 1) setOffset({ x: 0, y: 0 });
+    else setOffset((o) => clampOffset(o.x, o.y, zoom));
+  }, [zoom, clampOffset]);
+
+  useEffect(() => {
+    setOffset({ x: 0, y: 0 });
+  }, [view]);
+
+  // Cursor-anchored wheel zoom. React's onWheel is passive, so bind natively.
+  const wheelRef = useRef<(e: WheelEvent) => void>(() => {});
+  wheelRef.current = (e: WheelEvent) => {
+    if (!onZoomChange) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
+    const next = clamp(zoom * Math.exp(-dy * 0.0015), MIN_ZOOM, MAX_ZOOM);
+    if (next === zoom) return;
+    // Convert pointer to viewBox units (viewBox is 0 0 100 100, stretched to fit).
+    const px = ((e.clientX - rect.left) / rect.width) * 100;
+    const py = ((e.clientY - rect.top) / rect.height) * 100;
+    const k = next / zoom;
+    setOffset((o) => clampOffset(px - (px - o.x) * k, py - (py - o.y) * k, next));
+    onZoomChange(Number(next.toFixed(3)));
+  };
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      wheelRef.current(e);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0 || zoom <= 1) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    dragRef.current = {
+      px: ((e.clientX - rect.left) / rect.width) * 100,
+      py: ((e.clientY - rect.top) / rect.height) * 100,
+      ox: offset.x,
+      oy: offset.y,
+    };
+    setDragging(true);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!d || !rect) return;
+    const px = ((e.clientX - rect.left) / rect.width) * 100;
+    const py = ((e.clientY - rect.top) / rect.height) * 100;
+    setOffset(clampOffset(d.ox + (px - d.px), d.oy + (py - d.py), zoom));
+  };
+
+  const endDrag = (e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    setDragging(false);
+    if ((e.currentTarget as HTMLElement).hasPointerCapture?.(e.pointerId)) {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    }
+  };
+
+  // Counter-scale strokes and markers so they stay legible while zoomed.
+  const s = 1 / zoom;
+  const showLabels = zoom >= 1.6;
+
   return (
-    <div className="relative h-[420px] w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+    <div
+      ref={containerRef}
+      className={cn(
+        "relative h-[460px] w-full touch-none overflow-hidden rounded-lg border border-slate-200 bg-slate-50",
+        zoom > 1 ? (dragging ? "cursor-grabbing" : "cursor-grab") : "cursor-default",
+      )}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+    >
       <svg
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
-        className="h-full w-full"
+        className="h-full w-full select-none"
         role="img"
         aria-label={`Global optical connectivity map showing ${links.length} synthetic links`}
-        style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}
       >
-        {view === "geographic" && (
-          <>
-            {[20, 40, 60, 80].map((y) => (
-              <line key={`h${y}`} x1="0" y1={y} x2="100" y2={y} stroke="#e2e8f0" strokeWidth="0.15" />
-            ))}
-            {[20, 40, 60, 80].map((x) => (
-              <line key={`v${x}`} x1={x} y1="0" x2={x} y2="100" stroke="#e2e8f0" strokeWidth="0.15" />
-            ))}
-            {LANDMASSES.map((d, i) => (
-              <path key={i} d={d} fill="#e8eef5" stroke="#cbd5e1" strokeWidth="0.2" />
-            ))}
-          </>
-        )}
+        <g transform={`translate(${offset.x} ${offset.y}) scale(${zoom})`}>
+          {view === "geographic" && (
+            <>
+              <rect x="0" y="0" width="100" height="100" fill="#f8fafc" />
+              {[20, 40, 60, 80].map((y) => (
+                <line key={`h${y}`} x1="0" y1={y} x2="100" y2={y} stroke="#e2e8f0" strokeWidth={0.15 * s} />
+              ))}
+              {[20, 40, 60, 80].map((x) => (
+                <line key={`v${x}`} x1={x} y1="0" x2={x} y2="100" stroke="#e2e8f0" strokeWidth={0.15 * s} />
+              ))}
+              {LANDMASSES.map((d, i) => (
+                <path key={i} d={d} fill="#e8eef5" stroke="#cbd5e1" strokeWidth={0.2 * s} />
+              ))}
+            </>
+          )}
 
-        {positioned.map((l) => {
-          const color = statusColors[l.status];
-          const isSel = l.id === selectedId;
-          const isHi = l.id === highlightId;
-          const mx = (l.ax + l.bx) / 2;
-          const my = (l.ay + l.by) / 2;
-          const showWeather = overlays.weather && (l.status === "at_risk" || l.weatherRisk.toLowerCase().includes("rain"));
-          const showFallback = overlays.fallback && l.status === "rf_fallback";
-          const showImpact = overlays.impact && (l.status === "unavailable" || l.status === "degraded");
-          const showPredicted = overlays.predicted && l.status === "at_risk";
-          return (
-            <g
-              key={l.id}
-              role="button"
-              tabIndex={0}
-              aria-label={`${l.name} — ${statusLabels[l.status]}`}
-              onClick={() => onSelect(l.id)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(l.id); }
-              }}
-              className="cursor-pointer focus:outline-none"
-            >
-              {(isSel || isHi) && (
-                <circle cx={mx} cy={my} r={4.2} fill={color} opacity={0.14}>
-                  <animate attributeName="r" values="3.2;5.4;3.2" dur="2.4s" repeatCount="indefinite" />
-                </circle>
-              )}
-              {showWeather && <circle cx={mx} cy={my} r={3.4} fill="#d97706" opacity={0.12} />}
-              {showPredicted && <circle cx={mx} cy={my} r={5.2} fill="none" stroke="#d97706" strokeWidth="0.18" strokeDasharray="0.8 0.8" />}
-              {showImpact && <circle cx={mx} cy={my} r={2.6} fill="none" stroke="#e11d48" strokeWidth="0.28" />}
-              <line
-                x1={l.ax} y1={l.ay} x2={l.bx} y2={l.by}
-                stroke={color}
-                strokeWidth={isSel ? 0.85 : 0.5}
-                strokeDasharray={l.status === "stale" || l.status === "maintenance" ? "1 0.8" : undefined}
-                opacity={0.95}
-              />
-              {showFallback && (
-                <line x1={l.ax} y1={l.ay + 1.2} x2={l.bx} y2={l.by + 1.2} stroke="#0284c7" strokeWidth="0.35" strokeDasharray="0.6 0.6" />
-              )}
-              <circle cx={l.ax} cy={l.ay} r={isSel ? 1.05 : 0.75} fill={color} stroke="#ffffff" strokeWidth="0.18" />
-              <circle cx={l.bx} cy={l.by} r={isSel ? 1.05 : 0.75} fill={color} stroke="#ffffff" strokeWidth="0.18" />
-              <title>{`${l.name} · ${statusLabels[l.status]} · ${l.customer}`}</title>
-            </g>
-          );
-        })}
+          {positioned.map((l) => {
+            const color = statusColors[l.status];
+            const isSel = l.id === selectedId;
+            const isHi = l.id === highlightId;
+            const mx = (l.ax + l.bx) / 2;
+            const my = (l.ay + l.by) / 2;
+            const showWeather = overlays.weather && (l.status === "at_risk" || l.weatherRisk.toLowerCase().includes("rain"));
+            const showFallback = overlays.fallback && l.status === "rf_fallback";
+            const showImpact = overlays.impact && (l.status === "unavailable" || l.status === "degraded");
+            const showPredicted = overlays.predicted && l.status === "at_risk";
+            return (
+              <g
+                key={l.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`${l.name} — ${statusLabels[l.status]}`}
+                aria-pressed={isSel}
+                onClick={() => onSelect(l.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(l.id); }
+                }}
+                className="cursor-pointer outline-none"
+              >
+                {/* Invisible hit area so thin links stay easy to click. */}
+                <line x1={l.ax} y1={l.ay} x2={l.bx} y2={l.by} stroke="transparent" strokeWidth={3 * s} strokeLinecap="round" />
+                {(isSel || isHi) && (
+                  <circle cx={mx} cy={my} r={4.2 * s} fill={color} opacity={0.18}>
+                    <animate attributeName="r" values={`${3.2 * s};${5.4 * s};${3.2 * s}`} dur="2.4s" repeatCount="indefinite" />
+                  </circle>
+                )}
+                {showWeather && <circle cx={mx} cy={my} r={3.4 * s} fill="#d97706" opacity={0.12} />}
+                {showPredicted && <circle cx={mx} cy={my} r={5.2 * s} fill="none" stroke="#d97706" strokeWidth={0.18 * s} strokeDasharray={`${0.8 * s} ${0.8 * s}`} />}
+                {showImpact && <circle cx={mx} cy={my} r={2.6 * s} fill="none" stroke="#e11d48" strokeWidth={0.28 * s} />}
+                <line
+                  x1={l.ax} y1={l.ay} x2={l.bx} y2={l.by}
+                  stroke={color}
+                  strokeWidth={(isSel ? 0.85 : 0.5) * s}
+                  strokeLinecap="round"
+                  strokeDasharray={l.status === "stale" || l.status === "maintenance" ? `${1 * s} ${0.8 * s}` : undefined}
+                  opacity={0.95}
+                />
+                {showFallback && (
+                  <line x1={l.ax} y1={l.ay + 1.2 * s} x2={l.bx} y2={l.by + 1.2 * s} stroke="#0284c7" strokeWidth={0.35 * s} strokeDasharray={`${0.6 * s} ${0.6 * s}`} />
+                )}
+                <circle cx={l.ax} cy={l.ay} r={(isSel ? 1.05 : 0.75) * s} fill={color} stroke="#ffffff" strokeWidth={0.18 * s} />
+                <circle cx={l.bx} cy={l.by} r={(isSel ? 1.05 : 0.75) * s} fill={color} stroke="#ffffff" strokeWidth={0.18 * s} />
+                {(showLabels || isSel || isHi) && (
+                  <text
+                    x={mx}
+                    y={my - 1.8 * s}
+                    textAnchor="middle"
+                    fontSize={2.4 * s}
+                    fill="#334155"
+                    stroke="#ffffff"
+                    strokeWidth={0.7 * s}
+                    paintOrder="stroke"
+                    className="pointer-events-none"
+                  >
+                    {l.name}
+                  </text>
+                )}
+                <title>{`${l.name} · ${statusLabels[l.status]} · ${l.customer}`}</title>
+              </g>
+            );
+          })}
+        </g>
       </svg>
 
+      <div className="pointer-events-none absolute right-2 top-2 rounded-md border border-slate-200 bg-white/90 px-2 py-1 text-[10px] text-slate-600 backdrop-blur">
+        {Math.round(zoom * 100)}% · scroll to zoom{zoom > 1 ? " · drag to pan" : ""}
+      </div>
+
       <ul className="pointer-events-none absolute bottom-2 left-2 flex flex-wrap gap-x-3 gap-y-1 rounded-md border border-slate-200 bg-white/90 px-2 py-1.5 text-[10px] text-slate-600 backdrop-blur">
-        {(Object.keys(statusLabels) as (keyof typeof statusLabels)[]).map((s) => (
-          <li key={s} className="flex items-center gap-1">
-            <span className="h-1.5 w-3 rounded" style={{ backgroundColor: statusColors[s] }} aria-hidden />
-            {statusLabels[s]}
+        {(Object.keys(statusLabels) as (keyof typeof statusLabels)[]).map((st) => (
+          <li key={st} className="flex items-center gap-1">
+            <span className="h-1.5 w-3 rounded" style={{ backgroundColor: statusColors[st] }} aria-hidden />
+            {statusLabels[st]}
           </li>
         ))}
       </ul>

@@ -320,9 +320,10 @@ export default function GlobalOpticalOperationsCenter() {
                   </button>
                 ))}
               </div>
-              <button type="button" onClick={() => setZoom((z) => Math.min(2, z + 0.2))} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">Zoom in</button>
-              <button type="button" onClick={() => setZoom((z) => Math.max(0.8, z - 0.2))} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">Zoom out</button>
+              <button type="button" onClick={() => setZoom((z) => Math.min(6, Number((z * 1.25).toFixed(3))))} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">Zoom in</button>
+              <button type="button" onClick={() => setZoom((z) => Math.max(0.8, Number((z / 1.25).toFixed(3))))} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">Zoom out</button>
               <button type="button" onClick={() => setZoom(1)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">Reset</button>
+
               <button type="button" onClick={() => setFullScreen((f) => !f)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">
                 {fullScreen ? "Exit full screen" : "Full screen"}
               </button>
@@ -349,10 +350,13 @@ export default function GlobalOpticalOperationsCenter() {
             view={view}
             overlays={overlays}
             zoom={zoom}
+            onZoomChange={setZoom}
             onSelect={(id) => setSelectedLink(id)}
+
           />
           <p className="mt-2 text-[10.5px] text-slate-500">
-            Select a link to open its detail drawer. Terminal locations, routes and states are synthetic.
+            Select a link to open its detail drawer. Scroll to zoom, drag to pan when zoomed in. Terminal locations, routes and states are synthetic.
+
           </p>
         </Panel>
 
