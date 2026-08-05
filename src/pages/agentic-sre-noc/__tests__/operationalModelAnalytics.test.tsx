@@ -24,7 +24,7 @@ describe("Operational Model Analytics (AIM-004)", () => {
     });
     expect(screen.getByTestId("analytics-performance")).toBeInTheDocument();
     expect(screen.getByTestId("analytics-factors")).toBeInTheDocument();
-    expect(screen.getByTestId("analytics-waterfall")).toBeInTheDocument();
+    expect(screen.getByTestId("analytics-impact")).toBeInTheDocument();
     expect(screen.getByTestId("analytics-horizon")).toBeInTheDocument();
     expect(screen.getByTestId("analytics-highrisk")).toBeInTheDocument();
   });
