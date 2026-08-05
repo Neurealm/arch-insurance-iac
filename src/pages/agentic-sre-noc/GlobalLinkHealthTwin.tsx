@@ -21,7 +21,9 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Panel, Select, Field, ToolbarButton } from "./components/NocPrimitives";
+import { OperatingGuide } from "./components/OperatingGuide";
 import { GlobalLinkHealthMap } from "./map/GlobalLinkHealthMap";
+
 import {
   activityEvents, chennaiScenario, coworkers, GLHT_LINK_TYPES, GLHT_PRODUCTS,
   GLHT_REGIONS, GLHT_SAVED_VIEWS, GLHT_TIME_RANGES, glhtKpis, incidentSummary,
@@ -209,6 +211,41 @@ export default function GlobalLinkHealthTwin() {
 
   const totalIncidents = incidentSummary.reduce((s, i) => s + i.count, 0);
 
+  /* --------------------------- operating guide -------------------------- */
+  const scrollTo = (id: string) => {
+    const el = typeof document !== "undefined" ? document.getElementById(id) : null;
+    el?.scrollIntoView({
+      behavior: typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+        ? "auto" : "smooth",
+      block: "start",
+    });
+  };
+
+  const kpiValue = (id: string) => kpiCards.find((k) => k.id === id)?.value ?? "—";
+
+  const guideOutcomeMetrics = useMemo(() => [
+    { label: "Services healthy", value: kpiValue("services") },
+    { label: "Optical availability", value: kpiValue("availability") },
+    { label: "Capacity protected", value: kpiValue("capacity") },
+    { label: "Predicted risks", value: kpiValue("atrisk") },
+    { label: "Recoveries completed", value: String(visibleOutcomes.length) },
+    { label: "Error budget", value: "68% remaining" },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [kpiCards, visibleOutcomes]);
+
+  const guideObjectiveFacts = useMemo(() => [
+    { label: "Current stage", value: stage?.label ?? "Predict Risk" },
+    { label: "Owner", value: "NOC Duty Manager" },
+    { label: "Active coworkers", value: String(coworkers.filter((c) => c.status === "Active").length) },
+    { label: "Time to impact", value: "About 6 hours" },
+    { label: "Confidence", value: `${stage?.confidence ?? twinAssessment.confidence}%` },
+    { label: "Services exposed", value: "12" },
+    { label: "Capacity exposed", value: "820 Gbps" },
+    { label: "Approval", value: approval === "approved" ? "Approved" : "Pending human approval" },
+    { label: "Rollback", value: "Ready" },
+  ], [stage, approval]);
+
+
   const mapBlock = (
     <>
       <GlobalLinkHealthMap
@@ -306,8 +343,21 @@ export default function GlobalLinkHealthTwin() {
           </div>
         </header>
 
+        {/* ---------------- 1b. Global Link Health Operating Guide --------- */}
+        <OperatingGuide
+          outcomeMetrics={guideOutcomeMetrics}
+          objectiveFacts={guideObjectiveFacts}
+          currentStageKey="predict"
+          onShowMap={() => { setRegion("Chennai"); scrollTo("glht-map-section"); }}
+          onViewRisks={() => { setStateFilter("At risk"); scrollTo("glht-risk-section"); }}
+          onOpenEvidence={() => setEvidenceOpen(true)}
+          onViewCoworkers={() => scrollTo("glht-coworkers-section")}
+          onRunScenario={() => { setPlaying(true); if (step < 0) setStep(0); scrollTo("glht-map-section"); }}
+        />
+
         {/* ---------------------- 2. Global KPI scorecard ------------------ */}
         <section aria-label="Global KPI scorecard" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+
           {kpiCards.map((k) => (
             <button
               key={k.id}
@@ -338,7 +388,7 @@ export default function GlobalLinkHealthTwin() {
         </section>
 
         {/* ------------- 3 & 4. Map plus Digital Twin assessment ----------- */}
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+        <div id="glht-map-section" className="grid grid-cols-1 gap-4 xl:grid-cols-12">
           <Panel
             className="xl:col-span-8"
             title="Global Link Health Map"
@@ -418,7 +468,7 @@ export default function GlobalLinkHealthTwin() {
         </div>
 
         {/* ------------------------ 5, 6, 7 analytics ---------------------- */}
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+        <div id="glht-risk-section" className="grid grid-cols-1 gap-4 xl:grid-cols-12">
           <Panel
             className="xl:col-span-5"
             title="Top Link Risks, Next Six Hours"
@@ -558,6 +608,7 @@ export default function GlobalLinkHealthTwin() {
         </div>
 
         {/* ------------------------ 8. Digital coworkers ------------------- */}
+        <div id="glht-coworkers-section">
         <Panel title="Digital Coworkers" subtitle="Agents contributing to global link health, with scope and guardrail state">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {visibleCoworkers.map((c) => (
@@ -593,6 +644,8 @@ export default function GlobalLinkHealthTwin() {
             ))}
           </div>
         </Panel>
+        </div>
+
 
         {/* --------------- 9, 10, 11 activity, outcomes, metrics ----------- */}
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
