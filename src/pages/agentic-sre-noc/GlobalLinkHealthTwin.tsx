@@ -357,6 +357,7 @@ export default function GlobalLinkHealthTwin() {
               </span>
             }
           >
+            <div className="xl:max-h-[620px] xl:overflow-y-auto xl:pr-1.5">
             <p className="text-[12.5px] leading-relaxed text-slate-700">{stage?.assessment ?? twinAssessment.summary}</p>
 
             <h3 className="mt-3 text-[12px] font-semibold text-slate-800">Key drivers</h3>
