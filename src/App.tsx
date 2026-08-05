@@ -393,6 +393,7 @@ import DiscoveryLibraryDemo from "./pages/crm-demo/DiscoveryLibraryDemo.tsx";
 import DiscoveryConfidenceDemo from "./pages/crm-demo/DiscoveryConfidenceDemo.tsx";
 import PublicQuestionnaire from "./pages/PublicQuestionnaire.tsx";
 import RunOpsLayout from "./runops/shell/RunOpsLayout.tsx";
+import SreLayout from "./pages/prod-twin/SreLayout.tsx";
 import RunOpsCommand from "./runops/pages/Command.tsx";
 import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
@@ -653,7 +654,6 @@ const App = () => (
           <Route path="/product-reliability-anatomy" element={<ProductReliabilityAnatomy />} />
           <Route path="/transformation-journey" element={<TransformationJourney />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
-          <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
           <Route path="/data-orchestration-twin" element={<DataOrchLayout />}>
             <Route index element={<DataOrchExecutiveControlPlane />} />
             <Route path="executive-control-plane" element={<DataOrchExecutiveControlPlane />} />
@@ -688,28 +688,31 @@ const App = () => (
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
           
-          <Route path="/product-line-map" element={<ProductLineMap />} />
-          <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
-          <Route path="/production-topology" element={<ProductionTopology />} />
-          <Route path="/sre-operating-model" element={<SreOperatingModel />} />
-          <Route path="/signal-intelligence" element={<SignalIntelligence />} />
-          <Route path="/enterprise-cloud-twin" element={<ScenarioStateProvider><EnterpriseCloudTwin /></ScenarioStateProvider>} />
-          <Route path="/aws-resilience-architecture-twin" element={<AWSResilienceArchitectureTwin />} />
-          <Route path="/platform-engineering-factory" element={<PlatformEngineeringFactory />} />
-          <Route path="/hybrid-cloud-workbench" element={<HybridCloudWorkbench />} />
-          <Route path="/automation-marketplace" element={<AutomationMarketplace />} />
-          <Route path="/modernization-factory" element={<ModernizationFactory />} />
-          <Route path="/cyber-resilience-overlay" element={<CyberResilienceOverlay />} />
-          <Route path="/ai-coworker-control-room" element={<AiCoworkerControlRoom />} />
-          <Route path="/transition-dual-run" element={<TransitionDualRun />} />
-          <Route path="/acquisition-onboarding-factory" element={<AcquisitionOnboardingFactory />} />
-          <Route path="/value-creation-board" element={<ValueCreationBoard />} />
-          <Route path="/modernization-roadmap" element={<ModernizationRoadmap />} />
-          <Route path="/interactive-demo-center" element={<InteractiveDemoCenter />} />
-          <Route path="/modernization-roadmap-v2" element={<ModernizationRoadmapV2 />} />
           <Route path="/executive-service-owner-twin" element={<ExecutiveServiceOwnerTwin />} />
           <Route path="/delivery-org-twin" element={<DeliveryOrgTwin />} />
           <Route path="/engagement-manager-twin" element={<EngagementManagerTwin />} />
+          <Route element={<SreLayout />}>
+            <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
+            <Route path="/product-line-map" element={<ProductLineMap />} />
+            <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
+            <Route path="/production-topology" element={<ProductionTopology />} />
+            <Route path="/sre-operating-model" element={<SreOperatingModel />} />
+            <Route path="/signal-intelligence" element={<SignalIntelligence />} />
+            <Route path="/enterprise-cloud-twin" element={<ScenarioStateProvider><EnterpriseCloudTwin /></ScenarioStateProvider>} />
+            <Route path="/aws-resilience-architecture-twin" element={<AWSResilienceArchitectureTwin />} />
+            <Route path="/platform-engineering-factory" element={<PlatformEngineeringFactory />} />
+            <Route path="/hybrid-cloud-workbench" element={<HybridCloudWorkbench />} />
+            <Route path="/automation-marketplace" element={<AutomationMarketplace />} />
+            <Route path="/modernization-factory" element={<ModernizationFactory />} />
+            <Route path="/cyber-resilience-overlay" element={<CyberResilienceOverlay />} />
+            <Route path="/ai-coworker-control-room" element={<AiCoworkerControlRoom />} />
+            <Route path="/transition-dual-run" element={<TransitionDualRun />} />
+            <Route path="/acquisition-onboarding-factory" element={<AcquisitionOnboardingFactory />} />
+            <Route path="/value-creation-board" element={<ValueCreationBoard />} />
+            <Route path="/modernization-roadmap" element={<ModernizationRoadmap />} />
+            <Route path="/interactive-demo-center" element={<InteractiveDemoCenter />} />
+            <Route path="/modernization-roadmap-v2" element={<ModernizationRoadmapV2 />} />
+          </Route>
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />
