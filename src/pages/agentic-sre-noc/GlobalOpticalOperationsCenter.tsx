@@ -322,7 +322,7 @@ export default function GlobalOpticalOperationsCenter() {
         </Panel>
 
         <Panel title="Active Situations" subtitle={`${filteredSituations.length} correlated operational conditions`}>
-          <ul className="space-y-2.5">
+          <ul className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
             {filteredSituations.map((s) => (
               <li key={s.id}>
                 <button
@@ -355,7 +355,7 @@ export default function GlobalOpticalOperationsCenter() {
             {filteredSituations.length === 0 && <li className="text-[12px] text-slate-500">No situations match the current filters.</li>}
           </ul>
         </Panel>
-      </div>
+
 
       {/* 5 — Predictive risk */}
       <Panel
