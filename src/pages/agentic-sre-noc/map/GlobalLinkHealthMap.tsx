@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Map, { NavigationControl, Source, type MapRef } from "react-map-gl/maplibre";
+import Map, { Source, type MapRef } from "react-map-gl/maplibre";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Layers, Maximize2, Minimize2, Play, RotateCcw, Search, SlidersHorizontal } from "lucide-react";
@@ -217,7 +217,6 @@ export function GlobalLinkHealthMap({
           style={{ width: "100%", height: "100%" }}
           aria-label={title}
         >
-          <NavigationControl position="bottom-right" showCompass={false} visualizePitch={false} />
           {sourceEntries.map(([id, data]) => (
             <Source key={id} id={id} type="geojson" data={data} />
           ))}
