@@ -308,7 +308,7 @@ export function PredictivePipeline({
       <div className="sr-only" role="status" aria-live="polite">{s.announcement}</div>
 
       <div className="flex w-full min-w-0 max-w-full flex-wrap items-center justify-between gap-2">
-        <p className="min-w-0 flex-1 text-[10.5px] text-slate-500">
+        <p className="min-w-0 max-w-full text-[10.5px] text-slate-500">
           Synthetic reference logic. Deterministic stages are labelled separately from model-based inference.
         </p>
         <div
