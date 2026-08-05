@@ -518,7 +518,7 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
 
 const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "PLATFORM",       keys: ["home", "ops", "ome"] },
-  { label: "DIGITAL TWINS",  keys: ["sre-practice", "sre-data-orch", "runops-runbooks", "sead", "ai-vlsi", "neurealm-agentic"] },
+  { label: "",  keys: ["sre-practice", "sre-data-orch", "runops-runbooks", "sead", "ai-vlsi", "neurealm-agentic"] },
 
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "coworkers"] },
