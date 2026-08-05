@@ -10,7 +10,7 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   Activity, AlertTriangle, Bot, CheckCircle2, ChevronDown, ChevronRight, CloudRain,
-  Gauge, Maximize2, Minimize2, Pause, Play, RefreshCw, RotateCcw, ShieldCheck,
+  Gauge, Pause, Play, RefreshCw, RotateCcw, ShieldCheck,
   Signal, Sparkles, TrendingDown, TrendingUp, Users, X, Zap,
 } from "lucide-react";
 import {
@@ -19,7 +19,7 @@ import {
 } from "recharts";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { GoocMap, type MapOverlays } from "./components/GoocMap";
+
 import {
   agents, chennaiScenario, CUSTOMERS, kpis, links, outcomes, PRODUCTS,
   predictiveRisks, REGIONS, reliabilityMetrics, riskCategories, severityChip,
@@ -50,11 +50,8 @@ export default function GlobalOpticalOperationsCenter() {
   const [statusFilter, setStatusFilter] = useState<string>("All statuses");
   const [refreshedAt, setRefreshedAt] = useState(() => "11:04:22 UTC");
 
-  // Map state
-  const [view, setView] = useState<"geographic" | "topology">("geographic");
-  const [zoom, setZoom] = useState(1);
-  const [fullScreen, setFullScreen] = useState(false);
-  const [overlays, setOverlays] = useState<MapOverlays>({ weather: true, fallback: true, impact: true, predicted: true });
+  // Map state removed with the Global Optical Connectivity panel.
+
 
   // Drawers
   const [selectedLink, setSelectedLink] = useState<string | null>(null);
@@ -96,7 +93,7 @@ export default function GlobalOpticalOperationsCenter() {
   const agent = agents.find((a) => a.id === selectedAgent) ?? null;
 
   const scenarioActive = scenarioStep >= 0;
-  const chennaiHighlight = scenarioActive ? "lnk-chennai-041" : null;
+  
 
   const advanceScenario = useCallback(() => {
     setScenarioStep((prev) => {
@@ -159,8 +156,8 @@ export default function GlobalOpticalOperationsCenter() {
     setTimeRange("24h"); setRegion("All regions"); setProduct("All products");
     setCustomer("All customers"); setStatusFilter("All statuses");
     setSelectedLink(null); setSelectedSituation(null); setSelectedAgent(null);
-    setSelectedEvent(null); setZoom(1); setView("geographic"); setFullScreen(false);
-    setOverlays({ weather: true, fallback: true, impact: true, predicted: true });
+    setSelectedEvent(null);
+
     resetScenario();
   };
 
@@ -197,13 +194,6 @@ export default function GlobalOpticalOperationsCenter() {
               className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11.5px] text-slate-700 shadow-sm hover:bg-slate-50"
             >
               <RefreshCw className="h-3.5 w-3.5" /> Refresh
-            </button>
-            <button
-              type="button"
-              onClick={() => setFullScreen((f) => !f)}
-              className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11.5px] text-slate-700 shadow-sm hover:bg-slate-50"
-            >
-              {fullScreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />} Full screen map
             </button>
             <button
               type="button"
