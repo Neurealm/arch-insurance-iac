@@ -59,6 +59,12 @@ export interface LifecycleContext {
   horizon: string;
   selectedLinkId: string | null;
   thresholdPct: number;
+  /** Optional page-controlled lifecycle tab, keeps a single source of truth. */
+  tab?: LifecycleTab;
+  onTabChange?: (tab: LifecycleTab) => void;
+  /** Optional page-controlled active model version. */
+  activeVersion?: string;
+  onActiveVersionChange?: (version: string) => void;
 }
 
 /** Deterministic per-simulation drift adjustments. */
