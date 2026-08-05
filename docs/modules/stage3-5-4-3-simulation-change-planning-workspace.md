@@ -12,25 +12,36 @@ any repository file, and **no patch is ever applied**.
 
 | File | Responsibility |
 | --- | --- |
-| `RemediationWorkspaceProvider.tsx` | Route-scoped workflow state; owns the memoized engine pair and defers every engine call off the commit path |
+| `RemediationWorkspaceProvider.tsx` | Route-scoped workflow state; owns the memoized engine pair, the seven-stage machine, staleness bookkeeping, request deduplication and handler-level eligibility enforcement |
+| `remediation/eligibility.ts` | The canonical eligibility policy (simulation, alternative comparison, change plan) and blocker summarisation |
+| `remediation/recommendationSelection.ts` | Deterministic default recommendation and the `?recommendation=` contract |
 | `remediationPresentation.ts` | Pure token → label/tone mapping and metric formatting |
-| `pages/RemediationWorkspace.tsx` | Five-stage progressive workflow shell and stage gating |
+| `pages/RemediationWorkspace.tsx` | Seven-stage progressive workflow shell and stage gating |
 | `components/remediation/RecommendationPicker.tsx` | Stage 1 — filterable recommendation selection |
-| `components/remediation/ProposalPanel.tsx` | Stage 2 — proposals, parameter binding, validation, conflicts |
-| `components/remediation/SimulationPanel.tsx` | Stage 3 — metric deltas, resolutions, regressions, residual risk, score derivation |
-| `components/remediation/AlternativesPanel.tsx` | Stage 4 — mutually exclusive alternative comparison |
-| `components/remediation/ChangePlanPanel.tsx` | Stage 5 — workstreams, steps, patch specifications, approvals, validation checkpoints, rollback, drift |
+| `components/remediation/ProposalPanel.tsx` | Stage 2 — explicit proposal generation, proposal selection, conflicts |
+| `components/remediation/ParameterPanel.tsx` | Stage 3 — parameter binding with graph-derived candidates |
+| `components/remediation/ValidationPanel.tsx` | Stage 4 — explicit validation invocation and classification display |
+| `components/remediation/SimulationPanel.tsx` | Stage 5 — eligibility verdict, gate reason, metric deltas, resolutions, regressions, residual risk |
+| `components/remediation/AlternativesPanel.tsx` | Stage 6 — explicit assessment, per-alternative eligibility, gated comparison |
+| `components/remediation/ChangePlanPanel.tsx` | Stage 7 — readiness criteria, workstreams, steps, patches, approvals, rollback, drift, evidence source |
+| `components/remediation/BoundedList.tsx` | Bounded rendering for steps, patches and blockers |
 
 ## Workflow
 
 ```text
-1 Recommendation  →  2 Proposal  →  3 Simulation  →  5 Change plan
-                          └─────→  4 Alternatives
+1 Recommendation → 2 Generate proposals → 3 Resolve parameters → 4 Validate
+                                                                    │
+                                          6 Compare outcomes ←──────┤
+                                                                    ▼
+                                                            5 Run simulation
+                                                                    ▼
+                                                          7 Review change plan
 ```
 
 Later stages are always visible but locked with an explanation, so the operator
-can see the whole path rather than facing hidden UI. Stage 4 is optional: it
+can see the whole path rather than facing hidden UI. Stage 6 is optional: it
 reports plainly when a proposal has no mutually exclusive alternative.
+
 
 ## Guarantees
 
