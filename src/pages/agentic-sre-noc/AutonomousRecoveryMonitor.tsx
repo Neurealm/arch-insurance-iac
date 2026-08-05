@@ -1172,7 +1172,7 @@ export default function AutonomousRecoveryMonitor() {
             <ToolbarButton onClick={() => { setValOverrides(Object.fromEntries(validationTests.map((t) => [t.id, "Passed" as ValidationStatus]))); addEvent("All validation tests run", "Validation Agent", "Validation suite executed", "Validation"); }}>Run all validation tests</ToolbarButton>
             <ToolbarButton onClick={() => valId && setValOverrides((p) => ({ ...p, [valId]: "Passed" }))}>Run selected test</ToolbarButton>
             <ToolbarButton onClick={() => setValOverrides((p) => Object.fromEntries(Object.entries(p).map(([k, v]) => [k, v === "Failed" ? "Running" : v])))}>Retry failed test</ToolbarButton>
-            <ToolbarButton onClick={() => valId && { ...setValOverrides((p) => ({ ...p, [valId]: "Passed" })) } && addEvent("Validation overridden with human note", owner, `Test ${valId} accepted by the execution owner`, "Human decision")}>Override test with human note</ToolbarButton>
+            <ToolbarButton onClick={() => { if (!valId) return; setValOverrides((p) => ({ ...p, [valId]: "Passed" })); addEvent("Validation overridden with human note", owner, `Test ${valId} accepted by the execution owner`, "Human decision"); }}>Override test with human note</ToolbarButton>
             <ToolbarButton onClick={() => valId && setValOverrides((p) => ({ ...p, [valId]: "Not applicable" }))}>Mark not applicable</ToolbarButton>
             <ToolbarButton onClick={() => valId && addEvent("Evidence attached to validation", "Evidence Curator", `Evidence attached to ${valId}`, "Evidence")}>Attach evidence</ToolbarButton>
             <ToolbarButton onClick={triggerRollback}>Trigger rollback on failure</ToolbarButton>
