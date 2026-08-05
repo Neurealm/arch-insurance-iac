@@ -35,7 +35,7 @@ describe("customer service health fixtures", () => {
 
   it("bands matrix scores deterministically", () => {
     expect(matrixBand(95)).toBe("good");
-    expect(matrixBand(80)).toBe("watch");
+    expect(matrixBand(65)).toBe("watch");
     expect(matrixBand(40)).toBe("risk");
   });
 
