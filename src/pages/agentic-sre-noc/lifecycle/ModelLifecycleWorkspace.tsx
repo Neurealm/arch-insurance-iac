@@ -78,7 +78,7 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
             onRetry={onRetry}
           />
         )}
-        {state.tab === "Validation" && (
+        {(state.tab === "Validation" || state.tab === "Explainability") && (
           <ValidationTab
             panelState={state.panelState}
             view={state.validationView}
@@ -105,7 +105,7 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
             onRetry={onRetry}
           />
         )}
-        {state.tab === "Model Drift" && (
+        {state.tab === "Drift" && (
           <ModelDriftTab
             panelState={state.panelState}
             assessment={state.driftAssessment}
@@ -121,7 +121,7 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
             onRetry={onRetry}
           />
         )}
-        {state.tab === "Model Governance" && (
+        {state.tab === "Governance" && (
           <ModelGovernanceTab
             panelState={state.panelState}
             activeVersion={state.activeVersion}
