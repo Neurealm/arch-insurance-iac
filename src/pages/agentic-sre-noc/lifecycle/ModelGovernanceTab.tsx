@@ -92,7 +92,7 @@ export function ModelGovernanceTab(props: ModelGovernanceTabProps) {
       heightClass="min-h-[240px]"
     />
   );
-  if (frame) return <div data-testid="lifecycle-tab-governance">{frame}</div>;
+  if (panelState !== "ready") return <div data-testid="lifecycle-tab-governance">{frame}</div>;
 
   return (
     <div className="space-y-3" data-testid="lifecycle-tab-governance">

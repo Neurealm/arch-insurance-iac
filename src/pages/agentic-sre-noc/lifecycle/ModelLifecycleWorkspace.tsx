@@ -19,6 +19,22 @@ import type { TrainingProvenanceRecord } from "./lifecycleTypes";
 export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext }) {
   const state = useLifecycleState(context);
   const [provenance, setProvenance] = React.useState<TrainingProvenanceRecord | null>(null);
+  const provenanceRef = React.useRef<HTMLDivElement | null>(null);
+  const provenanceTriggerRef = React.useRef<HTMLElement | null>(null);
+
+  const openProvenance = React.useCallback((record: TrainingProvenanceRecord) => {
+    provenanceTriggerRef.current = document.activeElement as HTMLElement | null;
+    setProvenance(record);
+  }, []);
+
+  const closeProvenance = React.useCallback(() => {
+    setProvenance(null);
+    provenanceTriggerRef.current?.focus?.();
+  }, []);
+
+  React.useEffect(() => {
+    if (provenance) provenanceRef.current?.focus();
+  }, [provenance]);
 
   const onRetry = React.useCallback(() => {
     state.setPanelState("ready");
@@ -31,18 +47,38 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
     <section
       aria-label="Model lifecycle workspace"
       data-testid="model-lifecycle-workspace"
-      className="rounded-lg border border-slate-200 bg-slate-50/50 p-3"
+      className="rounded-lg border border-slate-200 bg-white p-3"
     >
       <header className="mb-2 flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <h2 className="text-[14px] font-semibold text-slate-900">Model Lifecycle, Validation and Governance</h2>
           <p className="text-[10.5px] text-slate-500">
-            Active model {state.activeVersion}{activeModel ? `, ${activeModel.label}` : ""}, rollback {state.rollbackVersion}. {SYNTHETIC_NOTICE}
+            Active model {state.activeVersion}{activeModel ? `, ${activeModel.label}` : ""}, rollback {state.rollbackVersion}.
+            Region {context.region}, product {context.product}, horizon {context.horizon}, threshold {context.thresholdPct} percent. {SYNTHETIC_NOTICE}
           </p>
         </div>
+        <label className="flex items-center gap-1 text-[10.5px] text-slate-600">
+          <span>Lifecycle state</span>
+          <select
+            aria-label="Lifecycle state"
+            value={state.panelState}
+            onChange={(event) => state.setPanelState(event.target.value as typeof state.panelState)}
+            className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10.5px] text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            {["ready", "loading", "empty", "error"].map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        </label>
       </header>
 
-      <div role="tablist" aria-label="Model lifecycle sections" className="mb-3 flex flex-wrap gap-1">
+
+      <div
+        role="tablist"
+        aria-label="Model lifecycle sections"
+        data-testid="lifecycle-tablist"
+        className="mb-3 flex gap-1 overflow-x-auto pb-1"
+      >
         {lifecycleTabs.map((tab) => (
           <button
             key={tab}
@@ -52,7 +88,7 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
             aria-selected={state.tab === tab}
             aria-controls="lifecycle-tabpanel"
             onClick={() => { state.setTab(tab); state.announce(`${tab} selected.`); }}
-            className={`rounded border px-2 py-1 text-[11px] font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+            className={`shrink-0 rounded border px-2 py-1 text-[11px] font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
               state.tab === tab ? "border-blue-300 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
             }`}
           >
@@ -73,7 +109,7 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
             qualityScore={state.datasetQualityScore}
             region={context.region}
             product={context.product}
-            onOpenProvenance={setProvenance}
+            onOpenProvenance={openProvenance}
             onNotify={state.announce}
             onRetry={onRetry}
           />
@@ -88,6 +124,9 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
             explainabilityQuality={state.explainabilityQuality}
             region={context.region}
             product={context.product}
+            horizon={context.horizon}
+            selectedLinkId={context.selectedLinkId}
+            thresholdPct={context.thresholdPct}
             onNotify={state.announce}
             onRetry={onRetry}
           />
@@ -157,11 +196,13 @@ export function ModelLifecycleWorkspace({ context }: { context: LifecycleContext
           aria-modal="false"
           aria-label={`Provenance detail, ${provenance.source}`}
           data-testid="provenance-drawer"
-          className="mt-3 rounded-lg border border-blue-200 bg-white p-3"
+          ref={provenanceRef}
+          tabIndex={-1}
+          className="mt-3 rounded-lg border border-blue-200 bg-white p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
           <div className="flex items-start justify-between gap-2">
             <h4 className="text-[12px] font-semibold text-slate-900">{provenance.source}</h4>
-            <LifecycleButton onClick={() => setProvenance(null)}>Close</LifecycleButton>
+            <LifecycleButton onClick={closeProvenance}>Close</LifecycleButton>
           </div>
           <dl className="mt-1 grid grid-cols-1 gap-x-4 gap-y-0.5 text-[10.5px] sm:grid-cols-2">
             <div><dt className="inline text-slate-500">Owner. </dt><dd className="inline text-slate-800">{provenance.owner}</dd></div>
