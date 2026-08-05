@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Select, ToolbarButton } from "./components/NocPrimitives";
+import { PredictivePipeline } from "./pipeline/PredictivePipeline";
 import {
   breadcrumb, featureContributions, forecastHorizons, governanceRecords, kpiMetrics,
   linkPredictions, modelActivity, modelEvidence, modelFeatures, modelSummary, pageSubtitle,
@@ -314,39 +315,13 @@ export default function PredictiveOpticalLinkIntelligence() {
           spec={spec.pipeline}
           state={panelState}
           heightClass="xl:min-h-[480px]"
-          className="xl:col-span-7"
+          className="xl:col-span-12"
         >
-          <ol className="grid grid-cols-1 gap-2 sm:grid-cols-3 xl:grid-cols-6">
-            {pipelineStages.map((s) => (
-              <li key={s.key}>
-                <button
-                  type="button"
-                  aria-pressed={selectedStage === s.key}
-                  onClick={() => setSelectedStage(s.key)}
-                  className={cn(
-                    "h-full w-full rounded-lg border px-2 py-1.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
-                    selectedStage === s.key ? "border-blue-400 bg-blue-50" : "border-slate-200 bg-white hover:bg-slate-50",
-                  )}
-                >
-                  <span className="flex items-center gap-1.5">
-                    <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-200 text-[9px] font-semibold text-slate-700">
-                      {s.index}
-                    </span>
-                    <span className="text-[12px] font-semibold text-slate-900">{s.title}</span>
-                  </span>
-                  <span className="mt-0.5 block text-[10.5px] text-slate-500">{s.caption}</span>
-                </button>
-              </li>
-            ))}
-          </ol>
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-            <Reserved label="Reserved for signal group cards" />
-            <Reserved label="Reserved for feature engineering and anomaly detection cards" />
-            <Reserved label="Reserved for risk model, impact and protected-action cards" />
-          </div>
+          <PredictivePipeline />
         </PanelShell>
 
-        <div className="space-y-3 xl:col-span-5">
+        <div className="space-y-3 xl:col-span-12">
+
           <PanelShell spec={spec.chennai} state={panelState} heightClass="xl:min-h-[360px]">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
               <div className="sm:col-span-3"><Reserved label="Reserved for scenario risk map" /></div>
