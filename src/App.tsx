@@ -431,6 +431,7 @@ import AgenticInvestigationWorkspace from "./pages/agentic-sre-noc/AgenticInvest
 import HumanApprovalActionCenter from "./pages/agentic-sre-noc/HumanApprovalActionCenter.tsx";
 import AutonomousRecoveryMonitor from "./pages/agentic-sre-noc/AutonomousRecoveryMonitor.tsx";
 import GlhtProductionArchitecture from "./pages/agentic-sre-noc/ProductionArchitecture.tsx";
+import PredictiveOpticalLinkIntelligence from "./pages/agentic-sre-noc/PredictiveOpticalLinkIntelligence.tsx";
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
 import SreAgenticOpticalOperationsCenter from "./pages/operations/sre-agentic-noc/SreAgenticOpticalOperationsCenter.tsx";
 import SreAgenticNocPlaceholder from "./pages/operations/sre-agentic-noc/SreAgenticNocPlaceholder.tsx";
@@ -749,6 +750,7 @@ const App = () => (
             <Route path="customer-service-health" element={<CustomerServiceHealthExplorer />} />
             <Route path="global-link-health-twin" element={<GlobalLinkHealthTwin />} />
             <Route path="global-link-health-twin/production-architecture" element={<GlhtProductionArchitecture />} />
+            <Route path="global-link-health-twin/predictive-optical-link-intelligence" element={<PredictiveOpticalLinkIntelligence />} />
             <Route path="service-topology" element={<GlobalOpticalServiceTopology />} />
             <Route path="predictive-link-risk" element={<PredictiveLinkRiskCenter />} />
             <Route path="situation-room" element={<ActiveSituationRoom />} />
