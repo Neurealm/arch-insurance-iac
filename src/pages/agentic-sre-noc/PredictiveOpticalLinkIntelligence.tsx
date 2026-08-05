@@ -18,6 +18,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Select, ToolbarButton } from "./components/NocPrimitives";
 import { PredictivePipeline } from "./pipeline/PredictivePipeline";
+import { ChennaiWorkspace } from "./chennai/ChennaiWorkspace";
+
 import {
   breadcrumb, featureContributions, forecastHorizons, governanceRecords, kpiMetrics,
   linkPredictions, modelActivity, modelEvidence, modelFeatures, modelSummary, pageSubtitle,
