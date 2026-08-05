@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Map, { NavigationControl, Source, type MapRef } from "react-map-gl/maplibre";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Layers, Maximize2, Minimize2, Play, RotateCcw, Search, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
