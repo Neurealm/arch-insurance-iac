@@ -395,7 +395,7 @@ export default function SreAgenticOpticalOperationsCenter() {
         </section>
 
         {/* Row 1 */}
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-12 lg:items-stretch">
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-12 lg:items-start">
           {executive ? (
             <>
               {twinPanel}
