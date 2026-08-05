@@ -83,7 +83,7 @@ describe("Lifecycle workspace integration (AIM-005.1)", () => {
   it("opens and closes the provenance panel from training data", async () => {
     const user = userEvent.setup();
     renderPage();
-    const triggers = workspace().getAllByRole("button", { name: /provenance/i });
+    const triggers = workspace().getAllByRole("button", { name: /Open detail/i });
     await user.click(triggers[0]);
     const drawer = screen.getByTestId("provenance-drawer");
     expect(drawer).toBeInTheDocument();
