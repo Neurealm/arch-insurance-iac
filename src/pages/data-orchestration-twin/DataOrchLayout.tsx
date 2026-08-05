@@ -87,10 +87,11 @@ export default function DataOrchLayout() {
         {/* Back link */}
         {!collapsed && (
           <Link
-            to="/prod-resilience-twin"
+            to="/app"
             className="mx-3 mt-2 mb-1 inline-flex items-center gap-1.5 text-[11px] text-sidebar-foreground/55 hover:text-white transition"
           >
-            <ArrowLeft className="h-3 w-3" /> Back to Resilience Twin
+            <ArrowLeft className="h-3 w-3" /> NeuGAIN Command Center
+
           </Link>
         )}
 
