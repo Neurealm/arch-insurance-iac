@@ -8,7 +8,8 @@
  */
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { Link as RouterLink } from "react-router-dom";
+import { ChevronDown, ChevronRight, Network } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { guideObjective, guideOutcome, guideStages } from "../data/guideFixtures";
 
@@ -92,6 +93,12 @@ export function OperatingGuide({
               </button>
             ))}
           </div>
+          <RouterLink
+            to="/agentic-sre-noc/global-link-health-twin/production-architecture"
+            className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            <Network className="h-3 w-3" aria-hidden />Solution Diagram
+          </RouterLink>
           <button
             type="button"
             aria-expanded={!collapsed}

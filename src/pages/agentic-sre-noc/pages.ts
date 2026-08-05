@@ -24,6 +24,7 @@ export const nocPages: NocPageMeta[] = [
   { slug: "", title: "Global Optical Operations Center", group: "Overview" },
   { slug: "customer-service-health", title: "Customer Service Health Explorer", group: "Overview" },
   { slug: "global-link-health-twin", title: "Global Link Health Twin", group: "Operational Intelligence" },
+  { slug: "global-link-health-twin/production-architecture", title: "Global Link Health Twin, Production Architecture", group: "Operational Intelligence" },
   { slug: "service-topology", title: "Global Optical Service Topology", group: "Operational Intelligence" },
   { slug: "predictive-link-risk", title: "Predictive Link Risk Center", group: "Operational Intelligence" },
   { slug: "situation-room", title: "Active Situation Room", group: "Incident Operations" },
