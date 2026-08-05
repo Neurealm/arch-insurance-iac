@@ -154,7 +154,7 @@ export function ModelGovernanceTab(props: ModelGovernanceTabProps) {
               <tr className="text-[10px] uppercase tracking-wide text-slate-500">
                 <th scope="col" className="py-1">Metric</th>
                 <th scope="col" className="py-1">{comparison.baseVersion}</th>
-                <th scope="col" className="py-1">{comparison.comparisonVersion}</th>
+                <th scope="col" className="py-1">{comparison.candidateVersion}</th>
                 <th scope="col" className="py-1">Delta</th>
               </tr>
             </thead>
@@ -163,7 +163,7 @@ export function ModelGovernanceTab(props: ModelGovernanceTabProps) {
                 <tr key={row.label} className="border-t border-slate-100">
                   <th scope="row" className="py-1 font-medium text-slate-900">{row.label}</th>
                   <td className="py-1 text-slate-700">{row.baseValue}{row.unit}</td>
-                  <td className="py-1 text-slate-700">{row.comparisonValue}{row.unit}</td>
+                  <td className="py-1 text-slate-700">{row.candidateValue}{row.unit}</td>
                   <td className={`py-1 font-medium ${row.improved ? "text-emerald-700" : "text-amber-700"}`}>
                     {row.delta > 0 ? "+" : ""}{row.delta}{row.unit}
                   </td>
@@ -171,7 +171,7 @@ export function ModelGovernanceTab(props: ModelGovernanceTabProps) {
               ))}
             </tbody>
           </table>
-          <p className="mt-1 text-[10.5px] text-slate-600">{comparison.summary}</p>
+          <p className="mt-1 text-[10.5px] text-slate-600">{comparison.verdict}. {comparison.improvedCount} metrics improved, {comparison.regressedCount} regressed.</p>
         </LifecycleSection>
 
         <LifecycleSection
