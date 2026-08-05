@@ -28,7 +28,6 @@ import { BoundedList, DEFAULT_LIST_LIMIT } from "@/platform/capability-intellige
 import { summarizePlanBlockers } from "@/platform/capability-intelligence/remediation/eligibility";
 
 const CANONICAL_GRAPH_HASH = "e889b604";
-void CANONICAL_GRAPH_HASH;
 
 const graph = getCapabilityGraph();
 const simulation = createSimulationEngine();
