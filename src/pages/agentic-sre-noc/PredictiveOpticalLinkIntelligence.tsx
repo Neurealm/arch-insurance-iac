@@ -19,6 +19,17 @@ import { cn } from "@/lib/utils";
 import { Select, ToolbarButton } from "./components/NocPrimitives";
 import { PredictivePipeline } from "./pipeline/PredictivePipeline";
 import { ChennaiWorkspace } from "./chennai/ChennaiWorkspace";
+import { useAnalyticsState } from "./analytics/useAnalyticsState";
+import { OperationalModelPerformance } from "./analytics/OperationalModelPerformance";
+import { PredictiveFactorsChart } from "./analytics/PredictiveFactorsChart";
+import { FeatureImpactWaterfall } from "./analytics/FeatureImpactWaterfall";
+import { PredictionHorizonChart } from "./analytics/PredictionHorizonChart";
+import { HighRiskLinksTable } from "./analytics/HighRiskLinksTable";
+import { ThresholdTradeoffPanel } from "./analytics/ThresholdTradeoffPanel";
+import { AnalyticsMetricDrawer } from "./analytics/AnalyticsMetricDrawer";
+import { DEFAULT_ANALYTICS_LINK_ID, highRiskLinkRecords } from "./analytics/analyticsFixtures";
+import type { AnalyticsPanelState } from "./analytics/AnalyticsPrimitives";
+import type { PredictionOverrides } from "./chennai/chennaiGeojson";
 
 import {
   breadcrumb, featureContributions, forecastHorizons, governanceRecords, kpiMetrics,
@@ -49,20 +60,34 @@ function Sparkline({ points, tone }: { points: number[]; tone: string }) {
 }
 
 function KpiCard({
-  label, value, deltaLabel, direction, intent, sparkline, description, loading,
+  label, value, deltaLabel, direction, intent, sparkline, description, loading, selected, onSelect,
 }: {
   label: string; value: string; deltaLabel: string; direction: "up" | "down" | "flat";
   intent: "positive" | "negative" | "neutral"; sparkline: number[]; description: string; loading: boolean;
+  selected?: boolean; onSelect?: () => void;
 }) {
   const toneClass =
     intent === "positive" ? "text-emerald-700" : intent === "negative" ? "text-rose-700" : "text-slate-600";
   const stroke = intent === "positive" ? "#059669" : intent === "negative" ? "#e11d48" : "#64748b";
   return (
     <article
-      className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+      className={cn(
+        "rounded-lg border bg-white p-3 shadow-sm",
+        selected ? "border-blue-400 ring-1 ring-blue-300" : "border-slate-200",
+      )}
       aria-label={`${label}. ${description}`}
+      data-selected={selected ? "true" : "false"}
     >
-      <h3 className="text-[11.5px] font-medium text-slate-600">{label}</h3>
+      <h3 className="text-[11.5px] font-medium text-slate-600">
+        <button
+          type="button"
+          aria-pressed={Boolean(selected)}
+          onClick={onSelect}
+          className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        >
+          {label}
+        </button>
+      </h3>
       {loading ? (
         <>
           <div className="mt-2 h-6 w-20 animate-pulse rounded bg-slate-100" />
@@ -83,9 +108,10 @@ function KpiCard({
 }
 
 function PanelShell({
-  spec, state, heightClass, className, children,
+  spec, state, heightClass, className, functional, children,
 }: {
-  spec: PanelSpec; state: PanelState; heightClass: string; className?: string; children?: React.ReactNode;
+  spec: PanelSpec; state: PanelState; heightClass: string; className?: string; functional?: boolean;
+  children?: React.ReactNode;
 }) {
   const headingId = `pli-panel-${spec.id}`;
   const descId = `${headingId}-desc`;
@@ -103,7 +129,7 @@ function PanelShell({
           <p id={descId} className="text-[11px] text-slate-500">{spec.description}</p>
         </div>
         <span className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
-          Placeholder
+          {functional ? "Synthetic data" : "Placeholder"}
         </span>
       </header>
 
@@ -149,9 +175,11 @@ function PanelShell({
         {state === "ready" && (
           <div className="flex h-full flex-col">
             <div className="flex-1">{children}</div>
-            <p className="mt-2 border-t border-dashed border-slate-200 pt-1.5 text-[10.5px] text-slate-500">
-              Planned visual: {spec.visualType} · Target height {spec.desktopHeight} · Final graphics arrive in AIM-002.
-            </p>
+            {!functional && (
+              <p className="mt-2 border-t border-dashed border-slate-200 pt-1.5 text-[10.5px] text-slate-500">
+                Planned visual: {spec.visualType} · Target height {spec.desktopHeight} · Final graphics arrive in a later stage.
+              </p>
+            )}
           </div>
         )}
       </div>
