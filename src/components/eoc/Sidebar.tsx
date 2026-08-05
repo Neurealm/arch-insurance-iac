@@ -860,8 +860,8 @@ export function EocSidebar({
                   });
                 if (!nodes.length) return null;
                 return (
-                  <div key={section.label} className="pt-3">
-                    {!collapsed && (
+                  <div key={section.label || section.keys[0]} className="pt-3">
+                    {!collapsed && section.label && (
                       <div className="px-3 pt-2 pb-1.5 text-[10px] font-semibold tracking-[0.16em] text-sidebar-foreground/45">
                         {section.label}
                       </div>
