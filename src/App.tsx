@@ -702,8 +702,11 @@ const App = () => (
           <Route path="/executive-service-owner-twin" element={<ExecutiveServiceOwnerTwin />} />
           <Route path="/delivery-org-twin" element={<DeliveryOrgTwin />} />
           <Route path="/engagement-manager-twin" element={<EngagementManagerTwin />} />
-          <Route path="/operations/traditional-noc/global-optical-operations" element={<TraditionalNocOperationsCenter />} />
+          <Route element={<NocLayout />}>
+            <Route path="/operations/traditional-noc/global-optical-operations" element={<TraditionalNocOperationsCenter />} />
+          </Route>
           <Route path="/agentic-sre-noc" element={<NocLayout />}>
+
             <Route index element={<GlobalOpticalOperationsCenter />} />
             <Route path="customer-service-health" element={<CustomerServiceHealthExplorer />} />
             <Route path="service-topology" element={<GlobalOpticalServiceTopology />} />
