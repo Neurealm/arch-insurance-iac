@@ -14,7 +14,7 @@ const VIEW_W = 210;
 const VIEW_H = 104;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 5;
-const NODE_W = 22;
+const NODE_W = 20;
 const NODE_H = 11;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
