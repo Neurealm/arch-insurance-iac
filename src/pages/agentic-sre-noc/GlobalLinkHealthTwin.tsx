@@ -203,7 +203,7 @@ export default function GlobalLinkHealthTwin() {
   const resetPage = () => {
     setRegion("All regions"); setProduct("All products"); setLinkType("All link types");
     setTimeRange("24h"); setStateFilter(null); setSeverityFilter(null); setStageFilter(null);
-    setPromptId(null); setSelectedRisk(null); setSimulated(null); setZoom(1); setMapView("geographic");
+    setPromptId(null); setSelectedRisk(null); setSimulated(null);
     resetScenario();
   };
 
