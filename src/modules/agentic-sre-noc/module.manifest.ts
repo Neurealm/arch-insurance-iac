@@ -110,7 +110,7 @@ export const manifest: ModuleManifest = {
       "Site Resilience Engineering and SRE Data Orchestration are separate modules and are unchanged by this module.",
   },
 
-  unresolved: [],
+  unableToVerify: [],
 };
 
 export default manifest;
