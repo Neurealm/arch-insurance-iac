@@ -564,7 +564,7 @@ const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "",  keys: ["neurealm-agentic"] },
 
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
-  { label: "OPERATIONS",     keys: ["carve-op", "coworkers"] },
+  { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
   { label: "ADMIN WORKSPACE", keys: ["crm", "etdm", "settings"] },
 ];
 
