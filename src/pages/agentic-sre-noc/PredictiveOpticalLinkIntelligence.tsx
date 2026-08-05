@@ -323,21 +323,25 @@ export default function PredictiveOpticalLinkIntelligence() {
         <div className="space-y-3 xl:col-span-12">
 
           <PanelShell spec={spec.chennai} state={panelState} heightClass="xl:min-h-[360px]">
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
-              <div className="sm:col-span-3"><Reserved label="Reserved for scenario risk map" /></div>
-              <dl className="sm:col-span-2 space-y-1">
-                {modelEvidence.map((e) => (
-                  <div key={e.key} className="rounded border border-slate-200 bg-slate-50 px-2 py-1">
-                    <dt className="text-[10px] uppercase tracking-wide text-slate-500">{e.label}</dt>
-                    <dd className="text-[11.5px] font-medium text-slate-900">{e.detail}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
+            <ChennaiWorkspace
+              selectedLinkId={selectedLink}
+              onSelectLink={setSelectedLink}
+              whatIfOpen={whatIfOpen}
+              onWhatIfOpenChange={setWhatIfOpen}
+            />
+            <dl className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-4">
+              {modelEvidence.map((e) => (
+                <div key={e.key} className="rounded border border-slate-200 bg-slate-50 px-2 py-1">
+                  <dt className="text-[10px] uppercase tracking-wide text-slate-500">{e.label}</dt>
+                  <dd className="text-[11.5px] font-medium text-slate-900">{e.detail}</dd>
+                </div>
+              ))}
+            </dl>
             <p className="mt-2 text-[11px] text-slate-600">
               {activeScenario.headline} · {activeScenario.riskLabel} · Region {activeScenario.region}
             </p>
           </PanelShell>
+
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <PanelShell spec={spec.performance} state={panelState} heightClass="min-h-[260px]">
