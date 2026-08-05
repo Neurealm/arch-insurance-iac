@@ -6,7 +6,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { APPROVAL_ID, SITUATION_ID } from "../data/approvalFixtures";
+import { APPROVAL_ID } from "../data/approvalFixtures";
+import { SITUATION_ID } from "../data/situationFixtures";
 import {
   EXECUTION_ID, diagnostics, executionActors, executionEvidence,
   executionStateStages, liveGuardrails, ownershipMatrix, OWNERSHIP_MATRIX_COLUMNS,
