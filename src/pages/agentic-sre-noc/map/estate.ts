@@ -263,6 +263,13 @@ const SITE_SPECS: Record<string, SiteSpec[]> = {
   ],
 };
 
+/**
+ * Regional separation factor. Sites remain within their metropolitan/regional
+ * catchment (roughly 50-120 km apart) so links read as regional terminal-to-
+ * terminal paths and stay legible at the global camera.
+ */
+const REGIONAL_SPREAD = 8;
+
 export const ESTATE_SITES: EstateSite[] = ESTATE_REGIONS.flatMap((region) => {
   const specs = SITE_SPECS[region.id] ?? [];
   return specs.map((spec, index) => ({
@@ -270,8 +277,8 @@ export const ESTATE_SITES: EstateSite[] = ESTATE_REGIONS.flatMap((region) => {
     name: spec.name,
     regionId: region.id,
     location: [
-      Number((region.center[0] + spec.dLng).toFixed(4)),
-      Number((region.center[1] + spec.dLat).toFixed(4)),
+      Number((region.center[0] + spec.dLng * REGIONAL_SPREAD).toFixed(4)),
+      Number((region.center[1] + spec.dLat * REGIONAL_SPREAD).toFixed(4)),
     ] as LngLat,
     siteType: spec.siteType,
     health: spec.health ?? "healthy",

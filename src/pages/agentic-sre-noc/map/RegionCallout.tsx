@@ -10,11 +10,11 @@ import { REGION_HEALTH_COLORS } from "./layers";
 import type { EstateRegion } from "./estate";
 
 const OFFSETS: Record<string, [number, number]> = {
-  "REG-CAL": [-70, -54],
-  "REG-LON": [-4, -70],
-  "REG-RIO": [72, 34],
-  "REG-NBO": [-78, 46],
-  "REG-CHN": [86, -30],
+  "REG-CAL": [104, -46],
+  "REG-LON": [-6, -68],
+  "REG-RIO": [104, 26],
+  "REG-NBO": [-104, 44],
+  "REG-CHN": [102, -44],
 };
 
 export function RegionCallout({ region }: { region: EstateRegion }) {

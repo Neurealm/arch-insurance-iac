@@ -53,17 +53,26 @@ const BASEMAP_STYLE = "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-sty
 
 type Breakpoint = "mobile" | "tablet" | "desktop";
 
-function useBreakpoint(): Breakpoint {
-  const [bp, setBp] = useState<Breakpoint>(() =>
-    typeof window === "undefined" ? "desktop" : window.innerWidth < 768 ? "mobile" : window.innerWidth < 1280 ? "tablet" : "desktop",
-  );
+/** Breakpoint derived from the *container* width, not the window, so the map
+ *  adapts correctly inside narrow dashboard columns and in full screen. */
+export function breakpointForWidth(width: number): Breakpoint {
+  if (width < 700) return "mobile";
+  if (width < 1120) return "tablet";
+  return "desktop";
+}
+
+function useContainerBreakpoint(ref: React.RefObject<HTMLDivElement | null>): Breakpoint {
+  const [bp, setBp] = useState<Breakpoint>("desktop");
   useEffect(() => {
-    const onResize = () =>
-      setBp(window.innerWidth < 768 ? "mobile" : window.innerWidth < 1280 ? "tablet" : "desktop");
-    window.addEventListener("resize", onResize);
-    onResize();
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
+    const node = ref.current;
+    if (!node) return;
+    const update = () => setBp(breakpointForWidth(node.getBoundingClientRect().width));
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [ref]);
   return bp;
 }
 
@@ -140,7 +149,7 @@ export function GlobalLinkHealthMap({
   const [webgl] = useState(hasWebGL);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const breakpoint = useBreakpoint();
+  const breakpoint = useContainerBreakpoint(containerRef);
 
   const [visibility, setVisibility] = useState<Record<LayerGroup, boolean>>({ ...DEFAULT_LAYER_VISIBILITY });
   const [legendOpen, setLegendOpen] = useState(true);

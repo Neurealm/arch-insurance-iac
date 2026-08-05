@@ -52,8 +52,8 @@ describe("GLHM-MAP-002 curated estate", () => {
   it("keeps actual optical links local to their region", () => {
     for (const link of ESTATE_OPTICAL_LINKS) {
       const [a, b] = link.path;
-      expect(Math.abs(a[0] - b[0])).toBeLessThan(1);
-      expect(Math.abs(a[1] - b[1])).toBeLessThan(1);
+      expect(Math.abs(a[0] - b[0])).toBeLessThan(3);
+      expect(Math.abs(a[1] - b[1])).toBeLessThan(3);
       expect(a).not.toEqual(b);
     }
   });
