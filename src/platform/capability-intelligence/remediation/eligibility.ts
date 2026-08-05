@@ -118,9 +118,17 @@ export function evaluateSimulationEligibility(
     );
   }
 
+  // A "simultaneous-alternatives" conflict describes variants that are
+  // mutually exclusive *if applied together*. Simulating one of them in
+  // isolation is exactly how an operator chooses between them, so it is not
+  // a blocker here — it is a blocker for the comparison stage instead.
   const blockingConflict = conflicts.find(
-    (c) => c.severity === "blocking" && c.proposalIds.includes(proposal.id),
+    (c) =>
+      c.severity === "blocking" &&
+      c.type !== "simultaneous-alternatives" &&
+      c.proposalIds.includes(proposal.id),
   );
+
   if (blockingConflict) {
     return verdict(
       "conflicting",
