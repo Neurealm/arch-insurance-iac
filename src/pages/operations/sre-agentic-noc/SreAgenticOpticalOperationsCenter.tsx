@@ -20,6 +20,9 @@ import {
   LearningImprovementPanel, OpticalNetworkHealthTable, PredictiveLinkRiskCenter,
   ServiceReliabilitySummary, SloErrorBudgetPanel,
 } from "./panels";
+import { Stage2WorkflowSection } from "./Stage2WorkflowSection";
+import { PRIMARY_ACTION_ID } from "@/data/agenticNocWorkflowData";
+import { linkStatusOverrides, useAgenticNocStore } from "@/stores/useAgenticNocStore";
 import {
   CUSTOMERS, REGIONS, SERVICES, TIME_RANGES, agenticActions, capacitySeries,
   changeRecords, hypotheses, learningRecords, links as allLinks, metricSummary,
@@ -129,16 +132,29 @@ export default function SreAgenticOpticalOperationsCenter() {
 
   const terminalIds = useMemo(() => new Set(terminals.map((t) => t.id)), [terminals]);
 
-  const links = useMemo(() => allLinks.filter((l) => (
-    terminalIds.has(l.sourceTerminalId) && terminalIds.has(l.targetTerminalId) &&
-    (filters.link === DEFAULT_FILTERS.link || l.name === filters.link) &&
-    (filters.service === DEFAULT_FILTERS.service || l.services.includes(filters.service)) &&
-    (filters.networkStatus === DEFAULT_FILTERS.networkStatus || l.status === filters.networkStatus) &&
-    (filters.riskLevel === DEFAULT_FILTERS.riskLevel || l.riskLevel === filters.riskLevel) &&
-    (filters.agentActivity === DEFAULT_FILTERS.agentActivity || l.agentActivity === filters.agentActivity) &&
-    (filters.validationState === DEFAULT_FILTERS.validationState ||
-      (l.validationState ?? "not-started") === filters.validationState)
-  )), [terminalIds, filters]);
+  // Stage 2 workflow state can override live link status on the twin.
+  const workflowActionState = useAgenticNocStore((s) => s.actionRuntimes[PRIMARY_ACTION_ID]?.state);
+  const workflowValidationState = useAgenticNocStore((s) => s.validationState);
+  const statusOverrides = useMemo(
+    () => linkStatusOverrides({
+      actionRuntimes: { [PRIMARY_ACTION_ID]: { state: workflowActionState } },
+      validationState: workflowValidationState,
+    } as never),
+    [workflowActionState, workflowValidationState],
+  );
+
+  const links = useMemo(() => allLinks
+    .map((l) => (statusOverrides[l.id] ? { ...l, status: statusOverrides[l.id] } : l))
+    .filter((l) => (
+      terminalIds.has(l.sourceTerminalId) && terminalIds.has(l.targetTerminalId) &&
+      (filters.link === DEFAULT_FILTERS.link || l.name === filters.link) &&
+      (filters.service === DEFAULT_FILTERS.service || l.services.includes(filters.service)) &&
+      (filters.networkStatus === DEFAULT_FILTERS.networkStatus || l.status === filters.networkStatus) &&
+      (filters.riskLevel === DEFAULT_FILTERS.riskLevel || l.riskLevel === filters.riskLevel) &&
+      (filters.agentActivity === DEFAULT_FILTERS.agentActivity || l.agentActivity === filters.agentActivity) &&
+      (filters.validationState === DEFAULT_FILTERS.validationState ||
+        (l.validationState ?? "not-started") === filters.validationState)
+    )), [terminalIds, filters, statusOverrides]);
 
   const linkIds = useMemo(() => new Set(links.map((l) => l.id)), [links]);
   const linkNames = useMemo(
@@ -452,6 +468,9 @@ export default function SreAgenticOpticalOperationsCenter() {
             </>
           )}
         </section>
+
+        {/* Stage 2 — active workflow surface */}
+        <Stage2WorkflowSection />
 
         {/* Row 4 */}
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
