@@ -350,7 +350,9 @@ export default function GlobalOpticalOperationsCenter() {
             view={view}
             overlays={overlays}
             zoom={zoom}
+            onZoomChange={setZoom}
             onSelect={(id) => setSelectedLink(id)}
+
           />
           <p className="mt-2 text-[10.5px] text-slate-500">
             Select a link to open its detail drawer. Terminal locations, routes and states are synthetic.
