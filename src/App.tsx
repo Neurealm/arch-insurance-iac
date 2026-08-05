@@ -696,7 +696,7 @@ const App = () => (
           <Route path="/engagement-manager-twin" element={<EngagementManagerTwin />} />
           <Route path="/agentic-sre-noc" element={<NocLayout />}>
             <Route index element={<GlobalOpticalOperationsCenter />} />
-            <Route path="customer-service-health" element={<NocPage slug="customer-service-health" />} />
+            <Route path="customer-service-health" element={<CustomerServiceHealthExplorer />} />
             <Route path="service-topology" element={<NocPage slug="service-topology" />} />
             <Route path="predictive-link-risk" element={<NocPage slug="predictive-link-risk" />} />
             <Route path="situation-room" element={<NocPage slug="situation-room" />} />

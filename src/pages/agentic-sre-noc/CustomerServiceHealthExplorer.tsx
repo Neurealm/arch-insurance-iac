@@ -21,13 +21,13 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Field, Panel, Select, ToolbarButton } from "./components/NocPrimitives";
 import { ServiceRouteGraph } from "./components/ServiceRouteGraph";
-import { agents, situations, TIME_RANGES } from "./data/goocFixtures";
+import { PRODUCTS, REGIONS, situations, TIME_RANGES } from "./data/goocFixtures";
 import {
   assuranceAgents, attainment, chennaiSloInsight, cshKpis, CSH_CUSTOMERS, customerServices,
   DATA_CONFIDENCE, DEFAULT_SERVICE_ID, errorBudgetBurn, incidentCommander, LAST_TELEMETRY,
   matrixBand, matrixBandClass, matrixBandGlyph, matrixBandLabel, matrixColumns,
-  performanceSeries, preventiveVsReactive, PRODUCTS, productComparison, protectionScenario,
-  REGIONS, regionComparison, riskBreakdown, riskChip, RISK_LEVELS, SAVED_VIEWS,
+  performanceSeries, preventiveVsReactive, productComparison, protectionScenario,
+  regionComparison, riskBreakdown, riskChip, RISK_LEVELS, SAVED_VIEWS,
   serviceEvents, serviceRecommendation, serviceRoute, SERVICE_TYPES, sloObjectives,
   sloStatusChip, SLO_STATUSES,
   type CustomerService, type RiskLevel, type ServiceEvent, type SloStatus,
