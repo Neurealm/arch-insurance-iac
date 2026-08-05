@@ -130,16 +130,21 @@ export default function SreAgenticOpticalOperationsCenter() {
 
   const terminalIds = useMemo(() => new Set(terminals.map((t) => t.id)), [terminals]);
 
-  const links = useMemo(() => allLinks.filter((l) => (
-    terminalIds.has(l.sourceTerminalId) && terminalIds.has(l.targetTerminalId) &&
-    (filters.link === DEFAULT_FILTERS.link || l.name === filters.link) &&
-    (filters.service === DEFAULT_FILTERS.service || l.services.includes(filters.service)) &&
-    (filters.networkStatus === DEFAULT_FILTERS.networkStatus || l.status === filters.networkStatus) &&
-    (filters.riskLevel === DEFAULT_FILTERS.riskLevel || l.riskLevel === filters.riskLevel) &&
-    (filters.agentActivity === DEFAULT_FILTERS.agentActivity || l.agentActivity === filters.agentActivity) &&
-    (filters.validationState === DEFAULT_FILTERS.validationState ||
-      (l.validationState ?? "not-started") === filters.validationState)
-  )), [terminalIds, filters]);
+  // Stage 2 workflow state can override live link status on the twin.
+  const statusOverrides = useAgenticNocStore(linkStatusOverrides);
+
+  const links = useMemo(() => allLinks
+    .map((l) => (statusOverrides[l.id] ? { ...l, status: statusOverrides[l.id] } : l))
+    .filter((l) => (
+      terminalIds.has(l.sourceTerminalId) && terminalIds.has(l.targetTerminalId) &&
+      (filters.link === DEFAULT_FILTERS.link || l.name === filters.link) &&
+      (filters.service === DEFAULT_FILTERS.service || l.services.includes(filters.service)) &&
+      (filters.networkStatus === DEFAULT_FILTERS.networkStatus || l.status === filters.networkStatus) &&
+      (filters.riskLevel === DEFAULT_FILTERS.riskLevel || l.riskLevel === filters.riskLevel) &&
+      (filters.agentActivity === DEFAULT_FILTERS.agentActivity || l.agentActivity === filters.agentActivity) &&
+      (filters.validationState === DEFAULT_FILTERS.validationState ||
+        (l.validationState ?? "not-started") === filters.validationState)
+    )), [terminalIds, filters, statusOverrides]);
 
   const linkIds = useMemo(() => new Set(links.map((l) => l.id)), [links]);
   const linkNames = useMemo(
