@@ -307,19 +307,22 @@ export function PredictivePipeline({
     >
       <div className="sr-only" role="status" aria-live="polite">{s.announcement}</div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[10.5px] text-slate-500">
+      <div className="flex w-full min-w-0 max-w-full flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 max-w-full text-[10.5px] text-slate-500">
           Synthetic reference logic. Deterministic stages are labelled separately from model-based inference.
         </p>
-        <div className="flex items-center gap-1">
-          <label className="flex items-center gap-1 text-[10px] text-slate-600">
+        <div
+          data-testid="pipeline-toolbar"
+          className="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-1"
+        >
+          <label className="flex min-w-0 items-center gap-1 text-[10px] text-slate-600">
             Stage data
             <select
               aria-label="Pipeline stage data state"
               value={columnState}
               data-testid="pipeline-state-select"
               onChange={(e) => s.setColumnState(e.target.value as typeof columnState)}
-              className="rounded border border-slate-200 bg-white px-1 py-0.5 text-[10px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="min-w-0 rounded border border-slate-200 bg-white px-1 py-0.5 text-[10px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               {["ready", "loading", "empty", "error"].map((v) => <option key={v} value={v}>{v}</option>)}
             </select>
@@ -327,23 +330,27 @@ export function PredictivePipeline({
           <button
             type="button"
             onClick={s.reset}
+            aria-label="Reset pipeline"
             data-testid="pipeline-reset"
-            className="flex items-center gap-1 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="flex min-h-11 min-w-11 shrink items-center justify-center gap-1 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:min-h-0 sm:min-w-0"
           >
-            <RotateCcw className="h-3 w-3" aria-hidden />Reset pipeline
+            <RotateCcw className="h-3 w-3 shrink-0" aria-hidden />
+            <span className="hidden truncate sm:inline">Reset pipeline</span>
           </button>
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
             aria-pressed={expanded}
+            aria-label={expanded ? "Exit full-screen pipeline" : "Full-screen pipeline"}
             data-testid="pipeline-fullscreen"
-            className="flex items-center gap-1 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="flex min-h-11 min-w-11 shrink items-center justify-center gap-1 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:min-h-0 sm:min-w-0"
           >
-            {expanded ? <Minimize2 className="h-3 w-3" aria-hidden /> : <Maximize2 className="h-3 w-3" aria-hidden />}
-            {expanded ? "Exit full-screen pipeline" : "Full-screen pipeline"}
+            {expanded ? <Minimize2 className="h-3 w-3 shrink-0" aria-hidden /> : <Maximize2 className="h-3 w-3 shrink-0" aria-hidden />}
+            <span className="hidden truncate sm:inline">{expanded ? "Exit full-screen pipeline" : "Full-screen pipeline"}</span>
           </button>
         </div>
       </div>
+
 
       <PipelineStageSelector stage={s.stage} onSelect={s.setStage} />
       <PipelineStatusSummary stageDetail={stageDetail} values={summaryValues} />

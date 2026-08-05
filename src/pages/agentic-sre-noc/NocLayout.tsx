@@ -26,7 +26,7 @@ export default function NocLayout() {
       <aside
         className={cn(
           "sticky top-0 z-30 h-screen shrink-0 flex flex-col border-r border-slate-200 bg-white transition-[width] duration-150",
-          collapsed ? "w-14" : "w-64",
+          collapsed ? "w-14" : "w-64 max-w-[45vw] sm:max-w-none",
         )}
         aria-label="Agentic SRE NOC navigation"
       >
@@ -134,16 +134,16 @@ export default function NocLayout() {
       </aside>
 
       <main className="flex-1 min-w-0">
-        <div className="bg-white border-b border-slate-200 px-6 py-2 sticky top-0 z-10 flex items-center gap-2 text-[11px] text-slate-500">
-          <Link to="/app" className="hover:text-indigo-600">NeuGAIN</Link>
-          <span>/</span>
-          <Link to={nocPath("")} className="text-slate-700 font-medium hover:text-indigo-600">
+        <div className="bg-white border-b border-slate-200 px-3 sm:px-6 py-2 sticky top-0 z-10 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-500">
+          <Link to="/app" className="shrink-0 hover:text-indigo-600">NeuGAIN</Link>
+          <span className="shrink-0">/</span>
+          <Link to={nocPath("")} className="shrink-0 text-slate-700 font-medium hover:text-indigo-600">
             Agentic SRE NOC
           </Link>
           {active && (
             <>
-              <span>/</span>
-              <span className="text-indigo-600 font-semibold truncate">{active.title}</span>
+              <span className="shrink-0">/</span>
+              <span className="min-w-0 max-w-full flex-1 truncate text-indigo-600 font-semibold">{active.title}</span>
             </>
           )}
         </div>
