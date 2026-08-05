@@ -27,6 +27,9 @@ import { PredictionHorizonChart } from "./analytics/PredictionHorizonChart";
 import { HighRiskLinksTable } from "./analytics/HighRiskLinksTable";
 import { ThresholdTradeoffPanel } from "./analytics/ThresholdTradeoffPanel";
 import { AnalyticsMetricDrawer } from "./analytics/AnalyticsMetricDrawer";
+import { ModelLifecycleWorkspace } from "./lifecycle/ModelLifecycleWorkspace";
+import { ACTIVE_VERSION } from "./lifecycle/lifecycleFixtures";
+import type { LifecycleTab } from "./lifecycle/lifecycleTypes";
 import { DEFAULT_ANALYTICS_LINK_ID, highRiskLinkRecords } from "./analytics/analyticsFixtures";
 import type { AnalyticsPanelState } from "./analytics/AnalyticsPrimitives";
 import type { PredictionOverrides } from "./chennai/chennaiGeojson";
@@ -35,8 +38,8 @@ import {
   breadcrumb, featureContributions, forecastHorizons, governanceRecords, kpiMetrics,
   linkPredictions, modelActivity, modelEvidence, modelFeatures, modelSummary, pageSubtitle,
   panelSpecs, pipelineStages, products, recommendedActions, regions, scenarios, timeRanges,
-  traditionalMonitoringGaps, trainingDatasets, trainingTabs, validationResults,
-  type PanelSpec, type PipelineStageKey, type TrainingTab,
+  traditionalMonitoringGaps,
+  type PanelSpec,
 } from "./data/pliFixtures";
 
 /* ------------------------------ shared parts ------------------------------ */
@@ -195,6 +198,20 @@ function Reserved({ label }: { label: string }) {
   );
 }
 
+/** Bottom governance strip item to lifecycle tab mapping. */
+const governanceTabTargets: Record<string, LifecycleTab> = {
+  owner: "Governance",
+  review: "Governance",
+  approval: "Governance",
+  lineage: "Governance",
+  drift: "Drift",
+  retention: "Governance",
+  training: "Training Data",
+  validation: "Validation",
+  explainability: "Explainability",
+  rollback: "Governance",
+};
+
 /* --------------------------------- page ----------------------------------- */
 
 export default function PredictiveOpticalLinkIntelligence() {
@@ -206,7 +223,8 @@ export default function PredictiveOpticalLinkIntelligence() {
   const [product, setProduct] = useState<string>(products[0]);
   const [selectedLink, setSelectedLink] = useState<string | null>(null);
   const [selectedStage, setSelectedStage] = useState<PipelineStageKey>("observe");
-  const [trainingTab, setTrainingTab] = useState<TrainingTab>(trainingTabs[0]);
+  const [lifecycleTab, setLifecycleTab] = useState<LifecycleTab>("Training Data");
+  const [activeModelVersion, setActiveModelVersion] = useState<string>(ACTIVE_VERSION);
   const [explainOpen, setExplainOpen] = useState(false);
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const [playbackRunning, setPlaybackRunning] = useState(false);
@@ -272,6 +290,11 @@ export default function PredictiveOpticalLinkIntelligence() {
     }
   };
   const handleThresholdPush = (pct: number) => { setPushedThresholdPct(pct); setPipelineThresholdPct(pct); };
+
+  const focusLifecycleTab = (tab: LifecycleTab) => {
+    setLifecycleTab(tab);
+    document.getElementById("model-lifecycle-workspace")?.scrollIntoView?.({ block: "start" });
+  };
 
   const groupedFeatures = useMemo(() => {
     const groups = ["Optical", "Environmental", "Network and Service", "Historical and Context"] as const;
@@ -519,33 +542,28 @@ export default function PredictiveOpticalLinkIntelligence() {
 
       {/* --------------------------- lower analytics ------------------------ */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12">
-        <PanelShell spec={spec.training} state={panelState} heightClass="min-h-[260px]" className="xl:col-span-5">
-          <div className="flex flex-wrap gap-1 border-b border-slate-200 pb-1" role="tablist" aria-label="Model training and validation views">
-            {trainingTabs.map((t) => (
-              <button
-                key={t}
-                role="tab"
-                type="button"
-                aria-selected={trainingTab === t}
-                onClick={() => setTrainingTab(t)}
-                className={cn(
-                  "rounded px-2 py-1 text-[11px] font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
-                  trainingTab === t ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50",
-                )}
-              >
-                {t}
-              </button>
-            ))}
+        <PanelShell
+          spec={spec.training}
+          state={panelState}
+          heightClass="min-h-[260px]"
+          className="xl:col-span-5"
+          functional
+        >
+          <div id="model-lifecycle-workspace" className="min-w-0">
+            <ModelLifecycleWorkspace
+              context={{
+                region,
+                product,
+                horizon,
+                selectedLinkId: selectedLink,
+                thresholdPct: pipelineThresholdPct,
+                tab: lifecycleTab,
+                onTabChange: setLifecycleTab,
+                activeVersion: activeModelVersion,
+                onActiveVersionChange: setActiveModelVersion,
+              }}
+            />
           </div>
-          <ul className="mt-2 space-y-1">
-            {trainingDatasets.map((d) => (
-              <li key={d.key} className="flex items-baseline justify-between gap-2 text-[11px]">
-                <span className="text-slate-600">{d.label}</span>
-                <span className="font-semibold text-slate-900">{d.sharePct}% · {d.samples}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-2"><Reserved label={`Reserved for ${trainingTab} visual`} /></div>
         </PanelShell>
 
         <PanelShell spec={spec.horizon} state={panelState} heightClass="min-h-[300px]" className="xl:col-span-4" functional>
@@ -622,7 +640,15 @@ export default function PredictiveOpticalLinkIntelligence() {
           <dl className="space-y-1">
             {governanceRecords.map((r) => (
               <div key={r.key} className="flex items-baseline justify-between gap-2 border-b border-slate-100 py-0.5">
-                <dt className="text-[11px] text-slate-600">{r.label}</dt>
+                <dt className="text-[11px] text-slate-600">
+                  <button
+                    type="button"
+                    onClick={() => focusLifecycleTab(governanceTabTargets[r.key] ?? "Governance")}
+                    className="text-left underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  >
+                    {r.label}
+                  </button>
+                </dt>
                 <dd className="text-[11.5px] font-medium text-slate-900">{r.value}</dd>
               </div>
             ))}
