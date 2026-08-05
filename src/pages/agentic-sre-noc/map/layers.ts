@@ -299,3 +299,12 @@ export const customerImpactMarkerLayer: LayerProps = {
 export function linkLayerGroup(layerId: string): LayerGroup {
   return layerId === "links-maintenance" ? "maintenance" : "opticalLinks";
 }
+
+/** Returns a copy of a layer definition with an explicit visibility layout. */
+export function withVisibility(layer: LayerProps, on: boolean): LayerProps {
+  const current = (layer as unknown as { layout?: Record<string, unknown> }).layout ?? {};
+  return {
+    ...(layer as object),
+    layout: { ...current, visibility: on ? "visible" : "none" },
+  } as LayerProps;
+}

@@ -27,7 +27,7 @@ import {
   corridorLayer, customerImpactMarkerLayer, DEFAULT_LAYER_VISIBILITY, fiberBackupLayer,
   incidentMarkerLayer, linkLayerGroup, linkLayers, regionHubLabelLayer, regionHubLayer,
   rfFallbackLayer, riskMarkerLayer, siteClusterCountLayer, siteClusterLayer, sitePointLayer,
-  type LayerGroup,
+  withVisibility, type LayerGroup,
 } from "./layers";
 import { CALLOUT_REGION_IDS, ESTATE_REGIONS, TABLET_CALLOUT_REGION_IDS } from "./estate";
 import { MapLegend } from "./MapLegend";
@@ -173,7 +173,6 @@ export function GlobalLinkHealthMap({
     return ESTATE_REGIONS.filter((r) => ids.includes(r.id));
   }, [breakpoint, visibility.regionalSummaries]);
 
-  const vis = (on: boolean) => ({ visibility: (on ? "visible" : "none") as "visible" | "none" });
 
   // Resize the canvas whenever the container box changes (nav collapse,
   // drawer open/close, full screen, window resize).
@@ -292,30 +291,26 @@ export function GlobalLinkHealthMap({
           >
             {/* 2. Service corridors */}
             <Source id="serviceCorridors" type="geojson" data={corridorsData} promoteId="id">
-              <Layer {...corridorLayer} layout={{ ...corridorLayer.layout, ...vis(visibility.serviceCorridors) }} />
+              <Layer {...withVisibility(corridorLayer, visibility.serviceCorridors)} />
             </Source>
 
             {/* 3-4. Fiber backup then RF fallback */}
             <Source id="fallbackRoutes" type="geojson" data={fallbackData} promoteId="id">
-              <Layer {...fiberBackupLayer} layout={{ ...fiberBackupLayer.layout, ...vis(visibility.fiberBackup) }} />
-              <Layer {...rfFallbackLayer} layout={{ ...rfFallbackLayer.layout, ...vis(visibility.rfFallback) }} />
+              <Layer {...withVisibility(fiberBackupLayer, visibility.fiberBackup)} />
+              <Layer {...withVisibility(rfFallbackLayer, visibility.rfFallback)} />
             </Source>
 
             {/* 5-11. Optical links by status, subordinate to prominent states */}
             <Source id="opticalLinks" type="geojson" data={linksData} promoteId="id">
               {linkLayers.map((layer) => (
-                <Layer
-                  key={layer.id}
-                  {...layer}
-                  layout={{ ...layer.layout, ...vis(visibility[linkLayerGroup(String(layer.id))]) }}
-                />
+                <Layer key={layer.id} {...withVisibility(layer, visibility[linkLayerGroup(String(layer.id))])} />
               ))}
             </Source>
 
             {/* 12. Region hubs */}
             <Source id="regions" type="geojson" data={regionsData} promoteId="id">
-              <Layer {...regionHubLayer} layout={{ ...regionHubLayer.layout, ...vis(true) }} />
-              <Layer {...regionHubLabelLayer} layout={{ ...regionHubLabelLayer.layout, ...vis(true) }} />
+              <Layer {...withVisibility(regionHubLayer, true)} />
+              <Layer {...withVisibility(regionHubLabelLayer, true)} />
             </Source>
 
             {/* 13. Sites (native clustering) */}
@@ -328,27 +323,24 @@ export function GlobalLinkHealthMap({
               clusterRadius={38}
               clusterMaxZoom={5}
             >
-              <Layer {...siteClusterLayer} layout={{ ...siteClusterLayer.layout, ...vis(visibility.sitePoints) }} />
-              <Layer {...siteClusterCountLayer} layout={{ ...siteClusterCountLayer.layout, ...vis(visibility.sitePoints) }} />
-              <Layer {...sitePointLayer} layout={{ ...sitePointLayer.layout, ...vis(visibility.sitePoints) }} />
+              <Layer {...withVisibility(siteClusterLayer, visibility.sitePoints)} />
+              <Layer {...withVisibility(siteClusterCountLayer, visibility.sitePoints)} />
+              <Layer {...withVisibility(sitePointLayer, visibility.sitePoints)} />
             </Source>
 
             {/* 14. Predicted risks */}
             <Source id="risks" type="geojson" data={risksData} promoteId="id">
-              <Layer {...riskMarkerLayer} layout={{ ...riskMarkerLayer.layout, ...vis(visibility.predictedRisks) }} />
+              <Layer {...withVisibility(riskMarkerLayer, visibility.predictedRisks)} />
             </Source>
 
             {/* 15. Active incidents */}
             <Source id="incidents" type="geojson" data={incidentsData} promoteId="id">
-              <Layer {...incidentMarkerLayer} layout={{ ...incidentMarkerLayer.layout, ...vis(visibility.activeIncidents) }} />
+              <Layer {...withVisibility(incidentMarkerLayer, visibility.activeIncidents)} />
             </Source>
 
             {/* 16. Customer impact */}
             <Source id="customerImpact" type="geojson" data={customerImpactData} promoteId="id">
-              <Layer
-                {...customerImpactMarkerLayer}
-                layout={{ ...customerImpactMarkerLayer.layout, ...vis(visibility.customerImpact) }}
-              />
+              <Layer {...withVisibility(customerImpactMarkerLayer, visibility.customerImpact)} />
             </Source>
 
             {callouts.map((region) => (
