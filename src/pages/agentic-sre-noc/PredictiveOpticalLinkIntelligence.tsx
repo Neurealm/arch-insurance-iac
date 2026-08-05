@@ -287,7 +287,7 @@ export default function PredictiveOpticalLinkIntelligence() {
       )}
     >
       {/* ------------------------------ header ------------------------------ */}
-      <header className="space-y-3">
+      <header data-testid="pli-header" className="space-y-3">
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-1 text-[11px] text-slate-500">
             {breadcrumb.map((crumb, i) => (

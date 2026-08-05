@@ -36,11 +36,20 @@ describe("Predictive Optical Link Intelligence (AIM-001)", () => {
 
   it("exposes all header controls", () => {
     renderPage();
+    /* Scope to the page header: role queries across the whole page are both
+       ambiguous (analytics panels expose their own filters) and very slow. */
+    const header = within(screen.getByTestId("pli-header"));
+
+    const comboboxNames = header
+      .getAllByRole("combobox")
+      .map((el) => el.getAttribute("aria-label") ?? el.getAttribute("name") ?? "");
     ["Scenario", "Time range", "Forecast horizon", "Region", "Product", "Panel state"].forEach((l) => {
-      expect(screen.getByRole("combobox", { name: l })).toBeInTheDocument();
+      expect(comboboxNames).toContain(l);
     });
+
+    const buttonLabels = header.getAllByRole("button").map((el) => el.textContent ?? "");
     ["Explain Model", "Run What-If", "Export Model Report", "Full screen", "Actions"].forEach((n) => {
-      expect(screen.getAllByRole("button", { name: new RegExp(n, "i") }).length).toBeGreaterThan(0);
+      expect(buttonLabels.some((label) => new RegExp(n, "i").test(label))).toBe(true);
     });
   });
 
