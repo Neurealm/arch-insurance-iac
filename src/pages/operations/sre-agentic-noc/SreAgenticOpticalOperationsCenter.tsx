@@ -20,6 +20,7 @@ import {
   LearningImprovementPanel, OpticalNetworkHealthTable, PredictiveLinkRiskCenter,
   ServiceReliabilitySummary, SloErrorBudgetPanel,
 } from "./panels";
+import { Stage2WorkflowSection } from "./Stage2WorkflowSection";
 import {
   CUSTOMERS, REGIONS, SERVICES, TIME_RANGES, agenticActions, capacitySeries,
   changeRecords, hypotheses, learningRecords, links as allLinks, metricSummary,
