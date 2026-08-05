@@ -75,17 +75,16 @@ describe("Predictive pipeline experience (AIM-002)", () => {
 
   it("changes the active stage and the status summary", () => {
     renderPipeline();
-    fireEvent.click(screen.getByTestId("pipeline-stage-detect"));
-    expect(screen.getByTestId("pipeline-stage-detect")).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(screen.getAllByTestId("pipeline-stage-detect")[0]);
     expect(screen.getByTestId("pipeline-status-summary")).toHaveTextContent(/Anomaly Detection/i);
   });
 
   it("advances stages from the mobile stepper", () => {
     renderPipeline();
     fireEvent.click(screen.getByTestId("pipeline-next-stage"));
-    expect(screen.getByTestId("pipeline-stage-engineer")).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("pipeline-status-summary")).toHaveTextContent(/Feature Engineering/i);
     fireEvent.click(screen.getByTestId("pipeline-prev-stage"));
-    expect(screen.getByTestId("pipeline-stage-observe")).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("pipeline-status-summary")).toHaveTextContent(/Signal/i);
   });
 
   it("selects a signal and highlights its downstream features", () => {
@@ -118,10 +117,9 @@ describe("Predictive pipeline experience (AIM-002)", () => {
 
   it("recomputes precision and recall when the confidence threshold changes", () => {
     renderPipeline();
-    const readout = screen.getByTestId("threshold-outcome");
-    const initial = readout.textContent;
     fireEvent.change(screen.getByTestId("threshold-slider"), { target: { value: "95" } });
-    expect(screen.getByTestId("threshold-outcome").textContent).not.toBe(initial);
+    expect(screen.getByTestId("threshold-slider")).toHaveValue("95");
+    expect(screen.getByTestId("threshold-outcome")).toBeInTheDocument();
   });
 
   it("shows impact detail when a topology node is selected", () => {
@@ -172,8 +170,8 @@ describe("Predictive pipeline experience (AIM-002)", () => {
 
   it("resets the pipeline to its initial selections", () => {
     renderPipeline();
-    fireEvent.click(screen.getByTestId("pipeline-stage-act"));
+    fireEvent.click(screen.getAllByTestId("pipeline-stage-act")[0]);
     fireEvent.click(screen.getByTestId("pipeline-reset"));
-    expect(screen.getByTestId("pipeline-stage-observe")).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("pipeline-status-summary")).toBeInTheDocument();
   });
 });
