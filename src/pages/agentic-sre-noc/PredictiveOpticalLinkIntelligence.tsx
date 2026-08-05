@@ -384,7 +384,7 @@ export default function PredictiveOpticalLinkIntelligence() {
       {/* ------------------------------ KPI row ----------------------------- */}
       <section aria-label="Model key performance indicators">
         <h2 className="sr-only">Model key performance indicators</h2>
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+        <div data-testid="pli-kpis" className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {kpiMetrics.map((m) => (
             <KpiCard
               key={m.key}
