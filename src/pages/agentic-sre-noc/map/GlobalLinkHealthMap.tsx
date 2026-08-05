@@ -24,6 +24,12 @@ export const GLOBAL_VIEW: CameraView = {
   pitch: 0,
 };
 
+/** Americas through Australia, matching the approved reference framing. */
+export const GLOBAL_BOUNDS: [[number, number], [number, number]] = [
+  [-168, -56],
+  [178, 74],
+];
+
 const BASEMAP_STYLE = "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json";
 
 function hasWebGL(): boolean {
@@ -129,7 +135,7 @@ export function GlobalLinkHealthMap({
     try {
       // Neutral operational palette: white water, very light gray land.
       for (const layer of map.getStyle().layers ?? []) {
-        if (layer.type === "background") map.setPaintProperty(layer.id, "background-color", "#ffffff");
+        if (layer.type === "background") map.setPaintProperty(layer.id, "background-color", "#eef2f6");
         if (layer.id.includes("water")) {
           if (layer.type === "fill") map.setPaintProperty(layer.id, "fill-color", "#ffffff");
           if (layer.type === "line") map.setPaintProperty(layer.id, "line-color", "#ffffff");
@@ -156,8 +162,7 @@ export function GlobalLinkHealthMap({
     const map = mapRef.current?.getMap();
     if (!map) return;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    map.jumpTo({ center: [GLOBAL_VIEW.longitude, GLOBAL_VIEW.latitude], zoom: GLOBAL_VIEW.zoom, bearing: 0, pitch: 0 });
-    if (!reduced) map.triggerRepaint();
+    map.fitBounds(GLOBAL_BOUNDS, { padding: 8, duration: reduced ? 0 : 400, bearing: 0, pitch: 0 });
   }, []);
 
   const zoomBy = useCallback((delta: number) => {
@@ -191,11 +196,8 @@ export function GlobalLinkHealthMap({
           ref={mapRef}
           mapLib={maplibregl}
           initialViewState={{
-            longitude: GLOBAL_VIEW.longitude,
-            latitude: GLOBAL_VIEW.latitude,
-            zoom: GLOBAL_VIEW.zoom,
-            bearing: 0,
-            pitch: 0,
+            bounds: GLOBAL_BOUNDS,
+            fitBoundsOptions: { padding: 8 },
           }}
           mapStyle={BASEMAP_STYLE}
           renderWorldCopies={false}
