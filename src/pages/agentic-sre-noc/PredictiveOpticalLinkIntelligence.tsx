@@ -537,7 +537,7 @@ export default function PredictiveOpticalLinkIntelligence() {
           spec={spec.training}
           state={panelState}
           heightClass="min-h-[260px]"
-          className="xl:col-span-12"
+          className="md:col-span-2 xl:col-span-12"
           functional
         >
           <div id="model-lifecycle-workspace" className="min-w-0">
