@@ -76,7 +76,7 @@ export function ModelDriftTab({
             </select>
           </label>
           <LifecycleButton onClick={() => onSimulate("none")} disabled={simulation === "none"}>Reset simulation</LifecycleButton>
-          <LifecycleButton onClick={() => onNotify(exportDriftSummary(assessment, retraining).message)}>
+          <LifecycleButton onClick={() => onNotify(exportDriftSummary(assessment.metrics).message)}>
             Export Drift Summary
           </LifecycleButton>
         </div>
