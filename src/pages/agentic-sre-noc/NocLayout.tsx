@@ -26,7 +26,7 @@ export default function NocLayout() {
       <aside
         className={cn(
           "sticky top-0 z-30 h-screen shrink-0 flex flex-col border-r border-slate-200 bg-white transition-[width] duration-150",
-          collapsed ? "w-14" : "w-64",
+          collapsed ? "w-14" : "w-64 max-w-[45vw] sm:max-w-none",
         )}
         aria-label="Agentic SRE NOC navigation"
       >
