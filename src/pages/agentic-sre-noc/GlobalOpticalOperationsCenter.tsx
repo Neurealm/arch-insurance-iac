@@ -27,6 +27,8 @@ import {
   transportMix, trafficSeries,
   type Agent, type LinkStatus, type OpticalLink, type Situation, type TimelineEventRow,
 } from "./data/goocFixtures";
+import { Field, Panel, Select } from "./components/NocPrimitives";
+
 
 /* ------------------------------ primitives ----------------------------- */
 // Panel, Select and Field now live in ./components/NocPrimitives so every
