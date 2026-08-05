@@ -13,6 +13,11 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  // maplibre-gl ships its own web worker; pre-bundling breaks the worker URL.
+  optimizeDeps: {
+    exclude: ["maplibre-gl"],
+  },
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
