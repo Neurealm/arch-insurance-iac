@@ -413,6 +413,7 @@ export default function GlobalLinkHealthTwin() {
                 <button type="button" onClick={() => setSimulated(null)} className="ml-2 underline">Dismiss</button>
               </div>
             )}
+            </div>
           </Panel>
         </div>
 
