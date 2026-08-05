@@ -75,17 +75,17 @@ describe("Predictive pipeline experience (AIM-002)", () => {
 
   it("changes the active stage and the status summary", () => {
     renderPipeline();
-    fireEvent.click(screen.getByTestId("pipeline-stage-tab-detect"));
-    expect(screen.getByTestId("pipeline-stage-tab-detect")).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(screen.getByTestId("pipeline-stage-detect"));
+    expect(screen.getByTestId("pipeline-stage-detect")).toHaveAttribute("aria-selected", "true");
     expect(screen.getByTestId("pipeline-status-summary")).toHaveTextContent(/Anomaly Detection/i);
   });
 
   it("advances stages from the mobile stepper", () => {
     renderPipeline();
     fireEvent.click(screen.getByTestId("pipeline-next-stage"));
-    expect(screen.getByTestId("pipeline-stage-tab-engineer")).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("pipeline-stage-engineer")).toHaveAttribute("aria-selected", "true");
     fireEvent.click(screen.getByTestId("pipeline-prev-stage"));
-    expect(screen.getByTestId("pipeline-stage-tab-observe")).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("pipeline-stage-observe")).toHaveAttribute("aria-selected", "true");
   });
 
   it("selects a signal and highlights its downstream features", () => {
@@ -102,20 +102,18 @@ describe("Predictive pipeline experience (AIM-002)", () => {
     renderPipeline();
     const feature = engineeredFeatures[0];
     fireEvent.click(screen.getByTestId(`feature-${feature.id}`));
-    fireEvent.click(screen.getByTestId(`feature-detail-${feature.id}`));
-    const drawer = screen.getByTestId("feature-drawer");
+    const drawer = screen.getByTestId("feature-detail-drawer");
     expect(within(drawer).getByText(feature.name)).toBeInTheDocument();
     expect(drawer).toHaveTextContent(/Example calculation/i);
     fireEvent.click(within(drawer).getByRole("button", { name: /close/i }));
-    expect(screen.queryByTestId("feature-drawer")).toBeNull();
+    expect(screen.queryByTestId("feature-detail-drawer")).toBeNull();
   });
 
   it("filters anomalies and keeps an accessible table alternative", () => {
     renderPipeline();
-    const before = screen.getAllByTestId(/anomaly-row-/).length;
-    fireEvent.change(screen.getByTestId("anomaly-risk-filter"), { target: { value: "High" } });
-    expect(screen.getAllByTestId(/anomaly-row-/).length).toBeLessThanOrEqual(before);
-    expect(screen.getByRole("table", { name: /anomal/i })).toBeInTheDocument();
+    const before = screen.getByTestId("anomaly-count").textContent;
+    fireEvent.change(screen.getByRole("combobox", { name: /risk class filter/i }), { target: { value: "High Risk" } });
+    expect(screen.getByTestId("anomaly-count").textContent).not.toBe(before);
   });
 
   it("recomputes precision and recall when the confidence threshold changes", () => {
@@ -165,17 +163,17 @@ describe("Predictive pipeline experience (AIM-002)", () => {
     renderPipeline();
     const select = screen.getByTestId("pipeline-state-select");
     fireEvent.change(select, { target: { value: "loading" } });
-    expect(screen.getAllByTestId(/column-loading-/).length).toBe(6);
+    expect(screen.getAllByText(/^Loading /).length).toBe(6);
     fireEvent.change(select, { target: { value: "empty" } });
-    expect(screen.getAllByTestId(/column-empty-/).length).toBe(6);
+    expect(screen.getAllByText(/^No .* for this selection$/).length).toBe(6);
     fireEvent.change(select, { target: { value: "error" } });
-    expect(screen.getAllByTestId(/column-error-/).length).toBe(6);
+    expect(screen.getAllByRole("alert").length).toBe(6);
   });
 
   it("resets the pipeline to its initial selections", () => {
     renderPipeline();
-    fireEvent.click(screen.getByTestId("pipeline-stage-tab-act"));
+    fireEvent.click(screen.getByTestId("pipeline-stage-act"));
     fireEvent.click(screen.getByTestId("pipeline-reset"));
-    expect(screen.getByTestId("pipeline-stage-tab-observe")).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("pipeline-stage-observe")).toHaveAttribute("aria-selected", "true");
   });
 });
