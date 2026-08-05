@@ -359,7 +359,7 @@ export default function PredictiveOpticalLinkIntelligence() {
           <div className="mx-1 hidden h-6 w-px bg-slate-200 lg:block" aria-hidden />
 
           <dl className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
-            <div><dt className="inline text-slate-500">Model version: </dt><dd className="inline font-semibold text-slate-900">{modelSummary.version}</dd></div>
+            <div><dt className="inline text-slate-500">Model version: </dt><dd className="inline font-semibold text-slate-900" data-testid="pli-active-version">{activeModelVersion}</dd></div>
             <div><dt className="inline text-slate-500">Last retrained: </dt><dd className="inline font-semibold text-slate-900">{modelSummary.lastRetrained}</dd></div>
             <div><dt className="inline text-slate-500">Model health: </dt><dd className="inline font-semibold text-slate-900">{modelSummary.health}</dd></div>
           </dl>

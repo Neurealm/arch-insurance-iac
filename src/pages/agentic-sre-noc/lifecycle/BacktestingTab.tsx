@@ -63,7 +63,7 @@ export function BacktestingTab({
       heightClass="min-h-[240px]"
     />
   );
-  if (frame) return <div data-testid="lifecycle-tab-backtesting">{frame}</div>;
+  if (panelState !== "ready") return <div data-testid="lifecycle-tab-backtesting">{frame}</div>;
 
   return (
     <div className="space-y-3" data-testid="lifecycle-tab-backtesting">

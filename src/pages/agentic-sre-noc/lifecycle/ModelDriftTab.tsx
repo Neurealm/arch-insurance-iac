@@ -54,7 +54,7 @@ export function ModelDriftTab({
       heightClass="min-h-[240px]"
     />
   );
-  if (frame) return <div data-testid="lifecycle-tab-drift">{frame}</div>;
+  if (panelState !== "ready") return <div data-testid="lifecycle-tab-drift">{frame}</div>;
 
   return (
     <div className="space-y-3" data-testid="lifecycle-tab-drift">
