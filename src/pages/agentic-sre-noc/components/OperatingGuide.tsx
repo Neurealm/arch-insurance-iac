@@ -125,11 +125,11 @@ export function OperatingGuide({
             <h3 className="text-[12px] font-semibold text-slate-900">Outcome</h3>
             <p className="mt-1 text-[11.5px] leading-relaxed text-slate-700">{guideOutcome.primary}</p>
 
-            <dl className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+            <dl className="mt-2 divide-y divide-slate-200 rounded border border-slate-200 bg-white px-2">
               {outcomeMetrics.map((m) => (
-                <div key={m.label} className="rounded border border-slate-200 bg-white px-1.5 py-1">
-                  <dt className="text-[9.5px] uppercase tracking-wide text-slate-500">{m.label}</dt>
-                  <dd className="text-[12px] font-semibold text-slate-900">{m.value}</dd>
+                <div key={m.label} className="flex items-baseline justify-between gap-2 py-0.5">
+                  <dt className="text-[10.5px] text-slate-500">{m.label}</dt>
+                  <dd className="text-[11px] font-semibold text-slate-900">{m.value}</dd>
                 </div>
               ))}
             </dl>
@@ -210,11 +210,11 @@ export function OperatingGuide({
             <h3 className="text-[12px] font-semibold text-slate-900">Current Operating Objective</h3>
             <p className="mt-1 text-[11.5px] leading-relaxed text-slate-700">{guideObjective.primary}</p>
 
-            <dl className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+            <dl className="mt-2 divide-y divide-slate-200 rounded border border-slate-200 bg-white px-2">
               {objectiveFacts.map((f) => (
-                <div key={f.label} className="rounded border border-slate-200 bg-white px-1.5 py-1">
-                  <dt className="text-[9.5px] uppercase tracking-wide text-slate-500">{f.label}</dt>
-                  <dd className="text-[11px] font-semibold text-slate-900">{f.value}</dd>
+                <div key={f.label} className="flex items-baseline justify-between gap-2 py-0.5">
+                  <dt className="text-[10.5px] text-slate-500">{f.label}</dt>
+                  <dd className="text-right text-[11px] font-semibold text-slate-900">{f.value}</dd>
                 </div>
               ))}
             </dl>
