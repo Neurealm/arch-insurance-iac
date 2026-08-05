@@ -397,6 +397,7 @@ import SreLayout from "./pages/prod-twin/SreLayout.tsx";
 import NocLayout from "./pages/agentic-sre-noc/NocLayout.tsx";
 import NocPage from "./pages/agentic-sre-noc/NocPage.tsx";
 import GlobalOpticalOperationsCenter from "./pages/agentic-sre-noc/GlobalOpticalOperationsCenter.tsx";
+import TraditionalNocOperationsCenter from "./pages/operations/traditional-noc/GlobalOpticalOperationsCenter.tsx";
 import CustomerServiceHealthExplorer from "./pages/agentic-sre-noc/CustomerServiceHealthExplorer.tsx";
 import GlobalOpticalServiceTopology from "./pages/agentic-sre-noc/GlobalOpticalServiceTopology.tsx";
 import PredictiveLinkRiskCenter from "./pages/agentic-sre-noc/PredictiveLinkRiskCenter.tsx";
@@ -701,6 +702,7 @@ const App = () => (
           <Route path="/executive-service-owner-twin" element={<ExecutiveServiceOwnerTwin />} />
           <Route path="/delivery-org-twin" element={<DeliveryOrgTwin />} />
           <Route path="/engagement-manager-twin" element={<EngagementManagerTwin />} />
+          <Route path="/operations/traditional-noc/global-optical-operations" element={<TraditionalNocOperationsCenter />} />
           <Route path="/agentic-sre-noc" element={<NocLayout />}>
             <Route index element={<GlobalOpticalOperationsCenter />} />
             <Route path="customer-service-health" element={<CustomerServiceHealthExplorer />} />

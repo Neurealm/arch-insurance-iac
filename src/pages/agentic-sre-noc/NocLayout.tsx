@@ -71,7 +71,30 @@ export default function NocLayout() {
                     {group}
                   </div>
                 )}
+                {group === "Overview" && (
+                  <NavLink
+                    to="/operations/traditional-noc/global-optical-operations"
+                    title={collapsed ? "Traditional NOC" : undefined}
+                    className={({ isActive }) =>
+                      cn(
+                        "mx-2 my-0.5 flex items-center gap-2.5 rounded-md py-2 text-[12.5px] transition-colors",
+                        collapsed ? "justify-center px-0" : "px-2.5",
+                        isActive
+                          ? "bg-slate-900 text-white"
+                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <Circle className={cn("h-1.5 w-1.5 shrink-0 fill-current", isActive ? "text-white" : "text-slate-400")} />
+                        {!collapsed && <span className="truncate">Traditional NOC</span>}
+                      </>
+                    )}
+                  </NavLink>
+                )}
                 {items.map((p) => (
+
                   <NavLink
                     key={p.slug || "index"}
                     to={nocPath(p.slug)}
