@@ -7,10 +7,12 @@ import {
   REMEDIATION_STAGES,
   REMEDIATION_STAGE_LABELS,
   RemediationWorkspaceProvider,
+  useOptionalRemediationWorkspace,
   useRemediationWorkspace,
   type RemediationStage,
   type StageState,
 } from "../RemediationWorkspaceProvider";
+
 import { RecommendationPicker } from "../components/remediation/RecommendationPicker";
 import { ProposalPanel } from "../components/remediation/ProposalPanel";
 import { ParameterPanel } from "../components/remediation/ParameterPanel";
@@ -19,6 +21,8 @@ import { SimulationPanel } from "../components/remediation/SimulationPanel";
 import { AlternativesPanel } from "../components/remediation/AlternativesPanel";
 import { ChangePlanPanel } from "../components/remediation/ChangePlanPanel";
 import { DETERMINISM_NOTICE, READ_ONLY_NOTICE } from "../remediationPresentation";
+import { reviewLink } from "../review/reviewLink";
+
 
 const STAGE_DESCRIPTION: Readonly<Record<RemediationStage, string>> = {
   recommendation: "Choose the advisory recommendation you want to work through.",
@@ -44,9 +48,18 @@ const STAGE_TONE: Record<StageState, "neutral" | "positive" | "info" | "warning"
   locked: "neutral",
 };
 
-/** Screen 4 — Simulation and Change Planning workspace. Planning-only. */
+/**
+ * Screen 4 — Simulation and Change Planning workspace. Planning-only.
+ *
+ * Stage 3.5.4.4 moved the provider up to the remediation route layout so this
+ * screen and the Change Review Readiness screen share one session. The screen
+ * still mounts its own provider when rendered without an ancestor one (a direct
+ * unit render), but never a second one on top of an existing session.
+ */
 export default function RemediationWorkspace() {
+  const existing = useOptionalRemediationWorkspace();
   const { snapshot } = useCapabilityIntelligence();
+  if (existing) return <WorkspaceBody />;
   if (!snapshot) return <EmptyState title="No analysis available" />;
   return (
     <RemediationWorkspaceProvider recommendations={snapshot.intelligence.recommendations}>
@@ -54,6 +67,7 @@ export default function RemediationWorkspace() {
     </RemediationWorkspaceProvider>
   );
 }
+
 
 function WorkspaceBody() {
   const { snapshot } = useCapabilityIntelligence();
@@ -195,7 +209,9 @@ function WorkspaceBody() {
           busy={workspace.busy === "plan"}
           stale={workspace.planStale}
           onBuild={workspace.buildChangePlan}
+          reviewHref={reviewLink(workspace.recommendation?.id ?? null)}
         />
+
       </Stage>
     </div>
   );

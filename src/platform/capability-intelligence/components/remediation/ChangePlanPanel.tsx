@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/platform/components/StatusBadge";
@@ -6,6 +7,7 @@ import { driftTone, planStatusTone, severityTone } from "../../remediationPresen
 import { PLAN_READINESS_CRITERIA, type EligibilityVerdict } from "../../remediation/eligibility";
 import { BoundedList } from "./BoundedList";
 import type { ChangePlan, DriftReport } from "@/modules/graph/change-plan/index";
+
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "Draft — no blocker and no executable patch",
@@ -31,6 +33,7 @@ export function ChangePlanPanel({
   stale,
   onBuild,
   evidenceSource = "real-graph",
+  reviewHref,
 }: {
   plan: ChangePlan | null;
   drift: DriftReport | null;
@@ -41,6 +44,11 @@ export function ChangePlanPanel({
   onBuild: () => void;
   /** Where the rendered plan came from. Fixtures are labelled as fixtures. */
   evidenceSource?: "real-graph" | "fixture";
+  /**
+   * Stage 3.5.4.4 — read-only route to the Change Review Readiness screen.
+   * Offered only when a plan exists; it navigates, and does nothing else.
+   */
+  reviewHref?: string;
 }) {
   return (
     <div className="space-y-4" data-testid="change-plan-stage">
@@ -52,10 +60,18 @@ export function ChangePlanPanel({
         >
           {busy ? "Planning…" : plan ? "Rebuild change plan" : "Build change plan"}
         </Button>
+        {plan && reviewHref && (
+          <Button asChild variant="outline" size="sm">
+            <Link to={reviewHref} data-testid="review-readiness-link">
+              Review readiness
+            </Link>
+          </Button>
+        )}
         {stale && plan && (
           <StatusBadge value="stale" tone="warning" label="Inputs changed — rebuild to refresh" />
         )}
       </div>
+
 
       <p className="text-xs text-muted-foreground" data-testid="plan-gate-reason">
         {eligibility.reason}
