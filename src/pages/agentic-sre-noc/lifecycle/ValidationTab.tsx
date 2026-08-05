@@ -162,7 +162,7 @@ export function ValidationTab({
         </div>
       )}
 
-      {view === "Segment Performance" && (
+      {view !== "Holdout Performance" && (
         <ValidationPerformanceMatrix
           segments={segments}
           selectedSegmentId={selectedSegmentId}
@@ -175,7 +175,7 @@ export function ValidationTab({
         />
       )}
 
-      {view === "Explainability Validation" && (
+      {(
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
           <LifecycleSection
             title="Explanation quality"
@@ -190,17 +190,24 @@ export function ValidationTab({
               </>
             }
           >
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-              {explainabilityDimensions.map((dimension) => (
-                <LifecycleStat
-                  key={dimension.key}
-                  label={dimension.label}
-                  value={`${explainabilityQuality[dimension.metric as keyof ExplainabilityQuality]}%`}
-                  hint={dimension.description}
-                />
-              ))}
+            <div className="mb-2 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+              <LifecycleStat label="Complete evidence" value={`${explainabilityQuality.completeEvidencePct}%`} />
+              <LifecycleStat label="Stable factor ranking" value={`${explainabilityQuality.stableFactorRankingPct}%`} />
+              <LifecycleStat label="Similar-event support" value={`${explainabilityQuality.similarEventSupportPct}%`} />
+              <LifecycleStat label="Human agreement" value={`${explainabilityQuality.humanAgreementPct}%`} />
+              <LifecycleStat label="Explanation within 2s" value={`${explainabilityQuality.fastExplanationPct}%`} />
+              <LifecycleStat label="Rule overrides" value={`${explainabilityQuality.ruleOverridePct}%`} />
             </div>
+            <ul className="space-y-0.5">
+              {explainabilityDimensions.map((dimension) => (
+                <li key={dimension.key} className="rounded border border-slate-200 bg-slate-50/70 px-2 py-1 text-[10.5px]">
+                  <span className="font-semibold text-slate-900">{dimension.label}. </span>
+                  <span className="text-slate-600">{dimension.value}</span>
+                </li>
+              ))}
+            </ul>
           </LifecycleSection>
+
 
           <LifecycleSection
             title="Sampled explanations"
