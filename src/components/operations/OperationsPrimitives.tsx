@@ -85,7 +85,7 @@ export function OperationalMetricCard({
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white text-left shadow-sm transition hover:border-blue-300 hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="group flex h-full w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white text-left shadow-sm transition hover:border-blue-300 hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
     >
       <span className={cn("h-1 w-full", bar)} aria-hidden />
       <span className="flex flex-1 flex-col gap-1.5 p-3">

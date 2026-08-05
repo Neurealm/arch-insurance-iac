@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  AlertTriangle, Download, Filter, Gauge, RefreshCw, Shield, X,
+  AlertTriangle, ChevronLeft, ChevronRight, Download, Filter, Gauge, RefreshCw, Shield, X,
 } from "lucide-react";
 import {
   Area, AreaChart, CartesianGrid, Legend, Line, ReferenceLine,
@@ -271,8 +271,8 @@ export default function GlobalOpticalOperationsCenter() {
           </p>
         )}
 
-        {/* Metric cards */}
-        <section aria-label="Top level outcome metrics" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Metric cards — two pinned, remainder on a slider */}
+        <section aria-label="Top level outcome metrics" className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <OperationalMetricCard
             title="Global network availability" value={`${metrics.availability.toFixed(2)}%`}
             tone={metrics.availability >= 99.95 ? "good" : "warn"}
@@ -291,65 +291,78 @@ export default function GlobalOpticalOperationsCenter() {
               { label: "Enterprise customers", value: String(metrics.criticalCustomers) },
               { label: "Estimated duration", value: `${metrics.estimatedDurationMinutes} min` },
             ]} />
-          <OperationalMetricCard
-            title="Active major incidents" value={String(metrics.criticalIncidents + metrics.majorIncidents)}
-            tone={metrics.criticalIncidents > 0 ? "bad" : "warn"}
-            onClick={() => setFilter("incidentStatus", "Open")}
-            lines={[
-              { label: "Critical", value: String(metrics.criticalIncidents) },
-              { label: "Major", value: String(metrics.majorIncidents) },
-              { label: "Oldest active", value: `${metrics.oldestIncidentMinutes} min` },
-              { label: "Awaiting ownership", value: String(metrics.unownedIncidents) },
-            ]} />
-          <OperationalMetricCard
-            title="Optical link health" value={`${metrics.healthyLinks}/${data.links.length}`} unit="healthy"
-            tone={metrics.unavailableLinks > 0 ? "bad" : metrics.degradedLinks > 0 ? "warn" : "good"}
-            onClick={() => setFilter("linkStatus", "degraded")}
-            lines={[
-              { label: "Degraded", value: String(metrics.degradedLinks) },
-              { label: "Unavailable", value: String(metrics.unavailableLinks) },
-              { label: "Below margin threshold", value: String(metrics.belowMargin) },
-            ]} />
-          <OperationalMetricCard
-            title="Site and terminal health" value={String(metrics.healthyTerminals)} unit="healthy terminals"
-            tone={metrics.offlineTerminals > 0 ? "bad" : metrics.degradedTerminals > 0 ? "warn" : "good"}
-            onClick={() => setFilter("linkStatus", DEFAULT_FILTERS.linkStatus)}
-            lines={[
-              { label: "Degraded", value: String(metrics.degradedTerminals) },
-              { label: "Offline or critical", value: String(metrics.offlineTerminals) },
-              { label: "In maintenance", value: String(metrics.maintenanceTerminals) },
-            ]} />
-          <OperationalMetricCard
-            title="Global capacity utilisation" value={`${metrics.utilization.toFixed(0)}%`}
-            tone={metrics.utilization >= 80 ? "warn" : "good"}
-            onClick={() => setFilter("domain", "Long-haul")}
-            lines={[
-              { label: "Peak utilisation", value: `${metrics.peakUtilization}%` },
-              { label: "Links above 80%", value: String(metrics.linksAbove80) },
-              { label: "Forecast breaches", value: String(metrics.linksAbove90) },
-            ]} />
-          <OperationalMetricCard
-            title="Change and maintenance exposure" value={String(metrics.activeChanges)} unit="active changes"
-            tone={metrics.highRiskChanges > 0 ? "warn" : "neutral"}
-            onClick={() => setFilter("maintenanceStatus", "Upcoming")}
-            lines={[
-              { label: "Upcoming maintenance", value: String(metrics.upcomingMaintenance) },
-              { label: "High-risk changes", value: String(metrics.highRiskChanges) },
-              { label: "Change failure rate", value: `${changeFailureRatePercent}%` },
-            ]} />
-          <OperationalMetricCard
-            title="Operational risk" value={String(metrics.highRiskLinks)} unit="high-risk links"
-            tone={metrics.highRiskLinks > 2 ? "bad" : "warn"}
-            onClick={() => setWeatherOnly(true)}
-            lines={[
-              { label: "Weather-exposed links", value: String(metrics.weatherExposedLinks) },
-              { label: "Capacity risks", value: String(metrics.capacityRisks) },
-              { label: "Aging incidents", value: String(metrics.agingIncidents) },
-            ]} />
+
+          <div className="sm:col-span-2">
+            <MetricSlider
+              cards={[
+                {
+                  title: "Active major incidents", value: String(metrics.criticalIncidents + metrics.majorIncidents),
+                  tone: metrics.criticalIncidents > 0 ? "bad" : "warn",
+                  onClick: () => setFilter("incidentStatus", "Open"),
+                  lines: [
+                    { label: "Critical", value: String(metrics.criticalIncidents) },
+                    { label: "Major", value: String(metrics.majorIncidents) },
+                    { label: "Oldest active", value: `${metrics.oldestIncidentMinutes} min` },
+                  ],
+                },
+                {
+                  title: "Optical link health", value: `${metrics.healthyLinks}/${data.links.length}`, unit: "healthy",
+                  tone: metrics.unavailableLinks > 0 ? "bad" : metrics.degradedLinks > 0 ? "warn" : "good",
+                  onClick: () => setFilter("linkStatus", "degraded"),
+                  lines: [
+                    { label: "Degraded", value: String(metrics.degradedLinks) },
+                    { label: "Unavailable", value: String(metrics.unavailableLinks) },
+                    { label: "Below margin threshold", value: String(metrics.belowMargin) },
+                  ],
+                },
+                {
+                  title: "Site and terminal health", value: String(metrics.healthyTerminals), unit: "healthy terminals",
+                  tone: metrics.offlineTerminals > 0 ? "bad" : metrics.degradedTerminals > 0 ? "warn" : "good",
+                  onClick: () => setFilter("linkStatus", DEFAULT_FILTERS.linkStatus),
+                  lines: [
+                    { label: "Degraded", value: String(metrics.degradedTerminals) },
+                    { label: "Offline or critical", value: String(metrics.offlineTerminals) },
+                    { label: "In maintenance", value: String(metrics.maintenanceTerminals) },
+                  ],
+                },
+                {
+                  title: "Global capacity utilisation", value: `${metrics.utilization.toFixed(0)}%`,
+                  tone: metrics.utilization >= 80 ? "warn" : "good",
+                  onClick: () => setFilter("domain", "Long-haul"),
+                  lines: [
+                    { label: "Peak utilisation", value: `${metrics.peakUtilization}%` },
+                    { label: "Links above 80%", value: String(metrics.linksAbove80) },
+                    { label: "Forecast breaches", value: String(metrics.linksAbove90) },
+                  ],
+                },
+                {
+                  title: "Change and maintenance exposure", value: String(metrics.activeChanges), unit: "active changes",
+                  tone: metrics.highRiskChanges > 0 ? "warn" : "neutral",
+                  onClick: () => setFilter("maintenanceStatus", "Upcoming"),
+                  lines: [
+                    { label: "Upcoming maintenance", value: String(metrics.upcomingMaintenance) },
+                    { label: "High-risk changes", value: String(metrics.highRiskChanges) },
+                    { label: "Change failure rate", value: `${changeFailureRatePercent}%` },
+                  ],
+                },
+                {
+                  title: "Operational risk", value: String(metrics.highRiskLinks), unit: "high-risk links",
+                  tone: metrics.highRiskLinks > 2 ? "bad" : "warn",
+                  onClick: () => setWeatherOnly(true),
+                  lines: [
+                    { label: "Weather-exposed links", value: String(metrics.weatherExposedLinks) },
+                    { label: "Capacity risks", value: String(metrics.capacityRisks) },
+                    { label: "Aging incidents", value: String(metrics.agingIncidents) },
+                  ],
+                },
+              ]}
+            />
+          </div>
         </section>
 
         {/* Row 1 */}
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-start">
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-stretch">
+
           <OpsPanel
             className="lg:col-span-8" title="Global Optical Network"
             subtitle="Operational status, customer impact, optical routes and terminal health"
@@ -389,7 +402,7 @@ export default function GlobalOpticalOperationsCenter() {
           </OpsPanel>
 
           <OpsPanel className="lg:col-span-4" title="Leadership Attention Required" subtitle="Decisions requiring senior ownership now">
-            <ol className="space-y-2.5">
+            <ol className="max-h-[520px] space-y-2.5 overflow-y-auto pr-1">
               {leadershipActions
                 .filter((a) => filters.region === DEFAULT_FILTERS.region || a.region === filters.region)
                 .slice(0, 5)
@@ -745,6 +758,54 @@ export default function GlobalOpticalOperationsCenter() {
 }
 
 /* ------------------------------- helpers ------------------------------- */
+
+type MetricCardConfig = React.ComponentProps<typeof OperationalMetricCard>;
+
+function MetricSlider({ cards }: { cards: MetricCardConfig[] }) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  const nudge = (direction: -1 | 1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction * (el.clientWidth / 2 + 12), behavior: "smooth" });
+  };
+
+  return (
+    <div className="relative h-full">
+      <div
+        ref={scrollerRef}
+        aria-label="Additional operational metrics"
+        className="flex h-full snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {cards.map((c) => (
+          <div key={c.title} className="w-[calc(50%-6px)] shrink-0 snap-start">
+            <OperationalMetricCard {...c} />
+          </div>
+        ))}
+      </div>
+      <SliderArrow side="left" onClick={() => nudge(-1)} />
+      <SliderArrow side="right" onClick={() => nudge(1)} />
+    </div>
+  );
+}
+
+function SliderArrow({ side, onClick }: { side: "left" | "right"; onClick: () => void }) {
+  const Icon = side === "left" ? ChevronLeft : ChevronRight;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={side === "left" ? "Show previous metrics" : "Show next metrics"}
+      className={cn(
+        "absolute top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white/95 p-1 text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+        side === "left" ? "left-1" : "right-1",
+      )}
+    >
+      <Icon className="h-4 w-4" aria-hidden />
+    </button>
+  );
+}
+
 
 function FilterSelect({
   label, value, options, onChange,
