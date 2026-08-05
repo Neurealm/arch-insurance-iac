@@ -537,7 +537,7 @@ export default function PredictiveOpticalLinkIntelligence() {
           spec={spec.training}
           state={panelState}
           heightClass="min-h-[260px]"
-          className="xl:col-span-5"
+          className="xl:col-span-12"
           functional
         >
           <div id="model-lifecycle-workspace" className="min-w-0">
@@ -557,7 +557,7 @@ export default function PredictiveOpticalLinkIntelligence() {
           </div>
         </PanelShell>
 
-        <PanelShell spec={spec.horizon} state={panelState} heightClass="min-h-[300px]" className="xl:col-span-4" functional>
+        <PanelShell spec={spec.horizon} state={panelState} heightClass="min-h-[300px]" className="xl:col-span-7" functional>
           <div data-testid="analytics-horizon" data-analytics-state={analyticsState} className="min-w-0">
             <PredictionHorizonChart
               state={analytics}
@@ -568,7 +568,7 @@ export default function PredictiveOpticalLinkIntelligence() {
           </div>
         </PanelShell>
 
-        <PanelShell spec={spec.traditional} state={panelState} heightClass="min-h-[260px]" className="xl:col-span-3">
+        <PanelShell spec={spec.traditional} state={panelState} heightClass="min-h-[260px]" className="xl:col-span-5">
           <ul className="space-y-1">
             {traditionalMonitoringGaps.map((g) => (
               <li key={g} className="flex gap-1.5 text-[11px] text-slate-700">
