@@ -7,7 +7,7 @@
  * through tabs, drawers and expandable panels; this page never navigates away.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle, Bot, CheckCircle2, ChevronRight, CloudFog, Download, Gauge,
   Maximize2, Minimize2, Pause, Play, RefreshCw, RotateCcw, Search, ShieldCheck,
@@ -646,9 +646,8 @@ export default function PredictiveLinkRiskCenter() {
                     <tr><th colSpan={visibleColumns.length} scope="colgroup" className="bg-slate-50 py-1.5 pl-1 text-left text-[10.5px] font-semibold uppercase tracking-wide text-slate-500">{group.key} · {group.rows.length}</th></tr>
                   )}
                   {group.rows.map((r) => (
-                    <>
+                    <Fragment key={r.id}>
                       <tr
-                        key={r.id}
                         onClick={() => { setSelectedRiskId(r.id); setExpandedRow(expandedRow === r.id ? null : r.id); }}
                         className={cn("cursor-pointer border-b border-slate-100 hover:bg-indigo-50/40",
                           selectedRiskId === r.id && "bg-indigo-50/70")}
@@ -660,7 +659,7 @@ export default function PredictiveLinkRiskCenter() {
                         ))}
                       </tr>
                       {expandedRow === r.id && (
-                        <tr key={`${r.id}-x`} className="border-b border-slate-100 bg-slate-50/70">
+                        <tr className="border-b border-slate-100 bg-slate-50/70">
                           <td colSpan={visibleColumns.length} className="p-3">
                             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                               <Field label="Secondary risk" value={String(r.secondaryRisk)} />
@@ -671,7 +670,7 @@ export default function PredictiveLinkRiskCenter() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   ))}
                 </tbody>
               ))}
