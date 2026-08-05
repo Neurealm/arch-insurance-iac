@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Activity, AlertTriangle, Bot, CheckCircle2, ChevronDown, ChevronRight, CloudRain,
   Gauge, Pause, Play, RefreshCw, RotateCcw, ShieldCheck,
@@ -88,6 +89,7 @@ export default function GlobalOpticalOperationsCenter() {
     [region],
   );
 
+  const navigate = useNavigate();
   const link = links.find((l) => l.id === selectedLink) ?? null;
   const situation = situations.find((s) => s.id === selectedSituation) ?? null;
   const agent = agents.find((a) => a.id === selectedAgent) ?? null;
