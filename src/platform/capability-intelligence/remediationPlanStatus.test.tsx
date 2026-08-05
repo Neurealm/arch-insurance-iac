@@ -27,7 +27,7 @@ import { ChangePlanPanel } from "@/platform/capability-intelligence/components/r
 import { BoundedList, DEFAULT_LIST_LIMIT } from "@/platform/capability-intelligence/components/remediation/BoundedList";
 import { summarizePlanBlockers } from "@/platform/capability-intelligence/remediation/eligibility";
 
-const CANONICAL_GRAPH_HASH = "e889b604";
+const CANONICAL_GRAPH_HASH = "88ceb819";
 
 /**
  * Stage 3.5.4.4 correction: the simulation engine reasons over the *populated*

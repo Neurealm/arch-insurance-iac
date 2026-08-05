@@ -215,7 +215,7 @@ describe("Stage 3.5.4.2.1 — graph contents state wording", () => {
     truncationReason: null,
     emptyReason: null,
     warnings: [],
-    graphHash: "e889b604",
+    graphHash: "88ceb819",
     errorMessage: null,
   });
 
