@@ -228,21 +228,40 @@ const canonicalRecommendations = () => computeCapabilityIntelligence().intellige
 function simulatableId(): string {
   const { simulation } = getRemediationEngines();
   for (const r of canonicalRecommendations()) {
-    if (simulation.generateProposalFromRecommendation(r).length > 0) {
+    const proposals = simulation.generateProposalFromRecommendation(r);
+    // Stage 3.5.4.3.1 gates simulation on the engine's own executable verdict,
+    // so the fixture recommendation must actually yield an executable proposal.
+    if (proposals.some((p) => simulation.validate(p).executable)) {
       return encodeURIComponent(r.id);
     }
   }
-  throw new Error("no recommendation in the real graph yields a proposal");
+  throw new Error("no recommendation in the real graph yields a simulatable proposal");
 }
 
+
 /** Selects the first offered proposal and returns the enabled Run button. */
+/**
+ * Walks the explicit stages Stage 3.5.4.3.1 introduced: nothing is generated
+ * or validated on the operator's behalf, so each step is clicked here too.
+ * Returns the run control for the first proposal the engine marks executable.
+ */
 async function selectFirstProposal(): Promise<HTMLElement> {
+  fireEvent.click(await screen.findByTestId("generate-proposals", undefined, { timeout: 20000 }));
   const options = await screen.findByTestId("proposal-options", undefined, { timeout: 20000 });
-  const button = options.querySelector("button");
-  if (!button) throw new Error("no proposal option rendered");
-  fireEvent.click(button);
-  return screen.findByTestId("run-simulation", undefined, { timeout: 20000 });
+  const buttons = [...options.querySelectorAll("button")];
+  if (buttons.length === 0) throw new Error("no proposal option rendered");
+  let run: HTMLElement | null = null;
+  for (const button of buttons) {
+    fireEvent.click(button);
+    fireEvent.click(await screen.findByTestId("validate-proposal", undefined, { timeout: 20000 }));
+    await screen.findByTestId("proposal-validation", undefined, { timeout: 20000 });
+    run = await screen.findByTestId("run-simulation", undefined, { timeout: 20000 });
+    if (!run.hasAttribute("disabled")) return run;
+  }
+  return run!;
 }
+
+
 
 
 describe("Stage 3.5.4.3 — workspace over the real repository graph", () => {
@@ -344,7 +363,7 @@ describe("Stage 3.5.4.3 — workspace over the real repository graph", () => {
     const progress = await screen.findByTestId("stage-progress", undefined, { timeout: 20000 });
     expect(progress.getAttribute("aria-label")).toBe("Remediation workflow progress");
     expect(progress.tagName.toLowerCase()).toBe("ol");
-    expect(progress.querySelectorAll("li")).toHaveLength(5);
+    expect(progress.querySelectorAll("li")).toHaveLength(7);
   }, 40000);
 });
 
