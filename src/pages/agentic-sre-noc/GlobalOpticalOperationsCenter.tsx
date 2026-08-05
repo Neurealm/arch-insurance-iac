@@ -10,7 +10,7 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   Activity, AlertTriangle, Bot, CheckCircle2, ChevronDown, ChevronRight, CloudRain,
-  Gauge, Maximize2, Minimize2, Pause, Play, RefreshCw, RotateCcw, ShieldCheck,
+  Gauge, Pause, Play, RefreshCw, RotateCcw, ShieldCheck,
   Signal, Sparkles, TrendingDown, TrendingUp, Users, X, Zap,
 } from "lucide-react";
 import {
@@ -19,7 +19,7 @@ import {
 } from "recharts";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { GoocMap, type MapOverlays } from "./components/GoocMap";
+
 import {
   agents, chennaiScenario, CUSTOMERS, kpis, links, outcomes, PRODUCTS,
   predictiveRisks, REGIONS, reliabilityMetrics, riskCategories, severityChip,
@@ -50,11 +50,8 @@ export default function GlobalOpticalOperationsCenter() {
   const [statusFilter, setStatusFilter] = useState<string>("All statuses");
   const [refreshedAt, setRefreshedAt] = useState(() => "11:04:22 UTC");
 
-  // Map state
-  const [view, setView] = useState<"geographic" | "topology">("geographic");
-  const [zoom, setZoom] = useState(1);
-  const [fullScreen, setFullScreen] = useState(false);
-  const [overlays, setOverlays] = useState<MapOverlays>({ weather: true, fallback: true, impact: true, predicted: true });
+  // Map state removed with the Global Optical Connectivity panel.
+
 
   // Drawers
   const [selectedLink, setSelectedLink] = useState<string | null>(null);
@@ -96,7 +93,7 @@ export default function GlobalOpticalOperationsCenter() {
   const agent = agents.find((a) => a.id === selectedAgent) ?? null;
 
   const scenarioActive = scenarioStep >= 0;
-  const chennaiHighlight = scenarioActive ? "lnk-chennai-041" : null;
+  
 
   const advanceScenario = useCallback(() => {
     setScenarioStep((prev) => {
@@ -159,8 +156,8 @@ export default function GlobalOpticalOperationsCenter() {
     setTimeRange("24h"); setRegion("All regions"); setProduct("All products");
     setCustomer("All customers"); setStatusFilter("All statuses");
     setSelectedLink(null); setSelectedSituation(null); setSelectedAgent(null);
-    setSelectedEvent(null); setZoom(1); setView("geographic"); setFullScreen(false);
-    setOverlays({ weather: true, fallback: true, impact: true, predicted: true });
+    setSelectedEvent(null);
+
     resetScenario();
   };
 
@@ -197,13 +194,6 @@ export default function GlobalOpticalOperationsCenter() {
               className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11.5px] text-slate-700 shadow-sm hover:bg-slate-50"
             >
               <RefreshCw className="h-3.5 w-3.5" /> Refresh
-            </button>
-            <button
-              type="button"
-              onClick={() => setFullScreen((f) => !f)}
-              className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11.5px] text-slate-700 shadow-sm hover:bg-slate-50"
-            >
-              {fullScreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />} Full screen map
             </button>
             <button
               type="button"
@@ -261,68 +251,13 @@ export default function GlobalOpticalOperationsCenter() {
         })}
       </div>
 
-      {/* 3 + 4 — Map and situations */}
-      <div className={cn("grid gap-5", fullScreen ? "grid-cols-1" : "grid-cols-1 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]")}>
-        <Panel
-          title="Global Optical Connectivity"
-          subtitle={`${filtered.length} synthetic links in view · ${view === "geographic" ? "Geographic view" : "Simplified topology view"}`}
-          action={
-            <div className="flex flex-wrap items-center gap-1.5">
-              <Select label="Link status" value={statusFilter} options={["All statuses", ...Object.values(statusLabels)]} onChange={setStatusFilter} />
-              <div className="flex overflow-hidden rounded-md border border-slate-200">
-                {(["geographic", "topology"] as const).map((v) => (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setView(v)}
-                    className={cn("px-2 py-1 text-[11px]", view === v ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-50")}
-                  >
-                    {v === "geographic" ? "Geographic" : "Topology"}
-                  </button>
-                ))}
-              </div>
-              <button type="button" onClick={() => setZoom((z) => Math.min(6, Number((z * 1.25).toFixed(3))))} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">Zoom in</button>
-              <button type="button" onClick={() => setZoom((z) => Math.max(0.8, Number((z / 1.25).toFixed(3))))} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">Zoom out</button>
-              <button type="button" onClick={() => setZoom(1)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">Reset</button>
-
-              <button type="button" onClick={() => setFullScreen((f) => !f)} className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">
-                {fullScreen ? "Exit full screen" : "Full screen"}
-              </button>
-            </div>
-          }
-        >
-          <div className="mb-2 flex flex-wrap gap-3 text-[11px] text-slate-600">
-            {([["weather", "Weather overlay"], ["fallback", "RF fallback overlay"], ["impact", "Customer impact overlay"], ["predicted", "Predicted risk overlay"]] as const).map(([key, label]) => (
-              <label key={key} className="flex items-center gap-1.5">
-                <input
-                  type="checkbox"
-                  checked={overlays[key]}
-                  onChange={() => setOverlays((o) => ({ ...o, [key]: !o[key] }))}
-                  className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-          <GoocMap
-            links={filtered}
-            selectedId={selectedLink}
-            highlightId={chennaiHighlight}
-            view={view}
-            overlays={overlays}
-            zoom={zoom}
-            onZoomChange={setZoom}
-            onSelect={(id) => setSelectedLink(id)}
-
-          />
-          <p className="mt-2 text-[10.5px] text-slate-500">
-            Select a link to open its detail drawer. Scroll to zoom, drag to pan when zoomed in. Terminal locations, routes and states are synthetic.
-
-          </p>
-        </Panel>
-
-        <Panel title="Active Situations" subtitle={`${filteredSituations.length} correlated operational conditions`}>
-          <ul className="space-y-2.5">
+      {/* 3 — Active situations */}
+      <Panel
+        title="Active Situations"
+        subtitle={`${filteredSituations.length} correlated operational conditions`}
+        action={<Select label="Link status" value={statusFilter} options={["All statuses", ...Object.values(statusLabels)]} onChange={setStatusFilter} />}
+      >
+          <ul className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
             {filteredSituations.map((s) => (
               <li key={s.id}>
                 <button
@@ -355,7 +290,7 @@ export default function GlobalOpticalOperationsCenter() {
             {filteredSituations.length === 0 && <li className="text-[12px] text-slate-500">No situations match the current filters.</li>}
           </ul>
         </Panel>
-      </div>
+
 
       {/* 5 — Predictive risk */}
       <Panel
