@@ -1055,11 +1055,11 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
  {
   "ref": "src/components/auth/PermissionRoute.tsx",
   "implementationType": "component",
-  "consumerCount": 1,
+  "consumerCount": 3,
   "reachableViaRoute": false,
   "activity": "active",
   "usesSupabase": false,
-  "evidence": "1 import site(s)"
+  "evidence": "3 import site(s)"
  },
  {
   "ref": "src/components/auth/ProtectedRoute.tsx",
@@ -1296,6 +1296,15 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "0 import site(s)"
  },
  {
+  "ref": "src/components/eoc/ModuleShellContext.tsx",
+  "implementationType": "context-provider",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
   "ref": "src/components/eoc/PersonaToggle.tsx",
   "implementationType": "component",
   "consumerCount": 1,
@@ -1521,6 +1530,87 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "1 import site(s)"
  },
  {
+  "ref": "src/components/operations/ActionApprovalDrawer.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/components/operations/AgenticGlobalOpticalMap.tsx",
+  "implementationType": "component",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/components/operations/AgenticMapLayerControls.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/components/operations/EvidenceDrawer.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/components/operations/GlobalOpticalMap.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/components/operations/OperationsPrimitives.tsx",
+  "implementationType": "component",
+  "consumerCount": 5,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "5 import site(s)"
+ },
+ {
+  "ref": "src/components/operations/OpsDrawer.tsx",
+  "implementationType": "component",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/components/operations/RecoveryValidationPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/components/operations/SituationLifecycleTimeline.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
   "ref": "src/components/org/EntityFormDialog.tsx",
   "implementationType": "component",
   "consumerCount": 2,
@@ -1712,11 +1802,11 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
  {
   "ref": "src/context/PersonaContext.tsx",
   "implementationType": "context-provider",
-  "consumerCount": 2,
+  "consumerCount": 3,
   "reachableViaRoute": false,
   "activity": "active",
   "usesSupabase": false,
-  "evidence": "2 import site(s)"
+  "evidence": "3 import site(s)"
  },
  {
   "ref": "src/context/ScenarioStateContext.tsx",
@@ -1726,6 +1816,24 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "activity": "active",
   "usesSupabase": false,
   "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/data/agenticNocWorkflowData.ts",
+  "implementationType": "static-data",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/data/agenticOpticalNetworkData.ts",
+  "implementationType": "static-data",
+  "consumerCount": 6,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "6 import site(s)"
  },
  {
   "ref": "src/data/assurance.ts",
@@ -1789,6 +1897,15 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "activity": "active",
   "usesSupabase": false,
   "evidence": "15 import site(s)"
+ },
+ {
+  "ref": "src/data/opticalNetworkData.ts",
+  "implementationType": "static-data",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
  },
  {
   "ref": "src/data/programTimelineMockData.ts",
@@ -2358,6 +2475,15 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "1 import site(s)"
  },
  {
+  "ref": "src/hooks/useOpticalOperations.ts",
+  "implementationType": "hook",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
   "ref": "src/hooks/usePageActivityTracker.ts",
   "implementationType": "hook",
   "consumerCount": 1,
@@ -2430,13 +2556,22 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "3 import site(s)"
  },
  {
-  "ref": "src/lib/utils.ts",
+  "ref": "src/lib/operations/exports.ts",
   "implementationType": "utility",
-  "consumerCount": 186,
+  "consumerCount": 3,
   "reachableViaRoute": false,
   "activity": "active",
   "usesSupabase": false,
-  "evidence": "186 import site(s)"
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/lib/utils.ts",
+  "implementationType": "utility",
+  "consumerCount": 218,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "218 import site(s)"
  },
  {
   "ref": "src/main.tsx",
@@ -2448,6 +2583,42 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "0 import site(s)"
  },
  {
+  "ref": "src/modules/agentic-sre-noc/module.manifest.ts",
+  "implementationType": "module",
+  "consumerCount": 0,
+  "reachableViaRoute": false,
+  "activity": "unused",
+  "usesSupabase": false,
+  "evidence": "0 import site(s)"
+ },
+ {
+  "ref": "src/modules/candidates.ts",
+  "implementationType": "service",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/modules/classification.ts",
+  "implementationType": "module",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/modules/classificationTypes.ts",
+  "implementationType": "service",
+  "consumerCount": 9,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "9 import site(s)"
+ },
+ {
   "ref": "src/modules/evidence.ts",
   "implementationType": "service",
   "consumerCount": 2,
@@ -2457,17 +2628,35 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "2 import site(s)"
  },
  {
+  "ref": "src/modules/generated/domainSignals.ts",
+  "implementationType": "service",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
   "ref": "src/modules/generated/implementationInventory.ts",
   "implementationType": "service",
-  "consumerCount": 4,
+  "consumerCount": 7,
   "reachableViaRoute": false,
   "activity": "active",
   "usesSupabase": true,
-  "evidence": "4 import site(s)"
+  "evidence": "7 import site(s)"
  },
  {
   "ref": "src/modules/generated/routeTable.ts",
   "implementationType": "module",
+  "consumerCount": 7,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "7 import site(s)"
+ },
+ {
+  "ref": "src/modules/governance.ts",
+  "implementationType": "module",
   "consumerCount": 2,
   "reachableViaRoute": false,
   "activity": "active",
@@ -2475,16 +2664,7 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "2 import site(s)"
  },
  {
-  "ref": "src/modules/inventory.ts",
-  "implementationType": "service",
-  "consumerCount": 2,
-  "reachableViaRoute": false,
-  "activity": "active",
-  "usesSupabase": false,
-  "evidence": "2 import site(s)"
- },
- {
-  "ref": "src/modules/registry.ts",
+  "ref": "src/modules/graph/build.ts",
   "implementationType": "module",
   "consumerCount": 4,
   "reachableViaRoute": false,
@@ -2493,7 +2673,106 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "4 import site(s)"
  },
  {
-  "ref": "src/modules/routeOwnership.ts",
+  "ref": "src/modules/graph/change-plan/ArtifactMapping.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/change-plan/ChangePlanTypes.ts",
+  "implementationType": "module",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/change-plan/index.ts",
+  "implementationType": "module",
+  "consumerCount": 11,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "11 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/change-plan/PatchSpecification.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/change-plan/PlanEngine.ts",
+  "implementationType": "module",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/index.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/intelligence/Consolidation.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/intelligence/index.ts",
+  "implementationType": "module",
+  "consumerCount": 23,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "23 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/intelligence/IntelligenceEngine.ts",
+  "implementationType": "module",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/intelligence/IntelligenceTypes.ts",
+  "implementationType": "module",
+  "consumerCount": 13,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "13 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/intelligence/Policies.ts",
+  "implementationType": "module",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/intelligence/Prioritization.ts",
   "implementationType": "module",
   "consumerCount": 3,
   "reachableViaRoute": false,
@@ -2502,8 +2781,125 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "3 import site(s)"
  },
  {
-  "ref": "src/modules/routeTypes.ts",
+  "ref": "src/modules/graph/intelligence/Remediation.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/intelligence/Summaries.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/orphans.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/populate.ts",
   "implementationType": "service",
+  "consumerCount": 9,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "9 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/populationTypes.ts",
+  "implementationType": "module",
+  "consumerCount": 13,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "13 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/query/GraphIndexes.ts",
+  "implementationType": "module",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/query/GraphSearch.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/query/GraphTraversal.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/query/index.ts",
+  "implementationType": "module",
+  "consumerCount": 44,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "44 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/query/LegacyGraphQuery.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/query/QueryEngine.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/query/QueryFilters.ts",
+  "implementationType": "module",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/query/QueryResults.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/query/QueryTypes.ts",
+  "implementationType": "module",
   "consumerCount": 10,
   "reachableViaRoute": false,
   "activity": "active",
@@ -2511,13 +2907,319 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "10 import site(s)"
  },
  {
-  "ref": "src/modules/sre/evidence.generated.ts",
+  "ref": "src/modules/graph/reasoning/CoverageAnalysis.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reasoning/CriticalityAnalysis.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reasoning/CycleAnalysis.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reasoning/ImpactAnalysis.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reasoning/index.ts",
+  "implementationType": "module",
+  "consumerCount": 21,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "21 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reasoning/LineageAnalysis.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reasoning/OwnershipAnalysis.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reasoning/ReasoningContext.ts",
+  "implementationType": "context-provider",
+  "consumerCount": 5,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "5 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reasoning/ReasoningEngine.ts",
   "implementationType": "module",
   "consumerCount": 1,
   "reachableViaRoute": false,
   "activity": "active",
   "usesSupabase": false,
   "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reasoning/ReasoningResults.ts",
+  "implementationType": "module",
+  "consumerCount": 7,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "7 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reasoning/ReasoningTypes.ts",
+  "implementationType": "module",
+  "consumerCount": 17,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "17 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/reconcile.ts",
+  "implementationType": "module",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/serialize.ts",
+  "implementationType": "module",
+  "consumerCount": 5,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "5 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/simulation/ConflictDetection.ts",
+  "implementationType": "module",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/simulation/GraphOverlay.ts",
+  "implementationType": "module",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/simulation/index.ts",
+  "implementationType": "module",
+  "consumerCount": 20,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "20 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/simulation/ProposalBundling.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/simulation/ProposalGeneration.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/simulation/ProposalScoring.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/simulation/ProposalValidation.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/simulation/SimulationEngine.ts",
+  "implementationType": "module",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/simulation/SimulationMetrics.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/simulation/SimulationTypes.ts",
+  "implementationType": "module",
+  "consumerCount": 9,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "9 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/sreSlice.ts",
+  "implementationType": "module",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/statistics.ts",
+  "implementationType": "module",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/types.ts",
+  "implementationType": "module",
+  "consumerCount": 59,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "59 import site(s)"
+ },
+ {
+  "ref": "src/modules/graph/validate.ts",
+  "implementationType": "module",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/modules/inventory.ts",
+  "implementationType": "service",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/modules/platform/platformCapabilities.ts",
+  "implementationType": "service",
+  "consumerCount": 9,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": true,
+  "evidence": "9 import site(s)"
+ },
+ {
+  "ref": "src/modules/registry.ts",
+  "implementationType": "module",
+  "consumerCount": 12,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "12 import site(s)"
+ },
+ {
+  "ref": "src/modules/routeOwnership.ts",
+  "implementationType": "module",
+  "consumerCount": 5,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "5 import site(s)"
+ },
+ {
+  "ref": "src/modules/routeTypes.ts",
+  "implementationType": "service",
+  "consumerCount": 14,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "14 import site(s)"
+ },
+ {
+  "ref": "src/modules/shared/sharedCapabilities.ts",
+  "implementationType": "module",
+  "consumerCount": 9,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "9 import site(s)"
+ },
+ {
+  "ref": "src/modules/sre/capabilityHierarchy.ts",
+  "implementationType": "module",
+  "consumerCount": 6,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "6 import site(s)"
+ },
+ {
+  "ref": "src/modules/sre/evidence.generated.ts",
+  "implementationType": "module",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
  },
  {
   "ref": "src/modules/sre/module.manifest.ts",
@@ -2531,11 +3233,11 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
  {
   "ref": "src/modules/types.ts",
   "implementationType": "module",
-  "consumerCount": 10,
+  "consumerCount": 19,
   "reachableViaRoute": false,
   "activity": "active",
   "usesSupabase": false,
-  "evidence": "10 import site(s)"
+  "evidence": "19 import site(s)"
  },
  {
   "ref": "src/modules/validate.ts",
@@ -2581,6 +3283,258 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "activity": "active",
   "usesSupabase": false,
   "evidence": "1 import site(s); referenced by application route"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/ActiveSituationRoom.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/AgenticInvestigationWorkspace.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/AutonomousRecoveryMonitor.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/components/GoocMap.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/components/NocPrimitives.tsx",
+  "implementationType": "page",
+  "consumerCount": 9,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "9 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/components/ServiceRouteGraph.tsx",
+  "implementationType": "page",
+  "consumerCount": 5,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "5 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/components/TopologyCanvas.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/components/TwinMap.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/components/WeatherRiskMap.tsx",
+  "implementationType": "page",
+  "consumerCount": 0,
+  "reachableViaRoute": false,
+  "activity": "unused",
+  "usesSupabase": false,
+  "evidence": "0 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/CustomerServiceHealthExplorer.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/data/approvalFixtures.ts",
+  "implementationType": "page",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/data/cshFixtures.ts",
+  "implementationType": "page",
+  "consumerCount": 14,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "14 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/data/glhtFixtures.ts",
+  "implementationType": "page",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/data/goocFixtures.ts",
+  "implementationType": "page",
+  "consumerCount": 16,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "16 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/data/investigationFixtures.ts",
+  "implementationType": "page",
+  "consumerCount": 5,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "5 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/data/plrFixtures.ts",
+  "implementationType": "page",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/data/recoveryFixtures.ts",
+  "implementationType": "page",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/data/situationFixtures.ts",
+  "implementationType": "page",
+  "consumerCount": 11,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "11 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/data/topologyFixtures.ts",
+  "implementationType": "page",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/data/witFixtures.ts",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/GlobalLinkHealthTwin.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/GlobalOpticalOperationsCenter.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/GlobalOpticalServiceTopology.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/HumanApprovalActionCenter.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/NocLayout.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/NocPage.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/pages.ts",
+  "implementationType": "page",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/pages/agentic-sre-noc/PredictiveLinkRiskCenter.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
  },
  {
   "ref": "src/pages/Alerts.tsx",
@@ -4680,6 +5634,60 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "1 import site(s); referenced by application route"
  },
  {
+  "ref": "src/pages/operations/sre-agentic-noc/panels.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx",
+  "implementationType": "page",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/pages/operations/sre-agentic-noc/SreAgenticNocPlaceholder.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/pages/operations/sre-agentic-noc/SreAgenticOpticalOperationsCenter.tsx",
+  "implementationType": "page",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/pages/operations/sre-agentic-noc/Stage2WorkflowSection.tsx",
+  "implementationType": "page",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/pages/operations/traditional-noc/GlobalOpticalOperationsCenter.tsx",
+  "implementationType": "page",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
   "ref": "src/pages/practice-library/dashboards/_layout.tsx",
   "implementationType": "page",
   "consumerCount": 20,
@@ -5290,6 +6298,15 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "activity": "active",
   "usesSupabase": false,
   "evidence": "1 import site(s); referenced by application route"
+ },
+ {
+  "ref": "src/pages/prod-twin/SreLayout.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
  },
  {
   "ref": "src/pages/prod-twin/SreOperatingModel.tsx",
@@ -5940,6 +6957,492 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "2 import site(s)"
  },
  {
+  "ref": "src/platform/capability-intelligence/CapabilityIntelligenceLayout.tsx",
+  "implementationType": "layout",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/CapabilityIntelligenceProvider.tsx",
+  "implementationType": "component",
+  "consumerCount": 13,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "13 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/CapabilityExplorerTable.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/CapabilityOverviewCards.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/EdgeDetailPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/EntityDrawer.tsx",
+  "implementationType": "component",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/ExploreRelationshipsLink.tsx",
+  "implementationType": "component",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/GraphContentsList.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/GraphControls.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/GraphLegend.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/GraphWarningList.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/RecommendationList.tsx",
+  "implementationType": "component",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/remediation/AlternativesPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/remediation/BoundedList.tsx",
+  "implementationType": "component",
+  "consumerCount": 9,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "9 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/remediation/ChangePlanPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/remediation/ParameterPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/remediation/ProposalPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/remediation/RecommendationPicker.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/remediation/SimulationPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/remediation/ValidationPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/review/ApprovalMatrixPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/review/ArtifactMappingPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/review/BlockerAnalysisPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/review/EvidencePackagePanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/review/GateMatrixTable.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/review/PatchWorkstreamPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/review/ReviewSummaryCard.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/review/ValidationRollbackPanel.tsx",
+  "implementationType": "component",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/components/RootEntityPicker.tsx",
+  "implementationType": "component",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/graph/exploreLink.ts",
+  "implementationType": "module",
+  "consumerCount": 5,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "5 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/graph/graphLayout.ts",
+  "implementationType": "module",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/graph/graphView.ts",
+  "implementationType": "module",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/graph/graphViewTypes.ts",
+  "implementationType": "module",
+  "consumerCount": 16,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "16 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/graph/graphWarnings.ts",
+  "implementationType": "module",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/graph/initialRoot.ts",
+  "implementationType": "module",
+  "consumerCount": 5,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "5 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/graph/nodeTaxonomy.ts",
+  "implementationType": "module",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/graph/reactFlowAdapter.ts",
+  "implementationType": "module",
+  "consumerCount": 5,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "5 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/graph/recommendationRoot.ts",
+  "implementationType": "module",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/pages/CapabilityExplorer.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/pages/CapabilityOverview.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/pages/ChangeReviewReadiness.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/pages/GraphExplorer.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/pages/RecommendationCenter.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/pages/RemediationLayout.tsx",
+  "implementationType": "page",
+  "consumerCount": 1,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/pages/RemediationWorkspace.tsx",
+  "implementationType": "page",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/presentation.ts",
+  "implementationType": "module",
+  "consumerCount": 11,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "11 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/remediation/eligibility.ts",
+  "implementationType": "module",
+  "consumerCount": 8,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "8 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/remediation/recommendationSelection.ts",
+  "implementationType": "module",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/remediationPresentation.ts",
+  "implementationType": "module",
+  "consumerCount": 9,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "9 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/RemediationWorkspaceProvider.tsx",
+  "implementationType": "component",
+  "consumerCount": 9,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "9 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/review/gateMatrix.ts",
+  "implementationType": "module",
+  "consumerCount": 4,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "4 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/review/reviewLink.ts",
+  "implementationType": "module",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/review/reviewPackage.ts",
+  "implementationType": "module",
+  "consumerCount": 9,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "9 import site(s)"
+ },
+ {
+  "ref": "src/platform/capability-intelligence/routes.tsx",
+  "implementationType": "component",
+  "consumerCount": 7,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "7 import site(s)"
+ },
+ {
   "ref": "src/platform/components/CommercialBootstrapButton.tsx",
   "implementationType": "component",
   "consumerCount": 2,
@@ -5967,13 +7470,31 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "1 import site(s)"
  },
  {
-  "ref": "src/platform/components/States.tsx",
+  "ref": "src/platform/components/PagedDataTable.tsx",
   "implementationType": "component",
-  "consumerCount": 33,
+  "consumerCount": 1,
   "reachableViaRoute": false,
   "activity": "active",
   "usesSupabase": false,
-  "evidence": "33 import site(s)"
+  "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/components/States.tsx",
+  "implementationType": "component",
+  "consumerCount": 46,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "46 import site(s)"
+ },
+ {
+  "ref": "src/platform/components/StatusBadge.tsx",
+  "implementationType": "component",
+  "consumerCount": 26,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "26 import site(s)"
  },
  {
   "ref": "src/platform/data/tenantOptions.ts",
@@ -6014,20 +7535,29 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
  {
   "ref": "src/platform/pages/ModuleRegistryDiagnostics.tsx",
   "implementationType": "page",
-  "consumerCount": 1,
+  "consumerCount": 2,
   "reachableViaRoute": true,
   "activity": "active",
   "usesSupabase": false,
-  "evidence": "1 import site(s); referenced by application route"
+  "evidence": "2 import site(s); referenced by application route"
  },
  {
-  "ref": "src/platform/pages/ModuleRegistryUnregistered.tsx",
+  "ref": "src/platform/pages/ModuleRegistryStage3.tsx",
   "implementationType": "page",
   "consumerCount": 1,
   "reachableViaRoute": false,
   "activity": "active",
   "usesSupabase": false,
   "evidence": "1 import site(s)"
+ },
+ {
+  "ref": "src/platform/pages/ModuleRegistryUnregistered.tsx",
+  "implementationType": "page",
+  "consumerCount": 2,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "2 import site(s)"
  },
  {
   "ref": "src/platform/pages/PlatformHome.tsx",
@@ -6113,11 +7643,11 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
  {
   "ref": "src/runops/components/graphs.tsx",
   "implementationType": "component",
-  "consumerCount": 1,
+  "consumerCount": 4,
   "reachableViaRoute": false,
   "activity": "active",
   "usesSupabase": false,
-  "evidence": "1 import site(s)"
+  "evidence": "4 import site(s)"
  },
  {
   "ref": "src/runops/components/index.ts",
@@ -6203,11 +7733,11 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
  {
   "ref": "src/runops/components/variants.ts",
   "implementationType": "module",
-  "consumerCount": 8,
+  "consumerCount": 10,
   "reachableViaRoute": false,
   "activity": "active",
   "usesSupabase": false,
-  "evidence": "8 import site(s)"
+  "evidence": "10 import site(s)"
  },
  {
   "ref": "src/runops/data/scenario.ts",
@@ -7317,6 +8847,15 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "evidence": "1 import site(s)"
  },
  {
+  "ref": "src/stores/useAgenticNocStore.ts",
+  "implementationType": "hook",
+  "consumerCount": 3,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "3 import site(s)"
+ },
+ {
   "ref": "src/test/setup.ts",
   "implementationType": "module",
   "consumerCount": 0,
@@ -7324,6 +8863,33 @@ export const IMPLEMENTATION_INVENTORY: readonly InventoryItem[] = [
   "activity": "unused",
   "usesSupabase": false,
   "evidence": "0 import site(s)"
+ },
+ {
+  "ref": "src/types/agenticNocWorkflow.ts",
+  "implementationType": "module",
+  "consumerCount": 8,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "8 import site(s)"
+ },
+ {
+  "ref": "src/types/agenticOpticalOperations.ts",
+  "implementationType": "module",
+  "consumerCount": 8,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "8 import site(s)"
+ },
+ {
+  "ref": "src/types/opticalOperations.ts",
+  "implementationType": "module",
+  "consumerCount": 5,
+  "reachableViaRoute": false,
+  "activity": "active",
+  "usesSupabase": false,
+  "evidence": "5 import site(s)"
  },
  {
   "ref": "src/vite-env.d.ts",
@@ -7647,123 +9213,9 @@ export const NAVIGATION_ENTRIES: readonly NavigationEntry[] = [
   "declaredIn": "src/components/eoc/Sidebar.tsx"
  },
  {
-  "navId": "sre-cmd",
-  "label": "PROD Resilience Command Center",
+  "navId": "sre-practice",
+  "label": "Site Resilience Engineering",
   "to": "/prod-resilience-twin",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-plm",
-  "label": "Client Product Line Map",
-  "to": "/product-line-map",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-gwm",
-  "label": "Client Golden Workflow Map",
-  "to": "/golden-workflow-map",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-topo",
-  "label": "Client Production Topology Digital Twin",
-  "to": "/production-topology",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-opmodel",
-  "label": "Client SRE Operating Model Cockpit",
-  "to": "/sre-operating-model",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-signal",
-  "label": "Signal Intelligence",
-  "to": "/signal-intelligence",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-ecdt",
-  "label": "Enterprise Cloud Application Digital Twin",
-  "to": "/enterprise-cloud-twin",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-awsrat",
-  "label": "AWS Resilience Architecture Twin",
-  "to": "/aws-resilience-architecture-twin",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-pef",
-  "label": "Platform Engineering & Golden Environment Factory",
-  "to": "/platform-engineering-factory",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-hcw",
-  "label": "Hybrid Cloud, Data & Modernization Workbench",
-  "to": "/hybrid-cloud-workbench",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-amp",
-  "label": "Product Reliability Automation Marketplace",
-  "to": "/automation-marketplace",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-admf",
-  "label": "Application & Data Modernization Factory",
-  "to": "/modernization-factory",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-cyber",
-  "label": "Cyber Resilience Overlay",
-  "to": "/cyber-resilience-overlay",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-aicr",
-  "label": "Automation & AI Digital Coworker Control Room",
-  "to": "/ai-coworker-control-room",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-tdr",
-  "label": "Transition & Dual-Run Command Center",
-  "to": "/transition-dual-run",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-aof",
-  "label": "Acquisition-to-SRE Onboarding Factory",
-  "to": "/acquisition-onboarding-factory",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-vcb",
-  "label": "Value Creation & PE / Board Dashboard",
-  "to": "/value-creation-board",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-mrm",
-  "label": "Modernization Roadmap",
-  "to": "/modernization-roadmap",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-idc",
-  "label": "Interactive Demo Experience Center",
-  "to": "/interactive-demo-center",
-  "declaredIn": "src/components/eoc/Sidebar.tsx"
- },
- {
-  "navId": "sre-mrm2",
-  "label": "Modernization Roadmap",
-  "to": "/modernization-roadmap-v2",
   "declaredIn": "src/components/eoc/Sidebar.tsx"
  },
  {
@@ -7896,6 +9348,12 @@ export const NAVIGATION_ENTRIES: readonly NavigationEntry[] = [
   "navId": "ir",
   "label": "Cyber Resilience, Incident Response & Recovery",
   "to": "/practice-library/cyber-security/resilience-ir",
+  "declaredIn": "src/components/eoc/Sidebar.tsx"
+ },
+ {
+  "navId": "agentic-sre-noc",
+  "label": "Agentic SRE NOC",
+  "to": "/agentic-sre-noc",
   "declaredIn": "src/components/eoc/Sidebar.tsx"
  },
  {
@@ -8093,6 +9551,12 @@ export const NAVIGATION_ENTRIES: readonly NavigationEntry[] = [
  {
   "navId": null,
   "label": "Module Registry",
+  "to": "/platform/capability-intelligence",
+  "declaredIn": "src/platform/shell/PlatformLayout.tsx"
+ },
+ {
+  "navId": null,
+  "label": "Capability Intelligence",
   "to": "/platform/audio",
   "declaredIn": "src/platform/shell/PlatformLayout.tsx"
  },
@@ -8241,6 +9705,8 @@ export const LINK_TARGETS: readonly string[] = [
  "/",
  "/admin/technology-taxonomy",
  "/admin/technology-taxonomy/domains",
+ "/agentic-sre-noc",
+ "/agentic-sre-noc/global-link-health-twin",
  "/app",
  "/avep",
  "/avep/context/engineering-context",
@@ -8282,6 +9748,7 @@ export const LINK_TARGETS: readonly string[] = [
  "/executive-service-owner-twin",
  "/forgot-password",
  "/login",
+ "/operations/traditional-noc/global-optical-operations",
  "/other",
  "/pending-approval",
  "/platform",
