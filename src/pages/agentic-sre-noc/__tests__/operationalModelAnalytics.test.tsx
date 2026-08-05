@@ -38,7 +38,7 @@ describe("Operational Model Analytics (AIM-004)", () => {
   it("selects a KPI and opens the metric drawer", async () => {
     const user = userEvent.setup();
     renderPage();
-    await user.click(screen.getByRole("button", { name: "False Positive Rate", exact: false }));
+    await user.click(screen.getByRole("button", { name: /False Positive Rate/i }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
