@@ -172,7 +172,8 @@ export interface LifecycleState {
 }
 
 export function useLifecycleState(context: LifecycleContext): LifecycleState {
-  const [tab, setTab] = useState<LifecycleTab>("Training Data");
+  const [internalTab, setInternalTab] = useState<LifecycleTab>("Training Data");
+  const tab = context.tab ?? internalTab;
   const [panelState, setPanelState] = useState<LifecyclePanelState>("ready");
   const [selectedVersion, setSelectedVersion] = useState<string>(ACTIVE_VERSION);
   const [comparisonVersion, setComparisonVersion] = useState<string>(CANDIDATE_VERSION);
@@ -188,13 +189,26 @@ export function useLifecycleState(context: LifecycleContext): LifecycleState {
   const [activityGroup, setActivityGroup] = useState<"None" | "Version" | "Event type">("None");
   const [selectedTimelineEventId, setSelectedTimelineEventId] = useState<string | null>(null);
 
-  const [activeVersion, setActiveVersion] = useState<string>(ACTIVE_VERSION);
+  const [internalActiveVersion, setInternalActiveVersion] = useState<string>(ACTIVE_VERSION);
+  const activeVersion = context.activeVersion ?? internalActiveVersion;
   const [rollbackVersion, setRollbackVersion] = useState<string>(ROLLBACK_VERSION);
   const [notes, setNotes] = useState<GovernanceNote[]>(initialGovernanceNotes);
   const [extraActivity, setExtraActivity] = useState<ModelLifecycleActivity[]>([]);
   const [announcement, setAnnouncement] = useState("");
 
   const announce = useCallback((message: string) => setAnnouncement(message), []);
+
+  const onTabChange = context.onTabChange;
+  const setTab = useCallback(
+    (next: LifecycleTab) => { setInternalTab(next); onTabChange?.(next); },
+    [onTabChange],
+  );
+
+  const onActiveVersionChange = context.onActiveVersionChange;
+  const setActiveVersion = useCallback(
+    (next: string) => { setInternalActiveVersion(next); onActiveVersionChange?.(next); },
+    [onActiveVersionChange],
+  );
 
   const appendActivity = useCallback((entry: Omit<ModelLifecycleActivity, "id">) => {
     setExtraActivity((current) => [
@@ -338,7 +352,7 @@ export function useLifecycleState(context: LifecycleContext): LifecycleState {
       });
       announce(`${version} promoted. Rollback version is now ${activeVersion}.`);
     },
-    [activeVersion, appendActivity, announce],
+    [activeVersion, appendActivity, announce, setActiveVersion],
   );
 
   const rollback = useCallback(() => {
@@ -358,7 +372,7 @@ export function useLifecycleState(context: LifecycleContext): LifecycleState {
       status: "Complete",
     });
     announce(`Rolled back. Active version is now ${restored}.`);
-  }, [rollbackVersion, appendActivity, announce]);
+  }, [rollbackVersion, appendActivity, announce, setActiveVersion]);
 
   const addNote = useCallback(
     (note: string) => {
@@ -387,8 +401,7 @@ export function useLifecycleState(context: LifecycleContext): LifecycleState {
 
   const activity = useMemo(() => [...extraActivity, ...lifecycleActivity], [extraActivity]);
 
-  /* context-derived announcement scope is intentionally read-only here */
-  void context;
+
 
   return {
     tab, setTab,
