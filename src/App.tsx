@@ -764,6 +764,7 @@ const App = () => (
             <Route path="discovery/artifact-normalization" element={<ArtifactNormalization />} />
             <Route path="artifact-normalization" element={<ArtifactNormalization />} />
             <Route path="discovery/business-condition-extraction" element={<BusinessConditionExtraction />} />
+            <Route path="business-condition-extraction" element={<BusinessConditionExtraction />} />
             <Route path="persona-studio/team-persona-construction" element={<TeamPersonaConstruction />} />
             <Route path="team-persona-construction" element={<TeamPersonaConstruction />} />
             <Route path="persona-studio/team-persona-library" element={<PersonaStudioScaffold title="Team Persona Library" purpose="Browse published Team Personas across the enterprise." />} />
