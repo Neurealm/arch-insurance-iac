@@ -360,6 +360,7 @@ import TeamPersonaConstruction from "./pages/enterprise-cognitive-fabric/TeamPer
 import TeamPersonaLibrary from "./pages/enterprise-cognitive-fabric/TeamPersonaLibrary.tsx";
 import PersonaStudioScaffold from "./pages/enterprise-cognitive-fabric/PersonaStudioScaffold.tsx";
 import PersonaValidation from "./pages/enterprise-cognitive-fabric/PersonaValidation.tsx";
+import EnterpriseCognitiveMemory from "./pages/enterprise-cognitive-fabric/EnterpriseCognitiveMemory.tsx";
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
@@ -773,6 +774,8 @@ const App = () => (
             <Route path="team-persona-library" element={<TeamPersonaLibrary />} />
             <Route path="persona-studio/persona-validation" element={<PersonaValidation />} />
             <Route path="persona-validation" element={<PersonaValidation />} />
+            <Route path="cognitive-memory/enterprise-cognitive-memory" element={<EnterpriseCognitiveMemory />} />
+            <Route path="enterprise-cognitive-memory" element={<EnterpriseCognitiveMemory />} />
             <Route path="persona-studio/persona-version-history" element={<PersonaStudioScaffold title="Persona Version History" purpose="Version lineage, change summaries, and approval history for Team Personas." />} />
             <Route path="cognitive-intake" element={<PersonaStudioScaffold title="Cognitive Intake" purpose="Incoming work evaluated against approved Team Personas." />} />
             <Route path=":slug" element={<EcfPage />} />
