@@ -8,6 +8,8 @@
 import * as React from "react";
 import { AlertTriangle, Download, Info, Table2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { controlTransition } from "../components/motion";
+
 
 export type AnalyticsPanelState = "ready" | "loading" | "empty" | "error";
 
