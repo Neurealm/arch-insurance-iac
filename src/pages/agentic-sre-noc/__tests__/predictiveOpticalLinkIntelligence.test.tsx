@@ -54,12 +54,46 @@ describe("Predictive Optical Link Intelligence (AIM-001)", () => {
   });
 
 
-  it("renders seven KPI cards with the approved synthetic values", () => {
+  it("renders five KPI cards including Operational Trust (AIM-010)", () => {
     renderPage();
-    expect(kpiMetrics).toHaveLength(7);
-    ["8,721", "32", "6", "5h 42m", "94.1%", "2.8%", "1,284"].forEach((v) => {
+    expect(kpiMetrics).toHaveLength(5);
+    ["32", "6", "5h 42m", "1,284"].forEach((v) => {
       expect(screen.getAllByText(v).length).toBeGreaterThan(0);
     });
+    const trust = screen.getByTestId("pli-operational-trust");
+    expect(within(trust).getByText("Model Healthy")).toBeInTheDocument();
+    expect(within(trust).getByText("94.1%")).toBeInTheDocument();
+    expect(within(trust).getByText("2.8%")).toBeInTheDocument();
+    expect(within(trust).getByText("96%")).toBeInTheDocument();
+  });
+
+  it("leads with the operational summary, situation, recommendation and confidence (AIM-010)", () => {
+    renderPage();
+    const page = screen.getByTestId("pli-page");
+    const order = ["pli-operational-summary", "pli-current-situation", "pli-recommended-action", "pli-panel-pipeline"]
+      .map((id) => Array.from(page.querySelectorAll("[data-testid]")).findIndex((el) => el.getAttribute("data-testid") === id));
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(screen.getByRole("heading", { name: "Current Operational Assessment" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Current Recommended Action" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Operational Confidence" })).toBeInTheDocument();
+  });
+
+  it("removes the duplicated Prediction Output and Model Inputs panels (AIM-010)", () => {
+    renderPage();
+    expect(screen.queryByTestId("pli-panel-output")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("pli-panel-inputs")).not.toBeInTheDocument();
+    expect(screen.getAllByTestId("pli-synthetic-notice")).toHaveLength(1);
+    expect(screen.getAllByTestId("pli-active-version")).toHaveLength(1);
+  });
+
+  it("collapses lifecycle and advanced analytics by default and exposes viewing modes (AIM-010)", () => {
+    renderPage();
+    expect(screen.getByTestId("pli-disclosure-lifecycle")).toHaveAttribute("data-open", "false");
+    expect(screen.getByTestId("pli-disclosure-threshold")).toHaveAttribute("data-open", "false");
+    const modes = within(screen.getByTestId("pli-viewing-mode")).getAllByRole("radio");
+    expect(modes.map((m) => m.textContent)).toEqual(["Operational", "Engineering", "Data Science"]);
+    expect(modes[0]).toHaveAttribute("aria-checked", "true");
   });
 
   it("renders every placeholder panel shell", () => {
