@@ -29,6 +29,30 @@ import {
   type MemoryFilters, type MemoryIndexingJob, type MemoryRecord, type MemoryServiceState,
   type MemoryView, type FlowMode,
 } from "./cognitive-memory/data";
+import {
+  GovernanceOverviewPanel, GovernanceQueuePanel, ConflictsPanel, DriftPanel, AccessPanel,
+  RetentionPanel, PublishingPanel, McpServicesPanel, UsagePanel, LearningPanel, ActivityPanel,
+  QualityDetailBody, StateBanner, defaultQueueFilters, type QueueFilters,
+} from "./cognitive-memory/governance-panels";
+import {
+  CurationWorkbench, PointInTimePanel, SnapshotsPanel, AccessSimulator, AgentContextSimulator,
+  buildAgentSimulation, initialCurationDecision, type CurationDecisionState,
+} from "./cognitive-memory/curation";
+import {
+  ReviewDrawer, ConflictDrawer, DriftDrawer, MergeDialog, SupersessionDialog, RefreshDialog,
+  CreateSnapshotDialog, PublishDialog, GlobalSearchDialog, NotificationsDrawer, ExportDialog,
+  DemoStoryOverlay,
+} from "./cognitive-memory/workflows";
+import {
+  governanceReviews as seedReviews, memoryConflicts as seedConflicts, memoryDrifts as seedDrifts,
+  retentionRows as seedRetention, memorySnapshots as seedSnapshots, seedNotifications,
+  memoryActivities as seedActivities, publishDestinations as seedDestinations, demoScenarios,
+  demoSteps, curationCandidates, supersessionCases, simIdentities, simRecords, simulateAccess,
+  simAgents, simTasks, pointInTimeEvents, toYaml, governanceDimensions,
+  type MemoryGovernanceReview, type MemoryConflict, type MemoryDrift, type RetentionRow,
+  type MemorySnapshot, type MemoryNotification, type ScenarioId, type CurationCandidate,
+} from "./cognitive-memory/governance-data";
+
 
 const PREF_KEY = "ecf.cognitive-memory.prefs.v1";
 
