@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, RefreshCw, Search } from "lucide-react";
+import { ChevronRight, Download, PlayCircle, RefreshCw, Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Pill } from "./persona-studio/primitives";
@@ -29,6 +29,25 @@ import {
   type FilterKey, type GraphNode, type ImpactCondition, type ImpactEvidence,
   type PersonaImpactConflict, type PersonaImpactEvaluation, type PiaView, type ProposalState,
 } from "./persona-impact/data";
+import {
+  AlternativeAnalysisPanel, AnalysisVersionHistoryPanel, ConditionSensitivityPanel, ConflictResolutionDrawer,
+  CrossTeamReviewPanel, DecisionPackagePanel, DemoStoryOverlay, EvidenceRemediationPanel, MitigatedImpactPanel,
+  MitigationPlannerPanel, NotificationsButton, NotificationsDrawer, OperationalStatePanel, PersonaOwnerReviewPanel,
+  PersonaScopePanel, PersonaVersionSensitivityPanel, RecentActivityPanel, ReviewQueuePanel, ReviewWorkbenchDrawer,
+  ScenarioComparisonPanel, ScenarioSimulatorPanel, VersionComparisonPanel,
+} from "./persona-impact/ops-panels";
+import {
+  AlternativeDetailDialog, BulkActionsDialog, DemoScenariosDialog, ExportDialog, GlobalSearchDialog,
+  PromptDialog, ReanalysisDialog, RoutingDialog, ScenarioDetailDialog, StartAnalysisDialog,
+} from "./persona-impact/ops-dialogs";
+import {
+  buildDecisionPackage, buildScenario, demoScenarios, makeActivity, makeNotification, personaCandidates,
+  readinessState, seededAnalysisVersions, seededMitigationVersions, seededNotifications, seededRecentActivity,
+  seededReviews, seededScenarios, storySteps,
+  type ChangeAlternative, type DemoScenario, type PersonaCandidate, type PersonaImpactMitigationVersion,
+  type PersonaImpactNotification, type PersonaImpactReview, type PersonaImpactScenario, type PiaActivityEvent,
+  type PiaOperationalState,
+} from "./persona-impact/ops-data";
 
 const pct = (n: number) => `${Math.round(n)}%`;
 
@@ -61,6 +80,36 @@ export default function PersonaImpactAnalysis() {
   const [evidenceDrawer, setEvidenceDrawer] = useState<ImpactEvidence | null>(null);
   const [nodeDrawer, setNodeDrawer] = useState<GraphNode | null>(null);
   const [conflictDrawer, setConflictDrawer] = useState<PersonaImpactConflict | null>(null);
+
+  /* ------------------------------------------------ prompt 2 operational state */
+  const [opState, setOpState] = useState<PiaOperationalState>("Analyzing");
+  const [analysisComplete, setAnalysisComplete] = useState(true);
+  const [candidates, setCandidates] = useState<PersonaCandidate[]>(personaCandidates);
+  const [scenarios, setScenarios] = useState<PersonaImpactScenario[]>(seededScenarios);
+  const [mitigationVersions, setMitigationVersions] = useState<PersonaImpactMitigationVersion[]>(seededMitigationVersions);
+  const [reviews, setReviews] = useState<PersonaImpactReview[]>(seededReviews);
+  const [notifications, setNotifications] = useState<PersonaImpactNotification[]>(seededNotifications);
+  const [activity, setActivity] = useState<PiaActivityEvent[]>(seededRecentActivity);
+  const [impactMode, setImpactMode] = useState<"Raw Impact" | "Mitigated Impact">("Raw Impact");
+  const [conditionMode, setConditionMode] = useState("Compare");
+  const [versionPair, setVersionPair] = useState<[string, string]>([seededAnalysisVersions[0].id, seededAnalysisVersions[seededAnalysisVersions.length - 1].id]);
+  const [showComparison, setShowComparison] = useState(false);
+
+  const [startOpen, setStartOpen] = useState(false);
+  const [reanalysisOpen, setReanalysisOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [scenariosOpen, setScenariosOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [routing, setRouting] = useState<null | "Cross Team Impact Matrix" | "Decision Intelligence">(null);
+  const [reviewDrawer, setReviewDrawer] = useState<PersonaImpactReview | null>(null);
+  const [alternative, setAlternative] = useState<ChangeAlternative | null>(null);
+  const [scenarioDetail, setScenarioDetail] = useState<PersonaImpactScenario | null>(null);
+  const [prompt, setPrompt] = useState<null | { title: string; description?: string; label: string; confirm: string; onSubmit: (v: string) => void }>(null);
+  const [storyIndex, setStoryIndex] = useState<number | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
 
   const say = useCallback((m: string) => setAnnounce(m), []);
 
@@ -117,6 +166,67 @@ export default function PersonaImpactAnalysis() {
   const toggleColumn = (key: string) =>
     setHiddenColumns((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
 
+  /* --------------------------------------------------- prompt 2 derivations */
+  const logActivity = useCallback((text: string, category: string) => {
+    setActivity((prev) => [makeActivity(text, category), ...prev].slice(0, 24));
+  }, []);
+
+  const notify = useCallback((type: Parameters<typeof makeNotification>[0], title: string, description: string,
+    severity: PersonaImpactNotification["severity"], personaTarget = personaId) => {
+    setNotifications((prev) => [makeNotification(type, title, description, severity, personaTarget), ...prev].slice(0, 30));
+  }, [personaId]);
+
+  const act = useCallback((message: string, category = "Analysis") => {
+    say(message);
+    logActivity(message, category);
+  }, [say, logActivity]);
+
+  const readiness = useMemo(
+    () => readinessState(proposal, reviews, mitigationVersions, analysisComplete),
+    [proposal, reviews, mitigationVersions, analysisComplete]);
+
+  const decisionPackage = useMemo(
+    () => buildDecisionPackage(proposal, versionPair[1], mitigationVersions.filter((m) => m.accepted), reviews),
+    [proposal, versionPair, mitigationVersions, reviews]);
+
+  const unread = notifications.filter((n) => n.status === "Unread").length;
+
+  const applyScenarioState = useCallback((s: DemoScenario) => {
+    if (s.reset) {
+      setProposal(initialProposal);
+      setMitigationVersions(seededMitigationVersions);
+      setReviews(seededReviews);
+      setNotifications(seededNotifications);
+      setActivity(seededRecentActivity);
+      setCandidates(personaCandidates);
+      setScenarios(seededScenarios);
+    }
+    if (s.proposal) setProposal((p) => ({ ...p, ...s.proposal }));
+    if (s.personaId) setPersonaId(s.personaId);
+    if (s.acceptMitigations) {
+      setMitigationVersions((prev) => prev.map((m) => ({ ...m, accepted: true, status: "Accepted" as const })));
+      setImpactMode("Mitigated Impact");
+    }
+    setOpState(s.operationalState);
+    setAnalysisComplete(s.operationalState !== "Analyzing");
+    setActiveScenarioId(s.id);
+    if (s.notification) notify(s.notification.type, s.notification.title, s.notification.description, s.notification.severity);
+    act(s.activity ?? `${s.name} applied`, "Demo");
+  }, [act, notify]);
+
+  const step = storyIndex === null ? null : storySteps[storyIndex];
+  useEffect(() => {
+    if (!step) return;
+    if (step.apply) setProposal((p) => ({ ...p, ...step.apply }));
+    if (step.personaId) setPersonaId(step.personaId);
+    if (step.acceptMitigations) {
+      setMitigationVersions((prev) => prev.map((m) => ({ ...m, accepted: true, status: "Accepted" as const })));
+      setImpactMode("Mitigated Impact");
+    }
+    const el = document.getElementById(step.target);
+    if (el) el.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+  }, [step, reducedMotion]);
+
   const serviceState = currentScore.score >= 70 ? "Needs Attention" : currentScore.score >= 60 ? "Review Required" : "Operational";
 
   return (
@@ -156,11 +266,29 @@ export default function PersonaImpactAnalysis() {
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={refresh}>
             <RefreshCw className="mr-1 h-3.5 w-3.5" aria-hidden /> Refresh
           </Button>
+          <Button size="sm" className="h-7 text-[11px]" onClick={() => setStartOpen(true)}>Start Impact Analysis</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setReanalysisOpen(true)}>Reanalyze</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setBulkOpen(true)}>
+            Bulk Actions{selectedRows.size ? ` (${selectedRows.size})` : ""}
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setSearchOpen(true)}>
+            <Search className="mr-1 h-3.5 w-3.5" aria-hidden /> Search
+          </Button>
+          <NotificationsButton unread={unread} onClick={() => setNotificationsOpen(true)} />
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setExportOpen(true)}>
+            <Download className="mr-1 h-3.5 w-3.5" aria-hidden /> Export
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setStoryIndex(0)}>
+            <PlayCircle className="mr-1 h-3.5 w-3.5" aria-hidden /> Demo Story
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setScenariosOpen(true)}>
+            <Sparkles className="mr-1 h-3.5 w-3.5" aria-hidden /> Demo Scenarios
+          </Button>
         </div>
       </header>
 
       {/* -------------------------------------------------------------- kpis */}
-      <section aria-label="Impact analysis key indicators" className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+      <section id="panel-kpis" aria-label="Impact analysis key indicators" className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
         {piaKpis.map((k) => (
           <IntakeKpiCard key={k.id} kpi={k} focused={kpiFocus === k.id}
             onClick={() => { setKpiFocus(kpiFocus === k.id ? null : k.id); say(`${k.name} focused`); }} />
@@ -258,6 +386,139 @@ export default function PersonaImpactAnalysis() {
 
         <AnalysisActivityPanel onOpen={openEvaluation} />
 
+        {/* ------------------------------------------------ prompt 2 operations */}
+        <OperationalStatePanel state={opState} onState={(v) => { setOpState(v); act(`Operational state set to ${v}`, "State"); }} readiness={readiness} />
+
+        <PersonaScopePanel
+          candidates={candidates}
+          onToggle={(id, included) => {
+            setCandidates((prev) => prev.map((c) => c.personaId === id
+              ? { ...c, included, status: included ? "Included" : "Excluded" } : c));
+            act(`${personaById(id).name} ${included ? "included in" : "excluded from"} analysis scope, analysis recalculated`, "Scope");
+          }}
+          onPrimary={(id) => {
+            setCandidates((prev) => prev.map((c) => ({ ...c, primary: c.personaId === id })));
+            setPersonaId(id);
+            act(`${personaById(id).name} marked primary Persona`, "Scope");
+          }}
+          onOpenPersona={(id) => { setPersonaId(id); setPersonaDrawer(id); }}
+          onAdd={() => setPrompt({
+            title: "Add Persona Manually", label: "Reason for inclusion", confirm: "Add Persona",
+            description: "Manually added Personas are recorded with the reason they were included.",
+            onSubmit: (v) => act(`Persona added manually to scope: ${v}`, "Scope"),
+          })}
+          onRequestValidation={(id) => act(`Persona validation requested for ${personaById(id).name}`, "Scope")}
+        />
+
+        <ScenarioSimulatorPanel
+          proposal={proposal} onProposal={setProposal} personaId={personaId}
+          onSaveScenario={() => setPrompt({
+            title: "Save Scenario", label: "Scenario name", confirm: "Save Scenario",
+            onSubmit: (name) => {
+              const sc = buildScenario(`SCN ${scenarios.length + 1}`, name || `Scenario ${scenarios.length + 1}`,
+                "Saved from the impact scenario simulator", proposal);
+              setScenarios((prev) => [...prev, sc]);
+              act(`Scenario saved: ${sc.name}`, "Scenario");
+            },
+          })}
+          onReset={() => { setProposal(initialProposal); act("Scenario reset to baseline proposal", "Scenario"); }}
+        />
+
+        <ScenarioComparisonPanel scenarios={scenarios}
+          onOpenScenario={setScenarioDetail}
+          onApplyScenario={(sc) => { setProposal(sc.proposalParameters); act(`Simulating ${sc.name}`, "Scenario"); }} />
+
+        <AlternativeAnalysisPanel
+          onOpen={setAlternative}
+          onSimulate={(a) => { setProposal({ ...proposal, ...a.patch }); act(`Simulating alternative ${a.label}`, "Alternative"); }}
+          onSendToDecision={(a) => act(`Alternative ${a.label} added to the decision package as an option`, "Alternative")} />
+
+        <MitigationPlannerPanel
+          versions={mitigationVersions}
+          onAccept={(id) => {
+            setMitigationVersions((prev) => prev.map((m) => m.id === id ? { ...m, accepted: true, status: "Accepted" } : m));
+            setImpactMode("Mitigated Impact");
+            notify("Mitigation Accepted", "Mitigation accepted", "Residual impact recalculated, original finding preserved.", "Informational");
+            act("Mitigation accepted and residual impact recalculated", "Mitigation");
+          }}
+          onReject={(id) => {
+            setMitigationVersions((prev) => prev.map((m) => m.id === id ? { ...m, accepted: false, status: "Rejected" } : m));
+            act("Mitigation rejected, original severity retained", "Mitigation");
+          }}
+          onRequestEvidence={(id) => act(`Mitigation evidence requested for ${id}`, "Evidence")}
+          onEdit={(m) => setPrompt({
+            title: `Edit Mitigation · ${m.title}`, label: "Revised mitigation description", confirm: "Save Mitigation",
+            onSubmit: (v) => act(`Mitigation ${m.id} updated: ${v}`, "Mitigation"),
+          })}
+          onAdd={() => setPrompt({
+            title: "Add Mitigation", label: "Mitigation description", confirm: "Add Mitigation",
+            onSubmit: (v) => act(`Mitigation added: ${v}`, "Mitigation"),
+          })}
+          onRecalculate={() => act("Mitigated scenario recalculated", "Mitigation")}
+        />
+
+        <MitigatedImpactPanel proposal={proposal} versions={mitigationVersions} mode={impactMode} onMode={setImpactMode} />
+
+        <EvidenceRemediationPanel proposal={proposal}
+          onRequest={(id) => { notify("Evidence Requested", "Evidence requested", `Request raised for ${id}.`, "Warning"); act(`Evidence requested for ${id}`, "Evidence"); }}
+          onAdd={(id) => {
+            setProposal({
+              ...proposal,
+              fraudLossEvidence: id === "EVD 7706" ? true : proposal.fraudLossEvidence,
+              dependencyStressEvidence: id === "EVD 7707" ? true : proposal.dependencyStressEvidence,
+              idempotencyEvidence: id === "EVD 7704" ? true : proposal.idempotencyEvidence,
+            });
+            act(`Evidence ${id} added, confidence updated without rewriting findings`, "Evidence");
+          }}
+          onNotApplicable={(id) => act(`Evidence ${id} marked not applicable with rationale recorded`, "Evidence")}
+          onLink={(id) => act(`Existing enterprise evidence linked to ${id}`, "Evidence")}
+          onOpen={(id) => { const e = impactEvidence.find((x) => x.id === id); if (e) setEvidenceDrawer(e); }}
+        />
+
+        <ReviewQueuePanel reviews={reviews}
+          onOpen={setReviewDrawer}
+          onApprove={(id) => {
+            setReviews((prev) => prev.map((r) => r.id === id ? { ...r, status: "Approved" } : r));
+            act(`Review ${id} approved`, "Review");
+          }}
+          onRequestChanges={(id) => { setReviews((prev) => prev.map((r) => r.id === id ? { ...r, status: "Changes Requested" } : r)); act(`Changes requested on ${id}`, "Review"); }}
+          onRequestEvidence={(id) => act(`Evidence requested for review ${id}`, "Review")}
+          onReassign={(id) => setPrompt({
+            title: `Reassign ${id}`, label: "New reviewer", confirm: "Reassign",
+            onSubmit: (v) => { setReviews((prev) => prev.map((r) => r.id === id ? { ...r, reviewer: v } : r)); act(`Review ${id} reassigned to ${v}`, "Review"); },
+          })}
+          onEscalate={(id) => { setReviews((prev) => prev.map((r) => r.id === id ? { ...r, status: "Escalated" } : r)); act(`Review ${id} escalated`, "Review"); }}
+        />
+
+        <PersonaOwnerReviewPanel proposal={proposal} personaId={personaId}
+          onAction={(a) => act(`${a} recorded for ${personaById(personaId).name}`, "Persona Review")} />
+
+        <CrossTeamReviewPanel onAction={(id, a) => act(`${a} recorded for ${personaById(id).name}`, "Cross Team")} />
+
+        <div className="grid gap-2 xl:grid-cols-2">
+          <PersonaVersionSensitivityPanel />
+          <ConditionSensitivityPanel mode={conditionMode} onMode={(m) => { setConditionMode(m); act(`Condition sensitivity mode ${m}`, "Sensitivity"); }} />
+        </div>
+
+        <AnalysisVersionHistoryPanel versions={seededAnalysisVersions} selected={versionPair} onSelect={setVersionPair}
+          onOpen={(v) => act(`Opened analysis version ${v.version}`, "Version")}
+          onCompare={() => { setShowComparison(true); act("Version comparison generated", "Version"); }}
+          onRestore={(v) => act(`Version ${v.version} restored as a simulation, current results unchanged`, "Version")}
+          onExport={(v) => { setExportOpen(true); act(`Export prepared for version ${v.version}`, "Export"); }} />
+
+        {showComparison && (
+          <VersionComparisonPanel
+            a={seededAnalysisVersions.find((v) => v.id === versionPair[0]) ?? seededAnalysisVersions[0]}
+            b={seededAnalysisVersions.find((v) => v.id === versionPair[1]) ?? seededAnalysisVersions[1]} />
+        )}
+
+        <DecisionPackagePanel pkg={decisionPackage} readiness={readiness}
+          onOpenMatrix={() => setRouting("Cross Team Impact Matrix")}
+          onOpenDecision={() => setRouting("Decision Intelligence")}
+          onExport={() => setExportOpen(true)} />
+
+        <RecentActivityPanel events={activity} />
+
         <Panel id="panel-scope" title="Scope Boundary"
           subtitle="What this page does and what belongs to adjacent Enterprise Cognitive Fabric capabilities">
           <SimpleTable head={["Concern", "Owned Here", "Owned Elsewhere"]}
@@ -291,6 +552,87 @@ export default function PersonaImpactAnalysis() {
       <EvidenceDrawer open={!!evidenceDrawer} onOpenChange={(v) => !v && setEvidenceDrawer(null)} evidence={evidenceDrawer} />
       <GraphNodeDrawer open={!!nodeDrawer} onOpenChange={(v) => !v && setNodeDrawer(null)} node={nodeDrawer} />
       <ConflictDrawer open={!!conflictDrawer} onOpenChange={(v) => !v && setConflictDrawer(null)} conflict={conflictDrawer} />
+
+      <ReviewWorkbenchDrawer open={!!reviewDrawer} onOpenChange={(v) => !v && setReviewDrawer(null)}
+        review={reviewDrawer} proposal={proposal}
+        onDecision={(action, comment) => {
+          if (reviewDrawer) setReviews((prev) => prev.map((r) => r.id === reviewDrawer.id
+            ? { ...r, status: action === "Confirm Impact" ? "Approved" : action === "Escalate" ? "Escalated" : "Changes Requested" } : r));
+          act(`${action} recorded${comment ? ` · ${comment}` : ""}`, "Review");
+          setReviewDrawer(null);
+        }} />
+
+      <ConflictResolutionDrawer open={!!conflictDrawer} onOpenChange={(v) => !v && setConflictDrawer(null)}
+        conflict={conflictDrawer}
+        onResolve={(type, note) => { act(`Conflict resolution recorded: ${type}${note ? ` · ${note}` : ""}`, "Conflict"); setConflictDrawer(null); }} />
+
+      <NotificationsDrawer open={notificationsOpen} onOpenChange={setNotificationsOpen} notifications={notifications}
+        onRead={(id) => setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, status: "Read" } : n))}
+        onReadAll={() => setNotifications((prev) => prev.map((n) => ({ ...n, status: "Read" as const })))}
+        onAcknowledge={(id) => { setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, status: "Acknowledged" } : n)); act(`Notification ${id} acknowledged`, "Notification"); }}
+        onAssign={(id) => setPrompt({ title: "Assign Notification", label: "Assignee", confirm: "Assign", onSubmit: (v) => act(`Notification ${id} assigned to ${v}`, "Notification") })}
+        onOpenItem={(n) => { setPersonaId(n.personaId); setNotificationsOpen(false); setView("workbench"); act(`Opened ${n.title}`, "Notification"); }} />
+
+      <StartAnalysisDialog open={startOpen} onOpenChange={setStartOpen}
+        onStart={(msg) => {
+          setOpState("Analyzing"); setAnalysisComplete(false);
+          notify("Impact Analysis Started", "Impact analysis started", msg, "Informational");
+          act(msg, "Analysis");
+          window.setTimeout(() => { setOpState("Analysis Complete"); setAnalysisComplete(true); }, 900);
+        }} />
+
+      <ReanalysisDialog open={reanalysisOpen} onOpenChange={setReanalysisOpen}
+        onRun={(scope, reason) => {
+          notify("Analysis Recalculated", "Analysis recalculated", `${scope} reanalysis complete. Prior versions preserved.`, "Informational");
+          act(`Reanalysis complete for ${scope} · ${reason}`, "Analysis");
+        }} />
+
+      <BulkActionsDialog open={bulkOpen} onOpenChange={setBulkOpen} count={selectedRows.size}
+        onApply={(action, note) => act(`${action} applied to ${selectedRows.size} evaluations${note ? ` · ${note}` : ""}`, "Bulk")} />
+
+      <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} proposal={proposal} reviews={reviews}
+        versions={seededAnalysisVersions} scenarios={scenarios} mitigationVersions={mitigationVersions}
+        onOpenResult={(r) => {
+          if (r.type === "Persona") { setPersonaId(r.id); setPersonaDrawer(r.id); }
+          else if (r.type === "Review Task") setReviewDrawer(reviews.find((x) => x.id === r.id) ?? null);
+          else if (r.type === "Impact Evaluation") openEvaluation(r.id);
+          act(`Opened ${r.type} ${r.id} from search`, "Search");
+        }} />
+
+      <ExportDialog open={exportOpen} onOpenChange={setExportOpen} proposal={proposal}
+        mitigationVersions={mitigationVersions} reviews={reviews} personaId={personaId}
+        onExported={(msg) => act(msg, "Export")} />
+
+      <RoutingDialog open={!!routing} onOpenChange={(v) => !v && setRouting(null)}
+        target={routing ?? "Cross Team Impact Matrix"} pkg={decisionPackage} reviews={reviews}
+        analysisComplete={analysisComplete}
+        onConfirm={(note) => {
+          setOpState(routing === "Decision Intelligence" ? "Routed to Decision Intelligence" : "Routed to Matrix");
+          notify("Impact Package Ready", `Routed to ${routing}`, note || "Impact package handed off with full provenance.", "Informational");
+          act(`Impact package routed to ${routing}`, "Routing");
+          setRouting(null);
+        }} />
+
+      <DemoScenariosDialog open={scenariosOpen} onOpenChange={setScenariosOpen} scenarios={demoScenarios}
+        activeId={activeScenarioId} onApply={applyScenarioState} />
+
+      <AlternativeDetailDialog open={!!alternative} onOpenChange={(v) => !v && setAlternative(null)} alternative={alternative} />
+      <ScenarioDetailDialog open={!!scenarioDetail} onOpenChange={(v) => !v && setScenarioDetail(null)}
+        scenario={scenarioDetail} proposal={proposal} />
+
+      {prompt && (
+        <PromptDialog open onOpenChange={(v) => !v && setPrompt(null)} title={prompt.title}
+          description={prompt.description} label={prompt.label} confirmLabel={prompt.confirm}
+          onSubmit={(v) => { prompt.onSubmit(v); setPrompt(null); }} />
+      )}
+
+      {step && (
+        <DemoStoryOverlay step={step} index={storyIndex ?? 0} total={storySteps.length}
+          onNext={() => setStoryIndex(Math.min(storySteps.length - 1, (storyIndex ?? 0) + 1))}
+          onPrev={() => setStoryIndex(Math.max(0, (storyIndex ?? 0) - 1))}
+          onExit={() => setStoryIndex(null)}
+          reducedMotion={reducedMotion} onReducedMotion={setReducedMotion} />
+      )}
 
       <p className="mt-3 text-[10px] text-slate-400">
         Columns available: {queueColumns.join(" · ")}

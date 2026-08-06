@@ -676,7 +676,8 @@ export interface ProposalState {
   proposedState: string;
   initialTraffic: number;
   maxTraffic: number;
-  deploymentTiming: "Standard window" | "Quarter end window";
+  deploymentTiming: "Standard window" | "Quarter end window" | "Maintenance window";
+  retryAttempts: number;
   progressiveRollout: boolean;
   idempotencyEvidence: boolean;
   fraudLossEvidence: boolean;
@@ -690,6 +691,7 @@ export const initialProposal: ProposalState = {
   proposedState: "Three automated retries",
   initialTraffic: 5,
   maxTraffic: 15,
+  retryAttempts: 3,
   deploymentTiming: "Standard window",
   progressiveRollout: true,
   idempotencyEvidence: true,
