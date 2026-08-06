@@ -552,17 +552,86 @@ export default function EnterpriseCognitiveMemory() {
 
         <ProvenancePanel onOpenRecord={(id) => openRecordById(id)} />
 
-        <Panel title="Prompt 2 scope" subtitle="Reserved capabilities — not implemented in this build package">
-          <div className="flex flex-wrap gap-1">
-            {["Governance", "Curation", "Conflict Resolution", "Record Merge", "Supersession", "Drift Management", "Memory Refresh",
-              "Point in Time Reconstruction", "Snapshots", "Access Policy Enforcement", "Access Simulation", "Retention", "Legal Hold",
-              "Publishing", "MCP Context Services", "Agent Context Simulation", "Decision & Outcome Learning", "Usage Analytics",
-              "Notifications", "Exports", "Demo Story", "Demo Scenarios"].map((l) => (
-                <button key={l} type="button" onClick={() => prompt2(l)}
-                  className="rounded border border-dashed border-slate-300 bg-slate-50 px-2 py-1 text-[10.5px] text-slate-500 hover:border-blue-300">{l}</button>
-              ))}
-          </div>
-        </Panel>
+        <GovernanceOverviewPanel loading={loading} activeDimension={activeDimension}
+          onDimension={(d) => {
+            setActiveDimension(d.id);
+            setQueueFilters({ ...defaultQueueFilters, issueType: d.issueTypes[0] ?? "All" });
+            scrollTo("panel-governance-queue");
+            say(`${d.name} dimension selected. Governance queue filtered.`);
+          }} />
+
+        <GovernanceQueuePanel reviews={reviews} filters={queueFilters} onFilters={setQueueFilters}
+          search={queueSearch} onSearch={setQueueSearch} loading={loading}
+          onAction={onGovernanceAction}
+          onOpen={(r) => { setActiveReview(r); setReviewOpen(true); }} />
+
+        <CurationWorkbench candidateId={candidateId} onCandidate={setCandidateId}
+          state={curationState} onState={setCurationState}
+          onSubmit={(c) => {
+            toast.success(`${curationState.decision} · ${c.title}`, { description: curationState.reason });
+            logActivity("Curation Decision", `${curationState.decision} applied to ${c.id}`, "Success", c.recordAId);
+            setCurationState(initialCurationDecision);
+            say(`${curationState.decision} applied to ${c.title}`);
+          }}
+          onMerge={(c) => { setMergeCandidate(c); setMergeOpen(true); }}
+          onSupersede={() => setSupersedeOpen(true)} />
+
+        <ConflictsPanel conflicts={conflicts} loading={loading}
+          onOpen={(c) => { setActiveConflict(c); setConflictOpen(true); }}
+          onResolve={onConflictResolve} />
+
+        <DriftPanel drifts={drifts} loading={loading}
+          onOpen={(d) => { setActiveDrift(d); setDriftOpen(true); }}
+          onAction={onDriftAction} />
+
+        <PointInTimePanel eventId={pitId} onEvent={(id) => { setPitId(id); say(`Point in time changed to ${id}`); }}
+          onCompare={(e) => toast.info("Compared with current memory", { description: `${e.facts.filter((f) => f.differs).length} facts differ` })}
+          onOpenDecision={(e) => toast.info(e.decision)}
+          onOpenEvidence={(e) => toast.info(`Evidence known at ${e.date} ${e.time}`, { description: "Future evidence excluded" })} />
+
+        <SnapshotsPanel snapshots={snapshots} onCreate={() => setSnapshotOpen(true)}
+          onOpen={(s) => toast.info(`${s.id} · ${s.name}`, { description: `${s.recordCount} records · index ${s.indexVersion}` })}
+          onCompare={(s) => toast.info(`Compared ${s.id} to current memory`)}
+          onExport={(s) => exportJson(`${s.id.replace(/\s/g, "-").toLowerCase()}-metadata.json`, s)}
+          onRestore={(s) => { toast.success(`${s.id} restored as simulation`, { description: "Live current memory unchanged" }); say(`${s.name} restored as simulation`); }} />
+
+        <AccessPanel onOpenPolicy={(id) => toast.info(`Access policy ${id}`)}
+          onOpenConflict={() => { const c = conflicts.find((x) => x.conflictType === "Access Conflict"); if (c) { setActiveConflict(c); setConflictOpen(true); } }} />
+
+        <AccessSimulator identityId={simIdentityId} recordId={simRecordId}
+          onIdentity={setSimIdentityId} onRecord={setSimRecordId} result={simResult}
+          onRun={(i, r) => { const res = simulateAccess(i, r); setSimResult(res); say(`Access ${res.decision} for ${i.name} on ${r.id}`); }} />
+
+        <RetentionPanel rows={retention} loading={loading} onAction={onRetentionAction} />
+
+        <PublishingPanel destinations={destinations} onPublish={() => setPublishOpen(true)}
+          onRepublish={(d) => { toast.success(`Republish queued · ${d.name}`); logActivity("Republish", `${d.name} republish queued`); }}
+          onPause={(d) => setDestinations((ds) => ds.map((x) => x.id === d.id ? { ...x, status: x.status === "Paused" ? "Healthy" : "Paused" } : x))}
+          onHistory={(d) => toast.info(`${d.name} publishing history`, { description: `Last published ${d.lastPublished} · ${d.version}` })} />
+
+        <McpServicesPanel
+          onOpen={(s) => toast.info(`${s.id} · ${s.name}`, { description: s.description })}
+          onTest={(s) => { toast.success(`Synthetic request to ${s.name}`, { description: `${s.averageLatency} · access validated` }); say(`Synthetic request executed against ${s.name}`); }}
+          onPolicy={(s) => toast.info(`Access policy ${s.accessPolicyId}`)}
+          onAudit={(s) => toast.info(`${s.name} audit history`, { description: `Last invocation ${s.lastInvocation}` })} />
+
+        <AgentContextSimulator agent={agent} task={agentTask} identityId={agentIdentityId} pitId={agentPitId}
+          onAgent={setAgent} onTask={setAgentTask} onIdentity={setAgentIdentityId} onPit={setAgentPitId}
+          output={agentOutput} onOpenRecord={(id) => openRecordById(id)}
+          onRun={() => {
+            const identity = simIdentities.find((i) => i.id === agentIdentityId) ?? simIdentities[0];
+            const pit = pointInTimeEvents.find((e) => e.id === agentPitId) ?? pointInTimeEvents[1];
+            const out = buildAgentSimulation(agent, agentTask, identity, pit);
+            setAgentOutput(out);
+            say(`Agent simulation complete. ${out.allowed.length} records allowed, ${out.denied.length} denied.`);
+          }} />
+
+        <UsagePanel onOpenRecord={(id) => openRecordById(id)} />
+
+        <LearningPanel onOpenRecord={(id) => openRecordById(id)} onOpenPointInTime={() => scrollTo("panel-pit")} />
+
+        <ActivityPanel activities={activities} onOpen={(a) => openRecordById(a.memoryRecordId)} />
+
       </div>
 
       <RecordDrawer open={recordOpen} onOpenChange={setRecordOpen} record={activeRecord} initialTab={recordTab}
