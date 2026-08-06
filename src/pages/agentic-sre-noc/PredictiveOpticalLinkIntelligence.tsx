@@ -43,12 +43,17 @@ import { exportExplainReport } from "./scenario/scenarioExport";
 import { SCENARIO_LINK_ID } from "./scenario/scenarioFixtures";
 
 import {
-  breadcrumb, featureContributions, forecastHorizons, governanceRecords, kpiMetrics,
-  linkPredictions, modelActivity, modelEvidence, modelFeatures, modelSummary, pageSubtitle,
-  panelSpecs, pipelineStages, products, recommendedActions, regions, scenarios, timeRanges,
-  traditionalMonitoringGaps,
-  type PanelSpec,
+  breadcrumb, forecastHorizons, governanceRecords, kpiMetrics, lifecycleSummary,
+  modelActivity, modelEvidence, modelSummary, pageSubtitle,
+  panelSpecs, products, regions, scenarios, syntheticNotice, timeRanges,
+  traditionalMonitoringGaps, validationResults,
+  type PanelSpec, type ViewingMode,
 } from "./data/pliFixtures";
+
+import {
+  Disclosure, OperationalConfidenceCard, OperationalSummaryBar, OperationalTrustCard,
+  RecommendedActionCard, ViewingModeSwitch,
+} from "./executive/ExecutivePrimitives";
 
 /* ------------------------------ shared parts ------------------------------ */
 
@@ -235,6 +240,9 @@ export default function PredictiveOpticalLinkIntelligence() {
   const [fullScreen, setFullScreen] = useState(false);
   const [panelState, setPanelState] = useState<PanelState>("ready");
   const [actionsOpen, setActionsOpen] = useState(false);
+  /* AIM-010 — executive experience state. */
+  const [viewMode, setViewMode] = useState<ViewingMode>("Operational");
+  const [contributionView, setContributionView] = useState<"Selected Link" | "Global">("Selected Link");
 
   const activeScenario = useMemo(
     () => scenarios.find((s) => s.label === scenario) ?? scenarios[0],
@@ -335,11 +343,6 @@ export default function PredictiveOpticalLinkIntelligence() {
   const setExplainOpen = scenarioState.setExplainOpen;
 
 
-  const groupedFeatures = useMemo(() => {
-    const groups = ["Optical", "Environmental", "Network and Service", "Historical and Context"] as const;
-    return groups.map((g) => ({ group: g, items: modelFeatures.filter((f) => f.group === g) }));
-  }, []);
-
   return (
     <div
       data-testid="pli-page"
@@ -378,6 +381,9 @@ export default function PredictiveOpticalLinkIntelligence() {
             <p className="mt-1 text-[11px] text-slate-500">
               {modelSummary.capability} · Owner {modelSummary.owner}
             </p>
+            <p data-testid="pli-synthetic-notice" className="mt-1 text-[10.5px] text-slate-500">
+              {syntheticNotice}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -403,14 +409,6 @@ export default function PredictiveOpticalLinkIntelligence() {
             options={panelStates}
             onChange={(v) => setPanelState(v as PanelState)}
           />
-
-          <div className="mx-1 hidden h-6 w-px bg-slate-200 lg:block" aria-hidden />
-
-          <dl className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
-            <div><dt className="inline text-slate-500">Model version: </dt><dd className="inline font-semibold text-slate-900" data-testid="pli-active-version">{activeModelVersion}</dd></div>
-            <div><dt className="inline text-slate-500">Last retrained: </dt><dd className="inline font-semibold text-slate-900">{modelSummary.lastRetrained}</dd></div>
-            <div><dt className="inline text-slate-500">Model health: </dt><dd className="inline font-semibold text-slate-900">{modelSummary.health}</dd></div>
-          </dl>
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <button
@@ -465,18 +463,26 @@ export default function PredictiveOpticalLinkIntelligence() {
       </header>
 
       {/* ------------------------------ KPI row ----------------------------- */}
-      <section aria-label="Model key performance indicators">
-        <h2 className="sr-only">Model key performance indicators</h2>
-        <div data-testid="pli-kpis" className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-          {kpiMetrics.map((m) => (
-            <KpiCard
-              key={m.key}
-              {...m}
-              loading={loading}
-              selected={analytics.kpiKey === m.key}
-              onSelect={() => handleKpi(m.key)}
-            />
-          ))}
+      <section aria-label="Operational key performance indicators">
+        <h2 className="sr-only">Operational key performance indicators</h2>
+        <div data-testid="pli-kpis" className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {kpiMetrics.map((m) =>
+            m.key === "operational-trust" ? (
+              <OperationalTrustCard
+                key={m.key}
+                selected={analytics.kpiKey === m.key}
+                onSelect={() => handleKpi(m.key)}
+              />
+            ) : (
+              <KpiCard
+                key={m.key}
+                {...m}
+                loading={loading}
+                selected={analytics.kpiKey === m.key}
+                onSelect={() => handleKpi(m.key)}
+              />
+            ),
+          )}
         </div>
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
           <button
@@ -496,68 +502,128 @@ export default function PredictiveOpticalLinkIntelligence() {
         </div>
       </section>
 
-      {/* --------------------------- primary layout ------------------------- */}
-      <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-12">
-        <PanelShell
-          spec={spec.pipeline}
-          state={panelState}
-          heightClass="xl:min-h-[480px]"
-          className="xl:col-span-12"
-        >
-          <PredictivePipeline
-            externalLinkId={activeLinkId}
-            onLinkChange={setSelectedLink}
-            externalFeatureId={highlightFeatureId}
-            onThresholdChange={setPipelineThresholdPct}
-            externalThresholdPct={pushedThresholdPct}
-          />
-        </PanelShell>
+      {/* -------------------- Section 1, operational summary ----------------- */}
+      <OperationalSummaryBar />
 
-        <div className="space-y-3 xl:col-span-12">
-
-          <PanelShell spec={spec.chennai} state={panelState} heightClass="xl:min-h-[360px]">
-            <ChennaiWorkspace
-              selectedLinkId={selectedLink}
-              onSelectLink={setSelectedLink}
-              whatIfOpen={whatIfOpen}
-              onWhatIfOpenChange={setWhatIfOpen}
-              onPredictionsChange={setChennaiPredictions}
-            />
-            <dl className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-4">
-              {modelEvidence.map((e) => (
-                <div key={e.key} className="rounded border border-slate-200 bg-slate-50 px-2 py-1">
-                  <dt className="text-[10px] uppercase tracking-wide text-slate-500">{e.label}</dt>
-                  <dd className="text-[11.5px] font-medium text-slate-900">{e.detail}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-2 text-[11px] text-slate-600">
-              {activeScenario.headline} · {activeScenario.riskLabel} · Region {activeScenario.region}
-            </p>
-          </PanelShell>
-
-
-          <div data-testid="analytics-threshold" data-analytics-state={analyticsState} className="min-w-0">
-            <ThresholdTradeoffPanel
-              state={analytics}
-              pipelineThresholdPct={pipelineThresholdPct}
-              onThresholdChange={handleThresholdPush}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            <PanelShell spec={spec.performance} state={panelState} heightClass="min-h-[300px]" functional>
-              <div data-testid="analytics-performance" data-analytics-state={analyticsState} className="min-w-0">
-                <OperationalModelPerformance
+      {/* --------------------- Section 2, current situation ------------------ */}
+      <section aria-labelledby="pli-current-situation" data-testid="pli-current-situation">
+        <h2 id="pli-current-situation" className="sr-only">Current situation</h2>
+        <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-12">
+          <div className="min-w-0 xl:col-span-5">
+            <PanelShell spec={spec.highrisk} state={panelState} heightClass="min-h-[320px]" functional>
+              <div data-testid="analytics-highrisk" data-analytics-state={analyticsState} className="min-w-0">
+                <HighRiskLinksTable
                   state={analytics}
+                  selectedLinkId={activeLinkId}
                   panelState={analyticsState}
-                  onOpenMetricDrawer={handleMetricDrawer}
+                  onSelectLink={handleSelectLink}
                   onNotify={handleNotify}
                 />
               </div>
             </PanelShell>
+          </div>
 
-            <PanelShell spec={spec.factors} state={panelState} heightClass="min-h-[300px]" functional>
+          <div className="min-w-0 xl:col-span-7">
+            <PanelShell spec={spec.chennai} state={panelState} heightClass="xl:min-h-[360px]">
+              <ChennaiWorkspace
+                selectedLinkId={selectedLink}
+                onSelectLink={setSelectedLink}
+                whatIfOpen={whatIfOpen}
+                onWhatIfOpenChange={setWhatIfOpen}
+                onPredictionsChange={setChennaiPredictions}
+              />
+              <dl className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3">
+                {modelEvidence
+                  .filter((e) => ["driver", "impact", "confidence", "services", "window"].includes(e.key))
+                  .map((e) => (
+                    <div key={e.key} className="rounded border border-slate-200 bg-slate-50 px-2 py-1">
+                      <dt className="text-[10px] uppercase tracking-wide text-slate-500">{e.label}</dt>
+                      <dd className="text-[11.5px] font-medium text-slate-900">{e.detail}</dd>
+                    </div>
+                  ))}
+              </dl>
+              <p className="mt-2 text-[11px] text-slate-600">
+                {activeScenario.headline} · {activeScenario.riskLabel} · Region {activeScenario.region}
+              </p>
+            </PanelShell>
+          </div>
+        </div>
+      </section>
+
+      {/* -------------------- Section 3, recommended action ------------------ */}
+      <section aria-labelledby="pli-recommendation-section" className="grid grid-cols-1 gap-3 xl:grid-cols-12">
+        <h2 id="pli-recommendation-section" className="sr-only">Recommended action and operational confidence</h2>
+        <div className="min-w-0 xl:col-span-7">
+          <RecommendedActionCard
+            onExplain={() => { setExplainOpen(true); scenarioState.setExplainTab("Current Prediction"); }}
+          />
+        </div>
+        <div className="min-w-0 xl:col-span-5">
+          <OperationalConfidenceCard />
+        </div>
+      </section>
+
+      {/* -------------------- Section 4, engineering analysis ---------------- */}
+      <section aria-labelledby="pli-engineering-analysis" className="space-y-3">
+        <h2 id="pli-engineering-analysis" className="text-sm font-semibold text-slate-900">
+          Engineering Analysis
+        </h2>
+        <p className="-mt-2 text-[11.5px] text-slate-600">Why the prediction model reaches this conclusion.</p>
+
+        <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-12">
+          <PanelShell
+            spec={spec.pipeline}
+            state={panelState}
+            heightClass="xl:min-h-[480px]"
+            className="xl:col-span-12"
+          >
+            <PredictivePipeline
+              externalLinkId={activeLinkId}
+              onLinkChange={setSelectedLink}
+              externalFeatureId={highlightFeatureId}
+              onThresholdChange={setPipelineThresholdPct}
+              externalThresholdPct={pushedThresholdPct}
+            />
+          </PanelShell>
+
+          <PanelShell
+            spec={spec.impact}
+            state={panelState}
+            heightClass="min-h-[320px]"
+            className="xl:col-span-12"
+            functional
+          >
+            <div className="mb-2 inline-flex overflow-hidden rounded border border-slate-200" role="group" aria-label="Feature contribution scope">
+              {(["Selected Link", "Global"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={contributionView === v}
+                  onClick={() => setContributionView(v)}
+                  className={cn(
+                    "px-2 py-1 text-[11px] font-medium",
+                    controlTransition,
+                    contributionView === v ? "bg-blue-600 text-white" : "bg-white text-slate-700 hover:bg-slate-50",
+                  )}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+            {contributionView === "Selected Link" ? (
+              <div data-testid="analytics-impact" data-analytics-state={analyticsState} className="min-w-0">
+                <FeatureImpactWaterfall
+                  state={analytics}
+                  selectedLinkId={activeLinkId}
+                  selectedLinkRisk={selectedLinkRisk}
+                  horizonLabel={`Next ${analytics.horizonHours} Hours`}
+                  whatIfRisk={whatIfRisk}
+                  panelState={analyticsState}
+                  onFactorSelected={(key) => handleNotify(key ? `Factor ${key} selected.` : "Factor selection cleared.")}
+                  onNotify={handleNotify}
+                />
+              </div>
+            ) : (
               <div data-testid="analytics-factors" data-analytics-state={analyticsState} className="min-w-0">
                 <PredictiveFactorsChart
                   state={analytics}
@@ -568,80 +634,186 @@ export default function PredictiveOpticalLinkIntelligence() {
                   onNotify={handleNotify}
                 />
               </div>
-            </PanelShell>
-          </div>
+            )}
+          </PanelShell>
+        </div>
+      </section>
 
-          <PanelShell spec={spec.impact} state={panelState} heightClass="min-h-[320px]" functional>
-            <div data-testid="analytics-impact" data-analytics-state={analyticsState} className="min-w-0">
-              <FeatureImpactWaterfall
+      {/* ---------------------- Section 5, model analytics ------------------- */}
+      <section aria-labelledby="pli-model-analytics" className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 id="pli-model-analytics" className="text-sm font-semibold text-slate-900">Model Analytics</h2>
+          <ViewingModeSwitch mode={viewMode} onChange={setViewMode} />
+        </div>
+
+        <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-2">
+          <PanelShell spec={spec.performance} state={panelState} heightClass="min-h-[300px]" functional>
+            <div data-testid="analytics-performance" data-analytics-state={analyticsState} className="min-w-0">
+              <OperationalModelPerformance
                 state={analytics}
-                selectedLinkId={activeLinkId}
-                selectedLinkRisk={selectedLinkRisk}
-                horizonLabel={`Next ${analytics.horizonHours} Hours`}
-                whatIfRisk={whatIfRisk}
                 panelState={analyticsState}
-                onFactorSelected={(key) => handleNotify(key ? `Factor ${key} selected.` : "Factor selection cleared.")}
+                onOpenMetricDrawer={handleMetricDrawer}
                 onNotify={handleNotify}
               />
+              {viewMode === "Data Science" && (
+                <dl data-testid="pli-data-science-metrics" className="mt-2 grid grid-cols-2 gap-1.5">
+                  {validationResults.map((v) => (
+                    <div key={v.key} className="rounded border border-blue-200 bg-blue-50 px-2 py-1">
+                      <dt className="text-[10px] uppercase tracking-wide text-blue-700">{v.label}</dt>
+                      <dd className="text-[11.5px] font-medium text-slate-900">{v.value}</dd>
+                    </div>
+                  ))}
+                  <div className="rounded border border-blue-200 bg-blue-50 px-2 py-1">
+                    <dt className="text-[10px] uppercase tracking-wide text-blue-700">Calibration error</dt>
+                    <dd className="text-[11.5px] font-medium text-slate-900">0.021 expected calibration error</dd>
+                  </div>
+                  <div className="rounded border border-blue-200 bg-blue-50 px-2 py-1">
+                    <dt className="text-[10px] uppercase tracking-wide text-blue-700">ROC AUC</dt>
+                    <dd className="text-[11.5px] font-medium text-slate-900">0.964</dd>
+                  </div>
+                </dl>
+              )}
             </div>
           </PanelShell>
 
-          <PanelShell spec={spec.highrisk} state={panelState} heightClass="min-h-[320px]" functional>
-            <div data-testid="analytics-highrisk" data-analytics-state={analyticsState} className="min-w-0">
-              <HighRiskLinksTable
+          <PanelShell spec={spec.horizon} state={panelState} heightClass="min-h-[300px]" functional>
+            <div data-testid="analytics-horizon" data-analytics-state={analyticsState} className="min-w-0">
+              <PredictionHorizonChart
                 state={analytics}
                 selectedLinkId={activeLinkId}
                 panelState={analyticsState}
-                onSelectLink={handleSelectLink}
                 onNotify={handleNotify}
               />
             </div>
           </PanelShell>
         </div>
-      </div>
 
-      {/* --------------------------- lower analytics ------------------------ */}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12">
-        <PanelShell
-          spec={spec.training}
-          state={panelState}
-          heightClass="min-h-[260px]"
-          className="md:col-span-2 xl:col-span-12"
-          functional
+        <Disclosure
+          id="threshold"
+          title="Advanced: threshold trade-off and technical metrics"
+          summary={
+            <p className="text-[11px] text-slate-600">
+              Confidence threshold {pipelineThresholdPct}%. Expand to review precision, recall and false-positive trade-offs.
+            </p>
+          }
         >
-          <div id="model-lifecycle-workspace" className="min-w-0">
-            <ModelLifecycleWorkspace
-              context={{
-                region,
-                product,
-                horizon,
-                selectedLinkId: selectedLink,
-                thresholdPct: pipelineThresholdPct,
-                tab: lifecycleTab,
-                onTabChange: setLifecycleTab,
-                activeVersion: activeModelVersion,
-                onActiveVersionChange: setActiveModelVersion,
-              }}
-            />
-          </div>
-        </PanelShell>
-
-        <PanelShell spec={spec.horizon} state={panelState} heightClass="min-h-[300px]" className="xl:col-span-7" functional>
-          <div data-testid="analytics-horizon" data-analytics-state={analyticsState} className="min-w-0">
-            <PredictionHorizonChart
+          <div data-testid="analytics-threshold" data-analytics-state={analyticsState} className="min-w-0">
+            <ThresholdTradeoffPanel
               state={analytics}
-              selectedLinkId={activeLinkId}
-              panelState={analyticsState}
-              onNotify={handleNotify}
+              pipelineThresholdPct={pipelineThresholdPct}
+              onThresholdChange={handleThresholdPush}
             />
           </div>
-        </PanelShell>
+          {viewMode === "Engineering" && (
+            <p className="mt-2 text-[11px] text-slate-600">
+              Feature engineering detail is available in the Engineering Analysis pipeline, Engineer stage.
+            </p>
+          )}
+        </Disclosure>
+      </section>
+
+      {/* ------------------------- Section 6, lifecycle ---------------------- */}
+      <section aria-labelledby="pli-lifecycle-section" className="space-y-3">
+        <h2 id="pli-lifecycle-section" className="text-sm font-semibold text-slate-900">Lifecycle</h2>
+        <Disclosure
+          id="lifecycle"
+          title="Model lifecycle, governance and validation"
+          summary={
+            <dl className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-4">
+              {lifecycleSummary.map((l) => (
+                <div key={l.key} className="rounded border border-slate-200 bg-white px-2 py-1">
+                  <dt className="text-[10px] uppercase tracking-wide text-slate-500">{l.label}</dt>
+                  <dd className="text-[11.5px] font-medium text-slate-900">
+                    {l.key === "version" ? <span data-testid="pli-active-version">{activeModelVersion}</span> : l.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          }
+        >
+          <div className="grid grid-cols-1 gap-3 xl:grid-cols-12">
+            <PanelShell
+              spec={spec.training}
+              state={panelState}
+              heightClass="min-h-[260px]"
+              className="xl:col-span-8"
+              functional
+            >
+              <div id="model-lifecycle-workspace" className="min-w-0">
+                <ModelLifecycleWorkspace
+                  context={{
+                    region,
+                    product,
+                    horizon,
+                    selectedLinkId: selectedLink,
+                    thresholdPct: pipelineThresholdPct,
+                    tab: lifecycleTab,
+                    onTabChange: setLifecycleTab,
+                    activeVersion: activeModelVersion,
+                    onActiveVersionChange: setActiveModelVersion,
+                  }}
+                />
+              </div>
+            </PanelShell>
+
+            <PanelShell spec={spec.governance} state={panelState} heightClass="min-h-[200px]" className="xl:col-span-4">
+              <dl className="space-y-1">
+                {governanceRecords.map((r) => (
+                  <div key={r.key} className="flex items-baseline justify-between gap-2 border-b border-slate-100 py-0.5">
+                    <dt className="text-[11px] text-slate-600">
+                      <button
+                        type="button"
+                        onClick={() => focusLifecycleTab(governanceTabTargets[r.key] ?? "Governance")}
+                        className="text-left underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      >
+                        {r.label}
+                      </button>
+                    </dt>
+                    <dd className="text-[11.5px] font-medium text-slate-900">{r.value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <ul className="mt-2 space-y-0.5 text-[10.5px] text-slate-600">
+                {modelActivity.map((a) => (
+                  <li key={a.at}>{a.at} · {a.actor} · {a.summary}</li>
+                ))}
+              </ul>
+            </PanelShell>
+          </div>
+        </Disclosure>
+      </section>
+
+      {/* ------------------------- Section 7, scenario ----------------------- */}
+      <section aria-labelledby="pli-scenario-section" className="space-y-3">
+        <h2 id="pli-scenario-section" className="text-sm font-semibold text-slate-900">Scenario</h2>
+        <p className="-mt-2 text-[11.5px] text-slate-600">
+          Narrative walkthrough of the Chennai predictive protection demonstration, outcome and learning.
+        </p>
+
+        <section
+          id="chennai-protection-scenario"
+          aria-labelledby="chennai-protection-scenario-title"
+          className="rounded-xl border border-slate-200 bg-white shadow-sm"
+        >
+          <header className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-200 px-4 py-2.5">
+            <div className="min-w-0">
+              <h3 id="chennai-protection-scenario-title" className="text-sm font-semibold text-slate-900">
+                Chennai Predictive Protection Scenario
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Fifteen deterministic stages from baseline to outcome and learning, with human-governed approval.
+              </p>
+            </div>
+          </header>
+          <div className="p-4">
+            <ScenarioWorkspace state={scenarioState} />
+          </div>
+        </section>
 
         <PanelShell
-          spec={{ ...spec.traditional, title: "Why Traditional Monitoring Does Not Solve This", description: "Stage-by-stage comparison of the current operating model with agentic predictive protection." }}
+          spec={{ ...spec.traditional, title: "Why Traditional Monitoring Does Not Solve This", description: "Stage-by-stage comparison of the current operating model with governed predictive protection." }}
           state={panelState}
           heightClass="min-h-[260px]"
-          className="xl:col-span-5"
           functional
         >
           <TraditionalComparisonPanel state={scenarioState} />
@@ -656,105 +828,8 @@ export default function PredictiveOpticalLinkIntelligence() {
             </ul>
           </details>
         </PanelShell>
-      </div>
-
-      {/* ------------------ AIM-006 predictive protection scenario ------------ */}
-      <section
-        id="chennai-protection-scenario"
-        aria-labelledby="chennai-protection-scenario-title"
-        className="rounded-xl border border-slate-200 bg-white shadow-sm"
-      >
-        <header className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-200 px-4 py-2.5">
-          <div className="min-w-0">
-            <h2 id="chennai-protection-scenario-title" className="text-sm font-semibold text-slate-900">
-              Chennai Predictive Protection Scenario
-            </h2>
-            <p className="text-[11px] text-slate-500">
-              Fifteen deterministic stages from baseline to outcome and learning, with human-governed approval.
-            </p>
-          </div>
-          <span className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
-            Synthetic data
-          </span>
-        </header>
-        <div className="p-4">
-          <ScenarioWorkspace state={scenarioState} />
-        </div>
       </section>
 
-
-      {/* ---------------------------- bottom strip -------------------------- */}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <PanelShell spec={spec.inputs} state={panelState} heightClass="min-h-[200px]">
-          <dl className="space-y-1.5">
-            {groupedFeatures.map((g) => (
-              <div key={g.group}>
-                <dt className="text-[11px] font-semibold text-slate-800">{g.group}</dt>
-                <dd className="text-[11px] text-slate-600">{g.items.map((i) => i.label).join(", ")}</dd>
-              </div>
-            ))}
-          </dl>
-        </PanelShell>
-
-        <PanelShell spec={spec.output} state={panelState} heightClass="min-h-[200px]">
-          <table className="w-full text-left text-[11px]">
-            <caption className="sr-only">Placeholder per-link prediction records</caption>
-            <thead>
-              <tr className="text-[10px] uppercase tracking-wide text-slate-500">
-                <th scope="col" className="py-1">Link</th>
-                <th scope="col" className="py-1">Risk</th>
-                <th scope="col" className="py-1">Lead time</th>
-                <th scope="col" className="py-1">Services</th>
-              </tr>
-            </thead>
-            <tbody>
-              {linkPredictions.map((l) => (
-                <tr
-                  key={l.linkId}
-                  onClick={() => setSelectedLink(l.linkId === selectedLink ? null : l.linkId)}
-                  className={cn("cursor-pointer border-t border-slate-100", selectedLink === l.linkId && "bg-blue-50")}
-                >
-                  <th scope="row" className="py-1 font-medium text-slate-900">{l.linkId}</th>
-                  <td className="py-1 text-slate-700">{l.risk}</td>
-                  <td className="py-1 text-slate-700">{l.leadTime}</td>
-                  <td className="py-1 text-slate-700">{l.servicesExposed}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <ul className="mt-2 flex flex-wrap gap-1">
-            {recommendedActions.map((a) => (
-              <li key={a.key} className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10.5px] text-slate-700">
-                {a.label} · {a.approval}
-              </li>
-            ))}
-          </ul>
-        </PanelShell>
-
-        <PanelShell spec={spec.governance} state={panelState} heightClass="min-h-[200px]">
-          <dl className="space-y-1">
-            {governanceRecords.map((r) => (
-              <div key={r.key} className="flex items-baseline justify-between gap-2 border-b border-slate-100 py-0.5">
-                <dt className="text-[11px] text-slate-600">
-                  <button
-                    type="button"
-                    onClick={() => focusLifecycleTab(governanceTabTargets[r.key] ?? "Governance")}
-                    className="text-left underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                  >
-                    {r.label}
-                  </button>
-                </dt>
-                <dd className="text-[11.5px] font-medium text-slate-900">{r.value}</dd>
-              </div>
-            ))}
-          </dl>
-          <ul className="mt-2 space-y-0.5 text-[10.5px] text-slate-600">
-            {modelActivity.map((a) => (
-              <li key={a.at}>{a.at} · {a.actor} · {a.summary}</li>
-            ))}
-          </ul>
-        </PanelShell>
-      </div>
 
       <AnalyticsMetricDrawer
         open={metricDrawerOpen}
@@ -793,10 +868,7 @@ export default function PredictiveOpticalLinkIntelligence() {
       )}
 
 
-      <p className="text-[10.5px] text-slate-500">
-        Synthetic Taara-aligned demonstration. Values, sparklines and panel content are temporary fixtures for the
-        AIM-001 page framework and do not represent deployed systems.
-      </p>
+
     </div>
   );
 }

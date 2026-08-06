@@ -129,15 +129,26 @@ export const breadcrumb = [
   "Predictive Optical Link Intelligence",
 ];
 
+/**
+ * AIM-010 — five operational KPIs. Prediction Accuracy, False Positive Rate and
+ * Links Modeled are folded into the single Operational Trust indicator.
+ */
 export const kpiMetrics: ModelMetric[] = [
-  { key: "links-modeled", label: "Links Modeled", value: "8,721", deltaLabel: "3.2% vs 24h", direction: "up", intent: "positive", sparkline: [42, 45, 44, 49, 52, 51, 55], description: "Optical links currently covered by the prediction model." },
-  { key: "at-risk", label: "Predicted At-Risk Links", value: "32", deltaLabel: "2 vs 24h", direction: "up", intent: "negative", sparkline: [18, 22, 20, 26, 24, 29, 32], description: "Links predicted to degrade within the forecast horizon." },
   { key: "high-risk-6h", label: "High Risk, Next 6 Hours", value: "6", deltaLabel: "1 vs 24h", direction: "up", intent: "negative", sparkline: [3, 4, 3, 5, 4, 5, 6], description: "Links with high-confidence degradation predicted in six hours." },
-  { key: "lead-time", label: "Mean Lead Time", value: "5h 42m", deltaLabel: "1h 18m vs 24h", direction: "up", intent: "positive", sparkline: [3.1, 3.6, 4.0, 4.4, 4.9, 5.3, 5.7], description: "Average warning time between prediction and observed impact." },
-  { key: "accuracy", label: "Prediction Accuracy", value: "94.1%", deltaLabel: "2.3% vs 7d", direction: "up", intent: "positive", sparkline: [90.4, 91.1, 91.8, 92.6, 93.2, 93.7, 94.1], description: "Share of predictions confirmed by observed link behaviour." },
-  { key: "false-positive", label: "False Positive Rate", value: "2.8%", deltaLabel: "0.6% vs 7d", direction: "down", intent: "positive", sparkline: [4.1, 3.9, 3.6, 3.4, 3.1, 2.9, 2.8], description: "Predicted degradations that did not occur." },
+  { key: "at-risk", label: "Predicted At-Risk Links", value: "32", deltaLabel: "2 vs 24h", direction: "up", intent: "negative", sparkline: [18, 22, 20, 26, 24, 29, 32], description: "Links predicted to degrade within the forecast horizon." },
   { key: "services-protected", label: "Customer Services Protected", value: "1,284", deltaLabel: "6.7% vs 7d", direction: "up", intent: "positive", sparkline: [1080, 1122, 1165, 1190, 1230, 1258, 1284], description: "Customer services shielded from predicted degradation." },
+  { key: "lead-time", label: "Prediction Lead Time", value: "5h 42m", deltaLabel: "1h 18m vs 24h", direction: "up", intent: "positive", sparkline: [3.1, 3.6, 4.0, 4.4, 4.9, 5.3, 5.7], description: "Average warning time between prediction and observed impact." },
+  { key: "operational-trust", label: "Operational Trust", value: "Model Healthy", deltaLabel: "stable vs 7d", direction: "flat", intent: "neutral", sparkline: [92.4, 92.9, 93.2, 93.6, 93.8, 94.0, 94.1], description: "Combined trust indicator. Model health 94.1 percent, false positive rate 2.8 percent, data freshness 96 percent." },
 ];
+
+/** Hover detail behind the Operational Trust KPI. */
+export const operationalTrustDetail = [
+  { key: "health", label: "Model health", value: "94.1%" },
+  { key: "false-positive", label: "False positive rate", value: "2.8%" },
+  { key: "freshness", label: "Data freshness", value: "96%" },
+  { key: "links", label: "Links modelled", value: "8,721" },
+] as const;
+
 
 export const scenarios: ScenarioState[] = [
   { key: "chennai-fog", label: "Chennai Fog Risk", region: "India South", headline: "Fog attenuation predicted across Chennai metro links", riskLabel: "High Risk" },
@@ -269,14 +280,11 @@ export const panelSpecs: PanelSpec[] = [
   { id: "pipeline", title: "Predictive Optical Link Risk Model Pipeline", visualType: "Six-stage horizontal pipeline with grouped signal and model cards", desktopHeight: "480 to 560 px", description: "Shows how signals become features, anomalies, risk predictions, customer impact and protected action." },
   { id: "chennai", title: "Chennai Fog Scenario, Model Output", visualType: "Geospatial risk map with evidence sidebar", desktopHeight: "360 to 430 px", description: "Scenario map of predicted at-risk links with model evidence and recommended window." },
   { id: "performance", title: "Model Performance", visualType: "Accuracy gauge with precision, recall and F1 bars", desktopHeight: "260 to 330 px", description: "Rolling ninety day model quality metrics." },
-  { id: "factors", title: "Top Predictive Factors", visualType: "Horizontal feature-importance bars", desktopHeight: "260 to 330 px", description: "Relative contribution of each input feature to the current prediction." },
   { id: "impact", title: "Feature Impact, Selected Link", visualType: "Signed contribution waterfall", desktopHeight: "300 to 360 px", description: "How each engineered factor moves the modelled risk score for the selected link." },
   { id: "highrisk", title: "Top High-Risk Links", visualType: "Ranked operational link table", desktopHeight: "300 to 360 px", description: "Links requiring attention first, with impact, lead time, fallback readiness and recommended action." },
   { id: "training", title: "Model Training and Validation", visualType: "Tabbed donut and backtest trend line", desktopHeight: "260 to 330 px", description: "Training composition, validation results, backtesting and explainability." },
   { id: "horizon", title: "Prediction Horizon Versus Confidence", visualType: "Multi-series confidence decay line chart", desktopHeight: "260 to 330 px", description: "Confidence by risk band across the forecast horizon." },
   { id: "traditional", title: "Why Traditional Monitoring Does Not Solve This", visualType: "Checklist with reactive versus predictive comparison", desktopHeight: "260 to 330 px", description: "Gaps in threshold based monitoring compared with predictive protection." },
-  { id: "inputs", title: "Model Inputs", visualType: "Grouped input inventory", desktopHeight: "200 to 240 px", description: "Optical, environmental, network, service and historical inputs consumed by the model." },
-  { id: "output", title: "Prediction Output", visualType: "Prediction record table", desktopHeight: "200 to 240 px", description: "Per-link prediction, lead time, risk band and exposed services." },
   { id: "governance", title: "Model Governance", visualType: "Governance record list with activity log", desktopHeight: "200 to 240 px", description: "Ownership, review, autonomy tier, lineage and evidence retention." },
 ];
 
@@ -285,3 +293,68 @@ export function getPanelSpec(id: string): PanelSpec {
   if (!found) throw new Error(`Unknown panel spec: ${id}`);
   return found;
 }
+
+/* ---------------------- AIM-010 executive experience ---------------------- */
+
+export interface SummaryChip {
+  key: string;
+  label: string;
+  value: string;
+  tone: "risk" | "warning" | "positive" | "analytic" | "neutral";
+}
+
+/** Section 1 — Current Operational Assessment. */
+export const operationalAssessment = {
+  headline: "6 optical links are predicted to degrade within the next six hours.",
+  detail: [
+    "One critical customer service carrying 10 Gbps requires governed preventive action.",
+    "RF fallback capacity has been validated.",
+    "Prediction confidence is 94%.",
+    "Expected intervention window: 5 hours 42 minutes.",
+  ],
+  chips: [
+    { key: "risk", label: "Risk", value: "6 links high risk, next 6 hours", tone: "risk" },
+    { key: "action", label: "Action", value: "Move priority traffic", tone: "warning" },
+    { key: "confidence", label: "Confidence", value: "94%", tone: "analytic" },
+    { key: "approval", label: "Approval", value: "Required", tone: "neutral" },
+  ] as SummaryChip[],
+};
+
+/** Section 3 — Current Recommended Action. */
+export const currentRecommendedAction = {
+  action: "Move Priority Traffic",
+  reason:
+    "Dense fog is expected to reduce link margin below acceptable operating reserve within the next 5 hours 42 minutes.",
+  facts: [
+    { key: "customer", label: "Customer", value: "Enterprise Mobile Backhaul" },
+    { key: "capacity", label: "Capacity", value: "10 Gbps" },
+    { key: "fallback", label: "Fallback", value: "Validated" },
+    { key: "approval", label: "Approval", value: "Required" },
+    { key: "confidence", label: "Confidence", value: "94%" },
+    { key: "rollback", label: "Rollback", value: "Ready" },
+  ],
+};
+
+/** Section 3 — Operational Confidence trust card. */
+export const operationalConfidence = [
+  { key: "prediction", label: "Prediction confidence", value: "94%", tone: "analytic" },
+  { key: "evidence", label: "Evidence completeness", value: "98%", tone: "analytic" },
+  { key: "telemetry", label: "Telemetry freshness", value: "96%", tone: "analytic" },
+  { key: "fallback", label: "Fallback validated", value: "Yes", tone: "positive" },
+  { key: "rollback", label: "Rollback ready", value: "Yes", tone: "positive" },
+  { key: "approval", label: "Human approval", value: "Required", tone: "neutral" },
+] as const;
+
+/** Section 6 — collapsed lifecycle summary. */
+export const lifecycleSummary = [
+  { key: "version", label: "Model version", value: "v2.4.1" },
+  { key: "drift", label: "Current drift", value: "1.4%, within 3% threshold" },
+  { key: "validation", label: "Validation", value: "Passed, 2026-07-28" },
+  { key: "retraining", label: "Next retraining", value: "Scheduled in 6 days" },
+] as const;
+
+export const viewingModes = ["Operational", "Engineering", "Data Science"] as const;
+export type ViewingMode = (typeof viewingModes)[number];
+
+export const syntheticNotice =
+  "Synthetic Taara-aligned demonstration. All values on this page are deterministic fixtures and do not represent deployed systems.";

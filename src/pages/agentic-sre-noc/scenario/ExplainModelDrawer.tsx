@@ -12,6 +12,7 @@ import { drawerEnter } from "../components/motion";
 import { X } from "lucide-react";
 import { globalContributions } from "../analytics/analyticsFixtures";
 import { operationalMetrics } from "../analytics/analyticsFixtures";
+import { modelFeatures } from "../data/pliFixtures";
 import { EvidenceWorkspace } from "./EvidenceWorkspace";
 import { SimilarEventsPanel } from "./SimilarEventsPanel";
 import {
@@ -53,6 +54,19 @@ function ModelOverviewTab({ state }: { state: ScenarioStateValue }) {
         <Row label="Current confidence threshold" value={`${state.context.thresholdPct}%`} />
         <Row label="Active region and product" value={`${state.context.region} · ${state.context.product}`} />
       </dl>
+      <div data-testid="explain-model-inputs">
+        <h4 className="text-[12px] font-semibold text-slate-900">Model inputs</h4>
+        <dl className="mt-1 space-y-1">
+          {(["Optical", "Environmental", "Network and Service", "Historical and Context"] as const).map((group) => (
+            <div key={group}>
+              <dt className="text-[11px] font-semibold text-slate-800">{group}</dt>
+              <dd className="text-[11px] text-slate-600">
+                {modelFeatures.filter((f) => f.group === group).map((f) => f.label).join(", ")}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
       <div>
         <h4 className="text-[12px] font-semibold text-slate-900">Model ensemble</h4>
         <ul className="mt-1 space-y-1">
