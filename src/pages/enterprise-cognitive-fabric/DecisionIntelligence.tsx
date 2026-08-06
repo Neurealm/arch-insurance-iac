@@ -1,9 +1,9 @@
 /**
- * Decision Intelligence — Prompt 1.
+ * Decision Intelligence — Prompt 1 core plus Prompt 2 operational workflow.
  *
  * Transforms governed enterprise context into an explainable decision
- * environment. It compares alternatives, exposes tradeoffs, and prepares a
- * Decision Context Package. It never records the final human decision.
+ * environment, then lets the enterprise make, explain, record, govern and hand
+ * off a decision while preserving the context that existed at the time.
  *
  * MAKE THE TRADEOFFS VISIBLE BEFORE THE DECISION BECOMES SOMEONE ELSE'S CONSEQUENCE.
  */
@@ -27,15 +27,45 @@ import {
   EvidenceDrawer, PriorDecisionDrawer,
 } from "./decision-intelligence/drawers";
 import {
-  activeFilterCount, baselineProposal, defaultFilters, deriveDecisionState, diTone, diViews,
+  activeFilterCount, defaultFilters, diTone, diViews,
   evaluationById, evaluations, filterOptions, kpiFocusPanel, operationalState, seedActivity,
   stageById,
   type ComparisonRow, type DecisionAlternative, type DecisionConstraint,
   type DecisionIntelligenceEvaluation, type DiEvidence, type DiView, type FilterKey,
-  type PriorDecision, type ProposalParams,
+  type PriorDecision,
 } from "./decision-intelligence/data";
+import {
+  AcknowledgementPanel, AlternativeRefinementPanel, ApprovalChainPanel, AuditTrailPanel,
+  ChallengePanel, ContextSnapshotPanel, DecisionRecordPanel, DemoScenarioBar, DemoStoryOverlay,
+  DecisionScopePanel, DissentPanel, EscalationPanel, ExecutionHandoffPanel, MitigationPlannerPanel,
+  MitigationTradeoffPanel, NotificationsPanel, ObservationContractPanel, OpsActivityPanel,
+  RawVsMitigatedPanel, ReadinessPanel, RecommendationVsDecisionPanel, RegisteredOutcomePanel,
+  ReviewQueuePanel, ReviewWorkbenchPanel, ScenarioComparisonPanel, ScenarioSimulatorPanel,
+  SensitivityPanel, ThresholdPanel, VersionComparisonPanel, VersionHistoryPanel,
+} from "./decision-intelligence/ops-panels";
+import {
+  ApprovalDialog, ChallengeDialog, DissentDialog, EscalationDialog, EvidenceActionDialog,
+  ExportDialog, GlobalSearchDialog, RecordDecisionDialog, RefineAlternativeDialog,
+  ReviewActionDialog, ScopeEditDialog, StartDecisionAnalysisDialog,
+} from "./decision-intelligence/ops-dialogs";
+import {
+  alternativeCode, baselineScenario, buildSnapshot, demoScenarios, emptyHandoff,
+  emptyObservationContract, personaNameById, readinessMetrics, readinessState, refinedParams,
+  scenarioState, seedAcknowledgements, seedApprovals, seedAudit, seedChallenges,
+  seedDecisionConditions, seedDecisionRecord, seedDissents, seedEscalations, seedMitigations,
+  seedNotifications, seedOpsActivity, seedRefinements, seedReviews, seedScenarios, seedScope,
+  seedVersions, storySteps, workExecutionRoute,
+  type AuditEvent, type DecisionAcknowledgement, type DecisionApproval,
+  type DecisionContextSnapshot, type DecisionDissent, type DecisionEscalation,
+  type DecisionNotification, type DecisionRecord, type DecisionReview, type DecisionScenarioParams,
+  type DecisionScope, type ExecutionHandoff, type ObservationContract, type OpsActivity,
+  type RecommendationChallenge, type RefinedAlternative, type ReviewDecision,
+} from "./decision-intelligence/ops-data";
 
 const STORAGE_KEY = "ecf:decision-intelligence:v1";
+const clock = () => new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+const stamp = () => new Date().toISOString().slice(0, 16).replace("T", " ");
+
 
 export default function DecisionIntelligence() {
   const navigate = useNavigate();
