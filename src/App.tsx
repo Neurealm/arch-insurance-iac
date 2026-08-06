@@ -364,6 +364,7 @@ import EnterpriseCognitiveMemory from "./pages/enterprise-cognitive-fabric/Enter
 import CognitiveIntake from "./pages/enterprise-cognitive-fabric/CognitiveIntake.tsx";
 import PersonaImpactAnalysis from "./pages/enterprise-cognitive-fabric/PersonaImpactAnalysis.tsx";
 import CrossTeamImpactAnalysis from "./pages/enterprise-cognitive-fabric/CrossTeamImpactAnalysis.tsx";
+import DecisionIntelligence from "./pages/enterprise-cognitive-fabric/DecisionIntelligence.tsx";
 
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
@@ -788,6 +789,8 @@ const App = () => (
             <Route path="evaluation/cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
             <Route path="evaluation/cross-team-impact-analysis" element={<CrossTeamImpactAnalysis />} />
             <Route path="cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
+            <Route path="evaluation/decision-intelligence" element={<DecisionIntelligence />} />
+            <Route path="decision-intelligence" element={<DecisionIntelligence />} />
 
             <Route path=":slug" element={<EcfPage />} />
           </Route>
