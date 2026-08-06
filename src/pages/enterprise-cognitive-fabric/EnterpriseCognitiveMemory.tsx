@@ -467,6 +467,13 @@ export default function EnterpriseCognitiveMemory() {
       </section>
 
       {/* KPIs */}
+      {overlay && (
+        <div className="mt-2">
+          <StateBanner state={overlay.operationalState} message={overlay.banner} toneName={overlay.bannerTone}
+            onDismiss={() => applyScenario(null)} />
+        </div>
+      )}
+
       <div id="panel-kpis" className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {memoryKpis.map((k) => <MemoryKpiCard key={k.id} kpi={k} onClick={() => onKpi(k.id)} focused={kpiFocus === k.id} />)}
       </div>
