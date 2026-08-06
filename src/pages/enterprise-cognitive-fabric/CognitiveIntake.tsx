@@ -40,7 +40,7 @@ import {
   ScenarioDialog, SubmitWorkDialog,
 } from "./cognitive-intake/ops-dialogs";
 import {
-  activatedRules, demoStorySteps, evaluateRules, isoNow, nextId, nowLabel, readinessRoute,
+  demoStorySteps, evaluateRules, nextId, nowLabel, readinessRoute,
   scenarioById, seedJobs, seedNotifications, seedPackageVersions, seedRecentActivity,
   type CognitiveIntakeJob, type CognitiveIntakeNotification, type CognitiveIntakePackageVersion,
   type CognitiveIntakeRuleActivation, type IntakeOperationalState, type RuleInput,
@@ -323,7 +323,6 @@ export default function CognitiveIntake() {
       status: "Running",
       currentStageId: "context",
       startedAt: nowLabel(),
-      startedAtIso: isoNow(),
       elapsedTime: "00:00:04",
     };
     setJobs((js) => [job, ...js]);
