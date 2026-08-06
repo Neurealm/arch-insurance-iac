@@ -1,9 +1,9 @@
 /**
- * Decision Intelligence — Prompt 1.
+ * Decision Intelligence — Prompt 1 core plus Prompt 2 operational workflow.
  *
  * Transforms governed enterprise context into an explainable decision
- * environment. It compares alternatives, exposes tradeoffs, and prepares a
- * Decision Context Package. It never records the final human decision.
+ * environment, then lets the enterprise make, explain, record, govern and hand
+ * off a decision while preserving the context that existed at the time.
  *
  * MAKE THE TRADEOFFS VISIBLE BEFORE THE DECISION BECOMES SOMEONE ELSE'S CONSEQUENCE.
  */
@@ -27,15 +27,45 @@ import {
   EvidenceDrawer, PriorDecisionDrawer,
 } from "./decision-intelligence/drawers";
 import {
-  activeFilterCount, baselineProposal, defaultFilters, deriveDecisionState, diTone, diViews,
+  activeFilterCount, defaultFilters, diTone, diViews,
   evaluationById, evaluations, filterOptions, kpiFocusPanel, operationalState, seedActivity,
   stageById,
   type ComparisonRow, type DecisionAlternative, type DecisionConstraint,
   type DecisionIntelligenceEvaluation, type DiEvidence, type DiView, type FilterKey,
-  type PriorDecision, type ProposalParams,
+  type PriorDecision,
 } from "./decision-intelligence/data";
+import {
+  AcknowledgementPanel, AlternativeRefinementPanel, ApprovalChainPanel, AuditTrailPanel,
+  ChallengePanel, ContextSnapshotPanel, DecisionRecordPanel, DemoScenarioBar, DemoStoryOverlay,
+  DecisionScopePanel, DissentPanel, EscalationPanel, ExecutionHandoffPanel, MitigationPlannerPanel,
+  MitigationTradeoffPanel, NotificationsPanel, ObservationContractPanel, OpsActivityPanel,
+  RawVsMitigatedPanel, ReadinessPanel, RecommendationVsDecisionPanel, RegisteredOutcomePanel,
+  ReviewQueuePanel, ReviewWorkbenchPanel, ScenarioComparisonPanel, ScenarioSimulatorPanel,
+  SensitivityPanel, ThresholdPanel, VersionComparisonPanel, VersionHistoryPanel,
+} from "./decision-intelligence/ops-panels";
+import {
+  ApprovalDialog, ChallengeDialog, DissentDialog, EscalationDialog, EvidenceActionDialog,
+  ExportDialog, GlobalSearchDialog, RecordDecisionDialog, RefineAlternativeDialog,
+  ReviewActionDialog, ScopeEditDialog, StartDecisionAnalysisDialog,
+} from "./decision-intelligence/ops-dialogs";
+import {
+  alternativeCode, baselineScenario, buildSnapshot, demoScenarios, emptyHandoff,
+  emptyObservationContract, personaNameById, readinessMetrics, readinessState, refinedParams,
+  scenarioState, seedAcknowledgements, seedApprovals, seedAudit, seedChallenges,
+  seedDecisionConditions, seedDecisionRecord, seedDissents, seedEscalations, seedMitigations,
+  seedNotifications, seedOpsActivity, seedRefinements, seedReviews, seedScenarios, seedScope,
+  seedVersions, storySteps, workExecutionRoute,
+  type AuditEvent, type DecisionAcknowledgement, type DecisionApproval,
+  type DecisionContextSnapshot, type DecisionDissent, type DecisionEscalation,
+  type DecisionNotification, type DecisionRecord, type DecisionReview, type DecisionScenarioParams,
+  type DecisionScope, type ExecutionHandoff, type ObservationContract, type OpsActivity,
+  type RecommendationChallenge, type RefinedAlternative, type ReviewDecision,
+} from "./decision-intelligence/ops-data";
 
 const STORAGE_KEY = "ecf:decision-intelligence:v1";
+const clock = () => new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+const stamp = () => new Date().toISOString().slice(0, 16).replace("T", " ");
+
 
 export default function DecisionIntelligence() {
   const navigate = useNavigate();
@@ -61,7 +91,7 @@ export default function DecisionIntelligence() {
   /* ----------------------------------------------------------- domain state */
   const [selectedDecisionId, setSelectedDecisionId] = useState("DIA 5001");
   const [selectedStage, setSelectedStage] = useState("DIS 12");
-  const [params, setParams] = useState<ProposalParams>(baselineProposal);
+  const [params, setParams] = useState<DecisionScenarioParams>(baselineScenario);
   const [selectedAlternatives, setSelectedAlternatives] = useState<string[]>(["ALT 5001 B"]);
   const [selectedPersona, setSelectedPersona] = useState<string | null>("PER 4101");
   const [selectedConstraint, setSelectedConstraint] = useState<string | null>(null);
@@ -77,6 +107,49 @@ export default function DecisionIntelligence() {
   const [evidenceDrawer, setEvidenceDrawer] = useState<DiEvidence | null>(null);
   const [constraintDrawer, setConstraintDrawer] = useState<DecisionConstraint | null>(null);
   const [priorDrawer, setPriorDrawer] = useState<PriorDecision | null>(null);
+
+  /* --------------------------------------------------- prompt 2 operations */
+  const [scope, setScope] = useState<DecisionScope>(seedScope);
+  const [refinements, setRefinements] = useState<RefinedAlternative[]>(seedRefinements);
+  const [comparedRefinement, setComparedRefinement] = useState<string | null>(null);
+  const [appliedMitigations, setAppliedMitigations] = useState<string[]>(
+    seedMitigations.filter((m) => m.status === "Accepted").map((m) => m.id));
+  const [mitigations, setMitigations] = useState(seedMitigations);
+  const [reviews, setReviews] = useState<DecisionReview[]>(seedReviews);
+  const [activeReview, setActiveReview] = useState<DecisionReview | null>(null);
+  const [acks, setAcks] = useState<DecisionAcknowledgement[]>(seedAcknowledgements);
+  const [approvals, setApprovals] = useState<DecisionApproval[]>(seedApprovals);
+  const [activeApproval, setActiveApproval] = useState<DecisionApproval | null>(null);
+  const [dissents, setDissents] = useState<DecisionDissent[]>(seedDissents);
+  const [challenges, setChallenges] = useState<RecommendationChallenge[]>(seedChallenges);
+  const [escalations, setEscalations] = useState<DecisionEscalation[]>(seedEscalations);
+  const [record, setRecord] = useState<DecisionRecord | null>(null);
+  const [snapshot, setSnapshot] = useState<DecisionContextSnapshot | null>(null);
+  const [handoff, setHandoff] = useState<ExecutionHandoff>(emptyHandoff);
+  const [contract, setContract] = useState<ObservationContract>(emptyObservationContract);
+  const [audit, setAudit] = useState<AuditEvent[]>(seedAudit);
+  const [notifications, setNotifications] = useState<DecisionNotification[]>(seedNotifications);
+  const [opsActivity, setOpsActivity] = useState<OpsActivity[]>(seedOpsActivity);
+  const [versionLeft, setVersionLeft] = useState("DIA 5001 v1");
+  const [versionRight, setVersionRight] = useState("DEC 5001 v1");
+  const [scenarioId, setScenarioId] = useState<string | null>(null);
+  const [storyIndex, setStoryIndex] = useState(-1);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [moreMenu, setMoreMenu] = useState(false);
+
+  /* dialogs */
+  const [startOpen, setStartOpen] = useState(false);
+  const [scopeOpen, setScopeOpen] = useState(false);
+  const [refineOpen, setRefineOpen] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [approvalOpen, setApprovalOpen] = useState(false);
+  const [dissentOpen, setDissentOpen] = useState(false);
+  const [challengeOpen, setChallengeOpen] = useState(false);
+  const [escalationOpen, setEscalationOpen] = useState(false);
+  const [recordOpen, setRecordOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const say = useCallback((m: string) => setAnnounce(m), []);
 
@@ -105,10 +178,27 @@ export default function DecisionIntelligence() {
   }, [view, density, hiddenColumns, savedView, selectedDecisionId, selectedStage]);
 
   /* ------------------------------------------------------------- derivation */
-  const derived = useMemo(() => deriveDecisionState(params), [params]);
+  const derived = useMemo(() => scenarioState(params), [params]);
   const evaluation = evaluationById(selectedDecisionId);
   const stage = stageById(selectedStage);
-  const serviceState = operationalState(derived);
+  const readiness = useMemo(
+    () => readinessMetrics(derived, reviews, approvals, record), [derived, reviews, approvals, record]);
+  const processState = useMemo(
+    () => readinessState(readiness, record, handoff), [readiness, record, handoff]);
+  const serviceState = record ? processState : operationalState(derived);
+
+  /* ------------------------------------------------------- activity engine */
+  const logOps = useCallback((action: string, description: string, result: string, owner: string) => {
+    const auditId = `AUD ${88200 + Math.floor(Math.random() * 700)}`;
+    setOpsActivity((prev) => [{ id: `DOA ${Date.now()}`, timestamp: clock(), evaluationId: "DIA 5001", action, description, result, owner, auditId }, ...prev]);
+    setAudit((prev) => [{ id: auditId, timestamp: stamp(), actor: owner, role: "Operator", action, previousState: "—", newState: result, reason: description }, ...prev]);
+    say(`${action}. ${description}`);
+  }, [say]);
+
+  const notify = useCallback((type: string, title: string, description: string, severity: DecisionNotification["severity"], owner: string) => {
+    setNotifications((prev) => [{ id: `DNT ${Date.now()}`, evaluationId: "DIA 5001", decisionRecordId: null, type, title, description, severity, owner, status: "Unread", createdAt: clock() }, ...prev]);
+  }, []);
+
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -183,7 +273,195 @@ export default function DecisionIntelligence() {
   const toggleRow = (id: string) =>
     setSelectedRows((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
-  const prompt2 = (label: string) => say(`${label} becomes available in Prompt 2 of Decision Intelligence`);
+  /* --------------------------------------------------- prompt 2 operations */
+  const changeParams = (p: Partial<DecisionScenarioParams>) => {
+    setParams((prev) => {
+      const next = { ...prev, ...p };
+      const before = scenarioState(prev);
+      const after = scenarioState(next);
+      const notes: string[] = [];
+      if (!before.jointApprovalRequired && after.jointApprovalRequired) notes.push("joint approval activated");
+      if (before.jointApprovalRequired && !after.jointApprovalRequired) notes.push("joint approval no longer required");
+      if (before.governanceRestricted !== after.governanceRestricted) notes.push(after.governanceRestricted ? "quarter end restriction activated" : "deployment restriction cleared");
+      if (before.posture !== after.posture) notes.push(`recommendation changed to ${after.posture}`);
+      setApprovals((prev2) => prev2.map((a) => (a.approver === "Release Governance"
+        ? { ...a, status: after.jointApprovalRequired ? (a.status === "Not Required" ? "Pending" : a.status) : "Not Required" }
+        : a)));
+      window.setTimeout(() => {
+        logOps("Scenario changed", `Proposal parameters updated. ${notes.length ? notes.join(", ") : "no governance change"}`,
+          after.posture, "Decision Facilitation");
+        if (notes.length) notify("Recommendation Changed", "Scenario change updated the decision context", notes.join(", "), "High", "Decision Facilitation");
+      }, 0);
+      return next;
+    });
+  };
+
+  const onEvidenceSubmit = (action: string, type: string, owner: string, note: string) => {
+    setEvidenceOpen(false);
+    if (action === "Add Evidence" || action === "Link Existing Evidence") {
+      if (type === "Fraud Analysis") changeParams({ fraudLossAnalysis: "Provided" });
+      else if (type === "Dependency Capacity Test" || type === "Load Test") changeParams({ dependencyStressTest: "Provided" });
+      else if (type === "Rollback Validation") changeParams({ rollbackCapability: "Available" });
+      logOps("Evidence added", `${type} added by ${owner}. ${note}`.trim(), "Coverage updated", owner);
+      notify("Evidence Added", `${type} added`, "Evidence coverage and recommendation confidence recalculated", "Medium", owner);
+    } else if (action === "Request Evidence") {
+      logOps("Evidence requested", `${type} requested from ${owner}. ${note}`.trim(), "Open", owner);
+      notify("Evidence Requested", `${type} requested`, `Requested from ${owner}`, "High", owner);
+    } else {
+      logOps(action, `${type} · ${note}`.trim(), "Recorded", owner);
+    }
+  };
+
+  const onReviewSubmit = (decision: ReviewDecision, comments: string, condition: string) => {
+    if (!activeReview) return;
+    const status = decision === "Disagree" ? "Challenged"
+      : decision === "Request Evidence" ? "Evidence Requested"
+        : decision === "Escalate" ? "Escalated" : "Complete";
+    setReviews((prev) => prev.map((r) => (r.id === activeReview.id
+      ? { ...r, decision, comments: [comments, condition].filter(Boolean).join(" · "), status, completedAt: stamp() } : r)));
+    setActiveReview((r) => (r ? { ...r, decision, comments, status } : r));
+    setReviewOpen(false);
+    logOps("Reviewer position recorded", `${activeReview.id} · ${decision}`, status, activeReview.reviewer);
+    notify(decision === "Disagree" ? "Reviewer Challenged Recommendation" : "Review Requested",
+      `${activeReview.reviewer} recorded ${decision}`, comments || activeReview.issue,
+      decision === "Disagree" ? "High" : "Medium", activeReview.reviewer);
+    if (decision === "Escalate") setEscalationOpen(true);
+  };
+
+  const onApprovalSubmit = (decision: string, conditions: string[], comments: string) => {
+    if (!activeApproval) return;
+    const status: DecisionApproval["status"] =
+      decision === "Approve" ? "Approved"
+        : decision === "Approve with Conditions" ? "Approved with Conditions"
+          : decision === "Request Changes" ? "Changes Requested"
+            : decision === "Reject" ? "Rejected" : decision === "Defer" ? "Deferred" : "Escalated";
+    setApprovals((prev) => prev.map((a) => (a.id === activeApproval.id
+      ? { ...a, status, decision, conditions, comments, completedAt: stamp() } : a)));
+    setApprovalOpen(false);
+    logOps("Approval recorded", `${activeApproval.approver} · ${decision}`, status, activeApproval.approver);
+    notify(status === "Rejected" ? "Approval Rejected" : status === "Approved with Conditions" ? "Conditional Approval" : "Approval Granted",
+      `${activeApproval.approver} ${decision}`, conditions.join(" · ") || comments || "No conditions", "Medium", activeApproval.approver);
+  };
+
+  const recordDecision = (r: { decision: string; selectedAlternativeId: string; rationale: string; conditions: typeof seedDecisionConditions; confidence: number }) => {
+    const next: DecisionRecord = {
+      ...seedDecisionRecord,
+      decision: r.decision,
+      selectedAlternativeId: r.selectedAlternativeId,
+      decisionRationale: r.rationale,
+      conditions: r.conditions,
+      confidence: r.confidence,
+      approvalIds: approvals.filter((a) => a.status.startsWith("Approved")).map((a) => a.id),
+      dissentIds: dissents.map((d) => d.id),
+      decisionDate: stamp(),
+      status: record ? "Amended" : "Recorded",
+    };
+    setRecord(next);
+    setSnapshot(buildSnapshot(next, derived));
+    setRecordOpen(false);
+    logOps("Decision recorded", `${next.decisionNumber} · ${next.decision}`, "Decision Recorded", next.decisionOwner);
+    notify("Decision Recorded", `${next.decisionNumber} recorded`, next.decision, "High", next.decisionOwner);
+    focusPanel("panel-decision-record");
+  };
+
+  const prepareHandoff = () => {
+    setHandoff((h) => ({ ...h, status: "Prepared", createdAt: stamp() }));
+    logOps("Execution handoff created", "Governed execution conditions prepared for DEC 5001", "Execution Ready", "Release Governance");
+    notify("Execution Handoff Created", "Execution handoff prepared", "Conditions, controls and limits published to execution", "Medium", "Release Governance");
+  };
+
+  const createContract = () => {
+    setContract((c) => ({ ...c, status: "Created", createdAt: stamp() }));
+    logOps("Observation contract created", "Learning observation contract created for DEC 5001", "Observation Contract Ready", "Organizational Learning");
+    notify("Observation Contract Created", "Observation contract created", "Expected outcomes registered for future comparison", "Medium", "Organizational Learning");
+  };
+
+  const applyScenario = (id: string) => {
+    const s = demoScenarios.find((x) => x.id === id);
+    if (!s) return;
+    setScenarioId(id);
+    if (s.state === "reset") {
+      setParams(baselineScenario); setReviews(seedReviews); setApprovals(seedApprovals);
+      setAcks(seedAcknowledgements); setDissents(seedDissents); setChallenges(seedChallenges);
+      setEscalations(seedEscalations); setRecord(null); setSnapshot(null); setHandoff(emptyHandoff);
+      setContract(emptyObservationContract); setNotifications(seedNotifications);
+      setOpsActivity(seedOpsActivity); setAudit(seedAudit); setRefinements(seedRefinements);
+      setComparedRefinement(null); setActiveReview(null); setScenarioId(null);
+      setMitigations(seedMitigations);
+      setAppliedMitigations(seedMitigations.filter((m) => m.status === "Accepted").map((m) => m.id));
+      say("Demo data reset to the seeded baseline");
+      return;
+    }
+    if (s.params) setParams((p) => ({ ...p, ...s.params }));
+    switch (s.state) {
+      case "review":
+        setReviews((prev) => prev.map((r) => (r.id === "DIR 5501"
+          ? { ...r, status: "Challenged", decision: "Disagree", comments: "Fraud exposure cannot be estimated without the analysis" } : r)));
+        break;
+      case "dissent":
+        setDissents(seedDissents);
+        break;
+      case "approve":
+        setApprovals((prev) => prev.map((a) => (a.approver === "Release Governance" ? { ...a, status: "Pending" } : a)));
+        break;
+      case "conditional":
+        setApprovals((prev) => prev.map((a) => (a.approver === "Fraud Engineering"
+          ? { ...a, status: "Approved with Conditions", decision: "Approve with Conditions", conditions: ["Maximum initial exposure 5%", "Fraud Loss Analysis accepted"], completedAt: stamp() } : a)));
+        break;
+      case "escalate":
+        setEscalations((prev) => [{
+          ...seedEscalations[0], id: `DES ${prev.length + 1}`, evaluationId: "DIA 5001",
+          issueType: "Executive Tradeoff Required", title: "Checkout retry expansion requires an executive tradeoff",
+          description: "Fraud exposure and checkout recovery cannot both be optimised at the requested exposure.",
+          severity: "High", status: "Open", createdAt: stamp(),
+        }, ...prev]);
+        break;
+      case "record":
+        recordDecision({
+          decision: "Approve Option B with Conditions", selectedAlternativeId: "ALT 5001 B",
+          rationale: seedDecisionRecord.decisionRationale, conditions: seedDecisionConditions, confidence: 94,
+        });
+        break;
+      case "handoff":
+        if (!record) recordDecision({ decision: "Approve Option B with Conditions", selectedAlternativeId: "ALT 5001 B", rationale: seedDecisionRecord.decisionRationale, conditions: seedDecisionConditions, confidence: 94 });
+        prepareHandoff();
+        break;
+      case "contract":
+        if (!record) recordDecision({ decision: "Approve Option B with Conditions", selectedAlternativeId: "ALT 5001 B", rationale: seedDecisionRecord.decisionRationale, conditions: seedDecisionConditions, confidence: 94 });
+        createContract();
+        break;
+      case "reassess":
+        notify("Decision Reassessment Required", "Context changed after the decision was recorded",
+          "A Persona version changed after the recorded decision. The snapshot is unchanged.", "High", "Decision Facilitation");
+        break;
+      default:
+        break;
+    }
+    logOps("Demo scenario applied", s.name, s.note, "Demo");
+  };
+
+  /* ------------------------------------------------------------- demo story */
+  const runStoryStep = (i: number) => {
+    const step = storySteps[i];
+    if (!step) return;
+    focusPanel(step.target);
+    switch (step.action) {
+      case "open-decision": setSelectedDecisionId("DIA 5001"); setDetail(evaluationById("DIA 5001")); break;
+      case "traffic-15": changeParams({ trafficExposure: 15 }); break;
+      case "rollout-off": changeParams({ progressiveRollout: false }); break;
+      case "add-evidence": changeParams({ fraudLossAnalysis: "Provided", dependencyStressTest: "Provided", progressiveRollout: true }); break;
+      case "record-decision":
+        recordDecision({ decision: "Approve Option B with Conditions", selectedAlternativeId: "ALT 5001 B", rationale: seedDecisionRecord.decisionRationale, conditions: seedDecisionConditions, confidence: 94 });
+        break;
+      case "handoff": prepareHandoff(); createContract(); break;
+      default: break;
+    }
+    say(`Demo story step ${i + 1}. ${step.caption}`);
+  };
+
+  const startStory = () => { setStoryIndex(0); runStoryStep(0); };
+  const nextStory = () => { const i = Math.min(storySteps.length - 1, storyIndex + 1); setStoryIndex(i); runStoryStep(i); };
+  const prevStory = () => { const i = Math.max(0, storyIndex - 1); setStoryIndex(i); runStoryStep(i); };
 
   const onNavigateFromDetail = (target: string) => {
     if (target === "cross-team") navigate("/enterprise-cognitive-fabric/evaluation/cross-team-impact-matrix");
@@ -202,6 +480,11 @@ export default function DecisionIntelligence() {
   };
   const leads = emphasis[view];
   const lead = (id: string) => (leads.includes(id) ? "order-first ring-1 ring-blue-200" : "");
+
+  const versionA = seedVersions.find((v) => v.id === versionLeft) ?? seedVersions[0];
+  const versionB = seedVersions.find((v) => v.id === versionRight) ?? seedVersions[seedVersions.length - 1];
+  const executionRouteExists = false;
+
 
   return (
     <div className="min-h-full bg-slate-50 p-3 text-slate-800">
@@ -240,19 +523,23 @@ export default function DecisionIntelligence() {
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={refresh}>
             <RefreshCw className="mr-1 h-3.5 w-3.5" aria-hidden /> Refresh
           </Button>
-          <Button size="sm" className="h-7 text-[11px]" onClick={() => prompt2("Start Decision Analysis")}>Start Decision Analysis</Button>
+          <Button size="sm" className="h-7 text-[11px]" onClick={() => setStartOpen(true)}>Start Decision Analysis</Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]"
             onClick={() => { setView("comparison"); focusPanel("panel-comparison"); say("Alternative comparison focused"); }}>
             <Scale className="mr-1 h-3.5 w-3.5" aria-hidden /> Compare Alternatives
           </Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => focusPanel("panel-evidence")}>Open Evidence</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => prompt2("Record Decision")}>Record Decision</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => prompt2("Governed Export")}>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setRecordOpen(true)}>Record Decision</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setSearchOpen(true)}>
+            <Search className="mr-1 h-3.5 w-3.5" aria-hidden /> Search
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setExportOpen(true)}>
             <Download className="mr-1 h-3.5 w-3.5" aria-hidden /> Export
           </Button>
-          <Button size="sm" variant="outline" className="h-7 px-2 text-[11px]" aria-label="More actions" onClick={() => prompt2("Additional decision operations")}>
+          <Button size="sm" variant="outline" className="h-7 px-2 text-[11px]" aria-label="More actions" onClick={() => { setMoreMenu((v) => !v); say("Additional decision operations"); }}>
             <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
           </Button>
+
         </div>
       </header>
 
@@ -382,7 +669,7 @@ export default function DecisionIntelligence() {
 
         <DecisionQualityPanel />
 
-        <DecisionContextPackagePanel evaluation={evaluationById("DIA 5001")} derived={derived} onOpenPrompt2={prompt2} />
+        <DecisionContextPackagePanel evaluation={evaluationById("DIA 5001")} derived={derived} onOpenPrompt2={(label) => { if (label.includes("Record")) setRecordOpen(true); else if (label.includes("Export")) setExportOpen(true); else say(label); }} />
 
         <ActivityPanel items={seedActivity} />
       </div>
