@@ -28,7 +28,7 @@ describe("AIM-006.1 — traditional comparison", () => {
 
   it("renders the synthetic-value labelling", () => {
     const { scope } = renderPanel();
-    expect(scope.getByText(/synthetic demonstration values/i)).toBeInTheDocument();
+    expect(scope.getAllByText(/synthetic demonstration values/i).length).toBeGreaterThan(0);
   });
 
   it("expands a row and shows the stage detail", async () => {

@@ -9,6 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import PredictiveOpticalLinkIntelligence from "../PredictiveOpticalLinkIntelligence";
+import "./helpers/aim006Harness";
 
 vi.mock("maplibre-gl", () => ({ default: { Map: class {}, NavigationControl: class {} } }));
 

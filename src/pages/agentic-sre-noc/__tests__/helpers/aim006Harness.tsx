@@ -59,3 +59,9 @@ export async function clickNextStage(
     await user.click(scope.getByRole("button", { name: /^next stage$/i }));
   }
 }
+
+/** jsdom does not implement object URLs; local CSV export needs them. */
+if (typeof URL.createObjectURL !== "function") {
+  (URL as unknown as { createObjectURL: (b: Blob) => string }).createObjectURL = () => "blob:aim006";
+  (URL as unknown as { revokeObjectURL: (u: string) => void }).revokeObjectURL = () => {};
+}
