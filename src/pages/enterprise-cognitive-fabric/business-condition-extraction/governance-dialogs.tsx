@@ -69,8 +69,9 @@ export function ReviewWorkbenchDialog({ review, open, onOpenChange, onDecision }
 
   const evidence = (
     <div className="space-y-1.5 text-[11.5px] text-slate-700">
-      <Field label="Evidence passage" value={evidenceSections[2]?.body ?? "The Payments API shall maintain 99.95 percent monthly availability."} />
-      <Field label="Source artifact" value={`${workbenchArtifact.name} · ${workbenchArtifact.id}`} />
+      <Field label="Evidence passage" value={evidenceSections[2]?.passages[0]?.text ?? "The Payments API shall maintain 99.95 percent monthly availability."} />
+      <Field label="Source artifact" value={`${workbenchArtifact.title} · ${workbenchArtifact.canonicalArtifactId}`} />
+
       <Field label="Source authority" value="Primary · Confluence Cloud · approved requirements space" />
       <Field label="Evidence coverage" value="100 percent of structured fields evidence linked" />
     </div>
