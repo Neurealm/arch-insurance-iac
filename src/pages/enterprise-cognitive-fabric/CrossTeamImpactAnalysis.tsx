@@ -138,13 +138,46 @@ export default function CrossTeamImpactAnalysis() {
 
   const logOps = useCallback((action: string, detail: string) => {
     setActivity((a) => [
-      { id: `ACT ${Date.now()}`, analysisId: "CTA 3001", action, detail, actor: "Coordination Office", at: new Date().toISOString().slice(11, 16) },
+      {
+        id: `ACT ${Date.now()}`,
+        timestamp: new Date().toISOString().slice(11, 16),
+        action, description: detail, owner: "Coordination Office", result: "Recorded",
+      },
       ...a,
     ]);
     setAnnounce(`${action}: ${detail}`);
   }, []);
 
   const spot = (panel: string) => storyOn && storySteps[storyIndex]?.target === panel;
+
+  const readiness = useMemo(
+    () => readinessMetrics(analysisState, accepted, acks, records),
+    [analysisState, accepted, acks, records],
+  );
+  const currentVersion = versions.find((v) => v.id === versionId) ?? versions[versions.length - 1];
+  const decisionPackage = useMemo(
+    () => buildDecisionPackage(analysisState, currentVersion, accepted, acks, escalations),
+    [analysisState, currentVersion, accepted, acks, escalations],
+  );
+  const routing = useMemo(
+    () => validateRouting(analysisState, accepted, acks, records, true, primaryPersona),
+    [analysisState, accepted, acks, records, primaryPersona],
+  );
+
+  const applyScenario = (id: string) => {
+    const s = demoScenarios.find((x) => x.id === id);
+    if (!s) return;
+    const next = { ...scenarioParams, ...s.params };
+    setActiveScenario(id);
+    setScenarioParams(next);
+    setAnalysisState(toAnalysisState(next));
+    if (s.accepted) setAccepted(s.accepted);
+    if (s.ackOverride) setAcks((list) => list.map((a) => s.ackOverride?.[a.personaId] ? { ...a, status: s.ackOverride[a.personaId]! } : a));
+    if (s.coordinationOverride) setRecords((list) => list.map((r) => s.coordinationOverride?.[r.id] ? { ...r, status: s.coordinationOverride[r.id]! } : r));
+    logOps("Demo scenario applied", `${s.name} — ${s.note}`);
+  };
+
+
 
 
   /* ------------------------------------------------------- local persistence */
