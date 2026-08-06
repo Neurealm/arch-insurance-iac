@@ -783,6 +783,53 @@ export default function PredictiveOpticalLinkIntelligence() {
         </Disclosure>
       </section>
 
+      {/* ------------------------- Section 7, scenario ----------------------- */}
+      <section aria-labelledby="pli-scenario-section" className="space-y-3">
+        <h2 id="pli-scenario-section" className="text-sm font-semibold text-slate-900">Scenario</h2>
+        <p className="-mt-2 text-[11.5px] text-slate-600">
+          Narrative walkthrough of the Chennai predictive protection demonstration, outcome and learning.
+        </p>
+
+        <section
+          id="chennai-protection-scenario"
+          aria-labelledby="chennai-protection-scenario-title"
+          className="rounded-xl border border-slate-200 bg-white shadow-sm"
+        >
+          <header className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-200 px-4 py-2.5">
+            <div className="min-w-0">
+              <h3 id="chennai-protection-scenario-title" className="text-sm font-semibold text-slate-900">
+                Chennai Predictive Protection Scenario
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Fifteen deterministic stages from baseline to outcome and learning, with human-governed approval.
+              </p>
+            </div>
+          </header>
+          <div className="p-4">
+            <ScenarioWorkspace state={scenarioState} />
+          </div>
+        </section>
+
+        <PanelShell
+          spec={{ ...spec.traditional, title: "Why Traditional Monitoring Does Not Solve This", description: "Stage-by-stage comparison of the current operating model with governed predictive protection." }}
+          state={panelState}
+          heightClass="min-h-[260px]"
+          functional
+        >
+          <TraditionalComparisonPanel state={scenarioState} />
+          <details className="mt-2 rounded border border-slate-200 bg-slate-50 p-2">
+            <summary className="cursor-pointer text-[11px] font-medium text-slate-800">Known traditional monitoring gaps</summary>
+            <ul className="mt-1 space-y-1">
+              {traditionalMonitoringGaps.map((g) => (
+                <li key={g} className="flex gap-1.5 text-[11px] text-slate-700">
+                  <span aria-hidden className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400" />{g}
+                </li>
+              ))}
+            </ul>
+          </details>
+        </PanelShell>
+      </section>
+
 
       <AnalyticsMetricDrawer
         open={metricDrawerOpen}
