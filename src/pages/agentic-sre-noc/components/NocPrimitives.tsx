@@ -37,8 +37,13 @@ export function Select({
         aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[11.5px] text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className={cn(
+          "rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[11.5px] text-slate-800 shadow-sm hover:border-slate-300",
+          controlTransition,
+          focusRing,
+        )}
       >
+
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
     </label>
