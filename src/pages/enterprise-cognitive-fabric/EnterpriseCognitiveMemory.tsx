@@ -399,18 +399,41 @@ export default function EnterpriseCognitiveMemory() {
           </Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => scrollTo("panel-explorer")}>Explore Memory</Button>
           <Button size="sm" className="h-7 text-[11px]" onClick={() => scrollTo("panel-workbench")}>Run Memory Query</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setSearchOpen(true)}>Global Search</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setNotificationsOpen(true)}
+            aria-label={`Notifications, ${unread} unread`}>
+            Notifications{unread > 0 && <span className="ml-1 rounded-full bg-blue-600 px-1.5 text-[10px] font-semibold text-white">{unread}</span>}
+          </Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => { scrollTo("panel-indexing"); toast.success("Indexing job queued", { description: "IDX 60453 · Semantic Index · current filter scope" }); }}>Start Indexing</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={exportSummary}>Export Memory Summary</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setExportOpen(true)}>Export</Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button size="sm" variant="outline" className="h-7 text-[11px]">More</Button></DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="text-[11px]">Prompt 2 capabilities</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="max-h-96 overflow-y-auto">
+              <DropdownMenuLabel className="text-[11px]">Memory operations</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {["Governance & Curation", "Conflict Resolution & Merge", "Point in Time Reconstruction", "Access Simulation", "Retention & Legal Hold", "MCP Context Services", "Demo Story"].map((l) => (
-                <DropdownMenuItem key={l} className="text-[11px]" onClick={() => prompt2(l)}>{l}</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-governance")}>Memory Governance</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-curation")}>Curation Workbench</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-conflicts")}>Conflict Resolution</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => { setMergeCandidate(curationCandidates[0]); setMergeOpen(true); }}>Record Merge</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setSupersedeOpen(true)}>Supersession</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setRefreshOpen(true)}>Memory Refresh</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-pit")}>Point in Time Memory</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setSnapshotOpen(true)}>Create Snapshot</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-access-sim")}>Access Simulation</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-retention")}>Retention &amp; Legal Hold</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setPublishOpen(true)}>Publish Memory</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-mcp")}>MCP Context Services</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setExportOpen(true)}>Governed Export</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-[11px]" onClick={() => { setStoryStep(0); say("Demo story started"); }}>Demo Story</DropdownMenuItem>
+              <DropdownMenuLabel className="text-[11px]">Demo scenarios</DropdownMenuLabel>
+              {demoScenarios.map((s) => (
+                <DropdownMenuItem key={s.id} className="text-[11px]" onClick={() => applyScenario(s.id)}>{s.name}</DropdownMenuItem>
               ))}
+              <DropdownMenuItem className="text-[11px]" onClick={() => applyScenario(null)}>Reset Demo Data</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
         </div>
       </header>
 
