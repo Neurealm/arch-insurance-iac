@@ -37,6 +37,7 @@ export default function PersonaImpactAnalysis() {
   const [density, setDensity] = useState<Density>("standard");
   const [loading, setLoading] = useState(true);
   const [announce, setAnnounce] = useState("");
+  const [kpiFocus, setKpiFocus] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<Record<FilterKey, string>>(defaultFilters);
   const [query, setQuery] = useState("");
@@ -77,23 +78,31 @@ export default function PersonaImpactAnalysis() {
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = evaluations.filter((e) => {
-      if (filters.Status !== "All" && e.status !== filters.Status) return false;
-      if (filters.Severity !== "All" && e.highestSeverity !== filters.Severity) return false;
-      if (filters.Stage !== "All" && stageById(e.currentStageId).name !== filters.Stage) return false;
-      if (filters.Team !== "All" && e.submittingTeam !== filters.Team) return false;
-      if (filters.Persona !== "All" && !e.selectedPersonaIds.some((p) => personaById(p).name === filters.Persona)) return false;
+      if (filters.impactStatus !== "All" && e.status !== filters.impactStatus) return false;
+      if (filters.impactSeverity !== "All" && e.highestSeverity !== filters.impactSeverity) return false;
+      if (filters.riskLevel !== "All" && e.riskLevel !== filters.riskLevel) return false;
+      if (filters.reviewStatus !== "All" && e.reviewStatus !== filters.reviewStatus) return false;
+      if (filters.submittingTeam !== "All" && e.submittingTeam !== filters.submittingTeam) return false;
+      if (filters.businessUnit !== "All" && e.businessUnit !== filters.businessUnit) return false;
+      if (filters.workType !== "All" && e.workType !== filters.workType) return false;
+      if (filters.environment !== "All" && e.environment !== filters.environment) return false;
+      if (filters.region !== "All" && e.region !== filters.region) return false;
+      if (filters.customerJourney !== "All" && e.customerJourney !== filters.customerJourney) return false;
+      if (filters.evaluationOwner !== "All" && e.owner !== filters.evaluationOwner) return false;
+      if (filters.teamPersona !== "All" && !e.selectedPersonaIds.some((p) => personaById(p).name === filters.teamPersona)) return false;
+      if (filters.affectedTeam !== "All" && !e.selectedPersonaIds.some((p) => personaById(p).name === filters.affectedTeam)) return false;
       if (q && !`${e.id} ${e.title} ${e.submittingTeam} ${e.owner}`.toLowerCase().includes(q)) return false;
       return true;
     });
     const dir = sortDir === "asc" ? 1 : -1;
     list = [...list].sort((a, b) => {
       if (sortKey === "Highest Severity") return (severityRank(a.highestSeverity) - severityRank(b.highestSeverity)) * dir;
-      if (sortKey === "Impact Score") return (a.aggregateImpactScore - b.aggregateImpactScore) * dir;
+      if (sortKey === "Impact Score") return (scorePersona(a.selectedPersonaIds[0], proposal).score - scorePersona(b.selectedPersonaIds[0], proposal).score) * dir;
       if (sortKey === "Confidence") return (a.overallConfidence - b.overallConfidence) * dir;
       return a.id.localeCompare(b.id) * dir;
     });
     return list;
-  }, [filters, query, sortKey, sortDir]);
+  }, [filters, query, sortKey, sortDir, proposal]);
 
   const stage = stageById(selectedStage);
   const stageFindings = useMemo(() => evaluatePersona(personaId, proposal), [personaId, proposal]);
@@ -152,7 +161,10 @@ export default function PersonaImpactAnalysis() {
 
       {/* -------------------------------------------------------------- kpis */}
       <section aria-label="Impact analysis key indicators" className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
-        {piaKpis.map((k) => <IntakeKpiCard key={k.label} kpi={k} />)}
+        {piaKpis.map((k) => (
+          <IntakeKpiCard key={k.id} kpi={k} focused={kpiFocus === k.id}
+            onClick={() => { setKpiFocus(kpiFocus === k.id ? null : k.id); say(`${k.name} focused`); }} />
+        ))}
       </section>
 
       {/* --------------------------------------------------------- lifecycle */}
@@ -193,7 +205,7 @@ export default function PersonaImpactAnalysis() {
               </label>
               {(Object.keys(filterOptions) as FilterKey[]).map((k) => (
                 <label key={k} className="flex flex-col text-[9.5px] uppercase tracking-wide text-slate-500">
-                  {k}
+                  {k.replace(/([A-Z])/g, " $1")}
                   <select value={filters[k]} onChange={(e) => { setFilters({ ...filters, [k]: e.target.value }); setPage(1); }}
                     className="h-6 rounded border border-slate-200 bg-white px-1 text-[11px] normal-case tracking-normal">
                     {filterOptions[k].map((o) => <option key={o}>{o}</option>)}
