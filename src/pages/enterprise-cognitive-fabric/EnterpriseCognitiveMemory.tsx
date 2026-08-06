@@ -109,7 +109,56 @@ export default function EnterpriseCognitiveMemory() {
   const [jobPaused, setJobPaused] = useState(false);
   const [qualityKey, setQualityKey] = useState<string | null>(null);
   const [qualityOpen, setQualityOpen] = useState(false);
-  const [serviceState] = useState<MemoryServiceState>("Operational");
+  const [serviceStateBase] = useState<MemoryServiceState>("Operational");
+
+  /* ---------------- Prompt 2 state ---------------- */
+  const [reviews, setReviews] = useState<MemoryGovernanceReview[]>(seedReviews);
+  const [conflicts, setConflicts] = useState<MemoryConflict[]>(seedConflicts);
+  const [drifts, setDrifts] = useState<MemoryDrift[]>(seedDrifts);
+  const [retention, setRetention] = useState<RetentionRow[]>(seedRetention);
+  const [snapshots, setSnapshots] = useState<MemorySnapshot[]>(seedSnapshots);
+  const [destinations, setDestinations] = useState(seedDestinations);
+  const [notifications, setNotifications] = useState<MemoryNotification[]>(seedNotifications);
+  const [activities, setActivities] = useState(seedActivities);
+  const [queueFilters, setQueueFilters] = useState<QueueFilters>(defaultQueueFilters);
+  const [queueSearch, setQueueSearch] = useState("");
+  const [activeDimension, setActiveDimension] = useState<string | null>(null);
+  const [candidateId, setCandidateId] = useState(curationCandidates[0].id);
+  const [curationState, setCurationState] = useState<CurationDecisionState>(initialCurationDecision);
+  const [pitId, setPitId] = useState("pit-approval");
+  const [simIdentityId, setSimIdentityId] = useState(simIdentities[4].id);
+  const [simRecordId, setSimRecordId] = useState(simRecords[0].id);
+  const [simResult, setSimResult] = useState<ReturnType<typeof simulateAccess> | null>(null);
+  const [agent, setAgent] = useState(simAgents[1]);
+  const [agentTask, setAgentTask] = useState(simTasks[0]);
+  const [agentIdentityId, setAgentIdentityId] = useState(simIdentities[4].id);
+  const [agentPitId, setAgentPitId] = useState("pit-approval");
+  const [agentOutput, setAgentOutput] = useState<ReturnType<typeof buildAgentSimulation> | null>(null);
+  const [scenario, setScenario] = useState<ScenarioId | null>(null);
+  const [storyStep, setStoryStep] = useState<number | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [activeReview, setActiveReview] = useState<MemoryGovernanceReview | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [activeConflict, setActiveConflict] = useState<MemoryConflict | null>(null);
+  const [conflictOpen, setConflictOpen] = useState(false);
+  const [activeDrift, setActiveDrift] = useState<MemoryDrift | null>(null);
+  const [driftOpen, setDriftOpen] = useState(false);
+  const [mergeCandidate, setMergeCandidate] = useState<CurationCandidate | null>(null);
+  const [mergeOpen, setMergeOpen] = useState(false);
+  const [supersedeId, setSupersedeId] = useState(supersessionCases[0].id);
+  const [supersedeOpen, setSupersedeOpen] = useState(false);
+  const [refreshOpen, setRefreshOpen] = useState(false);
+  const [snapshotOpen, setSnapshotOpen] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+
+  const overlay = scenario ? demoScenarios.find((s) => s.id === scenario) ?? null : null;
+  const serviceState = (overlay?.serviceState ?? serviceStateBase) as MemoryServiceState;
+  const simIdentity = simIdentities.find((i) => i.id === simIdentityId) ?? simIdentities[0];
+  const unread = notifications.filter((n) => !n.read).length;
+
 
   const setPrefs = useCallback((updater: (p: Prefs) => Prefs) => {
     setPrefsState((p) => { const next = updater(p); savePrefs(next); return next; });
