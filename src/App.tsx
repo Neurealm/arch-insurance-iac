@@ -361,6 +361,7 @@ import TeamPersonaLibrary from "./pages/enterprise-cognitive-fabric/TeamPersonaL
 import PersonaStudioScaffold from "./pages/enterprise-cognitive-fabric/PersonaStudioScaffold.tsx";
 import PersonaValidation from "./pages/enterprise-cognitive-fabric/PersonaValidation.tsx";
 import EnterpriseCognitiveMemory from "./pages/enterprise-cognitive-fabric/EnterpriseCognitiveMemory.tsx";
+import CognitiveIntake from "./pages/enterprise-cognitive-fabric/CognitiveIntake.tsx";
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
@@ -777,7 +778,8 @@ const App = () => (
             <Route path="cognitive-memory/enterprise-cognitive-memory" element={<EnterpriseCognitiveMemory />} />
             <Route path="enterprise-cognitive-memory" element={<EnterpriseCognitiveMemory />} />
             <Route path="persona-studio/persona-version-history" element={<PersonaStudioScaffold title="Persona Version History" purpose="Version lineage, change summaries, and approval history for Team Personas." />} />
-            <Route path="cognitive-intake" element={<PersonaStudioScaffold title="Cognitive Intake" purpose="Incoming work evaluated against approved Team Personas." />} />
+            <Route path="evaluation/cognitive-intake" element={<CognitiveIntake />} />
+            <Route path="cognitive-intake" element={<CognitiveIntake />} />
             <Route path=":slug" element={<EcfPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
