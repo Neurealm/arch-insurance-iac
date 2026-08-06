@@ -688,6 +688,20 @@ export default function TeamPersonaConstruction() {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={saveViewPreset}>Save View</DropdownMenuItem>
               <DropdownMenuItem onClick={exportCsv}><Download className="mr-1.5 h-3.5 w-3.5" aria-hidden /> Export current view</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setExportOpen(true)}>Export personas and governance…</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPublishHistoryOpen(true)}>Publishing history</DropdownMenuItem>
+              <DropdownMenuItem onClick={startStory}>Start demo story</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline" className="h-8 text-[11.5px]">Scenario: {scenario}</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto text-[12px]">
+              <DropdownMenuLabel>Demonstration scenarios</DropdownMenuLabel>
+              {DEMO_SCENARIOS.map((s) => (
+                <DropdownMenuItem key={s} onClick={() => applyScenario(s)}>{s}{scenario === s ? " ✓" : ""}</DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
           {savedView && <span className="rounded border border-slate-200 bg-white px-2 py-1 text-[10.5px] text-slate-500">Saved: {savedView}</span>}
@@ -695,6 +709,7 @@ export default function TeamPersonaConstruction() {
             {sidebarStatus.service}: {sidebarStatus.state} · {sidebarStatus.teamsOnboarded} teams · {sidebarStatus.activePersonas} personas · {sidebarStatus.personasInConstruction} in construction
           </span>
         </div>
+
       </header>
 
       <main className="space-y-3 px-5 py-3">
