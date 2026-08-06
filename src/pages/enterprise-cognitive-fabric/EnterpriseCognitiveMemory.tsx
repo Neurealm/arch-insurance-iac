@@ -653,6 +653,74 @@ export default function EnterpriseCognitiveMemory() {
         onViewLogs={() => toast.info(`${activeJob?.id} logs available in the Logs tab`)} />
 
       <QualityDrawer open={qualityOpen} onOpenChange={setQualityOpen} dimensionKey={qualityKey} />
+
+      <ReviewDrawer open={reviewOpen} onOpenChange={setReviewOpen} review={activeReview}
+        onAction={(a, r) => { onGovernanceAction(a, r); setReviewOpen(false); }} />
+
+      <ConflictDrawer open={conflictOpen} onOpenChange={setConflictOpen} conflict={activeConflict}
+        onResolve={(c, o) => { onConflictResolve(c, o); setConflictOpen(false); }}
+        onMerge={(c) => {
+          setConflictOpen(false);
+          setMergeCandidate(curationCandidates.find((x) => x.id === c.curationId) ?? curationCandidates[0]);
+          setMergeOpen(true);
+        }} />
+
+      <DriftDrawer open={driftOpen} onOpenChange={setDriftOpen} drift={activeDrift}
+        onAction={(a, d) => { onDriftAction(a, d); setDriftOpen(false); }} />
+
+      <MergeDialog open={mergeOpen} onOpenChange={setMergeOpen} candidate={mergeCandidate}
+        onComplete={(summary) => { toast.success("Merge completed", { description: summary }); logActivity("Merge", summary); say(`Merge completed. ${summary}`); }} />
+
+      <SupersessionDialog open={supersedeOpen} onOpenChange={setSupersedeOpen} caseId={supersedeId} onCaseId={setSupersedeId}
+        onComplete={(summary) => { toast.success("Supersession applied", { description: summary }); logActivity("Supersession", summary); say(`Supersession applied. ${summary}`); }} />
+
+      <RefreshDialog open={refreshOpen} onOpenChange={setRefreshOpen}
+        onComplete={(summary) => { toast.success("Memory refresh completed", { description: summary }); logActivity("Refresh", summary); say(summary); }} />
+
+      <CreateSnapshotDialog open={snapshotOpen} onOpenChange={setSnapshotOpen}
+        onCreate={(p) => {
+          const snap: MemorySnapshot = {
+            id: `SNP ${1005 + snapshots.length}`, name: p.name, timestamp: `${p.pointInTime} 00:00`,
+            domains: [p.scope], recordCount: "12.4M", relationshipCount: "38.2M", indexVersion: "v412",
+            accessPolicyVersion: "v10", createdBy: simIdentity.name, reason: p.reason, status: "Immutable",
+          };
+          setSnapshots((s) => [snap, ...s]);
+          logActivity("Snapshot Created", `${snap.id} · ${snap.name}`);
+          notify("Snapshot Created", snap.name, `${snap.recordCount} records captured`);
+          toast.success("Snapshot created", { description: `${snap.id} · live memory unchanged` });
+          say(`Snapshot ${snap.id} created`);
+        }} />
+
+      <PublishDialog open={publishOpen} onOpenChange={setPublishOpen}
+        onComplete={(summary) => {
+          setDestinations((ds) => ds.map((d) => ({ ...d, status: d.status === "Paused" ? "Paused" : "Healthy", pending: "0" })));
+          logActivity("Published", summary);
+          notify("Publishing Completed", "Memory publication completed", summary);
+          toast.success("Publishing completed", { description: summary });
+          say(`Publishing completed. ${summary}`);
+        }} />
+
+      <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen}
+        identityAllowsRestricted={simIdentity.restrictedEvidence}
+        onOpenResult={(id) => { setSearchOpen(false); openRecordById(id); }} />
+
+      <NotificationsDrawer open={notificationsOpen} onOpenChange={setNotificationsOpen} notifications={notifications}
+        onMarkRead={(n) => setNotifications((ns) => ns.map((x) => x.id === n.id ? { ...x, read: true } : x))}
+        onMarkAll={() => { setNotifications((ns) => ns.map((x) => ({ ...x, read: true }))); say("All notifications marked read"); }}
+        onOpenItem={(n) => { setNotificationsOpen(false); openRecordById(n.targetId); }}
+        onAssign={(n) => toast.success(`${n.id} assigned`, { description: "Assigned to Memory Operations" })}
+        onAcknowledge={(n) => { setNotifications((ns) => ns.map((x) => x.id === n.id ? { ...x, read: true } : x)); toast.success(`${n.id} acknowledged`); }} />
+
+      <ExportDialog open={exportOpen} onOpenChange={setExportOpen}
+        restrictedAllowed={simIdentity.restrictedEvidence} onExport={governedExport} />
+
+      {storyStep !== null && (
+        <DemoStoryOverlay step={storyStep} reducedMotion={reducedMotion} onToggleMotion={setReducedMotion}
+          onNext={() => setStoryStep((s) => Math.min((s ?? 0) + 1, demoSteps.length - 1))}
+          onPrev={() => setStoryStep((s) => Math.max((s ?? 0) - 1, 0))}
+          onExit={() => { setStoryStep(null); say("Demo story exited"); }} />
+      )}
     </div>
+
   );
 }
