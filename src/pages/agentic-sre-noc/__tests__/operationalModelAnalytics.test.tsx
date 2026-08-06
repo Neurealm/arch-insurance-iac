@@ -23,10 +23,18 @@ describe("Operational Model Analytics (AIM-004)", () => {
       expect(screen.getByTestId(`pli-panel-${id}`)).toBeInTheDocument();
     });
     expect(screen.getByTestId("analytics-performance")).toBeInTheDocument();
-    expect(screen.getByTestId("analytics-factors")).toBeInTheDocument();
     expect(screen.getByTestId("analytics-impact")).toBeInTheDocument();
     expect(screen.getByTestId("analytics-horizon")).toBeInTheDocument();
     expect(screen.getByTestId("analytics-highrisk")).toBeInTheDocument();
+  });
+
+  it("merges global feature contributions into the waterfall panel (AIM-010)", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    expect(screen.getByTestId("analytics-impact")).toBeInTheDocument();
+    const group = screen.getByRole("group", { name: "Feature contribution scope" });
+    await user.click(within(group).getByRole("button", { name: "Global" }));
+    expect(screen.getByTestId("analytics-factors")).toBeInTheDocument();
   });
 
   it("marks analytics panels as synthetic rather than placeholder", () => {
@@ -39,7 +47,7 @@ describe("Operational Model Analytics (AIM-004)", () => {
     const user = userEvent.setup();
     renderPage();
     const kpis = screen.getByTestId("pli-kpis");
-    await user.click(within(kpis).getByRole("button", { name: /False Positive Rate/i }));
+    await user.click(within(kpis).getByRole("button", { name: /Prediction Lead Time/i }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
