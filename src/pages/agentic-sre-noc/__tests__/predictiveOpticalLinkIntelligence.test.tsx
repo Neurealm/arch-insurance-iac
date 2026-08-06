@@ -83,7 +83,9 @@ describe("Predictive Optical Link Intelligence (AIM-001)", () => {
     expect(screen.getAllByText(/No data for the current selection/).length).toBe(panelSpecs.length);
 
     await user.selectOptions(select, "error");
-    expect(screen.getAllByRole("alert").length).toBe(panelSpecs.length);
+    // Panels report the error state; other live regions on the page may also be alerts.
+    expect(document.querySelectorAll('[data-panel-state="error"]').length).toBe(panelSpecs.length);
+    expect(screen.getAllByRole("alert").length).toBeGreaterThanOrEqual(panelSpecs.length);
   });
 
   it("uses a twelve-column grid without horizontal overflow", () => {
@@ -104,11 +106,13 @@ describe("Predictive Optical Link Intelligence (AIM-001)", () => {
     expect(panel).toHaveAttribute("aria-describedby", "pli-panel-horizon-desc");
   });
 
-  it("opens the Explain Model placeholder drawer", async () => {
+  it("opens the Explain Current Prediction drawer from the header", async () => {
     const user = userEvent.setup();
     renderPage();
-    await user.click(screen.getByRole("button", { name: /Explain Model/i }));
-    expect(screen.getByRole("dialog", { name: "Explain Model" })).toBeInTheDocument();
+    await user.click(screen.getByTitle("Explain Model"));
+    expect(
+      screen.getByRole("dialog", { name: /explain current prediction/i }),
+    ).toBeInTheDocument();
   });
 
   it("registers the page in the module registry", () => {
