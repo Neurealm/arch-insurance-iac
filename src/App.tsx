@@ -349,6 +349,8 @@ import EnterpriseCommandCenter from "./pages/enterprise-cognitive-fabric/Enterpr
 import EnterpriseSourceDiscovery from "./pages/enterprise-cognitive-fabric/EnterpriseSourceDiscovery.tsx";
 import DiscoveryScaffold from "./pages/enterprise-cognitive-fabric/DiscoveryScaffold.tsx";
 import DiscoveryConfiguration from "./pages/enterprise-cognitive-fabric/DiscoveryConfiguration.tsx";
+import DiscoveryPipeline from "./pages/enterprise-cognitive-fabric/DiscoveryPipeline.tsx";
+
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
 import UseCaseToDataContractMapper from "./pages/data-orchestration-twin/UseCaseToDataContractMapper.tsx";
