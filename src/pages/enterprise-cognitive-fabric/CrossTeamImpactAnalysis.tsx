@@ -101,6 +101,52 @@ export default function CrossTeamImpactAnalysis() {
 
   const say = useCallback((m: string) => setAnnounce(m), []);
 
+  /* ------------------------------------------------- Prompt 2 operations */
+  const [included, setIncluded] = useState<string[]>(ctiPersonaIds);
+  const [primaryPersona, setPrimaryPersona] = useState<string | null>("PER 4101");
+  const [addPersonaOpen, setAddPersonaOpen] = useState(false);
+  const [scenarioParams, setScenarioParams] = useState<ScenarioParams>(baselineParams);
+  const [mitigations, setMitigations] = useState<CrossTeamMitigation[]>(seedMitigations);
+  const [accepted, setAccepted] = useState<string[]>(["CTM 1001"]);
+  const [impactMode, setImpactMode] = useState<"raw" | "coordinated">("raw");
+  const [records, setRecords] = useState<CoordinationRecord[]>(seedCoordinationRecords);
+  const [coordinationDrawer, setCoordinationDrawer] = useState<CoordinationRecord | null>(null);
+  const [acks, setAcks] = useState<CrossTeamAcknowledgement[]>(seedAcknowledgements);
+  const [reviews] = useState(seedReviews);
+  const [escalations, setEscalations] = useState<CrossTeamEscalation[]>(seedEscalations);
+  const [escalationOpen, setEscalationOpen] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [evidenceTarget, setEvidenceTarget] = useState("");
+  const [conditionMode, setConditionMode] = useState("Compare");
+  const [versions, setVersions] = useState(seedVersions);
+  const [versionId, setVersionId] = useState(seedVersions[seedVersions.length - 1].id);
+  const [compareLeft, setCompareLeft] = useState(seedVersions[0].id);
+  const [compareRight, setCompareRight] = useState(seedVersions[seedVersions.length - 1].id);
+  const [notifications, setNotifications] = useState<CrossTeamNotification[]>(seedNotifications);
+  const [notificationFilter, setNotificationFilter] = useState("All");
+  const [activity, setActivity] = useState<OpsActivity[]>(seedOpsActivity);
+  const [startOpen, setStartOpen] = useState(false);
+  const [reanalysisOpen, setReanalysisOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [routingOpen, setRoutingOpen] = useState(false);
+  const [conflictManage, setConflictManage] = useState<CrossTeamImpactConflict | null>(null);
+  const [activeScenario, setActiveScenario] = useState<string | null>(null);
+  const [storyOn, setStoryOn] = useState(false);
+  const [storyIndex, setStoryIndex] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  const logOps = useCallback((action: string, detail: string) => {
+    setActivity((a) => [
+      { id: `ACT ${Date.now()}`, analysisId: "CTA 3001", action, detail, actor: "Coordination Office", at: new Date().toISOString().slice(11, 16) },
+      ...a,
+    ]);
+    setAnnounce(`${action}: ${detail}`);
+  }, []);
+
+  const spot = (panel: string) => storyOn && storySteps[storyIndex]?.target === panel;
+
+
   /* ------------------------------------------------------- local persistence */
   useEffect(() => {
     try {
