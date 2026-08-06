@@ -205,7 +205,7 @@ export function SelectedStagePanel({
 }
 
 export function SimpleTable({ head, rows }: { head: string[]; rows: React.ReactNode[][] }) {
-  if (!rows.length) return <EmptyState title="Nothing to display" description="No records match the current selection." />;
+  if (!rows.length) return <EmptyState message="Nothing to display" hint="No records match the current selection." />;
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[640px] border-collapse text-[11px]">
@@ -285,7 +285,7 @@ export function EvaluationQueuePanel({
       )}
 
       {loading ? <PanelSkeleton rows={5} /> : pageRows.length === 0 ? (
-        <EmptyState title="No evaluations match" description="Adjust filters or clear the search to see active impact evaluations." />
+        <EmptyState message="No evaluations match" hint="Adjust filters or clear the search to see active impact evaluations." />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1100px] border-collapse text-[11px]">
