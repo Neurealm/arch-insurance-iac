@@ -72,7 +72,8 @@ describe("Enterprise Command Center", () => {
 
   it("applies and clears a knowledge domain filter", () => {
     renderPage();
-    fireEvent.click(screen.getByRole("button", { name: /Engineering/ }));
+    const domains = screen.getByRole("heading", { name: "Top Knowledge Domains" }).closest("section")!;
+    fireEvent.click(within(domains).getByRole("button", { name: /^Engineering/ }));
     expect(screen.getByText(/Clear filter/)).toBeInTheDocument();
   });
 
