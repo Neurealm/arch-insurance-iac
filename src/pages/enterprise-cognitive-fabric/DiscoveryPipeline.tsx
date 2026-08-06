@@ -297,7 +297,8 @@ export default function DiscoveryPipeline() {
       {/* header */}
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-5 py-2.5 backdrop-blur">
         <div className="flex flex-wrap items-center gap-2">
-          <div className="min-w-0 flex-1">
+          <div className="w-full min-w-0 basis-full 2xl:w-auto 2xl:flex-1 2xl:basis-auto">
+
             <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[11px] text-slate-500">
               <Link to="/enterprise-cognitive-fabric" className="hover:text-blue-700">Enterprise Cognitive Fabric</Link>
               <span aria-hidden>/</span>
