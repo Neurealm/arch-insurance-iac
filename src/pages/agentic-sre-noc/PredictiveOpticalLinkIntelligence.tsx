@@ -178,8 +178,13 @@ function PanelShell({
             </p>
             <button
               type="button"
-              className="mt-1 rounded-md border border-rose-300 bg-white px-2 py-1 text-[11px] font-medium text-rose-700 shadow-sm hover:bg-rose-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+              className={cn(
+                "mt-1 rounded-md border border-rose-300 bg-white px-2 py-1 text-[11px] font-medium text-rose-700 shadow-sm hover:bg-rose-50",
+                controlTransition,
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500",
+              )}
             >
+
               Retry
             </button>
           </div>
