@@ -32,6 +32,21 @@ export interface AnalyticsMetricDrawerProps {
 }
 
 export function AnalyticsMetricDrawer({ open, metricKey, onClose, onSelectLink }: AnalyticsMetricDrawerProps) {
+  const closeRef = React.useRef<HTMLButtonElement | null>(null);
+  const restoreRef = React.useRef<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    if (!open) return undefined;
+    restoreRef.current = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      restoreRef.current?.focus?.();
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const metric = getOperationalMetric(metricKey);
@@ -44,7 +59,10 @@ export function AnalyticsMetricDrawer({ open, metricKey, onClose, onSelectLink }
       aria-modal="false"
       aria-label={`${metric.label} details`}
       data-testid="analytics-metric-drawer"
-      className="fixed inset-x-0 bottom-0 z-30 mx-auto max-h-[70vh] w-full max-w-xl overflow-y-auto rounded-t-xl border border-slate-200 bg-white p-3 shadow-lg sm:bottom-4 sm:left-auto sm:right-4 sm:rounded-xl"
+      className={cn(
+        "fixed inset-x-0 bottom-0 z-30 mx-auto max-h-[70vh] w-full max-w-xl overflow-y-auto rounded-t-xl border border-slate-200 bg-white p-3 shadow-lg sm:bottom-4 sm:left-auto sm:right-4 sm:rounded-xl",
+        "animate-fade-in motion-reduce:animate-none",
+      )}
     >
       <div className="flex items-start justify-between gap-2">
         <div>
@@ -52,12 +70,19 @@ export function AnalyticsMetricDrawer({ open, metricKey, onClose, onSelectLink }
           <p className="text-[11px] text-slate-500">{metric.period} · synthetic demonstration data</p>
         </div>
         <button
+          ref={closeRef}
           type="button"
           onClick={onClose}
-          className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          aria-label={`Close ${metric.label} details`}
+          className={cn(
+            "rounded border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50",
+            controlTransition,
+            focusRing,
+          )}
         >
           Close
         </button>
+
       </div>
 
       <div className="mt-2 flex items-baseline gap-2">
