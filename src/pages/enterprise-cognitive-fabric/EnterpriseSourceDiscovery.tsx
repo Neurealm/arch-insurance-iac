@@ -364,7 +364,7 @@ export default function EnterpriseSourceDiscovery() {
         </div>
 
         {/* Topology + inventory */}
-        <div className={cn("grid gap-3", view === "architecture" ? "2xl:grid-cols-[56fr_44fr]" : "2xl:grid-cols-[44fr_56fr]")}>
+        <div className="grid grid-cols-1 gap-3">
           <DiscoveryTopologyPanel
             activeCategory={category}
             onSelectCategory={(c) => { setCategory(c); setAnnounce(c ? `${c} category selected` : "Category filter cleared"); }}
