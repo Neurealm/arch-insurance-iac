@@ -232,7 +232,7 @@ export default function BusinessConditionExtraction() {
       sourceId: "Extraction Service", teamId: "Knowledge Governance", result: "Success",
       owner: "Alex Valencia", auditId: `AUD-${Math.floor(Math.random() * 90000 + 10000)}`,
       ...extra,
-    }, ...list].slice(0, 24));
+    } as ExtractionActivity, ...list].slice(0, 24));
   }, []);
 
   const requireImpact = (run: () => void) => { setImpactAfter(() => run); setImpactOpen(true); };
