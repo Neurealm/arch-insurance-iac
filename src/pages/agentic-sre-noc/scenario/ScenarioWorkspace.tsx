@@ -133,13 +133,14 @@ export function ScenarioWorkspace({ state }: { state: ScenarioStateValue }) {
           </ul>
           <dl className="mt-2 grid grid-cols-2 gap-1 text-[10.5px]">
             <div><dt className="text-slate-500">Risk</dt><dd className="font-medium text-slate-900">{stage.riskScore.toFixed(2)}</dd></div>
-            <div><dt className="text-slate-500">Confidence</dt><dd className="font-medium text-slate-900">{stage.confidencePct}%</dd></div>
+            <div><dt className="text-slate-500">Confidence</dt><dd data-testid="scenario-confidence" className="font-medium text-slate-900">{stage.confidencePct}%</dd></div>
             <div><dt className="text-slate-500">ETA</dt><dd className="font-medium text-slate-900">{stage.etaLabel}</dd></div>
-            <div><dt className="text-slate-500">Fallback</dt><dd className="font-medium text-slate-900">{stage.fallbackReady ? "Ready" : "Not ready"}</dd></div>
-            <div><dt className="text-slate-500">Approval</dt><dd className="font-medium text-slate-900">{approval.state}</dd></div>
+            <div><dt className="text-slate-500">Fallback</dt><dd data-testid="scenario-fallback" className="font-medium text-slate-900">{stage.fallbackReady ? "Ready" : "Not ready"}</dd></div>
+            <div><dt className="text-slate-500">Approval</dt><dd data-testid="scenario-approval-state" className="font-medium text-slate-900">{approval.state}</dd></div>
             <div><dt className="text-slate-500">Customer</dt><dd className="font-medium text-slate-900">{stage.customerHealthy ? "Healthy" : "At risk"}</dd></div>
           </dl>
           <p className="mt-1 text-[10.5px] text-slate-600">{approval.reason}</p>
+
           {stage.notes.length > 0 && (
             <ul className="mt-1 space-y-0.5" data-testid="scenario-simulation-notes">
               {stage.notes.map((n) => <li key={n} className="text-[10.5px] text-amber-800">{n}</li>)}
