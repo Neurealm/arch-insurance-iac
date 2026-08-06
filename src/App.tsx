@@ -789,6 +789,8 @@ const App = () => (
             <Route path="evaluation/cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
             <Route path="evaluation/cross-team-impact-analysis" element={<CrossTeamImpactAnalysis />} />
             <Route path="cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
+            <Route path="evaluation/decision-intelligence" element={<DecisionIntelligence />} />
+            <Route path="decision-intelligence" element={<DecisionIntelligence />} />
 
             <Route path=":slug" element={<EcfPage />} />
           </Route>
