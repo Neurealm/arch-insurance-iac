@@ -184,15 +184,102 @@ export default function CognitiveIntake() {
     entityResolution: result.entityResolution,
     conditionsIdentified: result.conditionsIdentified,
   };
-  const packageCompleteness = overallCompleteness(completenessInput);
+
+  /* ------------------------------------------------- Prompt 2 derivations -- */
+  const ruleInput: RuleInput = {
+    trafficExposure: workbench.trafficExposure,
+    deploymentTiming: workbench.deploymentTiming,
+    ...ruleFlags,
+  };
+
+  const ruleActivations: CognitiveIntakeRuleActivation[] = useMemo(
+    () => evaluateRules(ruleInput).map((r, idx) => ({
+      id: `RUL ${idx + 1}`,
+      intakeId: workbench.intakeId,
+      ruleType: r.ruleType,
+      status: r.triggered ? "Active" : "Resolved",
+      triggerField: r.ruleType === "Quarter End Timing" ? "Deployment timing" : "Traffic exposure",
+      previousValue: r.ruleType === "Quarter End Timing" ? "Standard window" : "5%",
+      currentValue: r.ruleType === "Quarter End Timing"
+        ? workbench.deploymentTiming : `${workbench.trafficExposure}%`,
+      conditionId: r.conditionId,
+      governanceRequirement: r.governanceRequirement,
+      personaIds: r.personaIds,
+      reviewers: r.reviewers,
+      gapId: r.gapId,
+      detail: r.detail,
+      activatedAt: nowLabel(),
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [workbench.trafficExposure, workbench.deploymentTiming, ruleFlags],
+  );
+
+  const openGapIds = ruleActivations.filter((r) => r.status === "Active" && r.gapId).map((r) => r.gapId as string);
+
+  const routingInput = {
+    workOwner: selectedIntake.workOwner,
+    intent: workbench.intent,
+    proposedState: workbench.proposedState,
+    scope: selectedIntake.scope,
+    resolvedEntityCount: entityMatches.filter((e) => e.matchStatus !== "Unresolved").length + resolvedEntities.length,
+    contextRetrievalComplete: true,
+    personaSearchComplete: true,
+    conditionSearchComplete: true,
+    evidenceMetadataCaptured: true,
+    criticalMissingEvidenceIdentified: true,
+    openQuestionsRecorded: true,
+    accessValidationComplete: true,
+    packageIntact: operationalState !== "Error",
+    criticalGapCount: openGapIds.length,
+    nonCriticalGapCount: Math.max(0, seedGaps.length - openGapIds.length),
+  };
+
+  const unreadCount = notifications.filter((n) => n.status === "Unread").length;
+
+  const logActivity = useCallback((action: string, description: string, resultKind: CognitiveIntakeActivity["result"] = "Success") => {
+    setActivityRows((rows) => [{
+      id: nextId("RA"), timestamp: nowLabel(), intakeId: workbench.intakeId, action, description,
+      teamId: "Checkout Engineering", result: resultKind, owner: "Intake Operations", auditId: nextId("AUD"),
+    }, ...rows]);
+  }, [workbench.intakeId]);
+
+  const notify = useCallback((title: string, description: string, severity: "Info" | "Warning" | "Critical", notificationType: string) => {
+    setNotifications((rows) => [{
+      id: nextId("NTF"), intakeId: workbench.intakeId, notificationType, severity,
+      title, description, status: "Unread", createdAt: nowLabel(), owner: "Intake Operations",
+      relatedRecordId: workbench.intakeId, actionRequired: severity !== "Info", acknowledgedBy: null,
+      acknowledgedAt: null,
+    } as CognitiveIntakeNotification, ...rows]);
+  }, [workbench.intakeId]);
+
+  const bumpPackageVersion = useCallback((changeReason: string) => {
+    setPackageVersions((vs) => {
+      const last = vs[vs.length - 1];
+      return [...vs, {
+        ...last,
+        id: nextId("PKGV"),
+        version: last.version + 1,
+        previousVersionId: last.id,
+        packageCompleteness: Math.min(100, last.packageCompleteness + 4),
+        changeReason,
+        createdBy: "Intake Operations",
+        createdAt: nowLabel(),
+      }];
+    });
+    setQualityRevision((r) => r + 1);
+  }, []);
 
   const serviceState: IntakeServiceState =
-    filtered.some((i) => i.status === "Needs Attention") ? "Needs Attention"
-      : filtered.some((i) => i.status === "Analyzing") ? "Analyzing" : "Operational";
+    operationalState === "Blocked" || operationalState === "Error" ? "Needs Attention"
+      : filtered.some((i) => i.status === "Needs Attention") ? "Needs Attention"
+        : filtered.some((i) => i.status === "Analyzing") ? "Analyzing" : "Operational";
 
   const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById(id)?.scrollIntoView({
+      behavior: reducedMotion ? "auto" : "smooth", block: "start",
+    });
   };
+
 
   const refresh = () => {
     setLoading(true);
