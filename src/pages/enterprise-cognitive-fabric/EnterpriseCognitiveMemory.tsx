@@ -518,7 +518,7 @@ export default function EnterpriseCognitiveMemory() {
                 onChange={(v) => setPref("density", v as Density)} />
               <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={exportCurrentView}>Export Current View</Button>
               <Button size="sm" variant="outline" className="h-7 text-[11px]" disabled={selected.size === 0}
-                onClick={() => prompt2("Bulk curation")}>Bulk Actions</Button>
+                onClick={() => { setCandidateId(curationCandidates[0].id); scrollTo("panel-curation"); }}>Bulk Actions</Button>
             </>
           } />
 
