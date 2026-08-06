@@ -241,10 +241,124 @@ export default function EnterpriseCognitiveMemory() {
     else { setSortKey(k); setSortDir("asc"); }
   };
 
-  const prompt2 = (label: string) =>
-    toast.info(`${label} arrives in Prompt 2`, { description: "Governance, curation, retention, publishing, and MCP context services are the next build package." });
+  /* ---------------- Prompt 2 handlers ---------------- */
+
+  const logActivity = (action: string, description: string, result: "Success" | "Warning" | "Denied" | "Conflict" = "Success", recordId = "MEM 100422") => {
+    setActivities((a) => [{
+      id: `ACT ${5100 + a.length}`, timestamp: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+      memoryRecordId: recordId, action, description, memoryType: "Memory Record", domain: "Payments",
+      result, owner: "Memory Operations", auditId: `AUD ${90400 + a.length}`,
+    }, ...a]);
+  };
+
+  const notify = (category: string, title: string, detail: string, severity: "info" | "warning" | "critical" = "info") => {
+    setNotifications((n) => [{
+      id: `NTF ${800 + n.length}`, category, title, detail,
+      time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+      severity, read: false, targetId: "MEM 100422",
+    }, ...n]);
+  };
+
+  const onGovernanceAction = (action: string, r: MemoryGovernanceReview) => {
+    if (action === "Merge Records") { setMergeCandidate(curationCandidates[0]); setMergeOpen(true); return; }
+    if (action === "Supersede") { setSupersedeOpen(true); return; }
+    if (action === "Refresh Record") { setRefreshOpen(true); return; }
+    const nextStatus =
+      action === "Acknowledge" ? "Acknowledged" :
+      action === "Escalate" ? "Escalated" :
+      action.startsWith("Resolve") || action === "Resolve" ? "Resolved" : "In Review";
+    setReviews((rs) => rs.map((x) => x.id === r.id
+      ? { ...x, status: nextStatus as MemoryGovernanceReview["status"], resolvedAt: nextStatus === "Resolved" ? new Date().toISOString() : null }
+      : x));
+    logActivity(action, `${action} applied to ${r.id} · ${r.memoryRecord}`, nextStatus === "Escalated" ? "Warning" : "Success", r.memoryRecordId);
+    toast.success(`${action} · ${r.id}`, { description: r.memoryRecord });
+    say(`${action} applied to review ${r.id}. Status ${nextStatus}.`);
+  };
+
+  const onConflictResolve = (c: MemoryConflict, option: string) => {
+    if (option === "Merge") {
+      const cand = curationCandidates.find((x) => x.id === c.curationId) ?? curationCandidates[0];
+      setMergeCandidate(cand); setMergeOpen(true); return;
+    }
+    if (option === "Create Effective Date Transition") { setSupersedeOpen(true); return; }
+    setConflicts((cs) => cs.map((x) => x.id === c.id
+      ? { ...x, reviewStatus: option === "Escalate" ? "Escalated" : "Resolved", resolution: option, resolvedAt: new Date().toISOString() }
+      : x));
+    logActivity("Conflict Resolved", `${c.id} resolved with ${option}`, "Success", c.recordAId);
+    toast.success(`Conflict ${c.id} · ${option}`);
+    say(`Conflict ${c.id} resolved with ${option}`);
+  };
+
+  const onDriftAction = (action: string, d: MemoryDrift) => {
+    const status = action === "Accept Update" ? "Accepted" : action === "Dismiss as Nonmaterial" ? "Dismissed" : "Under Review";
+    setDrifts((ds) => ds.map((x) => x.id === d.id ? { ...x, status: status as MemoryDrift["status"] } : x));
+    if (action === "Create Version") setSupersedeOpen(true);
+    logActivity(action, `${action} applied to drift ${d.id}`, "Success", d.memoryRecordId);
+    toast.success(`${action} · ${d.id}`);
+    say(`${action} applied to drift ${d.id}`);
+  };
+
+  const onRetentionAction = (action: string, r: RetentionRow) => {
+    setRetention((rs) => rs.map((x) => x.id === r.id ? {
+      ...x,
+      legalHold: action === "Place Legal Hold" ? true : action === "Release Legal Hold" ? false : x.legalHold,
+      status: action === "Archive" ? "Archived"
+        : action === "Place Legal Hold" ? "Legal Hold"
+        : action === "Release Legal Hold" ? "Active"
+        : action === "Extend Retention" ? "Active" : x.status,
+    } : x));
+    logActivity(action, `${action} applied to ${r.record}`, "Success", r.recordId);
+    toast.success(`${action} · ${r.record}`, { description: "No seeded data is physically deleted" });
+    say(`${action} applied to ${r.record}`);
+  };
+
+  const applyScenario = (id: ScenarioId | null) => {
+    setScenario(id);
+    if (!id) {
+      setReviews(seedReviews); setConflicts(seedConflicts); setDrifts(seedDrifts);
+      setRetention(seedRetention); setSnapshots(seedSnapshots); setDestinations(seedDestinations);
+      setNotifications(seedNotifications); setActivities(seedActivities);
+      toast.success("Demo data reset"); say("Demo data reset to the baseline state");
+      return;
+    }
+    const s = demoScenarios.find((x) => x.id === id);
+    if (!s) return;
+    logActivity("Scenario Applied", s.activity, s.bannerTone === "red" ? "Warning" : "Success");
+    notify(s.notification, s.name, s.description, s.bannerTone === "red" ? "critical" : s.bannerTone === "amber" ? "warning" : "info");
+    scrollTo(s.focusPanel);
+    toast.success(s.name, { description: s.description });
+    say(`${s.name} scenario applied. ${s.banner}`);
+  };
+
+  const governedExport = (cfg: { format: string; scope: string; options: string[]; includeRestricted: boolean }) => {
+    const payload = {
+      generatedAt: new Date().toISOString(), scope: cfg.scope, options: cfg.options,
+      identity: simIdentity.name, restrictedIncluded: cfg.includeRestricted,
+      governanceQueue: reviews.map((r) => ({ id: r.id, record: r.memoryRecord, issue: r.issueType, severity: r.severity, status: r.status })),
+      conflicts: conflicts.map((c) => ({ id: c.id, type: c.conflictType, severity: c.severity, status: c.reviewStatus })),
+      drift: drifts.map((d) => ({ id: d.id, type: d.driftType, materiality: d.materiality, status: d.status })),
+      records: filtered.filter((r) => cfg.includeRestricted || r.accessClassification !== "Restricted").map(recordToRow),
+    };
+    if (cfg.format === "CSV") {
+      exportCsv("enterprise-memory-governed.csv", [
+        ["ID", "Record", "Issue", "Severity", "Status"],
+        ...reviews.map((r) => [r.id, r.memoryRecord, r.issueType, r.severity, r.status]),
+      ]);
+    } else if (cfg.format === "JSON") {
+      exportJson("enterprise-memory-governed.json", payload);
+    } else if (cfg.format === "YAML") {
+      downloadBlob(toYaml(payload), "enterprise-memory-governed.yaml", "text/yaml;charset=utf-8");
+    } else {
+      downloadBlob(
+        `Enterprise Cognitive Memory — ${cfg.format}\nScope: ${cfg.scope}\nIdentity: ${simIdentity.name}\nRestricted content: ${cfg.includeRestricted ? "included" : "excluded"}\nGenerated: ${new Date().toISOString()}\n`,
+        `enterprise-memory-${cfg.format.toLowerCase().replace(/\s+/g, "-")}.txt`, "text/plain;charset=utf-8");
+    }
+    toast.success(`Export generated · ${cfg.format}`, { description: cfg.includeRestricted ? "Restricted content included" : "Restricted content excluded by policy" });
+    say(`Governed export generated as ${cfg.format}`);
+  };
 
   const filterKeys = Object.keys(memoryFilterOptions) as (keyof MemoryFilters)[];
+
 
   return (
     <div className="min-h-full bg-slate-50 px-5 py-4">
