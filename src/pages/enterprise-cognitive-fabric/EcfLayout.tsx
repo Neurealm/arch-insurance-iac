@@ -134,7 +134,14 @@ export default function EcfLayout() {
                     {group}
                   </div>
                 )}
-                {items.map((p) => (
+                {items.map((p) => {
+                  const subNav = subNavBySlug[p.slug];
+                  const expanded =
+                    !!subNav &&
+                    (subNavPrefixBySlug[p.slug] ?? []).some(
+                      (prefix) => location.pathname === prefix || location.pathname.startsWith(prefix + "/"),
+                    );
+                  return (
                   <div key={p.slug}>
                     <NavLink
                       to={`/enterprise-cognitive-fabric/${p.slug}`}
@@ -153,31 +160,25 @@ export default function EcfLayout() {
                         <>
                           <Circle className={cn("h-1.5 w-1.5 shrink-0 fill-current", isActive ? "text-white" : "text-slate-400")} />
                           {!collapsed && <span className="truncate">{p.title}</span>}
+                          {!collapsed && subNav && (
+                            expanded ? (
+                              <ChevronDown
+                                className={cn("ml-auto h-3.5 w-3.5 shrink-0", isActive ? "text-white" : "text-slate-400")}
+                                aria-label={`${subNav.length} nested pages`}
+                              />
+                            ) : (
+                              <ChevronRight
+                                className={cn("ml-auto h-3.5 w-3.5 shrink-0", isActive ? "text-white" : "text-slate-400")}
+                                aria-label={`${subNav.length} nested pages`}
+                              />
+                            )
+                          )}
                         </>
                       )}
                     </NavLink>
-                    {!collapsed && p.slug === "team-persona-construction" && (
+                    {!collapsed && subNav && expanded && (
                       <ul className="ml-6 border-l border-slate-200 pl-2">
-                        {personaStudioSubNav.map((sn) => (
-                          <li key={sn.to}>
-                            <NavLink
-                              to={sn.to}
-                              className={({ isActive }) =>
-                                cn(
-                                  "my-0.5 block rounded-md px-2 py-1.5 text-[11.5px] transition-colors",
-                                  isActive ? "bg-slate-100 font-medium text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-                                )
-                              }
-                            >
-                              {sn.label}
-                            </NavLink>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {!collapsed && p.slug === "enterprise-source-discovery" && location.pathname.includes("source-discovery") && (
-                      <ul className="ml-6 border-l border-slate-200 pl-2">
-                        {discoverySubNav.map((s) => (
+                        {subNav.map((s) => (
                           <li key={s.to}>
                             <NavLink
                               to={s.to}
@@ -195,7 +196,9 @@ export default function EcfLayout() {
                       </ul>
                     )}
                   </div>
-                ))}
+                  );
+                })}
+
               </div>
             );
           })}
