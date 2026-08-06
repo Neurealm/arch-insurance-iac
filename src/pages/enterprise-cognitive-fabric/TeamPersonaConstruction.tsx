@@ -815,9 +815,10 @@ export default function TeamPersonaConstruction() {
         <div className="grid gap-3 xl:grid-cols-2">
           <ConditionCoveragePanel onCategory={setCoverageCategory} activeCategory={coverageCategory} spotlight={spotlight === "panel-coverage"} />
           <QualityPanel
-            onDimension={(d) => { setFilters((f) => ({ ...f, qualityBand: d.score >= 95 ? "95 and above" : "90 to 94" })); toast.message(d.name, { description: `Score ${d.score} against target ${d.target}. Detailed dimension analysis arrives in the next stage.` }); }}
+            onDimension={(d) => setQualityDetail({ name: d.name, score: d.score, target: d.target, trend: [d.score - 3, d.score - 2, d.score - 1, d.score] })}
             spotlight={spotlight === "panel-quality"}
           />
+
         </div>
 
         {(showArchitecture || showPortfolio || view === "construction") && (
