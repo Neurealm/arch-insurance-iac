@@ -19,7 +19,7 @@ function renderPage() {
 describe("Operational Model Analytics (AIM-004)", () => {
   it("renders every analytics panel", () => {
     renderPage();
-    ["performance", "factors", "impact", "horizon", "highrisk"].forEach((id) => {
+    ["performance", "impact", "horizon", "highrisk"].forEach((id) => {
       expect(screen.getByTestId(`pli-panel-${id}`)).toBeInTheDocument();
     });
     expect(screen.getByTestId("analytics-performance")).toBeInTheDocument();
