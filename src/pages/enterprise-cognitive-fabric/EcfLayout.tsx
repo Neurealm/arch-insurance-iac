@@ -36,6 +36,10 @@ const subNavPrefixBySlug: Record<string, string[]> = {
     "/enterprise-cognitive-fabric/team-persona-construction",
     "/enterprise-cognitive-fabric/persona-studio",
   ],
+  "enterprise-cognitive-memory": [
+    "/enterprise-cognitive-fabric/enterprise-cognitive-memory",
+    "/enterprise-cognitive-fabric/cognitive-memory",
+  ],
 };
 
 
