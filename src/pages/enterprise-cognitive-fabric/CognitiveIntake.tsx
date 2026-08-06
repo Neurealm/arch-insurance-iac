@@ -29,15 +29,35 @@ import {
 } from "./cognitive-intake/workbench";
 import { IntakeDetailDrawer } from "./cognitive-intake/drawers";
 import {
+  ActiveJobsPanel, DemoStoryOverlay, JobDetailDrawer, NotificationsButton, NotificationsDrawer,
+  OperationalStatePanel, PackageHistoryPanel, QualityDetailPanel, RecentActivityPanel,
+  RuleActivationPanel,
+} from "./cognitive-intake/ops-panels";
+import {
+  AddEvidenceDialog, BulkActionDialog, ClarificationResponseDialog, ContextRefreshDialog,
+  EntityRemediationDialog, ExportDialog, GlobalSearchDialog, ImportWorkDialog, ReprocessDialog,
+  RequestClarificationDialog, RequestEvidenceDialog, RouteToReadinessDialog, RunIntakeDialog,
+  ScenarioDialog, SubmitWorkDialog,
+} from "./cognitive-intake/ops-dialogs";
+import {
+  activatedRules, demoStorySteps, evaluateRules, isoNow, nextId, nowLabel, readinessRoute,
+  scenarioById, seedJobs, seedNotifications, seedPackageVersions, seedRecentActivity,
+  type CognitiveIntakeJob, type CognitiveIntakeNotification, type CognitiveIntakePackageVersion,
+  type CognitiveIntakeRuleActivation, type IntakeOperationalState, type RuleInput,
+  type ScenarioDefinition,
+} from "./cognitive-intake/ops-data";
+import {
   activeIntakeFilterCount, applyIntakeFilters, contextMatches as seedContext,
   defaultIntakeFilters, entityMatches, evidenceItems as seedEvidence, gaps as seedGaps,
   intakeFilterLabels, intakeFilterOptions, intakeKpis, intakeLifecycleStages, intakes,
   personaCandidates as seedPersonas, relatedWork as seedRelated, savedIntakeViews, changeElements,
   overallCompleteness, queueColumns,
-  type CognitiveIntake, type CognitiveIntakeContextMatch, type CognitiveIntakeEvidence,
-  type CognitiveIntakePersonaCandidate, type CognitiveIntakeRelatedWork, type IntakeFilters,
+  type CognitiveIntake, type CognitiveIntakeActivity, type CognitiveIntakeContextMatch,
+  type CognitiveIntakeEvidence, type CognitiveIntakePersonaCandidate,
+  type CognitiveIntakeRelatedWork, type IntakeFilters,
   type IntakeMemoryType, type IntakeServiceState, type IntakeView,
 } from "./cognitive-intake/data";
+
 
 const PREF_KEY = "ecf.cognitive-intake.prefs.v1";
 
