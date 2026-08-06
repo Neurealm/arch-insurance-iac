@@ -207,7 +207,24 @@ export default function GlobalOpticalOperationsCenter() {
             </button>
           </div>
         </div>
+
+        <aside className="w-full shrink-0 xl:w-[380px]">
+          <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-900 shadow-sm">
+            <video
+              src={keynoteVideo.url}
+              controls
+              playsInline
+              preload="metadata"
+              className="aspect-video w-full"
+            />
+          </div>
+          <p className="mt-1.5 text-[11px] text-slate-500">
+            SRE-based agentic NOC executive keynote
+          </p>
+        </aside>
+        </div>
       </header>
+
 
       {/* 2 — KPI row */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
