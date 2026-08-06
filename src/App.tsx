@@ -362,6 +362,7 @@ import PersonaStudioScaffold from "./pages/enterprise-cognitive-fabric/PersonaSt
 import PersonaValidation from "./pages/enterprise-cognitive-fabric/PersonaValidation.tsx";
 import EnterpriseCognitiveMemory from "./pages/enterprise-cognitive-fabric/EnterpriseCognitiveMemory.tsx";
 import CognitiveIntake from "./pages/enterprise-cognitive-fabric/CognitiveIntake.tsx";
+import PersonaImpactAnalysis from "./pages/enterprise-cognitive-fabric/PersonaImpactAnalysis.tsx";
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
