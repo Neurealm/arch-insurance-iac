@@ -280,14 +280,11 @@ export const panelSpecs: PanelSpec[] = [
   { id: "pipeline", title: "Predictive Optical Link Risk Model Pipeline", visualType: "Six-stage horizontal pipeline with grouped signal and model cards", desktopHeight: "480 to 560 px", description: "Shows how signals become features, anomalies, risk predictions, customer impact and protected action." },
   { id: "chennai", title: "Chennai Fog Scenario, Model Output", visualType: "Geospatial risk map with evidence sidebar", desktopHeight: "360 to 430 px", description: "Scenario map of predicted at-risk links with model evidence and recommended window." },
   { id: "performance", title: "Model Performance", visualType: "Accuracy gauge with precision, recall and F1 bars", desktopHeight: "260 to 330 px", description: "Rolling ninety day model quality metrics." },
-  { id: "factors", title: "Top Predictive Factors", visualType: "Horizontal feature-importance bars", desktopHeight: "260 to 330 px", description: "Relative contribution of each input feature to the current prediction." },
   { id: "impact", title: "Feature Impact, Selected Link", visualType: "Signed contribution waterfall", desktopHeight: "300 to 360 px", description: "How each engineered factor moves the modelled risk score for the selected link." },
   { id: "highrisk", title: "Top High-Risk Links", visualType: "Ranked operational link table", desktopHeight: "300 to 360 px", description: "Links requiring attention first, with impact, lead time, fallback readiness and recommended action." },
   { id: "training", title: "Model Training and Validation", visualType: "Tabbed donut and backtest trend line", desktopHeight: "260 to 330 px", description: "Training composition, validation results, backtesting and explainability." },
   { id: "horizon", title: "Prediction Horizon Versus Confidence", visualType: "Multi-series confidence decay line chart", desktopHeight: "260 to 330 px", description: "Confidence by risk band across the forecast horizon." },
   { id: "traditional", title: "Why Traditional Monitoring Does Not Solve This", visualType: "Checklist with reactive versus predictive comparison", desktopHeight: "260 to 330 px", description: "Gaps in threshold based monitoring compared with predictive protection." },
-  { id: "inputs", title: "Model Inputs", visualType: "Grouped input inventory", desktopHeight: "200 to 240 px", description: "Optical, environmental, network, service and historical inputs consumed by the model." },
-  { id: "output", title: "Prediction Output", visualType: "Prediction record table", desktopHeight: "200 to 240 px", description: "Per-link prediction, lead time, risk band and exposed services." },
   { id: "governance", title: "Model Governance", visualType: "Governance record list with activity log", desktopHeight: "200 to 240 px", description: "Ownership, review, autonomy tier, lineage and evidence retention." },
 ];
 
@@ -296,3 +293,68 @@ export function getPanelSpec(id: string): PanelSpec {
   if (!found) throw new Error(`Unknown panel spec: ${id}`);
   return found;
 }
+
+/* ---------------------- AIM-010 executive experience ---------------------- */
+
+export interface SummaryChip {
+  key: string;
+  label: string;
+  value: string;
+  tone: "risk" | "warning" | "positive" | "analytic" | "neutral";
+}
+
+/** Section 1 — Current Operational Assessment. */
+export const operationalAssessment = {
+  headline: "6 optical links are predicted to degrade within the next six hours.",
+  detail: [
+    "One critical customer service carrying 10 Gbps requires governed preventive action.",
+    "RF fallback capacity has been validated.",
+    "Prediction confidence is 94%.",
+    "Expected intervention window: 5 hours 42 minutes.",
+  ],
+  chips: [
+    { key: "risk", label: "Risk", value: "6 links high risk, next 6 hours", tone: "risk" },
+    { key: "action", label: "Action", value: "Move priority traffic", tone: "warning" },
+    { key: "confidence", label: "Confidence", value: "94%", tone: "analytic" },
+    { key: "approval", label: "Approval", value: "Required", tone: "neutral" },
+  ] as SummaryChip[],
+};
+
+/** Section 3 — Current Recommended Action. */
+export const currentRecommendedAction = {
+  action: "Move Priority Traffic",
+  reason:
+    "Dense fog is expected to reduce link margin below acceptable operating reserve within the next 5 hours 42 minutes.",
+  facts: [
+    { key: "customer", label: "Customer", value: "Enterprise Mobile Backhaul" },
+    { key: "capacity", label: "Capacity", value: "10 Gbps" },
+    { key: "fallback", label: "Fallback", value: "Validated" },
+    { key: "approval", label: "Approval", value: "Required" },
+    { key: "confidence", label: "Confidence", value: "94%" },
+    { key: "rollback", label: "Rollback", value: "Ready" },
+  ],
+};
+
+/** Section 3 — Operational Confidence trust card. */
+export const operationalConfidence = [
+  { key: "prediction", label: "Prediction confidence", value: "94%", tone: "analytic" },
+  { key: "evidence", label: "Evidence completeness", value: "98%", tone: "analytic" },
+  { key: "telemetry", label: "Telemetry freshness", value: "96%", tone: "analytic" },
+  { key: "fallback", label: "Fallback validated", value: "Yes", tone: "positive" },
+  { key: "rollback", label: "Rollback ready", value: "Yes", tone: "positive" },
+  { key: "approval", label: "Human approval", value: "Required", tone: "neutral" },
+] as const;
+
+/** Section 6 — collapsed lifecycle summary. */
+export const lifecycleSummary = [
+  { key: "version", label: "Model version", value: "v2.4.1" },
+  { key: "drift", label: "Current drift", value: "1.4%, within 3% threshold" },
+  { key: "validation", label: "Validation", value: "Passed, 2026-07-28" },
+  { key: "retraining", label: "Next retraining", value: "Scheduled in 6 days" },
+] as const;
+
+export const viewingModes = ["Operational", "Engineering", "Data Science"] as const;
+export type ViewingMode = (typeof viewingModes)[number];
+
+export const syntheticNotice =
+  "Synthetic Taara-aligned demonstration. All values on this page are deterministic fixtures and do not represent deployed systems.";
