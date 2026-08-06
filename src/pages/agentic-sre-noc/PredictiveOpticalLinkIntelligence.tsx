@@ -16,7 +16,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { controlTransition, focusRing, surfaceTransition } from "./components/motion";
 import { Select, ToolbarButton } from "./components/NocPrimitives";
+
 import { PredictivePipeline } from "./pipeline/PredictivePipeline";
 import { ChennaiWorkspace } from "./chennai/ChennaiWorkspace";
 import { useAnalyticsState } from "./analytics/useAnalyticsState";
