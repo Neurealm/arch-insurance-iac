@@ -357,6 +357,7 @@ import ArtifactNormalization from "./pages/enterprise-cognitive-fabric/ArtifactN
 import BusinessConditionScaffold from "./pages/enterprise-cognitive-fabric/BusinessConditionScaffold.tsx";
 import BusinessConditionExtraction from "./pages/enterprise-cognitive-fabric/BusinessConditionExtraction.tsx";
 import TeamPersonaConstruction from "./pages/enterprise-cognitive-fabric/TeamPersonaConstruction.tsx";
+import TeamPersonaLibrary from "./pages/enterprise-cognitive-fabric/TeamPersonaLibrary.tsx";
 import PersonaStudioScaffold from "./pages/enterprise-cognitive-fabric/PersonaStudioScaffold.tsx";
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
@@ -767,7 +768,8 @@ const App = () => (
             <Route path="business-condition-extraction" element={<BusinessConditionExtraction />} />
             <Route path="persona-studio/team-persona-construction" element={<TeamPersonaConstruction />} />
             <Route path="team-persona-construction" element={<TeamPersonaConstruction />} />
-            <Route path="persona-studio/team-persona-library" element={<PersonaStudioScaffold title="Team Persona Library" purpose="Browse published Team Personas across the enterprise." />} />
+            <Route path="persona-studio/team-persona-library" element={<TeamPersonaLibrary />} />
+            <Route path="team-persona-library" element={<TeamPersonaLibrary />} />
             <Route path="persona-studio/persona-validation" element={<PersonaStudioScaffold title="Persona Validation" purpose="Human validation, conflict resolution, and approval of constructed Personas." />} />
             <Route path="persona-studio/persona-version-history" element={<PersonaStudioScaffold title="Persona Version History" purpose="Version lineage, change summaries, and approval history for Team Personas." />} />
             <Route path="cognitive-intake" element={<PersonaStudioScaffold title="Cognitive Intake" purpose="Incoming work evaluated against approved Team Personas." />} />
