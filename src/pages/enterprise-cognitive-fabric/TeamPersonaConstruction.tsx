@@ -21,10 +21,27 @@ import {
   ConflictPlaceholderDialog, StartConstructionDialog, type ConstructionResult,
 } from "./persona-studio/dialogs";
 import {
+  ActivityPanel, ApprovalWorkflowPanel, ConflictAnalysisPanel, CoveragePanel, DemoStoryOverlay,
+  DriftPanel, ImpactPreviewPanel, PublishingPanel, ReadinessPanel, ScenarioBanner, StateNotice,
+  ValidationQueuePanel, VersionHistoryPanel,
+} from "./persona-studio/governance-panels";
+import {
+  ApprovalDialog, ConflictResolutionDialog, ExportPersonasDialog, GlobalSearchDialog,
+  PublishPersonaDialog, PublishingHistoryDrawer, QualityDetailDrawer, RefreshPersonaDialog,
+  ValidationReviewDialog, VersionComparisonDialog,
+} from "./persona-studio/governance-dialogs";
+import {
+  DEMO_SCENARIOS, demoStorySteps, governanceNotifications, paymentsApprovalChain,
+  personaActivity, personaConflicts as seedConflicts, personaDrift as seedDrift,
+  personaReviews as seedReviews, personaVersions, scenarioStates,
+  type ApprovalStage, type DemoScenario, type GovernanceNotification, type PersonaActivity,
+  type PersonaConflict, type PersonaDrift, type PersonaReview, type PersonaVersion,
+} from "./persona-studio/governance-data";
+import {
   activeFilterCount, conditionGroups, constructionJobs as seedJobs, defaultFilters, filterLabels,
   filterOptions, gaps as seedGaps, jobLogs, jobTimeline, kpis, lifecycleCallouts, lifecycleStages,
   nf, paymentsCanvas, paymentsConditions, personaSections, personas as seedPersonas,
-  resolveConditions, resolveGaps, resolvePersonas, seedNotifications, sidebarStatus,
+  resolveConditions, resolveGaps, resolvePersonas, sidebarStatus,
   stageConfiguration, stageConflicts, stageDependencies, stageEvidence, stageOutputs, stageQueue,
   stageRisks, type BusinessCondition, type Filters, type GraphNode, type PersonaConstructionJob,
   type PersonaGap, type PersonaSection, type TeamPersona, type ViewMode,
