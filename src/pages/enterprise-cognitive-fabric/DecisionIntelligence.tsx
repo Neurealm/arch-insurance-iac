@@ -669,7 +669,7 @@ export default function DecisionIntelligence() {
 
         <DecisionQualityPanel />
 
-        <DecisionContextPackagePanel evaluation={evaluationById("DIA 5001")} derived={derived} onOpenPrompt2={prompt2} />
+        <DecisionContextPackagePanel evaluation={evaluationById("DIA 5001")} derived={derived} onOpenPrompt2={(label) => { if (label.includes("Record")) setRecordOpen(true); else if (label.includes("Export")) setExportOpen(true); else say(label); }} />
 
         <ActivityPanel items={seedActivity} />
       </div>
