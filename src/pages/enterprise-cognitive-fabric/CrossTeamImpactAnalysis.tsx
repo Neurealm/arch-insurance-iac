@@ -126,9 +126,8 @@ export default function CrossTeamImpactAnalysis() {
         if (filters.confidenceBand === "85-92%" && (a.confidence < 85 || a.confidence > 92)) return false;
         if (filters.confidenceBand === "Above 92%" && a.confidence <= 92) return false;
       }
-      if (filters.affectedTeam !== "All" && !a.personaIds.some((p) => p === filterOptions.affectedTeam.indexOf(filters.affectedTeam) >= 0 ? true : false)) {
-        // affected team is matched by persona name below
-      }
+      if (filters.affectedTeam !== "All" && !a.personaIds.some((p) => p !== "PER 4107")) return false;
+
       if (q && ![a.id, a.workItem, a.submittingTeam, a.owner].join(" ").toLowerCase().includes(q)) return false;
       if (kpiFocus === "conflicts" && a.conflictCount === 0) return false;
       if (kpiFocus === "dependencies" && a.sharedDependencyCount < 4) return false;
