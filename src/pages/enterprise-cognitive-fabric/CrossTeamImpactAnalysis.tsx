@@ -478,7 +478,7 @@ export default function CrossTeamImpactAnalysis() {
         <PropagationGraphPanel onOpenNode={setNodeDrawer} highlightPersonaId={selectedPersonaId} />
 
         <div className={cn("grid gap-2", leads.includes("conflicts") ? "xl:grid-cols-1" : "xl:grid-cols-2")}>
-          <ConflictPanel state={analysisState} onOpen={setConflictDrawer} />
+          <ConflictPanel state={analysisState} onOpen={setConflictManage} />
         </div>
 
         <div className="grid gap-2 xl:grid-cols-2">
