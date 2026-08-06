@@ -52,6 +52,8 @@ export default function EcfLayout() {
     window.localStorage.setItem("ecf.collapsed", collapsed ? "1" : "0");
   }, [collapsed]);
 
+  const [manualExpanded, setManualExpanded] = useState<Record<string, boolean>>({});
+
   const [lastUpdated, setLastUpdated] = useState<string>(() =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
   );
@@ -136,11 +138,13 @@ export default function EcfLayout() {
                 )}
                 {items.map((p) => {
                   const subNav = subNavBySlug[p.slug];
-                  const expanded =
+                  const routeExpanded =
                     !!subNav &&
                     (subNavPrefixBySlug[p.slug] ?? []).some(
                       (prefix) => location.pathname === prefix || location.pathname.startsWith(prefix + "/"),
                     );
+                  const override = manualExpanded[p.slug];
+                  const expanded = !!subNav && (override ?? routeExpanded);
                   return (
                   <div key={p.slug}>
                     <NavLink
@@ -161,21 +165,31 @@ export default function EcfLayout() {
                           <Circle className={cn("h-1.5 w-1.5 shrink-0 fill-current", isActive ? "text-white" : "text-slate-400")} />
                           {!collapsed && <span className="truncate">{p.title}</span>}
                           {!collapsed && subNav && (
-                            expanded ? (
-                              <ChevronDown
-                                className={cn("ml-auto h-3.5 w-3.5 shrink-0", isActive ? "text-white" : "text-slate-400")}
-                                aria-label={`${subNav.length} nested pages`}
-                              />
-                            ) : (
-                              <ChevronRight
-                                className={cn("ml-auto h-3.5 w-3.5 shrink-0", isActive ? "text-white" : "text-slate-400")}
-                                aria-label={`${subNav.length} nested pages`}
-                              />
-                            )
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setManualExpanded((m) => ({ ...m, [p.slug]: !expanded }));
+                              }}
+                              aria-expanded={expanded}
+                              aria-label={`${expanded ? "Collapse" : "Expand"} ${p.title} nested pages`}
+                              className={cn(
+                                "ml-auto grid h-5 w-5 shrink-0 place-items-center rounded",
+                                isActive ? "text-white hover:bg-white/20" : "text-slate-400 hover:bg-slate-200 hover:text-slate-700",
+                              )}
+                            >
+                              {expanded ? (
+                                <ChevronDown className="h-3.5 w-3.5" />
+                              ) : (
+                                <ChevronRight className="h-3.5 w-3.5" />
+                              )}
+                            </button>
                           )}
                         </>
                       )}
                     </NavLink>
+
                     {!collapsed && subNav && expanded && (
                       <ul className="ml-6 border-l border-slate-200 pl-2">
                         {subNav.map((s) => (
