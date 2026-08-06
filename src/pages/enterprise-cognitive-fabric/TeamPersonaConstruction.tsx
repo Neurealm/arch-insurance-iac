@@ -838,10 +838,172 @@ export default function TeamPersonaConstruction() {
 
         <JobsPanel jobs={jobs} onOpen={(j) => { setOpenJob(j); setJobTab("Summary"); }} spotlight={spotlight === "panel-jobs"} />
 
+        {/* ------------------------ governance and trust ----------------------- */}
+        <ValidationQueuePanel
+          reviews={filteredReviews}
+          loading={loadingGovernance}
+          onAction={onReviewAction}
+          activeSummary={reviewSummaryFilter}
+          onSummary={(id) => setReviewSummaryFilter((s) => (s === id ? null : id))}
+          spotlight={spotlight === "panel-validation-queue"}
+        />
+
+        <ConflictAnalysisPanel
+          conflicts={conflicts}
+          loading={loadingGovernance}
+          onAction={onConflictAction}
+          spotlight={spotlight === "panel-conflicts"}
+        />
+
+        <div className="grid gap-3 xl:grid-cols-2">
+          <ApprovalWorkflowPanel
+            chain={approvalChain}
+            currentStage={approvalStage}
+            onAction={onApprovalAction}
+            spotlight={spotlight === "panel-approval"}
+          />
+          <DriftPanel drift={drift} onAction={onDriftAction} spotlight={spotlight === "panel-drift"} />
+        </div>
+
+        <VersionHistoryPanel versions={versions} onAction={onVersionAction} spotlight={spotlight === "panel-versions"} />
+
+        <CoveragePanel
+          onCategory={(name) => { setCoverageCategory(name); focusPanel("panel-coverage"); }}
+          spotlight={spotlight === "panel-enterprise-coverage"}
+        />
+
+        <div className="grid gap-3 xl:grid-cols-2">
+          <PublishingPanel
+            publishingState={publishingState}
+            onPublish={() => setPublishOpen(true)}
+            onRepublish={() => { setPublishingState("Publishing"); window.setTimeout(() => { setPublishingState("Published"); toast.success("Selected version republished"); }, 400); }}
+            onHistory={() => setPublishHistoryOpen(true)}
+            onPause={() => { setPublishingState("Paused"); announce("Distribution paused"); toast.message("Distribution paused"); }}
+            spotlight={spotlight === "panel-publishing"}
+          />
+          <ReadinessPanel
+            readinessDelta={displayQuality - seedPersonas[0].qualityScore}
+            onProceed={() => navigate("/enterprise-cognitive-fabric/cognitive-memory/cognitive-intake")}
+            onLibrary={() => navigate("/enterprise-cognitive-fabric/persona-studio/team-persona-library")}
+            spotlight={spotlight === "panel-readiness"}
+          />
+        </div>
+
+        <div className="grid gap-3 xl:grid-cols-2">
+          <ImpactPreviewPanel
+            onOpenFull={() => navigate("/enterprise-cognitive-fabric/persona-studio/persona-validation")}
+            spotlight={spotlight === "panel-impact-preview"}
+          />
+          <ActivityPanel headline={activityHeadline} onOpen={openActivityTarget} spotlight={spotlight === "panel-activity"} />
+        </div>
+
         <SectionModelPanel sections={sections} onSelect={setOpenSection} />
 
         {showArchitecture && <ArchitecturePanel />}
       </main>
+
+      <div aria-live="polite" role="status" className="sr-only">{announcement}</div>
+
+      {storyStep !== null && (
+        <DemoStoryOverlay
+          step={storyStep}
+          total={demoStorySteps.length}
+          caption={demoStorySteps[storyStep].caption}
+          notes={demoStorySteps[storyStep].notes}
+          showNotes={storyNotes}
+          onToggleNotes={() => setStoryNotes((s) => !s)}
+          onNext={() => setStoryStep((s) => (s === null ? s : Math.min(s + 1, demoStorySteps.length - 1)))}
+          onPrev={() => setStoryStep((s) => (s === null ? s : Math.max(s - 1, 0)))}
+          onExit={() => { setStoryStep(null); setSpotlight(null); announce("Demo story ended"); }}
+        />
+      )}
+
+      <ValidationReviewDialog open={!!openReview} onOpenChange={(v) => !v && setOpenReview(null)} review={openReview} onDecision={onReviewDecision} />
+      <ConflictResolutionDialog open={!!openConflict} onOpenChange={(v) => !v && setOpenConflict(null)} conflict={openConflict} onResolve={onConflictResolve} />
+      <ApprovalDialog
+        open={!!approvalAction}
+        onOpenChange={(v) => !v && setApprovalAction(null)}
+        action={approvalAction ?? "Approve"}
+        quality={displayQuality}
+        completeness={metricsAfterDraft.completeness}
+        confidence={seedPersonas[0].confidence}
+        freshness={seedPersonas[0].freshnessStatus}
+        unresolvedConflicts={openConflicts.length}
+        knownGaps={gaps.length}
+        conditionsIncluded={seedPersonas[0].conditionsMapped}
+        conditionsExcluded={Object.values(mappingStates).filter((s) => s === "Excluded").length}
+        dependencyTeams={["Ledger Services", "Fraud Risk", "Customer Identity", "Settlement Operations"]}
+        downstreamConsumers={9}
+        version="3.4"
+        onConfirm={onApprovalConfirm}
+      />
+      {compareVersions && (
+        <VersionComparisonDialog
+          open={!!compareVersions}
+          onOpenChange={(v) => !v && setCompareVersions(null)}
+          from={compareVersions[0]}
+          to={compareVersions[1]}
+          onAction={(action, selected) => {
+            if (action === "Restore Selected") {
+              onVersionAction(compareVersions[0], "Restore as Draft");
+              toast.success(`${selected.length || "All"} selected dimensions restored into a draft`);
+            } else {
+              download("persona-version-comparison.json", JSON.stringify({ from: compareVersions[0].version, to: compareVersions[1].version, selected }, null, 2), "application/json");
+              toast.success("Comparison exported");
+            }
+            setCompareVersions(null);
+          }}
+        />
+      )}
+      <RefreshPersonaDialog
+        open={refreshOpen}
+        onOpenChange={setRefreshOpen}
+        onComplete={onRefreshComplete}
+        onOpenDraft={() => { setRefreshOpen(false); setView("workbench"); focusPanel("panel-workbench"); }}
+        onCompare={() => { setRefreshOpen(false); setCompareVersions([versions[1] ?? versions[0], versions[0]]); }}
+        onSubmitReview={() => { setRefreshOpen(false); setApprovalStage("Persona Owner Review"); toast.success("Refreshed draft submitted for review"); }}
+      />
+      <PublishPersonaDialog
+        open={publishOpen}
+        onOpenChange={setPublishOpen}
+        approved={approvalStage === "Approved" || approvalStage === "Published"}
+        quality={displayQuality}
+        completeness={metricsAfterDraft.completeness}
+        confidence={seedPersonas[0].confidence}
+        freshness={seedPersonas[0].freshnessStatus}
+        criticalConflicts={criticalConflicts}
+        owner={seedPersonas[0].personaOwner}
+        version="3.4"
+        onComplete={onPublishComplete}
+      />
+      <PublishingHistoryDrawer open={publishHistoryOpen} onOpenChange={setPublishHistoryOpen} />
+      <ExportPersonasDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        rows={exportRows}
+        onExported={(format, scope, count) => { toast.success(`${format} export ready`, { description: `${scope} · ${count} records` }); announce(`${format} export generated for ${scope}`); }}
+      />
+      <GlobalSearchDialog
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        initialQuery={search}
+        onOpenResult={(r) => { setSearchOpen(false); openSearchResult(r); }}
+      />
+      <QualityDetailDrawer
+        open={!!qualityDetail}
+        onOpenChange={(v) => !v && setQualityDetail(null)}
+        name={qualityDetail?.name ?? ""}
+        score={qualityDetail?.score ?? 0}
+        target={qualityDetail?.target ?? 0}
+        trend={qualityDetail?.trend ?? []}
+        onAction={(a) => {
+          if (a === "Open Affected Sections") { setQualityDetail(null); setView("workbench"); focusPanel("panel-workbench"); }
+          else if (a === "Open Review Queue") { setQualityDetail(null); focusPanel("panel-validation-queue"); }
+          else if (a === "Open Conflicts") { setQualityDetail(null); focusPanel("panel-conflicts"); }
+          else toast.success(`${a} requested`);
+        }}
+      />
+
 
       {/* filter drawer */}
       <Drawer open={filtersOpen} onOpenChange={setFiltersOpen} title="Filters" description="Filters update every panel on this page">
