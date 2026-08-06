@@ -241,10 +241,9 @@ describe("AIM-006.1 — exports and accessibility", () => {
     }
   });
 
-  it("renders loading and error states through the shared panel contract", () => {
-    const { handle, rerender } = renderWithScenarioState((state) => <ScenarioWorkspace state={state} />);
-    handle.current!.setPanelState("error");
-    rerender(<div />);
-    expect(screen.queryByTestId("scenario-workspace")).not.toBeInTheDocument();
+  it("keeps the outcome section focusable for cross-panel navigation", async () => {
+    const { user, scope } = renderWorkspace();
+    await user.click(scope.getByRole("button", { name: /show outcome/i }));
+    expect(screen.getByTestId("scenario-outcome")).toHaveFocus();
   });
 });
