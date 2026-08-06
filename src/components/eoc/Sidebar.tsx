@@ -10,7 +10,7 @@ import {
   Sparkles as Sparkles2, CheckCircle2 as CheckCircle2b,
   ShieldHalf,
   ClipboardList,
-  ArrowRightLeft, Rocket, Compass, Gauge, X, Database,
+  ArrowRightLeft, Rocket, Compass, Gauge, X, Database, Brain,
   Search as SearchIcon, Star, Clock, Circle,
   type LucideIcon,
 } from "lucide-react";
@@ -116,7 +116,7 @@ const tree: Node[] = [
   {
     key: "enterprise-cognitive-fabric",
     label: "Enterprise Cognitive Fabric",
-    icon: Database,
+    icon: Brain,
     to: "/enterprise-cognitive-fabric",
   },
   {
