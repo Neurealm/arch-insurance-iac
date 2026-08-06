@@ -102,7 +102,7 @@ export default function CrossTeamImpactAnalysis() {
   const say = useCallback((m: string) => setAnnounce(m), []);
 
   /* ------------------------------------------------- Prompt 2 operations */
-  const [included, setIncluded] = useState<string[]>(ctiPersonaIds);
+  const [included, setIncluded] = useState<string[]>(ctiPersonas.map((p) => p.id));
   const [primaryPersona, setPrimaryPersona] = useState<string | null>("PER 4101");
   const [addPersonaOpen, setAddPersonaOpen] = useState(false);
   const [scenarioParams, setScenarioParams] = useState<ScenarioParams>(baselineParams);
