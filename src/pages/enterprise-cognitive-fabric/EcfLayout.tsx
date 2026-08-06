@@ -1,29 +1,43 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { Brain, Home, ChevronsLeft, ChevronsRight, Circle, RefreshCw } from "lucide-react";
+import { Brain, Home, ChevronsLeft, ChevronsRight, ChevronDown, ChevronRight, Circle, RefreshCw } from "lucide-react";
 import { ecfPages, ecfGroups } from "./pages";
 import { cn } from "@/lib/utils";
 
 const SCROLL_KEY = "ecf.sidebarScroll";
 let cachedScroll = 0;
 
-const discoverySubNav = [
-  { to: "/enterprise-cognitive-fabric/discovery/source-discovery", label: "Enterprise Source Discovery" },
-  { to: "/enterprise-cognitive-fabric/discovery/configuration", label: "Discovery Configuration" },
-  { to: "/enterprise-cognitive-fabric/discovery/pipelines", label: "Discovery Pipelines" },
-  { to: "/enterprise-cognitive-fabric/discovery/source-registry", label: "Source Registry" },
-  { to: "/enterprise-cognitive-fabric/discovery/connector-health", label: "Connector Health" },
-  { to: "/enterprise-cognitive-fabric/discovery/artifact-ingestion", label: "Artifact Ingestion" },
-  { to: "/enterprise-cognitive-fabric/discovery/artifact-normalization", label: "Artifact Normalization" },
-  { to: "/enterprise-cognitive-fabric/discovery/business-condition-extraction", label: "Business Condition Extraction" },
-];
+// Sub-pages nested under a parent page. The parent page itself is NOT repeated
+// here — the parent nav link is the entry point for it.
+const subNavBySlug: Record<string, { to: string; label: string }[]> = {
+  "enterprise-source-discovery": [
+    { to: "/enterprise-cognitive-fabric/discovery/configuration", label: "Discovery Configuration" },
+    { to: "/enterprise-cognitive-fabric/discovery/pipelines", label: "Discovery Pipelines" },
+    { to: "/enterprise-cognitive-fabric/discovery/source-registry", label: "Source Registry" },
+    { to: "/enterprise-cognitive-fabric/discovery/connector-health", label: "Connector Health" },
+    { to: "/enterprise-cognitive-fabric/discovery/artifact-ingestion", label: "Artifact Ingestion" },
+    { to: "/enterprise-cognitive-fabric/discovery/artifact-normalization", label: "Artifact Normalization" },
+    { to: "/enterprise-cognitive-fabric/discovery/business-condition-extraction", label: "Business Condition Extraction" },
+  ],
+  "team-persona-construction": [
+    { to: "/enterprise-cognitive-fabric/persona-studio/team-persona-library", label: "Team Persona Library" },
+    { to: "/enterprise-cognitive-fabric/persona-studio/persona-validation", label: "Persona Validation" },
+    { to: "/enterprise-cognitive-fabric/persona-studio/persona-version-history", label: "Persona Version History" },
+  ],
+};
 
-const personaStudioSubNav = [
-  { to: "/enterprise-cognitive-fabric/persona-studio/team-persona-construction", label: "Team Persona Construction" },
-  { to: "/enterprise-cognitive-fabric/persona-studio/team-persona-library", label: "Team Persona Library" },
-  { to: "/enterprise-cognitive-fabric/persona-studio/persona-validation", label: "Persona Validation" },
-  { to: "/enterprise-cognitive-fabric/persona-studio/persona-version-history", label: "Persona Version History" },
-];
+// Path prefixes that keep a parent's sub-nav expanded.
+const subNavPrefixBySlug: Record<string, string[]> = {
+  "enterprise-source-discovery": [
+    "/enterprise-cognitive-fabric/enterprise-source-discovery",
+    "/enterprise-cognitive-fabric/discovery",
+  ],
+  "team-persona-construction": [
+    "/enterprise-cognitive-fabric/team-persona-construction",
+    "/enterprise-cognitive-fabric/persona-studio",
+  ],
+};
+
 
 export default function EcfLayout() {
   const location = useLocation();
@@ -120,7 +134,14 @@ export default function EcfLayout() {
                     {group}
                   </div>
                 )}
-                {items.map((p) => (
+                {items.map((p) => {
+                  const subNav = subNavBySlug[p.slug];
+                  const expanded =
+                    !!subNav &&
+                    (subNavPrefixBySlug[p.slug] ?? []).some(
+                      (prefix) => location.pathname === prefix || location.pathname.startsWith(prefix + "/"),
+                    );
+                  return (
                   <div key={p.slug}>
                     <NavLink
                       to={`/enterprise-cognitive-fabric/${p.slug}`}
@@ -139,31 +160,25 @@ export default function EcfLayout() {
                         <>
                           <Circle className={cn("h-1.5 w-1.5 shrink-0 fill-current", isActive ? "text-white" : "text-slate-400")} />
                           {!collapsed && <span className="truncate">{p.title}</span>}
+                          {!collapsed && subNav && (
+                            expanded ? (
+                              <ChevronDown
+                                className={cn("ml-auto h-3.5 w-3.5 shrink-0", isActive ? "text-white" : "text-slate-400")}
+                                aria-label={`${subNav.length} nested pages`}
+                              />
+                            ) : (
+                              <ChevronRight
+                                className={cn("ml-auto h-3.5 w-3.5 shrink-0", isActive ? "text-white" : "text-slate-400")}
+                                aria-label={`${subNav.length} nested pages`}
+                              />
+                            )
+                          )}
                         </>
                       )}
                     </NavLink>
-                    {!collapsed && p.slug === "team-persona-construction" && (
+                    {!collapsed && subNav && expanded && (
                       <ul className="ml-6 border-l border-slate-200 pl-2">
-                        {personaStudioSubNav.map((sn) => (
-                          <li key={sn.to}>
-                            <NavLink
-                              to={sn.to}
-                              className={({ isActive }) =>
-                                cn(
-                                  "my-0.5 block rounded-md px-2 py-1.5 text-[11.5px] transition-colors",
-                                  isActive ? "bg-slate-100 font-medium text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-                                )
-                              }
-                            >
-                              {sn.label}
-                            </NavLink>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {!collapsed && p.slug === "enterprise-source-discovery" && location.pathname.includes("source-discovery") && (
-                      <ul className="ml-6 border-l border-slate-200 pl-2">
-                        {discoverySubNav.map((s) => (
+                        {subNav.map((s) => (
                           <li key={s.to}>
                             <NavLink
                               to={s.to}
@@ -181,7 +196,9 @@ export default function EcfLayout() {
                       </ul>
                     )}
                   </div>
-                ))}
+                  );
+                })}
+
               </div>
             );
           })}
