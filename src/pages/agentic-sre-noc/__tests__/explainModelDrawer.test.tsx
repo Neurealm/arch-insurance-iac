@@ -102,7 +102,7 @@ describe("AIM-006.1 — Explain Model drawer", () => {
     const { user } = renderDrawer();
     const drawer = await openDrawer(user);
     await user.click(drawer.getByRole("button", { name: /export explain model report/i }));
-    expect(drawer.getByText(/aim006-evidence-index\.csv/i)).toBeInTheDocument();
+    expect(drawer.getByText(/aim006-explain-model-report\.csv/i)).toBeInTheDocument();
   });
 
   it("moves focus to Close on open and returns focus to the trigger on close", async () => {

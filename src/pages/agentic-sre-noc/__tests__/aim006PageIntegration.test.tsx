@@ -44,7 +44,7 @@ describe("AIM-006.1 — page integration", () => {
     await user.click(drawer.getByRole("button", { name: /close explain current prediction/i }));
 
     await user.click(screen.getByTitle("Export Model Report"));
-    expect(screen.getAllByText(/aim006-evidence-index\.csv/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/aim006-explain-model-report\.csv/i).length).toBeGreaterThan(0);
   });
 
   it("starts the scenario from the header control and progresses the workspace", async () => {
