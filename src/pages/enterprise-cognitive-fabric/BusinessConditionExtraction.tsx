@@ -179,6 +179,153 @@ export default function BusinessConditionExtraction() {
     say(`${action} — ${candidate?.candidateStatement ?? id}`);
   };
 
+  /* ---------------------------------------------------------- prompt 2 state */
+  const [scenario, setScenario] = useState<ScenarioId | null>(null);
+  const sc = scenario ? scenarioById(scenario) : null;
+  const kpi = sc?.kpi ?? { extracted: 94_812, approved: 87_442, jobs: "14", quality: "93/100", review: 427, ready: 82_906 };
+  const conflictCount = sc?.conflicts ?? 148;
+  const reviewCount = sc?.reviews ?? 427;
+  const publishState = sc?.publishingState ?? "Healthy";
+  const operationalState = sc?.operationalState ?? "Healthy";
+
+  const [reviews, setReviews] = useState<ConditionReview[]>(reviewsSeed);
+  const [reviewCategory, setReviewCategory] = useState("All");
+  const [reviewSearch, setReviewSearch] = useState("");
+  const [activeReview, setActiveReview] = useState<ConditionReview | null>(null);
+  const [conflictRows, setConflictRows] = useState<ConflictRow[]>(seedConflictRows);
+  const [issueFilter, setIssueFilter] = useState("All");
+  const [activeConflict, setActiveConflict] = useState<ConflictRow | null>(null);
+  const [mergeMode, setMergeMode] = useState<"merge" | "split" | null>(null);
+  const [taxonomyTypeId, setTaxonomyTypeId] = useState("service-level-objective");
+  const [taxonomyTest, setTaxonomyTest] = useState<string | null>(null);
+  const [taxonomyCompare, setTaxonomyCompare] = useState(false);
+  const [versions, setVersions] = useState<ConditionVersion[]>(conditionVersions);
+  const [versionSelection, setVersionSelection] = useState<string[]>(["VER-3.1", "VER-3.2"]);
+  const [versionCompareOpen, setVersionCompareOpen] = useState(false);
+  const [supersedeVersion, setSupersedeVersion] = useState<ConditionVersion | null>(null);
+  const [approvalStage, setApprovalStage] = useState("Governance Review");
+  const [approvalOpen, setApprovalOpen] = useState(false);
+  const [pausedDestinations, setPausedDestinations] = useState<string[]>([]);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [publishHistoryOpen, setPublishHistoryOpen] = useState(false);
+  const [impactOpen, setImpactOpen] = useState(false);
+  const [impactAfter, setImpactAfter] = useState<(() => void) | null>(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [reprocessOpen, setReprocessOpen] = useState(false);
+  const [pauseOpen, setPauseOpen] = useState(false);
+  const [extractionPaused, setExtractionPaused] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [govSearchOpen, setGovSearchOpen] = useState(false);
+  const [activity, setActivity] = useState<ExtractionActivity[]>(activitySeed);
+  const [govNotifications, setGovNotifications] = useState(governanceNotifications);
+  const [notifCategory, setNotifCategory] = useState("All");
+  const [demoStep, setDemoStep] = useState<number | null>(null);
+  const [loadingGovernance, setLoadingGovernance] = useState(false);
+
+  const govUnread = govNotifications.filter((n) => !n.read).length;
+
+  const logActivity = useCallback((action: string, description: string, extra: Partial<ExtractionActivity> = {}) => {
+    setActivity((list) => [{
+      id: `ACT-${Math.floor(Math.random() * 9000 + 1000)}`,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      action, description, conditionId: null, candidateId: null, jobId: null, conflictId: null, reviewId: null,
+      sourceId: "Extraction Service", teamId: "Knowledge Governance", result: "Success",
+      owner: "Alex Valencia", auditId: `AUD-${Math.floor(Math.random() * 90000 + 10000)}`,
+      ...extra,
+    }, ...list].slice(0, 24));
+  }, []);
+
+  const requireImpact = (run: () => void) => { setImpactAfter(() => run); setImpactOpen(true); };
+
+  const reviewAction = (action: string, r: ConditionReview) => {
+    setReviews((list) => list.map((x) => x.id !== r.id ? x : {
+      ...x,
+      status: action === "Approve" ? "Approved" : action === "Reject" ? "Rejected"
+        : action === "Escalate" ? "Escalated" : action === "Request Clarification" ? "Clarification Requested" : x.status,
+      completedAt: action === "Approve" || action === "Reject" ? "now" : x.completedAt,
+    }));
+    logActivity(`Review ${action}`, `${action} — ${r.conditionCandidate}`, { reviewId: r.id, conditionId: r.conditionId, result: action === "Reject" ? "Warning" : "Success" });
+    say(`${action} — review ${r.id}`);
+  };
+
+  const reviewDecision = (action: string, r: ConditionReview, comment: string) => {
+    const approved = action === "Approve Candidate";
+    setReviews((list) => list.map((x) => x.id !== r.id ? x : {
+      ...x, status: approved ? "Approved" : action === "Reject Candidate" ? "Rejected" : "In Review",
+      decision: action, comments: comment ? [...x.comments, comment] : x.comments,
+      completedAt: approved || action === "Reject Candidate" ? "now" : null,
+    }));
+    logActivity(approved ? "Condition Approved" : "Review Decision", `${action} — ${r.conditionCandidate}${comment ? ` · ${comment}` : ""}`,
+      { reviewId: r.id, conditionId: r.conditionId, result: approved ? "Success" : "Pending" });
+    say(`${action} recorded for ${r.id}. Condition state, quality, confidence, and readiness recalculated.`);
+  };
+
+  const conflictAction = (action: string, c: ConflictRow) => {
+    if (action === "Merge") { setMergeMode("merge"); return; }
+    if (action === "Supersede") { setSupersedeVersion(versions[1]); return; }
+    setConflictRows((list) => list.map((x) => x.id !== c.id ? x : {
+      ...x, status: action === "Acknowledge" ? "Acknowledged" : action === "Assign" ? "Assigned" : x.status,
+    }));
+    if (action === "Create Review Task") {
+      setReviews((list) => [{
+        ...reviewsSeed[1], id: `REV-${2400 + list.length + 1}`, conditionCandidate: c.condition,
+        reviewType: "Conflict Resolution", reason: c.detail, status: "Open", conflictId: c.id,
+      }, ...list]);
+    }
+    logActivity(`Conflict ${action}`, `${action} — ${c.condition}`, { conflictId: c.id, result: "Pending" });
+    say(`${action} — ${c.id}`);
+  };
+
+  const resolveConflict = (choice: string, c: ConflictRow, details: { reason: string }) => {
+    setConflictRows((list) => list.map((x) => x.id === c.id ? { ...x, status: "Resolved" } : x));
+    setReviews((list) => list.map((x) => x.conflictId === c.id ? { ...x, status: "Approved", decision: choice } : x));
+    setVersions((list) => [{
+      ...list[0], id: `VER-${(Number(list[0].version) + 0.1).toFixed(1)}`,
+      version: (Number(list[0].version) + 0.1).toFixed(1), previousVersionId: list[0].id,
+      changeType: "Value Change", changeSummary: `${choice} — ${details.reason}`, status: "Current",
+      changedBy: "Alex Valencia", changedAt: new Date().toISOString().slice(0, 16).replace("T", " "),
+    }, ...list.map((v) => v.id === list[0].id ? { ...v, status: "Superseded" as const } : v)]);
+    logActivity("Conflict Resolved", `${choice} — ${c.condition} · ${details.reason}`, { conflictId: c.id, result: "Success" });
+    setScenario("conflict-resolved");
+    say(`Conflict ${c.id} resolved with ${choice}. Versions created, conflict counts, quality, registry readiness, persona readiness, and context graph updated.`);
+  };
+
+  const applyScenario = (id: ScenarioId) => {
+    setLoadingGovernance(true);
+    const s = scenarioById(id);
+    setScenario(id === "reset" ? null : id);
+    setServiceState(s.serviceState as ServiceState);
+    setExtractionPaused(id === "paused");
+    if (id === "reset") {
+      setReviews(reviewsSeed); setConflictRows(seedConflictRows); setVersions(conditionVersions);
+      setActivity(activitySeed); setGovNotifications(governanceNotifications); setPausedDestinations([]);
+    }
+    setGovNotifications((list) => [{
+      id: `N-${Math.floor(Math.random() * 9000)}`, category: s.notification, title: s.label,
+      detail: s.banner, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      read: false, targetId: null, targetKind: "panel" as const,
+    }, ...list]);
+    logActivity("Scenario Applied", s.activity, { result: s.operationalState === "Healthy" ? "Success" : "Warning" });
+    setLastUpdated(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    setTimeout(() => setLoadingGovernance(false), 220);
+    say(`Scenario ${s.label} applied. ${s.banner}`);
+  };
+
+  const versionAction = (action: string, v: ConditionVersion) => {
+    if (action === "Compare") { setVersionCompareOpen(true); return; }
+    if (action === "Supersede") { setSupersedeVersion(v); return; }
+    if (action === "Export") { setExportOpen(true); return; }
+    if (action === "Mark Historical") {
+      setVersions((list) => list.map((x) => x.id === v.id ? { ...x, status: "Historical" } : x));
+    }
+    if (action === "Restore as Draft") {
+      setVersions((list) => [{ ...v, id: `${v.id}-draft`, version: `${v.version}-draft`, status: "Draft" }, ...list]);
+    }
+    logActivity(`Version ${action}`, `${action} — ${v.conditionId} v${v.version}`, { conditionId: v.conditionId });
+    say(`${action} — version ${v.version}`);
+  };
+
+
   const jobAction = (action: string, job: ExtractionJob) => {
     if (action === "Pause Job") setJobOverrides((o) => ({ ...o, [job.id]: { status: "Paused" } }));
     if (action === "Resume Job") setJobOverrides((o) => ({ ...o, [job.id]: { status: "Running" } }));
