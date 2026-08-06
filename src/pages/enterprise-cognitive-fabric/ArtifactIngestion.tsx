@@ -28,7 +28,7 @@ import {
   activeFilterCount, defaultFilters, demoScenarios, filterLabels, filterOptions, kpiTrends,
   makeDiscoveryBatch, makeManualArtifact, makeManualBatch, readiness as seedReadiness,
   resolveActivity, resolveArtifacts, resolveBatches, resolveExceptions, resolveStages,
-  scenarioSnapshots, searchCatalog, sidebarStatus, type ArtifactRecord, type DemoScenario,
+  scenarioSnapshots, searchCatalog, seedNotifications, sidebarStatus, type ArtifactRecord, type DemoScenario,
   type Filters, type IngestionActivity, type IngestionBatch, type IngestionException,
   type ThroughputMetric, type ViewMode,
 } from "./artifact-ingestion/data";
