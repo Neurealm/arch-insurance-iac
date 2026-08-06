@@ -7,23 +7,37 @@ import { cn } from "@/lib/utils";
 const SCROLL_KEY = "ecf.sidebarScroll";
 let cachedScroll = 0;
 
-const discoverySubNav = [
-  { to: "/enterprise-cognitive-fabric/discovery/source-discovery", label: "Enterprise Source Discovery" },
-  { to: "/enterprise-cognitive-fabric/discovery/configuration", label: "Discovery Configuration" },
-  { to: "/enterprise-cognitive-fabric/discovery/pipelines", label: "Discovery Pipelines" },
-  { to: "/enterprise-cognitive-fabric/discovery/source-registry", label: "Source Registry" },
-  { to: "/enterprise-cognitive-fabric/discovery/connector-health", label: "Connector Health" },
-  { to: "/enterprise-cognitive-fabric/discovery/artifact-ingestion", label: "Artifact Ingestion" },
-  { to: "/enterprise-cognitive-fabric/discovery/artifact-normalization", label: "Artifact Normalization" },
-  { to: "/enterprise-cognitive-fabric/discovery/business-condition-extraction", label: "Business Condition Extraction" },
-];
+// Sub-pages nested under a parent page. The parent page itself is NOT repeated
+// here — the parent nav link is the entry point for it.
+const subNavBySlug: Record<string, { to: string; label: string }[]> = {
+  "enterprise-source-discovery": [
+    { to: "/enterprise-cognitive-fabric/discovery/configuration", label: "Discovery Configuration" },
+    { to: "/enterprise-cognitive-fabric/discovery/pipelines", label: "Discovery Pipelines" },
+    { to: "/enterprise-cognitive-fabric/discovery/source-registry", label: "Source Registry" },
+    { to: "/enterprise-cognitive-fabric/discovery/connector-health", label: "Connector Health" },
+    { to: "/enterprise-cognitive-fabric/discovery/artifact-ingestion", label: "Artifact Ingestion" },
+    { to: "/enterprise-cognitive-fabric/discovery/artifact-normalization", label: "Artifact Normalization" },
+    { to: "/enterprise-cognitive-fabric/discovery/business-condition-extraction", label: "Business Condition Extraction" },
+  ],
+  "team-persona-construction": [
+    { to: "/enterprise-cognitive-fabric/persona-studio/team-persona-library", label: "Team Persona Library" },
+    { to: "/enterprise-cognitive-fabric/persona-studio/persona-validation", label: "Persona Validation" },
+    { to: "/enterprise-cognitive-fabric/persona-studio/persona-version-history", label: "Persona Version History" },
+  ],
+};
 
-const personaStudioSubNav = [
-  { to: "/enterprise-cognitive-fabric/persona-studio/team-persona-construction", label: "Team Persona Construction" },
-  { to: "/enterprise-cognitive-fabric/persona-studio/team-persona-library", label: "Team Persona Library" },
-  { to: "/enterprise-cognitive-fabric/persona-studio/persona-validation", label: "Persona Validation" },
-  { to: "/enterprise-cognitive-fabric/persona-studio/persona-version-history", label: "Persona Version History" },
-];
+// Path prefixes that keep a parent's sub-nav expanded.
+const subNavPrefixBySlug: Record<string, string[]> = {
+  "enterprise-source-discovery": [
+    "/enterprise-cognitive-fabric/enterprise-source-discovery",
+    "/enterprise-cognitive-fabric/discovery",
+  ],
+  "team-persona-construction": [
+    "/enterprise-cognitive-fabric/team-persona-construction",
+    "/enterprise-cognitive-fabric/persona-studio",
+  ],
+};
+
 
 export default function EcfLayout() {
   const location = useLocation();
