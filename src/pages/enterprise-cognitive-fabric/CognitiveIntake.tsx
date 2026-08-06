@@ -738,8 +738,32 @@ export default function CognitiveIntake() {
             if (r) openWorkbench(r);
           }} />
 
+        <div className="grid gap-2 xl:grid-cols-2">
+          <RuleActivationPanel activations={ruleActivations} onOpenWorkbench={() => scrollTo("panel-workbench")} />
+          <OperationalStatePanel state={operationalState} clarifications={clarifications}
+            evidenceRequests={evidenceRequests} refreshProgress={refreshProgress}
+            blockingReason={blockingReason} routing={routing}
+            onSubmitWork={() => setDialog("submit")} onRoute={() => setDialog("route")} />
+        </div>
+
+        <ActiveJobsPanel jobs={jobs} loading={loading}
+          onOpen={(j) => { setActiveJob(j); setJobOpen(true); }}
+          onRunIntake={() => setDialog("run")} />
+
+        {!showExecutive && <QualityDetailPanel recalcSignal={qualityRevision} />}
+
+        <PackageHistoryPanel versions={packageVersions}
+          onView={(v) => toast.info(`${v.version} · ${v.label}`, { description: `${v.createdAt} · completeness ${v.completeness}%` })}
+          onCompare={(a, b) => toast.info(`Comparing ${a.version} and ${b.version}`, {
+            description: `Completeness ${a.completeness}% → ${b.completeness}%`,
+          })}
+          onRestore={(v) => { bumpPackageVersion(`Restored from ${v.version}`); toast.success(`Restored ${v.version}`); }} />
+
         <PackageCompletenessPanel input={completenessInput}
-          onNextStage={() => prompt2("Routing into Cognitive Readiness Assessment")} />
+          onNextStage={() => setDialog("route")} />
+
+        <RecentActivityPanel rows={activityRows}
+          onOpen={(id) => { const r = intakes.find((x) => x.id === id); if (r) openDetail(r); }} />
 
         {!showExecutive && <ActivityPanel onOpen={(id) => { const r = intakes.find((x) => x.id === id); if (r) openDetail(r); }} />}
       </div>
@@ -750,6 +774,71 @@ export default function CognitiveIntake() {
         gaps={seedGaps.filter((g) => g.intakeId === (detailIntake?.id ?? ""))}
         related={intakeRelated} packageCompleteness={packageCompleteness}
         onOpenWorkbench={() => { setDetailOpen(false); if (detailIntake) openWorkbench(detailIntake); }} />
+
+      <JobDetailDrawer open={jobOpen} onOpenChange={setJobOpen} job={activeJob} onAction={handleJobAction} />
+
+      <NotificationsDrawer open={notificationsOpen} onOpenChange={setNotificationsOpen} items={notifications}
+        onMarkRead={(n) => setNotifications((ns) => ns.map((x) => x.id === n.id ? { ...x, status: "Read" } : x))}
+        onMarkAllRead={() => setNotifications((ns) => ns.map((x) => ({ ...x, status: "Read" as const })))}
+        onAcknowledge={(n) => {
+          setNotifications((ns) => ns.map((x) => x.id === n.id ? { ...x, status: "Acknowledged" } : x));
+          toast.success("Notification acknowledged", { description: n.title });
+        }}
+        onOpenItem={(n) => {
+          setNotificationsOpen(false);
+          const r = intakes.find((x) => x.id === n.intakeId);
+          if (r) openDetail(r); else scrollTo("panel-queue");
+        }}
+        onAssign={(n) => toast.success("Notification assigned", { description: `${n.title} assigned to ${n.owner}` })} />
+
+      <SubmitWorkDialog open={dialog === "submit"} onOpenChange={(v) => setDialog(v ? "submit" : null)}
+        onSubmit={handleSubmitWork} />
+      <ImportWorkDialog open={dialog === "import"} onOpenChange={(v) => setDialog(v ? "import" : null)}
+        onImport={handleImport} />
+      <RunIntakeDialog open={dialog === "run"} onOpenChange={(v) => setDialog(v ? "run" : null)}
+        onComplete={handleRunIntake} selectedCount={selected.size} />
+      <RequestClarificationDialog open={dialog === "clarify"} onOpenChange={(v) => setDialog(v ? "clarify" : null)}
+        gapIds={intakeGaps.map((g) => g.id)}
+        onRequest={(p) => { handleRequestClarification(p); setClarificationGap(p.gapId); setDialog("clarify-response"); }} />
+      <ClarificationResponseDialog open={dialog === "clarify-response"} onOpenChange={(v) => setDialog(v ? "clarify-response" : null)}
+        gapId={clarificationGap} onApply={handleClarificationResponse} />
+      <AddEvidenceDialog open={dialog === "add-evidence"} onOpenChange={(v) => setDialog(v ? "add-evidence" : null)}
+        onAdd={handleAddEvidenceRecord} />
+      <RequestEvidenceDialog open={dialog === "request-evidence"} onOpenChange={(v) => setDialog(v ? "request-evidence" : null)}
+        onRequest={handleRequestEvidence} />
+      <EntityRemediationDialog open={dialog === "entity"} onOpenChange={(v) => setDialog(v ? "entity" : null)}
+        onResolve={handleEntityRemediation} />
+      <ContextRefreshDialog open={dialog === "refresh-context"} onOpenChange={(v) => setDialog(v ? "refresh-context" : null)}
+        ruleInput={ruleInput} onProgress={setRefreshProgress} onComplete={handleContextRefreshComplete} />
+      <ReprocessDialog open={dialog === "reprocess"} onOpenChange={(v) => setDialog(v ? "reprocess" : null)}
+        onReprocess={handleReprocess} />
+      <BulkActionDialog open={dialog === "bulk"} onOpenChange={(v) => setDialog(v ? "bulk" : null)}
+        selected={filtered.filter((r) => selected.has(r.id))} onApply={handleBulk} />
+      <RouteToReadinessDialog open={dialog === "route"} onOpenChange={(v) => setDialog(v ? "route" : null)}
+        routingInput={routingInput} onRoute={handleRoute} />
+      <GlobalSearchDialog open={dialog === "search"} onOpenChange={(v) => setDialog(v ? "search" : null)}
+        onSelect={(r) => {
+          setDialog(null);
+          const row = intakes.find((x) => x.id === r.id || x.title === r.title);
+          if (row) openDetail(row); else scrollTo("panel-queue");
+        }} />
+      <ExportDialog open={dialog === "export"} onOpenChange={(v) => setDialog(v ? "export" : null)}
+        rows={filtered.filter((r) => selected.has(r.id))}
+        onExported={(format, scope) => {
+          logActivity("Governed Export", `${format} export generated for ${scope}`);
+          toast.success(`${format} export generated`, { description: scope });
+        }} />
+      <ScenarioDialog open={dialog === "scenarios"} onOpenChange={(v) => setDialog(v ? "scenarios" : null)}
+        activeId={activeScenario} onApply={applyScenario} onReset={resetScenario} />
+
+      {storyStep !== null && (
+        <DemoStoryOverlay step={demoStorySteps[storyStep - 1]} total={demoStorySteps.length}
+          onNext={() => runStoryStep(Math.min(demoStorySteps.length, storyStep + 1))}
+          onPrev={() => runStoryStep(Math.max(1, storyStep - 1))}
+          onExit={() => { setStoryStep(null); say("Demo story exited"); }}
+          reducedMotion={reducedMotion} onToggleMotion={() => setReducedMotion(!reducedMotion)} />
+      )}
     </div>
+
   );
 }
