@@ -785,6 +785,10 @@ const App = () => (
             <Route path="cognitive-intake" element={<CognitiveIntake />} />
             <Route path="evaluation/persona-impact-analysis" element={<PersonaImpactAnalysis />} />
             <Route path="persona-impact-analysis" element={<PersonaImpactAnalysis />} />
+            <Route path="evaluation/cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
+            <Route path="evaluation/cross-team-impact-analysis" element={<CrossTeamImpactAnalysis />} />
+            <Route path="cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
+
             <Route path=":slug" element={<EcfPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
