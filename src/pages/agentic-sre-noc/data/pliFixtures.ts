@@ -129,15 +129,26 @@ export const breadcrumb = [
   "Predictive Optical Link Intelligence",
 ];
 
+/**
+ * AIM-010 — five operational KPIs. Prediction Accuracy, False Positive Rate and
+ * Links Modeled are folded into the single Operational Trust indicator.
+ */
 export const kpiMetrics: ModelMetric[] = [
-  { key: "links-modeled", label: "Links Modeled", value: "8,721", deltaLabel: "3.2% vs 24h", direction: "up", intent: "positive", sparkline: [42, 45, 44, 49, 52, 51, 55], description: "Optical links currently covered by the prediction model." },
-  { key: "at-risk", label: "Predicted At-Risk Links", value: "32", deltaLabel: "2 vs 24h", direction: "up", intent: "negative", sparkline: [18, 22, 20, 26, 24, 29, 32], description: "Links predicted to degrade within the forecast horizon." },
   { key: "high-risk-6h", label: "High Risk, Next 6 Hours", value: "6", deltaLabel: "1 vs 24h", direction: "up", intent: "negative", sparkline: [3, 4, 3, 5, 4, 5, 6], description: "Links with high-confidence degradation predicted in six hours." },
-  { key: "lead-time", label: "Mean Lead Time", value: "5h 42m", deltaLabel: "1h 18m vs 24h", direction: "up", intent: "positive", sparkline: [3.1, 3.6, 4.0, 4.4, 4.9, 5.3, 5.7], description: "Average warning time between prediction and observed impact." },
-  { key: "accuracy", label: "Prediction Accuracy", value: "94.1%", deltaLabel: "2.3% vs 7d", direction: "up", intent: "positive", sparkline: [90.4, 91.1, 91.8, 92.6, 93.2, 93.7, 94.1], description: "Share of predictions confirmed by observed link behaviour." },
-  { key: "false-positive", label: "False Positive Rate", value: "2.8%", deltaLabel: "0.6% vs 7d", direction: "down", intent: "positive", sparkline: [4.1, 3.9, 3.6, 3.4, 3.1, 2.9, 2.8], description: "Predicted degradations that did not occur." },
+  { key: "at-risk", label: "Predicted At-Risk Links", value: "32", deltaLabel: "2 vs 24h", direction: "up", intent: "negative", sparkline: [18, 22, 20, 26, 24, 29, 32], description: "Links predicted to degrade within the forecast horizon." },
   { key: "services-protected", label: "Customer Services Protected", value: "1,284", deltaLabel: "6.7% vs 7d", direction: "up", intent: "positive", sparkline: [1080, 1122, 1165, 1190, 1230, 1258, 1284], description: "Customer services shielded from predicted degradation." },
+  { key: "lead-time", label: "Prediction Lead Time", value: "5h 42m", deltaLabel: "1h 18m vs 24h", direction: "up", intent: "positive", sparkline: [3.1, 3.6, 4.0, 4.4, 4.9, 5.3, 5.7], description: "Average warning time between prediction and observed impact." },
+  { key: "operational-trust", label: "Operational Trust", value: "Model Healthy", deltaLabel: "stable vs 7d", direction: "flat", intent: "neutral", sparkline: [92.4, 92.9, 93.2, 93.6, 93.8, 94.0, 94.1], description: "Combined trust indicator. Model health 94.1 percent, false positive rate 2.8 percent, data freshness 96 percent." },
 ];
+
+/** Hover detail behind the Operational Trust KPI. */
+export const operationalTrustDetail = [
+  { key: "health", label: "Model health", value: "94.1%" },
+  { key: "false-positive", label: "False positive rate", value: "2.8%" },
+  { key: "freshness", label: "Data freshness", value: "96%" },
+  { key: "links", label: "Links modelled", value: "8,721" },
+] as const;
+
 
 export const scenarios: ScenarioState[] = [
   { key: "chennai-fog", label: "Chennai Fog Risk", region: "India South", headline: "Fog attenuation predicted across Chennai metro links", riskLabel: "High Risk" },
