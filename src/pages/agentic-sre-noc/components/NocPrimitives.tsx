@@ -64,19 +64,27 @@ export function StatusDot({ status }: { status: LinkStatus }) {
 }
 
 export function ToolbarButton({
-  onClick, children, active, title,
-}: { onClick: () => void; children: React.ReactNode; active?: boolean; title?: string }) {
+  onClick, children, active, title, disabled,
+}: {
+  onClick: () => void; children: React.ReactNode; active?: boolean; title?: string; disabled?: boolean;
+}) {
   return (
     <button
       type="button"
       title={title}
       onClick={onClick}
+      disabled={disabled}
+      aria-pressed={active === undefined ? undefined : active}
       className={cn(
         "flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[11.5px] shadow-sm",
+        controlTransition,
+        focusRing,
         active ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+        disabled && "cursor-not-allowed opacity-50 hover:bg-white",
       )}
     >
       {children}
     </button>
   );
 }
+
