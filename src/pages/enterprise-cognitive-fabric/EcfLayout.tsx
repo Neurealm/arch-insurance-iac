@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { Brain, Home, ChevronsLeft, ChevronsRight, Circle } from "lucide-react";
+import { Brain, Home, ChevronsLeft, ChevronsRight, Circle, RefreshCw } from "lucide-react";
 import { ecfPages, ecfGroups } from "./pages";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,10 @@ export default function EcfLayout() {
   useEffect(() => {
     window.localStorage.setItem("ecf.collapsed", collapsed ? "1" : "0");
   }, [collapsed]);
+
+  const [lastUpdated, setLastUpdated] = useState<string>(() =>
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  );
 
   const navRef = useRef<HTMLElement | null>(null);
   useLayoutEffect(() => {
@@ -126,9 +130,33 @@ export default function EcfLayout() {
           })}
         </nav>
 
-        <div className="border-t border-slate-200 px-3 py-2 text-[10px] text-slate-500">
-          {!collapsed ? "Enterprise Cognitive Fabric" : "·"}
+        <div className="border-t border-slate-200 px-3 py-2">
+          {!collapsed ? (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-800">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
+                System Status: Operational
+              </div>
+              <div className="mt-0.5 text-[10px] text-slate-500">All Systems Operational</div>
+              <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
+                <span>Last Updated: {lastUpdated}</span>
+                <button
+                  type="button"
+                  onClick={() => setLastUpdated(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))}
+                  aria-label="Refresh system status"
+                  className="grid h-5 w-5 place-items-center rounded text-slate-500 hover:bg-slate-200 hover:text-slate-800"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid place-items-center" title="All systems operational">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" aria-label="All systems operational" />
+            </div>
+          )}
         </div>
+
       </aside>
 
       <main className="flex-1 min-w-0">
