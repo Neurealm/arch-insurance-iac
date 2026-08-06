@@ -352,8 +352,7 @@ export default function OrganizationalLearning() {
 
         <div className={lead("matrix")}>
           <ExpectedVsObservedPanel
-            selectedMetric={selection.expectationId
-              ? (analysis && null) ?? null : null}
+            selectedMetric={selection.expectationId}
             onOpenEvidence={setEvidenceDrawer}
             onOpenExpectation={setExpectationDrawer}
             onOpenVariance={setVarianceDrawer} />
