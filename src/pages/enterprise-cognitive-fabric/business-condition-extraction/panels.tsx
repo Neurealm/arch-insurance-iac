@@ -724,7 +724,7 @@ export function WorkbenchPanel({
             <p className="text-[10.5px] text-slate-500">{condition.id} · v{condition.version}</p>
           </div>
           <Tabs defaultValue="summary" className="p-2">
-            <TabsList className="h-7 flex-wrap">
+            <TabsList className="h-auto flex-wrap gap-0.5 py-0.5">
               {["summary", "record", "evidence", "ownership", "dependencies", "conflicts", "history"].map((t) => (
                 <TabsTrigger key={t} value={t} className="h-5 text-[10px] capitalize">{t}</TabsTrigger>
               ))}
