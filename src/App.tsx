@@ -363,6 +363,8 @@ import PersonaValidation from "./pages/enterprise-cognitive-fabric/PersonaValida
 import EnterpriseCognitiveMemory from "./pages/enterprise-cognitive-fabric/EnterpriseCognitiveMemory.tsx";
 import CognitiveIntake from "./pages/enterprise-cognitive-fabric/CognitiveIntake.tsx";
 import PersonaImpactAnalysis from "./pages/enterprise-cognitive-fabric/PersonaImpactAnalysis.tsx";
+import CrossTeamImpactAnalysis from "./pages/enterprise-cognitive-fabric/CrossTeamImpactAnalysis.tsx";
+
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
@@ -783,6 +785,10 @@ const App = () => (
             <Route path="cognitive-intake" element={<CognitiveIntake />} />
             <Route path="evaluation/persona-impact-analysis" element={<PersonaImpactAnalysis />} />
             <Route path="persona-impact-analysis" element={<PersonaImpactAnalysis />} />
+            <Route path="evaluation/cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
+            <Route path="evaluation/cross-team-impact-analysis" element={<CrossTeamImpactAnalysis />} />
+            <Route path="cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
+
             <Route path=":slug" element={<EcfPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />

@@ -24,7 +24,7 @@ import {
   ConditionDrawer, ConflictDrawer, EvaluationDetailDrawer, EvidenceDrawer, GraphNodeDrawer, PersonaContextDrawer,
 } from "./persona-impact/drawers";
 import {
-  defaultFilters, evaluatePersona, evaluations, filterOptions, initialProposal, lifecycleStages,
+  defaultFilters, evaluatePersona, evaluations, filterOptions, impactEvidence, initialProposal, lifecycleStages,
   personaById, piaKpis, piaViews, queueColumns, scorePersona, severityRank, stageById,
   type FilterKey, type GraphNode, type ImpactCondition, type ImpactEvidence,
   type PersonaImpactConflict, type PersonaImpactEvaluation, type PiaView, type ProposalState,
