@@ -719,10 +719,27 @@ export default function TeamPersonaConstruction() {
       </header>
 
       <main className="space-y-3 px-5 py-3">
+        {scenario !== "Reset Demo Data" && (
+          <ScenarioBanner scenario={scenario} text={scenarioState.banner} onReset={() => applyScenario("Reset Demo Data")} />
+        )}
+
+        {serviceState !== "Operational" && (
+          <StateNotice
+            state={serviceState === "Conflict" ? "Conflict" : "Degraded"}
+            message={serviceState === "Conflict"
+              ? `${criticalConflicts} critical conflict${criticalConflicts === 1 ? "" : "s"} must be resolved before this persona can be approved or published.`
+              : "Construction is running with reduced throughput. Review blocked jobs and dependency owners."}
+            actionLabel={serviceState === "Conflict" ? "Open Conflicts" : "Open Jobs"}
+            onAction={() => focusPanel(serviceState === "Conflict" ? "panel-conflicts" : "panel-jobs")}
+          />
+        )}
+
         {/* KPIs */}
         <section id="panel-kpis" aria-label="Key metrics" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {kpis.map((k) => <KpiCard key={k.id} kpi={k} onClick={() => onKpi(k.id)} />)}
         </section>
+
+
 
         {lastResult && (
           <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11.5px] text-emerald-800">
