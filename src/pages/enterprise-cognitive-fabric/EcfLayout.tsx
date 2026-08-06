@@ -15,6 +15,14 @@ const discoverySubNav = [
   { to: "/enterprise-cognitive-fabric/discovery/connector-health", label: "Connector Health" },
   { to: "/enterprise-cognitive-fabric/discovery/artifact-ingestion", label: "Artifact Ingestion" },
   { to: "/enterprise-cognitive-fabric/discovery/artifact-normalization", label: "Artifact Normalization" },
+  { to: "/enterprise-cognitive-fabric/discovery/business-condition-extraction", label: "Business Condition Extraction" },
+];
+
+const personaStudioSubNav = [
+  { to: "/enterprise-cognitive-fabric/persona-studio/team-persona-construction", label: "Team Persona Construction" },
+  { to: "/enterprise-cognitive-fabric/persona-studio/team-persona-library", label: "Team Persona Library" },
+  { to: "/enterprise-cognitive-fabric/persona-studio/persona-validation", label: "Persona Validation" },
+  { to: "/enterprise-cognitive-fabric/persona-studio/persona-version-history", label: "Persona Version History" },
 ];
 
 export default function EcfLayout() {
@@ -134,6 +142,25 @@ export default function EcfLayout() {
                         </>
                       )}
                     </NavLink>
+                    {!collapsed && p.slug === "team-persona-construction" && (
+                      <ul className="ml-6 border-l border-slate-200 pl-2">
+                        {personaStudioSubNav.map((sn) => (
+                          <li key={sn.to}>
+                            <NavLink
+                              to={sn.to}
+                              className={({ isActive }) =>
+                                cn(
+                                  "my-0.5 block rounded-md px-2 py-1.5 text-[11.5px] transition-colors",
+                                  isActive ? "bg-slate-100 font-medium text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                                )
+                              }
+                            >
+                              {sn.label}
+                            </NavLink>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     {!collapsed && p.slug === "enterprise-source-discovery" && location.pathname.includes("source-discovery") && (
                       <ul className="ml-6 border-l border-slate-200 pl-2">
                         {discoverySubNav.map((s) => (

@@ -355,6 +355,8 @@ import DiscoveryConnectorHealth from "./pages/enterprise-cognitive-fabric/Discov
 import ArtifactIngestion from "./pages/enterprise-cognitive-fabric/ArtifactIngestion.tsx";
 import ArtifactNormalization from "./pages/enterprise-cognitive-fabric/ArtifactNormalization.tsx";
 import BusinessConditionScaffold from "./pages/enterprise-cognitive-fabric/BusinessConditionScaffold.tsx";
+import TeamPersonaConstruction from "./pages/enterprise-cognitive-fabric/TeamPersonaConstruction.tsx";
+import PersonaStudioScaffold from "./pages/enterprise-cognitive-fabric/PersonaStudioScaffold.tsx";
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
@@ -761,6 +763,12 @@ const App = () => (
             <Route path="discovery/artifact-normalization" element={<ArtifactNormalization />} />
             <Route path="artifact-normalization" element={<ArtifactNormalization />} />
             <Route path="discovery/business-condition-extraction" element={<BusinessConditionScaffold />} />
+            <Route path="persona-studio/team-persona-construction" element={<TeamPersonaConstruction />} />
+            <Route path="team-persona-construction" element={<TeamPersonaConstruction />} />
+            <Route path="persona-studio/team-persona-library" element={<PersonaStudioScaffold title="Team Persona Library" purpose="Browse published Team Personas across the enterprise." />} />
+            <Route path="persona-studio/persona-validation" element={<PersonaStudioScaffold title="Persona Validation" purpose="Human validation, conflict resolution, and approval of constructed Personas." />} />
+            <Route path="persona-studio/persona-version-history" element={<PersonaStudioScaffold title="Persona Version History" purpose="Version lineage, change summaries, and approval history for Team Personas." />} />
+            <Route path="cognitive-intake" element={<PersonaStudioScaffold title="Cognitive Intake" purpose="Incoming work evaluated against approved Team Personas." />} />
             <Route path=":slug" element={<EcfPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
