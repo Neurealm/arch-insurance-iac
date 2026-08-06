@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
+import keynoteVideo from "@/assets/noc-executive-keynote.mp4.asset.json";
 import { useNavigate } from "react-router-dom";
 import {
   Activity, AlertTriangle, Bot, CheckCircle2, ChevronDown, ChevronRight, CloudRain,
@@ -167,7 +168,8 @@ export default function GlobalOpticalOperationsCenter() {
     <div className="px-6 py-6 space-y-5 max-w-[1600px]">
       {/* 1 — Header */}
       <header className="rounded-xl border border-slate-200 bg-gradient-to-br from-white to-indigo-50/40 p-5 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
+        <div className="min-w-0 flex-1 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600">Overview</div>
             <h1 className="mt-1 text-2xl font-bold text-slate-900">Global Optical Operations Center</h1>
@@ -206,7 +208,24 @@ export default function GlobalOpticalOperationsCenter() {
             </button>
           </div>
         </div>
+
+        <aside className="w-full shrink-0 xl:w-[380px]">
+          <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-900 shadow-sm">
+            <video
+              src={keynoteVideo.url}
+              controls
+              playsInline
+              preload="metadata"
+              className="aspect-video w-full"
+            />
+          </div>
+          <p className="mt-1.5 text-[11px] text-slate-500">
+            SRE-based agentic NOC executive keynote
+          </p>
+        </aside>
+        </div>
       </header>
+
 
       {/* 2 — KPI row */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
