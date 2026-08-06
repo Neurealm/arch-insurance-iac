@@ -930,7 +930,7 @@ export default function TeamPersonaConstruction() {
         freshness={seedPersonas[0].freshnessStatus}
         unresolvedConflicts={openConflicts.length}
         knownGaps={gaps.length}
-        conditionsIncluded={seedPersonas[0].conditionsMapped}
+        conditionsIncluded={seedPersonas[0].includedConditions}
         conditionsExcluded={Object.values(mappingStates).filter((s) => s === "Excluded").length}
         dependencyTeams={["Ledger Services", "Fraud Risk", "Customer Identity", "Settlement Operations"]}
         downstreamConsumers={9}
