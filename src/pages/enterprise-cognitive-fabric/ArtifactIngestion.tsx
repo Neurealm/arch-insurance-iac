@@ -112,7 +112,7 @@ export default function ArtifactIngestion() {
   const [duplicateDecisions, setDuplicateDecisions] = useState<Record<string, string>>({});
   const [permissionStates, setPermissionStates] = useState<Record<string, string>>({});
   const [exceptionCategory, setExceptionCategory] = useState("All");
-  const [notifications, setNotifications] = useState(() => scenarioSnapshots.healthy && [...require0()]);
+  const [notifications, setNotifications] = useState(() => seedNotifications.map((n) => ({ ...n })));
 
   /* dialogs and drawers */
   const [startOpen, setStartOpen] = useState(false);
