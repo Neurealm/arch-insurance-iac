@@ -435,7 +435,7 @@ export default function CustomerServiceHealthExplorer() {
                     <input
                       type="checkbox"
                       checked={!hidden.has(key)}
-                      onChange={() => setHidden((h) => { const n = new Set(h); n.has(key) ? n.delete(key) : n.add(key); return n; })}
+                      onChange={() => setHidden((h) => { const n = new Set(h); if (n.has(key)) n.delete(key); else n.add(key); return n; })}
                       className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600"
                     />
                     {col.label}
@@ -510,7 +510,7 @@ export default function CustomerServiceHealthExplorer() {
                             type="button"
                             aria-label={isOpen ? `Collapse ${s.name}` : `Expand ${s.name}`}
                             aria-expanded={isOpen}
-                            onClick={(e) => { e.stopPropagation(); setExpanded((x) => { const n = new Set(x); n.has(s.id) ? n.delete(s.id) : n.add(s.id); return n; }); }}
+                            onClick={(e) => { e.stopPropagation(); setExpanded((x) => { const n = new Set(x); if (n.has(s.id)) n.delete(s.id); else n.add(s.id); return n; }); }}
                             className="text-slate-400 hover:text-slate-700"
                           >
                             {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
@@ -522,7 +522,7 @@ export default function CustomerServiceHealthExplorer() {
                             aria-label={`Select ${s.name}`}
                             checked={selectedRows.has(s.id)}
                             onClick={(e) => e.stopPropagation()}
-                            onChange={() => setSelectedRows((r) => { const n = new Set(r); n.has(s.id) ? n.delete(s.id) : n.add(s.id); return n; })}
+                            onChange={() => setSelectedRows((r) => { const n = new Set(r); if (n.has(s.id)) n.delete(s.id); else n.add(s.id); return n; })}
                             className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600"
                           />
                         </td>
