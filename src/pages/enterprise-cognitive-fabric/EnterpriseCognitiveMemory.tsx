@@ -546,7 +546,7 @@ export default function EnterpriseCognitiveMemory() {
           <FreshnessAuthorityPanel
             onOpenRecord={(id) => openRecordById(id)}
             onOpenEvidence={(id) => openRecordById(id, "Evidence")}
-            onAssignReview={() => prompt2("Review assignment")} />
+            onAssignReview={() => scrollTo("panel-governance-queue")} />
           <IndexingPanel jobs={memoryIndexingJobs} onOpenJob={(j) => { setActiveJob(j); setJobPaused(false); setJobOpen(true); }} />
         </div>
 
