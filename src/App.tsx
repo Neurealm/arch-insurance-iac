@@ -350,6 +350,7 @@ import EnterpriseSourceDiscovery from "./pages/enterprise-cognitive-fabric/Enter
 import DiscoveryScaffold from "./pages/enterprise-cognitive-fabric/DiscoveryScaffold.tsx";
 import DiscoveryConfiguration from "./pages/enterprise-cognitive-fabric/DiscoveryConfiguration.tsx";
 import DiscoveryPipeline from "./pages/enterprise-cognitive-fabric/DiscoveryPipeline.tsx";
+import DiscoveryRegistry from "./pages/enterprise-cognitive-fabric/DiscoveryRegistry.tsx";
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
@@ -748,7 +749,8 @@ const App = () => (
             <Route path="discovery/pipelines" element={<DiscoveryPipeline />} />
             <Route path="discovery/pipeline" element={<DiscoveryPipeline />} />
 
-            <Route path="discovery/source-registry" element={<DiscoveryScaffold />} />
+            <Route path="discovery/source-registry" element={<DiscoveryRegistry />} />
+            <Route path="discovery/registry" element={<DiscoveryRegistry />} />
             <Route path="discovery/connector-health" element={<DiscoveryScaffold />} />
             <Route path=":slug" element={<EcfPage />} />
           </Route>
