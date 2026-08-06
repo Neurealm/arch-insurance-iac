@@ -25,6 +25,22 @@ import {
   resolveConditions, resolveJobs, resolveStages, sidebarStatus,
   type BusinessCondition, type ConditionCandidate, type ExtractionJob, type Filters, type ServiceState, type ViewMode,
 } from "./business-condition-extraction/data";
+import {
+  ActivityPanel, ApprovalGovernancePanel, ConflictGapPanel, DemoStoryOverlay, PublishingPanel,
+  ReviewQueuePanel, ScenarioBanner, TaxonomyAdminPanel, VersionHistoryPanel,
+} from "./business-condition-extraction/governance-panels";
+import {
+  ApprovalDialog, BulkActionsDialog, ConflictResolutionDialog, DownstreamImpactDialog, ExportConditionsDialog,
+  GovernanceSearchDialog, MergeSplitDialog, PauseResumeDialog, PublishHistoryDialog, PublishWizardDialog,
+  ReprocessDialog, ReviewWorkbenchDialog, SupersedeDialog, TaxonomyCompareDialog, TaxonomyTestDialog,
+  VersionCompareDialog,
+} from "./business-condition-extraction/governance-dialogs";
+import {
+  activitySeed, conditionVersions, conflictRows as seedConflictRows, demoSteps, governanceNotifications,
+  publishDestinations, reviewsSeed, scenarioById, scenarios,
+  type ConditionReview, type ConditionVersion, type ConflictRow, type ExtractionActivity, type ScenarioId,
+} from "./business-condition-extraction/governance-data";
+
 
 const VIEWS: { id: ViewMode; label: string }[] = [
   { id: "executive", label: "Executive" },
@@ -142,6 +158,7 @@ export default function BusinessConditionExtraction() {
   const metric = metricModels.find((m) => m.id === metricId) ?? metricModels[0];
   const filterCount = activeFilterCount(filters);
   const unread = notifications.filter((n) => !n.read).length;
+  const notificationCategoriesCount = 12;
   const readiness = seedReadiness;
 
   const applyFilters = () => {
@@ -162,6 +179,153 @@ export default function BusinessConditionExtraction() {
     else if (action === "Open evidence") setSelectedCandidateId(id);
     say(`${action} — ${candidate?.candidateStatement ?? id}`);
   };
+
+  /* ---------------------------------------------------------- prompt 2 state */
+  const [scenario, setScenario] = useState<ScenarioId | null>(null);
+  const sc = scenario ? scenarioById(scenario) : null;
+  const kpi = sc?.kpi ?? { extracted: 94_812, approved: 87_442, jobs: "14", quality: "93/100", review: 427, ready: 82_906 };
+  const conflictCount = sc?.conflicts ?? 148;
+  const reviewCount = sc?.reviews ?? 427;
+  const publishState = sc?.publishingState ?? "Healthy";
+  const operationalState = sc?.operationalState ?? "Healthy";
+
+  const [reviews, setReviews] = useState<ConditionReview[]>(reviewsSeed);
+  const [reviewCategory, setReviewCategory] = useState("All");
+  const [reviewSearch, setReviewSearch] = useState("");
+  const [activeReview, setActiveReview] = useState<ConditionReview | null>(null);
+  const [conflictRows, setConflictRows] = useState<ConflictRow[]>(seedConflictRows);
+  const [issueFilter, setIssueFilter] = useState("All");
+  const [activeConflict, setActiveConflict] = useState<ConflictRow | null>(null);
+  const [mergeMode, setMergeMode] = useState<"merge" | "split" | null>(null);
+  const [taxonomyTypeId, setTaxonomyTypeId] = useState("service-level-objective");
+  const [taxonomyTest, setTaxonomyTest] = useState<string | null>(null);
+  const [taxonomyCompare, setTaxonomyCompare] = useState(false);
+  const [versions, setVersions] = useState<ConditionVersion[]>(conditionVersions);
+  const [versionSelection, setVersionSelection] = useState<string[]>(["VER-3.1", "VER-3.2"]);
+  const [versionCompareOpen, setVersionCompareOpen] = useState(false);
+  const [supersedeVersion, setSupersedeVersion] = useState<ConditionVersion | null>(null);
+  const [approvalStage, setApprovalStage] = useState("Governance Review");
+  const [approvalOpen, setApprovalOpen] = useState(false);
+  const [pausedDestinations, setPausedDestinations] = useState<string[]>([]);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [publishHistoryOpen, setPublishHistoryOpen] = useState(false);
+  const [impactOpen, setImpactOpen] = useState(false);
+  const [impactAfter, setImpactAfter] = useState<(() => void) | null>(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [reprocessOpen, setReprocessOpen] = useState(false);
+  const [pauseOpen, setPauseOpen] = useState(false);
+  const [extractionPaused, setExtractionPaused] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [govSearchOpen, setGovSearchOpen] = useState(false);
+  const [activity, setActivity] = useState<ExtractionActivity[]>(activitySeed);
+  const [govNotifications, setGovNotifications] = useState(governanceNotifications);
+  const [notifCategory, setNotifCategory] = useState("All");
+  const [demoStep, setDemoStep] = useState<number | null>(null);
+  const [loadingGovernance, setLoadingGovernance] = useState(false);
+
+  const govUnread = govNotifications.filter((n) => !n.read).length;
+
+  const logActivity = useCallback((action: string, description: string, extra: Partial<ExtractionActivity> = {}) => {
+    setActivity((list) => [{
+      id: `ACT-${Math.floor(Math.random() * 9000 + 1000)}`,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      action, description, conditionId: null, candidateId: null, jobId: null, conflictId: null, reviewId: null,
+      sourceId: "Extraction Service", teamId: "Knowledge Governance", result: "Success",
+      owner: "Alex Valencia", auditId: `AUD-${Math.floor(Math.random() * 90000 + 10000)}`,
+      ...extra,
+    } as ExtractionActivity, ...list].slice(0, 24));
+  }, []);
+
+  const requireImpact = (run: () => void) => { setImpactAfter(() => run); setImpactOpen(true); };
+
+  const reviewAction = (action: string, r: ConditionReview) => {
+    setReviews((list) => list.map((x) => x.id !== r.id ? x : {
+      ...x,
+      status: action === "Approve" ? "Approved" : action === "Reject" ? "Rejected"
+        : action === "Escalate" ? "Escalated" : action === "Request Clarification" ? "Clarification Requested" : x.status,
+      completedAt: action === "Approve" || action === "Reject" ? "now" : x.completedAt,
+    }));
+    logActivity(`Review ${action}`, `${action} — ${r.conditionCandidate}`, { reviewId: r.id, conditionId: r.conditionId, result: action === "Reject" ? "Warning" : "Success" });
+    say(`${action} — review ${r.id}`);
+  };
+
+  const reviewDecision = (action: string, r: ConditionReview, comment: string) => {
+    const approved = action === "Approve Candidate";
+    setReviews((list) => list.map((x) => x.id !== r.id ? x : {
+      ...x, status: approved ? "Approved" : action === "Reject Candidate" ? "Rejected" : "In Review",
+      decision: action, comments: comment ? [...x.comments, comment] : x.comments,
+      completedAt: approved || action === "Reject Candidate" ? "now" : null,
+    }));
+    logActivity(approved ? "Condition Approved" : "Review Decision", `${action} — ${r.conditionCandidate}${comment ? ` · ${comment}` : ""}`,
+      { reviewId: r.id, conditionId: r.conditionId, result: approved ? "Success" : "Pending" });
+    say(`${action} recorded for ${r.id}. Condition state, quality, confidence, and readiness recalculated.`);
+  };
+
+  const conflictAction = (action: string, c: ConflictRow) => {
+    if (action === "Merge") { setMergeMode("merge"); return; }
+    if (action === "Supersede") { setSupersedeVersion(versions[1]); return; }
+    setConflictRows((list) => list.map((x) => x.id !== c.id ? x : {
+      ...x, status: action === "Acknowledge" ? "Acknowledged" : action === "Assign" ? "Assigned" : x.status,
+    }));
+    if (action === "Create Review Task") {
+      setReviews((list) => [{
+        ...reviewsSeed[1], id: `REV-${2400 + list.length + 1}`, conditionCandidate: c.condition,
+        reviewType: "Conflict Resolution", reason: c.detail, status: "Open", conflictId: c.id,
+      }, ...list]);
+    }
+    logActivity(`Conflict ${action}`, `${action} — ${c.condition}`, { conflictId: c.id, result: "Pending" });
+    say(`${action} — ${c.id}`);
+  };
+
+  const resolveConflict = (choice: string, c: ConflictRow, details: { reason: string }) => {
+    setConflictRows((list) => list.map((x) => x.id === c.id ? { ...x, status: "Resolved" } : x));
+    setReviews((list) => list.map((x) => x.conflictId === c.id ? { ...x, status: "Approved", decision: choice } : x));
+    setVersions((list) => [{
+      ...list[0], id: `VER-${(Number(list[0].version) + 0.1).toFixed(1)}`,
+      version: (Number(list[0].version) + 0.1).toFixed(1), previousVersionId: list[0].id,
+      changeType: "Value Change", changeSummary: `${choice} — ${details.reason}`, status: "Current",
+      changedBy: "Alex Valencia", changedAt: new Date().toISOString().slice(0, 16).replace("T", " "),
+    }, ...list.map((v) => v.id === list[0].id ? { ...v, status: "Superseded" as const } : v)]);
+    logActivity("Conflict Resolved", `${choice} — ${c.condition} · ${details.reason}`, { conflictId: c.id, result: "Success" });
+    setScenario("conflict-resolved");
+    say(`Conflict ${c.id} resolved with ${choice}. Versions created, conflict counts, quality, registry readiness, persona readiness, and context graph updated.`);
+  };
+
+  const applyScenario = (id: ScenarioId) => {
+    setLoadingGovernance(true);
+    const s = scenarioById(id);
+    setScenario(id === "reset" ? null : id);
+    setServiceState(s.serviceState as ServiceState);
+    setExtractionPaused(id === "paused");
+    if (id === "reset") {
+      setReviews(reviewsSeed); setConflictRows(seedConflictRows); setVersions(conditionVersions);
+      setActivity(activitySeed); setGovNotifications(governanceNotifications); setPausedDestinations([]);
+    }
+    setGovNotifications((list) => [{
+      id: `N-${Math.floor(Math.random() * 9000)}`, category: s.notification, title: s.label,
+      detail: s.banner, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      read: false, targetId: null, targetKind: "panel" as const,
+    }, ...list]);
+    logActivity("Scenario Applied", s.activity, { result: s.operationalState === "Healthy" ? "Success" : "Warning" });
+    setLastUpdated(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    setTimeout(() => setLoadingGovernance(false), 220);
+    say(`Scenario ${s.label} applied. ${s.banner}`);
+  };
+
+  const versionAction = (action: string, v: ConditionVersion) => {
+    if (action === "Compare") { setVersionCompareOpen(true); return; }
+    if (action === "Supersede") { setSupersedeVersion(v); return; }
+    if (action === "Export") { setExportOpen(true); return; }
+    if (action === "Mark Historical") {
+      setVersions((list) => list.map((x) => x.id === v.id ? { ...x, status: "Historical" } : x));
+    }
+    if (action === "Restore as Draft") {
+      setVersions((list) => [{ ...v, id: `${v.id}-draft`, version: `${v.version}-draft`, status: "Draft" }, ...list]);
+    }
+    logActivity(`Version ${action}`, `${action} — ${v.conditionId} v${v.version}`, { conditionId: v.conditionId });
+    say(`${action} — version ${v.version}`);
+  };
+
 
   const jobAction = (action: string, job: ExtractionJob) => {
     if (action === "Pause Job") setJobOverrides((o) => ({ ...o, [job.id]: { status: "Paused" } }));
@@ -208,7 +372,7 @@ export default function BusinessConditionExtraction() {
             </Button>
             <Button size="sm" variant="outline" className="relative h-7 w-7 p-0" aria-label="Notifications" onClick={() => setNotifOpen(true)}>
               <Bell className="h-3.5 w-3.5" />
-              {unread > 0 && <span className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-red-600 text-[9px] font-semibold text-white">{unread}</span>}
+              {govUnread > 0 && <span className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-red-600 text-[9px] font-semibold text-white">{govUnread}</span>}
             </Button>
             <Button size="sm" variant="outline" className="h-7 w-7 p-0" aria-label="Help" onClick={() => setHelpOpen(true)}>
               <CircleHelp className="h-3.5 w-3.5" />
@@ -235,24 +399,38 @@ export default function BusinessConditionExtraction() {
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={refresh}><RefreshCw className="mr-1 h-3.5 w-3.5" />Refresh</Button>
           <Button size="sm" className="h-7 text-[11px]" onClick={() => setStartOpen(true)}>Start Extraction</Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]"
-            onClick={() => setPlaceholder({ title: "Configure Taxonomy", detail: "Taxonomy administration is delivered in Prompt 2." })}>Configure Taxonomy</Button>
+            onClick={() => { focusPanel("panel-taxonomy-admin"); say("Taxonomy management opened"); }}>Configure Taxonomy</Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]"
-            onClick={() => setPlaceholder({ title: "Review Queue", detail: "Human review governance is delivered in Prompt 2." })}>Review Queue</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]"
-            onClick={() => setPlaceholder({ title: "Export Conditions", detail: "Condition export is delivered in Prompt 2." })}>Export Conditions</Button>
+            onClick={() => { focusPanel("panel-reviews"); say("Human review queue focused"); }}>Review Queue</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setExportOpen(true)}>Export Conditions</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setPauseOpen(true)}>
+            {extractionPaused ? "Resume Extraction" : "Pause Extraction"}
+          </Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setFilterOpen((v) => !v)}>
             <SlidersHorizontal className="mr-1 h-3.5 w-3.5" />Filters{filterCount > 0 && <Badge className="ml-1 h-4 px-1 text-[10px]">{filterCount}</Badge>}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button size="sm" variant="outline" className="h-7 text-[11px]">More</Button></DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="text-[11px]">Extraction service</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="max-h-[70vh] overflow-y-auto">
+              <DropdownMenuItem className="text-[11.5px] font-medium" onClick={() => setDemoStep(0)}>Demo Story</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11.5px]" onClick={() => setGovSearchOpen(true)}>Search conditions</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11.5px]" onClick={() => setReprocessOpen(true)}>Reprocess with Updated Taxonomy</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11.5px]" onClick={() => setMergeMode("merge")}>Merge Conditions</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11.5px]" onClick={() => setMergeMode("split")}>Split Condition</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11.5px]" onClick={() => setImpactOpen(true)}>Downstream Impact Preview</DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[11px]">Demo scenarios</DropdownMenuLabel>
+              {scenarios.map((s) => (
+                <DropdownMenuItem key={s.id} className="text-[11.5px]" onClick={() => applyScenario(s.id)}>{s.label}</DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[11px]">Extraction service</DropdownMenuLabel>
               {(["Operational", "Extracting", "Degraded", "Paused", "Backlogged", "Review Required", "Maintenance"] as ServiceState[]).map((s) => (
                 <DropdownMenuItem key={s} className="text-[11.5px]" onClick={() => { setServiceState(s); say(`Service state ${s}`); }}>{s}</DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
           <StatusPill status={serviceState} />
           <span className="text-[11px] text-slate-500">Last updated {lastUpdated}</span>
         </div>
@@ -281,24 +459,26 @@ export default function BusinessConditionExtraction() {
       </header>
 
       <main className="space-y-3 px-4 py-3">
+        {sc && <ScenarioBanner label={sc.label} message={sc.banner} state={operationalState} onReset={() => applyScenario("reset")} />}
+
         {/* KPIs */}
         <div id="panel-kpis" className="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
-          <Kpi label="Conditions Extracted" value={nf(94_812)} sub="+6,240 this week" trend={kpiTrends.extracted}
+          <Kpi label="Conditions Extracted" value={nf(kpi.extracted)} sub="+6,240 this week" trend={kpiTrends.extracted}
             tooltip="Total condition records produced across all extraction jobs"
             onClick={() => showKpiDetail("Conditions Extracted", "By condition type, source, team, domain, and authority — see Condition Type Distribution and Taxonomy panels.", "panel-distribution")} />
-          <Kpi label="Approved Conditions" value={nf(87_442)} sub="92 percent · Healthy" tone="green" trend={kpiTrends.approved}
+          <Kpi label="Approved Conditions" value={nf(kpi.approved)} sub="92 percent · Healthy" tone="green" trend={kpiTrends.approved}
             tooltip="Conditions approved and eligible for publication"
             onClick={() => { setFilters({ ...filters, approvalState: "Approved" }); setDraftFilters({ ...filters, approvalState: "Approved" }); focusPanel("panel-inventory"); say("Inventory filtered to approved conditions"); }} />
-          <Kpi label="Active Extraction Jobs" value="14" sub="11 Healthy · 2 Warning · 1 Blocked" trend={kpiTrends.jobs}
+          <Kpi label="Active Extraction Jobs" value={kpi.jobs} sub="11 Healthy · 2 Warning · 1 Blocked" trend={kpiTrends.jobs}
             tooltip="Jobs currently executing extraction stages"
             onClick={() => { focusPanel("panel-jobs"); say("Focused active extraction jobs"); }} />
-          <Kpi label="Extraction Quality" value="93/100" sub="Target 95 · Near Target" tone="amber" trend={kpiTrends.quality}
+          <Kpi label="Extraction Quality" value={kpi.quality} sub="Target 95 · Near Target" tone="amber" trend={kpiTrends.quality}
             tooltip="Composite quality across ten measured dimensions"
             onClick={() => { focusPanel("panel-quality"); say("Focused extraction quality"); }} />
-          <Kpi label="Conditions Requiring Review" value="427" sub="148 conflicts · 92 missing owners · 74 low confidence · 61 missing evidence · 52 ambiguous values" tone="amber" trend={kpiTrends.review}
+          <Kpi label="Conditions Requiring Review" value={nf(reviewCount)} sub="148 conflicts · 92 missing owners · 74 low confidence · 61 missing evidence · 52 ambiguous values" tone="amber" trend={kpiTrends.review}
             tooltip="Candidates blocked pending human validation"
             onClick={() => { setSelectedStageId("validation"); focusPanel("panel-stage"); say("Focused review and exception summary"); }} />
-          <Kpi label="Ready for Persona and Impact Use" value={nf(82_906)} sub="87 percent · approved, current, evidence linked, conflict free" tone="green" trend={kpiTrends.ready}
+          <Kpi label="Ready for Persona and Impact Use" value={nf(kpi.ready)} sub="87 percent · approved, current, evidence linked, conflict free" tone="green" trend={kpiTrends.ready}
             tooltip="Approved, current, evidence linked, and conflict free"
             onClick={() => { focusPanel("panel-downstream"); say("Focused downstream readiness"); }} />
         </div>
@@ -340,7 +520,7 @@ export default function BusinessConditionExtraction() {
         <ConditionsInventoryPanel conditionsList={conditionRows} view={view} density={density}
           search={conditionSearch} onSearch={setConditionSearch}
           onOpen={(c) => { setConditionDrawer(c); setSelectedConditionId(c.id); }}
-          onBulk={() => setPlaceholder({ title: "Bulk actions", detail: "Bulk governance actions are delivered in Prompt 2." })}
+          onBulk={() => setBulkOpen(true)}
           savedView={savedView} onSaveView={saveView} />
 
         <div className="grid gap-3 xl:grid-cols-2">
@@ -362,6 +542,46 @@ export default function BusinessConditionExtraction() {
           <QualityPanel onOpenDetail={setQualityDetail} />
           <RegistryReadinessPanel readiness={readiness} onFocus={(what) => { focusPanel(what === "approved" ? "panel-inventory" : "panel-stage"); }} />
         </div>
+
+        <ReviewQueuePanel reviews={reviews} density={density} loading={loadingGovernance}
+          categoryFilter={reviewCategory} onCategoryFilter={setReviewCategory}
+          search={reviewSearch} onSearch={setReviewSearch}
+          onOpen={(r) => setActiveReview(r)} onAction={reviewAction} />
+
+        <ConflictGapPanel rows={conflictRows} density={density} loading={loadingGovernance}
+          issueFilter={issueFilter} onIssueFilter={setIssueFilter}
+          onOpenComparison={(c) => setActiveConflict(c)} onAction={conflictAction} />
+
+        <TaxonomyAdminPanel selectedId={taxonomyTypeId} onSelect={setTaxonomyTypeId}
+          onAction={(a, name) => {
+            if (a === "Test Against Sample") setTaxonomyTest(name);
+            else if (a === "Compare Versions") setTaxonomyCompare(true);
+            else { logActivity("Taxonomy Updated", `${a} — ${name}`); say(`${a} — ${name}`); }
+          }} />
+
+        <VersionHistoryPanel versions={versions} density={density} selectedIds={versionSelection}
+          onToggle={(id) => setVersionSelection((sel) => sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id].slice(-2))}
+          onAction={versionAction} />
+
+        <ApprovalGovernancePanel stage={approvalStage} onStage={setApprovalStage}
+          onAction={() => setApprovalOpen(true)} />
+
+        <PublishingPanel destinations={publishDestinations} pausedIds={pausedDestinations} publishState={publishState}
+          onPublish={() => requireImpact(() => setPublishOpen(true))}
+          onRepublish={() => setPublishOpen(true)}
+          onHistory={() => setPublishHistoryOpen(true)}
+          onPause={(id) => {
+            setPausedDestinations((list) => list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
+            say(`Destination ${id} ${pausedDestinations.includes(id) ? "resumed" : "paused"}`);
+          }} />
+
+        <ActivityPanel activity={activity} density={density}
+          onOpen={(a) => {
+            if (a.conditionId) { const c = allConditions.find((x) => x.id === a.conditionId); if (c) { setConditionDrawer(c); return; } }
+            if (a.reviewId) { const r = reviews.find((x) => x.id === a.reviewId); if (r) { setActiveReview(r); return; } }
+            if (a.conflictId) { const cf = conflictRows.find((x) => x.id === a.conflictId); if (cf) { setActiveConflict(cf); return; } }
+            say(`Audit ${a.auditId} — ${a.description}`);
+          }} />
 
         <DownstreamReadinessPanel readiness={readiness}
           onProceed={() => navigate("/enterprise-cognitive-fabric/persona-studio/team-persona-construction")}
@@ -410,16 +630,38 @@ export default function BusinessConditionExtraction() {
         <SheetContent side="right" className="w-full sm:max-w-[420px]">
           <SheetHeader>
             <SheetTitle className="text-[14px]">Notifications</SheetTitle>
-            <SheetDescription className="text-[11.5px]">{unread} unread</SheetDescription>
+            <SheetDescription className="text-[11.5px]">{govUnread} unread across {notificationCategoriesCount} categories</SheetDescription>
           </SheetHeader>
-          <ul className="mt-3 space-y-1.5">
-            {notifications.map((n) => (
+          <div className="mt-2 flex flex-wrap items-center gap-1">
+            <Button size="sm" variant="outline" className="h-6 px-2 text-[10.5px]"
+              onClick={() => { setGovNotifications((l) => l.map((x) => ({ ...x, read: true }))); say("All notifications marked read"); }}>Mark All Read</Button>
+            <select value={notifCategory} onChange={(e) => setNotifCategory(e.target.value)} aria-label="Filter notifications"
+              className="h-6 rounded-md border border-slate-200 px-1 text-[10.5px]">
+              {["All", ...Array.from(new Set(govNotifications.map((n) => n.category)))].map((c) => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <ul className="mt-2 space-y-1.5">
+            {govNotifications.filter((n) => notifCategory === "All" || n.category === notifCategory).map((n) => (
               <li key={n.id}>
-                <button type="button" onClick={() => setNotifications((list) => list.map((x) => x.id === n.id ? { ...x, read: true } : x))}
-                  className={cn("w-full rounded-md border px-2 py-1.5 text-left", n.read ? "border-slate-200" : "border-blue-200 bg-blue-50")}>
+                <div className={cn("rounded-md border px-2 py-1.5", n.read ? "border-slate-200" : "border-blue-200 bg-blue-50")}>
+                  <p className="text-[10px] uppercase tracking-wide text-slate-500">{n.category} · {n.time}</p>
                   <p className="text-[11.5px] font-medium text-slate-800">{n.title}</p>
                   <p className="text-[11px] text-slate-500">{n.detail}</p>
-                </button>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    <Button size="sm" variant="outline" className="h-6 px-2 text-[10.5px]"
+                      onClick={() => setGovNotifications((l) => l.map((x) => x.id === n.id ? { ...x, read: true } : x))}>Mark Read</Button>
+                    <Button size="sm" variant="outline" className="h-6 px-2 text-[10.5px]"
+                      onClick={() => {
+                        setNotifOpen(false);
+                        if (n.targetKind === "condition" && n.targetId) { const c = allConditions.find((x) => x.id === n.targetId); if (c) setConditionDrawer(c); }
+                        else if (n.targetKind === "review" && n.targetId) { const r = reviews.find((x) => x.id === n.targetId); if (r) setActiveReview(r); }
+                        else if (n.targetKind === "conflict" && n.targetId) { const cf = conflictRows.find((x) => x.id === n.targetId); if (cf) setActiveConflict(cf); }
+                        else focusPanel(n.targetId ?? "panel-activity");
+                      }}>Open Item</Button>
+                    <Button size="sm" variant="outline" className="h-6 px-2 text-[10.5px]" onClick={() => say(`Assigned — ${n.title}`)}>Assign</Button>
+                    <Button size="sm" variant="outline" className="h-6 px-2 text-[10.5px]" onClick={() => say(`Acknowledged — ${n.title}`)}>Acknowledge</Button>
+                  </div>
+                </div>
               </li>
             ))}
           </ul>
@@ -443,6 +685,103 @@ export default function BusinessConditionExtraction() {
           </ul>
         </SheetContent>
       </Sheet>
+
+      {/* prompt 2 dialogs */}
+      <ReviewWorkbenchDialog review={activeReview} open={!!activeReview} onOpenChange={(o) => !o && setActiveReview(null)}
+        onDecision={reviewDecision} />
+
+      <ConflictResolutionDialog conflict={activeConflict} open={!!activeConflict} onOpenChange={(o) => !o && setActiveConflict(null)}
+        onResolve={resolveConflict} />
+
+      <MergeSplitDialog open={!!mergeMode} onOpenChange={(o) => !o && setMergeMode(null)} mode={mergeMode ?? "merge"}
+        onComplete={(mode, summary) => { logActivity(mode === "merge" ? "Conditions Merged" : "Condition Split", summary); say(summary); }} />
+
+      <TaxonomyTestDialog open={!!taxonomyTest} onOpenChange={(o) => !o && setTaxonomyTest(null)} typeName={taxonomyTest ?? ""} />
+      <TaxonomyCompareDialog open={taxonomyCompare} onOpenChange={setTaxonomyCompare} typeId={taxonomyTypeId} />
+
+      <VersionCompareDialog open={versionCompareOpen} onOpenChange={setVersionCompareOpen}
+        aId={versionSelection[0] ?? "VER-3.1"} bId={versionSelection[1] ?? "VER-3.2"}
+        onAction={(action, field) => { logActivity("Version Comparison", `${action}${field ? ` · ${field}` : ""}`); say(`${action}${field ? ` — ${field}` : ""}`); }} />
+
+      <SupersedeDialog open={!!supersedeVersion} onOpenChange={(o) => !o && setSupersedeVersion(null)} version={supersedeVersion}
+        onComplete={(option, reason) => {
+          setVersions((list) => list.map((v) => v.id === supersedeVersion?.id ? { ...v, status: "Superseded" } : v));
+          logActivity("Condition Superseded", `${option} — ${reason}`);
+          setScenario("superseded");
+          say(`${option}. Prior condition retained for point in time queries.`);
+        }} />
+
+      <ApprovalDialog open={approvalOpen} onOpenChange={setApprovalOpen} condition={workbenchCondition} stage={approvalStage}
+        onDecision={(decision, comment) => {
+          if (decision === "Approve" || decision === "Approve with Conditions") setApprovalStage("Approved");
+          if (decision === "Submit for Review") setApprovalStage("Domain Review");
+          logActivity("Condition Approved", `${decision} — ${workbenchCondition.id}${comment ? ` · ${comment}` : ""}`, { conditionId: workbenchCondition.id });
+          say(`${decision} — ${workbenchCondition.id}`);
+        }} />
+
+      <PublishWizardDialog open={publishOpen} onOpenChange={setPublishOpen}
+        onComplete={({ records, destinations }) => {
+          logActivity("Conditions Published", `${nf(records)} conditions published to ${destinations.length} destinations`);
+          setScenario("published");
+          say(`Publication complete. ${nf(records)} conditions published to ${destinations.length} destinations. Downstream consumers notified.`);
+        }} />
+
+      <PublishHistoryDialog open={publishHistoryOpen} onOpenChange={setPublishHistoryOpen} />
+
+      <DownstreamImpactDialog open={impactOpen} onOpenChange={setImpactOpen}
+        onAcknowledge={() => { const run = impactAfter; setImpactAfter(null); say("Downstream impact acknowledged"); run?.(); }} />
+
+      <BulkActionsDialog open={bulkOpen} onOpenChange={setBulkOpen} selectedCount={conditionRows.length}
+        onApply={(action) => {
+          if (action === "Export") { setExportOpen(true); return; }
+          if (action === "Publish") { requireImpact(() => setPublishOpen(true)); return; }
+          logActivity("Bulk Action", `${action} applied to ${conditionRows.length} conditions`);
+          say(`${action} applied to ${conditionRows.length} conditions`);
+        }} />
+
+      <ReprocessDialog open={reprocessOpen} onOpenChange={setReprocessOpen}
+        onComplete={(scope, reason) => {
+          logActivity("Taxonomy Updated", `Reprocessing ${scope} with taxonomy v3.7 — ${reason}`, { result: "Pending" });
+          setScenario("taxonomy-change");
+          say(`Reprocessing started for ${scope}. New versions will be created where classification changes.`);
+        }} />
+
+      <PauseResumeDialog open={pauseOpen} onOpenChange={setPauseOpen} paused={extractionPaused}
+        onConfirm={(mode, reason) => {
+          const resuming = mode === "resume";
+          setExtractionPaused(!resuming);
+          setServiceState(resuming ? "Operational" : "Paused");
+          if (!resuming) setScenario("paused"); else setScenario(null);
+          logActivity(resuming ? "Extraction Resumed" : "Extraction Paused", reason, { result: resuming ? "Success" : "Warning" });
+          say(resuming ? "Extraction resumed after validation" : `Extraction paused — ${reason}`);
+        }} />
+
+      <ExportConditionsDialog open={exportOpen} onOpenChange={setExportOpen} rows={conditionRows}
+        onExported={(format, scope, count) => {
+          logActivity("Export", `${format} export of ${scope} — ${count} records`);
+          say(`${format} export generated for ${scope} · ${count} records`);
+        }} />
+
+      <GovernanceSearchDialog open={govSearchOpen} onOpenChange={setGovSearchOpen}
+        onSelect={(id, kind) => {
+          if (kind === "Approved Condition") { const c = allConditions.find((x) => x.id === id); if (c) { setConditionDrawer(c); setSelectedConditionId(c.id); } }
+          else if (kind === "Review") { const r = reviews.find((x) => x.id === id); if (r) setActiveReview(r); }
+          else if (kind === "Conflict") { const cf = conflictRows.find((x) => x.id === id); if (cf) setActiveConflict(cf); }
+          else if (kind === "Extraction Job") { const j = jobs.find((x) => x.id === id); if (j) setJobDrawer(j); }
+          else if (kind === "Condition Type") focusPanel("panel-taxonomy-admin");
+          else if (kind === "Version") focusPanel("panel-versions");
+          else if (kind === "Metric") focusPanel("panel-btt");
+          else if (kind === "Dependency" || kind === "Service") focusPanel("panel-graph");
+          else focusPanel("panel-inventory");
+          say(`Opened ${kind} ${id}`);
+        }} />
+
+      {demoStep !== null && (
+        <DemoStoryOverlay stepIndex={demoStep}
+          onNext={() => setDemoStep((i) => (i === null ? 0 : i >= demoSteps.length - 1 ? null : i + 1))}
+          onPrev={() => setDemoStep((i) => (i && i > 0 ? i - 1 : 0))}
+          onExit={() => { setDemoStep(null); say("Demo story exited"); }} />
+      )}
     </div>
   );
 }
