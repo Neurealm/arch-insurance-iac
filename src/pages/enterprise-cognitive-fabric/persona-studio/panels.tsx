@@ -894,7 +894,7 @@ export function WorkbenchPanel({
               {canvasBlock("Decision Rules", "Decision Logic", canvas.decisionLogic)}
 
               <div className="rounded-lg border border-slate-300 bg-slate-50 p-2">
-                <h4 className="text-[11px] font-semibold text-slate-800">How This Team Thinks</h4>
+                <h4 id="panel-how-team-thinks" className="scroll-mt-24 text-[11px] font-semibold text-slate-800">How This Team Thinks</h4>
                 <div className="mt-1 grid gap-1.5 sm:grid-cols-2">
                   {howThisTeamThinks.map((b) => (
                     <div key={b.key} className="rounded border border-slate-200 bg-white p-1.5">

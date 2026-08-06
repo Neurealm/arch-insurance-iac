@@ -21,10 +21,27 @@ import {
   ConflictPlaceholderDialog, StartConstructionDialog, type ConstructionResult,
 } from "./persona-studio/dialogs";
 import {
+  ActivityPanel, ApprovalWorkflowPanel, ConflictAnalysisPanel, CoveragePanel, DemoStoryOverlay,
+  DriftPanel, ImpactPreviewPanel, PublishingPanel, ReadinessPanel, ScenarioBanner, StateNotice,
+  ValidationQueuePanel, VersionHistoryPanel,
+} from "./persona-studio/governance-panels";
+import {
+  ApprovalDialog, ConflictResolutionDialog, ExportPersonasDialog, GlobalSearchDialog,
+  PublishPersonaDialog, PublishingHistoryDrawer, QualityDetailDrawer, RefreshPersonaDialog,
+  ValidationReviewDialog, VersionComparisonDialog,
+} from "./persona-studio/governance-dialogs";
+import {
+  DEMO_SCENARIOS, demoStorySteps, governanceNotifications, paymentsApprovalChain,
+  personaActivity, personaConflicts as seedConflicts, personaDrift as seedDrift,
+  personaReviews as seedReviews, personaVersions, scenarioStates,
+  type ApprovalStage, type DemoScenario, type GovernanceNotification, type PersonaActivity,
+  type PersonaConflict, type PersonaDrift, type PersonaReview, type PersonaVersion,
+} from "./persona-studio/governance-data";
+import {
   activeFilterCount, conditionGroups, constructionJobs as seedJobs, defaultFilters, filterLabels,
   filterOptions, gaps as seedGaps, jobLogs, jobTimeline, kpis, lifecycleCallouts, lifecycleStages,
   nf, paymentsCanvas, paymentsConditions, personaSections, personas as seedPersonas,
-  resolveConditions, resolveGaps, resolvePersonas, seedNotifications, sidebarStatus,
+  resolveConditions, resolveGaps, resolvePersonas, sidebarStatus,
   stageConfiguration, stageConflicts, stageDependencies, stageEvidence, stageOutputs, stageQueue,
   stageRisks, type BusinessCondition, type Filters, type GraphNode, type PersonaConstructionJob,
   type PersonaGap, type PersonaSection, type TeamPersona, type ViewMode,
@@ -104,14 +121,58 @@ export default function TeamPersonaConstruction() {
   const [startOpen, setStartOpen] = useState(false);
   const [conflictCondition, setConflictCondition] = useState<string | null>(null);
 
+  /* --------------------------- governance state --------------------------- */
+  const [reviews, setReviews] = useState<PersonaReview[]>(seedReviews);
+  const [conflicts, setConflicts] = useState<PersonaConflict[]>(seedConflicts);
+  const [drift, setDrift] = useState<PersonaDrift[]>(seedDrift);
+  const [approvalChain, setApprovalChain] = useState(paymentsApprovalChain);
+  const [approvalStage, setApprovalStage] = useState<ApprovalStage>("Persona Owner Review");
+  const [versions, setVersions] = useState<PersonaVersion[]>(personaVersions);
+  const [publishingState, setPublishingState] = useState<string>("Idle");
+  const [notifications, setNotifications] = useState<GovernanceNotification[]>(governanceNotifications);
+  const [notificationFilter, setNotificationFilter] = useState<string>("All");
+  const [reviewSummaryFilter, setReviewSummaryFilter] = useState<string | null>(null);
+  const [openReview, setOpenReview] = useState<PersonaReview | null>(null);
+  const [openConflict, setOpenConflict] = useState<PersonaConflict | null>(null);
+  const [approvalAction, setApprovalAction] = useState<string | null>(null);
+  const [compareVersions, setCompareVersions] = useState<[PersonaVersion, PersonaVersion] | null>(null);
+  const [refreshOpen, setRefreshOpen] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [publishHistoryOpen, setPublishHistoryOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [qualityDetail, setQualityDetail] = useState<{ name: string; score: number; target: number; trend: number[] } | null>(null);
+  const [scenario, setScenario] = useState<DemoScenario>("Reset Demo Data");
+  const [storyStep, setStoryStep] = useState<number | null>(null);
+  const [storyNotes, setStoryNotes] = useState(true);
+  const [announcement, setAnnouncement] = useState("");
+  const [loadingGovernance, setLoadingGovernance] = useState(false);
+  const [activityHeadline, setActivityHeadline] = useState(personaActivity[0].description);
+
   /* ------------------------------ draft state ----------------------------- */
   const [mappingStates, setMappingStates] = useState<Record<string, BusinessCondition["mappingState"]>>({});
   const [selectedConditionId, setSelectedConditionId] = useState<string | null>(() => read<string | null>(LS.condition, "COND-100421"));
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [dirtyCount, setDirtyCount] = useState(0);
   const [lastResult, setLastResult] = useState<ConstructionResult | null>(null);
+  const [qualityAdjust, setQualityAdjust] = useState(0);
 
   useEffect(() => write(LS.condition, selectedConditionId), [selectedConditionId]);
+
+  const announce = useCallback((msg: string) => setAnnouncement(msg), []);
+
+  const pushNotification = useCallback((n: Omit<GovernanceNotification, "id" | "read" | "timestamp">) => {
+    setNotifications((prev) => [
+      { ...n, id: `NTF-${prev.length + 1}-${Date.now()}`, read: false, timestamp: "Now" },
+      ...prev,
+    ]);
+  }, []);
+
+  const visibleNotifications = useMemo(
+    () => (notificationFilter === "All" ? notifications : notifications.filter((n) => n.category === notificationFilter)),
+    [notifications, notificationFilter],
+  );
+
 
   /* -------------------------------- derived ------------------------------- */
   const personas = useMemo(() => {
@@ -138,19 +199,44 @@ export default function TeamPersonaConstruction() {
 
   useEffect(() => { setPage(1); }, [filters, search, view]);
 
+  const scenarioState = scenarioStates[scenario];
+
+  const filteredReviews = useMemo(() => {
+    if (!reviewSummaryFilter) return reviews;
+    const map: Record<string, (r: PersonaReview) => boolean> = {
+      "team-owner": (r) => r.reviewType === "Team Owner Review",
+      dependency: (r) => r.reviewType === "Dependency Conflict" || r.reviewType === "Dependency Owner Review",
+      governance: (r) => r.requiredApprovalLevel === "Governance",
+      conflict: (r) => r.conflicts.length > 0,
+      evidence: (r) => r.reviewType === "Evidence Gap",
+      overdue: (r) => r.status === "Overdue",
+    };
+    return reviews.filter(map[reviewSummaryFilter] ?? (() => true));
+  }, [reviews, reviewSummaryFilter]);
+
+  const openConflicts = useMemo(() => conflicts.filter((c) => c.reviewStatus !== "Resolved"), [conflicts]);
+  const criticalConflicts = useMemo(
+    () => openConflicts.filter((c) => c.severity === "Critical").length,
+    [openConflicts],
+  );
+  const unreadNotifications = useMemo(() => notifications.filter((n) => !n.read).length, [notifications]);
+
   const serviceState = useMemo(() => {
+    if (scenario !== "Reset Demo Data") return scenarioState.serviceState;
+    if (criticalConflicts > 0) return "Conflict";
     if (jobs.some((j) => j.status === "Blocked")) return "Degraded";
-    if (personas.some((p) => p.approvalState !== "Approved")) return "Review Required";
+    if (reviews.some((r) => r.status !== "Approved")) return "Review Required";
     if (jobs.length) return "Constructing";
     return "Operational";
-  }, [jobs, personas]);
+  }, [scenario, scenarioState, criticalConflicts, jobs, reviews]);
 
   const dirty = dirtyCount > 0;
 
   /* -------------------------------- actions ------------------------------- */
   const focusPanel = useCallback((id: string) => {
     setSpotlight(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    document.getElementById(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
     window.setTimeout(() => setSpotlight(null), 2200);
   }, []);
 
@@ -216,11 +302,266 @@ export default function TeamPersonaConstruction() {
     const excluded = Object.values(mappingStates).filter((s) => s === "Excluded").length;
     const included = Object.values(mappingStates).filter((s) => s === "Included").length;
     const base = seedPersonas[0];
+    const resolved = seedConflicts.length - openConflicts.length;
     return {
-      quality: Math.max(60, Math.min(100, base.qualityScore + included - excluded * 2)),
-      completeness: Math.max(50, Math.min(100, base.completenessScore + included - excluded * 2)),
+      quality: Math.max(60, Math.min(100, base.qualityScore + included - excluded * 2 + resolved + qualityAdjust)),
+      completeness: Math.max(50, Math.min(100, base.completenessScore + included - excluded * 2 + resolved + qualityAdjust)),
     };
-  }, [mappingStates]);
+  }, [mappingStates, openConflicts.length, qualityAdjust]);
+
+  const displayQuality = scenario === "Reset Demo Data" ? metricsAfterDraft.quality : scenarioState.qualityScore;
+
+  /* --------------------------- governance actions -------------------------- */
+
+  const onReviewAction = (r: PersonaReview, action: string) => {
+    if (action === "Open Review") { setOpenReview(r); return; }
+    if (action === "Approve") {
+      setReviews((rows) => rows.map((x) => (x.id === r.id ? { ...x, status: "Approved", decision: "Approve Section", completedAt: "Now" } : x)));
+      setQualityAdjust((q) => q + 1);
+      announce(`Review ${r.id} approved for ${r.personaName}`);
+      pushNotification({ category: "Persona approved", title: "Review approved", detail: `${r.id} · ${r.personaName}`, tone: "green", targetKind: "review", targetId: r.id });
+      toast.success(`${r.id} approved`);
+      return;
+    }
+    const nextStatus: Record<string, PersonaReview["status"]> = {
+      "Request Changes": "Changes Requested",
+      "Request Evidence": "In Review",
+      Reassign: "In Review",
+      "Extend Due Date": "In Review",
+      Escalate: "Escalated",
+    };
+    setReviews((rows) => rows.map((x) => (x.id === r.id ? { ...x, status: nextStatus[action] ?? x.status } : x)));
+    announce(`${action} recorded for review ${r.id}`);
+    toast.success(`${action} · ${r.id}`);
+  };
+
+  const onReviewDecision = (o: { reviewId: string; decision: string; comment: string }) => {
+    setReviews((rows) => rows.map((x) => (x.id === o.reviewId
+      ? {
+        ...x,
+        decision: o.decision,
+        comments: o.comment ? [...x.comments, o.comment] : x.comments,
+        status: o.decision.startsWith("Approve") ? "Approved" : o.decision === "Reject Persona" ? "Changes Requested" : o.decision === "Escalate to Governance" ? "Escalated" : "In Review",
+        completedAt: o.decision.startsWith("Approve") ? "Now" : null,
+      }
+      : x)));
+    if (o.decision === "Approve Persona") {
+      setApprovalStage("Team Owner Approval");
+      setApprovalChain((c) => c.map((a) => (a.approvalStage === "Persona Owner Review" ? { ...a, status: "Approved", decision: "Approved", completedAt: "Now" } : a)));
+    }
+    setQualityAdjust((q) => q + 1);
+    setOpenReview(null);
+    announce(`Validation decision ${o.decision} recorded for ${o.reviewId}. Quality and completeness recalculated.`);
+    pushNotification({ category: "Persona review requested", title: "Validation decision recorded", detail: `${o.reviewId} · ${o.decision}`, tone: "blue", targetKind: "review", targetId: o.reviewId });
+    toast.success(`${o.decision} recorded`, { description: `Audit event created for ${o.reviewId}` });
+  };
+
+  const onConflictAction = (c: PersonaConflict, action: string) => {
+    if (action === "Open Comparison" || action === "Select Authoritative Record" || action === "Merge"
+      || action === "Define Applicability" || action === "Define Effective Period" || action === "Resolve") {
+      setOpenConflict(c);
+      return;
+    }
+    if (action === "Mark Historical") {
+      setConflicts((rows) => rows.map((x) => (x.id === c.id ? { ...x, reviewStatus: "Resolved", resolution: "Marked historical", resolvedAt: "Now" } : x)));
+      toast.success(`${c.id} record marked historical`);
+      return;
+    }
+    setConflicts((rows) => rows.map((x) => (x.id === c.id ? { ...x, reviewStatus: action === "Assign Review" ? "In Review" : x.reviewStatus } : x)));
+    toast.success(`${action} · ${c.id}`);
+  };
+
+  const onConflictResolve = (o: { conflictId: string; choice: string; reason: string; effectiveDate: string; applicability: string }) => {
+    const conflict = conflicts.find((c) => c.id === o.conflictId);
+    setConflicts((rows) => rows.map((x) => (x.id === o.conflictId
+      ? { ...x, reviewStatus: o.choice === "Escalate to Governance" ? "Escalated" : "Resolved", resolution: `${o.choice} — ${o.reason}`, resolvedAt: "Now" }
+      : x)));
+    setReviews((rows) => rows.map((x) => (x.conflicts.length && x.personaId === conflict?.personaId ? { ...x, status: "In Review", conflicts: [] } : x)));
+    setDirtyCount((n) => n + 1);
+    setQualityAdjust((q) => q + 2);
+    setVersions((v) => [
+      { ...v[0], id: `PV-${v.length + 35}`, version: "3.4", status: "Draft", changeReason: `Conflict ${o.conflictId} resolved by ${o.choice}`, createdAt: "Now" },
+      ...v.slice(1),
+    ]);
+    setOpenConflict(null);
+    setActivityHeadline(`Conflict ${o.conflictId} resolved by ${o.choice}`);
+    announce(`Conflict ${o.conflictId} resolved using ${o.choice}. Persona draft, mappings, relationship graph, quality and review queue updated. ${conflict?.affectedEvaluationIds.length ?? 0} impact evaluations flagged for reassessment.`);
+    pushNotification({ category: "Downstream evaluation requires reassessment", title: "Conflict resolved", detail: `${o.conflictId} · ${conflict?.affectedEvaluationIds.length ?? 0} evaluations flagged`, tone: "amber", targetKind: "conflict", targetId: o.conflictId });
+    toast.success("Conflict resolved", { description: `Effective ${o.effectiveDate} · ${o.applicability}` });
+  };
+
+  const onApprovalAction = (action: string) => {
+    if (action === "Submit for Review") {
+      setApprovalStage("Persona Owner Review");
+      announce("Persona submitted for review");
+      toast.success("Submitted for review");
+      return;
+    }
+    setApprovalAction(action);
+  };
+
+  const onApprovalConfirm = (comment: string, effectiveDate: string) => {
+    const action = approvalAction ?? "Approve";
+    const order: ApprovalStage[] = ["Draft Complete", "Persona Owner Review", "Team Owner Approval", "Dependency Owner Review", "Governance Review", "Approved", "Published"];
+    if (action === "Approve" || action === "Approve with Conditions") {
+      const next = order[Math.min(order.indexOf(approvalStage) + 1, order.length - 1)];
+      setApprovalStage(next);
+      setApprovalChain((c) => c.map((a) => (a.approvalStage === approvalStage
+        ? { ...a, status: action === "Approve" ? "Approved" : "Approved with Conditions", decision: action, comments: comment ? [comment] : [], completedAt: "Now" }
+        : a.approvalStage === next ? { ...a, status: "In Progress", submittedAt: "Now" } : a)));
+      announce(`${action} recorded. Approval stage advanced to ${next}.`);
+      pushNotification({ category: "Persona approved", title: action, detail: `Stage advanced to ${next}`, tone: "green", targetKind: "persona", targetId: "PERSONA-1001" });
+    } else if (action === "Reject") {
+      setApprovalChain((c) => c.map((a) => (a.approvalStage === approvalStage ? { ...a, status: "Rejected", decision: comment, completedAt: "Now" } : a)));
+      announce("Persona rejected. Downstream publication blocked.");
+      pushNotification({ category: "Persona rejected", title: "Persona rejected", detail: comment || "Rejected at review", tone: "red", targetKind: "persona", targetId: "PERSONA-1001" });
+    } else {
+      setApprovalChain((c) => c.map((a) => (a.approvalStage === approvalStage ? { ...a, status: "Changes Requested", decision: comment, completedAt: null } : a)));
+      announce(`${action} recorded on the approval chain.`);
+    }
+    setApprovalAction(null);
+    toast.success(`${action} recorded`, { description: `Effective date ${effectiveDate}` });
+  };
+
+  const onVersionAction = (v: PersonaVersion, action: string) => {
+    if (action === "Compare") { setCompareVersions([versions[1] ?? versions[0], v]); return; }
+    if (action === "View Version") { setCompareVersions([v, versions[0]]); return; }
+    if (action === "Restore as Draft") {
+      setVersions((rows) => [
+        { ...v, id: `PV-restore-${v.version}`, version: `${v.version}.1`, status: "Draft", changeReason: `Restored from version ${v.version}`, createdAt: "Now", previousVersionId: v.id },
+        ...rows,
+      ]);
+      setDirtyCount((n) => n + 1);
+      announce(`Version ${v.version} restored as a new draft`);
+      toast.success(`Version ${v.version} restored as draft`);
+      return;
+    }
+    if (action === "Mark Historical") {
+      setVersions((rows) => rows.map((x) => (x.id === v.id ? { ...x, status: "Historical" } : x)));
+      toast.message(`Version ${v.version} marked historical`);
+      return;
+    }
+    download(`persona-version-${v.version}.json`, JSON.stringify(v, null, 2), "application/json");
+    toast.success(`Version ${v.version} exported`);
+  };
+
+  const onDriftAction = (d: PersonaDrift, action: string) => {
+    if (action === "Refresh Persona") { setRefreshOpen(true); return; }
+    if (action === "Open Comparison") { setCompareVersions([versions[1] ?? versions[0], versions[0]]); return; }
+    const next: Record<string, PersonaDrift["status"]> = {
+      "Accept Update": "Accepted",
+      "Create Draft Version": "Refreshed",
+      "Dismiss as Nonmaterial": "Dismissed",
+      "Request Review": "Under Review",
+    };
+    setDrift((rows) => rows.map((x) => (x.id === d.id ? { ...x, status: next[action] ?? x.status } : x)));
+    if (action === "Create Draft Version") {
+      setVersions((v) => [{ ...v[0], id: `PV-drift-${d.id}`, version: "3.5", status: "Draft", changeReason: `Drift ${d.id} accepted`, createdAt: "Now" }, ...v]);
+    }
+    announce(`${action} recorded for drift ${d.id}`);
+    toast.success(`${action} · ${d.personaName}`);
+  };
+
+  const onRefreshComplete = (r: { sectionsUpdated: number; conditionsAdded: number; evaluationsFlagged: number; draftVersion: string }) => {
+    setVersions((v) => [{ ...v[0], id: `PV-${r.draftVersion}`, version: r.draftVersion, status: "Draft", changeReason: "Persona refreshed from changed conditions", createdAt: "Now" }, ...v]);
+    setDrift((rows) => rows.map((x) => (x.materiality === "Material" ? { ...x, status: "Refreshed" } : x)));
+    setQualityAdjust((q) => q + 1);
+    setActivityHeadline(`Payments Platform refreshed into draft version ${r.draftVersion}`);
+    announce(`Persona refresh completed. Draft version ${r.draftVersion} created, ${r.sectionsUpdated} sections updated, ${r.evaluationsFlagged} evaluations flagged.`);
+    pushNotification({ category: "Persona refresh completed", title: "Persona refresh completed", detail: `Draft version ${r.draftVersion} created`, tone: "green", targetKind: "version", targetId: `PV-${r.draftVersion}` });
+  };
+
+  const onPublishComplete = () => {
+    setPublishingState("Published");
+    setApprovalStage("Published");
+    setVersions((v) => v.map((x, i) => (i === 0 ? { ...x, status: "Published", publishedAt: "Now", effectiveDate: "Today" } : x)));
+    setActivityHeadline("Payments Platform version 3.4 published to nine destinations");
+    announce("Persona published to nine downstream destinations. Audit event created and consumers notified.");
+    pushNotification({ category: "Persona published", title: "Persona published", detail: "Version 3.4 live on 9 destinations", tone: "green", targetKind: "publishing", targetId: "PUB-6602" });
+    toast.success("Persona published");
+  };
+
+  const applyScenario = (s: DemoScenario) => {
+    setLoadingGovernance(true);
+    setScenario(s);
+    const st = scenarioStates[s];
+    window.setTimeout(() => {
+      setLoadingGovernance(false);
+      if (s === "Reset Demo Data") {
+        setReviews(seedReviews); setConflicts(seedConflicts); setDrift(seedDrift);
+        setVersions(personaVersions); setApprovalChain(paymentsApprovalChain);
+        setApprovalStage("Persona Owner Review"); setPublishingState("Idle");
+        setNotifications(governanceNotifications); setQualityAdjust(0);
+        setActivityHeadline(personaActivity[0].description);
+        announce("Demonstration data reset to the seeded portfolio");
+        return;
+      }
+      setApprovalStage(st.approvalStage);
+      setPublishingState(st.publishingState === "Idle" ? "Idle" : st.publishingState);
+      setActivityHeadline(st.activityHeadline);
+      if (st.notification) {
+        pushNotification({ ...st.notification, targetKind: "persona", targetId: "PERSONA-1001" });
+      }
+      announce(`${s} scenario applied. ${st.banner}`);
+      if (st.emphasisPanel) focusPanel(st.emphasisPanel);
+    }, 220);
+  };
+
+  const openSearchResult = (r: { target: { kind: string; id: string } }) => {
+    if (r.target.kind === "persona") {
+      const p = seedPersonas.find((x) => x.id === r.target.id) ?? seedPersonas[0];
+      setOpenPersona(p); setPersonaTab("Overview");
+    } else if (r.target.kind === "review") {
+      setOpenReview(reviews.find((x) => x.id === r.target.id) ?? reviews[0]);
+    } else if (r.target.kind === "conflict") {
+      setOpenConflict(conflicts.find((x) => x.id === r.target.id) ?? conflicts[0]);
+    } else if (r.target.kind === "version") {
+      focusPanel("panel-versions");
+    } else {
+      focusPanel("panel-drift");
+    }
+  };
+
+  const openActivityTarget = (a: PersonaActivity) => {
+    if (a.target.kind === "review") setOpenReview(reviews.find((r) => r.id === a.target.id) ?? reviews[0]);
+    else if (a.target.kind === "conflict") setOpenConflict(conflicts.find((c) => c.id === a.target.id) ?? conflicts[0]);
+    else if (a.target.kind === "version") focusPanel("panel-versions");
+    else if (a.target.kind === "drift") focusPanel("panel-drift");
+    else if (a.target.kind === "evidence") { setView("workbench"); focusPanel("panel-workbench"); }
+    else { const p = seedPersonas.find((x) => x.id === a.personaId); if (p) { setOpenPersona(p); setPersonaTab("Overview"); } }
+  };
+
+  /* ------------------------------- demo story ------------------------------ */
+  const startStory = () => { setStoryStep(0); announce("Demo story started"); };
+  useEffect(() => {
+    if (storyStep === null) return;
+    const s = demoStorySteps[storyStep];
+    if (s.view) setView(s.view);
+    const id = window.setTimeout(() => focusPanel(s.target), 80);
+    announce(`Demo story step ${storyStep + 1}: ${s.caption}`);
+    return () => window.clearTimeout(id);
+  }, [storyStep, focusPanel, announce]);
+
+  useEffect(() => {
+    if (storyStep === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") setStoryStep((s) => (s === null ? s : Math.min(s + 1, demoStorySteps.length - 1)));
+      if (e.key === "ArrowLeft") setStoryStep((s) => (s === null ? s : Math.max(s - 1, 0)));
+      if (e.key === "Escape") setStoryStep(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [storyStep]);
+
+  const exportRows = useMemo(
+    () => personas.map((p) => ({
+      persona: p.id, team: p.teamName, businessUnit: p.businessUnit, status: p.constructionStatus,
+      approval: p.approvalState, quality: p.qualityScore, completeness: p.completenessScore,
+      confidence: p.confidence, freshness: p.freshnessStatus, owner: p.personaOwner,
+    })),
+    [personas],
+  );
+
 
   /* --------------------------------- render ------------------------------- */
   const showWorkbench = view === "workbench" || view === "construction";
@@ -267,13 +608,18 @@ export default function TeamPersonaConstruction() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") setSearchOpen(true); }}
                 placeholder="Search personas, teams, conditions"
                 aria-label="Global search"
                 className="h-8 w-60 rounded-md border border-slate-200 pl-7 pr-2 text-[11.5px] placeholder:text-slate-400 focus:border-blue-400 focus:outline-none"
               />
             </div>
-            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" aria-label="Notifications" onClick={() => setNotificationsOpen(true)}>
+            <Button size="sm" variant="outline" className="h-8 text-[11.5px]" onClick={() => setSearchOpen(true)}>Search all records</Button>
+            <Button size="sm" variant="ghost" className="relative h-8 w-8 p-0" aria-label={`Notifications, ${unreadNotifications} unread`} onClick={() => setNotificationsOpen(true)}>
               <Bell className="h-4 w-4" aria-hidden />
+              {unreadNotifications > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 rounded-full bg-red-600 px-1 text-[8.5px] font-semibold text-white">{unreadNotifications}</span>
+              )}
             </Button>
             <Button size="sm" variant="ghost" className="h-8 w-8 p-0" aria-label="Help" onClick={() => toast.message("Team Persona Construction", { description: "Assemble approved business conditions into a governed team operating model." })}>
               <CircleHelp className="h-4 w-4" aria-hidden />
@@ -348,6 +694,20 @@ export default function TeamPersonaConstruction() {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={saveViewPreset}>Save View</DropdownMenuItem>
               <DropdownMenuItem onClick={exportCsv}><Download className="mr-1.5 h-3.5 w-3.5" aria-hidden /> Export current view</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setExportOpen(true)}>Export personas and governance…</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPublishHistoryOpen(true)}>Publishing history</DropdownMenuItem>
+              <DropdownMenuItem onClick={startStory}>Start demo story</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline" className="h-8 text-[11.5px]">Scenario: {scenario}</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto text-[12px]">
+              <DropdownMenuLabel>Demonstration scenarios</DropdownMenuLabel>
+              {DEMO_SCENARIOS.map((s) => (
+                <DropdownMenuItem key={s} onClick={() => applyScenario(s)}>{s}{scenario === s ? " ✓" : ""}</DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
           {savedView && <span className="rounded border border-slate-200 bg-white px-2 py-1 text-[10.5px] text-slate-500">Saved: {savedView}</span>}
@@ -355,13 +715,31 @@ export default function TeamPersonaConstruction() {
             {sidebarStatus.service}: {sidebarStatus.state} · {sidebarStatus.teamsOnboarded} teams · {sidebarStatus.activePersonas} personas · {sidebarStatus.personasInConstruction} in construction
           </span>
         </div>
+
       </header>
 
       <main className="space-y-3 px-5 py-3">
+        {scenario !== "Reset Demo Data" && (
+          <ScenarioBanner scenario={scenario} text={scenarioState.banner} onReset={() => applyScenario("Reset Demo Data")} />
+        )}
+
+        {serviceState !== "Operational" && (
+          <StateNotice
+            state={serviceState === "Conflict" ? "Conflict" : "Degraded"}
+            message={serviceState === "Conflict"
+              ? `${criticalConflicts} critical conflict${criticalConflicts === 1 ? "" : "s"} must be resolved before this persona can be approved or published.`
+              : "Construction is running with reduced throughput. Review blocked jobs and dependency owners."}
+            actionLabel={serviceState === "Conflict" ? "Open Conflicts" : "Open Jobs"}
+            onAction={() => focusPanel(serviceState === "Conflict" ? "panel-conflicts" : "panel-jobs")}
+          />
+        )}
+
         {/* KPIs */}
         <section id="panel-kpis" aria-label="Key metrics" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {kpis.map((k) => <KpiCard key={k.id} kpi={k} onClick={() => onKpi(k.id)} />)}
         </section>
+
+
 
         {lastResult && (
           <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11.5px] text-emerald-800">
@@ -454,9 +832,10 @@ export default function TeamPersonaConstruction() {
         <div className="grid gap-3 xl:grid-cols-2">
           <ConditionCoveragePanel onCategory={setCoverageCategory} activeCategory={coverageCategory} spotlight={spotlight === "panel-coverage"} />
           <QualityPanel
-            onDimension={(d) => { setFilters((f) => ({ ...f, qualityBand: d.score >= 95 ? "95 and above" : "90 to 94" })); toast.message(d.name, { description: `Score ${d.score} against target ${d.target}. Detailed dimension analysis arrives in the next stage.` }); }}
+            onDimension={(d) => setQualityDetail({ name: d.name, score: d.score, target: d.target, trend: [d.score - 3, d.score - 2, d.score - 1, d.score] })}
             spotlight={spotlight === "panel-quality"}
           />
+
         </div>
 
         {(showArchitecture || showPortfolio || view === "construction") && (
@@ -477,10 +856,172 @@ export default function TeamPersonaConstruction() {
 
         <JobsPanel jobs={jobs} onOpen={(j) => { setOpenJob(j); setJobTab("Summary"); }} spotlight={spotlight === "panel-jobs"} />
 
+        {/* ------------------------ governance and trust ----------------------- */}
+        <ValidationQueuePanel
+          reviews={filteredReviews}
+          loading={loadingGovernance}
+          onAction={onReviewAction}
+          activeSummary={reviewSummaryFilter}
+          onSummary={(id) => setReviewSummaryFilter((s) => (s === id ? null : id))}
+          spotlight={spotlight === "panel-validation-queue"}
+        />
+
+        <ConflictAnalysisPanel
+          conflicts={conflicts}
+          loading={loadingGovernance}
+          onAction={onConflictAction}
+          spotlight={spotlight === "panel-conflicts"}
+        />
+
+        <div className="grid gap-3 xl:grid-cols-2">
+          <ApprovalWorkflowPanel
+            chain={approvalChain}
+            currentStage={approvalStage}
+            onAction={onApprovalAction}
+            spotlight={spotlight === "panel-approval"}
+          />
+          <DriftPanel drift={drift} onAction={onDriftAction} spotlight={spotlight === "panel-drift"} />
+        </div>
+
+        <VersionHistoryPanel versions={versions} onAction={onVersionAction} spotlight={spotlight === "panel-versions"} />
+
+        <CoveragePanel
+          onCategory={(name) => { setCoverageCategory(name); focusPanel("panel-coverage"); }}
+          spotlight={spotlight === "panel-enterprise-coverage"}
+        />
+
+        <div className="grid gap-3 xl:grid-cols-2">
+          <PublishingPanel
+            publishingState={publishingState}
+            onPublish={() => setPublishOpen(true)}
+            onRepublish={() => { setPublishingState("Publishing"); window.setTimeout(() => { setPublishingState("Published"); toast.success("Selected version republished"); }, 400); }}
+            onHistory={() => setPublishHistoryOpen(true)}
+            onPause={() => { setPublishingState("Paused"); announce("Distribution paused"); toast.message("Distribution paused"); }}
+            spotlight={spotlight === "panel-publishing"}
+          />
+          <ReadinessPanel
+            readinessDelta={displayQuality - seedPersonas[0].qualityScore}
+            onProceed={() => navigate("/enterprise-cognitive-fabric/cognitive-memory/cognitive-intake")}
+            onLibrary={() => navigate("/enterprise-cognitive-fabric/persona-studio/team-persona-library")}
+            spotlight={spotlight === "panel-readiness"}
+          />
+        </div>
+
+        <div className="grid gap-3 xl:grid-cols-2">
+          <ImpactPreviewPanel
+            onOpenFull={() => navigate("/enterprise-cognitive-fabric/persona-studio/persona-validation")}
+            spotlight={spotlight === "panel-impact-preview"}
+          />
+          <ActivityPanel headline={activityHeadline} onOpen={openActivityTarget} spotlight={spotlight === "panel-activity"} />
+        </div>
+
         <SectionModelPanel sections={sections} onSelect={setOpenSection} />
 
         {showArchitecture && <ArchitecturePanel />}
       </main>
+
+      <div aria-live="polite" role="status" className="sr-only">{announcement}</div>
+
+      {storyStep !== null && (
+        <DemoStoryOverlay
+          step={storyStep}
+          total={demoStorySteps.length}
+          caption={demoStorySteps[storyStep].caption}
+          notes={demoStorySteps[storyStep].notes}
+          showNotes={storyNotes}
+          onToggleNotes={() => setStoryNotes((s) => !s)}
+          onNext={() => setStoryStep((s) => (s === null ? s : Math.min(s + 1, demoStorySteps.length - 1)))}
+          onPrev={() => setStoryStep((s) => (s === null ? s : Math.max(s - 1, 0)))}
+          onExit={() => { setStoryStep(null); setSpotlight(null); announce("Demo story ended"); }}
+        />
+      )}
+
+      <ValidationReviewDialog open={!!openReview} onOpenChange={(v) => !v && setOpenReview(null)} review={openReview} onDecision={onReviewDecision} />
+      <ConflictResolutionDialog open={!!openConflict} onOpenChange={(v) => !v && setOpenConflict(null)} conflict={openConflict} onResolve={onConflictResolve} />
+      <ApprovalDialog
+        open={!!approvalAction}
+        onOpenChange={(v) => !v && setApprovalAction(null)}
+        action={approvalAction ?? "Approve"}
+        quality={displayQuality}
+        completeness={metricsAfterDraft.completeness}
+        confidence={seedPersonas[0].confidence}
+        freshness={seedPersonas[0].freshnessStatus}
+        unresolvedConflicts={openConflicts.length}
+        knownGaps={gaps.length}
+        conditionsIncluded={seedPersonas[0].includedConditions}
+        conditionsExcluded={Object.values(mappingStates).filter((s) => s === "Excluded").length}
+        dependencyTeams={["Ledger Services", "Fraud Risk", "Customer Identity", "Settlement Operations"]}
+        downstreamConsumers={9}
+        version="3.4"
+        onConfirm={onApprovalConfirm}
+      />
+      {compareVersions && (
+        <VersionComparisonDialog
+          open={!!compareVersions}
+          onOpenChange={(v) => !v && setCompareVersions(null)}
+          from={compareVersions[0]}
+          to={compareVersions[1]}
+          onAction={(action, selected) => {
+            if (action === "Restore Selected") {
+              onVersionAction(compareVersions[0], "Restore as Draft");
+              toast.success(`${selected.length || "All"} selected dimensions restored into a draft`);
+            } else {
+              download("persona-version-comparison.json", JSON.stringify({ from: compareVersions[0].version, to: compareVersions[1].version, selected }, null, 2), "application/json");
+              toast.success("Comparison exported");
+            }
+            setCompareVersions(null);
+          }}
+        />
+      )}
+      <RefreshPersonaDialog
+        open={refreshOpen}
+        onOpenChange={setRefreshOpen}
+        onComplete={onRefreshComplete}
+        onOpenDraft={() => { setRefreshOpen(false); setView("workbench"); focusPanel("panel-workbench"); }}
+        onCompare={() => { setRefreshOpen(false); setCompareVersions([versions[1] ?? versions[0], versions[0]]); }}
+        onSubmitReview={() => { setRefreshOpen(false); setApprovalStage("Persona Owner Review"); toast.success("Refreshed draft submitted for review"); }}
+      />
+      <PublishPersonaDialog
+        open={publishOpen}
+        onOpenChange={setPublishOpen}
+        approved={approvalStage === "Approved" || approvalStage === "Published"}
+        quality={displayQuality}
+        completeness={metricsAfterDraft.completeness}
+        confidence={seedPersonas[0].confidence}
+        freshness={seedPersonas[0].freshnessStatus}
+        criticalConflicts={criticalConflicts}
+        owner={seedPersonas[0].personaOwner}
+        version="3.4"
+        onComplete={onPublishComplete}
+      />
+      <PublishingHistoryDrawer open={publishHistoryOpen} onOpenChange={setPublishHistoryOpen} />
+      <ExportPersonasDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        rows={exportRows}
+        onExported={(format, scope, count) => { toast.success(`${format} export ready`, { description: `${scope} · ${count} records` }); announce(`${format} export generated for ${scope}`); }}
+      />
+      <GlobalSearchDialog
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        initialQuery={search}
+        onOpenResult={(r) => { setSearchOpen(false); openSearchResult(r); }}
+      />
+      <QualityDetailDrawer
+        open={!!qualityDetail}
+        onOpenChange={(v) => !v && setQualityDetail(null)}
+        name={qualityDetail?.name ?? ""}
+        score={qualityDetail?.score ?? 0}
+        target={qualityDetail?.target ?? 0}
+        trend={qualityDetail?.trend ?? []}
+        onAction={(a) => {
+          if (a === "Open Affected Sections") { setQualityDetail(null); setView("workbench"); focusPanel("panel-workbench"); }
+          else if (a === "Open Review Queue") { setQualityDetail(null); focusPanel("panel-validation-queue"); }
+          else if (a === "Open Conflicts") { setQualityDetail(null); focusPanel("panel-conflicts"); }
+          else toast.success(`${a} requested`);
+        }}
+      />
+
 
       {/* filter drawer */}
       <Drawer open={filtersOpen} onOpenChange={setFiltersOpen} title="Filters" description="Filters update every panel on this page">
@@ -504,16 +1045,68 @@ export default function TeamPersonaConstruction() {
       </Drawer>
 
       {/* notifications */}
-      <Drawer open={notificationsOpen} onOpenChange={setNotificationsOpen} title="Notifications" description="Persona construction activity">
+      <Drawer
+        open={notificationsOpen}
+        onOpenChange={setNotificationsOpen}
+        title="Notifications"
+        description="Persona review, conflict, approval, drift and publishing events"
+      >
+        <div className="flex flex-wrap items-center gap-1.5">
+          {["All", ...Array.from(new Set(notifications.map((n) => n.category)))].map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setNotificationFilter(c)}
+              aria-pressed={notificationFilter === c}
+              className={cn(
+                "rounded border px-1.5 py-0.5 text-[10.5px]",
+                notificationFilter === c ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50",
+              )}
+            >
+              {c}
+            </button>
+          ))}
+          <Button size="sm" variant="outline" className="ml-auto h-6 text-[10.5px]" onClick={() => setNotifications((rows) => rows.map((n) => ({ ...n, read: true })))}>
+            Mark all read
+          </Button>
+        </div>
         <ul className="space-y-1.5">
-          {seedNotifications.map((n) => (
-            <li key={n.id} className={cn("rounded-md border p-2", n.tone === "amber" ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50")}>
-              <div className="text-[12px] font-medium text-slate-800">{n.title}</div>
+          {visibleNotifications.map((n) => (
+            <li
+              key={n.id}
+              className={cn(
+                "rounded-md border p-2",
+                n.tone === "red" ? "border-red-200 bg-red-50"
+                  : n.tone === "amber" ? "border-amber-200 bg-amber-50"
+                    : n.tone === "blue" ? "border-blue-200 bg-blue-50" : "border-emerald-200 bg-emerald-50",
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[12px] font-medium text-slate-800">{n.title}</div>
+                <span className="text-[10px] text-slate-500">{n.timestamp}</span>
+              </div>
               <div className="text-[11px] text-slate-600">{n.detail}</div>
+              <div className="mt-1 flex items-center gap-1.5">
+                <span className="rounded border border-slate-200 bg-white px-1 text-[9.5px] text-slate-600">{n.category}</span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-6 text-[10.5px]"
+                  onClick={() => {
+                    setNotifications((rows) => rows.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
+                    setNotificationsOpen(false);
+                    openSearchResult({ target: { kind: n.targetKind, id: n.targetId } });
+                  }}
+                >
+                  Open record
+                </Button>
+                {!n.read && <span className="text-[10px] font-semibold text-blue-700">Unread</span>}
+              </div>
             </li>
           ))}
         </ul>
       </Drawer>
+
 
       {/* graph node */}
       <Drawer open={!!openNode} onOpenChange={(v) => !v && setOpenNode(null)} title={openNode?.label ?? ""} description={openNode?.kind}>
