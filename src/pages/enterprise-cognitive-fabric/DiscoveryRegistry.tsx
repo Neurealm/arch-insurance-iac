@@ -39,7 +39,7 @@ const VIEW_LABEL: Record<ViewMode, string> = {
   catalog: "Catalog View",
   operations: "Operations View",
   governance: "Governance View",
-  relationships: "Relationship View",
+  relationship: "Relationship View",
 };
 
 const STORY = [
@@ -564,12 +564,12 @@ export default function DiscoveryRegistry() {
         <h3 className="mt-2 text-[12px] font-semibold text-slate-900">Lowest scoring sources</h3>
         <ul className="mt-1 space-y-1">
           {Object.entries(sourceQualityDetail)
-            .sort((a, b) => a[1].composite - b[1].composite)
+            .sort((a, b) => a[1].overallScore - b[1].overallScore)
             .slice(0, 5)
             .map(([id, q]) => (
               <li key={id} className="flex items-center justify-between text-[11.5px]">
                 <span className="text-slate-700">{id}</span>
-                <Pill label={`${q.composite}`} tone={q.composite >= 90 ? "green" : q.composite >= 75 ? "amber" : "red"} />
+                <Pill label={`${q.overallScore}`} tone={q.overallScore >= 90 ? "green" : q.overallScore >= 75 ? "amber" : "red"} />
               </li>
             ))}
         </ul>
