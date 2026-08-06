@@ -580,10 +580,14 @@ export default function CognitiveIntake() {
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={refresh}>
             <RefreshCw className="mr-1 h-3.5 w-3.5" aria-hidden /> Refresh
           </Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => prompt2("Submit Work")}>Submit Work</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => prompt2("Import Work Item")}>Import Work Item</Button>
-          <Button size="sm" className="h-7 text-[11px]" onClick={() => prompt2("Run Intake orchestration")}>Run Intake</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => prompt2("Export Intake")}>Export Intake</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setDialog("search")}>
+            <Search className="mr-1 h-3.5 w-3.5" aria-hidden /> Search
+          </Button>
+          <NotificationsButton unread={unreadCount} onClick={() => setNotificationsOpen(true)} />
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setDialog("submit")}>Submit Work</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setDialog("import")}>Import Work Item</Button>
+          <Button size="sm" className="h-7 text-[11px]" onClick={() => setDialog("run")}>Run Intake</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setDialog("export")}>Export Intake</Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button size="sm" variant="outline" className="h-7 text-[11px]">More</Button></DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="max-h-96 overflow-y-auto">
@@ -595,16 +599,29 @@ export default function CognitiveIntake() {
               <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-personas")}>Candidate Team Personas</DropdownMenuItem>
               <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-evidence")}>Evidence Completeness</DropdownMenuItem>
               <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-gaps")}>Clarification &amp; Gaps</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-jobs")}>Active Intake Jobs</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-rules")}>Enterprise Rule Activation</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-package-history")}>Intake Package History</DropdownMenuItem>
               <DropdownMenuItem className="text-[11px]" onClick={() => scrollTo("panel-completeness")}>Intake Package Completeness</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-[11px]">Available in Prompt 2</DropdownMenuLabel>
-              {["Clarification Workflow", "Evidence Remediation", "Context Refresh", "Active Intake Jobs",
-                "Bulk Actions", "Routing to Readiness", "Global Search", "Notifications", "Governed Export",
-                "Demo Story", "Demo Scenarios"].map((l) => (
-                <DropdownMenuItem key={l} className="text-[11px]" onClick={() => prompt2(l)}>{l}</DropdownMenuItem>
-              ))}
+              <DropdownMenuLabel className="text-[11px]">Workflows</DropdownMenuLabel>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setDialog("clarify")}>Request Clarification</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setDialog("add-evidence")}>Add Evidence</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setDialog("request-evidence")}>Request Evidence</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setDialog("entity")}>Entity Remediation</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => { setOperationalState("Context Refreshing"); setDialog("refresh-context"); }}>Refresh Enterprise Context</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setDialog("reprocess")}>Reprocess Intake</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setDialog("route")}>Route to Readiness Assessment</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[11px]">Demonstration</DropdownMenuLabel>
+              <DropdownMenuItem className="text-[11px]" onClick={() => runStoryStep(1)}>Start Demo Story</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setDialog("scenarios")}>Demo Scenarios</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11px]" onClick={() => setReducedMotion(!reducedMotion)}>
+                Reduced Motion {reducedMotion ? "On" : "Off"}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
         </div>
       </header>
 
