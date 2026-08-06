@@ -13,7 +13,7 @@ import {
   authorityDistribution, authorityEvidence, canonicalContext, conditionTypeDistribution, conflicts,
   dependencies, evidenceSections, gaps, graphEdges, graphNodes, metricModels, publishingDestinations,
   qualityDimensions, relationshipTypes, stageConfiguration, stageOutputs, stageQueue, taxonomy,
-  workbenchArtifact, evidenceReferences,
+  workbenchArtifact, evidenceReferences, candidates,
   type BusinessCondition, type ConditionCandidate, type ConditionReadiness, type ExtractionJob,
   type ExtractionStage, type MetricModel, type Tone, type ViewMode,
 } from "./data";
@@ -545,10 +545,6 @@ export function WorkbenchPanel({
 }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const active = hovered ?? selectedCandidateId;
-  const candidateList = useMemo(() => import("./data"), []); // typing helper only
-  void candidateList;
-
-  const { candidates } = require("./data") as { candidates: ConditionCandidate[] };
 
   const structured: [string, string][] = [
     ["condition_id", condition.id], ["condition_family_id", condition.conditionFamilyId],
