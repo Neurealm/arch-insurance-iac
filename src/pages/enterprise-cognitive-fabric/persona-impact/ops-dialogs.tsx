@@ -16,7 +16,7 @@ import {
   analysisScopeOptions, buildExportRows, contextRuleOptions, executionSteps, exportFormats,
   exportOptions, exportScopes, intakePackages, personaCandidates, qualityControlDefaults,
   reanalysisScopes, reanalysisSteps, searchAll, searchExamples, startSteps, toCsv, toYaml,
-  validateRouting, type ChangeAlternative, type DemoScenario, type PersonaImpactAnalysisVersion,
+  validateRouting, type ChangeAlternative, type DemoScenario, type PersonaImpactAnalysisVersion, type PersonaImpactDecisionPackage,
   type PersonaImpactMitigationVersion, type PersonaImpactReview, type PersonaImpactScenario,
   type PiaSearchResult,
 } from "./ops-data";
@@ -169,7 +169,7 @@ export function ReanalysisDialog({
 }: {
   open: boolean; onOpenChange: (v: boolean) => void; onRun: (scope: string, reason: string) => void;
 }) {
-  const [scope, setScope] = useState(reanalysisScopes[0]);
+  const [scope, setScope] = useState<string>(reanalysisScopes[0]);
   const [reason, setReason] = useState("");
   const [running, setRunning] = useState(false);
   const [i, setI] = useState(0);
@@ -548,7 +548,7 @@ export function AlternativeDetailDialog({
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-[15px]">{alternative.label} · {alternative.title}</DialogTitle>
-          <DialogDescription className="text-[11.5px]">{alternative.description}</DialogDescription>
+          <DialogDescription className="text-[11.5px]">{alternative.expectedBenefit}</DialogDescription>
         </DialogHeader>
         <dl className="rounded border border-slate-200 bg-white p-2">
           <Row label="Expected Benefit" value={alternative.expectedBenefit} />
@@ -590,7 +590,6 @@ export function ScenarioDetailDialog({
           <Row label="Traffic Exposure" value={`${scenario.trafficExposure}%`} />
           <Row label="Progressive Rollout" value={scenario.progressiveRollout ? "Enabled" : "Disabled"} />
           <Row label="Deployment Timing" value={scenario.deploymentTiming} />
-          <Row label="Created By" value={scenario.createdBy} />
           <Row label="Created At" value={scenario.createdAt} />
         </dl>
         <SimpleTable head={["Persona", "Impact Score", "Highest Severity", "Approval", "Evidence Sufficiency"]}
