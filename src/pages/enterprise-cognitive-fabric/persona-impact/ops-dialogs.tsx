@@ -272,19 +272,19 @@ export function BulkActionsDialog({
 /* ----------------------------------------------------------- routing ----- */
 
 export function RoutingDialog({
-  open, onOpenChange, target, proposal, reviews, mitigationVersions, analysisComplete, onConfirm,
+  open, onOpenChange, target, pkg, reviews, analysisComplete, onConfirm,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   target: "Cross Team Impact Matrix" | "Decision Intelligence";
-  proposal: ProposalState;
+  pkg: PersonaImpactDecisionPackage;
   reviews: PersonaImpactReview[];
-  mitigationVersions: PersonaImpactMitigationVersion[];
   analysisComplete: boolean;
   onConfirm: (note: string) => void;
 }) {
   const [note, setNote] = useState("");
-  const check = validateRouting(target, proposal, reviews, mitigationVersions, analysisComplete);
+  const check = validateRouting(target, pkg, reviews, analysisComplete);
+  const allowed = check.validationStatus !== "Blocked";
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
@@ -294,12 +294,19 @@ export function RoutingDialog({
             Persona Impact Analysis produces structured input. It does not make the enterprise decision.
           </DialogDescription>
         </DialogHeader>
-        <SimpleTable head={["Requirement", "State"]}
-          rows={check.requirements.map((r) => [r.label,
-            <Pill key="s" label={r.met ? "Met" : "Not met"} tone={r.met ? "green" : "red"} />])} />
-        {!check.allowed && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10.5px] uppercase tracking-wide text-slate-500">Validation</span>
+          <Pill label={check.validationStatus} tone={allowed ? (check.warnings.length ? "amber" : "green") : "red"} />
+        </div>
+        <SimpleTable head={["Type", "Detail"]}
+          rows={[
+            ...check.blocking.map((b) => [<Pill key="b" label="Blocking" tone="red" />, b]),
+            ...check.warnings.map((w) => [<Pill key="w" label="Warning" tone="amber" />, w]),
+            ...(check.blocking.length || check.warnings.length ? [] : [[<Pill key="p" label="Passed" tone="green" />, "All routing requirements met"]]),
+          ]} />
+        {!allowed && (
           <p role="alert" className="rounded border border-red-200 bg-red-50 p-1.5 text-[11px] text-red-700">
-            {check.blockedReason}
+            Routing blocked: {check.blocking.join(" · ")}
           </p>
         )}
         <Field label="Routing note">
@@ -307,12 +314,13 @@ export function RoutingDialog({
             className="w-full rounded border border-slate-200 p-1.5 text-[11.5px]" />
         </Field>
         <DialogFooter>
-          <Button size="sm" className="h-7 text-[11px]" disabled={!check.allowed}
+          <Button size="sm" className="h-7 text-[11px]" disabled={!allowed}
             onClick={() => { onConfirm(note); setNote(""); onOpenChange(false); }}>Confirm Handoff</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+
 }
 
 /* ------------------------------------------------------------- search ---- */
