@@ -164,7 +164,7 @@ export function StartDecisionAnalysisDialog({
             <Row label="Dependencies" value="4 shared dependencies" />
             <Row label="Evidence" value={`${evidenceFor("DIA 5001").filter((e) => e.required).length} required evidence records`} />
             <Row label="Estimated Tradeoffs" value="6 to 8 material tradeoffs" />
-            <Row label="Estimated Duration" value="约 4 minutes" />
+            <Row label="Estimated Duration" value="Approximately 4 minutes" />
           </dl>
         )}
 
