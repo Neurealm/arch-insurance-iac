@@ -81,7 +81,8 @@ function KpiCard({
   return (
     <article
       className={cn(
-        "rounded-lg border bg-white p-3 shadow-sm",
+        "rounded-lg border bg-white p-3 shadow-sm hover:shadow-md",
+        surfaceTransition,
         selected ? "border-blue-400 ring-1 ring-blue-300" : "border-slate-200",
       )}
       aria-label={`${label}. ${description}`}
@@ -92,11 +93,12 @@ function KpiCard({
           type="button"
           aria-pressed={Boolean(selected)}
           onClick={onSelect}
-          className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          className={cn("w-full rounded text-left", focusRing)}
         >
           {label}
         </button>
       </h3>
+
       {loading ? (
         <>
           <div className="mt-2 h-6 w-20 animate-pulse rounded bg-slate-100" />
