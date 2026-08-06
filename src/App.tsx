@@ -348,6 +348,7 @@ import EcfPage from "./pages/enterprise-cognitive-fabric/EcfPage.tsx";
 import EnterpriseCommandCenter from "./pages/enterprise-cognitive-fabric/EnterpriseCommandCenter.tsx";
 import EnterpriseSourceDiscovery from "./pages/enterprise-cognitive-fabric/EnterpriseSourceDiscovery.tsx";
 import DiscoveryScaffold from "./pages/enterprise-cognitive-fabric/DiscoveryScaffold.tsx";
+import DiscoveryConfiguration from "./pages/enterprise-cognitive-fabric/DiscoveryConfiguration.tsx";
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
 import UseCaseToDataContractMapper from "./pages/data-orchestration-twin/UseCaseToDataContractMapper.tsx";
@@ -740,7 +741,7 @@ const App = () => (
             <Route path="enterprise-source-discovery" element={<EnterpriseSourceDiscovery />} />
             <Route path="discovery/source-discovery" element={<EnterpriseSourceDiscovery />} />
             <Route path="discovery/ingestion-normalization" element={<DiscoveryScaffold />} />
-            <Route path="discovery/configuration" element={<DiscoveryScaffold />} />
+            <Route path="discovery/configuration" element={<DiscoveryConfiguration />} />
             <Route path="discovery/pipelines" element={<DiscoveryScaffold />} />
             <Route path="discovery/source-registry" element={<DiscoveryScaffold />} />
             <Route path="discovery/connector-health" element={<DiscoveryScaffold />} />
