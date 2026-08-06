@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Drawer, Pill, Row } from "../persona-studio/primitives";
 import {
-  applicabilityFor, assumptionEvaluations, causalDimensionLabels, causalFor, contradictions,
+  applicabilityFor, assumptionEvaluations, candidateById, causalDimensionLabels, causalFor, contradictions,
   controlEffectiveness, decisionContext, evidenceById, evidenceRecords, expectations, historyEvents,
   learningPackage, mitigationEffectiveness, observations, olTone, personaNameById, relatedKnowledge,
   riskRealizations, unexpectedConsequences, variances,
@@ -177,7 +177,7 @@ export function LearningEvaluationDrawer({
         {tab === "Learning Candidates" && (
           <MiniTable head={["Candidate", "Learning Type", "Confidence", "Applicability", "Status"]}
             rows={analysis.learningCandidateIds.map((id) => {
-              const c = require0(id);
+              const c = candidateById(id);
               return [c?.title ?? id, c?.learningType ?? "—", c ? `${c.causalConfidence}%` : "—",
               c?.applicableScopes.join(" · ") ?? "—",
               <Pill key={id} label={c?.status ?? "Candidate"} tone={olTone(c?.status ?? "Candidate")} />];
@@ -219,12 +219,6 @@ export function LearningEvaluationDrawer({
       </div>
     </Drawer>
   );
-}
-
-/* helper kept local so the drawer does not import the whole candidate table */
-function require0(id: string) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  return undefined as unknown as LearningCandidate | undefined;
 }
 
 /* ================================================= learning candidate detail */
