@@ -14,7 +14,7 @@ export function Panel({
   title, subtitle, action, children, className,
 }: { title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-xl border border-slate-200 bg-white shadow-sm", className)}>
+    <section className={cn("rounded-xl border border-slate-200 bg-white shadow-sm", surfaceTransition, className)}>
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
