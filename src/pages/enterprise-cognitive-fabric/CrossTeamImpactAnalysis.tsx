@@ -48,7 +48,7 @@ import {
   StartAnalysisDialog,
 } from "./cross-team-impact/ops-dialogs";
 import {
-  baselineParams, buildDecisionPackage, ctiPersonas as opsPersonas, demoScenarios, readinessMetrics,
+  baselineParams, buildDecisionPackage, demoScenarios, readinessMetrics,
   seedAcknowledgements, seedCoordinationRecords, seedDependencyReviews, seedEscalations,
   seedMitigations, seedNotifications, seedOpsActivity, seedReviews, seedVersions, storySteps,
   toAnalysisState, validateRouting,
