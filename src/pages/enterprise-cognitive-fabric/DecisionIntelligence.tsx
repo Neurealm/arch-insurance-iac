@@ -91,7 +91,7 @@ export default function DecisionIntelligence() {
   /* ----------------------------------------------------------- domain state */
   const [selectedDecisionId, setSelectedDecisionId] = useState("DIA 5001");
   const [selectedStage, setSelectedStage] = useState("DIS 12");
-  const [params, setParams] = useState<ProposalParams>(baselineProposal);
+  const [params, setParams] = useState<DecisionScenarioParams>(baselineScenario);
   const [selectedAlternatives, setSelectedAlternatives] = useState<string[]>(["ALT 5001 B"]);
   const [selectedPersona, setSelectedPersona] = useState<string | null>("PER 4101");
   const [selectedConstraint, setSelectedConstraint] = useState<string | null>(null);
