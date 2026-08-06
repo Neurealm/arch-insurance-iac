@@ -108,6 +108,49 @@ export default function DecisionIntelligence() {
   const [constraintDrawer, setConstraintDrawer] = useState<DecisionConstraint | null>(null);
   const [priorDrawer, setPriorDrawer] = useState<PriorDecision | null>(null);
 
+  /* --------------------------------------------------- prompt 2 operations */
+  const [scope, setScope] = useState<DecisionScope>(seedScope);
+  const [refinements, setRefinements] = useState<RefinedAlternative[]>(seedRefinements);
+  const [comparedRefinement, setComparedRefinement] = useState<string | null>(null);
+  const [appliedMitigations, setAppliedMitigations] = useState<string[]>(
+    seedMitigations.filter((m) => m.status === "Accepted").map((m) => m.id));
+  const [mitigations, setMitigations] = useState(seedMitigations);
+  const [reviews, setReviews] = useState<DecisionReview[]>(seedReviews);
+  const [activeReview, setActiveReview] = useState<DecisionReview | null>(null);
+  const [acks, setAcks] = useState<DecisionAcknowledgement[]>(seedAcknowledgements);
+  const [approvals, setApprovals] = useState<DecisionApproval[]>(seedApprovals);
+  const [activeApproval, setActiveApproval] = useState<DecisionApproval | null>(null);
+  const [dissents, setDissents] = useState<DecisionDissent[]>(seedDissents);
+  const [challenges, setChallenges] = useState<RecommendationChallenge[]>(seedChallenges);
+  const [escalations, setEscalations] = useState<DecisionEscalation[]>(seedEscalations);
+  const [record, setRecord] = useState<DecisionRecord | null>(null);
+  const [snapshot, setSnapshot] = useState<DecisionContextSnapshot | null>(null);
+  const [handoff, setHandoff] = useState<ExecutionHandoff>(emptyHandoff);
+  const [contract, setContract] = useState<ObservationContract>(emptyObservationContract);
+  const [audit, setAudit] = useState<AuditEvent[]>(seedAudit);
+  const [notifications, setNotifications] = useState<DecisionNotification[]>(seedNotifications);
+  const [opsActivity, setOpsActivity] = useState<OpsActivity[]>(seedOpsActivity);
+  const [versionLeft, setVersionLeft] = useState("DIA 5001 v1");
+  const [versionRight, setVersionRight] = useState("DEC 5001 v1");
+  const [scenarioId, setScenarioId] = useState<string | null>(null);
+  const [storyIndex, setStoryIndex] = useState(-1);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [moreMenu, setMoreMenu] = useState(false);
+
+  /* dialogs */
+  const [startOpen, setStartOpen] = useState(false);
+  const [scopeOpen, setScopeOpen] = useState(false);
+  const [refineOpen, setRefineOpen] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [approvalOpen, setApprovalOpen] = useState(false);
+  const [dissentOpen, setDissentOpen] = useState(false);
+  const [challengeOpen, setChallengeOpen] = useState(false);
+  const [escalationOpen, setEscalationOpen] = useState(false);
+  const [recordOpen, setRecordOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+
   const say = useCallback((m: string) => setAnnounce(m), []);
 
   /* ------------------------------------------------------------ persistence */
@@ -135,10 +178,27 @@ export default function DecisionIntelligence() {
   }, [view, density, hiddenColumns, savedView, selectedDecisionId, selectedStage]);
 
   /* ------------------------------------------------------------- derivation */
-  const derived = useMemo(() => deriveDecisionState(params), [params]);
+  const derived = useMemo(() => scenarioState(params), [params]);
   const evaluation = evaluationById(selectedDecisionId);
   const stage = stageById(selectedStage);
-  const serviceState = operationalState(derived);
+  const readiness = useMemo(
+    () => readinessMetrics(derived, reviews, approvals, record), [derived, reviews, approvals, record]);
+  const processState = useMemo(
+    () => readinessState(readiness, record, handoff), [readiness, record, handoff]);
+  const serviceState = record ? processState : operationalState(derived);
+
+  /* ------------------------------------------------------- activity engine */
+  const logOps = useCallback((action: string, description: string, result: string, owner: string) => {
+    const auditId = `AUD ${88200 + Math.floor(Math.random() * 700)}`;
+    setOpsActivity((prev) => [{ id: `DOA ${Date.now()}`, timestamp: clock(), evaluationId: "DIA 5001", action, description, result, owner, auditId }, ...prev]);
+    setAudit((prev) => [{ id: auditId, timestamp: stamp(), actor: owner, role: "Operator", action, previousState: "—", newState: result, reason: description }, ...prev]);
+    say(`${action}. ${description}`);
+  }, [say]);
+
+  const notify = useCallback((type: string, title: string, description: string, severity: DecisionNotification["severity"], owner: string) => {
+    setNotifications((prev) => [{ id: `DNT ${Date.now()}`, evaluationId: "DIA 5001", decisionRecordId: null, type, title, description, severity, owner, status: "Unread", createdAt: clock() }, ...prev]);
+  }, []);
+
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
