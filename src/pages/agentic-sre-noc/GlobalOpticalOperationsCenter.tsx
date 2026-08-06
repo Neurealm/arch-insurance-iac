@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
+import keynoteVideo from "@/assets/noc-executive-keynote.mp4.asset.json";
 import { useNavigate } from "react-router-dom";
 import {
   Activity, AlertTriangle, Bot, CheckCircle2, ChevronDown, ChevronRight, CloudRain,
