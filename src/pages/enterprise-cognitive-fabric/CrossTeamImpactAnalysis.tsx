@@ -27,15 +27,37 @@ import {
   GraphNodeDrawer, PersonaDrawer,
 } from "./cross-team-impact/drawers";
 import {
-  activeFilterCount, analyses, buildPairMatrix, ctiKpis, ctiViews, defaultFilters, evidenceState,
+  activeFilterCount, analyses, buildPairMatrix, ctiKpis, ctiPersonas, ctiViews, defaultFilters, evidenceState,
   filterOptions, initialAnalysisState, kpiFocusPanel, lifecycleStages, operationalState, pairCell,
   severityRank, stageById,
   type CrossTeamImpactAnalysis, type CrossTeamImpactConflict, type CrossTeamImpactMatrixCell,
   type CrossTeamSharedDependency, type CtiAnalysisState, type CtiEvidence, type CtiGraphNode,
   type CtiView, type FilterKey,
 } from "./cross-team-impact/data";
+import {
+  AcknowledgementPanel, ConditionSensitivityPanel, CoordinationActionPanel, DecisionPackagePanel,
+  DemoScenarioBar, DemoStoryOverlay, DependencyOwnerReviewPanel, EscalationPanel,
+  EvidenceRemediationPanel, MitigationPlannerPanel, MitigationTradeoffPanel, NotificationsPanel,
+  OpsActivityPanel, PersonaOwnerReviewPanel, PersonaVersionSensitivityPanel, RawCoordinatedPanel,
+  ReadinessPanel, ScenarioComparisonPanel, ScenarioSimulatorPanel, TeamScopePanel,
+  VersionComparisonPanel, VersionHistoryPanel,
+} from "./cross-team-impact/ops-panels";
+import {
+  AddPersonaDialog, ConflictManagementDrawer, CoordinationActionDrawer, EscalationDialog,
+  EvidenceDialog, ExportDialog, GlobalSearchDialog, ReanalysisDialog, RoutingDialog,
+  StartAnalysisDialog,
+} from "./cross-team-impact/ops-dialogs";
+import {
+  baselineParams, buildDecisionPackage, demoScenarios, readinessMetrics,
+  seedAcknowledgements, seedCoordinationRecords, seedDependencyReviews, seedEscalations,
+  seedMitigations, seedNotifications, seedOpsActivity, seedReviews, seedVersions, storySteps,
+  toAnalysisState, validateRouting,
+  type CoordinationRecord, type CrossTeamAcknowledgement, type CrossTeamEscalation,
+  type CrossTeamMitigation, type CrossTeamNotification, type OpsActivity, type ScenarioParams,
+} from "./cross-team-impact/ops-data";
 
 const STORAGE_KEY = "ecf:cross-team-impact:v1";
+
 
 export default function CrossTeamImpactAnalysis() {
   const navigate = useNavigate();
@@ -78,6 +100,85 @@ export default function CrossTeamImpactAnalysis() {
   const [nodeDrawer, setNodeDrawer] = useState<CtiGraphNode | null>(null);
 
   const say = useCallback((m: string) => setAnnounce(m), []);
+
+  /* ------------------------------------------------- Prompt 2 operations */
+  const [included, setIncluded] = useState<string[]>(ctiPersonas.map((p) => p.id));
+  const [primaryPersona, setPrimaryPersona] = useState<string | null>("PER 4101");
+  const [addPersonaOpen, setAddPersonaOpen] = useState(false);
+  const [scenarioParams, setScenarioParams] = useState<ScenarioParams>(baselineParams);
+  const [mitigations, setMitigations] = useState<CrossTeamMitigation[]>(seedMitigations);
+  const [accepted, setAccepted] = useState<string[]>(["CTM 1001"]);
+  const [impactMode, setImpactMode] = useState<"raw" | "coordinated">("raw");
+  const [records, setRecords] = useState<CoordinationRecord[]>(seedCoordinationRecords);
+  const [coordinationDrawer, setCoordinationDrawer] = useState<CoordinationRecord | null>(null);
+  const [acks, setAcks] = useState<CrossTeamAcknowledgement[]>(seedAcknowledgements);
+  const [reviews] = useState(seedReviews);
+  const [escalations, setEscalations] = useState<CrossTeamEscalation[]>(seedEscalations);
+  const [escalationOpen, setEscalationOpen] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [evidenceTarget, setEvidenceTarget] = useState("");
+  const [conditionMode, setConditionMode] = useState("Compare");
+  const [versions, setVersions] = useState(seedVersions);
+  const [versionId, setVersionId] = useState(seedVersions[seedVersions.length - 1].id);
+  const [compareLeft, setCompareLeft] = useState(seedVersions[0].id);
+  const [compareRight, setCompareRight] = useState(seedVersions[seedVersions.length - 1].id);
+  const [notifications, setNotifications] = useState<CrossTeamNotification[]>(seedNotifications);
+  const [notificationFilter, setNotificationFilter] = useState("All");
+  const [activity, setActivity] = useState<OpsActivity[]>(seedOpsActivity);
+  const [startOpen, setStartOpen] = useState(false);
+  const [reanalysisOpen, setReanalysisOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [routingOpen, setRoutingOpen] = useState(false);
+  const [conflictManage, setConflictManage] = useState<CrossTeamImpactConflict | null>(null);
+  const [activeScenario, setActiveScenario] = useState<string | null>(null);
+  const [storyOn, setStoryOn] = useState(false);
+  const [storyIndex, setStoryIndex] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  const logOps = useCallback((action: string, detail: string) => {
+    setActivity((a) => [
+      {
+        id: `ACT ${Date.now()}`,
+        timestamp: new Date().toISOString().slice(11, 16),
+        action, description: detail, owner: "Coordination Office", result: "Recorded",
+      },
+      ...a,
+    ]);
+    setAnnounce(`${action}: ${detail}`);
+  }, []);
+
+  const spot = (panel: string) => storyOn && storySteps[storyIndex]?.target === panel;
+
+  const readiness = useMemo(
+    () => readinessMetrics(analysisState, accepted, acks, records),
+    [analysisState, accepted, acks, records],
+  );
+  const currentVersion = versions.find((v) => v.id === versionId) ?? versions[versions.length - 1];
+  const decisionPackage = useMemo(
+    () => buildDecisionPackage(analysisState, currentVersion, accepted, acks, escalations),
+    [analysisState, currentVersion, accepted, acks, escalations],
+  );
+  const routing = useMemo(
+    () => validateRouting(analysisState, accepted, acks, records, true, primaryPersona),
+    [analysisState, accepted, acks, records, primaryPersona],
+  );
+
+  const applyScenario = (id: string) => {
+    const s = demoScenarios.find((x) => x.id === id);
+    if (!s) return;
+    const next = { ...scenarioParams, ...s.params };
+    setActiveScenario(id);
+    setScenarioParams(next);
+    setAnalysisState(toAnalysisState(next));
+    if (s.accepted) setAccepted(s.accepted);
+    if (s.ackOverride) setAcks((list) => list.map((a) => s.ackOverride?.[a.personaId] ? { ...a, status: s.ackOverride[a.personaId]! } : a));
+    if (s.coordinationOverride) setRecords((list) => list.map((r) => s.coordinationOverride?.[r.id] ? { ...r, status: s.coordinationOverride[r.id]! } : r));
+    logOps("Demo scenario applied", `${s.name} — ${s.note}`);
+  };
+
+
+
 
   /* ------------------------------------------------------- local persistence */
   useEffect(() => {
@@ -218,18 +319,33 @@ export default function CrossTeamImpactAnalysis() {
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={refresh}>
             <RefreshCw className="mr-1 h-3.5 w-3.5" aria-hidden /> Refresh
           </Button>
-          <Button size="sm" className="h-7 text-[11px]" disabled title="Available in the next release">Start Cross Team Analysis</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => { setFiltersOpen(true); focusPanel("panel-filters"); }}>
+          <Button size="sm" className="h-7 text-[11px]" onClick={() => setStartOpen(true)}>Start Cross Team Analysis</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => { setFiltersOpen(true); focusPanel("panel-team-scope"); }}>
             <Users className="mr-1 h-3.5 w-3.5" aria-hidden /> Select Teams
           </Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]"
             onClick={() => { setMatrixMode("persona-persona"); focusPanel("panel-matrix"); say("Persona by Persona comparison selected"); }}>
             Compare Perspectives
           </Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" disabled title="Governed export arrives in the next release">
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setReanalysisOpen(true)}>Reanalyze</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setSearchOpen(true)}>
+            <Search className="mr-1 h-3.5 w-3.5" aria-hidden /> Global Search
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setExportOpen(true)}>
             <Download className="mr-1 h-3.5 w-3.5" aria-hidden /> Export Analysis
           </Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => focusPanel("panel-activity")}>More</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setRoutingOpen(true)}>Proceed to Decision Intelligence</Button>
+          <Button size="sm" variant={storyOn ? "default" : "outline"} className="h-7 text-[11px]"
+            onClick={() => { setStoryOn((s) => !s); setStoryIndex(0); if (!storyOn) focusPanel(storySteps[0].target); }}>
+            {storyOn ? "Exit Demo Story" : "Demo Story"}
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => focusPanel("panel-notifications")}>
+            Notifications
+            {notifications.some((n) => n.status === "Unread") && (
+              <span className="ml-1 rounded-full bg-blue-600 px-1 text-[9px] text-white">{notifications.filter((n) => n.status === "Unread").length}</span>
+            )}
+          </Button>
+
         </div>
       </header>
 
@@ -362,7 +478,7 @@ export default function CrossTeamImpactAnalysis() {
         <PropagationGraphPanel onOpenNode={setNodeDrawer} highlightPersonaId={selectedPersonaId} />
 
         <div className={cn("grid gap-2", leads.includes("conflicts") ? "xl:grid-cols-1" : "xl:grid-cols-2")}>
-          <ConflictPanel state={analysisState} onOpen={setConflictDrawer} />
+          <ConflictPanel state={analysisState} onOpen={setConflictManage} />
         </div>
 
         <div className="grid gap-2 xl:grid-cols-2">
@@ -379,6 +495,85 @@ export default function CrossTeamImpactAnalysis() {
         {view !== "executive" && <EnterpriseSummaryPanel state={analysisState} />}
 
         <ActivityPanel onOpen={(id) => setDetail(analyses.find((a) => a.id === id) ?? null)} />
+
+        {/* --------------------------------------------- Prompt 2 operations */}
+        <TeamScopePanel state={analysisState} included={included} primary={primaryPersona}
+          onToggle={(id) => { setIncluded((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]); logOps("Team scope changed", id); }}
+          onPrimary={(id) => { setPrimaryPersona(id); logOps("Primary team set", id); }}
+          onAdd={() => setAddPersonaOpen(true)}
+          onOpenPersona={(id) => { setSelectedPersonaId(id); setPersonaDrawer(id); }}
+          onOpenResult={() => navigate("/enterprise-cognitive-fabric/evaluation/persona-impact-analysis")} />
+
+        <ScenarioSimulatorPanel params={scenarioParams} spotlight={spot("panel-scenario")}
+          onParams={(p) => { setScenarioParams(p); setAnalysisState(toAnalysisState(p)); say("Scenario recalculated across the matrix"); }}
+          onReset={() => { setScenarioParams(baselineParams); setAnalysisState(toAnalysisState(baselineParams)); say("Scenario reset to baseline"); }}
+          onCompare={() => focusPanel("panel-scenario-comparison")} />
+
+        <ScenarioComparisonPanel current={scenarioParams} />
+
+        <MitigationPlannerPanel mitigations={mitigations} accepted={accepted} spotlight={spot("panel-mitigation-planner")}
+          onAccept={(id) => { setAccepted((a) => Array.from(new Set([...a, id]))); logOps("Mitigation accepted", id); }}
+          onReject={(id) => { setAccepted((a) => a.filter((x) => x !== id)); logOps("Mitigation rejected", id); }}
+          onEdit={(m) => { setMitigations((list) => list.map((x) => x.id === m.id ? m : x)); logOps("Mitigation edited", m.id); }}
+          onAssign={(m) => logOps("Mitigation owner assigned", m.id)}
+          onRequestEvidence={(m) => { setEvidenceTarget(m.title); setEvidenceOpen(true); }}
+          onOpenPersona={(id) => { setSelectedPersonaId(id); setPersonaDrawer(id); }} />
+
+        <MitigationTradeoffPanel mitigations={mitigations.filter((m) => accepted.includes(m.id))} />
+
+        <RawCoordinatedPanel state={analysisState} accepted={accepted} mitigations={mitigations}
+          mode={impactMode} onMode={setImpactMode} spotlight={spot("panel-raw-coordinated")} />
+
+        <CoordinationActionPanel records={records} spotlight={spot("panel-coordination-actions")}
+          onStatus={(id, s) => { setRecords((r) => r.map((x) => x.id === id ? { ...x, status: s } : x)); logOps("Coordination status changed", `${id} · ${s}`); }}
+          onOpen={setCoordinationDrawer}
+          onEscalate={() => setEscalationOpen(true)}
+          onRequestEvidence={(r) => { setEvidenceTarget(r.title); setEvidenceOpen(true); }} />
+
+        <AcknowledgementPanel acks={acks} spotlight={spot("panel-acknowledgement")}
+          onAct={(id, status) => { setAcks((a) => a.map((x) => x.id === id ? { ...x, status } : x)); logOps("Acknowledgement recorded", `${id} · ${status}`); }}
+          onOpenPersona={(id) => { setSelectedPersonaId(id); setPersonaDrawer(id); }} />
+
+        <PersonaOwnerReviewPanel state={analysisState} reviews={reviews}
+          onAction={(personaId, action) => logOps("Persona owner review", `${personaId} · ${action}`)}
+          onOpenPersona={(id) => { setSelectedPersonaId(id); setPersonaDrawer(id); }} />
+
+        <DependencyOwnerReviewPanel reviews={seedDependencyReviews}
+          onAction={(dependencyId, action) => logOps("Dependency owner review", `${dependencyId} · ${action}`)} />
+
+        <EscalationPanel escalations={escalations} onCreate={() => setEscalationOpen(true)} />
+
+        <EvidenceRemediationPanel state={analysisState}
+          onAdd={(id) => { setEvidenceTarget(id); setEvidenceOpen(true); }}
+          onRequest={(id) => { setEvidenceTarget(id); setEvidenceOpen(true); }} />
+
+        <PersonaVersionSensitivityPanel />
+
+        <ConditionSensitivityPanel mode={conditionMode} onMode={setConditionMode} />
+
+        <VersionHistoryPanel versions={versions} selected={versionId} onSelect={setVersionId}
+          onCompare={(id) => { setCompareRight(id); focusPanel("panel-version-comparison"); }}
+          onSimulate={(id) => logOps("Version simulated", id)}
+          onExport={() => setExportOpen(true)} />
+
+        <VersionComparisonPanel versions={versions} left={compareLeft} right={compareRight}
+          onLeft={setCompareLeft} onRight={setCompareRight} />
+
+        <ReadinessPanel state={analysisState} accepted={accepted} acks={acks} records={records} />
+
+        <DecisionPackagePanel pkg={decisionPackage} readiness={readiness.state} spotlight={spot("panel-decision-package")}
+          onRoute={() => setRoutingOpen(true)}
+          onExport={() => setExportOpen(true)}
+          onOpenValidation={() => setRoutingOpen(true)} />
+
+        <NotificationsPanel notifications={notifications} filter={notificationFilter} onFilter={setNotificationFilter}
+          onRead={(id) => setNotifications((n) => n.map((x) => x.id === id ? { ...x, status: "Read" } : x))}
+          onReadAll={() => setNotifications((n) => n.map((x) => ({ ...x, status: "Read" as const })))}
+          onOpen={(n) => { setNotifications((list) => list.map((x) => x.id === n.id ? { ...x, status: "Read" } : x)); focusPanel("panel-coordination-actions"); }} />
+
+        <OpsActivityPanel activity={activity} />
+
+        <DemoScenarioBar scenarios={demoScenarios} active={activeScenario} onSelect={applyScenario} />
       </div>
 
       {/* ---------------------------------------------------------- drawers */}
@@ -393,6 +588,92 @@ export default function CrossTeamImpactAnalysis() {
       <EvidenceDrawer evidence={evidenceDrawer} onClose={() => setEvidenceDrawer(null)} />
       <PersonaDrawer personaId={personaDrawer} state={analysisState} onClose={() => setPersonaDrawer(null)} />
       <GraphNodeDrawer node={nodeDrawer} onClose={() => setNodeDrawer(null)} />
+
+      {/* ------------------------------------------- Prompt 2 dialogs */}
+      <StartAnalysisDialog open={startOpen} onClose={() => setStartOpen(false)}
+        onComplete={(summary) => {
+          setStartOpen(false);
+          logOps("Cross Team Analysis started", summary);
+          setNotifications((n) => [{ id: `NTF ${Date.now()}`, analysisId: "CTA 3001", type: "Analysis Completed", title: "Cross Team Analysis completed", description: summary, severity: "Medium", owner: "Coordination Office", status: "Unread", createdAt: new Date().toISOString().slice(11, 16) }, ...n]);
+          focusPanel("panel-matrix");
+        }} />
+
+      <ReanalysisDialog open={reanalysisOpen} onClose={() => setReanalysisOpen(false)}
+        onComplete={(scope, reason) => {
+          setReanalysisOpen(false);
+          const next = { ...currentVersion, id: `CTV ${versions.length + 1}`, version: versions.length + 1, changeReason: reason, createdAt: new Date().toISOString().slice(0, 16).replace("T", " ") };
+          setVersions((v) => [...v, next]);
+          setVersionId(next.id);
+          setCompareRight(next.id);
+          logOps("Reanalysis complete", `${scope} — ${reason}`);
+        }} />
+
+      <EscalationDialog open={escalationOpen} onClose={() => setEscalationOpen(false)} state={analysisState}
+        onCreate={(e) => {
+          setEscalations((list) => [...list, { ...e, id: `CTE ${list.length + 1}`, createdAt: new Date().toISOString().slice(0, 16).replace("T", " ") }]);
+          setEscalationOpen(false);
+          logOps("Escalation created", e.title);
+        }} />
+
+      <EvidenceDialog open={evidenceOpen} onClose={() => setEvidenceOpen(false)} target={evidenceTarget}
+        onAdd={(type, note) => {
+          setEvidenceOpen(false);
+          const flag = /fraud/i.test(evidenceTarget + type) ? "fraudLossEvidence"
+            : /idempot/i.test(evidenceTarget + type) ? "idempotencyEvidence"
+              : /depend|load|capacity/i.test(evidenceTarget + type) ? "dependencyLoadEvidence" : null;
+          if (flag) {
+            const next = { ...scenarioParams, [flag]: true } as ScenarioParams;
+            setScenarioParams(next);
+            setAnalysisState(toAnalysisState(next));
+          }
+          logOps("Evidence recorded", `${type} · ${evidenceTarget}${note ? ` — ${note}` : ""}`);
+        }} />
+
+      <ConflictManagementDrawer conflict={conflictManage} state={analysisState}
+        onClose={() => setConflictManage(null)}
+        onAction={(action, note) => {
+          if (action === "Escalate to Governance" || action === "Escalate to Decision Intelligence") setEscalationOpen(true);
+          if (action === "Request Evidence") { setEvidenceTarget(conflictManage?.id ?? "Conflict"); setEvidenceOpen(true); }
+          logOps("Conflict coordination", `${conflictManage?.id ?? ""} · ${action}${note ? ` — ${note}` : ""}`);
+        }} />
+
+      <CoordinationActionDrawer record={coordinationDrawer} onClose={() => setCoordinationDrawer(null)}
+        onUpdate={(r) => { setRecords((list) => list.map((x) => x.id === r.id ? r : x)); setCoordinationDrawer(null); logOps("Coordination action updated", r.id); }} />
+
+      <GlobalSearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} state={analysisState}
+        mitigations={mitigations} records={records} acks={acks} escalations={escalations} versions={versions}
+        onOpenHit={(hit) => { setSearchOpen(false); focusPanel("panel-matrix"); }} />
+
+      <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} state={analysisState}
+        mitigations={mitigations} records={records} acks={acks}
+        onExported={(format, scope) => { setExportOpen(false); logOps("Governed export generated", `${format} · ${scope}`); }} />
+
+      <RoutingDialog open={routingOpen} onClose={() => setRoutingOpen(false)} validation={routing}
+        onRoute={() => {
+          setRoutingOpen(false);
+          logOps("Decision context routed", "Package handed to Decision Intelligence");
+          navigate("/enterprise-cognitive-fabric/evaluation/decision-intelligence");
+        }} />
+
+      <AddPersonaDialog open={addPersonaOpen} onClose={() => setAddPersonaOpen(false)}
+        onAdd={(name) => { setAddPersonaOpen(false); logOps("Team Persona added to scope", name); }} />
+
+      {storyOn && (
+        <DemoStoryOverlay step={storySteps[storyIndex]} index={storyIndex} total={storySteps.length}
+          reducedMotion={reducedMotion} onReducedMotion={setReducedMotion}
+          onNext={() => {
+            const next = Math.min(storySteps.length - 1, storyIndex + 1);
+            setStoryIndex(next);
+            focusPanel(storySteps[next].target);
+          }}
+          onPrev={() => {
+            const prev = Math.max(0, storyIndex - 1);
+            setStoryIndex(prev);
+            focusPanel(storySteps[prev].target);
+          }}
+          onExit={() => setStoryOn(false)} />
+      )}
     </div>
+
   );
 }
