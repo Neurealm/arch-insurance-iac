@@ -398,24 +398,38 @@ export default function BusinessConditionExtraction() {
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={refresh}><RefreshCw className="mr-1 h-3.5 w-3.5" />Refresh</Button>
           <Button size="sm" className="h-7 text-[11px]" onClick={() => setStartOpen(true)}>Start Extraction</Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]"
-            onClick={() => setPlaceholder({ title: "Configure Taxonomy", detail: "Taxonomy administration is delivered in Prompt 2." })}>Configure Taxonomy</Button>
+            onClick={() => { focusPanel("panel-taxonomy-admin"); say("Taxonomy management opened"); }}>Configure Taxonomy</Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]"
-            onClick={() => setPlaceholder({ title: "Review Queue", detail: "Human review governance is delivered in Prompt 2." })}>Review Queue</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]"
-            onClick={() => setPlaceholder({ title: "Export Conditions", detail: "Condition export is delivered in Prompt 2." })}>Export Conditions</Button>
+            onClick={() => { focusPanel("panel-reviews"); say("Human review queue focused"); }}>Review Queue</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setExportOpen(true)}>Export Conditions</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setPauseOpen(true)}>
+            {extractionPaused ? "Resume Extraction" : "Pause Extraction"}
+          </Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setFilterOpen((v) => !v)}>
             <SlidersHorizontal className="mr-1 h-3.5 w-3.5" />Filters{filterCount > 0 && <Badge className="ml-1 h-4 px-1 text-[10px]">{filterCount}</Badge>}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button size="sm" variant="outline" className="h-7 text-[11px]">More</Button></DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="text-[11px]">Extraction service</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="max-h-[70vh] overflow-y-auto">
+              <DropdownMenuItem className="text-[11.5px] font-medium" onClick={() => setDemoStep(0)}>Demo Story</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11.5px]" onClick={() => setGovSearchOpen(true)}>Search conditions</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11.5px]" onClick={() => setReprocessOpen(true)}>Reprocess with Updated Taxonomy</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11.5px]" onClick={() => setMergeMode("merge")}>Merge Conditions</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11.5px]" onClick={() => setMergeMode("split")}>Split Condition</DropdownMenuItem>
+              <DropdownMenuItem className="text-[11.5px]" onClick={() => setImpactOpen(true)}>Downstream Impact Preview</DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[11px]">Demo scenarios</DropdownMenuLabel>
+              {scenarios.map((s) => (
+                <DropdownMenuItem key={s.id} className="text-[11.5px]" onClick={() => applyScenario(s.id)}>{s.label}</DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-[11px]">Extraction service</DropdownMenuLabel>
               {(["Operational", "Extracting", "Degraded", "Paused", "Backlogged", "Review Required", "Maintenance"] as ServiceState[]).map((s) => (
                 <DropdownMenuItem key={s} className="text-[11.5px]" onClick={() => { setServiceState(s); say(`Service state ${s}`); }}>{s}</DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
           <StatusPill status={serviceState} />
           <span className="text-[11px] text-slate-500">Last updated {lastUpdated}</span>
         </div>
