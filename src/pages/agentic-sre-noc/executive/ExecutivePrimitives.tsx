@@ -210,7 +210,7 @@ export function Disclosure({
         </span>
       </button>
       {!open && summary && <div className="px-3 pb-2">{summary}</div>}
-      <div id={`pli-disclosure-body-${id}`} hidden={!open} className="px-3 pb-3">
+      <div id={`pli-disclosure-body-${id}`} className={cn("px-3 pb-3", !open && "hidden")}>
         {children}
       </div>
     </div>
