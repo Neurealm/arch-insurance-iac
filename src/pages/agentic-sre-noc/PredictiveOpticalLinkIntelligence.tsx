@@ -9,7 +9,7 @@
  * playback or model analytics are implemented here.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
   AlertTriangle, ChevronRight, Download, Info, Maximize2, Minimize2, MoreHorizontal,
@@ -33,6 +33,12 @@ import type { LifecycleTab } from "./lifecycle/lifecycleTypes";
 import { DEFAULT_ANALYTICS_LINK_ID, highRiskLinkRecords } from "./analytics/analyticsFixtures";
 import type { AnalyticsPanelState } from "./analytics/AnalyticsPrimitives";
 import type { PredictionOverrides } from "./chennai/chennaiGeojson";
+import { useScenarioState } from "./scenario/useScenarioState";
+import { ExplainModelDrawer } from "./scenario/ExplainModelDrawer";
+import { TraditionalComparisonPanel } from "./scenario/TraditionalComparisonPanel";
+import { ScenarioWorkspace } from "./scenario/ScenarioWorkspace";
+import { exportExplainReport } from "./scenario/scenarioExport";
+import { SCENARIO_LINK_ID } from "./scenario/scenarioFixtures";
 
 import {
   breadcrumb, featureContributions, forecastHorizons, governanceRecords, kpiMetrics,
@@ -216,9 +222,7 @@ export default function PredictiveOpticalLinkIntelligence() {
   const [selectedLink, setSelectedLink] = useState<string | null>(null);
   const [lifecycleTab, setLifecycleTab] = useState<LifecycleTab>("Training Data");
   const [activeModelVersion, setActiveModelVersion] = useState<string>(ACTIVE_VERSION);
-  const [explainOpen, setExplainOpen] = useState(false);
   const [whatIfOpen, setWhatIfOpen] = useState(false);
-  const [playbackRunning, setPlaybackRunning] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
   const [panelState, setPanelState] = useState<PanelState>("ready");
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -286,6 +290,41 @@ export default function PredictiveOpticalLinkIntelligence() {
     setLifecycleTab(tab);
     document.getElementById("model-lifecycle-workspace")?.scrollIntoView?.({ block: "start" });
   };
+
+  /* ------------------------ AIM-006 scenario and explain -------------------- */
+
+  const scenarioContext = useMemo(
+    () => ({
+      selectedLinkId: activeLinkId,
+      region,
+      product,
+      horizon,
+      modelVersion: activeModelVersion,
+      thresholdPct: pipelineThresholdPct,
+    }),
+    [activeLinkId, region, product, horizon, activeModelVersion, pipelineThresholdPct],
+  );
+  const scenarioState = useScenarioState(scenarioContext);
+  const scenarioStageIndex = scenarioState.stageIndex;
+  const scenarioFocus = scenarioState.stage.focus;
+  const scenarioSetPanelState = scenarioState.setPanelState;
+
+  /* Scenario progress drives the shared page selections owned by earlier stages. */
+  useEffect(() => {
+    if (scenarioStageIndex >= 4) setSelectedLink(SCENARIO_LINK_ID);
+  }, [scenarioStageIndex]);
+
+  useEffect(() => {
+    if (scenarioFocus === "governance") setLifecycleTab("Governance");
+  }, [scenarioFocus]);
+
+  useEffect(() => {
+    scenarioSetPanelState(panelState);
+  }, [panelState, scenarioSetPanelState]);
+
+  const explainOpen = scenarioState.explainOpen;
+  const setExplainOpen = scenarioState.setExplainOpen;
+
 
   const groupedFeatures = useMemo(() => {
     const groups = ["Optical", "Environmental", "Network and Service", "Historical and Context"] as const;
@@ -365,18 +404,39 @@ export default function PredictiveOpticalLinkIntelligence() {
           </dl>
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
-            <ToolbarButton onClick={() => setExplainOpen(true)} active={explainOpen} title="Explain Model">
-              <Sparkles className="h-3.5 w-3.5" aria-hidden />Explain Model
-            </ToolbarButton>
+            <button
+              type="button"
+              data-explain-trigger="true"
+              title="Explain Model"
+              aria-pressed={explainOpen}
+              onClick={() => { setExplainOpen(true); scenarioState.setExplainTab("Model Overview"); }}
+              className={cn(
+                "flex min-h-11 items-center gap-1.5 rounded-md border px-2.5 text-[11.5px] shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:min-h-0 sm:py-1.5",
+                explainOpen ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+              )}
+            >
+              <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />Explain Model
+            </button>
             <ToolbarButton onClick={() => setWhatIfOpen(true)} active={whatIfOpen} title="Run What-If">
               Run What-If
             </ToolbarButton>
-            <ToolbarButton onClick={() => setPlaybackRunning((p) => !p)} active={playbackRunning} title="Scenario playback">
-              {playbackRunning ? "Pause scenario" : "Play scenario"}
+            <ToolbarButton
+              onClick={() => {
+                scenarioState.setPlaying(true);
+                document.getElementById("chennai-protection-scenario")?.scrollIntoView?.({ block: "start" });
+              }}
+              active={scenarioState.playing}
+              title="Run Chennai Predictive Protection Scenario"
+            >
+              Run Chennai Predictive Protection Scenario
             </ToolbarButton>
-            <ToolbarButton onClick={() => undefined} title="Export Model Report">
+            <ToolbarButton
+              onClick={() => scenarioState.setExportMessage(exportExplainReport(scenarioState.activeEvidence).message)}
+              title="Export Model Report"
+            >
               <Download className="h-3.5 w-3.5" aria-hidden />Export Model Report
             </ToolbarButton>
+
             <ToolbarButton onClick={() => setFullScreen((f) => !f)} active={fullScreen} title="Full screen">
               {fullScreen ? <Minimize2 className="h-3.5 w-3.5" aria-hidden /> : <Maximize2 className="h-3.5 w-3.5" aria-hidden />}
               {fullScreen ? "Exit full screen" : "Full screen"}
@@ -568,16 +628,51 @@ export default function PredictiveOpticalLinkIntelligence() {
           </div>
         </PanelShell>
 
-        <PanelShell spec={spec.traditional} state={panelState} heightClass="min-h-[260px]" className="xl:col-span-5">
-          <ul className="space-y-1">
-            {traditionalMonitoringGaps.map((g) => (
-              <li key={g} className="flex gap-1.5 text-[11px] text-slate-700">
-                <span aria-hidden className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400" />{g}
-              </li>
-            ))}
-          </ul>
+        <PanelShell
+          spec={{ ...spec.traditional, title: "Why Traditional Monitoring Does Not Solve This", description: "Stage-by-stage comparison of the current operating model with agentic predictive protection." }}
+          state={panelState}
+          heightClass="min-h-[260px]"
+          className="xl:col-span-5"
+          functional
+        >
+          <TraditionalComparisonPanel state={scenarioState} />
+          <details className="mt-2 rounded border border-slate-200 bg-slate-50 p-2">
+            <summary className="cursor-pointer text-[11px] font-medium text-slate-800">Known traditional monitoring gaps</summary>
+            <ul className="mt-1 space-y-1">
+              {traditionalMonitoringGaps.map((g) => (
+                <li key={g} className="flex gap-1.5 text-[11px] text-slate-700">
+                  <span aria-hidden className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400" />{g}
+                </li>
+              ))}
+            </ul>
+          </details>
         </PanelShell>
       </div>
+
+      {/* ------------------ AIM-006 predictive protection scenario ------------ */}
+      <section
+        id="chennai-protection-scenario"
+        aria-labelledby="chennai-protection-scenario-title"
+        className="rounded-xl border border-slate-200 bg-white shadow-sm"
+      >
+        <header className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-200 px-4 py-2.5">
+          <div className="min-w-0">
+            <h2 id="chennai-protection-scenario-title" className="text-sm font-semibold text-slate-900">
+              Chennai Predictive Protection Scenario
+            </h2>
+            <p className="text-[11px] text-slate-500">
+              Fifteen deterministic stages from baseline to outcome and learning, with human-governed approval.
+            </p>
+          </div>
+          <span className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+            Synthetic data
+          </span>
+        </header>
+        <div className="p-4">
+          <ScenarioWorkspace state={scenarioState} />
+        </div>
+      </section>
+
 
       {/* ---------------------------- bottom strip -------------------------- */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -660,24 +755,26 @@ export default function PredictiveOpticalLinkIntelligence() {
       />
 
       {/* --------------------------- drawer shells -------------------------- */}
-      {(explainOpen || whatIfOpen) && (
+      <ExplainModelDrawer state={scenarioState} />
+
+      {whatIfOpen && !explainOpen && (
         <div
           role="dialog"
           aria-modal="false"
-          aria-label={explainOpen ? "Explain Model" : "Run What-If"}
+          aria-label="Run What-If"
           className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-xl rounded-t-xl border border-slate-200 bg-white p-4 shadow-lg sm:right-4 sm:left-auto sm:bottom-4 sm:rounded-xl"
         >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">{explainOpen ? "Explain Model" : "Run What-If"}</h2>
+              <h2 className="text-sm font-semibold text-slate-900">Run What-If</h2>
               <p className="mt-1 text-[11.5px] text-slate-600">
-                Placeholder drawer. Model explanation, feature attribution and what-if simulation are implemented in a
-                later stage.
+                What-If simulation runs inside the Chennai scenario workspace. Adjust drivers there to compare modelled
+                risk against the current forecast.
               </p>
             </div>
             <button
               type="button"
-              onClick={() => { setExplainOpen(false); setWhatIfOpen(false); }}
+              onClick={() => setWhatIfOpen(false)}
               className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               Close
@@ -685,6 +782,7 @@ export default function PredictiveOpticalLinkIntelligence() {
           </div>
         </div>
       )}
+
 
       <p className="text-[10.5px] text-slate-500">
         Synthetic Taara-aligned demonstration. Values, sparklines and panel content are temporary fixtures for the
