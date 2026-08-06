@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { Brain, Home, ChevronsLeft, ChevronsRight, Circle, RefreshCw } from "lucide-react";
+import { Brain, Home, ChevronsLeft, ChevronsRight, ChevronDown, ChevronRight, Circle, RefreshCw } from "lucide-react";
 import { ecfPages, ecfGroups } from "./pages";
 import { cn } from "@/lib/utils";
 
