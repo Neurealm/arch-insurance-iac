@@ -3,7 +3,8 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Pill, Row, type Tone } from "../persona-studio/primitives";
-import { Panel, ListBlockShim } from "./workbench-shim";
+import { Panel } from "../cognitive-memory/panels";
+import { ListBlock as ListBlockShim } from "./panels";
 import {
   alternativesFor, constraintsFor, diTone, magnitudeTone, positionsFor, priorDecisions,
   recommendationBenefits, recommendationCosts, sharedDependencies, strengthenTriggers,
