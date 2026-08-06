@@ -121,14 +121,52 @@ export default function TeamPersonaConstruction() {
   const [startOpen, setStartOpen] = useState(false);
   const [conflictCondition, setConflictCondition] = useState<string | null>(null);
 
+  /* --------------------------- governance state --------------------------- */
+  const [reviews, setReviews] = useState<PersonaReview[]>(seedReviews);
+  const [conflicts, setConflicts] = useState<PersonaConflict[]>(seedConflicts);
+  const [drift, setDrift] = useState<PersonaDrift[]>(seedDrift);
+  const [approvalChain, setApprovalChain] = useState(paymentsApprovalChain);
+  const [approvalStage, setApprovalStage] = useState<ApprovalStage>("Persona Owner Review");
+  const [versions, setVersions] = useState<PersonaVersion[]>(personaVersions);
+  const [publishingState, setPublishingState] = useState<string>("Idle");
+  const [notifications, setNotifications] = useState<GovernanceNotification[]>(governanceNotifications);
+  const [notificationFilter, setNotificationFilter] = useState<string>("All");
+  const [reviewSummaryFilter, setReviewSummaryFilter] = useState<string | null>(null);
+  const [openReview, setOpenReview] = useState<PersonaReview | null>(null);
+  const [openConflict, setOpenConflict] = useState<PersonaConflict | null>(null);
+  const [approvalAction, setApprovalAction] = useState<string | null>(null);
+  const [compareVersions, setCompareVersions] = useState<[PersonaVersion, PersonaVersion] | null>(null);
+  const [refreshOpen, setRefreshOpen] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [publishHistoryOpen, setPublishHistoryOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [qualityDetail, setQualityDetail] = useState<{ name: string; score: number; target: number; trend: number[] } | null>(null);
+  const [scenario, setScenario] = useState<DemoScenario>("Reset Demo Data");
+  const [storyStep, setStoryStep] = useState<number | null>(null);
+  const [storyNotes, setStoryNotes] = useState(true);
+  const [announcement, setAnnouncement] = useState("");
+  const [loadingGovernance, setLoadingGovernance] = useState(false);
+  const [activityHeadline, setActivityHeadline] = useState(personaActivity[0].description);
+
   /* ------------------------------ draft state ----------------------------- */
   const [mappingStates, setMappingStates] = useState<Record<string, BusinessCondition["mappingState"]>>({});
   const [selectedConditionId, setSelectedConditionId] = useState<string | null>(() => read<string | null>(LS.condition, "COND-100421"));
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [dirtyCount, setDirtyCount] = useState(0);
   const [lastResult, setLastResult] = useState<ConstructionResult | null>(null);
+  const [qualityAdjust, setQualityAdjust] = useState(0);
 
   useEffect(() => write(LS.condition, selectedConditionId), [selectedConditionId]);
+
+  const announce = useCallback((msg: string) => setAnnouncement(msg), []);
+
+  const pushNotification = useCallback((n: Omit<GovernanceNotification, "id" | "read" | "timestamp">) => {
+    setNotifications((prev) => [
+      { ...n, id: `NTF-${prev.length + 1}-${Date.now()}`, read: false, timestamp: "Now" },
+      ...prev,
+    ]);
+  }, []);
 
   /* -------------------------------- derived ------------------------------- */
   const personas = useMemo(() => {
