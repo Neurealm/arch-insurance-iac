@@ -43,12 +43,17 @@ import { exportExplainReport } from "./scenario/scenarioExport";
 import { SCENARIO_LINK_ID } from "./scenario/scenarioFixtures";
 
 import {
-  breadcrumb, featureContributions, forecastHorizons, governanceRecords, kpiMetrics,
-  linkPredictions, modelActivity, modelEvidence, modelFeatures, modelSummary, pageSubtitle,
-  panelSpecs, pipelineStages, products, recommendedActions, regions, scenarios, timeRanges,
-  traditionalMonitoringGaps,
-  type PanelSpec,
+  breadcrumb, forecastHorizons, governanceRecords, kpiMetrics, lifecycleSummary,
+  modelActivity, modelEvidence, modelSummary, pageSubtitle,
+  panelSpecs, products, regions, scenarios, syntheticNotice, timeRanges,
+  traditionalMonitoringGaps, validationResults,
+  type PanelSpec, type ViewingMode,
 } from "./data/pliFixtures";
+
+import {
+  Disclosure, OperationalConfidenceCard, OperationalSummaryBar, OperationalTrustCard,
+  RecommendedActionCard, ViewingModeSwitch,
+} from "./executive/ExecutivePrimitives";
 
 /* ------------------------------ shared parts ------------------------------ */
 
@@ -235,6 +240,9 @@ export default function PredictiveOpticalLinkIntelligence() {
   const [fullScreen, setFullScreen] = useState(false);
   const [panelState, setPanelState] = useState<PanelState>("ready");
   const [actionsOpen, setActionsOpen] = useState(false);
+  /* AIM-010 — executive experience state. */
+  const [viewMode, setViewMode] = useState<ViewingMode>("Operational");
+  const [contributionView, setContributionView] = useState<"Selected Link" | "Global">("Selected Link");
 
   const activeScenario = useMemo(
     () => scenarios.find((s) => s.label === scenario) ?? scenarios[0],
@@ -335,11 +343,6 @@ export default function PredictiveOpticalLinkIntelligence() {
   const setExplainOpen = scenarioState.setExplainOpen;
 
 
-  const groupedFeatures = useMemo(() => {
-    const groups = ["Optical", "Environmental", "Network and Service", "Historical and Context"] as const;
-    return groups.map((g) => ({ group: g, items: modelFeatures.filter((f) => f.group === g) }));
-  }, []);
-
   return (
     <div
       data-testid="pli-page"
@@ -378,6 +381,9 @@ export default function PredictiveOpticalLinkIntelligence() {
             <p className="mt-1 text-[11px] text-slate-500">
               {modelSummary.capability} · Owner {modelSummary.owner}
             </p>
+            <p data-testid="pli-synthetic-notice" className="mt-1 text-[10.5px] text-slate-500">
+              {syntheticNotice}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -403,14 +409,6 @@ export default function PredictiveOpticalLinkIntelligence() {
             options={panelStates}
             onChange={(v) => setPanelState(v as PanelState)}
           />
-
-          <div className="mx-1 hidden h-6 w-px bg-slate-200 lg:block" aria-hidden />
-
-          <dl className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
-            <div><dt className="inline text-slate-500">Model version: </dt><dd className="inline font-semibold text-slate-900" data-testid="pli-active-version">{activeModelVersion}</dd></div>
-            <div><dt className="inline text-slate-500">Last retrained: </dt><dd className="inline font-semibold text-slate-900">{modelSummary.lastRetrained}</dd></div>
-            <div><dt className="inline text-slate-500">Model health: </dt><dd className="inline font-semibold text-slate-900">{modelSummary.health}</dd></div>
-          </dl>
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <button
