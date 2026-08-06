@@ -523,19 +523,23 @@ export default function DecisionIntelligence() {
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={refresh}>
             <RefreshCw className="mr-1 h-3.5 w-3.5" aria-hidden /> Refresh
           </Button>
-          <Button size="sm" className="h-7 text-[11px]" onClick={() => prompt2("Start Decision Analysis")}>Start Decision Analysis</Button>
+          <Button size="sm" className="h-7 text-[11px]" onClick={() => setStartOpen(true)}>Start Decision Analysis</Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]"
             onClick={() => { setView("comparison"); focusPanel("panel-comparison"); say("Alternative comparison focused"); }}>
             <Scale className="mr-1 h-3.5 w-3.5" aria-hidden /> Compare Alternatives
           </Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => focusPanel("panel-evidence")}>Open Evidence</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => prompt2("Record Decision")}>Record Decision</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => prompt2("Governed Export")}>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setRecordOpen(true)}>Record Decision</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setSearchOpen(true)}>
+            <Search className="mr-1 h-3.5 w-3.5" aria-hidden /> Search
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setExportOpen(true)}>
             <Download className="mr-1 h-3.5 w-3.5" aria-hidden /> Export
           </Button>
-          <Button size="sm" variant="outline" className="h-7 px-2 text-[11px]" aria-label="More actions" onClick={() => prompt2("Additional decision operations")}>
+          <Button size="sm" variant="outline" className="h-7 px-2 text-[11px]" aria-label="More actions" onClick={() => { setMoreMenu((v) => !v); say("Additional decision operations"); }}>
             <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
           </Button>
+
         </div>
       </header>
 
