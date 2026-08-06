@@ -24,11 +24,11 @@ import {
   CognitiveHealthPanel, CognitiveInsightsPanel, ContextGraphPanel, DiscoveryPipelinesPanel,
   IncomingWorkPanel, KnowledgeDomainsPanel, KpiCard, LearningLoopPanel, MemoryUtilizationPanel,
   Panel, RecentDecisionsPanel, StatusBadge, SystemAlertsPanel,
-} from "./panels";
+} from "./command-center/panels";
 import {
   defaultFilters, filterOptions, kpiTrends, knowledgeDomains, notificationSeed, searchCatalog,
   seedFrom, timeRanges, type DemoState, type Filters, type ViewMode,
-} from "./data";
+} from "./command-center/data";
 
 const VIEW_LABEL: Record<ViewMode, string> = {
   executive: "Executive View",
@@ -130,7 +130,7 @@ export default function EnterpriseCommandCenter() {
 
   const setFilter = (key: keyof Filters, value: string) => {
     setFilters((f) => ({ ...f, [key]: value }));
-    setAnnounce(`Filter ${key} set to ${value}`);
+    setAnnounce(`Filter ${String(key)} set to ${value}`);
   };
 
   const spotlight = storyStep !== null ? STORY[storyStep].target : null;
@@ -150,7 +150,7 @@ export default function EnterpriseCommandCenter() {
   }, [storyStep]);
 
   const unread = notifications.filter((n) => !n.read).length;
-  const notifTypes = ["All", ...Array.from(new Set(notificationSeed.map((n) => n.type)))];
+  const notifTypes: string[] = ["All", ...Array.from(new Set<string>(notificationSeed.map((n) => n.type)))];
 
   const pipelineError = demoState === "discovery-failure" ? null : null;
 
@@ -436,7 +436,7 @@ export default function EnterpriseCommandCenter() {
         <CommandInput placeholder="Search teams, personas, conditions, work items, decisions, evidence…" />
         <CommandList>
           <CommandEmpty>No matching fabric records.</CommandEmpty>
-          {Array.from(new Set(searchCatalog.map((s) => s.category))).map((cat) => (
+          {Array.from(new Set<string>(searchCatalog.map((s) => s.category))).map((cat) => (
             <CommandGroup key={cat} heading={cat}>
               {searchCatalog.filter((s) => s.category === cat).map((s) => (
                 <CommandItem
