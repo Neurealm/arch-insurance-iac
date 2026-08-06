@@ -114,6 +114,12 @@ const tree: Node[] = [
     statusDot: "green",
   },
   {
+    key: "enterprise-cognitive-fabric",
+    label: "Enterprise Cognitive Fabric",
+    icon: Database,
+    to: "/enterprise-cognitive-fabric",
+  },
+  {
     key: "runops",
     label: "RunOps Practice",
     icon: BookOpen,
