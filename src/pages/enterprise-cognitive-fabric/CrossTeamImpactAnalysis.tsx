@@ -586,7 +586,7 @@ export default function CrossTeamImpactAnalysis() {
       <ReanalysisDialog open={reanalysisOpen} onClose={() => setReanalysisOpen(false)}
         onComplete={(scope, reason) => {
           setReanalysisOpen(false);
-          const next = { ...currentVersion, id: `CTV ${versions.length + 1}`, version: `v${versions.length + 1}.0`, changeReason: reason, createdAt: new Date().toISOString().slice(0, 16).replace("T", " ") };
+          const next = { ...currentVersion, id: `CTV ${versions.length + 1}`, version: versions.length + 1, changeReason: reason, createdAt: new Date().toISOString().slice(0, 16).replace("T", " ") };
           setVersions((v) => [...v, next]);
           setVersionId(next.id);
           setCompareRight(next.id);
@@ -627,7 +627,7 @@ export default function CrossTeamImpactAnalysis() {
 
       <GlobalSearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} state={analysisState}
         mitigations={mitigations} records={records} acks={acks} escalations={escalations} versions={versions}
-        onOpenHit={(hit) => { setSearchOpen(false); focusPanel(hit.panel ?? "panel-matrix"); }} />
+        onOpenHit={(hit) => { setSearchOpen(false); focusPanel("panel-matrix"); }} />
 
       <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} state={analysisState}
         mitigations={mitigations} records={records} acks={acks}
