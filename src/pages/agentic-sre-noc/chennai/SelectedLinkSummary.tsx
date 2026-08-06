@@ -117,23 +117,29 @@ export function SelectedLinkSummary({
         </div>
       </div>
 
-      <dl className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-3 xl:grid-cols-4">
-        <Metric label="Link ID" value={link.id} />
-        <Metric label="Risk score" value={prediction.riskProbability.toFixed(2)} tone={riskTone === "critical" ? "critical" : undefined} />
-        <Metric label="Risk class" value={prediction.riskClass} />
-        <Metric label="Prediction confidence" value={`${prediction.confidencePct}%`} />
+      {/* AIM-010 — six primary metrics, everything else behind More Details. */}
+      <dl className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+        <Metric label="Risk" value={`${prediction.riskClass}, ${prediction.riskProbability.toFixed(2)}`} tone={riskTone === "critical" ? "critical" : undefined} />
         <Metric label="ETA to impact" value={prediction.etaLabel} />
+        <Metric label="Confidence" value={`${prediction.confidencePct}%`} />
         <Metric label="Primary driver" value={link.primaryDriver} />
         <Metric label="Capacity exposed" value={`${prediction.capacity.exposedGbps} Gbps`} tone="warning" />
-        <Metric label="Customer services exposed" value={String(prediction.customer.servicesExposed)} />
         <Metric label="Recommended action" value={prediction.recommendedAction?.name ?? "None"} tone="positive" />
-        <Metric label="Approval requirement" value={prediction.approvalRequired ? "Required" : "Not required"} />
-        <Metric label="Fallback readiness" value={`${prediction.fallback.state}, ${Math.round(prediction.fallback.score * 100)}%`} />
-        <Metric label="Data quality" value={`${link.dataQualityPct}%`} />
-        <Metric label="Source agreement" value={`${link.sourceAgreementPct}%`} />
-        <Metric label="Model version" value={CHENNAI_MODEL_VERSION} />
-        <Metric label="Last evaluated" value={link.lastEvaluated.replace("T", " ").replace("Z", " UTC")} />
       </dl>
+
+      <details className="mt-2 rounded border border-slate-200 bg-slate-50 p-2" data-testid="chennai-selected-more">
+        <summary className="cursor-pointer text-[11px] font-medium text-slate-800">More Details</summary>
+        <dl className="mt-1.5 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+          <Metric label="Link ID" value={link.id} />
+          <Metric label="Customer services exposed" value={String(prediction.customer.servicesExposed)} />
+          <Metric label="Approval requirement" value={prediction.approvalRequired ? "Required" : "Not required"} />
+          <Metric label="Fallback readiness" value={`${prediction.fallback.state}, ${Math.round(prediction.fallback.score * 100)}%`} />
+          <Metric label="Data quality" value={`${link.dataQualityPct}%`} />
+          <Metric label="Source agreement" value={`${link.sourceAgreementPct}%`} />
+          <Metric label="Model version" value={CHENNAI_MODEL_VERSION} />
+          <Metric label="Last evaluated" value={link.lastEvaluated.replace("T", " ").replace("Z", " UTC")} />
+        </dl>
+      </details>
 
       <div className="mt-2 flex flex-wrap gap-1.5">
         <button type="button" className={ACTION_BUTTON} onClick={onViewEvidence}>View Evidence</button>
@@ -144,10 +150,6 @@ export function SelectedLinkSummary({
         <button type="button" className={ACTION_BUTTON} onClick={onResetSelection}>Reset Link Selection</button>
       </div>
 
-      <p className="mt-1.5 text-[10px] text-slate-500">
-        Synthetic reference logic. Values are calculated locally from the demonstration model and are not a Taara
-        production prediction.
-      </p>
     </section>
   );
 }
