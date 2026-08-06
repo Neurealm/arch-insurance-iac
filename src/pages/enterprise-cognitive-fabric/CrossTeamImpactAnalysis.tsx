@@ -34,8 +34,30 @@ import {
   type CrossTeamSharedDependency, type CtiAnalysisState, type CtiEvidence, type CtiGraphNode,
   type CtiView, type FilterKey,
 } from "./cross-team-impact/data";
+import {
+  AcknowledgementPanel, ConditionSensitivityPanel, CoordinationActionPanel, DecisionPackagePanel,
+  DemoScenarioBar, DemoStoryOverlay, DependencyOwnerReviewPanel, EscalationPanel,
+  EvidenceRemediationPanel, MitigationPlannerPanel, MitigationTradeoffPanel, NotificationsPanel,
+  OpsActivityPanel, PersonaOwnerReviewPanel, PersonaVersionSensitivityPanel, RawCoordinatedPanel,
+  ReadinessPanel, ScenarioComparisonPanel, ScenarioSimulatorPanel, TeamScopePanel,
+  VersionComparisonPanel, VersionHistoryPanel,
+} from "./cross-team-impact/ops-panels";
+import {
+  AddPersonaDialog, ConflictManagementDrawer, CoordinationActionDrawer, EscalationDialog,
+  EvidenceDialog, ExportDialog, GlobalSearchDialog, ReanalysisDialog, RoutingDialog,
+  StartAnalysisDialog,
+} from "./cross-team-impact/ops-dialogs";
+import {
+  baselineParams, buildDecisionPackage, ctiPersonas as opsPersonas, demoScenarios, readinessMetrics,
+  seedAcknowledgements, seedCoordinationRecords, seedDependencyReviews, seedEscalations,
+  seedMitigations, seedNotifications, seedOpsActivity, seedReviews, seedVersions, storySteps,
+  toAnalysisState, validateRouting,
+  type CoordinationRecord, type CrossTeamAcknowledgement, type CrossTeamEscalation,
+  type CrossTeamMitigation, type CrossTeamNotification, type OpsActivity, type ScenarioParams,
+} from "./cross-team-impact/ops-data";
 
 const STORAGE_KEY = "ecf:cross-team-impact:v1";
+
 
 export default function CrossTeamImpactAnalysis() {
   const navigate = useNavigate();
