@@ -76,7 +76,7 @@ export default function BusinessConditionExtraction() {
 
   /* persisted preferences */
   const [view, setView] = useState<ViewMode>(() =>
-    (typeof window !== "undefined" && (localStorage.getItem(LS("view")) as ViewMode)) || "executive");
+    (typeof window !== "undefined" && (localStorage.getItem(LS("view")) as ViewMode)) || "operations");
   const [density, setDensity] = useState<Density>(() =>
     (typeof window !== "undefined" && (localStorage.getItem(LS("density")) as Density)) || "compact");
   const [filters, setFilters] = useState<Filters>(() => {
