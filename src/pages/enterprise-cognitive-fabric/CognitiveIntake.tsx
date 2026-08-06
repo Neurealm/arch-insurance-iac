@@ -184,6 +184,7 @@ export default function CognitiveIntake() {
     entityResolution: result.entityResolution,
     conditionsIdentified: result.conditionsIdentified,
   };
+  const packageCompleteness = overallCompleteness(completenessInput);
 
   /* ------------------------------------------------- Prompt 2 derivations -- */
   const ruleInput: RuleInput = {
@@ -221,7 +222,7 @@ export default function CognitiveIntake() {
     intent: workbench.intent,
     proposedState: workbench.proposedState,
     scope: selectedIntake.scope,
-    resolvedEntityCount: entityMatches.filter((e) => e.matchStatus !== "Unresolved").length + resolvedEntities.length,
+    resolvedEntityCount: entityMatches.filter((e) => e.status !== "Unresolved").length + resolvedEntities.length,
     contextRetrievalComplete: true,
     personaSearchComplete: true,
     conditionSearchComplete: true,

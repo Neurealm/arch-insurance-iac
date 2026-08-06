@@ -98,6 +98,9 @@ export interface CognitiveIntakeRuleActivation {
   governanceRequirement: string;
   activatedAt: string;
   status: "Active" | "Not Triggered" | "Resolved";
+  reviewers: string[];
+  gapId: string | null;
+  detail: string;
 }
 
 export interface CognitiveIntakeEvidenceRequest {
