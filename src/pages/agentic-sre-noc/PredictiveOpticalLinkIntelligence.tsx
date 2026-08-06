@@ -793,10 +793,7 @@ export default function PredictiveOpticalLinkIntelligence() {
       )}
 
 
-      <p className="text-[10.5px] text-slate-500">
-        Synthetic Taara-aligned demonstration. Values, sparklines and panel content are temporary fixtures for the
-        AIM-001 page framework and do not represent deployed systems.
-      </p>
+
     </div>
   );
 }
