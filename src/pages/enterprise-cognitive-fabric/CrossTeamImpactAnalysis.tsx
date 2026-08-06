@@ -379,6 +379,85 @@ export default function CrossTeamImpactAnalysis() {
         {view !== "executive" && <EnterpriseSummaryPanel state={analysisState} />}
 
         <ActivityPanel onOpen={(id) => setDetail(analyses.find((a) => a.id === id) ?? null)} />
+
+        {/* --------------------------------------------- Prompt 2 operations */}
+        <TeamScopePanel state={analysisState} included={included} primary={primaryPersona}
+          onToggle={(id) => { setIncluded((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]); logOps("Team scope changed", id); }}
+          onPrimary={(id) => { setPrimaryPersona(id); logOps("Primary team set", id); }}
+          onAdd={() => setAddPersonaOpen(true)}
+          onOpenPersona={(id) => { setSelectedPersonaId(id); setPersonaDrawer(id); }}
+          onOpenResult={() => navigate("/enterprise-cognitive-fabric/evaluation/persona-impact-analysis")} />
+
+        <ScenarioSimulatorPanel params={scenarioParams} spotlight={spot("panel-scenario")}
+          onParams={(p) => { setScenarioParams(p); setAnalysisState(toAnalysisState(p)); say("Scenario recalculated across the matrix"); }}
+          onReset={() => { setScenarioParams(baselineParams); setAnalysisState(toAnalysisState(baselineParams)); say("Scenario reset to baseline"); }}
+          onCompare={() => focusPanel("panel-scenario-comparison")} />
+
+        <ScenarioComparisonPanel current={scenarioParams} />
+
+        <MitigationPlannerPanel mitigations={mitigations} accepted={accepted} spotlight={spot("panel-mitigation-planner")}
+          onAccept={(id) => { setAccepted((a) => Array.from(new Set([...a, id]))); logOps("Mitigation accepted", id); }}
+          onReject={(id) => { setAccepted((a) => a.filter((x) => x !== id)); logOps("Mitigation rejected", id); }}
+          onEdit={(m) => { setMitigations((list) => list.map((x) => x.id === m.id ? m : x)); logOps("Mitigation edited", m.id); }}
+          onAssign={(m) => logOps("Mitigation owner assigned", m.id)}
+          onRequestEvidence={(m) => { setEvidenceTarget(m.title); setEvidenceOpen(true); }}
+          onOpenPersona={(id) => { setSelectedPersonaId(id); setPersonaDrawer(id); }} />
+
+        <MitigationTradeoffPanel mitigations={mitigations.filter((m) => accepted.includes(m.id))} />
+
+        <RawCoordinatedPanel state={analysisState} accepted={accepted} mitigations={mitigations}
+          mode={impactMode} onMode={setImpactMode} spotlight={spot("panel-raw-coordinated")} />
+
+        <CoordinationActionPanel records={records} spotlight={spot("panel-coordination-actions")}
+          onStatus={(id, s) => { setRecords((r) => r.map((x) => x.id === id ? { ...x, status: s } : x)); logOps("Coordination status changed", `${id} · ${s}`); }}
+          onOpen={setCoordinationDrawer}
+          onEscalate={() => setEscalationOpen(true)}
+          onRequestEvidence={(r) => { setEvidenceTarget(r.title); setEvidenceOpen(true); }} />
+
+        <AcknowledgementPanel acks={acks} spotlight={spot("panel-acknowledgement")}
+          onAct={(id, status) => { setAcks((a) => a.map((x) => x.id === id ? { ...x, status } : x)); logOps("Acknowledgement recorded", `${id} · ${status}`); }}
+          onOpenPersona={(id) => { setSelectedPersonaId(id); setPersonaDrawer(id); }} />
+
+        <PersonaOwnerReviewPanel state={analysisState} reviews={reviews}
+          onAction={(personaId, action) => logOps("Persona owner review", `${personaId} · ${action}`)}
+          onOpenPersona={(id) => { setSelectedPersonaId(id); setPersonaDrawer(id); }} />
+
+        <DependencyOwnerReviewPanel reviews={seedDependencyReviews}
+          onAction={(dependencyId, action) => logOps("Dependency owner review", `${dependencyId} · ${action}`)} />
+
+        <EscalationPanel escalations={escalations} onCreate={() => setEscalationOpen(true)} />
+
+        <EvidenceRemediationPanel state={analysisState}
+          onAdd={(id) => { setEvidenceTarget(id); setEvidenceOpen(true); }}
+          onRequest={(id) => { setEvidenceTarget(id); setEvidenceOpen(true); }} />
+
+        <PersonaVersionSensitivityPanel />
+
+        <ConditionSensitivityPanel mode={conditionMode} onMode={setConditionMode} />
+
+        <VersionHistoryPanel versions={versions} selected={versionId} onSelect={setVersionId}
+          onCompare={(id) => { setCompareRight(id); focusPanel("panel-version-comparison"); }}
+          onSimulate={(id) => logOps("Version simulated", id)}
+          onExport={() => setExportOpen(true)} />
+
+        <VersionComparisonPanel versions={versions} left={compareLeft} right={compareRight}
+          onLeft={setCompareLeft} onRight={setCompareRight} />
+
+        <ReadinessPanel state={analysisState} accepted={accepted} acks={acks} records={records} />
+
+        <DecisionPackagePanel pkg={decisionPackage} readiness={readiness.state} spotlight={spot("panel-decision-package")}
+          onRoute={() => setRoutingOpen(true)}
+          onExport={() => setExportOpen(true)}
+          onOpenValidation={() => setRoutingOpen(true)} />
+
+        <NotificationsPanel notifications={notifications} filter={notificationFilter} onFilter={setNotificationFilter}
+          onRead={(id) => setNotifications((n) => n.map((x) => x.id === id ? { ...x, status: "Read" } : x))}
+          onReadAll={() => setNotifications((n) => n.map((x) => ({ ...x, status: "Read" as const })))}
+          onOpen={(n) => { setNotifications((list) => list.map((x) => x.id === n.id ? { ...x, status: "Read" } : x)); focusPanel("panel-coordination-actions"); }} />
+
+        <OpsActivityPanel activity={activity} />
+
+        <DemoScenarioBar scenarios={demoScenarios} active={activeScenario} onSelect={applyScenario} />
       </div>
 
       {/* ---------------------------------------------------------- drawers */}
