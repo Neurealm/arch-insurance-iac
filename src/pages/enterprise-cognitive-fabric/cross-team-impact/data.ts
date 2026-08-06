@@ -826,7 +826,7 @@ const dimensionSeeds: CellSeed[] = [
   { persona: "PER 4103", dimension: "Evidence", direction: "Review Required", severity: "High", summary: "Fraud loss analysis is the gating evidence for expansion.", evidence: ["EV 7102"] },
   // SRE
   { persona: "PER 4104", dimension: "Reliability", direction: "Negative", severity: "Medium", summary: "Retry storms interact badly with existing incident conditions.", conditions: ["BC 5101"] },
-  { persona: "PER 4104", dimension: "Operational", direction: "Negative", severity: "High", summary: "Additional operating surface, alerts, and rollout supervision.", controlsNote: undefined as never, dependencies: ["CSD 6101", "CSD 6102"] },
+  { persona: "PER 4104", dimension: "Operational", direction: "Negative", severity: "High", summary: "Additional operating surface, alerts, and rollout supervision." dependencies: ["CSD 6101", "CSD 6102"] },
   { persona: "PER 4104", dimension: "Dependency", direction: "Negative", severity: "High", summary: "Four shared dependencies absorb the amplified call volume.", dependencies: ["CSD 6101", "CSD 6102", "CSD 6103"], conflictId: "CTC 7003" },
   { persona: "PER 4104", dimension: "Controls", direction: "Review Required", severity: "Medium", summary: "Rollback automation and dependency health monitoring must be in place.", conditions: ["BC 5101"], evidence: ["EV 7104"] },
   { persona: "PER 4104", dimension: "Reversibility", direction: "Positive", severity: "High", summary: "Automated rollback path is well established for this service.", },
