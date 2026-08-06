@@ -353,6 +353,8 @@ import DiscoveryPipeline from "./pages/enterprise-cognitive-fabric/DiscoveryPipe
 import DiscoveryRegistry from "./pages/enterprise-cognitive-fabric/DiscoveryRegistry.tsx";
 import DiscoveryConnectorHealth from "./pages/enterprise-cognitive-fabric/DiscoveryConnectorHealth.tsx";
 import ArtifactIngestion from "./pages/enterprise-cognitive-fabric/ArtifactIngestion.tsx";
+import ArtifactNormalization from "./pages/enterprise-cognitive-fabric/ArtifactNormalization.tsx";
+import BusinessConditionScaffold from "./pages/enterprise-cognitive-fabric/BusinessConditionScaffold.tsx";
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
@@ -756,7 +758,9 @@ const App = () => (
             <Route path="discovery/connector-health" element={<DiscoveryConnectorHealth />} />
             <Route path="discovery/artifact-ingestion" element={<ArtifactIngestion />} />
             <Route path="artifact-ingestion" element={<ArtifactIngestion />} />
-            <Route path="discovery/artifact-normalization" element={<DiscoveryScaffold />} />
+            <Route path="discovery/artifact-normalization" element={<ArtifactNormalization />} />
+            <Route path="artifact-normalization" element={<ArtifactNormalization />} />
+            <Route path="discovery/business-condition-extraction" element={<BusinessConditionScaffold />} />
             <Route path=":slug" element={<EcfPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
