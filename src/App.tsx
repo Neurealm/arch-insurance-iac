@@ -342,6 +342,9 @@ import EhrDashboard from "./pages/practice-library/dashboards/EhrDashboard.tsx";
 import WorkforceDashboard from "./pages/practice-library/dashboards/WorkforceDashboard.tsx";
 import ProdResilienceTwin from "./pages/prod-twin/ProdResilienceTwin.tsx";
 import DataOrchLayout from "./pages/data-orchestration-twin/DataOrchLayout.tsx";
+import EcfLayout from "./pages/enterprise-cognitive-fabric/EcfLayout.tsx";
+import EcfLanding from "./pages/enterprise-cognitive-fabric/EcfLanding.tsx";
+import EcfPage from "./pages/enterprise-cognitive-fabric/EcfPage.tsx";
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
 import UseCaseToDataContractMapper from "./pages/data-orchestration-twin/UseCaseToDataContractMapper.tsx";
@@ -726,6 +729,10 @@ const App = () => (
             <Route path="data-gap-register-and-engineering-backlog" element={<DataGapRegisterAndEngineeringBacklog />} />
             <Route path="sow-execution-plan-and-acceptance-dashboard" element={<SowExecutionPlanAndAcceptanceDashboard />} />
             <Route path=":slug" element={<DataOrchPage />} />
+          </Route>
+          <Route path="/enterprise-cognitive-fabric" element={<EcfLayout />}>
+            <Route index element={<EcfLanding />} />
+            <Route path=":slug" element={<EcfPage />} />
           </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
           
