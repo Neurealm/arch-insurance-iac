@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, RefreshCw, Search } from "lucide-react";
+import { ChevronRight, Download, PlayCircle, RefreshCw, Search, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Pill } from "./persona-studio/primitives";
@@ -29,6 +29,25 @@ import {
   type FilterKey, type GraphNode, type ImpactCondition, type ImpactEvidence,
   type PersonaImpactConflict, type PersonaImpactEvaluation, type PiaView, type ProposalState,
 } from "./persona-impact/data";
+import {
+  AlternativeAnalysisPanel, AnalysisVersionHistoryPanel, ConditionSensitivityPanel, ConflictResolutionDrawer,
+  CrossTeamReviewPanel, DecisionPackagePanel, DemoStoryOverlay, EvidenceRemediationPanel, MitigatedImpactPanel,
+  MitigationPlannerPanel, NotificationsButton, NotificationsDrawer, OperationalStatePanel, PersonaOwnerReviewPanel,
+  PersonaScopePanel, PersonaVersionSensitivityPanel, RecentActivityPanel, ReviewQueuePanel, ReviewWorkbenchDrawer,
+  ScenarioComparisonPanel, ScenarioSimulatorPanel, VersionComparisonPanel,
+} from "./persona-impact/ops-panels";
+import {
+  AlternativeDetailDialog, BulkActionsDialog, DemoScenariosDialog, ExportDialog, GlobalSearchDialog,
+  PromptDialog, ReanalysisDialog, RoutingDialog, ScenarioDetailDialog, StartAnalysisDialog,
+} from "./persona-impact/ops-dialogs";
+import {
+  buildDecisionPackage, buildScenario, demoScenarios, makeActivity, makeNotification, personaCandidates,
+  readinessState, seededAnalysisVersions, seededMitigationVersions, seededNotifications, seededRecentActivity,
+  seededReviews, seededScenarios, storySteps,
+  type ChangeAlternative, type DemoScenario, type PersonaCandidate, type PersonaImpactMitigationVersion,
+  type PersonaImpactNotification, type PersonaImpactReview, type PersonaImpactScenario, type PiaActivityEvent,
+  type PiaOperationalState,
+} from "./persona-impact/ops-data";
 
 const pct = (n: number) => `${Math.round(n)}%`;
 
@@ -61,6 +80,36 @@ export default function PersonaImpactAnalysis() {
   const [evidenceDrawer, setEvidenceDrawer] = useState<ImpactEvidence | null>(null);
   const [nodeDrawer, setNodeDrawer] = useState<GraphNode | null>(null);
   const [conflictDrawer, setConflictDrawer] = useState<PersonaImpactConflict | null>(null);
+
+  /* ------------------------------------------------ prompt 2 operational state */
+  const [opState, setOpState] = useState<PiaOperationalState>("Analyzing");
+  const [analysisComplete, setAnalysisComplete] = useState(true);
+  const [candidates, setCandidates] = useState<PersonaCandidate[]>(personaCandidates);
+  const [scenarios, setScenarios] = useState<PersonaImpactScenario[]>(seededScenarios);
+  const [mitigationVersions, setMitigationVersions] = useState<PersonaImpactMitigationVersion[]>(seededMitigationVersions);
+  const [reviews, setReviews] = useState<PersonaImpactReview[]>(seededReviews);
+  const [notifications, setNotifications] = useState<PersonaImpactNotification[]>(seededNotifications);
+  const [activity, setActivity] = useState<PiaActivityEvent[]>(seededRecentActivity);
+  const [impactMode, setImpactMode] = useState<"Raw Impact" | "Mitigated Impact">("Raw Impact");
+  const [conditionMode, setConditionMode] = useState("Compare");
+  const [versionPair, setVersionPair] = useState<[string, string]>([seededAnalysisVersions[0].id, seededAnalysisVersions[seededAnalysisVersions.length - 1].id]);
+  const [showComparison, setShowComparison] = useState(false);
+
+  const [startOpen, setStartOpen] = useState(false);
+  const [reanalysisOpen, setReanalysisOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [scenariosOpen, setScenariosOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [routing, setRouting] = useState<null | "Cross Team Impact Matrix" | "Decision Intelligence">(null);
+  const [reviewDrawer, setReviewDrawer] = useState<PersonaImpactReview | null>(null);
+  const [alternative, setAlternative] = useState<ChangeAlternative | null>(null);
+  const [scenarioDetail, setScenarioDetail] = useState<PersonaImpactScenario | null>(null);
+  const [prompt, setPrompt] = useState<null | { title: string; description?: string; label: string; confirm: string; onSubmit: (v: string) => void }>(null);
+  const [storyIndex, setStoryIndex] = useState<number | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
 
   const say = useCallback((m: string) => setAnnounce(m), []);
 
@@ -116,6 +165,67 @@ export default function PersonaImpactAnalysis() {
 
   const toggleColumn = (key: string) =>
     setHiddenColumns((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+
+  /* --------------------------------------------------- prompt 2 derivations */
+  const logActivity = useCallback((text: string, category: string) => {
+    setActivity((prev) => [makeActivity(text, category), ...prev].slice(0, 24));
+  }, []);
+
+  const notify = useCallback((type: Parameters<typeof makeNotification>[0], title: string, description: string,
+    severity: PersonaImpactNotification["severity"], personaTarget = personaId) => {
+    setNotifications((prev) => [makeNotification(type, title, description, severity, personaTarget), ...prev].slice(0, 30));
+  }, [personaId]);
+
+  const act = useCallback((message: string, category = "Analysis") => {
+    say(message);
+    logActivity(message, category);
+  }, [say, logActivity]);
+
+  const readiness = useMemo(
+    () => readinessState(proposal, reviews, mitigationVersions, analysisComplete),
+    [proposal, reviews, mitigationVersions, analysisComplete]);
+
+  const decisionPackage = useMemo(
+    () => buildDecisionPackage(proposal, versionPair[1], mitigationVersions.filter((m) => m.accepted), reviews),
+    [proposal, versionPair, mitigationVersions, reviews]);
+
+  const unread = notifications.filter((n) => n.status === "Unread").length;
+
+  const applyScenarioState = useCallback((s: DemoScenario) => {
+    if (s.reset) {
+      setProposal(initialProposal);
+      setMitigationVersions(seededMitigationVersions);
+      setReviews(seededReviews);
+      setNotifications(seededNotifications);
+      setActivity(seededRecentActivity);
+      setCandidates(personaCandidates);
+      setScenarios(seededScenarios);
+    }
+    if (s.proposal) setProposal((p) => ({ ...p, ...s.proposal }));
+    if (s.personaId) setPersonaId(s.personaId);
+    if (s.acceptMitigations) {
+      setMitigationVersions((prev) => prev.map((m) => ({ ...m, accepted: true, status: "Accepted" as const })));
+      setImpactMode("Mitigated Impact");
+    }
+    setOpState(s.operationalState);
+    setAnalysisComplete(s.operationalState !== "Analyzing");
+    setActiveScenarioId(s.id);
+    if (s.notification) notify(s.notification.type, s.notification.title, s.notification.description, s.notification.severity);
+    act(s.activity ?? `${s.name} applied`, "Demo");
+  }, [act, notify]);
+
+  const step = storyIndex === null ? null : storySteps[storyIndex];
+  useEffect(() => {
+    if (!step) return;
+    if (step.apply) setProposal((p) => ({ ...p, ...step.apply }));
+    if (step.personaId) setPersonaId(step.personaId);
+    if (step.acceptMitigations) {
+      setMitigationVersions((prev) => prev.map((m) => ({ ...m, accepted: true, status: "Accepted" as const })));
+      setImpactMode("Mitigated Impact");
+    }
+    const el = document.getElementById(step.target);
+    if (el) el.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+  }, [step, reducedMotion]);
 
   const serviceState = currentScore.score >= 70 ? "Needs Attention" : currentScore.score >= 60 ? "Review Required" : "Operational";
 
