@@ -739,7 +739,7 @@ export default function PredictiveOpticalLinkIntelligence() {
               className="xl:col-span-8"
               functional
             >
-              <div id="model-lifecycle-workspace" data-testid="model-lifecycle-workspace" className="min-w-0">
+              <div id="model-lifecycle-workspace" className="min-w-0">
                 <ModelLifecycleWorkspace
                   context={{
                     region,
