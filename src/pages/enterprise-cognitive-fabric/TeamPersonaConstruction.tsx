@@ -193,19 +193,44 @@ export default function TeamPersonaConstruction() {
 
   useEffect(() => { setPage(1); }, [filters, search, view]);
 
+  const scenarioState = scenarioStates[scenario];
+
+  const filteredReviews = useMemo(() => {
+    if (!reviewSummaryFilter) return reviews;
+    const map: Record<string, (r: PersonaReview) => boolean> = {
+      "team-owner": (r) => r.reviewType === "Team Owner Review",
+      dependency: (r) => r.reviewType === "Dependency Conflict" || r.reviewType === "Dependency Owner Review",
+      governance: (r) => r.requiredApprovalLevel === "Governance",
+      conflict: (r) => r.conflicts.length > 0,
+      evidence: (r) => r.reviewType === "Evidence Gap",
+      overdue: (r) => r.status === "Overdue",
+    };
+    return reviews.filter(map[reviewSummaryFilter] ?? (() => true));
+  }, [reviews, reviewSummaryFilter]);
+
+  const openConflicts = useMemo(() => conflicts.filter((c) => c.reviewStatus !== "Resolved"), [conflicts]);
+  const criticalConflicts = useMemo(
+    () => openConflicts.filter((c) => c.severity === "Critical").length,
+    [openConflicts],
+  );
+  const unreadNotifications = useMemo(() => notifications.filter((n) => !n.read).length, [notifications]);
+
   const serviceState = useMemo(() => {
+    if (scenario !== "Reset Demo Data") return scenarioState.serviceState;
+    if (criticalConflicts > 0) return "Conflict";
     if (jobs.some((j) => j.status === "Blocked")) return "Degraded";
-    if (personas.some((p) => p.approvalState !== "Approved")) return "Review Required";
+    if (reviews.some((r) => r.status !== "Approved")) return "Review Required";
     if (jobs.length) return "Constructing";
     return "Operational";
-  }, [jobs, personas]);
+  }, [scenario, scenarioState, criticalConflicts, jobs, reviews]);
 
   const dirty = dirtyCount > 0;
 
   /* -------------------------------- actions ------------------------------- */
   const focusPanel = useCallback((id: string) => {
     setSpotlight(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    document.getElementById(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
     window.setTimeout(() => setSpotlight(null), 2200);
   }, []);
 
