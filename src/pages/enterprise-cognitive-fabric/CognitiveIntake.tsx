@@ -689,7 +689,8 @@ export default function CognitiveIntake() {
               <FilterSelect label="Density" value={prefs.density} options={["compact", "standard", "comfortable"]}
                 onChange={(v) => setPref("density", v as Density)} />
               <Button size="sm" variant="outline" className="h-7 text-[11px]" disabled={selected.size === 0}
-                onClick={() => prompt2("Bulk actions")}>Bulk Actions</Button>
+                onClick={() => setDialog("bulk")}>Bulk Actions</Button>
+
             </>
           } />
 
