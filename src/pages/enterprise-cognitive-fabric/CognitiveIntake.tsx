@@ -16,7 +16,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronRight, Filter, RefreshCw } from "lucide-react";
+import { ChevronRight, Filter, RefreshCw, Search } from "lucide-react";
 import { FilterSelect, Pill } from "./persona-studio/primitives";
 import {
   IntakeKpiCard, LifecyclePanel, SelectedStagePanel, IntakeQueuePanel, ClassificationPanel,
