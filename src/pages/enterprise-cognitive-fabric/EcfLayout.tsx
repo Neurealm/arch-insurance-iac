@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { Brain, Home, ChevronsLeft, ChevronsRight, Circle } from "lucide-react";
+import { Brain, Home, ChevronsLeft, ChevronsRight, Circle, RefreshCw } from "lucide-react";
 import { ecfPages, ecfGroups } from "./pages";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,10 @@ export default function EcfLayout() {
   useEffect(() => {
     window.localStorage.setItem("ecf.collapsed", collapsed ? "1" : "0");
   }, [collapsed]);
+
+  const [lastUpdated, setLastUpdated] = useState<string>(() =>
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  );
 
   const navRef = useRef<HTMLElement | null>(null);
   useLayoutEffect(() => {
