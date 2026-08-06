@@ -7,9 +7,11 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { controlTransition, focusRing } from "../components/motion";
 import { getOperationalMetric, highRiskLinkRecords, technicalMetrics } from "./analyticsFixtures";
 import { metricStatus } from "./analyticsCalculations";
 import { StatusPill } from "./AnalyticsPrimitives";
+
 
 const LEAD_TIME_DISTRIBUTION = [
   { bucket: "0 to 15 min error", share: 34 },
