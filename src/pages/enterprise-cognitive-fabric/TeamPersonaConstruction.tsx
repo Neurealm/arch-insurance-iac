@@ -168,6 +168,15 @@ export default function TeamPersonaConstruction() {
     ]);
   }, []);
 
+  const openConflicts = useMemo(() => conflicts.filter((c) => c.reviewStatus !== "Resolved"), [conflicts]);
+  const criticalConflicts = useMemo(() => openConflicts.filter((c) => c.severity === "Critical").length, [openConflicts]);
+  const unreadNotifications = useMemo(() => notifications.filter((n) => !n.read).length, [notifications]);
+  const scenarioState = scenarioStates[scenario];
+  const visibleNotifications = useMemo(
+    () => (notificationFilter === "All" ? notifications : notifications.filter((n) => n.category === notificationFilter)),
+    [notifications, notificationFilter],
+  );
+
   /* -------------------------------- derived ------------------------------- */
   const personas = useMemo(() => {
     const rows = resolvePersonas(seedPersonas, filters, search);
