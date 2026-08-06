@@ -743,7 +743,9 @@ const App = () => (
             <Route path="discovery/ingestion-normalization" element={<DiscoveryScaffold />} />
             <Route path="discovery/configuration" element={<DiscoveryConfiguration />} />
             <Route path="discovery-configuration" element={<DiscoveryConfiguration />} />
-            <Route path="discovery/pipelines" element={<DiscoveryScaffold />} />
+            <Route path="discovery/pipelines" element={<DiscoveryPipeline />} />
+            <Route path="discovery/pipeline" element={<DiscoveryPipeline />} />
+
             <Route path="discovery/source-registry" element={<DiscoveryScaffold />} />
             <Route path="discovery/connector-health" element={<DiscoveryScaffold />} />
             <Route path=":slug" element={<EcfPage />} />
