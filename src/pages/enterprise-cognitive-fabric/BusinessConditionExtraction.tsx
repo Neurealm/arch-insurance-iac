@@ -25,6 +25,22 @@ import {
   resolveConditions, resolveJobs, resolveStages, sidebarStatus,
   type BusinessCondition, type ConditionCandidate, type ExtractionJob, type Filters, type ServiceState, type ViewMode,
 } from "./business-condition-extraction/data";
+import {
+  ActivityPanel, ApprovalGovernancePanel, ConflictGapPanel, DemoStoryOverlay, PublishingPanel,
+  ReviewQueuePanel, ScenarioBanner, TaxonomyAdminPanel, VersionHistoryPanel,
+} from "./business-condition-extraction/governance-panels";
+import {
+  ApprovalDialog, BulkActionsDialog, ConflictResolutionDialog, DownstreamImpactDialog, ExportConditionsDialog,
+  GovernanceSearchDialog, MergeSplitDialog, PauseResumeDialog, PublishHistoryDialog, PublishWizardDialog,
+  ReprocessDialog, ReviewWorkbenchDialog, SupersedeDialog, TaxonomyCompareDialog, TaxonomyTestDialog,
+  VersionCompareDialog,
+} from "./business-condition-extraction/governance-dialogs";
+import {
+  activitySeed, conditionVersions, conflictRows as seedConflictRows, demoSteps, governanceNotifications,
+  publishDestinations, reviewsSeed, scenarioById, scenarios,
+  type ConditionReview, type ConditionVersion, type ConflictRow, type ExtractionActivity, type ScenarioId,
+} from "./business-condition-extraction/governance-data";
+
 
 const VIEWS: { id: ViewMode; label: string }[] = [
   { id: "executive", label: "Executive" },
