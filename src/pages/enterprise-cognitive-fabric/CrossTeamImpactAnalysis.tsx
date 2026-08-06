@@ -27,7 +27,7 @@ import {
   GraphNodeDrawer, PersonaDrawer,
 } from "./cross-team-impact/drawers";
 import {
-  activeFilterCount, analyses, buildPairMatrix, ctiKpis, ctiViews, defaultFilters, evidenceState,
+  activeFilterCount, analyses, buildPairMatrix, ctiKpis, ctiPersonas, ctiViews, defaultFilters, evidenceState,
   filterOptions, initialAnalysisState, kpiFocusPanel, lifecycleStages, operationalState, pairCell,
   severityRank, stageById,
   type CrossTeamImpactAnalysis, type CrossTeamImpactConflict, type CrossTeamImpactMatrixCell,
