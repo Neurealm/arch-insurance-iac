@@ -1,6 +1,6 @@
 /** Team Persona Library — panels. Reuses ECF primitives and Tailwind conventions. */
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -265,8 +265,8 @@ export function InventoryPanel({
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {rows.map((p) => (
-                      <>
-                        <tr key={p.id} className="cursor-pointer hover:bg-slate-50" onClick={() => onOpen(p)}>
+                      <Fragment key={p.id}>
+                        <tr className="cursor-pointer hover:bg-slate-50" onClick={() => onOpen(p)}>
                           <td className="px-2 py-1.5" onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox" aria-label={`Select ${p.teamName}`}
@@ -290,7 +290,7 @@ export function InventoryPanel({
                           </td>
                         </tr>
                         {expanded === p.id && (
-                          <tr key={`${p.id}-x`} className="bg-slate-50">
+                          <tr className="bg-slate-50">
                             <td colSpan={columns.length + 2} className="px-3 py-2 text-[11px] text-slate-600">
                               <span className="font-medium text-slate-800">Decision priorities: </span>
                               {p.thinking.decisionPriorities.join(" · ")}
@@ -299,7 +299,7 @@ export function InventoryPanel({
                             </td>
                           </tr>
                         )}
-                      </>
+                      </Fragment>
                     ))}
                   </tbody>
                 </table>
