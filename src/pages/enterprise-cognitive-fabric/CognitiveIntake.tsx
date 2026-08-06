@@ -119,6 +119,37 @@ export default function CognitiveIntake() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailIntake, setDetailIntake] = useState<CognitiveIntake | null>(null);
 
+  /* ------------------------------------------------------ Prompt 2 state -- */
+  const [jobs, setJobs] = useState<CognitiveIntakeJob[]>(seedJobs);
+  const [jobOpen, setJobOpen] = useState(false);
+  const [activeJob, setActiveJob] = useState<CognitiveIntakeJob | null>(null);
+  const [notifications, setNotifications] = useState<CognitiveIntakeNotification[]>(seedNotifications);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [activityRows, setActivityRows] = useState<CognitiveIntakeActivity[]>(seedRecentActivity);
+  const [packageVersions, setPackageVersions] = useState<CognitiveIntakePackageVersion[]>(seedPackageVersions);
+  const [operationalState, setOperationalState] = useState<IntakeOperationalState>("Analyzing");
+  const [blockingReason, setBlockingReason] = useState<string | null>(null);
+  const [refreshProgress, setRefreshProgress] = useState(0);
+  const [routing, setRouting] = useState<{ readinessAssessmentId: string; routedAt: string } | null>(null);
+  const [clarifications, setClarifications] = useState<{ id: string; gapId: string; question: string; assignedTo: string; status: string }[]>([]);
+  const [evidenceRequests, setEvidenceRequests] = useState<{ id: string; evidenceType: string; requestedFrom: string; status: string }[]>([]);
+  const [resolvedEntities, setResolvedEntities] = useState<string[]>([]);
+  const [ruleFlags, setRuleFlags] = useState({
+    rollbackThresholdDefined: false,
+    idempotencyEvidenceProvided: false,
+    fraudAnalysisProvided: false,
+  });
+  const [qualityRevision, setQualityRevision] = useState(1);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [storyStep, setStoryStep] = useState<number | null>(null);
+  const [activeScenario, setActiveScenario] = useState("healthy");
+
+  const [dialog, setDialog] = useState<string | null>(null);
+  const [clarificationGap, setClarificationGap] = useState<string | null>(null);
+  const isOpen = (id: string) => dialog === id;
+  const closeDialog = (v: boolean) => { if (!v) setDialog(null); };
+
+
   const say = useCallback((m: string) => setAnnounce(m), []);
 
   const setPrefs = (next: Prefs) => { setPrefsState(next); savePrefs(next); };
