@@ -7,6 +7,14 @@ import { cn } from "@/lib/utils";
 const SCROLL_KEY = "ecf.sidebarScroll";
 let cachedScroll = 0;
 
+const discoverySubNav = [
+  { to: "/enterprise-cognitive-fabric/discovery/source-discovery", label: "Enterprise Source Discovery" },
+  { to: "/enterprise-cognitive-fabric/discovery/configuration", label: "Discovery Configuration" },
+  { to: "/enterprise-cognitive-fabric/discovery/pipelines", label: "Discovery Pipelines" },
+  { to: "/enterprise-cognitive-fabric/discovery/source-registry", label: "Source Registry" },
+  { to: "/enterprise-cognitive-fabric/discovery/connector-health", label: "Connector Health" },
+];
+
 export default function EcfLayout() {
   const location = useLocation();
   const activeIdx = ecfPages.findIndex((p) => location.pathname.endsWith(p.slug));
@@ -103,27 +111,47 @@ export default function EcfLayout() {
                   </div>
                 )}
                 {items.map((p) => (
-                  <NavLink
-                    key={p.slug}
-                    to={`/enterprise-cognitive-fabric/${p.slug}`}
-                    title={collapsed ? p.title : undefined}
-                    className={({ isActive }) =>
-                      cn(
-                        "mx-2 my-0.5 flex items-center gap-2.5 rounded-md py-2 text-[12.5px] transition-colors",
-                        collapsed ? "justify-center px-0" : "px-2.5",
-                        isActive
-                          ? "bg-slate-900 text-white"
-                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <Circle className={cn("h-1.5 w-1.5 shrink-0 fill-current", isActive ? "text-white" : "text-slate-400")} />
-                        {!collapsed && <span className="truncate">{p.title}</span>}
-                      </>
+                  <div key={p.slug}>
+                    <NavLink
+                      to={`/enterprise-cognitive-fabric/${p.slug}`}
+                      title={collapsed ? p.title : undefined}
+                      className={({ isActive }) =>
+                        cn(
+                          "mx-2 my-0.5 flex items-center gap-2.5 rounded-md py-2 text-[12.5px] transition-colors",
+                          collapsed ? "justify-center px-0" : "px-2.5",
+                          isActive
+                            ? "bg-slate-900 text-white"
+                            : "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
+                        )
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <Circle className={cn("h-1.5 w-1.5 shrink-0 fill-current", isActive ? "text-white" : "text-slate-400")} />
+                          {!collapsed && <span className="truncate">{p.title}</span>}
+                        </>
+                      )}
+                    </NavLink>
+                    {!collapsed && p.slug === "enterprise-source-discovery" && location.pathname.includes("source-discovery") && (
+                      <ul className="ml-6 border-l border-slate-200 pl-2">
+                        {discoverySubNav.map((s) => (
+                          <li key={s.to}>
+                            <NavLink
+                              to={s.to}
+                              className={({ isActive }) =>
+                                cn(
+                                  "my-0.5 block rounded-md px-2 py-1.5 text-[11.5px] transition-colors",
+                                  isActive ? "bg-slate-100 font-medium text-slate-900" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                                )
+                              }
+                            >
+                              {s.label}
+                            </NavLink>
+                          </li>
+                        ))}
+                      </ul>
                     )}
-                  </NavLink>
+                  </div>
                 ))}
               </div>
             );
