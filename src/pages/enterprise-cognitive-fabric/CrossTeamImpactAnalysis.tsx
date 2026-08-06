@@ -176,7 +176,7 @@ export default function CrossTeamImpactAnalysis() {
     dependency: ["dependencies", "graph", "matrix", "workbench"],
     coordination: ["conflicts", "agreements", "ownership", "mitigations", "workbench"],
     executive: ["summary", "quality", "conflicts", "dependencies"],
-  } as const;
+  };
   const leads = emphasis[view];
 
   return (
