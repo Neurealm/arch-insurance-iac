@@ -8,6 +8,8 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { controlTransition, focusRing } from "../components/motion";
+
 import { ChennaiScenarioMap } from "./ChennaiScenarioMap";
 import { SelectedLinkSummary } from "./SelectedLinkSummary";
 import { WhatIfPanel } from "./WhatIfPanel";
