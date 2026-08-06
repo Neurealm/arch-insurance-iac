@@ -167,7 +167,8 @@ export default function GlobalOpticalOperationsCenter() {
     <div className="px-6 py-6 space-y-5 max-w-[1600px]">
       {/* 1 — Header */}
       <header className="rounded-xl border border-slate-200 bg-gradient-to-br from-white to-indigo-50/40 p-5 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
+        <div className="min-w-0 flex-1 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600">Overview</div>
             <h1 className="mt-1 text-2xl font-bold text-slate-900">Global Optical Operations Center</h1>
