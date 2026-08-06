@@ -292,6 +292,199 @@ export default function CognitiveIntake() {
     }, 500);
   };
 
+  /* ---------------------------------------------------- Prompt 2 handlers -- */
+
+  const handleSubmitWork = (p: { title: string; workType: string; workOwner: string }) => {
+    const id = nextId("INT");
+    setOperationalState("New");
+    logActivity("Work Received", `${p.title} entered Cognitive Intake as ${id}`);
+    notify("New work submitted", `${p.title} submitted by ${p.workOwner}`, "Info", "New Work Submitted");
+    bumpPackageVersion("Original Intake");
+    toast.success(`Work submitted · ${id}`, { description: "Original submission preserved verbatim" });
+    say(`${p.title} submitted to Cognitive Intake as ${id}`);
+    scrollTo("panel-queue");
+  };
+
+  const handleImport = (records: { sourceId: string; title: string; missingFields: string[] }[]) => {
+    records.forEach((r) => {
+      logActivity("Work Imported", `${r.sourceId} imported as governed intake`, r.missingFields.length ? "Warning" : "Success");
+    });
+    notify("Work imported", `${records.length} source record(s) imported into governed intake`, "Info", "New Work Submitted");
+    toast.success(`${records.length} record(s) imported`, { description: "Source metadata and gaps preserved" });
+    say(`${records.length} source records imported`);
+  };
+
+  const handleRunIntake = (scope: string) => {
+    const job: CognitiveIntakeJob = {
+      ...seedJobs[0],
+      id: nextId("CIJ"),
+      intakeIds: [workbench.intakeId],
+      intakeTitle: selectedIntake.title,
+      status: "Running",
+      currentStageId: "context",
+      startedAt: nowLabel(),
+      startedAtIso: isoNow(),
+      elapsedTime: "00:00:04",
+    };
+    setJobs((js) => [job, ...js]);
+    setOperationalState("Analyzing");
+    logActivity("Intake Started", `Intake run started for ${scope}`);
+    notify("Intake started", `${job.id} executing against ${selectedIntake.title}`, "Info", "Intake Started");
+    bumpPackageVersion("After Enterprise Context Retrieval");
+    toast.success("Intake run complete", { description: `${job.id} · Intake Package rebuilt` });
+    say("Intake run complete. Intake package rebuilt.");
+    scrollTo("panel-jobs");
+  };
+
+  const handleJobAction = (action: string, job: CognitiveIntakeJob) => {
+    if (action === "Open Workbench") { setJobOpen(false); scrollTo("panel-workbench"); return; }
+    if (action === "Open Intake") {
+      const r = intakes.find((x) => x.id === job.intakeIds[0]);
+      setJobOpen(false);
+      if (r) openDetail(r);
+      return;
+    }
+    const status: CognitiveIntakeJob["status"] =
+      action === "Pause" ? "Paused" : action === "Resume" || action === "Retry" || action === "Restart from Stage" ? "Running" : job.status;
+    setJobs((js) => js.map((j) => j.id === job.id ? { ...j, status } : j));
+    setActiveJob((j) => j && j.id === job.id ? { ...j, status } : j);
+    logActivity(`Job ${action}`, `${action} applied to ${job.id}`);
+    toast.success(`${action} · ${job.id}`);
+    say(`${action} applied to ${job.id}`);
+  };
+
+  const handleRequestClarification = (p: { gapId: string; question: string; assignedTo: string }) => {
+    setClarifications((cs) => [...cs, { id: nextId("CLR"), gapId: p.gapId, question: p.question, assignedTo: p.assignedTo, status: "Pending" }]);
+    setOperationalState("Needs Clarification");
+    logActivity("Clarification Requested", `${p.question} assigned to ${p.assignedTo}`, "Warning");
+    notify("Clarification requested", p.question, "Warning", "Clarification Required");
+    toast.success("Clarification requested", { description: `${p.gapId} · ${p.assignedTo}` });
+    say(`Clarification requested for ${p.gapId}`);
+  };
+
+  const applyEffect = (effect: string) => {
+    if (effect === "traffic-15") setWorkbench((w) => ({ ...w, trafficExposure: 15 }));
+    if (effect === "quarter-end") setWorkbench((w) => ({ ...w, deploymentTiming: "Quarter end window" }));
+    if (effect === "rollback-threshold") setRuleFlags((f) => ({ ...f, rollbackThresholdDefined: true }));
+    if (effect === "idempotency-evidence") setRuleFlags((f) => ({ ...f, idempotencyEvidenceProvided: true }));
+    if (effect === "fraud-evidence") setRuleFlags((f) => ({ ...f, fraudAnalysisProvided: true }));
+  };
+
+  const handleClarificationResponse = (gapId: string, effect: string, results: string[]) => {
+    applyEffect(effect);
+    setClarifications((cs) => cs.map((c) => c.gapId === gapId ? { ...c, status: "Answered" } : c));
+    bumpPackageVersion("After Clarification Response");
+    logActivity("Clarification Answered", `${gapId} answered · ${results[0]}`);
+    notify("Clarification response received", results.join(" · "), "Info", "Clarification Response Received");
+    setOperationalState("Analyzing");
+    toast.success("Clarification applied", { description: results.join(" · ") });
+    say(`Clarification response applied for ${gapId}`);
+  };
+
+  const handleAddEvidenceRecord = (p: { title: string; evidenceType: string; closesGapId: string }) => {
+    const seed = { "GAP 9101": "idempotency-evidence", "GAP 9103": "fraud-evidence", "GAP 9102": "rollback-threshold" }[p.closesGapId];
+    if (seed) applyEffect(seed);
+    bumpPackageVersion("After Evidence Addition");
+    logActivity("Evidence Added", `${p.evidenceType} · ${p.title} closes ${p.closesGapId}`);
+    notify("Evidence added", `${p.title} attached and ${p.closesGapId} closed`, "Info", "Evidence Added");
+    toast.success("Evidence added", { description: `${p.closesGapId} closed · package version incremented` });
+    say(`${p.title} added. ${p.closesGapId} closed.`);
+  };
+
+  const handleRequestEvidence = (p: { evidenceType: string; requestedFrom: string }) => {
+    setEvidenceRequests((rs) => [...rs, { id: nextId("EVR"), evidenceType: p.evidenceType, requestedFrom: p.requestedFrom, status: "Requested" }]);
+    setOperationalState("Awaiting Evidence");
+    logActivity("Evidence Requested", `${p.evidenceType} requested from ${p.requestedFrom}`, "Warning");
+    notify("Evidence requested", `${p.evidenceType} requested from ${p.requestedFrom}`, "Warning", "Evidence Requested");
+    toast.success("Evidence request sent");
+    say(`${p.evidenceType} requested from ${p.requestedFrom}`);
+  };
+
+  const handleEntityRemediation = (p: { detected: string; action: string; candidate: string }) => {
+    setResolvedEntities((e) => [...e, p.candidate]);
+    bumpPackageVersion("After Entity Remediation");
+    logActivity("Entity Resolved", `${p.detected} resolved to ${p.candidate} via ${p.action}`);
+    notify("Entity resolved", `${p.detected} → ${p.candidate}`, "Info", "Entity Resolution Failed");
+    setBlockingReason(null);
+    setOperationalState("Analyzing");
+    toast.success("Entity remediated", { description: `${p.detected} → ${p.candidate}` });
+    say(`${p.detected} resolved to ${p.candidate}`);
+  };
+
+  const handleContextRefreshComplete = () => {
+    bumpPackageVersion("After Enterprise Context Refresh");
+    setOperationalState("Analyzing");
+    setRefreshProgress(100);
+    logActivity("Context Refreshed", "Enterprise Cognitive Memory re-queried and package rebuilt");
+    notify("Context refreshed", "Intake Package rebuilt against current enterprise context", "Info", "Package Updated");
+    toast.success("Enterprise context refreshed");
+    say("Enterprise context refreshed and package rebuilt");
+  };
+
+  const handleReprocess = (p: { reason: string; stages: string[] }) => {
+    bumpPackageVersion(`Reprocessed · ${p.reason}`);
+    logActivity("Intake Reprocessed", `${p.stages.length} stage(s) re-run · ${p.reason}`);
+    notify("Intake reprocessed", p.reason, "Info", "Package Updated");
+    toast.success("Intake reprocessed", { description: "Prior package versions preserved" });
+    say("Intake reprocessed. New package version created.");
+  };
+
+  const handleBulk = (action: string, rows: CognitiveIntake[]) => {
+    logActivity(`Bulk ${action}`, `${action} applied to ${rows.length} intake(s)`);
+    notify("Bulk action applied", `${action} applied to ${rows.length} intake(s)`, "Info", "Package Updated");
+    toast.success(`${action} applied`, { description: `${rows.length} intake(s) updated` });
+    say(`${action} applied to ${rows.length} intakes`);
+  };
+
+  const handleRoute = (status: string) => {
+    const id = nextId("CRA");
+    setRouting({ readinessAssessmentId: id, routedAt: nowLabel() });
+    setOperationalState("Routed to Readiness");
+    logActivity("Routed to Readiness", `Intake Package routed to Cognitive Readiness Assessment (${status})`);
+    notify("Routed to readiness", `Readiness Assessment ${id} created`, "Info", "Intake Routed to Readiness");
+    toast.success("Routed to Cognitive Readiness Assessment", { description: `${id} · validation ${status}` });
+    say(`Routed to Cognitive Readiness Assessment as ${id}`);
+    navigate(readinessRoute);
+  };
+
+  const applyScenario = (s: ScenarioDefinition) => {
+    setActiveScenario(s.id);
+    setOperationalState(s.operationalState);
+    if (typeof s.trafficExposure === "number") setWorkbench((w) => ({ ...w, trafficExposure: s.trafficExposure as number }));
+    if (s.deploymentTiming) setWorkbench((w) => ({ ...w, deploymentTiming: s.deploymentTiming as "Standard window" | "Quarter end window" }));
+    setBlockingReason(s.operationalState === "Blocked" ? s.description : null);
+    logActivity(s.label, s.activity, s.operationalState === "Blocked" ? "Blocked" : s.notification.severity === "Warning" ? "Warning" : "Success");
+    notify(s.notification.title, s.description, s.notification.severity, s.notification.type);
+    setQualityRevision((r) => r + 1);
+    toast.success(`Scenario · ${s.label}`, { description: s.description });
+    say(`${s.label} scenario applied`);
+  };
+
+  const resetScenario = () => {
+    setActiveScenario("healthy");
+    setOperationalState("Analyzing");
+    setWorkbench(initialWorkbenchState);
+    setRuleFlags({ rollbackThresholdDefined: false, idempotencyEvidenceProvided: false, fraudAnalysisProvided: false });
+    setBlockingReason(null);
+    setRouting(null);
+    setClarifications([]);
+    setEvidenceRequests([]);
+    setResolvedEntities([]);
+    toast.success("Baseline restored");
+    say("Cognitive Intake reset to baseline");
+  };
+
+  const runStoryStep = (n: number) => {
+    setStoryStep(n);
+    const step = demoStorySteps[n - 1];
+    if (n === 8) applyEffect("traffic-15");
+    if (n === 9) applyEffect("quarter-end");
+    if (n === 10) { applyEffect("idempotency-evidence"); applyEffect("rollback-threshold"); bumpPackageVersion("Demo Story · evidence and clarification supplied"); }
+    scrollTo(step.target);
+    say(`Demo story step ${n}. ${step.title}.`);
+  };
+
+
   const onKpi = (id: string) => {
     setKpiFocus(id === kpiFocus ? null : id);
     if (id === "incoming") { setFilter("workStatus", "All"); scrollTo("panel-queue"); }
