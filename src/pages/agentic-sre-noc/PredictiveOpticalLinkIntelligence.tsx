@@ -16,7 +16,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { controlTransition, focusRing, surfaceTransition } from "./components/motion";
 import { Select, ToolbarButton } from "./components/NocPrimitives";
+
 import { PredictivePipeline } from "./pipeline/PredictivePipeline";
 import { ChennaiWorkspace } from "./chennai/ChennaiWorkspace";
 import { useAnalyticsState } from "./analytics/useAnalyticsState";
@@ -81,7 +83,8 @@ function KpiCard({
   return (
     <article
       className={cn(
-        "rounded-lg border bg-white p-3 shadow-sm",
+        "rounded-lg border bg-white p-3 shadow-sm hover:shadow-md",
+        surfaceTransition,
         selected ? "border-blue-400 ring-1 ring-blue-300" : "border-slate-200",
       )}
       aria-label={`${label}. ${description}`}
@@ -92,11 +95,12 @@ function KpiCard({
           type="button"
           aria-pressed={Boolean(selected)}
           onClick={onSelect}
-          className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          className={cn("w-full rounded text-left", focusRing)}
         >
           {label}
         </button>
       </h3>
+
       {loading ? (
         <>
           <div className="mt-2 h-6 w-20 animate-pulse rounded bg-slate-100" />
@@ -130,7 +134,7 @@ function PanelShell({
       aria-describedby={descId}
       data-testid={`pli-panel-${spec.id}`}
       data-panel-state={state}
-      className={cn("flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm", className)}
+      className={cn("flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm", surfaceTransition, className)}
     >
       <header className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-200 px-4 py-2.5">
         <div className="min-w-0">
@@ -174,8 +178,13 @@ function PanelShell({
             </p>
             <button
               type="button"
-              className="mt-1 rounded-md border border-rose-300 bg-white px-2 py-1 text-[11px] font-medium text-rose-700 shadow-sm hover:bg-rose-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+              className={cn(
+                "mt-1 rounded-md border border-rose-300 bg-white px-2 py-1 text-[11px] font-medium text-rose-700 shadow-sm hover:bg-rose-50",
+                controlTransition,
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500",
+              )}
             >
+
               Retry
             </button>
           </div>

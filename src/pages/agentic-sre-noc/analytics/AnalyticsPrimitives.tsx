@@ -8,6 +8,8 @@
 import * as React from "react";
 import { AlertTriangle, Download, Info, Table2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { controlTransition } from "../components/motion";
+
 
 export type AnalyticsPanelState = "ready" | "loading" | "empty" | "error";
 
@@ -73,7 +75,7 @@ export function AnalyticsDataTable({
     <div className={cn("max-h-52 overflow-auto rounded border border-slate-200", className)}>
       <table className="w-full text-left text-[10.5px]">
         <caption className="sr-only">{caption}</caption>
-        <thead className="sticky top-0 bg-slate-50">
+        <thead className="sticky top-0 z-10 bg-slate-50 shadow-[inset_0_-1px_0_0_rgb(226_232_240)]">
           <tr className="text-slate-500">
             {headers.map((h) => (
               <th key={h} scope="col" className="whitespace-nowrap px-1.5 py-1 font-medium">{h}</th>
@@ -82,7 +84,7 @@ export function AnalyticsDataTable({
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={`${row[0]}-${i}`} className="border-t border-slate-100">
+            <tr key={`${row[0]}-${i}`} className={cn("border-t border-slate-100 hover:bg-slate-50", controlTransition)}>
               {row.map((cell, j) => (
                 <td key={`${i}-${j}`} className="whitespace-nowrap px-1.5 py-0.5 text-slate-700">{cell}</td>
               ))}
@@ -93,6 +95,7 @@ export function AnalyticsDataTable({
     </div>
   );
 }
+
 
 /* ------------------------------ chart frame ------------------------------- */
 

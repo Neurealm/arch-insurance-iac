@@ -5,6 +5,7 @@
 import * as React from "react";
 import { AlertTriangle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { controlTransition, focusRing, surfaceTransition } from "../components/motion";
 import type { ColumnState } from "./usePipelineState";
 
 export function PipelineColumn({
@@ -29,7 +30,8 @@ export function PipelineColumn({
       data-emphasis={emphasis ? "on" : "off"}
       aria-labelledby={headingId}
       className={cn(
-        "flex min-w-0 flex-col rounded-lg border bg-white transition-opacity motion-reduce:transition-none",
+        "flex min-w-0 flex-col rounded-lg border bg-white",
+        surfaceTransition,
         emphasis ? "border-blue-300 shadow-sm" : "border-slate-200 opacity-95 xl:opacity-75",
       )}
     >
@@ -73,7 +75,7 @@ export function PipelineColumn({
             <button
               type="button"
               onClick={onRetry}
-              className="mt-1 rounded border border-rose-300 bg-white px-2 py-0.5 text-[10.5px] font-medium text-rose-700 hover:bg-rose-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+              className={cn("mt-1 rounded border border-rose-300 bg-white px-2 py-0.5 text-[10.5px] font-medium text-rose-700 hover:bg-rose-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500", controlTransition)}
             >
               Retry stage
             </button>
@@ -110,7 +112,9 @@ export function PipelineCard({
       aria-label={ariaLabel}
       onClick={onClick}
       className={cn(
-        "w-full rounded border px-2 py-1.5 text-left transition-colors motion-reduce:transition-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+        "w-full rounded border px-2 py-1.5 text-left",
+        controlTransition,
+        focusRing,
         selected
           ? "border-blue-400 bg-blue-50"
           : highlighted

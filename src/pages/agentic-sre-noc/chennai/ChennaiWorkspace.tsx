@@ -8,6 +8,8 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { controlTransition, focusRing } from "../components/motion";
+
 import { ChennaiScenarioMap } from "./ChennaiScenarioMap";
 import { SelectedLinkSummary } from "./SelectedLinkSummary";
 import { WhatIfPanel } from "./WhatIfPanel";
@@ -178,7 +180,7 @@ export function ChennaiWorkspace({
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500">
                   <th scope="col" className="py-0.5 font-medium">Link</th>
-                  <th scope="col" className="py-0.5 font-medium">Risk</th>
+                  <th scope="col" className="py-0.5 text-right font-medium tabular-nums">Risk</th>
                   <th scope="col" className="py-0.5 font-medium">Class</th>
                   <th scope="col" className="py-0.5 font-medium">ETA</th>
                   <th scope="col" className="py-0.5 font-medium">Driver</th>
@@ -188,19 +190,27 @@ export function ChennaiWorkspace({
                 {rankedLinks.map(({ link: l, prediction }) => (
                   <tr
                     key={l.id}
-                    className={cn("border-b border-slate-100", l.id === activeId && "bg-blue-50/60")}
+                    className={cn(
+                      "border-b border-slate-100 hover:bg-slate-50",
+                      controlTransition,
+                      l.id === activeId && "bg-blue-50/60 hover:bg-blue-50",
+                    )}
                   >
                     <th scope="row" className="py-0.5 font-normal">
                       <button
                         type="button"
                         onClick={() => onSelectLink(l.id)}
                         aria-current={l.id === activeId ? "true" : undefined}
-                        className="text-left font-medium text-blue-700 underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        className={cn(
+                          "rounded text-left font-medium text-blue-700 underline-offset-2 hover:underline",
+                          focusRing,
+                        )}
                       >
                         {l.id}
                       </button>
                     </th>
-                    <td className="py-0.5 text-slate-900">{prediction.riskProbability.toFixed(2)}</td>
+                    <td className="py-0.5 text-right tabular-nums text-slate-900">{prediction.riskProbability.toFixed(2)}</td>
+
                     <td
                       className={cn(
                         "py-0.5 font-medium",

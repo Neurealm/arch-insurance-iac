@@ -8,6 +8,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { drawerEnter } from "../components/motion";
 import { X } from "lucide-react";
 import { globalContributions } from "../analytics/analyticsFixtures";
 import { operationalMetrics } from "../analytics/analyticsFixtures";
@@ -255,6 +256,7 @@ export function ExplainModelDrawer({ state }: { state: ScenarioStateValue }) {
       className={cn(
         "fixed inset-x-0 bottom-0 z-40 max-h-[88vh] overflow-y-auto rounded-t-xl border border-slate-200 bg-white p-4 shadow-2xl",
         "sm:inset-y-0 sm:left-auto sm:right-0 sm:max-h-none sm:w-[min(760px,96vw)] sm:rounded-none sm:rounded-l-xl",
+        drawerEnter,
       )}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
