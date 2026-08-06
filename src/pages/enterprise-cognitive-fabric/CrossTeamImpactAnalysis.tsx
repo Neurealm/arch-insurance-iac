@@ -319,18 +319,33 @@ export default function CrossTeamImpactAnalysis() {
           <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={refresh}>
             <RefreshCw className="mr-1 h-3.5 w-3.5" aria-hidden /> Refresh
           </Button>
-          <Button size="sm" className="h-7 text-[11px]" disabled title="Available in the next release">Start Cross Team Analysis</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => { setFiltersOpen(true); focusPanel("panel-filters"); }}>
+          <Button size="sm" className="h-7 text-[11px]" onClick={() => setStartOpen(true)}>Start Cross Team Analysis</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => { setFiltersOpen(true); focusPanel("panel-team-scope"); }}>
             <Users className="mr-1 h-3.5 w-3.5" aria-hidden /> Select Teams
           </Button>
           <Button size="sm" variant="outline" className="h-7 text-[11px]"
             onClick={() => { setMatrixMode("persona-persona"); focusPanel("panel-matrix"); say("Persona by Persona comparison selected"); }}>
             Compare Perspectives
           </Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" disabled title="Governed export arrives in the next release">
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setReanalysisOpen(true)}>Reanalyze</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setSearchOpen(true)}>
+            <Search className="mr-1 h-3.5 w-3.5" aria-hidden /> Global Search
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setExportOpen(true)}>
             <Download className="mr-1 h-3.5 w-3.5" aria-hidden /> Export Analysis
           </Button>
-          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => focusPanel("panel-activity")}>More</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setRoutingOpen(true)}>Proceed to Decision Intelligence</Button>
+          <Button size="sm" variant={storyOn ? "default" : "outline"} className="h-7 text-[11px]"
+            onClick={() => { setStoryOn((s) => !s); setStoryIndex(0); if (!storyOn) focusPanel(storySteps[0].target); }}>
+            {storyOn ? "Exit Demo Story" : "Demo Story"}
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => focusPanel("panel-notifications")}>
+            Notifications
+            {notifications.some((n) => n.status === "Unread") && (
+              <span className="ml-1 rounded-full bg-blue-600 px-1 text-[9px] text-white">{notifications.filter((n) => n.status === "Unread").length}</span>
+            )}
+          </Button>
+
         </div>
       </header>
 
