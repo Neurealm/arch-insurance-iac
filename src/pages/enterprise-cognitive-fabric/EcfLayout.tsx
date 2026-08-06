@@ -13,6 +13,7 @@ const discoverySubNav = [
   { to: "/enterprise-cognitive-fabric/discovery/pipelines", label: "Discovery Pipelines" },
   { to: "/enterprise-cognitive-fabric/discovery/source-registry", label: "Source Registry" },
   { to: "/enterprise-cognitive-fabric/discovery/connector-health", label: "Connector Health" },
+  { to: "/enterprise-cognitive-fabric/discovery/artifact-ingestion", label: "Artifact Ingestion" },
 ];
 
 export default function EcfLayout() {
