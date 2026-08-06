@@ -54,7 +54,7 @@ export default function NocLayout() {
           <Link
             to="/app"
             title={collapsed ? "NeuGAIN Command Center" : undefined}
-            className="mx-2 my-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[12.5px] text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+            className="mx-2 my-0.5 flex items-center gap-2.5 rounded-md bg-transparent px-2.5 py-2 text-[12.5px] text-slate-700 transition-colors hover:bg-sky-50 hover:text-sky-700"
           >
             <Home className="h-4 w-4 shrink-0 text-slate-500" />
             {!collapsed && <span className="truncate">NeuGAIN Command Center</span>}
@@ -81,7 +81,7 @@ export default function NocLayout() {
                         collapsed ? "justify-center px-0" : "px-2.5",
                         isActive
                           ? "bg-slate-900 text-white"
-                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
+                          : "bg-transparent text-slate-700 hover:bg-sky-50 hover:text-sky-700",
                       )
                     }
                   >
@@ -106,7 +106,7 @@ export default function NocLayout() {
                         collapsed ? "justify-center px-0" : "px-2.5",
                         isActive
                           ? "bg-slate-900 text-white"
-                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
+                          : "bg-transparent text-slate-700 hover:bg-sky-50 hover:text-sky-700",
                       )
                     }
                   >
