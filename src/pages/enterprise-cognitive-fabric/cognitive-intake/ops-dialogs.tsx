@@ -18,7 +18,7 @@ import {
 import { Pill, Row } from "../persona-studio/primitives";
 import { intakeTone } from "./panels";
 import {
-  intakes, workTypes, type CognitiveIntake,
+  intakes, intakeFilterOptions, type CognitiveIntake,
 } from "./data";
 import {
   analysisOptions, bulkActions, bulkRoutingPreview, clarificationOwners,
@@ -30,6 +30,8 @@ import {
   buildExportRows, unsupportedBulkActions, validateRouting,
   type ExportFormat, type RoutingInput, type RuleInput, type ScenarioDefinition, type SearchResult,
 } from "./ops-data";
+
+const workTypeOptions = intakeFilterOptions.workType.filter((w) => w !== "All");
 
 /* ----------------------------------------------------------------- helpers */
 
@@ -116,7 +118,7 @@ export function SubmitWorkDialog({
   const [step, setStep] = useState(0);
   const [running, setRunning] = useState(false);
   const [form, setForm] = useState<SubmitPayload>({
-    title: "", description: "", workType: workTypes[0] ?? "Configuration Change",
+    title: "", description: "", workType: workTypeOptions[0],
     priority: "High", submittingTeam: "Checkout Engineering", workOwner: "",
     targetDate: "", evidence: [],
   });
@@ -159,7 +161,7 @@ export function SubmitWorkDialog({
             <Field id="sw-type" title="Work Type">
               <select id="sw-type" className={field} value={form.workType}
                 onChange={(e) => setForm({ ...form, workType: e.target.value })}>
-                {workTypes.map((w) => <option key={w}>{w}</option>)}
+                {workTypeOptions.map((w) => <option key={w}>{w}</option>)}
               </select>
             </Field>
             <Field id="sw-priority" title="Priority">
