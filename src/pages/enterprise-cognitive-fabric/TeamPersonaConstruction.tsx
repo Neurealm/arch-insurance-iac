@@ -296,11 +296,266 @@ export default function TeamPersonaConstruction() {
     const excluded = Object.values(mappingStates).filter((s) => s === "Excluded").length;
     const included = Object.values(mappingStates).filter((s) => s === "Included").length;
     const base = seedPersonas[0];
+    const resolved = seedConflicts.length - openConflicts.length;
     return {
-      quality: Math.max(60, Math.min(100, base.qualityScore + included - excluded * 2)),
-      completeness: Math.max(50, Math.min(100, base.completenessScore + included - excluded * 2)),
+      quality: Math.max(60, Math.min(100, base.qualityScore + included - excluded * 2 + resolved + qualityAdjust)),
+      completeness: Math.max(50, Math.min(100, base.completenessScore + included - excluded * 2 + resolved + qualityAdjust)),
     };
-  }, [mappingStates]);
+  }, [mappingStates, openConflicts.length, qualityAdjust]);
+
+  const displayQuality = scenario === "Reset Demo Data" ? metricsAfterDraft.quality : scenarioState.qualityScore;
+
+  /* --------------------------- governance actions -------------------------- */
+
+  const onReviewAction = (r: PersonaReview, action: string) => {
+    if (action === "Open Review") { setOpenReview(r); return; }
+    if (action === "Approve") {
+      setReviews((rows) => rows.map((x) => (x.id === r.id ? { ...x, status: "Approved", decision: "Approve Section", completedAt: "Now" } : x)));
+      setQualityAdjust((q) => q + 1);
+      announce(`Review ${r.id} approved for ${r.personaName}`);
+      pushNotification({ category: "Persona approved", title: "Review approved", detail: `${r.id} · ${r.personaName}`, tone: "green", targetKind: "review", targetId: r.id });
+      toast.success(`${r.id} approved`);
+      return;
+    }
+    const nextStatus: Record<string, PersonaReview["status"]> = {
+      "Request Changes": "Changes Requested",
+      "Request Evidence": "In Review",
+      Reassign: "In Review",
+      "Extend Due Date": "In Review",
+      Escalate: "Escalated",
+    };
+    setReviews((rows) => rows.map((x) => (x.id === r.id ? { ...x, status: nextStatus[action] ?? x.status } : x)));
+    announce(`${action} recorded for review ${r.id}`);
+    toast.success(`${action} · ${r.id}`);
+  };
+
+  const onReviewDecision = (o: { reviewId: string; decision: string; comment: string }) => {
+    setReviews((rows) => rows.map((x) => (x.id === o.reviewId
+      ? {
+        ...x,
+        decision: o.decision,
+        comments: o.comment ? [...x.comments, o.comment] : x.comments,
+        status: o.decision.startsWith("Approve") ? "Approved" : o.decision === "Reject Persona" ? "Changes Requested" : o.decision === "Escalate to Governance" ? "Escalated" : "In Review",
+        completedAt: o.decision.startsWith("Approve") ? "Now" : null,
+      }
+      : x)));
+    if (o.decision === "Approve Persona") {
+      setApprovalStage("Team Owner Approval");
+      setApprovalChain((c) => c.map((a) => (a.approvalStage === "Persona Owner Review" ? { ...a, status: "Approved", decision: "Approved", completedAt: "Now" } : a)));
+    }
+    setQualityAdjust((q) => q + 1);
+    setOpenReview(null);
+    announce(`Validation decision ${o.decision} recorded for ${o.reviewId}. Quality and completeness recalculated.`);
+    pushNotification({ category: "Persona review requested", title: "Validation decision recorded", detail: `${o.reviewId} · ${o.decision}`, tone: "blue", targetKind: "review", targetId: o.reviewId });
+    toast.success(`${o.decision} recorded`, { description: `Audit event created for ${o.reviewId}` });
+  };
+
+  const onConflictAction = (c: PersonaConflict, action: string) => {
+    if (action === "Open Comparison" || action === "Select Authoritative Record" || action === "Merge"
+      || action === "Define Applicability" || action === "Define Effective Period" || action === "Resolve") {
+      setOpenConflict(c);
+      return;
+    }
+    if (action === "Mark Historical") {
+      setConflicts((rows) => rows.map((x) => (x.id === c.id ? { ...x, reviewStatus: "Resolved", resolution: "Marked historical", resolvedAt: "Now" } : x)));
+      toast.success(`${c.id} record marked historical`);
+      return;
+    }
+    setConflicts((rows) => rows.map((x) => (x.id === c.id ? { ...x, reviewStatus: action === "Assign Review" ? "In Review" : x.reviewStatus } : x)));
+    toast.success(`${action} · ${c.id}`);
+  };
+
+  const onConflictResolve = (o: { conflictId: string; choice: string; reason: string; effectiveDate: string; applicability: string }) => {
+    const conflict = conflicts.find((c) => c.id === o.conflictId);
+    setConflicts((rows) => rows.map((x) => (x.id === o.conflictId
+      ? { ...x, reviewStatus: o.choice === "Escalate to Governance" ? "Escalated" : "Resolved", resolution: `${o.choice} — ${o.reason}`, resolvedAt: "Now" }
+      : x)));
+    setReviews((rows) => rows.map((x) => (x.conflicts.length && x.personaId === conflict?.personaId ? { ...x, status: "In Review", conflicts: [] } : x)));
+    setDirtyCount((n) => n + 1);
+    setQualityAdjust((q) => q + 2);
+    setVersions((v) => [
+      { ...v[0], id: `PV-${v.length + 35}`, version: "3.4", status: "Draft", changeReason: `Conflict ${o.conflictId} resolved by ${o.choice}`, createdAt: "Now" },
+      ...v.slice(1),
+    ]);
+    setOpenConflict(null);
+    setActivityHeadline(`Conflict ${o.conflictId} resolved by ${o.choice}`);
+    announce(`Conflict ${o.conflictId} resolved using ${o.choice}. Persona draft, mappings, relationship graph, quality and review queue updated. ${conflict?.affectedEvaluationIds.length ?? 0} impact evaluations flagged for reassessment.`);
+    pushNotification({ category: "Downstream evaluation requires reassessment", title: "Conflict resolved", detail: `${o.conflictId} · ${conflict?.affectedEvaluationIds.length ?? 0} evaluations flagged`, tone: "amber", targetKind: "conflict", targetId: o.conflictId });
+    toast.success("Conflict resolved", { description: `Effective ${o.effectiveDate} · ${o.applicability}` });
+  };
+
+  const onApprovalAction = (action: string) => {
+    if (action === "Submit for Review") {
+      setApprovalStage("Persona Owner Review");
+      announce("Persona submitted for review");
+      toast.success("Submitted for review");
+      return;
+    }
+    setApprovalAction(action);
+  };
+
+  const onApprovalConfirm = (comment: string, effectiveDate: string) => {
+    const action = approvalAction ?? "Approve";
+    const order: ApprovalStage[] = ["Draft Complete", "Persona Owner Review", "Team Owner Approval", "Dependency Owner Review", "Governance Review", "Approved", "Published"];
+    if (action === "Approve" || action === "Approve with Conditions") {
+      const next = order[Math.min(order.indexOf(approvalStage) + 1, order.length - 1)];
+      setApprovalStage(next);
+      setApprovalChain((c) => c.map((a) => (a.approvalStage === approvalStage
+        ? { ...a, status: action === "Approve" ? "Approved" : "Approved with Conditions", decision: action, comments: comment ? [comment] : [], completedAt: "Now" }
+        : a.approvalStage === next ? { ...a, status: "In Progress", submittedAt: "Now" } : a)));
+      announce(`${action} recorded. Approval stage advanced to ${next}.`);
+      pushNotification({ category: "Persona approved", title: action, detail: `Stage advanced to ${next}`, tone: "green", targetKind: "persona", targetId: "PERSONA-1001" });
+    } else if (action === "Reject") {
+      setApprovalChain((c) => c.map((a) => (a.approvalStage === approvalStage ? { ...a, status: "Rejected", decision: comment, completedAt: "Now" } : a)));
+      announce("Persona rejected. Downstream publication blocked.");
+      pushNotification({ category: "Persona rejected", title: "Persona rejected", detail: comment || "Rejected at review", tone: "red", targetKind: "persona", targetId: "PERSONA-1001" });
+    } else {
+      setApprovalChain((c) => c.map((a) => (a.approvalStage === approvalStage ? { ...a, status: "Changes Requested", decision: comment, completedAt: null } : a)));
+      announce(`${action} recorded on the approval chain.`);
+    }
+    setApprovalAction(null);
+    toast.success(`${action} recorded`, { description: `Effective date ${effectiveDate}` });
+  };
+
+  const onVersionAction = (v: PersonaVersion, action: string) => {
+    if (action === "Compare") { setCompareVersions([versions[1] ?? versions[0], v]); return; }
+    if (action === "View Version") { setCompareVersions([v, versions[0]]); return; }
+    if (action === "Restore as Draft") {
+      setVersions((rows) => [
+        { ...v, id: `PV-restore-${v.version}`, version: `${v.version}.1`, status: "Draft", changeReason: `Restored from version ${v.version}`, createdAt: "Now", previousVersionId: v.id },
+        ...rows,
+      ]);
+      setDirtyCount((n) => n + 1);
+      announce(`Version ${v.version} restored as a new draft`);
+      toast.success(`Version ${v.version} restored as draft`);
+      return;
+    }
+    if (action === "Mark Historical") {
+      setVersions((rows) => rows.map((x) => (x.id === v.id ? { ...x, status: "Historical" } : x)));
+      toast.message(`Version ${v.version} marked historical`);
+      return;
+    }
+    download(`persona-version-${v.version}.json`, JSON.stringify(v, null, 2), "application/json");
+    toast.success(`Version ${v.version} exported`);
+  };
+
+  const onDriftAction = (d: PersonaDrift, action: string) => {
+    if (action === "Refresh Persona") { setRefreshOpen(true); return; }
+    if (action === "Open Comparison") { setCompareVersions([versions[1] ?? versions[0], versions[0]]); return; }
+    const next: Record<string, PersonaDrift["status"]> = {
+      "Accept Update": "Accepted",
+      "Create Draft Version": "Refreshed",
+      "Dismiss as Nonmaterial": "Dismissed",
+      "Request Review": "Under Review",
+    };
+    setDrift((rows) => rows.map((x) => (x.id === d.id ? { ...x, status: next[action] ?? x.status } : x)));
+    if (action === "Create Draft Version") {
+      setVersions((v) => [{ ...v[0], id: `PV-drift-${d.id}`, version: "3.5", status: "Draft", changeReason: `Drift ${d.id} accepted`, createdAt: "Now" }, ...v]);
+    }
+    announce(`${action} recorded for drift ${d.id}`);
+    toast.success(`${action} · ${d.personaName}`);
+  };
+
+  const onRefreshComplete = (r: { sectionsUpdated: number; conditionsAdded: number; evaluationsFlagged: number; draftVersion: string }) => {
+    setVersions((v) => [{ ...v[0], id: `PV-${r.draftVersion}`, version: r.draftVersion, status: "Draft", changeReason: "Persona refreshed from changed conditions", createdAt: "Now" }, ...v]);
+    setDrift((rows) => rows.map((x) => (x.materiality === "Material" ? { ...x, status: "Refreshed" } : x)));
+    setQualityAdjust((q) => q + 1);
+    setActivityHeadline(`Payments Platform refreshed into draft version ${r.draftVersion}`);
+    announce(`Persona refresh completed. Draft version ${r.draftVersion} created, ${r.sectionsUpdated} sections updated, ${r.evaluationsFlagged} evaluations flagged.`);
+    pushNotification({ category: "Persona refresh completed", title: "Persona refresh completed", detail: `Draft version ${r.draftVersion} created`, tone: "green", targetKind: "version", targetId: `PV-${r.draftVersion}` });
+  };
+
+  const onPublishComplete = () => {
+    setPublishingState("Published");
+    setApprovalStage("Published");
+    setVersions((v) => v.map((x, i) => (i === 0 ? { ...x, status: "Published", publishedAt: "Now", effectiveDate: "Today" } : x)));
+    setActivityHeadline("Payments Platform version 3.4 published to nine destinations");
+    announce("Persona published to nine downstream destinations. Audit event created and consumers notified.");
+    pushNotification({ category: "Persona published", title: "Persona published", detail: "Version 3.4 live on 9 destinations", tone: "green", targetKind: "publishing", targetId: "PUB-6602" });
+    toast.success("Persona published");
+  };
+
+  const applyScenario = (s: DemoScenario) => {
+    setLoadingGovernance(true);
+    setScenario(s);
+    const st = scenarioStates[s];
+    window.setTimeout(() => {
+      setLoadingGovernance(false);
+      if (s === "Reset Demo Data") {
+        setReviews(seedReviews); setConflicts(seedConflicts); setDrift(seedDrift);
+        setVersions(personaVersions); setApprovalChain(paymentsApprovalChain);
+        setApprovalStage("Persona Owner Review"); setPublishingState("Idle");
+        setNotifications(governanceNotifications); setQualityAdjust(0);
+        setActivityHeadline(personaActivity[0].description);
+        announce("Demonstration data reset to the seeded portfolio");
+        return;
+      }
+      setApprovalStage(st.approvalStage);
+      setPublishingState(st.publishingState === "Idle" ? "Idle" : st.publishingState);
+      setActivityHeadline(st.activityHeadline);
+      if (st.notification) {
+        pushNotification({ ...st.notification, targetKind: "persona", targetId: "PERSONA-1001" });
+      }
+      announce(`${s} scenario applied. ${st.banner}`);
+      if (st.emphasisPanel) focusPanel(st.emphasisPanel);
+    }, 220);
+  };
+
+  const openSearchResult = (r: { target: { kind: string; id: string } }) => {
+    if (r.target.kind === "persona") {
+      const p = seedPersonas.find((x) => x.id === r.target.id) ?? seedPersonas[0];
+      setOpenPersona(p); setPersonaTab("Overview");
+    } else if (r.target.kind === "review") {
+      setOpenReview(reviews.find((x) => x.id === r.target.id) ?? reviews[0]);
+    } else if (r.target.kind === "conflict") {
+      setOpenConflict(conflicts.find((x) => x.id === r.target.id) ?? conflicts[0]);
+    } else if (r.target.kind === "version") {
+      focusPanel("panel-versions");
+    } else {
+      focusPanel("panel-drift");
+    }
+  };
+
+  const openActivityTarget = (a: PersonaActivity) => {
+    if (a.target.kind === "review") setOpenReview(reviews.find((r) => r.id === a.target.id) ?? reviews[0]);
+    else if (a.target.kind === "conflict") setOpenConflict(conflicts.find((c) => c.id === a.target.id) ?? conflicts[0]);
+    else if (a.target.kind === "version") focusPanel("panel-versions");
+    else if (a.target.kind === "drift") focusPanel("panel-drift");
+    else if (a.target.kind === "evidence") { setView("workbench"); focusPanel("panel-workbench"); }
+    else { const p = seedPersonas.find((x) => x.id === a.personaId); if (p) { setOpenPersona(p); setPersonaTab("Overview"); } }
+  };
+
+  /* ------------------------------- demo story ------------------------------ */
+  const startStory = () => { setStoryStep(0); announce("Demo story started"); };
+  useEffect(() => {
+    if (storyStep === null) return;
+    const s = demoStorySteps[storyStep];
+    if (s.view) setView(s.view);
+    const id = window.setTimeout(() => focusPanel(s.target), 80);
+    announce(`Demo story step ${storyStep + 1}: ${s.caption}`);
+    return () => window.clearTimeout(id);
+  }, [storyStep, focusPanel, announce]);
+
+  useEffect(() => {
+    if (storyStep === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") setStoryStep((s) => (s === null ? s : Math.min(s + 1, demoStorySteps.length - 1)));
+      if (e.key === "ArrowLeft") setStoryStep((s) => (s === null ? s : Math.max(s - 1, 0)));
+      if (e.key === "Escape") setStoryStep(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [storyStep]);
+
+  const exportRows = useMemo(
+    () => personas.map((p) => ({
+      persona: p.id, team: p.teamName, businessUnit: p.businessUnit, status: p.constructionStatus,
+      approval: p.approvalState, quality: p.qualityScore, completeness: p.completenessScore,
+      confidence: p.confidence, freshness: p.freshnessStatus, owner: p.personaOwner,
+    })),
+    [personas],
+  );
+
 
   /* --------------------------------- render ------------------------------- */
   const showWorkbench = view === "workbench" || view === "construction";
