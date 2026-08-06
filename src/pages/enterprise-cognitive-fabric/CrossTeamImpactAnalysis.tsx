@@ -573,6 +573,92 @@ export default function CrossTeamImpactAnalysis() {
       <EvidenceDrawer evidence={evidenceDrawer} onClose={() => setEvidenceDrawer(null)} />
       <PersonaDrawer personaId={personaDrawer} state={analysisState} onClose={() => setPersonaDrawer(null)} />
       <GraphNodeDrawer node={nodeDrawer} onClose={() => setNodeDrawer(null)} />
+
+      {/* ------------------------------------------- Prompt 2 dialogs */}
+      <StartAnalysisDialog open={startOpen} onClose={() => setStartOpen(false)}
+        onComplete={(summary) => {
+          setStartOpen(false);
+          logOps("Cross Team Analysis started", summary);
+          setNotifications((n) => [{ id: `NTF ${Date.now()}`, analysisId: "CTA 3001", type: "Analysis Completed", title: "Cross Team Analysis completed", description: summary, severity: "Medium", owner: "Coordination Office", status: "Unread", createdAt: new Date().toISOString().slice(11, 16) }, ...n]);
+          focusPanel("panel-matrix");
+        }} />
+
+      <ReanalysisDialog open={reanalysisOpen} onClose={() => setReanalysisOpen(false)}
+        onComplete={(scope, reason) => {
+          setReanalysisOpen(false);
+          const next = { ...currentVersion, id: `CTV ${versions.length + 1}`, version: `v${versions.length + 1}.0`, changeReason: reason, createdAt: new Date().toISOString().slice(0, 16).replace("T", " ") };
+          setVersions((v) => [...v, next]);
+          setVersionId(next.id);
+          setCompareRight(next.id);
+          logOps("Reanalysis complete", `${scope} — ${reason}`);
+        }} />
+
+      <EscalationDialog open={escalationOpen} onClose={() => setEscalationOpen(false)} state={analysisState}
+        onCreate={(e) => {
+          setEscalations((list) => [...list, { ...e, id: `CTE ${list.length + 1}`, createdAt: new Date().toISOString().slice(0, 16).replace("T", " ") }]);
+          setEscalationOpen(false);
+          logOps("Escalation created", e.title);
+        }} />
+
+      <EvidenceDialog open={evidenceOpen} onClose={() => setEvidenceOpen(false)} target={evidenceTarget}
+        onAdd={(type, note) => {
+          setEvidenceOpen(false);
+          const flag = /fraud/i.test(evidenceTarget + type) ? "fraudLossEvidence"
+            : /idempot/i.test(evidenceTarget + type) ? "idempotencyEvidence"
+              : /depend|load|capacity/i.test(evidenceTarget + type) ? "dependencyLoadEvidence" : null;
+          if (flag) {
+            const next = { ...scenarioParams, [flag]: true } as ScenarioParams;
+            setScenarioParams(next);
+            setAnalysisState(toAnalysisState(next));
+          }
+          logOps("Evidence recorded", `${type} · ${evidenceTarget}${note ? ` — ${note}` : ""}`);
+        }} />
+
+      <ConflictManagementDrawer conflict={conflictManage} state={analysisState}
+        onClose={() => setConflictManage(null)}
+        onAction={(action, note) => {
+          if (action === "Escalate to Governance" || action === "Escalate to Decision Intelligence") setEscalationOpen(true);
+          if (action === "Request Evidence") { setEvidenceTarget(conflictManage?.id ?? "Conflict"); setEvidenceOpen(true); }
+          logOps("Conflict coordination", `${conflictManage?.id ?? ""} · ${action}${note ? ` — ${note}` : ""}`);
+        }} />
+
+      <CoordinationActionDrawer record={coordinationDrawer} onClose={() => setCoordinationDrawer(null)}
+        onUpdate={(r) => { setRecords((list) => list.map((x) => x.id === r.id ? r : x)); setCoordinationDrawer(null); logOps("Coordination action updated", r.id); }} />
+
+      <GlobalSearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} state={analysisState}
+        mitigations={mitigations} records={records} acks={acks} escalations={escalations} versions={versions}
+        onOpenHit={(hit) => { setSearchOpen(false); focusPanel(hit.panel ?? "panel-matrix"); }} />
+
+      <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} state={analysisState}
+        mitigations={mitigations} records={records} acks={acks}
+        onExported={(format, scope) => { setExportOpen(false); logOps("Governed export generated", `${format} · ${scope}`); }} />
+
+      <RoutingDialog open={routingOpen} onClose={() => setRoutingOpen(false)} validation={routing}
+        onRoute={() => {
+          setRoutingOpen(false);
+          logOps("Decision context routed", "Package handed to Decision Intelligence");
+          navigate("/enterprise-cognitive-fabric/evaluation/decision-intelligence");
+        }} />
+
+      <AddPersonaDialog open={addPersonaOpen} onClose={() => setAddPersonaOpen(false)}
+        onAdd={(name) => { setAddPersonaOpen(false); logOps("Team Persona added to scope", name); }} />
+
+      {storyOn && (
+        <DemoStoryOverlay step={storySteps[storyIndex]} index={storyIndex} total={storySteps.length}
+          reducedMotion={reducedMotion} onReducedMotion={setReducedMotion}
+          onNext={() => {
+            const next = Math.min(storySteps.length - 1, storyIndex + 1);
+            setStoryIndex(next);
+            focusPanel(storySteps[next].target);
+          }}
+          onPrev={() => {
+            const prev = Math.max(0, storyIndex - 1);
+            setStoryIndex(prev);
+            focusPanel(storySteps[prev].target);
+          }}
+          onExit={() => setStoryOn(false)} />
+      )}
     </div>
+
   );
 }
