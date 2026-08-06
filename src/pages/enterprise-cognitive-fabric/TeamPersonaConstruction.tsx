@@ -1027,16 +1027,68 @@ export default function TeamPersonaConstruction() {
       </Drawer>
 
       {/* notifications */}
-      <Drawer open={notificationsOpen} onOpenChange={setNotificationsOpen} title="Notifications" description="Persona construction activity">
+      <Drawer
+        open={notificationsOpen}
+        onOpenChange={setNotificationsOpen}
+        title="Notifications"
+        description="Persona review, conflict, approval, drift and publishing events"
+      >
+        <div className="flex flex-wrap items-center gap-1.5">
+          {["All", ...Array.from(new Set(notifications.map((n) => n.category)))].map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setNotificationFilter(c)}
+              aria-pressed={notificationFilter === c}
+              className={cn(
+                "rounded border px-1.5 py-0.5 text-[10.5px]",
+                notificationFilter === c ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50",
+              )}
+            >
+              {c}
+            </button>
+          ))}
+          <Button size="sm" variant="outline" className="ml-auto h-6 text-[10.5px]" onClick={() => setNotifications((rows) => rows.map((n) => ({ ...n, read: true })))}>
+            Mark all read
+          </Button>
+        </div>
         <ul className="space-y-1.5">
-          {seedNotifications.map((n) => (
-            <li key={n.id} className={cn("rounded-md border p-2", n.tone === "amber" ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50")}>
-              <div className="text-[12px] font-medium text-slate-800">{n.title}</div>
+          {visibleNotifications.map((n) => (
+            <li
+              key={n.id}
+              className={cn(
+                "rounded-md border p-2",
+                n.tone === "red" ? "border-red-200 bg-red-50"
+                  : n.tone === "amber" ? "border-amber-200 bg-amber-50"
+                    : n.tone === "blue" ? "border-blue-200 bg-blue-50" : "border-emerald-200 bg-emerald-50",
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[12px] font-medium text-slate-800">{n.title}</div>
+                <span className="text-[10px] text-slate-500">{n.timestamp}</span>
+              </div>
               <div className="text-[11px] text-slate-600">{n.detail}</div>
+              <div className="mt-1 flex items-center gap-1.5">
+                <span className="rounded border border-slate-200 bg-white px-1 text-[9.5px] text-slate-600">{n.category}</span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-6 text-[10.5px]"
+                  onClick={() => {
+                    setNotifications((rows) => rows.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
+                    setNotificationsOpen(false);
+                    openSearchResult({ target: { kind: n.targetKind, id: n.targetId } });
+                  }}
+                >
+                  Open record
+                </Button>
+                {!n.read && <span className="text-[10px] font-semibold text-blue-700">Unread</span>}
+              </div>
             </li>
           ))}
         </ul>
       </Drawer>
+
 
       {/* graph node */}
       <Drawer open={!!openNode} onOpenChange={(v) => !v && setOpenNode(null)} title={openNode?.label ?? ""} description={openNode?.kind}>
