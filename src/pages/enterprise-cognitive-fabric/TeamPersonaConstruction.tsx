@@ -602,13 +602,18 @@ export default function TeamPersonaConstruction() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") setSearchOpen(true); }}
                 placeholder="Search personas, teams, conditions"
                 aria-label="Global search"
                 className="h-8 w-60 rounded-md border border-slate-200 pl-7 pr-2 text-[11.5px] placeholder:text-slate-400 focus:border-blue-400 focus:outline-none"
               />
             </div>
-            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" aria-label="Notifications" onClick={() => setNotificationsOpen(true)}>
+            <Button size="sm" variant="outline" className="h-8 text-[11.5px]" onClick={() => setSearchOpen(true)}>Search all records</Button>
+            <Button size="sm" variant="ghost" className="relative h-8 w-8 p-0" aria-label={`Notifications, ${unreadNotifications} unread`} onClick={() => setNotificationsOpen(true)}>
               <Bell className="h-4 w-4" aria-hidden />
+              {unreadNotifications > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 rounded-full bg-red-600 px-1 text-[8.5px] font-semibold text-white">{unreadNotifications}</span>
+              )}
             </Button>
             <Button size="sm" variant="ghost" className="h-8 w-8 p-0" aria-label="Help" onClick={() => toast.message("Team Persona Construction", { description: "Assemble approved business conditions into a governed team operating model." })}>
               <CircleHelp className="h-4 w-4" aria-hidden />
