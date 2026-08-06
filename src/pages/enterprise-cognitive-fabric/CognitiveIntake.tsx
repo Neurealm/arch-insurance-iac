@@ -753,11 +753,11 @@ export default function CognitiveIntake() {
         {!showExecutive && <QualityDetailPanel recalcSignal={qualityRevision} />}
 
         <PackageHistoryPanel versions={packageVersions}
-          onView={(v) => toast.info(`${v.version} · ${v.label}`, { description: `${v.createdAt} · completeness ${v.completeness}%` })}
-          onCompare={(a, b) => toast.info(`Comparing ${a.version} and ${b.version}`, {
-            description: `Completeness ${a.completeness}% → ${b.completeness}%`,
+          onView={(v) => toast.info(`Package v${v.version}`, { description: `Completeness ${v.packageCompleteness}%` })}
+          onCompare={(a, b) => toast.info(`Comparing v${a.version} and v${b.version}`, {
+            description: `Completeness ${a.packageCompleteness}% → ${b.packageCompleteness}%`,
           })}
-          onRestore={(v) => { bumpPackageVersion(`Restored from ${v.version}`); toast.success(`Restored ${v.version}`); }} />
+          onRestore={(v) => { bumpPackageVersion(`Restored from v${v.version}`); toast.success(`Restored v${v.version}`); }} />
 
         <PackageCompletenessPanel input={completenessInput}
           onNextStage={() => setDialog("route")} />
