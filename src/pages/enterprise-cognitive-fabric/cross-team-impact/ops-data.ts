@@ -891,8 +891,8 @@ export function searchEverything(
   const push = (h: SearchHit) => hits.push(h);
 
   ctiPersonas.forEach((p) => push({ id: p.id, type: "Persona", analysis: "CTA 3001", teams: p.team, issue: p.primaryRisk, severity: p.highestSeverity, owner: p.team, status: p.reviewRequired ? "Review Required" : "Reviewed", target: "panel-personas" }));
-  buildDimensionMatrix(state).forEach((c) => push({ id: c.id, type: "Matrix Cell", analysis: "CTA 3001", teams: personaById(c.personaId).short, issue: `${c.dimension} · ${c.summary}`, severity: String(c.severity), owner: personaById(c.personaId).team, status: c.status ?? "—", target: "panel-matrix" }));
-  intersectionsFor(state).forEach((i) => push({ id: i.id, type: "Intersection", analysis: "CTA 3001", teams: i.personaIds.map((p) => personaById(p).short).join(" + "), issue: i.title, severity: i.severity, owner: "Coordination Office", status: i.status, target: "panel-workbench" }));
+  buildDimensionMatrix(state).forEach((c) => push({ id: c.id, type: "Matrix Cell", analysis: "CTA 3001", teams: personaById(c.rowPersonaId).short, issue: `${c.impactDimension ?? "Persona"} · ${c.summary}`, severity: String(c.severity), owner: personaById(c.rowPersonaId).team, status: c.coordinationRequired ? "Coordination Required" : "Recorded", target: "panel-matrix" }));
+  intersectionsFor(state).forEach((i) => push({ id: i.id, type: "Intersection", analysis: "CTA 3001", teams: i.personaIds.map((p) => personaById(p).short).join(" + "), issue: i.summary, severity: i.severity, owner: "Coordination Office", status: i.status, target: "panel-workbench" }));
   conflictsFor(state).forEach((c) => push({ id: c.id, type: "Conflict", analysis: "CTA 3001", teams: `${personaById(c.personaAId).short} ↔ ${personaById(c.personaBId).short}`, issue: c.description, severity: c.severity, owner: "Coordination Office", status: c.status, target: "panel-conflicts" }));
   agreements.forEach((a) => push({ id: a.id, type: "Agreement", analysis: "CTA 3001", teams: a.personaIds.map((p) => personaById(p).short).join(", "), issue: a.title, severity: "Low", owner: "Coordination Office", status: "Agreed", target: "panel-agreements" }));
   opportunities.forEach((o) => push({ id: o.id, type: "Opportunity", analysis: "CTA 3001", teams: o.personaIds.map((p) => personaById(p).short).join(", "), issue: o.title, severity: "Low", owner: "Coordination Office", status: o.benefitType, target: "panel-opportunities" }));
@@ -978,7 +978,7 @@ export function buildExportRows(
       return compareVersions(seedVersions[0], seedVersions[seedVersions.length - 1]).map((r) => ({ field: r.field, from: r.left, to: r.right, state: r.state }));
     case "Matrix":
     case "Current Matrix View":
-      return buildDimensionMatrix(state).map((c) => ({ id: c.id, persona: personaById(c.personaId).name, dimension: c.dimension, direction: c.impactDirection, severity: c.severity, confidence: c.confidence }));
+      return buildDimensionMatrix(state).map((c) => ({ id: c.id, persona: personaById(c.rowPersonaId).name, dimension: c.impactDimension ?? "—", direction: c.direction, severity: c.severity, confidence: c.confidence }));
     case "Decision Context Package":
       return acks.map((a) => ({ team: a.teamId, status: a.status, topFinding: a.topFinding, requiredAction: a.requiredAction }));
     default:
