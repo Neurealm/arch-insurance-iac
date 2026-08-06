@@ -458,24 +458,26 @@ export default function BusinessConditionExtraction() {
       </header>
 
       <main className="space-y-3 px-4 py-3">
+        {sc && <ScenarioBanner label={sc.label} message={sc.banner} state={operationalState} onReset={() => applyScenario("reset")} />}
+
         {/* KPIs */}
         <div id="panel-kpis" className="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
-          <Kpi label="Conditions Extracted" value={nf(94_812)} sub="+6,240 this week" trend={kpiTrends.extracted}
+          <Kpi label="Conditions Extracted" value={nf(kpi.extracted)} sub="+6,240 this week" trend={kpiTrends.extracted}
             tooltip="Total condition records produced across all extraction jobs"
             onClick={() => showKpiDetail("Conditions Extracted", "By condition type, source, team, domain, and authority — see Condition Type Distribution and Taxonomy panels.", "panel-distribution")} />
-          <Kpi label="Approved Conditions" value={nf(87_442)} sub="92 percent · Healthy" tone="green" trend={kpiTrends.approved}
+          <Kpi label="Approved Conditions" value={nf(kpi.approved)} sub="92 percent · Healthy" tone="green" trend={kpiTrends.approved}
             tooltip="Conditions approved and eligible for publication"
             onClick={() => { setFilters({ ...filters, approvalState: "Approved" }); setDraftFilters({ ...filters, approvalState: "Approved" }); focusPanel("panel-inventory"); say("Inventory filtered to approved conditions"); }} />
-          <Kpi label="Active Extraction Jobs" value="14" sub="11 Healthy · 2 Warning · 1 Blocked" trend={kpiTrends.jobs}
+          <Kpi label="Active Extraction Jobs" value={kpi.jobs} sub="11 Healthy · 2 Warning · 1 Blocked" trend={kpiTrends.jobs}
             tooltip="Jobs currently executing extraction stages"
             onClick={() => { focusPanel("panel-jobs"); say("Focused active extraction jobs"); }} />
-          <Kpi label="Extraction Quality" value="93/100" sub="Target 95 · Near Target" tone="amber" trend={kpiTrends.quality}
+          <Kpi label="Extraction Quality" value={kpi.quality} sub="Target 95 · Near Target" tone="amber" trend={kpiTrends.quality}
             tooltip="Composite quality across ten measured dimensions"
             onClick={() => { focusPanel("panel-quality"); say("Focused extraction quality"); }} />
-          <Kpi label="Conditions Requiring Review" value="427" sub="148 conflicts · 92 missing owners · 74 low confidence · 61 missing evidence · 52 ambiguous values" tone="amber" trend={kpiTrends.review}
+          <Kpi label="Conditions Requiring Review" value={nf(reviewCount)} sub="148 conflicts · 92 missing owners · 74 low confidence · 61 missing evidence · 52 ambiguous values" tone="amber" trend={kpiTrends.review}
             tooltip="Candidates blocked pending human validation"
             onClick={() => { setSelectedStageId("validation"); focusPanel("panel-stage"); say("Focused review and exception summary"); }} />
-          <Kpi label="Ready for Persona and Impact Use" value={nf(82_906)} sub="87 percent · approved, current, evidence linked, conflict free" tone="green" trend={kpiTrends.ready}
+          <Kpi label="Ready for Persona and Impact Use" value={nf(kpi.ready)} sub="87 percent · approved, current, evidence linked, conflict free" tone="green" trend={kpiTrends.ready}
             tooltip="Approved, current, evidence linked, and conflict free"
             onClick={() => { focusPanel("panel-downstream"); say("Focused downstream readiness"); }} />
         </div>
@@ -517,7 +519,7 @@ export default function BusinessConditionExtraction() {
         <ConditionsInventoryPanel conditionsList={conditionRows} view={view} density={density}
           search={conditionSearch} onSearch={setConditionSearch}
           onOpen={(c) => { setConditionDrawer(c); setSelectedConditionId(c.id); }}
-          onBulk={() => setPlaceholder({ title: "Bulk actions", detail: "Bulk governance actions are delivered in Prompt 2." })}
+          onBulk={() => setBulkOpen(true)}
           savedView={savedView} onSaveView={saveView} />
 
         <div className="grid gap-3 xl:grid-cols-2">
@@ -539,6 +541,46 @@ export default function BusinessConditionExtraction() {
           <QualityPanel onOpenDetail={setQualityDetail} />
           <RegistryReadinessPanel readiness={readiness} onFocus={(what) => { focusPanel(what === "approved" ? "panel-inventory" : "panel-stage"); }} />
         </div>
+
+        <ReviewQueuePanel reviews={reviews} density={density} loading={loadingGovernance}
+          categoryFilter={reviewCategory} onCategoryFilter={setReviewCategory}
+          search={reviewSearch} onSearch={setReviewSearch}
+          onOpen={(r) => setActiveReview(r)} onAction={reviewAction} />
+
+        <ConflictGapPanel rows={conflictRows} density={density} loading={loadingGovernance}
+          issueFilter={issueFilter} onIssueFilter={setIssueFilter}
+          onOpenComparison={(c) => setActiveConflict(c)} onAction={conflictAction} />
+
+        <TaxonomyAdminPanel selectedId={taxonomyTypeId} onSelect={setTaxonomyTypeId}
+          onAction={(a, name) => {
+            if (a === "Test Against Sample") setTaxonomyTest(name);
+            else if (a === "Compare Versions") setTaxonomyCompare(true);
+            else { logActivity("Taxonomy Updated", `${a} — ${name}`); say(`${a} — ${name}`); }
+          }} />
+
+        <VersionHistoryPanel versions={versions} density={density} selectedIds={versionSelection}
+          onToggle={(id) => setVersionSelection((sel) => sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id].slice(-2))}
+          onAction={versionAction} />
+
+        <ApprovalGovernancePanel stage={approvalStage} onStage={setApprovalStage}
+          onAction={() => setApprovalOpen(true)} />
+
+        <PublishingPanel destinations={publishDestinations} pausedIds={pausedDestinations} publishState={publishState}
+          onPublish={() => requireImpact(() => setPublishOpen(true))}
+          onRepublish={() => setPublishOpen(true)}
+          onHistory={() => setPublishHistoryOpen(true)}
+          onPause={(id) => {
+            setPausedDestinations((list) => list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
+            say(`Destination ${id} ${pausedDestinations.includes(id) ? "resumed" : "paused"}`);
+          }} />
+
+        <ActivityPanel activity={activity} density={density}
+          onOpen={(a) => {
+            if (a.conditionId) { const c = allConditions.find((x) => x.id === a.conditionId); if (c) { setConditionDrawer(c); return; } }
+            if (a.reviewId) { const r = reviews.find((x) => x.id === a.reviewId); if (r) { setActiveReview(r); return; } }
+            if (a.conflictId) { const cf = conflictRows.find((x) => x.id === a.conflictId); if (cf) { setActiveConflict(cf); return; } }
+            say(`Audit ${a.auditId} — ${a.description}`);
+          }} />
 
         <DownstreamReadinessPanel readiness={readiness}
           onProceed={() => navigate("/enterprise-cognitive-fabric/persona-studio/team-persona-construction")}
