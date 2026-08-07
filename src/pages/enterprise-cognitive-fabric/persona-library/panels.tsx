@@ -334,7 +334,9 @@ export function InventoryPanel({
                           </tr>
                         )}
                       </Fragment>
-                    ))}
+                      );
+                    })}
+
                   </tbody>
                 </table>
               </div>
