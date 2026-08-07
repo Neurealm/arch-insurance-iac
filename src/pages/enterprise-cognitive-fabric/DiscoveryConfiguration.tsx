@@ -20,7 +20,7 @@ import {
   CadencePanel, ChangeDetectionPanel, ContentTypePolicyPanel, DiscoveryRulesPanel,
   DuplicatePolicyPanel, EnterpriseScopePanel, EvidencePanel, FreshnessPanel, LifecyclePanel,
   PermissionPolicyPanel, PreviewBreakdownPanel, PreviewPanel, ProcessingHandoffPanel,
-  Prompt2Placeholder, QualityPanel, SamplingPanel, SourcePlatformPanel, TraversalPanel,
+  QualityPanel, SamplingPanel, SourcePlatformPanel, TraversalPanel,
   WorkbenchHandoffRegion, WorkbenchPolicyRegion, WorkbenchScopeRegion, WorkbenchSourceRegion,
   AuthorityPanel,
 } from "./discovery-config/panels";
