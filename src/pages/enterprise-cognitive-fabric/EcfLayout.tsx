@@ -16,7 +16,6 @@ const subNavBySlug: Record<string, { to: string; label: string }[]> = {
     { to: "/enterprise-cognitive-fabric/discovery/source-registry", label: "Source Registry" },
     { to: "/enterprise-cognitive-fabric/discovery/connector-health", label: "Connector Health" },
   ],
-  ],
   "team-persona-construction": [
     { to: "/enterprise-cognitive-fabric/persona-studio/team-persona-library", label: "Team Persona Library" },
     { to: "/enterprise-cognitive-fabric/persona-studio/persona-validation", label: "Persona Validation" },
