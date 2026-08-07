@@ -11,7 +11,7 @@ import {
   useDetailDrawer, SimpleBars, Spark, GaugeRing, toneMap, type Kpi,
   ViewModeToggle, FullOnly, execKpis, type ViewMode,
 } from "../components/primitives";
-import DomainContextBar from "../components/bands";
+import { DomainContextBar } from "../components/bands";
 
 const kpis: Kpi[] = [
   { id: "total", icon: Database, label: "Total Storage", value: "1.84 PB", sub: "across 4 clouds", tone: "blue" },

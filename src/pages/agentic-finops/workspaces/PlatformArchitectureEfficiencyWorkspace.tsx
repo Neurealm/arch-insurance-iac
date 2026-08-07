@@ -169,6 +169,7 @@ export default function PlatformArchitectureEfficiencyWorkspace() {
         </DataTable>
       </Panel>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-[1fr_1.3fr]">
         {/* 2 */}
         <Panel index={2} title="Current architecture cost breakdown">
@@ -201,6 +202,7 @@ export default function PlatformArchitectureEfficiencyWorkspace() {
           </div>
         </Panel>
       </div>
+      </FullOnly>
 
       {/* 4 */}
       <Panel index={4} title="Value realization funnel">
@@ -231,6 +233,7 @@ export default function PlatformArchitectureEfficiencyWorkspace() {
         <p className="mt-2 text-[11.5px] text-slate-500">Alternative 1 is the recommended target architecture (highlighted).</p>
       </Panel>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
         {/* 6 */}
         <Panel index={6} title="Business & technical context">
@@ -277,7 +280,9 @@ export default function PlatformArchitectureEfficiencyWorkspace() {
           </div>
         </Panel>
       </div>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
         {/* 8 */}
         <Panel index={8} title="Architecture drivers">
@@ -304,8 +309,10 @@ export default function PlatformArchitectureEfficiencyWorkspace() {
           </DataTable>
         </Panel>
       </div>
+      </FullOnly>
 
       {/* 10 */}
+      <FullOnly mode={mode}>
       <Panel index={10} title="Execution roadmap">
         <div className="flex flex-wrap items-stretch gap-2">
           {roadmap.map((r, i) => (
@@ -320,7 +327,9 @@ export default function PlatformArchitectureEfficiencyWorkspace() {
           ))}
         </div>
       </Panel>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
         {/* 11 */}
         <Panel index={11} title="Confidence & evidence">
@@ -341,6 +350,7 @@ export default function PlatformArchitectureEfficiencyWorkspace() {
           ]} title="Identified → Realized" />
         </Panel>
       </div>
+      </FullOnly>
 
       <PageBands lifecycle={lifecycleWithActive("Simulate")} />
 
