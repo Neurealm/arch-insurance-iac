@@ -260,7 +260,17 @@ export function AttributeRegistryPanel({
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {attributes.map((a) => (
-                  <tr key={a.id} id={`row-${a.id}`} className="cursor-pointer align-top hover:bg-slate-50" onClick={() => onOpen(a)}>
+                  <tr
+                    key={a.id}
+                    id={`row-${a.id}`}
+                    className={cn(
+                      "cursor-pointer align-top",
+                      a.id === "FOP-081" || a.id === "FOP-082"
+                        ? "bg-amber-100 hover:bg-amber-200"
+                        : "hover:bg-slate-50",
+                    )}
+                    onClick={() => onOpen(a)}
+                  >
                     {visible.map((c) => (
                       <td key={c.key} className={cn("max-w-[240px] px-2 text-slate-700", pad)}>{c.get(a)}</td>
                     ))}
