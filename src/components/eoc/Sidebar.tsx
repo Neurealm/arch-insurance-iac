@@ -10,7 +10,7 @@ import {
   Sparkles as Sparkles2, CheckCircle2 as CheckCircle2b,
   ShieldHalf,
   ClipboardList,
-  ArrowRightLeft, Rocket, Compass, Gauge, X, Database, Brain,
+  ArrowRightLeft, Rocket, Compass, Gauge, X, Database, Brain, Wallet,
   Search as SearchIcon, Star, Clock, Circle,
   type LucideIcon,
 } from "lucide-react";
@@ -111,6 +111,14 @@ const tree: Node[] = [
     icon: Database,
     to: "/data-orchestration-twin",
     pill: "LIVE",
+    statusDot: "green",
+  },
+  {
+    key: "agentic-finops",
+    label: "Agentic FinOps Digital Twin",
+    icon: Wallet,
+    to: "/agentic-finops",
+    pill: "NEW",
     statusDot: "green",
   },
   {
@@ -565,7 +573,7 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
 
 const SECTIONS: { label: string; keys: string[] }[] = [
   { label: "",       keys: ["home", "ops", "ome"] },
-  { label: "AGENTIC OPERATIONS", keys: ["sre-practice", "sre-data-orch", "enterprise-cognitive-fabric", "agentic-sre-noc", "runops-runbooks"] },
+  { label: "AGENTIC OPERATIONS", keys: ["sre-practice", "sre-data-orch", "agentic-finops", "enterprise-cognitive-fabric", "agentic-sre-noc", "runops-runbooks"] },
   { label: "AI SILICON ENGINEERING", keys: ["sead", "ai-vlsi"] },
   { label: "",  keys: ["neurealm-agentic"] },
 

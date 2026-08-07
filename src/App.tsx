@@ -342,6 +342,17 @@ import EhrDashboard from "./pages/practice-library/dashboards/EhrDashboard.tsx";
 import WorkforceDashboard from "./pages/practice-library/dashboards/WorkforceDashboard.tsx";
 import ProdResilienceTwin from "./pages/prod-twin/ProdResilienceTwin.tsx";
 import DataOrchLayout from "./pages/data-orchestration-twin/DataOrchLayout.tsx";
+import FinOpsLayout from "./pages/agentic-finops/FinOpsLayout.tsx";
+import FinOpsOverview from "./pages/agentic-finops/workspaces/FinOpsOverview.tsx";
+import ResourceRightsizingWorkspace from "./pages/agentic-finops/workspaces/ResourceRightsizingWorkspace.tsx";
+import IdleOrphanedResourcesWorkspace from "./pages/agentic-finops/workspaces/IdleOrphanedResourcesWorkspace.tsx";
+import CommitmentOptimizationWorkspace from "./pages/agentic-finops/workspaces/CommitmentOptimizationWorkspace.tsx";
+import ElasticitySchedulingWorkspace from "./pages/agentic-finops/workspaces/ElasticitySchedulingWorkspace.tsx";
+import StorageDataLifecycleWorkspace from "./pages/agentic-finops/workspaces/StorageDataLifecycleWorkspace.tsx";
+import NetworkDataMovementWorkspace from "./pages/agentic-finops/workspaces/NetworkDataMovementWorkspace.tsx";
+import PlatformArchitectureEfficiencyWorkspace from "./pages/agentic-finops/workspaces/PlatformArchitectureEfficiencyWorkspace.tsx";
+import KubernetesEconomicsWorkspace from "./pages/agentic-finops/workspaces/KubernetesEconomicsWorkspace.tsx";
+import GovernanceRealizationWorkspace from "./pages/agentic-finops/workspaces/GovernanceRealizationWorkspace.tsx";
 import EcfLayout from "./pages/enterprise-cognitive-fabric/EcfLayout.tsx";
 import EcfLanding from "./pages/enterprise-cognitive-fabric/EcfLanding.tsx";
 import EcfPage from "./pages/enterprise-cognitive-fabric/EcfPage.tsx";
@@ -722,6 +733,19 @@ const App = () => (
           <Route path="/product-reliability-anatomy" element={<ProductReliabilityAnatomy />} />
           <Route path="/transformation-journey" element={<TransformationJourney />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
+          <Route path="/agentic-finops" element={<FinOpsLayout />}>
+            <Route index element={<FinOpsOverview />} />
+            <Route path="overview" element={<FinOpsOverview />} />
+            <Route path="resource-rightsizing" element={<ResourceRightsizingWorkspace />} />
+            <Route path="idle-orphaned-resources" element={<IdleOrphanedResourcesWorkspace />} />
+            <Route path="commitment-optimization" element={<CommitmentOptimizationWorkspace />} />
+            <Route path="elasticity-scheduling" element={<ElasticitySchedulingWorkspace />} />
+            <Route path="storage-data-lifecycle" element={<StorageDataLifecycleWorkspace />} />
+            <Route path="network-data-movement" element={<NetworkDataMovementWorkspace />} />
+            <Route path="platform-architecture-efficiency" element={<PlatformArchitectureEfficiencyWorkspace />} />
+            <Route path="kubernetes-economics" element={<KubernetesEconomicsWorkspace />} />
+            <Route path="governance-realization" element={<GovernanceRealizationWorkspace />} />
+          </Route>
           <Route path="/data-orchestration-twin" element={<DataOrchLayout />}>
             <Route index element={<DataOrchExecutiveControlPlane />} />
             <Route path="executive-control-plane" element={<DataOrchExecutiveControlPlane />} />
