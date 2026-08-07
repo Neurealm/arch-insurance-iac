@@ -149,7 +149,7 @@ const capability: [string, string, string][] = [
 
 export default function ResourceRightsizingDecisionWorkspace() {
   const drawer = useDetailDrawer();
-  const [mode, setMode] = useState<ViewMode>("exec");
+  const [mode, setMode] = useState<ViewMode>("full");
   const [active, setActive] = useState<string[]>(["cpu", "memory"]);
   const toggle = (k: string) =>
     setActive((a) => (a.includes(k) ? a.filter((x) => x !== k) : [...a, k]));

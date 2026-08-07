@@ -60,7 +60,7 @@ const domains = [
 
 export default function FinOpsOverview() {
   const drawer = useDetailDrawer();
-  const [mode, setMode] = useState<ViewMode>("exec");
+  const [mode, setMode] = useState<ViewMode>("full");
   const page = finopsPages[0];
 
   return (

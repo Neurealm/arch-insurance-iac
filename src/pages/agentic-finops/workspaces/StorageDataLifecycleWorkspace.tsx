@@ -110,7 +110,7 @@ export default function StorageDataLifecycleWorkspace() {
   const drawer = useDetailDrawer();
   const [tab, setTab] = useState<(typeof accessTabs)[number]>("By Last Accessed");
   const [selected, setSelected] = useState(dataSets[0]);
-  const [mode, setMode] = useState<ViewMode>("exec");
+  const [mode, setMode] = useState<ViewMode>("full");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">

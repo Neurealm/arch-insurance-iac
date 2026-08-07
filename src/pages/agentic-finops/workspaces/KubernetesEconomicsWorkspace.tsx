@@ -125,7 +125,7 @@ const executionPlan: [string, string, string, string][] = [
 export default function KubernetesEconomicsWorkspace() {
   const drawer = useDetailDrawer();
   const [tab, setTab] = useState<(typeof utilTabs)[number]>("CPU");
-  const [mode, setMode] = useState<ViewMode>("exec");
+  const [mode, setMode] = useState<ViewMode>("full");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">

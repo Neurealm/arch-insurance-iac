@@ -97,7 +97,7 @@ const whatIf: [string, string, string, string, string][] = [
 
 export default function CommitmentOptimizationWorkspace() {
   const drawer = useDetailDrawer();
-  const [mode, setMode] = useState<ViewMode>("exec");
+  const [mode, setMode] = useState<ViewMode>("full");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
