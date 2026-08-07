@@ -196,9 +196,191 @@ export default function DiscoveryConfiguration() {
 
   const focusPanel = useCallback((id: string) => {
     setSpotlight(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById(id)?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
     window.setTimeout(() => setSpotlight((s) => (s === id ? null : s)), 2600);
+  }, [reducedMotion]);
+
+  /* --------------------------------------------------- governance helpers */
+
+  const nowLabel = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  const logActivity = useCallback((text: string, kind: string) => {
+    setActivity((a) => [{ id: `ACT-${Date.now()}`, time: nowLabel(), text, kind }, ...a].slice(0, 40));
   }, []);
+
+  const logAudit = useCallback((action: string, elementType: string, elementId: string, previousState: string, newState: string, reason: string) => {
+    setAudit((a) => [{
+      id: `AE-${Date.now()}`, configurationId: "DISC-CFG-001", configurationVersion: "4.3",
+      timestamp: nowLabel(), actor: "Discovery Operations", actorRole: "Configuration Owner",
+      action, elementType, elementId, previousState, newState, reason, auditId: `AUD-${90000 + a.length}`,
+    }, ...a]);
+  }, []);
+
+  const notify = useCallback((type: string, title: string, description: string, severity: "Low" | "Medium" | "High" | "Critical") => {
+    setNotifications((n) => [{
+      id: `NTF-${Date.now()}`, configurationId: "DISC-CFG-001", configurationVersion: "4.3",
+      type, title, description, severity, owner: "Discovery Operations", status: "Unread", createdAt: nowLabel(),
+    }, ...n]);
+  }, []);
+
+  const activationBlocked = scenarioState.activationBlocked || validation.blockedCount > 0
+    || reviews.some((r) => r.severity === "High" && ["Open", "In Review", "Escalated"].includes(r.status));
+  const blockReason = validation.blockedCount > 0
+    ? "Validation reported blocking issues"
+    : scenarioState.blockReason
+      || (reviews.some((r) => r.severity === "High" && ["Open", "In Review", "Escalated"].includes(r.status))
+        ? "High severity governance reviews are still open"
+        : "");
+
+  const runValidation = useCallback(() => {
+    setValidating(true);
+    setValidation((v) => ({ ...v, status: "Running", startedAt: nowLabel(), completedAt: "" }));
+    window.setTimeout(() => {
+      setValidating(false);
+      setValidation({
+        ...seedValidation,
+        validationScore: scenarioState.validationScore,
+        passedCount: scenarioState.passedCount,
+        warningCount: scenarioState.warningCount,
+        reviewRequiredCount: scenarioState.reviewRequiredCount,
+        blockedCount: scenarioState.blockedCount,
+        status: scenarioState.blockedCount > 3 ? "Failed" : "Completed",
+        startedAt: nowLabel(), completedAt: nowLabel(),
+      });
+      logActivity(`Enterprise Knowledge Discovery v4.3 validation completed at ${scenarioState.validationScore} / 100`, "Validation");
+      logAudit("Validation Run", "Configuration", "DISC-CFG-001", "Validation Required", scenarioState.blockedCount > 3 ? "Validation Failed" : "Validation Warning", "Preapproval validation");
+      notify(scenarioState.blockedCount > 3 ? "Validation Failed" : "Validation Completed",
+        `Validation ${scenarioState.blockedCount > 3 ? "failed" : "completed"} at ${scenarioState.validationScore} / 100`,
+        `${scenarioState.warningCount} warnings and ${scenarioState.reviewRequiredCount} review required items`, "Medium");
+      toast.success("Configuration validation completed", { description: `Score ${scenarioState.validationScore} / 100. No downstream state was changed.` });
+    }, 900);
+  }, [scenarioState, logActivity, logAudit, notify]);
+
+  const runActivation = (plan: ActivationPlan) => {
+    if (plan.mode === "Scheduled") {
+      const when = plan.scheduledDate ? `${plan.scheduledDate}${plan.scheduledTime ? ` ${plan.scheduledTime}` : ""}` : "Awaiting date selection";
+      setActivation((a) => ({ ...a, status: "Scheduled", mode: plan.mode, scheduledAt: when, scope: plan.scope, rollbackOwner: plan.rollbackOwner }));
+      logActivity(`Activation scheduled for v${plan.version} (${when})`, "Activation");
+      logAudit("Activated", "Activation", "ACT-4301", "Approved", "Scheduled", "Scheduled activation created");
+      notify("Activation Scheduled", `Activation scheduled for v${plan.version}`, `Window ${when} · scope ${plan.scope}`, "Medium");
+      toast.success("Activation scheduled", { description: `${when} · rollback owner ${plan.rollbackOwner}` });
+      setActivationOpen(false);
+      return;
+    }
+    setActivating(true);
+    setActivation((a) => ({ ...a, status: "Activating", mode: plan.mode, scope: plan.scope, rollbackOwner: plan.rollbackOwner }));
+    let i = 0;
+    const tick = window.setInterval(() => {
+      i += 1;
+      setActivationStep(i);
+      if (i >= activationExecutionSteps.length) {
+        window.clearInterval(tick);
+        setActivating(false);
+        if (scenario === "Activation Failed") {
+          setActivation((a) => ({ ...a, status: "Activation Failed" }));
+          logActivity("Activation failed during scheduler update. v4.2 remains active.", "Activation");
+          notify("Activation Failed", "Activation halted on critical error", "Scheduler update failed. Previous version remains active.", "High");
+          toast.error("Activation failed", { description: "Paused on critical error. v4.2 remains the active configuration." });
+          return;
+        }
+        setVersions((vs) => vs.map((v) =>
+          v.version === plan.version
+            ? { ...v, status: "Active", approvalState: "Active", effectiveDate: new Date().toISOString().slice(0, 10) }
+            : v.status === "Active"
+              ? { ...v, status: "Superseded", approvalState: "Superseded", supersededDate: new Date().toISOString().slice(0, 10) }
+              : v));
+        setActivation((a) => ({ ...a, status: "Active", activatedBy: "Discovery Operations", completedAt: nowLabel(), rollbackVersion: "v4.2" }));
+        logActivity(`Enterprise Knowledge Discovery v${plan.version} activated. v4.2 preserved as superseded.`, "Activation");
+        logAudit("Activated", "Configuration", "DISC-CFG-001", "Approved", "Active", "Configuration published to discovery execution layer");
+        notify("Configuration Activated", `v${plan.version} is now active`, "Enterprise Source Discovery now executes this configuration reference.", "Medium");
+        toast.success(`Configuration v${plan.version} activated`, { description: "v4.2 preserved as superseded. Enterprise Source Discovery reference updated." });
+        setActivationOpen(false);
+      }
+    }, 160);
+  };
+
+  const runRollback = (payload: { toVersion: string; type: string; scope: string; reason: string; owner: string }) => {
+    setRollbackRunning(true);
+    const from = versions.find((v) => v.status === "Active")?.version ?? "4.3";
+    window.setTimeout(() => {
+      setRollbackRunning(false);
+      setVersions((vs) => vs.map((v) =>
+        v.version === payload.toVersion ? { ...v, status: "Active", approvalState: "Active", supersededDate: "" }
+          : v.version === from ? { ...v, status: "Rolled Back", approvalState: "Rolled Back" } : v));
+      setRollbacks((r) => [{
+        id: `RBK-${900 + r.length}`, fromVersion: from, toVersion: payload.toVersion,
+        rollbackType: payload.type, reason: payload.reason, owner: payload.owner,
+        status: "Rolled Back", completedAt: nowLabel(),
+      }, ...r]);
+      setActivation((a) => ({ ...a, status: "Active", rollbackVersion: `v${payload.toVersion}` }));
+      logActivity(`Rollback from v${from} to v${payload.toVersion} completed. Reconciliation job created.`, "Rollback");
+      logAudit("Rolled Back", "Configuration", "DISC-CFG-001", `v${from} Active`, `v${payload.toVersion} Active`, payload.reason);
+      notify("Rollback Completed", `Rolled back to v${payload.toVersion}`, "Historical versions preserved. Reconciliation job created.", "High");
+      toast.success(`Rolled back to v${payload.toVersion}`, { description: "Prior versions preserved. No historical record was modified." });
+      setRollbackOpen(false);
+    }, 900);
+  };
+
+  const searchIndex: SearchResult[] = useMemo(
+    () => buildSearchIndex({ reviews, conflicts, results, exceptions, drift, versions, approvals, draft }),
+    [reviews, conflicts, results, exceptions, drift, versions, approvals, draft]);
+
+  const applyScenario = (s: DemoScenario) => {
+    setScenario(s);
+    const st = scenarioStates[s];
+    setValidation((v) => ({
+      ...v, validationScore: st.validationScore, passedCount: st.passedCount, warningCount: st.warningCount,
+      reviewRequiredCount: st.reviewRequiredCount, blockedCount: st.blockedCount,
+      status: st.serviceState === "Validation Failed" ? "Failed" : st.validationScore === 0 ? "Not Run" : "Completed",
+    }));
+    setActivation((a) => ({ ...a, status: st.activationStatus }));
+    if (s === "Reset Demo Data") {
+      setResults(seedValidationResults); setConflicts(seedRuleConflicts); setReviews(seedReviews);
+      setApprovals(seedApprovals); setVersions(seedVersions); setExceptions(seedExceptions);
+      setDrift(seedDrift); setNotifications(seedNotifications); setActivity(seedActivity);
+      setAudit(seedAudit); setRollbacks([]); setOverrides({}); setPromoted({});
+      setActivation({ status: "Draft", mode: "Immediate", scheduledAt: "", scope: "Enterprise", rollbackOwner: "Discovery Operations", rollbackVersion: "v4.2", activatedBy: "", completedAt: "" });
+      setActivationStep(0); setOwnership(seedOwnership);
+    }
+    if (s === "Configuration Drift") {
+      setDrift([...seedDrift,
+        { ...seedDrift[0], id: "DRF-003", elementType: "Permission Policy", elementId: "Unknown permission handling", approvedState: "Restrict", observedState: "Metadata only", driftType: "Permission Policy Drift", severity: "High", detectedAt: nowLabel() },
+        { ...seedDrift[1], id: "DRF-004", elementType: "Owner", elementId: "Condition eligibility handoff", approvedState: "Assigned", observedState: "Unassigned", driftType: "Owner Drift", severity: "Medium", detectedAt: nowLabel() }]);
+    }
+    if (s === "Exception Expiring") {
+      setExceptions((e) => e.map((x) => (x.id === "EXC-502" ? { ...x, status: "Expiring" } : x)));
+    }
+    if (s === "Configuration Activated") {
+      setVersions((vs) => vs.map((v) => v.version === "4.3" ? { ...v, status: "Active", approvalState: "Active", effectiveDate: new Date().toISOString().slice(0, 10) }
+        : v.version === "4.2" ? { ...v, status: "Superseded", approvalState: "Superseded", supersededDate: new Date().toISOString().slice(0, 10) } : v));
+    }
+    logActivity(`Demo scenario applied: ${s}`, "Scenario");
+    toast.success(`Scenario: ${s}`, { description: st.note });
+  };
+
+  const doExport = (format: string, scope: string, options: string[]) => {
+    const rows: Record<string, unknown>[] = [
+      ...results.map((r) => ({ recordType: "Validation Result", id: r.id, category: r.category, element: r.configurationElementId, issue: r.issue, severity: r.severity, status: r.status, owner: r.owner })),
+      ...conflicts.map((c) => ({ recordType: "Rule Conflict", id: c.id, category: c.conflictType, element: `${c.ruleAId} vs ${c.ruleBId}`, issue: c.overlapScope, severity: c.severity, status: c.status, owner: "Discovery Governance" })),
+      ...reviews.map((r) => ({ recordType: "Review", id: r.id, category: r.reviewType, element: r.issue, issue: r.scope, severity: r.severity, status: r.status, owner: r.reviewer })),
+      ...versions.map((v) => ({ recordType: "Version", id: v.id, category: "Version", element: `v${v.version}`, issue: v.changeReason, severity: "Low", status: v.status, owner: v.createdBy })),
+    ];
+    const stamp = new Date().toISOString().slice(0, 10);
+    const name = `discovery-configuration-${scope.toLowerCase().replace(/\s+/g, "-")}-${stamp}`;
+    if (format === "CSV") downloadFile(`${name}.csv`, toCsv(rows), "text/csv");
+    else if (format === "JSON") downloadFile(`${name}.json`, JSON.stringify({ scope, options, generatedAt: stamp, records: rows }, null, 2), "application/json");
+    else if (format === "YAML") downloadFile(`${name}.yaml`, `scope: ${scope}\nrecords:\n${toYaml(rows)}`, "text/yaml");
+    else downloadFile(`${name}.txt`, `${format} — ${scope}\nIncluded: ${options.join(", ")}\n\n${rows.map((r) => Object.values(r).join(" · ")).join("\n")}`, "text/plain");
+    logActivity(`Governed export generated (${format} · ${scope})`, "Export");
+    toast.success(`Export generated as ${format}`, { description: `${rows.length} governed records · scope ${scope}` });
+  };
+
+  useEffect(() => {
+    if (storyStep === null) return;
+    focusPanel(demoStory[storyStep].target);
+  }, [storyStep, focusPanel]);
+
+
 
   /* ------------------------------------------------------------- mutators */
 
