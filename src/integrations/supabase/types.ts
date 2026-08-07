@@ -4258,6 +4258,59 @@ export type Database = {
           },
         ]
       }
+      guidance_agent_interactions: {
+        Row: {
+          answer: string | null
+          confidence: number | null
+          created_at: string
+          escalated: boolean
+          escalated_at: string | null
+          escalation_note: string | null
+          id: string
+          matched_catalog_ids: string[]
+          question: string
+          status: string
+          tenant_id: string | null
+          user_id: string
+        }
+        Insert: {
+          answer?: string | null
+          confidence?: number | null
+          created_at?: string
+          escalated?: boolean
+          escalated_at?: string | null
+          escalation_note?: string | null
+          id?: string
+          matched_catalog_ids?: string[]
+          question: string
+          status?: string
+          tenant_id?: string | null
+          user_id: string
+        }
+        Update: {
+          answer?: string | null
+          confidence?: number | null
+          created_at?: string
+          escalated?: boolean
+          escalated_at?: string | null
+          escalation_note?: string | null
+          id?: string
+          matched_catalog_ids?: string[]
+          question?: string
+          status?: string
+          tenant_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guidance_agent_interactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integrations_catalog: {
         Row: {
           auth_type: string

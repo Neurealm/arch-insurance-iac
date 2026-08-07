@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   ArrowLeft, MessageSquare, Flag, RefreshCw, Search, CheckCircle2, Inbox,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/eoc/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -94,8 +95,8 @@ export default function GuidanceInsights() {
       } else {
         setProfiles(new Map());
       }
-    } catch (e: any) {
-      toast.error(e.message ?? "Failed to load guidance interactions");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to load guidance interactions");
     } finally {
       setLoading(false);
     }
@@ -268,7 +269,7 @@ export default function GuidanceInsights() {
   );
 }
 
-function StatCard({ label, value, icon: Icon }: { label: string; value: number; icon: any }) {
+function StatCard({ label, value, icon: Icon }: { label: string; value: number; icon: LucideIcon }) {
   return (
     <Card>
       <CardContent className="p-4 flex items-center gap-3">

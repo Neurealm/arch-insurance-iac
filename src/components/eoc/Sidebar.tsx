@@ -276,7 +276,7 @@ function useFavorites() {
     try { return JSON.parse(window.localStorage.getItem(FAV_KEY) || "[]"); } catch { return []; }
   });
   useEffect(() => {
-    try { window.localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch {}
+    try { window.localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch { /* ignore quota/private-mode errors */ }
   }, [favs]);
   const toggle = (to: string) =>
     setFavs((prev) => (prev.includes(to) ? prev.filter((x) => x !== to) : [to, ...prev].slice(0, 12)));
@@ -292,10 +292,9 @@ function useRecents(pathname: string) {
     if (!pathname) return;
     setRec((prev) => {
       const next = [pathname, ...prev.filter((p) => p !== pathname)].slice(0, 5);
-      try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch {}
+      try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch { /* ignore quota/private-mode errors */ }
       return next;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
   return rec;
 }
