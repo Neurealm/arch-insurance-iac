@@ -120,11 +120,11 @@ export default function EnterpriseCognitiveHealth() {
       if (signalSeverity !== "All" && s.severity !== signalSeverity) return false;
       if (signalModule !== "All" && s.sourceModule !== signalModule) return false;
       if (filters.businessUnit !== "All" && s.scopeId !== "Enterprise" && s.scopeId !== filters.businessUnit) return false;
-      if (filters.healthDimension !== "All" && dimensionById(s.dimensionId).name !== filters.healthDimension) return false;
-      if (filters.signalSeverity !== "All" && s.severity !== filters.signalSeverity) return false;
-      if (filters.sourceModule !== "All" && s.sourceModule !== filters.sourceModule) return false;
-      if (kpiFocus === "critical" && s.severity !== "Critical" && s.severity !== "High") return false;
-      if (kpiFocus === "attention" && s.status === "Healthy") return false;
+      if (filters.dimension !== "All" && dimensionById(s.dimensionId).name !== filters.dimension) return false;
+      if (filters.severity !== "All" && s.severity !== filters.severity) return false;
+      if (filters.knowledgeDomain !== "All" && s.scopeId !== "Enterprise" && s.scopeId !== filters.knowledgeDomain) return false;
+      if (kpiFocus === "critical-signals" && s.severity !== "Critical" && s.severity !== "High") return false;
+      if (kpiFocus === "attention-domains" && s.status === "Healthy") return false;
       if (q && ![s.id, s.name, s.sourceModule, s.scopeId].join(" ").toLowerCase().includes(q)) return false;
       return true;
     });
