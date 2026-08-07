@@ -1,6 +1,7 @@
 /** Team Persona Library — panels. Reuses ECF primitives and Tailwind conventions. */
 
 import { Fragment, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -278,7 +279,15 @@ export function InventoryPanel({
                           ))}
                           <td className={cn("whitespace-nowrap px-2", pad)} onClick={(e) => e.stopPropagation()}>
                             <div className="flex gap-1">
-                              <Button size="sm" variant="outline" className="h-6 text-[10.5px]" onClick={() => onOpen(p)}>Open</Button>
+                              {p.teamName === "Cloud FinOps" ? (
+                                <Link
+                                  to="/enterprise-cognitive-fabric/modeling-memory/cloud-finops-attribute-store"
+                                  className="inline-flex h-6 items-center rounded-md border border-amber-300 bg-amber-300 px-2 text-[10.5px] font-medium text-slate-900 hover:bg-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                                  aria-label="Open Cloud FinOps Persona Attribute Store"
+                                >Open</Link>
+                              ) : (
+                                <Button size="sm" variant="outline" className="h-6 text-[10.5px]" onClick={() => onOpen(p)}>Open</Button>
+                              )}
                               <Button
                                 size="sm" variant="ghost" className="h-6 text-[10.5px]"
                                 aria-label={`Toggle summary for ${p.teamName}`}

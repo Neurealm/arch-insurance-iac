@@ -369,7 +369,7 @@ import BusinessConditionScaffold from "./pages/enterprise-cognitive-fabric/Busin
 import BusinessConditionExtraction from "./pages/enterprise-cognitive-fabric/BusinessConditionExtraction.tsx";
 import TeamPersonaConstruction from "./pages/enterprise-cognitive-fabric/TeamPersonaConstruction.tsx";
 import TeamPersonaLibrary from "./pages/enterprise-cognitive-fabric/TeamPersonaLibrary.tsx";
-const CloudFinOpsAttributeStore = lazy(() => import("./pages/enterprise-cognitive-fabric/finops-attribute-store/CloudFinOpsAttributeStore"));
+import CloudFinOpsAttributeStore from "./pages/enterprise-cognitive-fabric/finops-attribute-store/CloudFinOpsAttributeStore";
 import PersonaStudioScaffold from "./pages/enterprise-cognitive-fabric/PersonaStudioScaffold.tsx";
 import PersonaValidation from "./pages/enterprise-cognitive-fabric/PersonaValidation.tsx";
 import EnterpriseCognitiveMemory from "./pages/enterprise-cognitive-fabric/EnterpriseCognitiveMemory.tsx";
