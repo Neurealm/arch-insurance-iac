@@ -596,15 +596,16 @@ export default function DiscoveryConfiguration() {
             <Button size="sm" variant="outline" className="h-8 text-[12px]" onClick={() => { setNewMode("clone"); setNewOpen(true); }}>
               <Copy className="mr-1 h-3.5 w-3.5" aria-hidden /> Clone
             </Button>
-            <Button size="sm" variant="outline" className="h-8 text-[12px]"
-              onClick={() => toast.info("Validation arrives with configuration governance", { description: "Prompt 2 adds validation, review, and policy conflict analysis." })}>
-              Validate Configuration
+            <Button size="sm" variant="outline" className="h-8 text-[12px]" onClick={runValidation} disabled={validating}>
+              {validating ? "Validating…" : "Validate Configuration"}
             </Button>
             <Button size="sm" variant="outline" className="h-8 text-[12px]" onClick={startDryRun}>
               <Play className="mr-1 h-3.5 w-3.5" aria-hidden /> Run Preview
             </Button>
-            <Button size="sm" variant="outline" className="h-8 text-[12px]"
-              onClick={() => toast.info("Activation arrives with configuration governance", { description: "Approval, publishing, activation, and rollback are Prompt 2 capabilities." })}>
+            <Button size="sm" variant="outline" className="h-8 text-[12px]" onClick={() => setSearchOpen(true)} aria-label="Global search">
+              <Search className="mr-1 h-3.5 w-3.5" aria-hidden /> Search
+            </Button>
+            <Button size="sm" variant="outline" className="h-8 text-[12px]" onClick={() => setActivationOpen(true)}>
               Activate
             </Button>
             <DropdownMenu>
@@ -613,14 +614,28 @@ export default function DiscoveryConfiguration() {
                   <MoreHorizontal className="h-4 w-4" aria-hidden />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="max-h-[70vh] overflow-y-auto">
                 <DropdownMenuLabel className="text-[11px]">Configuration</DropdownMenuLabel>
                 <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-workbench")}>Open workbench</DropdownMenuItem>
                 <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-preview")}>Open preview</DropdownMenuItem>
                 <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-quality")}>Open quality</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-[12px]" onClick={() => toast.info("Governed export arrives with configuration governance")}>Governed export</DropdownMenuItem>
-                <DropdownMenuItem className="text-[12px]" onClick={() => toast.info("Version history arrives with configuration governance")}>Version history</DropdownMenuItem>
+                <DropdownMenuLabel className="text-[11px]">Governance</DropdownMenuLabel>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-validation")}>Validation</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-reviews")}>Review queue</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-approvals")}>Approval chain</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-versions")}>Version history</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-comparison")}>Version comparison</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-drift")}>Configuration drift</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => setRollbackOpen(true)}>Rollback configuration</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-[12px]" onClick={() => setExportOpen(true)}>Governed export</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => setStoryStep(0)}>Demo Story</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-[11px]">Demo scenarios</DropdownMenuLabel>
+                {demoScenarios.map((s) => (
+                  <DropdownMenuItem key={s} className="text-[12px]" onClick={() => applyScenario(s)}>{s}</DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -628,11 +643,17 @@ export default function DiscoveryConfiguration() {
 
         <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
           <span className="text-[11px] text-slate-500">Configuration service state</span>
-          <StatusBadge tone={preview.blockingIssues.length ? "red" : "amber"}>{serviceState}</StatusBadge>
-          <StatusBadge tone="green">Active v4.2 in Production</StatusBadge>
+          <StatusBadge tone={activationBlocked ? "red" : preview.blockingIssues.length ? "red" : "amber"}>{scenarioState.serviceState}</StatusBadge>
+          <StatusBadge tone="green">
+            {versions.find((v) => v.status === "Active")?.version === "4.3" ? "Active v4.3 in Production" : "Active v4.2 in Production"}
+          </StatusBadge>
           <StatusBadge tone="blue">{draft.name}</StatusBadge>
+          <StatusBadge tone="slate">{serviceState}</StatusBadge>
           <span className="ml-auto text-[11px] text-slate-500">Refreshed {refreshedAt}</span>
         </div>
+
+        <ScenarioBanner scenario={scenario} state={scenarioState} />
+
 
         {/* filters */}
         <section className="mb-3 rounded-xl border border-slate-200 bg-white" aria-label="Global filters">
