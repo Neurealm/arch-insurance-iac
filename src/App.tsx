@@ -815,6 +815,9 @@ const App = () => (
             <Route path="persona-studio/persona-version-history" element={<PersonaStudioScaffold title="Persona Version History" purpose="Version lineage, change summaries, and approval history for Team Personas." />} />
             <Route path="evaluation/cognitive-intake" element={<CognitiveIntake />} />
             <Route path="cognitive-intake" element={<CognitiveIntake />} />
+            <Route path="evaluation/cognitive-readiness-assessment" element={<CognitiveReadinessAssessment />} />
+            <Route path="cognitive-readiness-assessment" element={<CognitiveReadinessAssessment />} />
+
             <Route path="evaluation/persona-impact-analysis" element={<PersonaImpactAnalysis />} />
             <Route path="persona-impact-analysis" element={<PersonaImpactAnalysis />} />
             <Route path="evaluation/cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
