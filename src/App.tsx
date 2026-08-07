@@ -369,6 +369,7 @@ import BusinessConditionScaffold from "./pages/enterprise-cognitive-fabric/Busin
 import BusinessConditionExtraction from "./pages/enterprise-cognitive-fabric/BusinessConditionExtraction.tsx";
 import TeamPersonaConstruction from "./pages/enterprise-cognitive-fabric/TeamPersonaConstruction.tsx";
 import TeamPersonaLibrary from "./pages/enterprise-cognitive-fabric/TeamPersonaLibrary.tsx";
+import CloudFinOpsAttributeStore from "./pages/enterprise-cognitive-fabric/finops-attribute-store/CloudFinOpsAttributeStore";
 import PersonaStudioScaffold from "./pages/enterprise-cognitive-fabric/PersonaStudioScaffold.tsx";
 import PersonaValidation from "./pages/enterprise-cognitive-fabric/PersonaValidation.tsx";
 import EnterpriseCognitiveMemory from "./pages/enterprise-cognitive-fabric/EnterpriseCognitiveMemory.tsx";
@@ -805,6 +806,8 @@ const App = () => (
             <Route path="team-persona-construction" element={<TeamPersonaConstruction />} />
             <Route path="persona-studio/team-persona-library" element={<TeamPersonaLibrary />} />
             <Route path="team-persona-library" element={<TeamPersonaLibrary />} />
+            <Route path="modeling-memory/cloud-finops-attribute-store" element={<CloudFinOpsAttributeStore />} />
+            <Route path="persona-studio/cloud-finops-attribute-store" element={<CloudFinOpsAttributeStore />} />
             <Route path="persona-studio/persona-validation" element={<PersonaValidation />} />
             <Route path="persona-validation" element={<PersonaValidation />} />
             <Route path="cognitive-memory/enterprise-cognitive-memory" element={<EnterpriseCognitiveMemory />} />
