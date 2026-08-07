@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   ArrowLeft, MessageSquare, Flag, RefreshCw, Search, CheckCircle2, Inbox,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/eoc/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
