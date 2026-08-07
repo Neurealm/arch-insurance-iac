@@ -11,7 +11,9 @@ import AgentGrid, { type AgentChip } from "../components/AgentGrid";
 import {
   Panel, Card, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer,
   useDetailDrawer, toneMap, LinkAction, type Kpi,
+  ViewModeToggle, FullOnly, execKpis, type ViewMode,
 } from "../components/primitives";
+import { DomainContextBar } from "../components/bands";
 
 const kpis: Kpi[] = [
   { id: "eval", icon: Server, label: "Resources Evaluated", value: "18,428", sub: "across 6 accounts", tone: "blue" },
@@ -147,6 +149,7 @@ const capability: [string, string, string][] = [
 
 export default function ResourceRightsizingDecisionWorkspace() {
   const drawer = useDetailDrawer();
+  const [mode, setMode] = useState<ViewMode>("exec");
   const [active, setActive] = useState<string[]>(["cpu", "memory"]);
   const toggle = (k: string) =>
     setActive((a) => (a.includes(k) ? a.filter((x) => x !== k) : [...a, k]));
@@ -163,9 +166,11 @@ export default function ResourceRightsizingDecisionWorkspace() {
           rows: [["Duration", "48 seconds"], ["New candidates", "37"], ["Withdrawn", "12"], ["Evidence freshness", "98.4% within SLA"]],
         })}
         onSecondary={(l) => drawer.open({ title: l, subtitle: "Synthetic demonstration action", tone: "slate", bullets: ["No external system was contacted.", "Evidence bundle generated locally."] })}
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
       />
+      <DomainContextBar headline="Opportunity in this domain: $2.9M · Confidence 94% · Risk Low" nextSlug="idle-orphaned-resources" nextLabel="Idle & Orphaned Resources" />
 
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({
+      <KpiStrip kpis={execKpis(kpis, mode)} onSelect={(k) => drawer.open({
         title: k.label, subtitle: k.sub, tone: k.tone,
         rows: [["Current value", k.value], ["Trend (30d)", "improving"], ["Source", "Agentic FinOps twin"]],
       })} />
@@ -255,6 +260,7 @@ export default function ResourceRightsizingDecisionWorkspace() {
       </Panel>
 
       {/* 3 */}
+      <FullOnly mode={mode}>
       <Panel index={3} title="Agentic investigation">
         <AgentGrid
           agents={agents}
@@ -265,8 +271,10 @@ export default function ResourceRightsizingDecisionWorkspace() {
           })}
         />
       </Panel>
+      </FullOnly>
 
       {/* 4 */}
+      <FullOnly mode={mode}>
       <Panel
         index={4}
         title="Observed workload behavior"
@@ -303,6 +311,7 @@ export default function ResourceRightsizingDecisionWorkspace() {
           The 01:00–02:00 UTC settlement burst crosses the saturation threshold on the current instance type. Any sizing decision that ignores this window will breach the latency SLO.
         </p>
       </Panel>
+      </FullOnly>
 
       {/* 5 */}
       <Panel index={5} title="Digital twin scenario simulation">
@@ -320,8 +329,9 @@ export default function ResourceRightsizingDecisionWorkspace() {
         </DataTable>
       </Panel>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1fr_1fr]"}>
         {/* 6 */}
+        <FullOnly mode={mode}>
         <Panel index={6} title="Confidence & evidence gap">
           <DonutCard
             total="82%"
@@ -355,8 +365,10 @@ export default function ResourceRightsizingDecisionWorkspace() {
             </div>
           </div>
         </Panel>
+        </FullOnly>
 
         {/* 7 */}
+        <FullOnly mode={mode}>
         <Panel index={7} title="Operating responsibility">
           <DataTable head={<><Th>Function</Th><Th>Responsibility</Th><Th right>Role</Th></>}>
             {responsibility.map(([fn, resp, role]) => (
@@ -368,9 +380,11 @@ export default function ResourceRightsizingDecisionWorkspace() {
             ))}
           </DataTable>
         </Panel>
+        </FullOnly>
       </div>
 
       {/* 8 */}
+      <FullOnly mode={mode}>
       <Panel index={8} title="Maturity & adoption path">
         <div className="grid gap-3 md:grid-cols-3">
           {[
@@ -403,6 +417,7 @@ export default function ResourceRightsizingDecisionWorkspace() {
           </div>
         </div>
       </Panel>
+      </FullOnly>
 
       {/* 9 + bands */}
       <PageBands lifecycle={lifecycleWithActive("Decide")} />

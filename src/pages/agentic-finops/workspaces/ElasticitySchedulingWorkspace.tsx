@@ -10,7 +10,9 @@ import SavingsFunnel from "../components/SavingsFunnel";
 import {
   Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer, ConfidenceCell,
   useDetailDrawer, GaugeRing, ProgressRow, type Kpi,
+  ViewModeToggle, FullOnly, execKpis, type ViewMode,
 } from "../components/primitives";
+import { DomainContextBar } from "../components/bands";
 
 const kpis: Kpi[] = [
   { id: "elig", icon: Server, label: "Total Eligible Resources", value: "2,186", sub: "non-prod + burst prod", tone: "blue" },
@@ -103,6 +105,7 @@ const executionPlan: [string, string, string, string, string, string][] = [
 
 export default function ElasticitySchedulingWorkspace() {
   const drawer = useDetailDrawer();
+  const [mode, setMode] = useState<ViewMode>("exec");
   const [tab, setTab] = useState<(typeof patternTabs)[number]>("By Hour");
   const data = tab === "By Hour" ? hourly : tab === "By Day of Week" ? daily : byEnv;
 
@@ -110,14 +113,17 @@ export default function ElasticitySchedulingWorkspace() {
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
       <FinOpsHeader
         title="Elasticity & Scheduling Workspace"
-        tagline="Optimize runtime by aligning compute resources to actual demand patterns with intelligent scheduling, scale policies, and automation."
+        tagline="Save $1.1M by running compute only when the business actually needs it."
         secondaryActions={[{ label: "Export Schedules", icon: "export" }, { label: "Schedule Simulator", icon: "simulate" }]}
         meta={{ lastAnalysis: "16 minutes ago", freshness: "98.9% within SLA", resources: "2,186 eligible resources analyzed" }}
         onPrimary={() => drawer.open({ title: "Elasticity analysis run", tone: "blue", rows: [["Opportunities", "627"], ["Monthly savings", "$412K"], ["Duration", "36 seconds"]] })}
         onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
       />
 
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+      <DomainContextBar headline="Opportunity in this domain: $1.1M · Confidence 91% · Risk Low" nextSlug="storage-data-lifecycle" nextLabel="Storage & Data Lifecycle" />
+
+      <KpiStrip kpis={execKpis(kpis, mode)} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
 
       {/* 1 */}
       <Panel index={1} title="Top elasticity & scheduling opportunities">
@@ -135,8 +141,9 @@ export default function ElasticitySchedulingWorkspace() {
         </DataTable>
       </Panel>
 
-      <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1.4fr_1fr]"}>
         {/* 2 */}
+        <FullOnly mode={mode}>
         <Panel index={2} title="Usage pattern overview" action={<span>Recommended runtime window shaded</span>}>
           <div className="mb-2 flex flex-wrap gap-1.5">
             {patternTabs.map((t) => (
@@ -166,6 +173,7 @@ export default function ElasticitySchedulingWorkspace() {
             </AreaChart>
           </ResponsiveContainer>
         </Panel>
+        </FullOnly>
 
         {/* 3 */}
         <Panel index={3} title="Potential savings breakdown">
@@ -181,6 +189,7 @@ export default function ElasticitySchedulingWorkspace() {
         </Panel>
       </div>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
         {/* 4 */}
         <Panel index={4} title="Scheduling impact summary">
@@ -223,7 +232,9 @@ export default function ElasticitySchedulingWorkspace() {
           </DataTable>
         </Panel>
       </div>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-2">
         {/* 6 */}
         <Panel index={6} title="Demand pattern insights">
@@ -249,7 +260,9 @@ export default function ElasticitySchedulingWorkspace() {
           </DataTable>
         </Panel>
       </div>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-2">
         {/* 8 */}
         <Panel index={8} title="Scheduling policy & guardrails">
@@ -277,7 +290,9 @@ export default function ElasticitySchedulingWorkspace() {
           </DataTable>
         </Panel>
       </div>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       {/* 10 */}
       <Panel index={10} title="Execution plan">
         <DataTable head={<><Th>Step</Th><Th>Action</Th><Th>Type</Th><Th>Automation</Th><Th right>Duration</Th><Th>Rollback</Th></>}>
@@ -291,9 +306,11 @@ export default function ElasticitySchedulingWorkspace() {
           ))}
         </DataTable>
       </Panel>
+      </FullOnly>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1fr_1.4fr]"}>
         {/* 11 */}
+        <FullOnly mode={mode}>
         <Panel index={11} title="Confidence & risk overview">
           <GaugeRing pct={91} label="Overall confidence" sub="Low risk" />
           <div className="mt-3 space-y-2">
@@ -313,6 +330,7 @@ export default function ElasticitySchedulingWorkspace() {
             </ul>
           </div>
         </Panel>
+        </FullOnly>
 
         {/* 12 */}
         <Panel index={12} title="Value realization tracker">

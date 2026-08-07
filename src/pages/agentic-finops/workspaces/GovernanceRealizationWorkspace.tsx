@@ -6,10 +6,11 @@ import { Bar, BarChart, CartesianGrid, Legend, Line, ComposedChart, ResponsiveCo
 import { cn } from "@/lib/utils";
 import FinOpsHeader from "../components/FinOpsHeader";
 import PageBands, { lifecycleWithActive } from "../components/PageBands";
-import SyntheticFooter from "../components/SyntheticFooter";
+import { DomainContextBar } from "../components/bands";
 import {
   Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer,
-  useDetailDrawer, GaugeRing, ProgressRow, toneMap, type Kpi, type Tone,
+  useDetailDrawer, GaugeRing, ProgressRow, toneMap, ViewModeToggle, FullOnly, execKpis,
+  type Kpi, type Tone, type ViewMode,
 } from "../components/primitives";
 
 const kpis: Kpi[] = [
@@ -177,27 +178,32 @@ export default function GovernanceRealizationWorkspace() {
   const [fw, setFw] = useState<(typeof frameworkTabs)[number]>("Policies");
   const [ap, setAp] = useState<(typeof approvalTabs)[number]>("Pending");
   const [acc, setAcc] = useState<(typeof accountabilityTabs)[number]>("By Business Unit");
+  const [mode, setMode] = useState<ViewMode>("exec");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
       <FinOpsHeader
         title="Governance & Realization Workspace"
-        tagline="Drive FinOps accountability, policy compliance, and measurable business value. Govern spend, enforce standards, track commitments, and realize financial and operational outcomes."
+        tagline="Prove $5.8M of banked savings and keep 94.2% of cloud spend inside policy."
         secondaryActions={[{ label: "Export Audit Pack", icon: "export" }, { label: "Governance Simulator", icon: "simulate" }]}
         meta={{ lastAnalysis: "5 minutes ago", freshness: "99.6% within SLA", resources: "$30.4M cloud spend governed" }}
         onPrimary={() => drawer.open({ title: "Governance evaluation run", tone: "emerald", rows: [["Policies evaluated", "6"], ["Resources checked", "18,428"], ["Violations", "12"], ["Compliance", "94.2%"]] })}
         onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
       />
 
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+      <DomainContextBar headline="Realized savings: $5.8M · Policy compliance 94.2% · Risk Low" />
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1.6fr]">
+      <KpiStrip kpis={execKpis(kpis, mode)} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1fr_1.6fr]"}>
         {/* 1 */}
         <Panel index={1} title="Policy compliance overview">
           <DonutCard total="94.2%" totalLabel="Compliant" data={compliance} />
         </Panel>
 
         {/* 2 */}
+        <FullOnly mode={mode}>
         <Panel index={2} title="Governance framework">
           <div className="mb-2 flex flex-wrap gap-1.5">
             {frameworkTabs.map((t) => (
@@ -219,10 +225,12 @@ export default function GovernanceRealizationWorkspace() {
             ))}
           </DataTable>
         </Panel>
+        </FullOnly>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1.6fr_1fr]"}>
         {/* 3 */}
+        <FullOnly mode={mode}>
         <Panel index={3} title="Approval workflow">
           <div className="mb-2 flex flex-wrap gap-1.5">
             {approvalTabs.map((t) => (
@@ -243,6 +251,7 @@ export default function GovernanceRealizationWorkspace() {
             ))}
           </DataTable>
         </Panel>
+        </FullOnly>
 
         {/* 4 */}
         <Panel index={4} title="Value realization tracker">
@@ -255,6 +264,7 @@ export default function GovernanceRealizationWorkspace() {
       </div>
 
       {/* 5 */}
+      <FullOnly mode={mode}>
       <Panel index={5} title="Financial accountability">
         <div className="mb-2 flex flex-wrap gap-1.5">
           {accountabilityTabs.map((t) => (
@@ -275,7 +285,9 @@ export default function GovernanceRealizationWorkspace() {
           ))}
         </DataTable>
       </Panel>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-2">
         {/* 6 */}
         <Panel index={6} title="Risk & compliance monitoring">
@@ -308,8 +320,10 @@ export default function GovernanceRealizationWorkspace() {
           </div>
         </Panel>
       </div>
+      </FullOnly>
 
       {/* 8 */}
+      <FullOnly mode={mode}>
       <Panel index={8} title="Realization timeline">
         <ResponsiveContainer width="100%" height={230}>
           <ComposedChart data={timeline} margin={{ top: 8, right: 10, left: -14, bottom: 0 }}>
@@ -324,8 +338,10 @@ export default function GovernanceRealizationWorkspace() {
           </ComposedChart>
         </ResponsiveContainer>
       </Panel>
+      </FullOnly>
 
       {/* 9 */}
+      <FullOnly mode={mode}>
       <Panel index={9} title="Governance insights">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {insights.map((i) => {
@@ -339,7 +355,9 @@ export default function GovernanceRealizationWorkspace() {
           })}
         </div>
       </Panel>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-2">
         {/* 10 */}
         <Panel index={10} title="Recommendations">
@@ -368,6 +386,7 @@ export default function GovernanceRealizationWorkspace() {
           </DataTable>
         </Panel>
       </div>
+      </FullOnly>
 
       {/* 12 */}
       <Panel index={12} title="Business outcomes">
@@ -382,8 +401,7 @@ export default function GovernanceRealizationWorkspace() {
         </div>
       </Panel>
 
-      <PageBands lifecycle={lifecycleWithActive("Realize")} />
-      <SyntheticFooter tagline="Smarter governance. Greater value. A stronger business." />
+      <PageBands lifecycle={lifecycleWithActive("Govern")} tagline="Smarter governance. Greater value. A stronger business." />
 
       <DetailDrawer payload={drawer.payload} onClose={drawer.close} />
     </div>

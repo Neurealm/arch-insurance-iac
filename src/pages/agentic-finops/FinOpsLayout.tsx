@@ -130,7 +130,7 @@ export default function FinOpsLayout() {
           <div className="flex items-center gap-2 text-[11px] text-slate-500 min-w-0">
             <Link to="/prod-resilience-twin" className="hover:text-indigo-600">Cloud FinOps</Link>
             <span>/</span>
-            <span className="text-slate-700 font-medium">Optimization Intelligence</span>
+            <span className="text-slate-700 font-medium">{active?.group ?? "Optimization Intelligence"}</span>
             {active && (
               <>
                 <span>/</span>

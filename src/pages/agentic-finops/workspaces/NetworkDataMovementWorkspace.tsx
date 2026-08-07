@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Network, Upload, Shuffle, Globe2, Router, Zap, Target, Activity, CheckCircle2,
 } from "lucide-react";
@@ -7,8 +8,9 @@ import PageBands, { lifecycleWithActive } from "../components/PageBands";
 import AgentGrid, { type AgentChip } from "../components/AgentGrid";
 import {
   Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer, ConfidenceCell,
-  useDetailDrawer, CostDriverBars, Spark, toneMap, type Kpi,
+  useDetailDrawer, CostDriverBars, Spark, toneMap, ViewModeToggle, FullOnly, execKpis, type Kpi, type ViewMode,
 } from "../components/primitives";
+import { DomainContextBar } from "../components/bands";
 
 const kpis: Kpi[] = [
   { id: "spend", icon: Network, label: "Total Network Spend", value: "$2.87M", sub: "annualized", tone: "blue" },
@@ -141,21 +143,25 @@ function arc(from: number[], to: number[]) {
 
 export default function NetworkDataMovementWorkspace() {
   const drawer = useDetailDrawer();
+  const [mode, setMode] = useState<ViewMode>("exec");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
       <FinOpsHeader
         title="Network & Data Movement Workspace"
-        tagline="Identify and optimize inefficient traffic flows, egress costs, cross-region movement, and networking resources."
+        tagline="Cut $0.9M of avoidable data movement without changing customer experience."
         secondaryActions={[{ label: "Export Flow Analysis", icon: "export" }, { label: "Traffic Simulator", icon: "simulate" }]}
         meta={{ lastAnalysis: "19 minutes ago", freshness: "97.2% within SLA", resources: "126 TB monthly traffic analyzed" }}
         onPrimary={() => drawer.open({ title: "Network analysis run", tone: "blue", rows: [["Flows analyzed", "18,904"], ["Opportunities", "43"], ["Potential savings", "$438K/mo"]] })}
         onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
       />
 
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+      <DomainContextBar headline="Opportunity in this domain: $0.9M · Confidence 74% · Risk Medium" nextSlug="platform-architecture-efficiency" nextLabel="Platform & Architecture Efficiency" />
 
-      <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
+      <KpiStrip kpis={execKpis(kpis, mode)} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1.5fr_1fr]"}>
         {/* 1 */}
         <Panel index={1} title="Top costly traffic flows">
           <DataTable head={<>
@@ -172,14 +178,17 @@ export default function NetworkDataMovementWorkspace() {
         </Panel>
 
         {/* 2 */}
+        <FullOnly mode={mode}>
         <Panel index={2} title="Traffic by type">
           <DonutCard total="$2.87M" totalLabel="Annual network spend" data={byType} />
         </Panel>
+        </FullOnly>
       </div>
 
       {/* 3 */}
       <Panel index={3} title="Geographic traffic map">
-        <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
+        <div className={mode === "exec" ? "grid gap-4" : "grid gap-4 xl:grid-cols-[2fr_1fr]"}>
+          <FullOnly mode={mode}>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-2">
             <svg viewBox="0 0 100 62" className="h-[260px] w-full" role="img" aria-label="Global traffic flow map">
               <rect width="100" height="62" fill="#f8fafc" />
@@ -207,6 +216,7 @@ export default function NetworkDataMovementWorkspace() {
               ))}
             </div>
           </div>
+          </FullOnly>
 
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Primary recommendations</div>
@@ -244,6 +254,7 @@ export default function NetworkDataMovementWorkspace() {
         </DataTable>
       </Panel>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-3">
         {/* 5 */}
         <Panel index={5} title="Data flow insights">
@@ -277,8 +288,10 @@ export default function NetworkDataMovementWorkspace() {
           </div>
         </Panel>
       </div>
+      </FullOnly>
 
       {/* 8 */}
+      <FullOnly mode={mode}>
       <Panel index={8} title="Traffic flow visualization">
         <div className="grid gap-4 md:grid-cols-3">
           {[["Sources", sankeySources], ["Traffic types", sankeyTypes], ["Destinations", sankeyDest]].map(([label, items]) => (
@@ -302,8 +315,10 @@ export default function NetworkDataMovementWorkspace() {
           Band width represents share of monthly transferred volume. Sources feed traffic types, which resolve to destination classes.
         </p>
       </Panel>
+      </FullOnly>
 
       {/* 9 */}
+      <FullOnly mode={mode}>
       <Panel index={9} title="Digital twin investigation">
         <AgentGrid agents={agents} columns="md:grid-cols-3 xl:grid-cols-6"
           engineNote="18,904 flows correlated across VPC flow logs, service maps, and billing records"
@@ -329,7 +344,9 @@ export default function NetworkDataMovementWorkspace() {
           </div>
         </div>
       </Panel>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
         {/* 10 */}
         <Panel index={10} title="Execution plan">
@@ -359,8 +376,9 @@ export default function NetworkDataMovementWorkspace() {
           </ul>
         </Panel>
       </div>
+      </FullOnly>
 
-      <PageBands lifecycle={lifecycleWithActive("Contextualize")} />
+      <PageBands lifecycle={lifecycleWithActive("Validate")} />
 
       <DetailDrawer payload={drawer.payload} onClose={drawer.close} />
     </div>

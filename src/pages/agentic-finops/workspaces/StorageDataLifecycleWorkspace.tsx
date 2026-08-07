@@ -9,7 +9,9 @@ import SavingsFunnel from "../components/SavingsFunnel";
 import {
   Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer, ConfidenceCell,
   useDetailDrawer, SimpleBars, Spark, GaugeRing, toneMap, type Kpi,
+  ViewModeToggle, FullOnly, execKpis, type ViewMode,
 } from "../components/primitives";
+import { DomainContextBar } from "../components/bands";
 
 const kpis: Kpi[] = [
   { id: "total", icon: Database, label: "Total Storage", value: "1.84 PB", sub: "across 4 clouds", tone: "blue" },
@@ -108,21 +110,25 @@ export default function StorageDataLifecycleWorkspace() {
   const drawer = useDetailDrawer();
   const [tab, setTab] = useState<(typeof accessTabs)[number]>("By Last Accessed");
   const [selected, setSelected] = useState(dataSets[0]);
+  const [mode, setMode] = useState<ViewMode>("exec");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
       <FinOpsHeader
         title="Storage & Data Lifecycle Workspace"
-        tagline="Optimize storage costs by aligning data with access patterns, business value, compliance, and lifecycle policies."
+        tagline="Release $1.2M by matching data storage tiers to how the business actually uses the data."
         secondaryActions={[{ label: "Export Lifecycle Rules", icon: "export" }, { label: "Tiering Simulator", icon: "simulate" }]}
         meta={{ lastAnalysis: "31 minutes ago", freshness: "96.8% within SLA", resources: "1.84 PB catalogued" }}
         onPrimary={() => drawer.open({ title: "Storage analysis run", tone: "blue", rows: [["Data sets", "214"], ["Opportunities", "68"], ["Savings", "$612K/yr"]] })}
         onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
       />
 
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+      <DomainContextBar headline="Opportunity in this domain: $1.2M · Confidence 88% · Risk Low" nextSlug="network-data-movement" nextLabel="Network & Data Movement" />
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1.3fr]">
+      <KpiStrip kpis={execKpis(kpis, mode)} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1fr_1.3fr]"}>
         {/* 1 */}
         <Panel index={1} title="Storage inventory by tier">
           <DonutCard total="1.84 PB" totalLabel="Total storage" data={tiers} />
@@ -137,6 +143,7 @@ export default function StorageDataLifecycleWorkspace() {
         </Panel>
 
         {/* 2 */}
+        <FullOnly mode={mode}>
         <Panel index={2} title="Data access pattern analysis">
           <div className="mb-2 flex flex-wrap gap-1.5">
             {accessTabs.map((t) => (
@@ -152,13 +159,16 @@ export default function StorageDataLifecycleWorkspace() {
             <span className="font-semibold">705 TB (38.3%)</span> has not been accessed in over one year yet still sits on hot storage tiers.
           </div>
         </Panel>
+        </FullOnly>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1.3fr]">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1fr_1.3fr]"}>
         {/* 3 */}
+        <FullOnly mode={mode}>
         <Panel index={3} title="Lifecycle policy coverage">
           <DonutCard total="93.2%" totalLabel="Compliance coverage" data={policyCoverage} />
         </Panel>
+        </FullOnly>
 
         {/* 4 */}
         <Panel index={4} title="Cost optimization opportunities">
@@ -182,6 +192,7 @@ export default function StorageDataLifecycleWorkspace() {
       </div>
 
       {/* 5 */}
+      <FullOnly mode={mode}>
       <Panel index={5} title="Data set opportunity list">
         <DataTable head={<>
           <Th>Data set / bucket</Th><Th>Type</Th><Th>BU</Th><Th>Last accessed</Th><Th>Current tier</Th><Th>Optimal tier</Th>
@@ -202,7 +213,9 @@ export default function StorageDataLifecycleWorkspace() {
           ))}
         </DataTable>
       </Panel>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-[1fr_1.3fr]">
         {/* 6 */}
         <Panel index={6} title="Data set details">
@@ -252,8 +265,10 @@ export default function StorageDataLifecycleWorkspace() {
           </div>
         </Panel>
       </div>
+      </FullOnly>
 
       {/* 8 */}
+      <FullOnly mode={mode}>
       <Panel index={8} title="Policy violations & risks">
         <DataTable head={<><Th>Violation</Th><Th>Data set</Th><Th right>Severity</Th><Th>Impact</Th><Th>Remediation</Th></>}>
           {policyViolations.map(([v, ds, sev, imp, rem]) => (
@@ -265,7 +280,9 @@ export default function StorageDataLifecycleWorkspace() {
           ))}
         </DataTable>
       </Panel>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-2">
         {/* 9 */}
         <Panel index={9} title="Digital twin agent investigation">
@@ -298,15 +315,18 @@ export default function StorageDataLifecycleWorkspace() {
           </div>
         </Panel>
       </div>
+      </FullOnly>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1fr_1.4fr]"}>
         {/* 11 */}
+        <FullOnly mode={mode}>
         <Panel index={11} title="Confidence & risk">
           <GaugeRing pct={89} label="Overall confidence" sub="Low risk" />
           <p className="mt-2 text-center text-[11.5px] text-slate-600">
             Retrieval cost, compliance holds, and owner confirmation modeled for every proposed transition.
           </p>
         </Panel>
+        </FullOnly>
 
         {/* 12 */}
         <Panel index={12} title="Value realization tracker">

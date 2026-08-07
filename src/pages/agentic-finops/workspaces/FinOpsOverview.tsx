@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { DollarSign, TrendingDown, Bot, ShieldCheck, Gauge, Layers, Clock, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Card, CostDriverBars, DataTable, DetailDrawer, DonutCard, Kpi, KpiStrip, Panel,
   ProgressRow, RiskCell, Td, Th, TrendArea, useDetailDrawer, Badge, LinkAction, ConfidenceCell,
+  ViewModeToggle, FullOnly, execKpis, type ViewMode,
 } from "../components/primitives";
-import { WorkspaceFooter, WorkspaceShell, FilterBar, defaultFabric, defaultMaturity } from "../components/bands";
+import { WorkspaceFooter, defaultFabric, defaultMaturity, finopsLifecycle } from "../components/bands";
+import FinOpsHeader from "../components/FinOpsHeader";
 import { finopsBase, finopsPages } from "../pages";
+
 
 const kpis: Kpi[] = [
   { id: "spend", icon: DollarSign, label: "Annualized spend", value: "$48.2M", sub: "+3.1% vs prior qtr", tone: "blue" },
@@ -56,16 +60,18 @@ const domains = [
 
 export default function FinOpsOverview() {
   const drawer = useDetailDrawer();
+  const [mode, setMode] = useState<ViewMode>("exec");
   const page = finopsPages[0];
 
   return (
-    <WorkspaceShell
-      title={page.title}
-      subtitle={page.subtitle}
-      actions={<FilterBar chips={["All accounts", "All providers", "Last 90 days", "Include forecast"]} />}
-    >
+    <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
+      <FinOpsHeader
+        title={page.title}
+        tagline="One portfolio view of where cloud money is going, what can be recovered, and what has already been banked."
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
+      />
       <KpiStrip
-        kpis={kpis}
+        kpis={execKpis(kpis, mode)}
         onSelect={(k) =>
           drawer.open({
             title: k.label, subtitle: `${k.value} — ${k.sub ?? ""}`, tone: k.tone,
@@ -143,36 +149,42 @@ export default function FinOpsOverview() {
         </DataTable>
       </Panel>
 
-      <div className="grid gap-5 md:grid-cols-3">
-        <Card title="Agentic activity (30d)">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li className="flex justify-between"><span>Candidates generated</span><span className="font-medium">3,841</span></li>
-            <li className="flex justify-between"><span>Auto-validated safe</span><span className="font-medium">2,104</span></li>
-            <li className="flex justify-between"><span>Escalated to human</span><span className="font-medium">612</span></li>
-            <li className="flex justify-between"><span>Executed under policy</span><span className="font-medium">1,284</span></li>
-            <li className="flex justify-between"><span>Auto-rolled back</span><span className="font-medium">9</span></li>
-          </ul>
-        </Card>
-        <Card title="Guardrails in force">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li>Change freeze windows honored (retail peak)</li>
-            <li>Prod tier-1 requires two-person approval</li>
-            <li>Max 5% concurrent capacity reduction per service</li>
-            <li>Automatic rollback on SLO burn &gt; 2x</li>
-          </ul>
-        </Card>
-        <Card title="Financial governance">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li>Savings booked only after 2 billing cycles</li>
-            <li>Showback allocated to 38 cost centers</li>
-            <li>Unit economics tracked per 1K transactions</li>
-            <li>Quarterly true-up with Finance close</li>
-          </ul>
-        </Card>
-      </div>
+      <FullOnly mode={mode}>
+        <div className="grid gap-5 md:grid-cols-3">
+          <Card title="Agentic activity (30d)">
+            <ul className="space-y-1.5 text-[12.5px] text-slate-700">
+              <li className="flex justify-between"><span>Candidates generated</span><span className="font-medium">3,841</span></li>
+              <li className="flex justify-between"><span>Auto-validated safe</span><span className="font-medium">2,104</span></li>
+              <li className="flex justify-between"><span>Escalated to human</span><span className="font-medium">612</span></li>
+              <li className="flex justify-between"><span>Executed under policy</span><span className="font-medium">1,284</span></li>
+              <li className="flex justify-between"><span>Auto-rolled back</span><span className="font-medium">9</span></li>
+            </ul>
+          </Card>
+          <Card title="Guardrails in force">
+            <ul className="space-y-1.5 text-[12.5px] text-slate-700">
+              <li>Change freeze windows honored (retail peak)</li>
+              <li>Prod tier-1 requires two-person approval</li>
+              <li>Max 5% concurrent capacity reduction per service</li>
+              <li>Automatic rollback on SLO burn &gt; 2x</li>
+            </ul>
+          </Card>
+          <Card title="Financial governance">
+            <ul className="space-y-1.5 text-[12.5px] text-slate-700">
+              <li>Savings booked only after 2 billing cycles</li>
+              <li>Showback allocated to 38 cost centers</li>
+              <li>Unit economics tracked per 1K transactions</li>
+              <li>Quarterly true-up with Finance close</li>
+            </ul>
+          </Card>
+        </div>
+      </FullOnly>
 
-      <WorkspaceFooter fabric={defaultFabric} maturity={defaultMaturity} />
+      <WorkspaceFooter
+        fabric={defaultFabric}
+        maturity={defaultMaturity}
+        lifecycle={finopsLifecycle.map((s) => (s.label === "Govern & report" ? { ...s, state: "active" as const } : s))}
+      />
       <DetailDrawer payload={drawer.payload} onClose={drawer.close} />
-    </WorkspaceShell>
+    </div>
   );
 }

@@ -10,7 +10,9 @@ import SavingsFunnel from "../components/SavingsFunnel";
 import {
   Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer, ConfidenceCell,
   useDetailDrawer, CostDriverBars, Spark, GaugeRing, ProgressRow, type Kpi,
+  ViewModeToggle, FullOnly, execKpis, type ViewMode,
 } from "../components/primitives";
+import { DomainContextBar } from "../components/bands";
 
 const kpis: Kpi[] = [
   { id: "spend", icon: Container, label: "Total K8s Spend", value: "$1.75M", sub: "annualized", tone: "blue" },
@@ -123,21 +125,25 @@ const executionPlan: [string, string, string, string][] = [
 export default function KubernetesEconomicsWorkspace() {
   const drawer = useDetailDrawer();
   const [tab, setTab] = useState<(typeof utilTabs)[number]>("CPU");
+  const [mode, setMode] = useState<ViewMode>("exec");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
       <FinOpsHeader
         title="Kubernetes Economics Workspace"
-        tagline="Reduce Kubernetes waste across compute, requests and limits, storage, networking, and cluster operations."
+        tagline="Recover $1.28M of Kubernetes waste while protecting reliability."
         secondaryActions={[{ label: "Export Rightsizing Manifest", icon: "export" }, { label: "Cluster Simulator", icon: "simulate" }]}
         meta={{ lastAnalysis: "9 minutes ago", freshness: "99.3% within SLA", resources: "4 clusters · 2,634 pods analyzed" }}
         onPrimary={() => drawer.open({ title: "Kubernetes analysis run", tone: "blue", rows: [["Clusters", "4"], ["Pods", "2,634"], ["Opportunities", "217"], ["Waste identified", "$1.28M"]] })}
         onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
       />
 
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+      <DomainContextBar headline="Opportunity in this domain: $0.7M · Confidence 92% · Risk Low" nextSlug="governance-realization" nextLabel="Governance & Realization" />
 
-      <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
+      <KpiStrip kpis={execKpis(kpis, mode)} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1.5fr_1fr]"}>
         {/* 1 */}
         <Panel index={1} title="Cluster overview">
           <DataTable head={<>
@@ -164,12 +170,15 @@ export default function KubernetesEconomicsWorkspace() {
         </Panel>
 
         {/* 2 */}
+        <FullOnly mode={mode}>
         <Panel index={2} title="Kubernetes spend breakdown">
           <DonutCard total="$1.75M" totalLabel="Annual K8s spend" data={spendMix} />
         </Panel>
+        </FullOnly>
       </div>
 
       {/* 3 */}
+      <FullOnly mode={mode}>
       <Panel index={3} title="Resource utilization trends" action={<span>Actual vs requested vs limit</span>}>
         <div className="mb-2 flex flex-wrap gap-1.5">
           {utilTabs.map((t) => (
@@ -194,8 +203,9 @@ export default function KubernetesEconomicsWorkspace() {
           </LineChart>
         </ResponsiveContainer>
       </Panel>
+      </FullOnly>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1.3fr]">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1fr_1.3fr]"}>
         {/* 4 */}
         <Panel index={4} title="Top optimization opportunities">
           <DataTable head={<><Th>Opportunity type</Th><Th right>Count</Th><Th right>Annual savings</Th><Th right>Confidence</Th></>}>
@@ -210,6 +220,7 @@ export default function KubernetesEconomicsWorkspace() {
         </Panel>
 
         {/* 5 */}
+        <FullOnly mode={mode}>
         <Panel index={5} title="Workload rightsizing summary">
           <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
             {[["CPU requests over-provisioned", "37%"], ["CPU limits over-provisioned", "49%"], ["Memory requests over-provisioned", "31%"], ["Memory limits over-provisioned", "46%"]].map(([l, v]) => (
@@ -231,8 +242,10 @@ export default function KubernetesEconomicsWorkspace() {
             </DataTable>
           </div>
         </Panel>
+        </FullOnly>
       </div>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
         {/* 6 */}
         <Panel index={6} title="Node group optimization">
@@ -256,8 +269,9 @@ export default function KubernetesEconomicsWorkspace() {
           <CostDriverBars data={costDrivers} />
         </Panel>
       </div>
+      </FullOnly>
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1fr_1.4fr]"}>
         {/* 8 */}
         <Panel index={8} title="Cluster efficiency score">
           <GaugeRing pct={59} label="Blended efficiency" tone="amber" />
@@ -269,6 +283,7 @@ export default function KubernetesEconomicsWorkspace() {
         </Panel>
 
         {/* 9 */}
+        <FullOnly mode={mode}>
         <Panel index={9} title="Persistent storage insights">
           <div className="grid grid-cols-3 gap-2">
             {[["Total PVs", "636"], ["Unused", "184"], ["Orphaned capacity", "2.1 TB"]].map(([l, v]) => (
@@ -289,8 +304,10 @@ export default function KubernetesEconomicsWorkspace() {
             </DataTable>
           </div>
         </Panel>
+        </FullOnly>
       </div>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-2">
         {/* 10 */}
         <Panel index={10} title="Digital twin investigation">
@@ -319,8 +336,10 @@ export default function KubernetesEconomicsWorkspace() {
           </DataTable>
         </Panel>
       </div>
+      </FullOnly>
 
       {/* 12 */}
+      <FullOnly mode={mode}>
       <Panel index={12} title="Value realization tracker">
         <SavingsFunnel stages={[
           { label: "Identified", value: "$1.28M", pct: 100, tone: "blue" },
@@ -330,8 +349,9 @@ export default function KubernetesEconomicsWorkspace() {
           { label: "Realized YTD", value: "$364K", pct: 28, tone: "emerald" },
         ]} title="Identified → Realized" />
       </Panel>
+      </FullOnly>
 
-      <PageBands lifecycle={lifecycleWithActive("Observe")} />
+      <PageBands lifecycle={lifecycleWithActive("Execute")} />
 
       <DetailDrawer payload={drawer.payload} onClose={drawer.close} />
     </div>

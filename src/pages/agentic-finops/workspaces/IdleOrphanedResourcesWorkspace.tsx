@@ -10,7 +10,9 @@ import SavingsFunnel from "../components/SavingsFunnel";
 import {
   Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer, ConfidenceCell,
   useDetailDrawer, toneMap, CostDriverBars, ProgressRow, LinkAction, type Kpi,
+  ViewModeToggle, FullOnly, execKpis, type ViewMode,
 } from "../components/primitives";
+import { DomainContextBar } from "../components/bands";
 
 const kpis: Kpi[] = [
   { id: "scan", icon: Search, label: "Total Resources Scanned", value: "18,428", sub: "6 accounts · 4 clouds", tone: "blue" },
@@ -97,19 +99,23 @@ export default function IdleOrphanedResourceReclamationWorkspace() {
   const drawer = useDetailDrawer();
   const [selected, setSelected] = useState<Candidate>(candidates[0]);
   const [tab, setTab] = useState<(typeof explainerTabs)[number]>("Evidence");
+  const [mode, setMode] = useState<ViewMode>("exec");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
       <FinOpsHeader
         title="Idle & Orphaned Resource Reclamation Workspace"
-        tagline="Discover, validate, and reclaim unused cloud resources with full dependency, ownership, and risk analysis."
+        tagline="Reclaim $1.8M of unused cloud capacity with dependency-verified, low-risk deletions."
         secondaryActions={[{ label: "Export Candidate List", icon: "export" }, { label: "Reclamation Simulator", icon: "simulate" }]}
         meta={{ lastAnalysis: "8 minutes ago", freshness: "99.1% within SLA", resources: "18,428 resources scanned" }}
         onPrimary={() => drawer.open({ title: "Discovery scan complete", tone: "blue", rows: [["New candidates", "63"], ["Resolved since last run", "41"], ["Scan duration", "2m 11s"]] })}
         onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
       />
 
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value], ["Source", "Discovery agent"]] })} />
+      <DomainContextBar headline="Opportunity in this domain: $1.8M · Confidence 96% · Risk Very Low" nextSlug="commitment-optimization" nextLabel="Commitment Optimization" />
+
+      <KpiStrip kpis={execKpis(kpis, mode)} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value], ["Source", "Discovery agent"]] })} />
 
       {/* 1 */}
       <Panel index={1} title="Top idle & orphaned candidates" action={<LinkAction onClick={() => drawer.open({ title: "All 1,732 candidates", tone: "blue", bullets: ["Filtered views available by cloud, account, and owner."] })}>View all 1,732</LinkAction>}>
@@ -147,11 +153,13 @@ export default function IdleOrphanedResourceReclamationWorkspace() {
         </div>
       </Panel>
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-2"}>
         {/* 2 */}
-        <Panel index={2} title="Why resources are idle">
-          <DonutCard data={reasons} total="1,732" totalLabel="Candidates" />
-        </Panel>
+        <FullOnly mode={mode}>
+          <Panel index={2} title="Why resources are idle">
+            <DonutCard data={reasons} total="1,732" totalLabel="Candidates" />
+          </Panel>
+        </FullOnly>
 
         {/* 3 */}
         <Panel index={3} title="Savings impact">
@@ -178,6 +186,7 @@ export default function IdleOrphanedResourceReclamationWorkspace() {
       </div>
 
       {/* 4 */}
+      <FullOnly mode={mode}>
       <Panel index={4} title="Agentic investigation workspace">
         <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
           <div className="space-y-3">
@@ -225,8 +234,9 @@ export default function IdleOrphanedResourceReclamationWorkspace() {
           </div>
         </div>
       </Panel>
+      </FullOnly>
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-2"}>
         {/* 5 */}
         <Panel index={5} title="Confidence & risk overview">
           <DonutCard total="1,732" totalLabel="Candidates" data={[
@@ -244,6 +254,7 @@ export default function IdleOrphanedResourceReclamationWorkspace() {
         </Panel>
 
         {/* 6 */}
+        <FullOnly mode={mode}>
         <Panel index={6} title="Orphaned resource explainer">
           <div className="flex flex-wrap gap-1.5">
             {explainerTabs.map((t) => (
@@ -281,8 +292,10 @@ export default function IdleOrphanedResourceReclamationWorkspace() {
             </ul>
           </div>
         </Panel>
+        </FullOnly>
       </div>
 
+      <FullOnly mode={mode}>
       {/* 7 */}
       <Panel index={7} title="Existing tool vs Neurealm">
         <DataTable head={<><Th>Capability</Th><Th right>Existing tooling</Th><Th right>Neurealm agentic FinOps</Th></>}>
@@ -295,7 +308,9 @@ export default function IdleOrphanedResourceReclamationWorkspace() {
           ))}
         </DataTable>
       </Panel>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       {/* 8 */}
       <Panel index={8} title="Responsibility model">
         <DataTable head={<><Th>Function</Th><Th>Responsibility</Th><Th right>Role</Th></>}>
@@ -314,9 +329,10 @@ export default function IdleOrphanedResourceReclamationWorkspace() {
           ))}
         </DataTable>
       </Panel>
+      </FullOnly>
 
       <PageBands
-        lifecycle={lifecycleWithActive("Investigate")}
+        lifecycle={lifecycleWithActive("Execute")}
         maturity={[
           { level: "Level 1", title: "Manual sweeps", detail: "Quarterly clean-up campaigns driven by spreadsheets. Time to value: 1 quarter.", state: "future" },
           { level: "Level 2", title: "Evidence-backed reclamation", detail: "Continuous discovery with ownership and dependency proof before deletion. Time to value: 30 days.", state: "current" },
