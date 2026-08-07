@@ -1,5 +1,5 @@
 import {
-  Gauge, Trash2, PiggyBank, Timer, HardDrive, Network, Boxes, Container, ShieldCheck,
+  Gauge, Trash2, PiggyBank, Timer, HardDrive, Network, Boxes, Container, ShieldCheck, LayoutDashboard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -13,9 +13,20 @@ export interface FinPage {
   breadcrumb: string;
 }
 
-export const finGroups = ["Optimization Intelligence", "Governance"] as const;
+export const finGroups = ["Executive", "Optimization Intelligence", "Governance"] as const;
 
 export const finPages: FinPage[] = [
+  {
+    slug: "overview",
+    navLabel: "Executive Overview",
+    title: "Agentic FinOps — Executive Overview",
+    group: "Executive",
+    icon: LayoutDashboard,
+    breadcrumb: "Executive Overview",
+    subtitle:
+      "Portfolio-level view of cloud spend, identified opportunity, realization, and governance across every optimization domain.",
+  },
+
   {
     slug: "resource-rightsizing",
     navLabel: "Resource Rightsizing",
