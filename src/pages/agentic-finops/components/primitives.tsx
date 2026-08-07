@@ -424,3 +424,43 @@ export function RefreshNote({ text = "2 minutes ago" }: { text?: string }) {
     </span>
   );
 }
+
+/* ------------------------------------------------------- view density */
+
+export type ViewMode = "exec" | "full";
+
+export function ViewModeToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void }) {
+  const items: { id: ViewMode; label: string }[] = [
+    { id: "exec", label: "Executive" },
+    { id: "full", label: "Full detail" },
+  ];
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white p-0.5">
+      {items.map((i) => (
+        <button
+          key={i.id}
+          type="button"
+          onClick={() => onChange(i.id)}
+          aria-pressed={mode === i.id}
+          className={cn(
+            "rounded-full px-2.5 py-1 text-[11px] font-medium transition",
+            mode === i.id ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900",
+          )}
+        >
+          {i.label}
+        </button>
+      ))}
+    </span>
+  );
+}
+
+/** Renders children only in "Full detail" mode. */
+export function FullOnly({ mode, children }: { mode: ViewMode; children: ReactNode }) {
+  if (mode !== "full") return null;
+  return <>{children}</>;
+}
+
+/** Executive mode shows only the first `n` KPIs. */
+export function execKpis<T>(kpis: T[], mode: ViewMode, n = 5): T[] {
+  return mode === "exec" ? kpis.slice(0, n) : kpis;
+}

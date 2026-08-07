@@ -178,3 +178,26 @@ export const defaultMaturity: MaturityLevel[] = [
   { level: "Level 2", title: "Guided optimization", detail: "Twin generates ranked, evidence-backed recommendations with human approval on every change.", state: "current" },
   { level: "Level 3", title: "Autonomous FinOps", detail: "Low-risk changes execute automatically under policy, with continuous savings verification and rollback.", state: "next" },
 ];
+
+/* --------------------------------------------------- domain context bar */
+
+export function DomainContextBar({
+  headline,
+  nextSlug,
+  nextLabel,
+  base = "/agentic-finops",
+}: { headline: string; nextSlug?: string; nextLabel?: string; base?: string }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-[12px]">
+      <a href={`${base}/overview`} className="font-medium text-indigo-600 hover:text-indigo-800">
+        ← Executive Overview
+      </a>
+      <span className="text-slate-600">{headline}</span>
+      {nextSlug ? (
+        <a href={`${base}/${nextSlug}`} className="font-medium text-indigo-600 hover:text-indigo-800">
+          {nextLabel ?? "Next domain"} →
+        </a>
+      ) : <span />}
+    </div>
+  );
+}
