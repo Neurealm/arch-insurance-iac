@@ -1,168 +1,339 @@
-import { Container, DollarSign, Cpu, Layers, PackageOpen, ShieldCheck, Gauge, Server } from "lucide-react";
+import { useState } from "react";
 import {
-  Badge, Card, ConfidenceCell, CostDriverBars, DataTable, DetailDrawer, DonutCard, GaugeRing, Kpi,
-  KpiStrip, Panel, ProgressRow, RiskCell, SimpleBars, Td, Th, useDetailDrawer,
+  Container, Gauge, Trash2, Scaling, Layers, HardDrive, Target, Activity, CheckCircle2,
+} from "lucide-react";
+import { CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { cn } from "@/lib/utils";
+import FinOpsHeader from "../components/FinOpsHeader";
+import PageBands, { lifecycleWithActive } from "../components/PageBands";
+import SavingsFunnel from "../components/SavingsFunnel";
+import {
+  Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer, ConfidenceCell,
+  useDetailDrawer, CostDriverBars, Spark, GaugeRing, ProgressRow, type Kpi,
 } from "../components/primitives";
-import { WorkspaceFooter, WorkspaceShell, FilterBar, defaultFabric, defaultMaturity } from "../components/bands";
-import { finopsPages } from "../pages";
-
-const page = finopsPages.find((p) => p.slug === "kubernetes-economics")!;
 
 const kpis: Kpi[] = [
-  { id: "clusters", icon: Container, label: "Clusters", value: "38", sub: "6 providers / regions", tone: "blue" },
-  { id: "spend", icon: DollarSign, label: "Annual K8s spend", value: "$9.14M", sub: "Compute + control plane", tone: "violet" },
-  { id: "opp", icon: Gauge, label: "Optimization opportunity", value: "$742K", sub: "312 candidates", tone: "emerald" },
-  { id: "requests", icon: PackageOpen, label: "Request efficiency", value: "41%", sub: "Requested vs used", tone: "amber" },
-  { id: "bin", icon: Layers, label: "Bin-packing density", value: "58%", sub: "Target 75%", tone: "sky" },
-  { id: "spot", icon: Server, label: "Spot coverage", value: "29%", sub: "Eligible workloads", tone: "teal" },
-  { id: "idle", icon: Cpu, label: "Idle node cost", value: "$118K", sub: "Annualized", tone: "rose" },
-  { id: "policy", icon: ShieldCheck, label: "Namespaces with quotas", value: "76%", sub: "Governance coverage", tone: "slate" },
+  { id: "spend", icon: Container, label: "Total K8s Spend", value: "$1.75M", sub: "annualized", tone: "blue" },
+  { id: "eff", icon: Gauge, label: "Cluster Efficiency", value: "59%", sub: "target 75%", tone: "amber" },
+  { id: "waste", icon: Trash2, label: "Waste Identified", value: "$1.28M", sub: "73% of spend", tone: "rose" },
+  { id: "rs", icon: Scaling, label: "Rightsizing Savings", value: "$842K", sub: "requests & limits", tone: "emerald" },
+  { id: "clu", icon: Layers, label: "Cluster Optimization Savings", value: "$284K", sub: "node groups & bin-packing", tone: "teal" },
+  { id: "pv", icon: HardDrive, label: "Unused Persistent Storage", value: "2.1 TB", sub: "184 orphaned PVs", tone: "violet" },
+  { id: "opps", icon: Target, label: "Optimization Opportunities", value: "217", sub: "ranked by value", tone: "sky" },
+  { id: "health", icon: Activity, label: "Optimization Health", value: "Good", sub: "efficiency improving", tone: "emerald" },
 ];
 
-const clusters = [
-  { name: "prod-us-east-core", nodes: 214, cost: "$2.41M", req: 38, dens: 54, spot: 12, save: "$214K", conf: 93, risk: "Low" as const },
-  { name: "prod-eu-west-core", nodes: 138, cost: "$1.62M", req: 42, dens: 58, spot: 9, save: "$148K", conf: 91, risk: "Low" as const },
-  { name: "prod-data-platform", nodes: 96, cost: "$1.48M", req: 51, dens: 66, spot: 4, save: "$96K", conf: 86, risk: "Medium" as const },
-  { name: "ml-training-shared", nodes: 62, cost: "$1.21M", req: 34, dens: 47, spot: 61, save: "$132K", conf: 88, risk: "Medium" as const },
-  { name: "staging-shared", nodes: 74, cost: "$0.68M", req: 28, dens: 41, spot: 74, save: "$88K", conf: 96, risk: "Very Low" as const },
-  { name: "dev-sandboxes", nodes: 118, cost: "$0.54M", req: 22, dens: 33, spot: 82, save: "$64K", conf: 97, risk: "Very Low" as const },
+const clusters: [string, number, string, string, string, string, number[]][] = [
+  ["prod-commerce", 96, "62%", "58%", "61%", "$41,800/mo", [52, 55, 58, 57, 60, 61, 61]],
+  ["prod-payments", 74, "68%", "64%", "66%", "$34,200/mo", [58, 60, 62, 63, 65, 66, 66]],
+  ["prod-marketing", 52, "41%", "38%", "44%", "$21,600/mo", [48, 46, 44, 43, 44, 44, 44]],
+  ["prod-analytics", 48, "54%", "71%", "58%", "$28,300/mo", [50, 52, 55, 56, 57, 58, 58]],
 ];
 
 const spendMix = [
-  { name: "Worker nodes", value: 62, display: "$5.67M" },
-  { name: "Persistent volumes", value: 12, display: "$1.10M" },
-  { name: "Load balancers", value: 9, display: "$0.82M" },
-  { name: "Control planes", value: 7, display: "$0.64M" },
-  { name: "Cross-AZ traffic", value: 6, display: "$0.55M" },
-  { name: "Registry & artifacts", value: 4, display: "$0.36M" },
+  { name: "Compute nodes", value: 62, display: "$1.09M" },
+  { name: "EBS / persistent storage", value: 14, display: "$245K" },
+  { name: "Load balancers", value: 9, display: "$158K" },
+  { name: "NAT gateway & data transfer", value: 8, display: "$140K" },
+  { name: "K8s control plane", value: 4, display: "$70K" },
+  { name: "Other", value: 3, display: "$53K" },
 ];
 
-const nodeGroups = [
-  { label: "m6i general", value: 214 }, { label: "c6i compute", value: 148 },
-  { label: "r6i memory", value: 96 }, { label: "g5 GPU", value: 42 },
-  { label: "c7g ARM", value: 118 }, { label: "spot pool", value: 164 },
+const utilTabs = ["CPU", "Memory", "Pods", "Storage", "Network"] as const;
+const utilSeries: Record<(typeof utilTabs)[number], { label: string; actual: number; requested: number; limit: number }[]> =
+  Object.fromEntries(utilTabs.map((t) => [
+    t,
+    Array.from({ length: 14 }, (_, i) => {
+      const base = { CPU: 34, Memory: 46, Pods: 58, Storage: 41, Network: 29 }[t];
+      return {
+        label: `D${i + 1}`,
+        actual: base + ((i * 5) % 11) - 4,
+        requested: base + 26,
+        limit: base + 44,
+      };
+    }),
+  ])) as Record<(typeof utilTabs)[number], { label: string; actual: number; requested: number; limit: number }[]>;
+
+const topOpportunities: [string, string, string, number][] = [
+  ["Reduce over-provisioned CPU requests", "1,284 workloads", "$412K", 96],
+  ["Reduce over-provisioned memory requests", "982 workloads", "$268K", 94],
+  ["Consolidate under-packed node groups", "8 node groups", "$184K", 91],
+  ["Move stateless workloads to Spot", "412 pods", "$162K", 84],
+  ["Delete orphaned persistent volumes", "184 PVs", "$96K", 98],
+  ["Adopt Graviton node groups", "3 clusters", "$88K", 89],
+  ["Remove idle namespaces", "22 namespaces", "$68K", 93],
 ];
 
-const drivers = [
-  { name: "Over-requested CPU", value: 268, display: "$268K" },
-  { name: "Over-requested memory", value: 174, display: "$174K" },
-  { name: "Idle / cordoned nodes", value: 118, display: "$118K" },
-  { name: "Unattached volumes", value: 92, display: "$92K" },
-  { name: "Cross-AZ pod chatter", value: 90, display: "$90K" },
+const namespaceRows: [string, string, string, string, string][] = [
+  ["commerce-api", "3.2 vCPU → 1.4 vCPU", "12 GiB → 6 GiB", "$8,400/mo", "96%"],
+  ["payments-core", "4.0 vCPU → 2.2 vCPU", "16 GiB → 10 GiB", "$7,100/mo", "94%"],
+  ["search-index", "2.6 vCPU → 1.1 vCPU", "10 GiB → 5 GiB", "$5,300/mo", "92%"],
+  ["marketing-web", "1.8 vCPU → 0.6 vCPU", "6 GiB → 2 GiB", "$4,600/mo", "97%"],
+  ["analytics-jobs", "6.0 vCPU → 4.2 vCPU", "24 GiB → 18 GiB", "$3,900/mo", "86%"],
+  ["notification-svc", "1.2 vCPU → 0.4 vCPU", "4 GiB → 1.5 GiB", "$2,800/mo", "95%"],
+];
+
+const nodeGroups: [string, string, string, string, string][] = [
+  ["prod-commerce/general", "m5.4xlarge × 32", "m7g.2xlarge × 38", "41% → 68%", "$96K"],
+  ["prod-payments/general", "c5.4xlarge × 24", "c7g.2xlarge × 28", "44% → 71%", "$78K"],
+  ["prod-analytics/spark", "r5.8xlarge × 12", "r6g.4xlarge × 18", "38% → 64%", "$62K"],
+  ["prod-marketing/web", "m5.2xlarge × 18", "m7g.large × 22", "29% → 66%", "$48K"],
+];
+
+const costDrivers = [
+  { name: "Over-provisioned requests", value: 680, display: "$680K" },
+  { name: "Under-packed nodes", value: 284, display: "$284K" },
+  { name: "Idle namespaces", value: 132, display: "$132K" },
+  { name: "Orphaned volumes", value: 96, display: "$96K" },
+  { name: "On-demand vs spot gap", value: 88, display: "$88K" },
+];
+
+const efficiencyParts = [
+  ["CPU packing efficiency", 54],
+  ["Memory packing efficiency", 61],
+  ["Request accuracy", 48],
+  ["Node utilization", 63],
+  ["Workload density", 69],
+] as const;
+
+const storageClasses: [string, string, string, string][] = [
+  ["gp3-default", "412 PVs", "1.4 TB unused", "$58K/yr"],
+  ["gp2-legacy", "186 PVs", "0.5 TB unused", "$24K/yr"],
+  ["io2-high-perf", "38 PVs", "0.2 TB unused", "$14K/yr"],
+];
+
+const findings = [
+  "Requests are set at historical peak rather than observed p95, wasting 37% of reserved CPU.",
+  "Four node groups run below 45% packing efficiency due to oversized instance types.",
+  "184 persistent volumes remain after their owning namespaces were deleted.",
+  "Marketing cluster has the lowest efficiency and the clearest consolidation path.",
+  "Graviton node groups deliver a 22% price/performance gain on all four clusters.",
+];
+
+const executionPlan: [string, string, string, string][] = [
+  ["1", "Apply VPA recommendations in recommend-only mode", "5 days", "Automated"],
+  ["2", "Roll out right-sized requests to non-prod namespaces", "1 week", "Automated"],
+  ["3", "Roll out right-sized requests to production namespaces", "2 weeks", "Gated"],
+  ["4", "Introduce Graviton node groups alongside existing pools", "2 weeks", "Automated"],
+  ["5", "Drain and retire over-sized node groups", "1 week", "Gated"],
+  ["6", "Delete orphaned persistent volumes after snapshot", "3 days", "Automated"],
+  ["7", "Verify cluster cost against the billing ledger", "30 days", "Automated"],
 ];
 
 export default function KubernetesEconomicsWorkspace() {
   const drawer = useDetailDrawer();
-  return (
-    <WorkspaceShell
-      title={page.title}
-      subtitle={page.subtitle}
-      actions={<FilterBar chips={["All clusters", "Production + staging", "Requests vs usage", "Exclude GPU training"]} />}
-    >
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({
-        title: k.label, subtitle: `${k.value} — ${k.sub ?? ""}`, tone: k.tone,
-        rows: [["Value", k.value], ["Source", "kube-state-metrics + Prometheus + billing"], ["Attribution", "Namespace → cost center"], ["Refresh", "Hourly"]],
-        bullets: ["Request efficiency compares p95 usage to declared requests across a 14-day window.", "Recommendations preserve declared limits and PodDisruptionBudgets."],
-      })} />
+  const [tab, setTab] = useState<(typeof utilTabs)[number]>("CPU");
 
-      <div className="grid gap-5 xl:grid-cols-[1.45fr_1fr]">
-        <Panel index={1} title="Cluster overview" action="Cost, efficiency, and opportunity by cluster">
+  return (
+    <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
+      <FinOpsHeader
+        title="Kubernetes Economics Workspace"
+        tagline="Reduce Kubernetes waste across compute, requests and limits, storage, networking, and cluster operations."
+        secondaryActions={[{ label: "Export Rightsizing Manifest", icon: "export" }, { label: "Cluster Simulator", icon: "simulate" }]}
+        meta={{ lastAnalysis: "9 minutes ago", freshness: "99.3% within SLA", resources: "4 clusters · 2,634 pods analyzed" }}
+        onPrimary={() => drawer.open({ title: "Kubernetes analysis run", tone: "blue", rows: [["Clusters", "4"], ["Pods", "2,634"], ["Opportunities", "217"], ["Waste identified", "$1.28M"]] })}
+        onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+      />
+
+      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+
+      <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
+        {/* 1 */}
+        <Panel index={1} title="Cluster overview">
           <DataTable head={<>
-            <Th>Cluster</Th><Th right>Nodes</Th><Th right>Annual cost</Th><Th right>Request eff.</Th>
-            <Th right>Density</Th><Th right>Spot</Th><Th right>Opportunity</Th><Th right>Confidence</Th><Th>Risk</Th>
+            <Th>Cluster</Th><Th right>Nodes</Th><Th right>CPU util</Th><Th right>Mem util</Th><Th right>Efficiency</Th><Th right>Monthly cost</Th><Th right>Trend</Th>
           </>}>
-            {clusters.map((c) => (
-              <tr key={c.name} className="cursor-pointer hover:bg-slate-50" onClick={() => drawer.open({
-                title: c.name, subtitle: `${c.nodes} nodes · ${c.cost} annualized`, tone: "blue",
-                rows: [["Request efficiency", `${c.req}%`], ["Bin-packing density", `${c.dens}%`], ["Spot coverage", `${c.spot}%`], ["Opportunity", c.save], ["Confidence", `${c.conf}%`], ["Risk", c.risk]],
-                bullets: [
-                  "Right-sizing requests to p95 usage recovers most of the modeled opportunity.",
-                  "Node group consolidation raises density without breaching PodDisruptionBudgets.",
-                  "Spot expansion applies only to workloads tolerating interruption within 2 minutes.",
-                ],
-              })}>
-                <Td className="font-medium text-slate-900">{c.name}</Td>
-                <Td right>{c.nodes}</Td>
-                <Td right>{c.cost}</Td>
-                <Td right>{c.req}%</Td>
-                <Td right>{c.dens}%</Td>
-                <Td right>{c.spot}%</Td>
-                <Td right className="font-semibold text-emerald-700">{c.save}</Td>
-                <ConfidenceCell pct={c.conf} right />
-                <RiskCell level={c.risk} />
+            {clusters.map(([name, nodes, cpu, mem, eff, cost, trend]) => (
+              <tr key={name} className="cursor-pointer hover:bg-slate-50" onClick={() => drawer.open({ title: name, tone: "blue", rows: [["Nodes", String(nodes)], ["CPU utilization", cpu], ["Memory utilization", mem], ["Efficiency", eff], ["Monthly cost", cost]] })}>
+                <Td className="font-medium text-slate-900">{name}</Td>
+                <Td right>{nodes}</Td><Td right>{cpu}</Td><Td right>{mem}</Td>
+                <Td right><span className={cn("font-semibold", parseInt(eff) >= 60 ? "text-emerald-700" : "text-amber-700")}>{eff}</span></Td>
+                <Td right>{cost}</Td>
+                <Td right><div className="w-24"><Spark data={trend.map((y, x) => ({ x, y }))} color="#6366f1" height={26} /></div></Td>
+              </tr>
+            ))}
+          </DataTable>
+          <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
+            {[["Nodes", "270"], ["CPU", "6,480 vCPU"], ["Memory", "24.1 TiB"], ["Pods", "2,634"]].map(([l, v]) => (
+              <div key={l} className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+                <div className="text-[10px] uppercase tracking-wide text-slate-500">{l}</div>
+                <div className="text-lg font-bold text-slate-900">{v}</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        {/* 2 */}
+        <Panel index={2} title="Kubernetes spend breakdown">
+          <DonutCard total="$1.75M" totalLabel="Annual K8s spend" data={spendMix} />
+        </Panel>
+      </div>
+
+      {/* 3 */}
+      <Panel index={3} title="Resource utilization trends" action={<span>Actual vs requested vs limit</span>}>
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {utilTabs.map((t) => (
+            <button key={t} type="button" onClick={() => setTab(t)}
+              className={cn("rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition",
+                tab === t ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-indigo-300")}>
+              {t}
+            </button>
+          ))}
+        </div>
+        <ResponsiveContainer width="100%" height={230}>
+          <LineChart data={utilSeries[tab]} margin={{ top: 8, right: 10, left: -16, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+            <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Line type="monotone" dataKey="actual" name="Average actual" stroke="#6366f1" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="requested" name="Requested" stroke="#f59e0b" strokeWidth={1.6} strokeDasharray="4 3" dot={false} />
+            <Line type="monotone" dataKey="limit" name="Limit" stroke="#ef4444" strokeWidth={1.6} strokeDasharray="2 3" dot={false} />
+            <ReferenceLine y={75} stroke="#10b981" strokeDasharray="4 4" label={{ value: "Target efficiency", fontSize: 10, fill: "#10b981", position: "insideTopRight" }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </Panel>
+
+      <div className="grid gap-5 xl:grid-cols-[1fr_1.3fr]">
+        {/* 4 */}
+        <Panel index={4} title="Top optimization opportunities">
+          <DataTable head={<><Th>Opportunity type</Th><Th right>Count</Th><Th right>Annual savings</Th><Th right>Confidence</Th></>}>
+            {topOpportunities.map(([o, c, s, conf]) => (
+              <tr key={o} className="hover:bg-slate-50">
+                <Td className="font-medium text-slate-900">{o}</Td><Td right>{c}</Td>
+                <Td right className="font-semibold text-emerald-700">{s}</Td>
+                <ConfidenceCell pct={conf} right />
               </tr>
             ))}
           </DataTable>
         </Panel>
 
-        <Panel index={2} title="Spend breakdown">
-          <DonutCard data={spendMix} total="$9.14M" totalLabel="Annualized" />
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-lg border border-slate-200 p-3 text-center">
-              <GaugeRing pct={41} label="Request efficiency" sub="Target 70%" tone="amber" />
-            </div>
-            <div className="rounded-lg border border-slate-200 p-3 text-center">
-              <GaugeRing pct={58} label="Bin-packing" sub="Target 75%" tone="blue" />
-            </div>
+        {/* 5 */}
+        <Panel index={5} title="Workload rightsizing summary">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            {[["CPU requests over-provisioned", "37%"], ["CPU limits over-provisioned", "49%"], ["Memory requests over-provisioned", "31%"], ["Memory limits over-provisioned", "46%"]].map(([l, v]) => (
+              <div key={l} className="rounded-lg border border-amber-200 bg-amber-50 p-2.5">
+                <div className="text-[10px] uppercase tracking-wide text-slate-500">{l}</div>
+                <div className="text-2xl font-bold text-amber-700">{v}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3">
+            <DataTable head={<><Th>Namespace</Th><Th>CPU request change</Th><Th>Memory request change</Th><Th right>Savings</Th><Th right>Confidence</Th></>}>
+              {namespaceRows.map(([ns, cpu, mem, save, conf]) => (
+                <tr key={ns} className="hover:bg-slate-50">
+                  <Td className="font-medium text-slate-900">{ns}</Td><Td>{cpu}</Td><Td>{mem}</Td>
+                  <Td right className="font-semibold text-emerald-700">{save}</Td>
+                  <ConfidenceCell pct={parseInt(conf)} right />
+                </tr>
+              ))}
+            </DataTable>
           </div>
         </Panel>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-3">
-        <Panel index={3} title="Node group optimization" action="Node count by group">
-          <SimpleBars data={nodeGroups} color="#3b82f6" />
-          <p className="mt-2 text-[11.5px] text-slate-500">
-            Consolidating m6i and c6i pools into a single ARM-capable group removes 62 nodes at equal capacity.
-          </p>
+      <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
+        {/* 6 */}
+        <Panel index={6} title="Node group optimization">
+          <DataTable head={<><Th>Node group</Th><Th>Current</Th><Th>Recommended</Th><Th right>Utilization</Th><Th right>Annual savings</Th><Th right>Review</Th></>}>
+            {nodeGroups.map(([ng, cur, rec, util, save]) => (
+              <tr key={ng} className="hover:bg-slate-50">
+                <Td className="font-medium text-slate-900">{ng}</Td><Td>{cur}</Td><Td className="text-emerald-700">{rec}</Td>
+                <Td right>{util}</Td>
+                <Td right className="font-semibold text-emerald-700">{save}</Td>
+                <Td right>
+                  <button type="button" onClick={() => drawer.open({ title: ng, subtitle: `${cur} → ${rec}`, tone: "emerald", rows: [["Utilization", util], ["Annual savings", save], ["Rollout", "Add new pool, drain old"], ["Rollback", "Re-scale original pool"]] })}
+                    className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 hover:border-indigo-400 hover:text-indigo-700">Review</button>
+                </Td>
+              </tr>
+            ))}
+          </DataTable>
         </Panel>
-        <Panel index={4} title="Waste drivers">
-          <CostDriverBars data={drivers} />
+
+        {/* 7 */}
+        <Panel index={7} title="Cost drivers">
+          <CostDriverBars data={costDrivers} />
         </Panel>
-        <Panel index={5} title="Governance coverage">
-          <div className="space-y-2.5">
-            <ProgressRow label="Namespace quotas set" pct={76} tone="emerald" />
-            <ProgressRow label="Limit ranges defined" pct={68} tone="blue" />
-            <ProgressRow label="Cost labels complete" pct={84} tone="teal" />
-            <ProgressRow label="VPA / HPA configured" pct={57} tone="amber" />
-            <ProgressRow label="Untracked namespaces" pct={11} tone="rose" />
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
+        {/* 8 */}
+        <Panel index={8} title="Cluster efficiency score">
+          <GaugeRing pct={59} label="Blended efficiency" tone="amber" />
+          <div className="mt-3 space-y-2">
+            {efficiencyParts.map(([l, v]) => (
+              <ProgressRow key={l} label={l} pct={v} tone={v >= 60 ? "emerald" : "amber"} />
+            ))}
           </div>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            <Badge tone="emerald">Showback live</Badge>
-            <Badge tone="blue">38 clusters</Badge>
-            <Badge tone="amber">11% untracked</Badge>
+        </Panel>
+
+        {/* 9 */}
+        <Panel index={9} title="Persistent storage insights">
+          <div className="grid grid-cols-3 gap-2">
+            {[["Total PVs", "636"], ["Unused", "184"], ["Orphaned capacity", "2.1 TB"]].map(([l, v]) => (
+              <div key={l} className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+                <div className="text-[10px] uppercase tracking-wide text-slate-500">{l}</div>
+                <div className="text-xl font-bold text-slate-900">{v}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3">
+            <DataTable head={<><Th>Storage class</Th><Th right>Volumes</Th><Th right>Unused</Th><Th right>Annual savings</Th></>}>
+              {storageClasses.map(([sc, pv, unused, save]) => (
+                <tr key={sc} className="hover:bg-slate-50">
+                  <Td className="font-medium text-slate-900">{sc}</Td><Td right>{pv}</Td><Td right>{unused}</Td>
+                  <Td right className="font-semibold text-emerald-700">{save}</Td>
+                </tr>
+              ))}
+            </DataTable>
           </div>
         </Panel>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-3">
-        <Card title="Recommended workload actions">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li>Right-size requests for 312 deployments to p95 usage</li>
-            <li>Move 148 batch workloads to a spot-backed node group</li>
-            <li>Enable VPA in recommendation mode across staging</li>
-            <li>Reclaim 92 unattached persistent volumes</li>
-          </ul>
-        </Card>
-        <Card title="Reliability guardrails">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li>PodDisruptionBudgets always respected during drain</li>
-            <li>Minimum 2 replicas retained for tier-1 services</li>
-            <li>Spot capped at 40% for latency-sensitive workloads</li>
-            <li>Automatic revert if pod eviction rate doubles</li>
-          </ul>
-        </Card>
-        <Card title="Agent activity">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li>Re-scored 312 workload recommendations · 05:20 UTC</li>
-            <li>Applied 46 request changes in staging</li>
-            <li>Consolidated 3 node groups in dev-sandboxes</li>
-            <li>Verified $214K realized K8s savings YTD</li>
-          </ul>
-        </Card>
+      <div className="grid gap-5 xl:grid-cols-2">
+        {/* 10 */}
+        <Panel index={10} title="Digital twin investigation">
+          <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-[11.5px] text-slate-700">
+            Six agents correlated cluster telemetry, workload manifests, scheduling events, and billing data across 2,634 pods.
+          </div>
+          <div className="mt-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Key findings</div>
+            <ul className="mt-1 space-y-1">
+              {findings.map((f) => (
+                <li key={f} className="flex gap-1.5 text-[11.5px] text-slate-700"><CheckCircle2 className="mt-[2px] h-3 w-3 shrink-0 text-emerald-500" />{f}</li>
+              ))}
+            </ul>
+          </div>
+        </Panel>
+
+        {/* 11 */}
+        <Panel index={11} title="Execution plan">
+          <DataTable head={<><Th>Step</Th><Th>Action</Th><Th right>Duration</Th><Th right>Mode</Th></>}>
+            {executionPlan.map(([s, a, d, m]) => (
+              <tr key={s} className="hover:bg-slate-50">
+                <Td className="font-semibold text-slate-900">{s}</Td><Td>{a}</Td><Td right>{d}</Td>
+                <Td right><Badge tone={m === "Automated" ? "emerald" : "amber"}>{m}</Badge></Td>
+              </tr>
+            ))}
+          </DataTable>
+        </Panel>
       </div>
 
-      <WorkspaceFooter fabric={defaultFabric} maturity={defaultMaturity} />
+      {/* 12 */}
+      <Panel index={12} title="Value realization tracker">
+        <SavingsFunnel stages={[
+          { label: "Identified", value: "$1.28M", pct: 100, tone: "blue" },
+          { label: "Validated", value: "$1.06M", pct: 83, tone: "sky" },
+          { label: "Approved", value: "$742K", pct: 58, tone: "amber" },
+          { label: "Implemented", value: "$486K", pct: 38, tone: "violet" },
+          { label: "Realized YTD", value: "$364K", pct: 28, tone: "emerald" },
+        ]} title="Identified → Realized" />
+      </Panel>
+
+      <PageBands lifecycle={lifecycleWithActive("Observe")} />
+
       <DetailDrawer payload={drawer.payload} onClose={drawer.close} />
-    </WorkspaceShell>
+    </div>
   );
 }
