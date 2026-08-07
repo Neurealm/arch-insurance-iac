@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   DollarSign, Percent, PiggyBank, AlertTriangle, CalendarClock, TrendingUp, Repeat, Activity, CheckCircle2,
 } from "lucide-react";
@@ -5,10 +6,11 @@ import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceLine, R
 import { cn } from "@/lib/utils";
 import FinOpsHeader from "../components/FinOpsHeader";
 import PageBands, { lifecycleWithActive } from "../components/PageBands";
+import { DomainContextBar } from "../components/bands";
 import SavingsFunnel from "../components/SavingsFunnel";
 import {
   Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer, ConfidenceCell,
-  useDetailDrawer, CostDriverBars, type Kpi,
+  useDetailDrawer, CostDriverBars, type Kpi, ViewModeToggle, FullOnly, execKpis, type ViewMode,
 } from "../components/primitives";
 
 const kpis: Kpi[] = [
@@ -95,19 +97,23 @@ const whatIf: [string, string, string, string, string][] = [
 
 export default function CommitmentOptimizationWorkspace() {
   const drawer = useDetailDrawer();
+  const [mode, setMode] = useState<ViewMode>("exec");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
       <FinOpsHeader
         title="Commitment Optimization Workspace"
-        tagline="Maximize savings through intelligent commitment planning, continuous coverage analysis, and dynamic rebalancing."
+        tagline="Capture $1.6M by aligning commitment coverage to real, forecasted demand."
         secondaryActions={[{ label: "Export Commitment Plan", icon: "export" }, { label: "What-If Simulator", icon: "simulate" }]}
         meta={{ lastAnalysis: "22 minutes ago", freshness: "97.6% within SLA", resources: "$10.04M committed portfolio" }}
         onPrimary={() => drawer.open({ title: "Commitment analysis run", tone: "blue", rows: [["Coverage", "71.4%"], ["Rebalance actions", "7"], ["Net opportunity", "$2.31M"]] })}
         onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
       />
 
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value], ["Source", "Commitment agent"]] })} />
+      <DomainContextBar headline="Opportunity in this domain: $1.6M · Confidence 89% · Risk Medium" nextSlug="elasticity-scheduling" nextLabel="Elasticity & Scheduling" />
+
+      <KpiStrip kpis={execKpis(kpis, mode)} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value], ["Source", "Commitment agent"]] })} />
 
       {/* 1 */}
       <Panel index={1} title="Commitment portfolio overview">
@@ -143,6 +149,7 @@ export default function CommitmentOptimizationWorkspace() {
       </Panel>
 
       {/* 2 */}
+      <FullOnly mode={mode}>
       <Panel index={2} title="Commitment coverage by service">
         <DataTable head={<>
           <Th>Service</Th><Th right>Eligible spend</Th><Th right>Covered</Th><Th right>Coverage %</Th><Th right>On-demand</Th><Th right>Potential savings</Th>
@@ -161,9 +168,11 @@ export default function CommitmentOptimizationWorkspace() {
           })}
         </DataTable>
       </Panel>
+      </FullOnly>
 
-      <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
+      <div className={mode === "exec" ? "grid gap-5" : "grid gap-5 xl:grid-cols-[1.4fr_1fr]"}>
         {/* 3 */}
+        <FullOnly mode={mode}>
         <Panel index={3} title="Commitment expiration schedule">
           <div className="mb-2 flex flex-wrap items-end gap-3">
             <div>
@@ -184,6 +193,7 @@ export default function CommitmentOptimizationWorkspace() {
             </BarChart>
           </ResponsiveContainer>
         </Panel>
+        </FullOnly>
 
         <Panel index="3b" title="Decision summary">
           <div className="rounded-lg border-2 border-emerald-300 bg-emerald-50 p-3">
@@ -221,6 +231,7 @@ export default function CommitmentOptimizationWorkspace() {
         </DataTable>
       </Panel>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-2">
         {/* 5 */}
         <Panel index={5} title="Demand forecast & eligible spend">
@@ -257,7 +268,9 @@ export default function CommitmentOptimizationWorkspace() {
           </div>
         </Panel>
       </div>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-2">
         {/* 7 */}
         <Panel index={7} title="Commitment utilization health">
@@ -294,7 +307,9 @@ export default function CommitmentOptimizationWorkspace() {
           </DataTable>
         </Panel>
       </div>
+      </FullOnly>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-2">
         {/* 9 */}
         <Panel index={9} title="Governance & approval">
@@ -324,6 +339,7 @@ export default function CommitmentOptimizationWorkspace() {
           ]} title="Identified → Realized" />
         </Panel>
       </div>
+      </FullOnly>
 
       <PageBands lifecycle={lifecycleWithActive("Govern")} />
 
