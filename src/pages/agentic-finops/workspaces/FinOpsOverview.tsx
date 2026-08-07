@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { DollarSign, TrendingDown, Bot, ShieldCheck, Gauge, Layers, Clock, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Card, CostDriverBars, DataTable, DetailDrawer, DonutCard, Kpi, KpiStrip, Panel,
   ProgressRow, RiskCell, Td, Th, TrendArea, useDetailDrawer, Badge, LinkAction, ConfidenceCell,
+  ViewModeToggle, FullOnly, execKpis, type ViewMode,
 } from "../components/primitives";
-import { WorkspaceFooter, WorkspaceShell, FilterBar, defaultFabric, defaultMaturity } from "../components/bands";
+import { WorkspaceFooter, defaultFabric, defaultMaturity, finopsLifecycle } from "../components/bands";
+import FinOpsHeader from "../components/FinOpsHeader";
 import { finopsBase, finopsPages } from "../pages";
+
 
 const kpis: Kpi[] = [
   { id: "spend", icon: DollarSign, label: "Annualized spend", value: "$48.2M", sub: "+3.1% vs prior qtr", tone: "blue" },
