@@ -130,7 +130,7 @@ export default function CloudFinOpsAttributeStore() {
     const t = window.setTimeout(() => {
       setDecomposing(false);
       setStatus("Ready to Publish");
-      log("Decomposition complete — 80 atomic attributes produced");
+      log("Decomposition complete — 82 atomic attributes produced");
       setAnnounce("Decomposition complete");
     }, 1600);
     timers.current.push(t);
