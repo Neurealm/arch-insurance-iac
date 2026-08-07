@@ -1,25 +1,28 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { ArrowLeft, ArrowRight, ChevronsLeft, ChevronsRight, Circle, Home, Wallet } from "lucide-react";
-import { finopsBase, finopsGroups, finopsPages } from "./pages";
+import { Wallet, Home, ArrowLeft, ArrowRight, ChevronsLeft, ChevronsRight, Circle } from "lucide-react";
+import { finPages, finGroups, finBase, finDefaultSlug } from "./pages";
 import { cn } from "@/lib/utils";
 
-const SCROLL_KEY = "agenticFinops.sidebarScroll";
+const SCROLL_KEY = "agenticFinOps.sidebarScroll";
+const COLLAPSE_KEY = "agenticFinOps.collapsed";
 let cachedScroll = 0;
 
 export default function FinOpsLayout() {
   const location = useLocation();
-  const activeIdx = finopsPages.findIndex((p) => location.pathname.endsWith(p.slug));
-  const active = activeIdx >= 0 ? finopsPages[activeIdx] : finopsPages[0];
-  const prev = activeIdx > 0 ? finopsPages[activeIdx - 1] : null;
-  const next = activeIdx >= 0 && activeIdx < finopsPages.length - 1 ? finopsPages[activeIdx + 1] : null;
+  const path = location.pathname.replace(/\/$/, "");
+  const slug = path === finBase ? finDefaultSlug : path.split("/").pop() ?? finDefaultSlug;
+  const activeIdx = finPages.findIndex((p) => p.slug === slug);
+  const active = activeIdx >= 0 ? finPages[activeIdx] : finPages[0];
+  const prev = activeIdx > 0 ? finPages[activeIdx - 1] : null;
+  const next = activeIdx >= 0 && activeIdx < finPages.length - 1 ? finPages[activeIdx + 1] : null;
 
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("agenticFinops.collapsed") === "1";
+    return window.localStorage.getItem(COLLAPSE_KEY) === "1";
   });
   useEffect(() => {
-    window.localStorage.setItem("agenticFinops.collapsed", collapsed ? "1" : "0");
+    window.localStorage.setItem(COLLAPSE_KEY, collapsed ? "1" : "0");
   }, [collapsed]);
 
   const navRef = useRef<HTMLElement | null>(null);
@@ -52,7 +55,7 @@ export default function FinOpsLayout() {
           {!collapsed && (
             <div className="min-w-0">
               <div className="text-[10px] uppercase tracking-wider text-slate-500">Module</div>
-              <div className="text-[12.5px] font-semibold leading-tight text-slate-900">Agentic FinOps Twin</div>
+              <div className="text-[12.5px] font-semibold leading-tight text-slate-900">Agentic FinOps</div>
             </div>
           )}
           <button
@@ -76,8 +79,8 @@ export default function FinOpsLayout() {
           </Link>
           <div className="mx-2 my-1 h-px bg-slate-200" aria-hidden />
 
-          {finopsGroups.map((group) => {
-            const items = finopsPages.filter((p) => p.group === group);
+          {finGroups.map((group) => {
+            const items = finPages.filter((p) => p.group === group);
             if (!items.length) return null;
             return (
               <div key={group} className="mb-2">
@@ -89,22 +92,27 @@ export default function FinOpsLayout() {
                 {items.map((p) => (
                   <NavLink
                     key={p.slug}
-                    to={`${finopsBase}/${p.slug}`}
-                    title={collapsed ? p.title : undefined}
+                    to={`${finBase}/${p.slug}`}
+                    title={collapsed ? p.navLabel : undefined}
                     className={({ isActive }) =>
                       cn(
                         "mx-2 my-0.5 flex items-center gap-2.5 rounded-md py-2 text-[12.5px] transition-colors",
                         collapsed ? "justify-center px-0" : "px-2.5",
-                        isActive ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
+                        isActive || p.slug === slug
+                          ? "bg-slate-900 text-white"
+                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
                       )
                     }
                   >
-                    {({ isActive }) => (
-                      <>
-                        <Circle className={cn("h-1.5 w-1.5 shrink-0 fill-current", isActive ? "text-white" : "text-slate-400")} />
-                        {!collapsed && <span className="truncate">{p.navLabel}</span>}
-                      </>
-                    )}
+                    {({ isActive }) => {
+                      const on = isActive || p.slug === slug;
+                      return (
+                        <>
+                          <Circle className={cn("h-1.5 w-1.5 shrink-0 fill-current", on ? "text-white" : "text-slate-400")} />
+                          {!collapsed && <span className="truncate">{p.navLabel}</span>}
+                        </>
+                      );
+                    }}
                   </NavLink>
                 ))}
               </div>
@@ -113,45 +121,45 @@ export default function FinOpsLayout() {
         </nav>
 
         <div className="border-t border-slate-200 px-3 py-2 text-[10px] text-slate-500">
-          {!collapsed ? "Agentic FinOps Digital Twin" : "·"}
+          {!collapsed ? "Agentic FinOps" : "·"}
         </div>
       </aside>
 
       <main className="flex-1 min-w-0">
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-6 py-2">
-          <div className="flex min-w-0 items-center gap-2 text-[11px] text-slate-500">
-            <Link to="/app" className="hover:text-indigo-600">NeuGAIN</Link>
+        <div className="bg-white border-b border-slate-200 px-6 py-2 sticky top-0 z-10 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-[11px] text-slate-500 min-w-0">
+            <Link to="/prod-resilience-twin" className="hover:text-indigo-600">Cloud FinOps</Link>
             <span>/</span>
-            <span className="font-medium text-slate-700">Agentic FinOps Digital Twin</span>
+            <span className="text-slate-700 font-medium">Optimization Intelligence</span>
             {active && (
               <>
                 <span>/</span>
-                <span className="truncate font-semibold text-indigo-600">{active.breadcrumb}</span>
+                <span className="text-indigo-600 font-semibold truncate">{active.title}</span>
               </>
             )}
           </div>
           {(prev || next) && (
-            <div className="flex shrink-0 items-center gap-1.5">
-              {prev && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              {prev ? (
                 <Link
-                  to={`${finopsBase}/${prev.slug}`}
+                  to={`${finBase}/${prev.slug}`}
                   title={`Previous: ${prev.title}`}
-                  className="inline-flex max-w-[220px] items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] text-slate-700 transition hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700"
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 px-2 py-1 text-[11px] text-slate-700 hover:text-indigo-700 transition max-w-[220px]"
                 >
                   <ArrowLeft className="h-3 w-3 shrink-0" />
                   <span className="truncate">{prev.navLabel}</span>
                 </Link>
-              )}
-              {next && (
+              ) : null}
+              {next ? (
                 <Link
-                  to={`${finopsBase}/${next.slug}`}
+                  to={`${finBase}/${next.slug}`}
                   title={`Next: ${next.title}`}
-                  className="inline-flex max-w-[220px] items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] text-slate-700 transition hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700"
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 px-2 py-1 text-[11px] text-slate-700 hover:text-indigo-700 transition max-w-[220px]"
                 >
                   <span className="truncate">{next.navLabel}</span>
                   <ArrowRight className="h-3 w-3 shrink-0" />
                 </Link>
-              )}
+              ) : null}
             </div>
           )}
         </div>
