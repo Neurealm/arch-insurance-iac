@@ -1218,19 +1218,22 @@ export default function DiscoveryConfiguration() {
       {/* ------------------------------------------- prompt 2 governance overlays */}
       <ConflictResolutionDialog
         open={conflictOpen} onOpenChange={setConflictOpen} conflict={conflictDialog}
-        onResolve={(c, resolution, rationale) => {
-          setConflicts((cs) => cs.map((x) => (x.id === c.id ? { ...x, status: "Resolved", resolution, resolvedBy: "Discovery Governance" } : x)));
-          logAudit("Conflict Resolved", "Rule", `${c.ruleAId}/${c.ruleBId}`, c.status, "Resolved", rationale || resolution);
-          logActivity(`Conflict ${c.id} resolved as ${resolution}`, "Conflict");
-          notify("Conflict Detected", `${c.id} resolved`, resolution, c.severity);
-          toast.success(`Conflict ${c.id} resolved`, { description: resolution });
+        onResolve={(id, payload) => {
+          const c = conflicts.find((x) => x.id === id);
+          setConflicts((cs) => cs.map((x) => (x.id === id ? { ...x, status: "Resolved", resolution: payload.action, resolvedBy: payload.reviewer } : x)));
+          logAudit("Conflict Resolved", "Rule", id, c?.status ?? "Open", "Resolved", payload.reason || payload.action);
+          logActivity(`Conflict ${id} resolved as ${payload.action}`, "Conflict");
+          notify("Conflict Detected", `${id} resolved`, payload.action, c?.severity ?? "Medium");
+          toast.success(`Conflict ${id} resolved`, { description: `${payload.action} · effective ${payload.effectiveDate || "immediately"}` });
           setConflictOpen(false);
         }}
       />
       <ReviewDecisionDialog
         open={!!reviewDialog} onOpenChange={(o) => !o && setReviewDialog(null)}
-        review={reviews.find((r) => r.id === reviewDialog?.id) ?? null} action={reviewDialog?.action ?? ""}
-        onSubmit={(id, action, comments, conditions) => {
+        reviewId={reviewDialog?.id ?? ""} action={reviewDialog?.action ?? ""}
+        onSubmit={({ comments, conditions }) => {
+          const id = reviewDialog?.id ?? "";
+          const action = reviewDialog?.action ?? "";
           const status = action === "Approve with Conditions" ? "Approved with Conditions"
             : action === "Reject" ? "Rejected" : action === "Escalate" ? "Escalated" : "In Review";
           setReviews((rs) => rs.map((x) => (x.id === id ? { ...x, status, decision: action, comments, conditions, completedAt: nowLabel() } : x)));
@@ -1245,25 +1248,19 @@ export default function DiscoveryConfiguration() {
         open={exceptionOpen} onOpenChange={setExceptionOpen}
         onCreate={(e) => {
           const id = `EXC-${600 + exceptions.length}`;
-          setExceptions((xs) => [{
-            id, configurationId: "DISC-CFG-001", exceptionType: e.exceptionType, scope: e.scope,
-            justification: e.justification, requestedBy: "Discovery Operations", approver: e.approver,
-            approvalState: "Pending", expirationDate: e.expirationDate, reviewRequirement: e.reviewRequirement,
-            compensatingControl: e.compensatingControl, status: "Pending",
-          }, ...xs]);
-          logAudit("Exception Created", "Exception", id, "None", "Pending", e.justification);
+          setExceptions((xs) => [{ ...e, id }, ...xs]);
+          logAudit("Exception Created", "Exception", id, "None", "Active", e.reason);
           logActivity(`Exception ${id} created (${e.exceptionType})`, "Exception");
-          notify("Exception Created", `${id} awaiting approval`, e.justification, "Medium");
-          toast.success(`Exception ${id} created`, { description: `Expires ${e.expirationDate || "unset"} · approver ${e.approver}` });
+          notify("Exception Created", `${id} created`, e.reason, "Medium");
+          toast.success(`Exception ${id} created`, { description: `Expires ${e.expirationDate} · approver ${e.approver}` });
           setExceptionOpen(false);
         }}
       />
       <ActivationWizard
-        open={activationOpen} onOpenChange={setActivationOpen}
+        open={activationOpen} onOpenChange={setActivationOpen} impact={seedImpact}
         blocked={activationBlocked} blockReason={blockReason}
         running={activating} executionStep={activationStep}
         onActivate={runActivation}
-        onOpenBlocking={() => { setActivationOpen(false); focusPanel("panel-validation-results"); }}
       />
       <RollbackDialog
         open={rollbackOpen} onOpenChange={setRollbackOpen} versions={versions} running={rollbackRunning}
@@ -1271,15 +1268,20 @@ export default function DiscoveryConfiguration() {
       />
       <GlobalSearchDialog
         open={searchOpen} onOpenChange={setSearchOpen} index={searchIndex}
-        onSelect={(r) => { setSearchOpen(false); focusPanel(r.panel); }}
+        onOpenResult={(r) => { setSearchOpen(false); focusPanel(r.panel); }}
       />
       <ExportDialog open={exportOpen} onOpenChange={setExportOpen} onExport={(f, s, o) => { doExport(f, s, o); setExportOpen(false); }} />
       <VersionDetailDialog open={versionDetailOpen} onOpenChange={setVersionDetailOpen} version={versionDetail} />
-      <DemoStoryOverlay
-        step={storyStep} reducedMotion={reducedMotion}
-        onToggleMotion={() => setReducedMotion((m) => !m)}
-        onStep={setStoryStep} onClose={() => setStoryStep(null)}
-      />
+      {storyStep !== null && (
+        <DemoStoryOverlay
+          step={storyStep} reducedMotion={reducedMotion}
+          onToggleMotion={(v) => setReducedMotion(v)}
+          onNext={() => setStoryStep((s) => Math.min((s ?? 0) + 1, demoStory.length - 1))}
+          onPrev={() => setStoryStep((s) => Math.max((s ?? 0) - 1, 0))}
+          onExit={() => setStoryStep(null)}
+        />
+      )}
+
 
     </div>
   );
