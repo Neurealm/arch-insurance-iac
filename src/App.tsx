@@ -366,6 +366,7 @@ import PersonaImpactAnalysis from "./pages/enterprise-cognitive-fabric/PersonaIm
 import CrossTeamImpactAnalysis from "./pages/enterprise-cognitive-fabric/CrossTeamImpactAnalysis.tsx";
 import DecisionIntelligence from "./pages/enterprise-cognitive-fabric/DecisionIntelligence.tsx";
 import OrganizationalLearning from "./pages/enterprise-cognitive-fabric/OrganizationalLearning.tsx";
+import EnterpriseCognitiveHealth from "./pages/enterprise-cognitive-fabric/EnterpriseCognitiveHealth.tsx";
 
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
