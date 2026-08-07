@@ -228,6 +228,21 @@ export function InventoryPanel({
         </label>
       </div>
 
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2">
+        <p className="text-[11.5px] text-amber-900">
+          <span className="font-semibold">Cloud FinOps</span> has a structured Persona Attribute Store (FOP-001 – FOP-080).
+        </p>
+        <Link
+          to={ATTRIBUTE_STORE_ROUTE}
+          className="inline-flex h-7 items-center gap-1 rounded-md border border-amber-500 bg-amber-300 px-2.5 text-[11px] font-semibold text-slate-900 hover:bg-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+        >
+          Open Attribute Store
+          <ArrowUpRight className="h-3 w-3" aria-hidden />
+        </Link>
+      </div>
+
+
+
       {loading ? <PanelSkeleton rows={6} />
         : error ? (
           <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-[12px] text-red-700">
