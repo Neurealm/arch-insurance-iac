@@ -520,6 +520,22 @@ export const libraryPersonas: LibraryPersona[] = [
       ["Instrumentation gaps", "Sampling bias", "Stale experience baselines"],
       ["Speed of insight versus statistical rigour", "Granularity versus privacy"]),
   }),
+  persona({
+    id: "PERSONA 1010",
+    teamName: "Cloud FinOps",
+    businessUnit: "Platform Operations",
+    knowledgeDomains: ["Finance", "Cloud Economics"],
+    mission: "Maximize cloud cost efficiency without compromising reliability, performance, or delivery speed",
+    qualityScore: 95, completenessScore: 96, confidence: 95, freshnessStatus: "Current",
+    constructionStatus: "Approved", approvalState: "Approved", conditionCount: 287, dependencyCount: 24,
+    personaOwner: "Cloud FinOps Practice", riskLevel: "Medium", dependencyCriticality: "High",
+    services: [{ name: "Cloud Cost Intelligence", criticality: "Tier 1", slo: "Daily cost ingestion within 4 hours" }],
+    thinking: genericThinking("Cloud FinOps",
+      ["Unit economics", "Commitment coverage", "Waste elimination", "Reliability preserved during optimization"],
+      ["Cloud unit cost reduced 12 percent year over year", "Commitment coverage above 85 percent", "Forecast accuracy within 5 percent"],
+      ["Idle and orphaned resources accumulating", "Unallocated spend without owner", "Rightsizing change causing performance regression"],
+      ["Savings depth versus workload risk", "Commitment lock-in versus elasticity", "Optimization velocity versus change safety"]),
+  }),
 ];
 
 /* ------------------------------- filters -------------------------------- */

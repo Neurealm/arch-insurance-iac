@@ -6,8 +6,8 @@ import {
 import { viewColumns } from "../persona-library/panels";
 
 describe("Team Persona Library data", () => {
-  it("seeds nine Personas with the expected identifiers", () => {
-    expect(libraryPersonas).toHaveLength(9);
+  it("seeds ten Personas with the expected identifiers", () => {
+    expect(libraryPersonas).toHaveLength(10);
     expect(libraryPersonas[0].id).toBe("PERSONA 1001");
     expect(libraryPersonas[0].teamName).toBe("Payments Platform");
   });
@@ -40,7 +40,7 @@ describe("Team Persona Library data", () => {
   });
 
   it("clears filters back to the full library", () => {
-    expect(applyLibraryFilters(libraryPersonas, defaultLibraryFilters, "")).toHaveLength(9);
+    expect(applyLibraryFilters(libraryPersonas, defaultLibraryFilters, "")).toHaveLength(10);
   });
 
   it("searches across teams and services", () => {
