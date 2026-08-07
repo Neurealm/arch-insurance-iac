@@ -35,6 +35,31 @@ import {
   type DiscoveryPreviewWarning, type DiscoveryRule, type DraftState, type DryRunResult,
   type Filters, type ScopeState, type ViewMode,
 } from "./discovery-config/data";
+import {
+  ActivationPanel, ActivityPanel, AccessValidationPanel, ApprovalChainPanel, AuditHistoryPanel,
+  ChangeImpactPanel, ConflictsPanel, DriftPanel, EnvironmentPromotionPanel, ExceptionsPanel,
+  GovernanceSummaryPanel, InheritancePanel, NotificationsPanel, OwnershipPanel, PrecheckPanel,
+  PublishingHistoryPanel, ResidencyPanel, ReviewQueuePanel, ReviewWorkbench, RollbackPanel,
+  RuntimeCompatibilityPanel, ScenarioBanner, ValidationPanel, ValidationResultsPanel,
+  VersionComparisonPanel, VersionHistoryPanel,
+} from "./discovery-config/gov-panels";
+import {
+  ActivationWizard, ConflictResolutionDialog, DemoStoryOverlay, ExceptionDialog, ExportDialog,
+  GlobalSearchDialog, ReviewDecisionDialog, RollbackDialog, VersionDetailDialog,
+  type ActivationPlan,
+} from "./discovery-config/gov-dialogs";
+import {
+  activationExecutionSteps, buildSearchIndex, demoScenarios, demoStory, downloadFile,
+  scenarioStates, seedActivity, seedApprovals, seedAudit, seedDrift, seedExceptions, seedImpact,
+  seedNotifications, seedOwnership, seedReviews, seedRuleConflicts, seedValidation,
+  seedValidationResults, seedVersions, toCsv, toYaml,
+  type DemoScenario, type DiscoveryConfigurationApproval, type DiscoveryConfigurationAuditEvent,
+  type DiscoveryConfigurationDrift, type DiscoveryConfigurationException,
+  type DiscoveryConfigurationNotification, type DiscoveryConfigurationReview,
+  type DiscoveryConfigurationValidation, type DiscoveryConfigurationVersion,
+  type DiscoveryRuleConflict, type DiscoveryValidationResult, type SearchResult,
+} from "./discovery-config/gov-data";
+
 
 const PREF_KEY = "ecf.discoveryConfiguration.v2.prefs";
 
