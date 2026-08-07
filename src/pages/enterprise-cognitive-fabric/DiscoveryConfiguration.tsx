@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ChevronRight, Copy, Database, Filter, Gauge, Layers, MoreHorizontal, Play, Plus,
-  RefreshCw, ShieldCheck, SlidersHorizontal,
+  RefreshCw, Search, ShieldCheck, SlidersHorizontal,
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
