@@ -120,7 +120,7 @@ export const finPages: FinPage[] = [
 ];
 
 export const finBase = "/agentic-finops";
-export const finDefaultSlug = "resource-rightsizing";
+export const finDefaultSlug = "overview";
 
 /* Back-compat aliases */
 export type FinOpsPage = FinPage;
