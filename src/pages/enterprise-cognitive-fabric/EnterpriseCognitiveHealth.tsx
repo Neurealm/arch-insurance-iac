@@ -146,7 +146,7 @@ export default function EnterpriseCognitiveHealth() {
   const onKpi = (id: string) => {
     setKpiFocus((prev) => (prev === id ? null : id));
     setSignalPage(1);
-    focusPanel(kpiFocusPanel(id).panelId);
+    focusPanel(kpiFocusPanel(id));
     say(`${chKpis.find((k) => k.id === id)?.label ?? id} focus applied`);
   };
 
