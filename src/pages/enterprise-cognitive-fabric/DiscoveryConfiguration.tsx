@@ -1214,6 +1214,73 @@ export default function DiscoveryConfiguration() {
         onOpenWarnings={() => { setDryRunOpen(false); focusPanel("panel-breakdown"); }}
         onSaveDraft={() => toast.success("Draft configuration saved locally", { description: "No downstream ECF state was changed." })}
       />
+
+      {/* ------------------------------------------- prompt 2 governance overlays */}
+      <ConflictResolutionDialog
+        open={conflictOpen} onOpenChange={setConflictOpen} conflict={conflictDialog}
+        onResolve={(c, resolution, rationale) => {
+          setConflicts((cs) => cs.map((x) => (x.id === c.id ? { ...x, status: "Resolved", resolution, resolvedBy: "Discovery Governance" } : x)));
+          logAudit("Conflict Resolved", "Rule", `${c.ruleAId}/${c.ruleBId}`, c.status, "Resolved", rationale || resolution);
+          logActivity(`Conflict ${c.id} resolved as ${resolution}`, "Conflict");
+          notify("Conflict Detected", `${c.id} resolved`, resolution, c.severity);
+          toast.success(`Conflict ${c.id} resolved`, { description: resolution });
+          setConflictOpen(false);
+        }}
+      />
+      <ReviewDecisionDialog
+        open={!!reviewDialog} onOpenChange={(o) => !o && setReviewDialog(null)}
+        review={reviews.find((r) => r.id === reviewDialog?.id) ?? null} action={reviewDialog?.action ?? ""}
+        onSubmit={(id, action, comments, conditions) => {
+          const status = action === "Approve with Conditions" ? "Approved with Conditions"
+            : action === "Reject" ? "Rejected" : action === "Escalate" ? "Escalated" : "In Review";
+          setReviews((rs) => rs.map((x) => (x.id === id ? { ...x, status, decision: action, comments, conditions, completedAt: nowLabel() } : x)));
+          logAudit(action === "Reject" ? "Rejected" : action === "Escalate" ? "Escalated" : "Approved", "Review", id, "In Review", status, comments || action);
+          logActivity(`${id} ${status.toLowerCase()}`, "Review");
+          notify(action === "Escalate" ? "Escalation Raised" : "Review Approved", `${id} ${status}`, comments || action, action === "Escalate" ? "High" : "Medium");
+          toast.success(`${id}: ${status}`);
+          setReviewDialog(null);
+        }}
+      />
+      <ExceptionDialog
+        open={exceptionOpen} onOpenChange={setExceptionOpen}
+        onCreate={(e) => {
+          const id = `EXC-${600 + exceptions.length}`;
+          setExceptions((xs) => [{
+            id, configurationId: "DISC-CFG-001", exceptionType: e.exceptionType, scope: e.scope,
+            justification: e.justification, requestedBy: "Discovery Operations", approver: e.approver,
+            approvalState: "Pending", expirationDate: e.expirationDate, reviewRequirement: e.reviewRequirement,
+            compensatingControl: e.compensatingControl, status: "Pending",
+          }, ...xs]);
+          logAudit("Exception Created", "Exception", id, "None", "Pending", e.justification);
+          logActivity(`Exception ${id} created (${e.exceptionType})`, "Exception");
+          notify("Exception Created", `${id} awaiting approval`, e.justification, "Medium");
+          toast.success(`Exception ${id} created`, { description: `Expires ${e.expirationDate || "unset"} · approver ${e.approver}` });
+          setExceptionOpen(false);
+        }}
+      />
+      <ActivationWizard
+        open={activationOpen} onOpenChange={setActivationOpen}
+        blocked={activationBlocked} blockReason={blockReason}
+        running={activating} executionStep={activationStep}
+        onActivate={runActivation}
+        onOpenBlocking={() => { setActivationOpen(false); focusPanel("panel-validation-results"); }}
+      />
+      <RollbackDialog
+        open={rollbackOpen} onOpenChange={setRollbackOpen} versions={versions} running={rollbackRunning}
+        onRollback={runRollback}
+      />
+      <GlobalSearchDialog
+        open={searchOpen} onOpenChange={setSearchOpen} index={searchIndex}
+        onSelect={(r) => { setSearchOpen(false); focusPanel(r.panel); }}
+      />
+      <ExportDialog open={exportOpen} onOpenChange={setExportOpen} onExport={(f, s, o) => { doExport(f, s, o); setExportOpen(false); }} />
+      <VersionDetailDialog open={versionDetailOpen} onOpenChange={setVersionDetailOpen} version={versionDetail} />
+      <DemoStoryOverlay
+        step={storyStep} reducedMotion={reducedMotion}
+        onToggleMotion={() => setReducedMotion((m) => !m)}
+        onStep={setStoryStep} onClose={() => setStoryStep(null)}
+      />
+
     </div>
   );
 }
