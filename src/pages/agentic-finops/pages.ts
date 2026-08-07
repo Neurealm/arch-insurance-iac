@@ -1,10 +1,9 @@
 import {
-  LayoutDashboard, Gauge, Trash2, PiggyBank, Timer, HardDrive, Network,
-  Boxes, Container, ShieldCheck,
+  Gauge, Trash2, PiggyBank, Timer, HardDrive, Network, Boxes, Container, ShieldCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-export interface FinOpsPage {
+export interface FinPage {
   slug: string;
   title: string;
   navLabel: string;
@@ -14,19 +13,9 @@ export interface FinOpsPage {
   breadcrumb: string;
 }
 
-export const finopsGroups = ["Overview", "Optimization Intelligence", "Governance"] as const;
+export const finGroups = ["Optimization Intelligence", "Governance"] as const;
 
-export const finopsPages: FinOpsPage[] = [
-  {
-    slug: "overview",
-    navLabel: "Overview",
-    title: "Agentic FinOps Overview",
-    group: "Overview",
-    icon: LayoutDashboard,
-    breadcrumb: "Overview",
-    subtitle:
-      "Portfolio view of cloud spend, optimization opportunity, agentic activity, and financially verified realized savings.",
-  },
+export const finPages: FinPage[] = [
   {
     slug: "resource-rightsizing",
     navLabel: "Resource Rightsizing",
@@ -65,7 +54,7 @@ export const finopsPages: FinOpsPage[] = [
     icon: Timer,
     breadcrumb: "Elasticity & Scheduling",
     subtitle:
-      "Optimize runtime by aligning compute resources to actual demand patterns with intelligent scheduling, scale policies, and automation.",
+      "Optimize runtime by aligning compute to real demand patterns with intelligent scheduling, scale policies, and automation.",
   },
   {
     slug: "storage-data-lifecycle",
@@ -75,7 +64,7 @@ export const finopsPages: FinOpsPage[] = [
     icon: HardDrive,
     breadcrumb: "Storage & Data Lifecycle",
     subtitle:
-      "Optimize storage costs by aligning data with access patterns, business value, compliance, and lifecycle policies.",
+      "Optimize storage cost by aligning data with access patterns, business value, compliance, and lifecycle policy.",
   },
   {
     slug: "network-data-movement",
@@ -85,7 +74,7 @@ export const finopsPages: FinOpsPage[] = [
     icon: Network,
     breadcrumb: "Network & Data Movement",
     subtitle:
-      "Identify and optimize inefficient traffic flows, egress costs, cross-region movement, and networking resources.",
+      "Identify and optimize inefficient traffic flows, egress cost, cross-region movement, and networking resources.",
   },
   {
     slug: "platform-architecture-efficiency",
@@ -105,7 +94,7 @@ export const finopsPages: FinOpsPage[] = [
     icon: Container,
     breadcrumb: "Kubernetes Economics",
     subtitle:
-      "Reduce Kubernetes waste across compute, requests/limits, storage, networking, and cluster operations.",
+      "Reduce Kubernetes waste across compute, requests and limits, storage, networking, and cluster operations.",
   },
   {
     slug: "governance-realization",
@@ -119,4 +108,11 @@ export const finopsPages: FinOpsPage[] = [
   },
 ];
 
-export const finopsBase = "/agentic-finops";
+export const finBase = "/agentic-finops";
+export const finDefaultSlug = "resource-rightsizing";
+
+/* Back-compat aliases */
+export type FinOpsPage = FinPage;
+export const finopsPages = finPages;
+export const finopsGroups = finGroups;
+export const finopsBase = finBase;
