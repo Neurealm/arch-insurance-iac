@@ -60,16 +60,18 @@ const domains = [
 
 export default function FinOpsOverview() {
   const drawer = useDetailDrawer();
+  const [mode, setMode] = useState<ViewMode>("exec");
   const page = finopsPages[0];
 
   return (
-    <WorkspaceShell
-      title={page.title}
-      subtitle={page.subtitle}
-      actions={<FilterBar chips={["All accounts", "All providers", "Last 90 days", "Include forecast"]} />}
-    >
+    <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
+      <FinOpsHeader
+        title={page.title}
+        tagline="One portfolio view of where cloud money is going, what can be recovered, and what has already been banked."
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
+      />
       <KpiStrip
-        kpis={kpis}
+        kpis={execKpis(kpis, mode)}
         onSelect={(k) =>
           drawer.open({
             title: k.label, subtitle: `${k.value} — ${k.sub ?? ""}`, tone: k.tone,
