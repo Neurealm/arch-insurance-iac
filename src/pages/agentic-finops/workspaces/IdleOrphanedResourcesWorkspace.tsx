@@ -186,6 +186,7 @@ export default function IdleOrphanedResourceReclamationWorkspace() {
       </div>
 
       {/* 4 */}
+      <FullOnly mode={mode}>
       <Panel index={4} title="Agentic investigation workspace">
         <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
           <div className="space-y-3">
