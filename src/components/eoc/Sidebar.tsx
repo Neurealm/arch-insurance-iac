@@ -118,7 +118,6 @@ const tree: Node[] = [
     label: "Agentic FinOps Digital Twin",
     icon: Wallet,
     to: "/agentic-finops",
-    statusDot: "green",
   },
   {
     key: "enterprise-cognitive-fabric",
