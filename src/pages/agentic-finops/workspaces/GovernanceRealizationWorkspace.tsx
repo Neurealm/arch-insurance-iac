@@ -178,7 +178,7 @@ export default function GovernanceRealizationWorkspace() {
   const [fw, setFw] = useState<(typeof frameworkTabs)[number]>("Policies");
   const [ap, setAp] = useState<(typeof approvalTabs)[number]>("Pending");
   const [acc, setAcc] = useState<(typeof accountabilityTabs)[number]>("By Business Unit");
-  const [mode, setMode] = useState<ViewMode>("exec");
+  const [mode, setMode] = useState<ViewMode>("full");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">

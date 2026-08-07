@@ -105,7 +105,7 @@ const executionPlan: [string, string, string, string, string, string][] = [
 
 export default function ElasticitySchedulingWorkspace() {
   const drawer = useDetailDrawer();
-  const [mode, setMode] = useState<ViewMode>("exec");
+  const [mode, setMode] = useState<ViewMode>("full");
   const [tab, setTab] = useState<(typeof patternTabs)[number]>("By Hour");
   const data = tab === "By Hour" ? hourly : tab === "By Day of Week" ? daily : byEnv;
 

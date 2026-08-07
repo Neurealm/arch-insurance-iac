@@ -143,7 +143,7 @@ function arc(from: number[], to: number[]) {
 
 export default function NetworkDataMovementWorkspace() {
   const drawer = useDetailDrawer();
-  const [mode, setMode] = useState<ViewMode>("exec");
+  const [mode, setMode] = useState<ViewMode>("full");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">

@@ -99,7 +99,7 @@ export default function IdleOrphanedResourceReclamationWorkspace() {
   const drawer = useDetailDrawer();
   const [selected, setSelected] = useState<Candidate>(candidates[0]);
   const [tab, setTab] = useState<(typeof explainerTabs)[number]>("Evidence");
-  const [mode, setMode] = useState<ViewMode>("exec");
+  const [mode, setMode] = useState<ViewMode>("full");
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">

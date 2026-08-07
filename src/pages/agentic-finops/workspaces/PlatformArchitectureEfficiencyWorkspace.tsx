@@ -129,7 +129,7 @@ const toneBg: Record<string, string> = {
 
 export default function PlatformArchitectureEfficiencyWorkspace() {
   const drawer = useDetailDrawer();
-  const [mode, setMode] = useState<ViewMode>("exec");
+  const [mode, setMode] = useState<ViewMode>("full");
   const pos = Object.fromEntries(archNodes.map((n) => [n.id, n]));
 
   return (
