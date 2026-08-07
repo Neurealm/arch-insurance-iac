@@ -307,6 +307,7 @@ export default function KubernetesEconomicsWorkspace() {
         </FullOnly>
       </div>
 
+      <FullOnly mode={mode}>
       <div className="grid gap-5 xl:grid-cols-2">
         {/* 10 */}
         <Panel index={10} title="Digital twin investigation">
@@ -335,8 +336,10 @@ export default function KubernetesEconomicsWorkspace() {
           </DataTable>
         </Panel>
       </div>
+      </FullOnly>
 
       {/* 12 */}
+      <FullOnly mode={mode}>
       <Panel index={12} title="Value realization tracker">
         <SavingsFunnel stages={[
           { label: "Identified", value: "$1.28M", pct: 100, tone: "blue" },
@@ -346,6 +349,7 @@ export default function KubernetesEconomicsWorkspace() {
           { label: "Realized YTD", value: "$364K", pct: 28, tone: "emerald" },
         ]} title="Identified → Realized" />
       </Panel>
+      </FullOnly>
 
       <PageBands lifecycle={lifecycleWithActive("Execute")} />
 
