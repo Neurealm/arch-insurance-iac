@@ -374,6 +374,8 @@ import PersonaStudioScaffold from "./pages/enterprise-cognitive-fabric/PersonaSt
 import PersonaValidation from "./pages/enterprise-cognitive-fabric/PersonaValidation.tsx";
 import EnterpriseCognitiveMemory from "./pages/enterprise-cognitive-fabric/EnterpriseCognitiveMemory.tsx";
 import CognitiveIntake from "./pages/enterprise-cognitive-fabric/CognitiveIntake.tsx";
+import CognitiveReadinessAssessment from "./pages/enterprise-cognitive-fabric/CognitiveReadinessAssessment.tsx";
+
 import PersonaImpactAnalysis from "./pages/enterprise-cognitive-fabric/PersonaImpactAnalysis.tsx";
 import CrossTeamImpactAnalysis from "./pages/enterprise-cognitive-fabric/CrossTeamImpactAnalysis.tsx";
 import DecisionIntelligence from "./pages/enterprise-cognitive-fabric/DecisionIntelligence.tsx";
