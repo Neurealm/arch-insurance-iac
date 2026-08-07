@@ -1,180 +1,391 @@
-import { ShieldCheck, DollarSign, ClipboardCheck, Users, Target, AlertTriangle, FileCheck, TrendingUp } from "lucide-react";
+import { useState } from "react";
 import {
-  Badge, Card, ConfidenceCell, DataTable, DetailDrawer, DonutCard, GaugeRing, Kpi, KpiStrip,
-  LinkAction, Panel, ProgressRow, RiskCell, Td, Th, TrendArea, useDetailDrawer,
+  ShieldCheck, Landmark, TrendingUp, ShieldAlert, Timer, Target, HeartPulse, FileCheck, CheckCircle2,
+} from "lucide-react";
+import { Bar, BarChart, CartesianGrid, Legend, Line, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { cn } from "@/lib/utils";
+import FinOpsHeader from "../components/FinOpsHeader";
+import PageBands, { lifecycleWithActive } from "../components/PageBands";
+import SyntheticFooter from "../components/SyntheticFooter";
+import {
+  Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer,
+  useDetailDrawer, GaugeRing, ProgressRow, toneMap, type Kpi, type Tone,
 } from "../components/primitives";
-import { WorkspaceFooter, WorkspaceShell, FilterBar, defaultFabric, defaultMaturity } from "../components/bands";
-import { finopsPages } from "../pages";
-
-const page = finopsPages.find((p) => p.slug === "governance-realization")!;
 
 const kpis: Kpi[] = [
-  { id: "realized", icon: DollarSign, label: "Realized savings YTD", value: "$5.81M", sub: "Billing verified", tone: "emerald" },
-  { id: "target", icon: Target, label: "Annual target", value: "$8.00M", sub: "73% attained", tone: "blue" },
-  { id: "pipeline", icon: TrendingUp, label: "Committed pipeline", value: "$3.12M", sub: "Approved, in flight", tone: "teal" },
-  { id: "policy", icon: ShieldCheck, label: "Policy compliance", value: "94%", sub: "12 open exceptions", tone: "violet" },
-  { id: "approvals", icon: ClipboardCheck, label: "Open approvals", value: "38", sub: "Median age 2.1 days", tone: "amber" },
-  { id: "owners", icon: Users, label: "Accountable owners", value: "38", sub: "Cost centers mapped", tone: "sky" },
-  { id: "breach", icon: AlertTriangle, label: "Budget breaches", value: "4", sub: "Of 38 cost centers", tone: "rose" },
-  { id: "audit", icon: FileCheck, label: "Audit evidence", value: "100%", sub: "Changes traceable", tone: "slate" },
+  { id: "comp", icon: ShieldCheck, label: "Policy Compliance", value: "94.2%", sub: "target 96%", tone: "emerald" },
+  { id: "gov", icon: Landmark, label: "Governed Spend", value: "$28.7M", sub: "of $30.4M total", tone: "blue" },
+  { id: "real", icon: TrendingUp, label: "Realized Savings YTD", value: "$4.32M", sub: "billing-verified", tone: "emerald" },
+  { id: "viol", icon: ShieldAlert, label: "Policy Violations", value: "12", sub: "3 high severity", tone: "rose" },
+  { id: "sla", icon: Timer, label: "Approval SLA", value: "1.8 hrs", sub: "median decision time", tone: "sky" },
+  { id: "rate", icon: Target, label: "Value Realization Rate", value: "76%", sub: "approved → realized", tone: "violet" },
+  { id: "health", icon: HeartPulse, label: "Governance Health", value: "Excellent", sub: "all controls green", tone: "teal" },
+  { id: "audit", icon: FileCheck, label: "Audit Readiness", value: "98.5%", sub: "evidence complete", tone: "amber" },
 ];
 
 const compliance = [
-  { policy: "Mandatory cost allocation tags", scope: "All resources", rate: 91, exceptions: 14, owner: "Cloud Platform", status: "On track" },
-  { policy: "Budget threshold alerting", scope: "38 cost centers", rate: 100, exceptions: 0, owner: "Finance", status: "Compliant" },
-  { policy: "Approval before commitment purchase", scope: "All commitments", rate: 100, exceptions: 0, owner: "Finance", status: "Compliant" },
-  { policy: "Lifecycle policy on object storage", scope: "1,204 buckets", rate: 58, exceptions: 41, owner: "Data Platform", status: "At risk" },
-  { policy: "Non-prod scheduling enforced", scope: "Non-prod estate", rate: 86, exceptions: 9, owner: "Dev Enablement", status: "On track" },
-  { policy: "Rightsizing SLA (14 days to decision)", scope: "418 candidates", rate: 78, exceptions: 22, owner: "Service owners", status: "At risk" },
+  { name: "Compliant", value: 94.2, display: "94.2%", color: "#10b981" },
+  { name: "Warning", value: 3.4, display: "3.4%", color: "#f59e0b" },
+  { name: "Violation", value: 1.6, display: "1.6%", color: "#ef4444" },
+  { name: "Not evaluated", value: 0.8, display: "0.8%", color: "#cbd5e1" },
 ];
 
-const approvals = [
-  { id: "AP-2201", item: "Commitment purchase · Compute SP 3yr", value: "$1.20M", stage: "CFO sign-off", age: "1d", conf: 93, risk: "Low" as const },
-  { id: "AP-2208", item: "Rightsize 27 production ASGs", value: "$248K", stage: "Service owner", age: "3d", conf: 94, risk: "Low" as const },
-  { id: "AP-2214", item: "Delete 704 quarantined resources", value: "$1.18M", stage: "Platform owner", age: "2d", conf: 96, risk: "Very Low" as const },
-  { id: "AP-2219", item: "Storage lifecycle rollout · top 20 buckets", value: "$512K", stage: "Data governance", age: "5d", conf: 88, risk: "Medium" as const },
-  { id: "AP-2226", item: "Managed streaming migration funding", value: "$122K", stage: "Architecture board", age: "8d", conf: 71, risk: "High" as const },
+const frameworkTabs = ["Policies", "Standards", "Controls", "Approvals"] as const;
+const policies: Record<(typeof frameworkTabs)[number], [string, string, string, string, string][]> = {
+  Policies: [
+    ["Cost allocation", "Financial", "98.1%", "Active", "2 hours ago"],
+    ["Resource tagging", "Operational", "93.4%", "Active", "2 hours ago"],
+    ["Instance sizing", "Technical", "89.6%", "Active", "6 hours ago"],
+    ["Storage lifecycle", "Data", "93.2%", "Active", "1 day ago"],
+    ["Network security", "Security", "99.2%", "Active", "3 hours ago"],
+    ["Approval workflows", "Governance", "100%", "Active", "1 hour ago"],
+  ],
+  Standards: [
+    ["FinOps Foundation Framework", "Industry", "91.0%", "Adopted", "1 week ago"],
+    ["Cloud unit economics standard", "Internal", "88.4%", "Adopted", "2 weeks ago"],
+    ["Tagging taxonomy v3", "Internal", "93.4%", "Adopted", "3 days ago"],
+    ["Green cloud reporting", "Sustainability", "76.2%", "Pilot", "1 month ago"],
+  ],
+  Controls: [
+    ["Budget threshold alerting", "Preventive", "100%", "Enforced", "Continuous"],
+    ["Commitment purchase gate", "Preventive", "100%", "Enforced", "Continuous"],
+    ["Untagged resource quarantine", "Detective", "94.8%", "Enforced", "Hourly"],
+    ["Anomaly detection", "Detective", "97.1%", "Enforced", "Continuous"],
+    ["Post-change savings verification", "Corrective", "92.6%", "Enforced", "Monthly"],
+  ],
+  Approvals: [
+    ["Change above $250K annualized", "Financial", "100%", "Required", "Continuous"],
+    ["Production rightsizing", "Technical", "100%", "Required", "Continuous"],
+    ["Resource deletion", "Operational", "100%", "Required", "Continuous"],
+    ["Architecture migration", "Strategic", "100%", "Required", "Continuous"],
+  ],
+};
+
+const approvalTabs = ["Pending", "In Review", "Approved", "History"] as const;
+const approvals: Record<(typeof approvalTabs)[number], [string, string, string, string, string][]> = {
+  Pending: [
+    ["REQ-4821", "Commitment rebalance plan", "FinOps Lead", "$2.31M", "42 min"],
+    ["REQ-4822", "Reclaim 184 orphaned volumes", "Cloud Engineering", "$96K", "1.2 hrs"],
+    ["REQ-4826", "Graviton node group rollout", "Platform SRE", "$284K", "18 min"],
+  ],
+  "In Review": [
+    ["REQ-4809", "Storage lifecycle policy set", "Data Governance", "$612K", "6 hrs"],
+    ["REQ-4814", "Non-prod scheduling activation", "Engineering Ops", "$412K", "3 hrs"],
+  ],
+  Approved: [
+    ["REQ-4788", "Payment service rightsizing", "SRE + FinOps", "$13.2K", "Approved"],
+    ["REQ-4791", "VPC endpoint deployment", "Network Eng", "$1.39M", "Approved"],
+    ["REQ-4796", "Delete expired log archives", "Legal + Platform", "$9.4K", "Approved"],
+  ],
+  History: [
+    ["REQ-4702", "Aggressive 3-year commitment", "Finance", "$3.06M", "Rejected — cash policy"],
+    ["REQ-4718", "Perf fleet decommission", "Perf Eng", "$21.7K", "Approved"],
+    ["REQ-4740", "Cross-region replication change", "Data Eng", "$852K", "Approved"],
+  ],
+};
+
+const accountabilityTabs = ["By Business Unit", "By Application", "By Team", "By Owner"] as const;
+const accountability: Record<(typeof accountabilityTabs)[number], [string, string, string, string, string][]> = {
+  "By Business Unit": [
+    ["Commerce", "$11.4M", "96.2%", "+2.1%", "On track"],
+    ["Payments", "$7.8M", "97.8%", "-1.4%", "On track"],
+    ["Analytics", "$5.2M", "89.4%", "+8.6%", "At risk"],
+    ["Marketing", "$3.1M", "91.0%", "+4.2%", "Watch"],
+    ["Corporate", "$2.9M", "98.4%", "-0.6%", "On track"],
+  ],
+  "By Application": [
+    ["Payment Authorization", "$4.2M", "98.1%", "-2.2%", "On track"],
+    ["Order Capture", "$3.6M", "95.4%", "+1.1%", "On track"],
+    ["Data Lake", "$3.1M", "86.2%", "+11.4%", "At risk"],
+    ["Customer Profile", "$2.4M", "93.8%", "+0.4%", "On track"],
+    ["Media Delivery", "$1.9M", "90.6%", "+6.2%", "Watch"],
+  ],
+  "By Team": [
+    ["Platform Engineering", "$6.8M", "97.2%", "-3.1%", "On track"],
+    ["Data Engineering", "$5.4M", "87.6%", "+9.8%", "At risk"],
+    ["Commerce Squad", "$4.9M", "95.8%", "+1.6%", "On track"],
+    ["SRE", "$3.2M", "99.1%", "-2.4%", "On track"],
+  ],
+  "By Owner": [
+    ["a.okafor@example.com", "$4.1M", "97.4%", "-1.8%", "On track"],
+    ["m.tanaka@example.com", "$3.7M", "88.2%", "+10.2%", "At risk"],
+    ["s.delacroix@example.com", "$2.8M", "94.6%", "+2.4%", "Watch"],
+    ["j.almeida@example.com", "$2.2M", "98.8%", "-0.9%", "On track"],
+  ],
+};
+
+const riskFactors: [string, string, number][] = [
+  ["Untagged production spend", "Low", 22],
+  ["Unapproved commitment exposure", "Low", 14],
+  ["Concentration in a single region", "Medium", 41],
+  ["Budget variance in Analytics", "Medium", 38],
+  ["Audit evidence gaps", "Low", 9],
 ];
 
-const realization = [
-  { label: "Apr", value: 2.9 }, { label: "May", value: 3.4 }, { label: "Jun", value: 4.0 },
-  { label: "Jul", value: 4.6 }, { label: "Aug", value: 5.2 }, { label: "Sep", value: 5.8 },
+const evidenceChecklist = [
+  "Policy definitions versioned and signed",
+  "Every approval decision recorded with rationale",
+  "Change records linked to billing impact",
+  "Savings verified against invoice line items",
+  "Access and role assignments reviewed quarterly",
+  "Exception register current and owner-attested",
 ];
 
-const outcomeMix = [
-  { name: "Rightsizing", value: 31, display: "$1.80M" },
-  { name: "Reclamation", value: 21, display: "$1.24M" },
-  { name: "Commitments", value: 19, display: "$1.10M" },
-  { name: "Scheduling", value: 12, display: "$0.70M" },
-  { name: "Storage lifecycle", value: 9, display: "$0.52M" },
-  { name: "Network", value: 5, display: "$0.29M" },
-  { name: "Architecture", value: 3, display: "$0.16M" },
+const timeline = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => ({
+  label: m,
+  target: 500 + i * 90,
+  realized: i <= 8 ? 420 + i * 82 : 0,
+  forecast: 470 + i * 88,
+}));
+
+const insights = [
+  { title: "Analytics variance is the primary governance risk", detail: "Spend is 8.6% above plan with 89.4% governed coverage. Two untagged clusters account for most of the gap.", tone: "amber" as Tone },
+  { title: "Approval velocity is a competitive advantage", detail: "Median approval time fell from 9.4 hours to 1.8 hours after evidence packages were attached automatically.", tone: "emerald" as Tone },
+  { title: "Realization rate is stable at 76%", detail: "The gap between approved and realized value is driven by change-window slippage, not by inaccurate estimates.", tone: "blue" as Tone },
+  { title: "Audit readiness is near target", detail: "98.5% of required evidence is current; the remaining gap is the quarterly access review for two service accounts.", tone: "violet" as Tone },
+];
+
+const recommendations: [string, string, string][] = [
+  ["Enforce tagging quarantine in the Analytics account", "High", "Take Action"],
+  ["Close the two outstanding access reviews before the audit", "High", "Take Action"],
+  ["Rebalance commitments ahead of the 90-day expiry cliff", "High", "Review"],
+  ["Automate savings verification for storage transitions", "Medium", "Implement"],
+  ["Extend unit-economics reporting to Marketing", "Medium", "Plan"],
+  ["Pilot sustainability reporting for the Commerce portfolio", "Low", "Plan"],
+];
+
+const executionPlan: [string, string, string, string][] = [
+  ["1", "Publish updated tagging policy with quarantine enforcement", "1 week", "Governance"],
+  ["2", "Complete outstanding access reviews", "3 days", "Security"],
+  ["3", "Submit commitment rebalance for approval", "2 days", "FinOps"],
+  ["4", "Automate storage savings verification", "2 weeks", "Platform"],
+  ["5", "Extend accountability reporting to all business units", "3 weeks", "FinOps"],
+  ["6", "Run the quarterly governance review", "1 day", "Executive"],
+];
+
+const outcomes = [
+  ["Cloud unit cost", "-11.4%", "vs prior year"],
+  ["Savings realized", "$4.32M", "year to date"],
+  ["Governed spend", "94.4%", "of total cloud spend"],
+  ["Decision latency", "1.8 hrs", "median approval"],
+  ["Audit findings", "0", "material findings"],
+  ["Forecast accuracy", "96.2%", "rolling 6 months"],
 ];
 
 export default function GovernanceRealizationWorkspace() {
   const drawer = useDetailDrawer();
-  return (
-    <WorkspaceShell
-      title={page.title}
-      subtitle={page.subtitle}
-      actions={<FilterBar chips={["Fiscal year to date", "All cost centers", "Verified savings only", "Include exceptions"]} />}
-    >
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({
-        title: k.label, subtitle: `${k.value} — ${k.sub ?? ""}`, tone: k.tone,
-        rows: [["Value", k.value], ["Verification", "Two consecutive billing cycles"], ["Owner", "FinOps council"], ["Reported to", "Finance close package"]],
-        bullets: ["Only billing-verified savings count toward the annual target.", "Every change carries an immutable audit trail from detection through verification."],
-      })} />
+  const [fw, setFw] = useState<(typeof frameworkTabs)[number]>("Policies");
+  const [ap, setAp] = useState<(typeof approvalTabs)[number]>("Pending");
+  const [acc, setAcc] = useState<(typeof accountabilityTabs)[number]>("By Business Unit");
 
-      <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
-        <Panel index={1} title="Policy compliance" action="Enforcement rate by policy">
-          <DataTable head={<>
-            <Th>Policy</Th><Th>Scope</Th><Th right>Compliance</Th><Th right>Exceptions</Th><Th>Owner</Th><Th>Status</Th>
-          </>}>
-            {compliance.map((c) => (
-              <tr key={c.policy} className="cursor-pointer hover:bg-slate-50" onClick={() => drawer.open({
-                title: c.policy, subtitle: `${c.scope} · owner ${c.owner}`, tone: c.rate >= 90 ? "emerald" : "amber",
-                rows: [["Compliance rate", `${c.rate}%`], ["Open exceptions", String(c.exceptions)], ["Owner", c.owner], ["Status", c.status], ["Review cadence", "Monthly FinOps council"]],
-                bullets: [
-                  "Exceptions require a documented business justification and an expiry date.",
-                  "Non-compliant resources are surfaced to the owning cost center weekly.",
-                ],
-              })}>
-                <Td className="font-medium text-slate-900">{c.policy}</Td>
-                <Td className="text-slate-500">{c.scope}</Td>
-                <ConfidenceCell pct={c.rate} right />
-                <Td right>{c.exceptions}</Td>
-                <Td>{c.owner}</Td>
-                <Td>
-                  <Badge tone={c.status === "Compliant" ? "emerald" : c.status === "On track" ? "blue" : "amber"}>{c.status}</Badge>
-                </Td>
-              </tr>
-            ))}
-          </DataTable>
+  return (
+    <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
+      <FinOpsHeader
+        title="Governance & Realization Workspace"
+        tagline="Drive FinOps accountability, policy compliance, and measurable business value. Govern spend, enforce standards, track commitments, and realize financial and operational outcomes."
+        secondaryActions={[{ label: "Export Audit Pack", icon: "export" }, { label: "Governance Simulator", icon: "simulate" }]}
+        meta={{ lastAnalysis: "5 minutes ago", freshness: "99.6% within SLA", resources: "$30.4M cloud spend governed" }}
+        onPrimary={() => drawer.open({ title: "Governance evaluation run", tone: "emerald", rows: [["Policies evaluated", "6"], ["Resources checked", "18,428"], ["Violations", "12"], ["Compliance", "94.2%"]] })}
+        onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+      />
+
+      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+
+      <div className="grid gap-5 xl:grid-cols-[1fr_1.6fr]">
+        {/* 1 */}
+        <Panel index={1} title="Policy compliance overview">
+          <DonutCard total="94.2%" totalLabel="Compliant" data={compliance} />
         </Panel>
 
-        <Panel index={2} title="Approval workflows" action="Open decisions and ageing">
-          <DataTable head={<><Th>ID</Th><Th>Item</Th><Th right>Value</Th><Th>Stage</Th><Th right>Age</Th><Th>Risk</Th></>}>
-            {approvals.map((a) => (
-              <tr key={a.id} className="cursor-pointer hover:bg-slate-50" onClick={() => drawer.open({
-                title: `${a.id} · ${a.item}`, subtitle: `${a.value} pending at ${a.stage}`, tone: "amber",
-                rows: [["Value", a.value], ["Stage", a.stage], ["Age", a.age], ["Confidence", `${a.conf}%`], ["Risk", a.risk], ["SLA", "5 business days"]],
-                bullets: [
-                  "Approval packet includes evidence, blast radius, rollback plan, and financial model.",
-                  "Escalation to the FinOps council occurs automatically after the SLA lapses.",
-                ],
-              })}>
-                <Td className="font-medium text-slate-900">{a.id}</Td>
-                <Td>{a.item}</Td>
-                <Td right className="font-semibold text-slate-900">{a.value}</Td>
-                <Td className="text-slate-500">{a.stage}</Td>
-                <Td right>{a.age}</Td>
-                <RiskCell level={a.risk} />
+        {/* 2 */}
+        <Panel index={2} title="Governance framework">
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {frameworkTabs.map((t) => (
+              <button key={t} type="button" onClick={() => setFw(t)}
+                className={cn("rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition",
+                  fw === t ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-indigo-300")}>
+                {t}
+              </button>
+            ))}
+          </div>
+          <DataTable head={<><Th>Name</Th><Th>Category</Th><Th right>Coverage</Th><Th right>Status</Th><Th right>Last evaluated</Th></>}>
+            {policies[fw].map(([n, cat, cov, st, last]) => (
+              <tr key={n} className="hover:bg-slate-50">
+                <Td className="font-medium text-slate-900">{n}</Td><Td>{cat}</Td>
+                <Td right><span className={cn("font-semibold", parseFloat(cov) >= 93 ? "text-emerald-700" : parseFloat(cov) >= 85 ? "text-amber-700" : "text-rose-700")}>{cov}</span></Td>
+                <Td right><Badge tone={st === "Pilot" ? "amber" : "emerald"}>{st}</Badge></Td>
+                <Td right>{last}</Td>
               </tr>
             ))}
           </DataTable>
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-[11.5px] text-slate-500">38 approvals open · median age 2.1 days</span>
-            <LinkAction>Open approval queue</LinkAction>
-          </div>
         </Panel>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-3">
-        <Panel index={3} title="Realization against target" action="$M verified, cumulative">
-          <TrendArea data={realization} color="#10b981" yTickFormatter={(v) => `$${v}M`} />
-          <div className="mt-3 grid grid-cols-2 items-center gap-3">
-            <GaugeRing pct={73} label="Target attainment" sub="$5.81M / $8.00M" />
-            <div className="text-[12px] text-slate-600">
-              Pipeline of $3.12M already approved covers the remaining gap with a 1.1x buffer.
+      <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
+        {/* 3 */}
+        <Panel index={3} title="Approval workflow">
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {approvalTabs.map((t) => (
+              <button key={t} type="button" onClick={() => setAp(t)}
+                className={cn("rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition",
+                  ap === t ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-indigo-300")}>
+                {t}
+              </button>
+            ))}
+          </div>
+          <DataTable head={<><Th>Request</Th><Th>Description</Th><Th>Approver</Th><Th right>Value</Th><Th right>Status / age</Th></>}>
+            {approvals[ap].map(([id, desc, approver, val, status]) => (
+              <tr key={id} className="cursor-pointer hover:bg-slate-50" onClick={() => drawer.open({ title: `${id} · ${desc}`, tone: "blue", rows: [["Approver", approver], ["Value", val], ["Status", status], ["Evidence attached", "Yes"]] })}>
+                <Td className="font-medium text-slate-900">{id}</Td><Td>{desc}</Td><Td>{approver}</Td>
+                <Td right className="font-semibold text-emerald-700">{val}</Td>
+                <Td right>{status}</Td>
+              </tr>
+            ))}
+          </DataTable>
+        </Panel>
+
+        {/* 4 */}
+        <Panel index={4} title="Value realization tracker">
+          <DonutCard total="76%" totalLabel="Realization rate" data={[
+            { name: "Realized", value: 76, display: "$4.32M", color: "#10b981" },
+            { name: "In progress", value: 16, display: "$910K", color: "#f59e0b" },
+            { name: "Identified only", value: 8, display: "$455K", color: "#cbd5e1" },
+          ]} />
+        </Panel>
+      </div>
+
+      {/* 5 */}
+      <Panel index={5} title="Financial accountability">
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {accountabilityTabs.map((t) => (
+            <button key={t} type="button" onClick={() => setAcc(t)}
+              className={cn("rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition",
+                acc === t ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-indigo-300")}>
+              {t}
+            </button>
+          ))}
+        </div>
+        <DataTable head={<><Th>Entity</Th><Th right>Spend</Th><Th right>Governed %</Th><Th right>Variance</Th><Th right>Accountability</Th></>}>
+          {accountability[acc].map(([e, spend, gov, variance, status]) => (
+            <tr key={e} className="hover:bg-slate-50">
+              <Td className="font-medium text-slate-900">{e}</Td><Td right>{spend}</Td><Td right>{gov}</Td>
+              <Td right className={variance.startsWith("+") ? "font-semibold text-rose-700" : "font-semibold text-emerald-700"}>{variance}</Td>
+              <Td right><Badge tone={status === "At risk" ? "rose" : status === "Watch" ? "amber" : "emerald"}>{status}</Badge></Td>
+            </tr>
+          ))}
+        </DataTable>
+      </Panel>
+
+      <div className="grid gap-5 xl:grid-cols-2">
+        {/* 6 */}
+        <Panel index={6} title="Risk & compliance monitoring">
+          <GaugeRing pct={18} label="Risk score (of 100)" sub="Low" tone="emerald" />
+          <div className="mt-3 space-y-2">
+            {riskFactors.map(([f, level, pct]) => (
+              <div key={f} className="grid grid-cols-[1fr_auto] items-center gap-2">
+                <ProgressRow label={f} pct={pct} tone={pct >= 40 ? "amber" : "emerald"} />
+                <Badge tone={level === "Medium" ? "amber" : "emerald"}>{level}</Badge>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        {/* 7 */}
+        <Panel index={7} title="Audit & evidence">
+          <div className="grid gap-3 md:grid-cols-[auto_1fr] md:items-center">
+            <GaugeRing pct={98} label="Audit readiness" sub="98.5%" />
+            <div>
+              <ul className="space-y-1">
+                {evidenceChecklist.map((e) => (
+                  <li key={e} className="flex gap-1.5 text-[11.5px] text-slate-700"><CheckCircle2 className="mt-[2px] h-3 w-3 shrink-0 text-emerald-500" />{e}</li>
+                ))}
+              </ul>
+              <div className="mt-2 flex flex-wrap gap-4 text-[11.5px] text-slate-600">
+                <span>Last audit: <span className="font-semibold text-slate-900">14 Feb 2026</span></span>
+                <span>Next audit: <span className="font-semibold text-slate-900">21 Aug 2026</span></span>
+              </div>
             </div>
           </div>
         </Panel>
-        <Panel index={4} title="Business outcomes by lever">
-          <DonutCard data={outcomeMix} total="$5.81M" totalLabel="Verified YTD" />
+      </div>
+
+      {/* 8 */}
+      <Panel index={8} title="Realization timeline">
+        <ResponsiveContainer width="100%" height={230}>
+          <ComposedChart data={timeline} margin={{ top: 8, right: 10, left: -14, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+            <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Bar dataKey="realized" name="Realized ($K)" fill="#10b981" radius={[3, 3, 0, 0]} />
+            <Line type="monotone" dataKey="target" name="Target ($K)" stroke="#6366f1" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="forecast" name="Forecast ($K)" stroke="#f59e0b" strokeWidth={1.6} strokeDasharray="4 3" dot={false} />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </Panel>
+
+      {/* 9 */}
+      <Panel index={9} title="Governance insights">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {insights.map((i) => {
+            const t = toneMap[i.tone];
+            return (
+              <div key={i.title} className={cn("rounded-lg border p-3", t.bg, t.border)}>
+                <div className={cn("text-[12px] font-semibold", t.text)}>{i.title}</div>
+                <p className="mt-1 text-[11.5px] leading-snug text-slate-700">{i.detail}</p>
+              </div>
+            );
+          })}
+        </div>
+      </Panel>
+
+      <div className="grid gap-5 xl:grid-cols-2">
+        {/* 10 */}
+        <Panel index={10} title="Recommendations">
+          <ul className="space-y-2">
+            {recommendations.map(([r, pri, action]) => (
+              <li key={r} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+                <div className="min-w-0">
+                  <div className="truncate text-[12px] font-medium text-slate-900">{r}</div>
+                  <Badge tone={pri === "High" ? "rose" : pri === "Medium" ? "amber" : "slate"}>{pri} priority</Badge>
+                </div>
+                <button type="button" onClick={() => drawer.open({ title: r, subtitle: `${pri} priority`, tone: "blue", rows: [["Recommended action", action], ["Owner", "FinOps governance board"], ["Due", "This quarter"]] })}
+                  className="shrink-0 rounded-md bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-slate-800">{action}</button>
+              </li>
+            ))}
+          </ul>
         </Panel>
-        <Panel index={5} title="Accountability health">
-          <div className="space-y-2.5">
-            <ProgressRow label="Cost centers within budget" pct={89} tone="emerald" right="34/38" />
-            <ProgressRow label="Owners acting within SLA" pct={78} tone="blue" />
-            <ProgressRow label="Unit economics reported" pct={92} tone="teal" />
-            <ProgressRow label="Forecast accuracy" pct={96} tone="violet" />
-            <ProgressRow label="Exceptions past expiry" pct={7} tone="rose" right="3" />
-          </div>
-          <p className="mt-3 text-[11.5px] text-slate-500">
-            Unit economics are reported per 1,000 transactions and per active customer, alongside absolute spend.
-          </p>
+
+        {/* 11 */}
+        <Panel index={11} title="Execution plan">
+          <DataTable head={<><Th>Step</Th><Th>Action</Th><Th right>Duration</Th><Th right>Owner</Th></>}>
+            {executionPlan.map(([s, a, d, o]) => (
+              <tr key={s} className="hover:bg-slate-50">
+                <Td className="font-semibold text-slate-900">{s}</Td><Td>{a}</Td><Td right>{d}</Td><Td right>{o}</Td>
+              </tr>
+            ))}
+          </DataTable>
         </Panel>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-3">
-        <Card title="FinOps council decisions">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li>Raised commitment coverage target from 80% to 85%</li>
-            <li>Approved autonomous execution for reclamation under $5K</li>
-            <li>Extended storage lifecycle exception for audit archives</li>
-            <li>Set Q1 unit-cost target at $0.42 per 1K transactions</li>
-          </ul>
-        </Card>
-        <Card title="Audit and evidence">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li>Every change linked to detection evidence and approver</li>
-            <li>Savings reconciled to invoices across two billing cycles</li>
-            <li>Immutable log retained for 7 years</li>
-            <li>Quarterly external review with no material findings</li>
-          </ul>
-        </Card>
-        <Card title="Next quarter commitments">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li className="flex justify-between"><span>Rightsizing wave 3</span><span className="font-medium">$620K</span></li>
-            <li className="flex justify-between"><span>Storage lifecycle rollout</span><span className="font-medium">$512K</span></li>
-            <li className="flex justify-between"><span>Coverage to 85%</span><span className="font-medium">$1.58M</span></li>
-            <li className="flex justify-between"><span>Network fixes</span><span className="font-medium">$402K</span></li>
-          </ul>
-        </Card>
-      </div>
+      {/* 12 */}
+      <Panel index={12} title="Business outcomes">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+          {outcomes.map(([l, v, s]) => (
+            <div key={l} className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+              <div className="text-[10px] uppercase tracking-wide text-slate-500">{l}</div>
+              <div className="text-2xl font-bold leading-tight text-emerald-800">{v}</div>
+              <div className="text-[11px] text-slate-600">{s}</div>
+            </div>
+          ))}
+        </div>
+      </Panel>
 
-      <WorkspaceFooter fabric={defaultFabric} maturity={defaultMaturity} />
+      <PageBands lifecycle={lifecycleWithActive("Realize")} />
+      <SyntheticFooter tagline="Smarter governance. Greater value. A stronger business." />
+
       <DetailDrawer payload={drawer.payload} onClose={drawer.close} />
-    </WorkspaceShell>
+    </div>
   );
 }

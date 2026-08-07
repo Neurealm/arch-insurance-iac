@@ -1,174 +1,330 @@
-import { Trash2, DollarSign, Search, ShieldAlert, Users, CheckCircle2, Clock, Archive } from "lucide-react";
+import { useState } from "react";
 import {
-  Badge, Card, ConfidenceCell, DataTable, DetailDrawer, DonutCard, Kpi, KpiStrip, LinkAction,
-  Panel, ProgressRow, RiskCell, Td, Th, TrendArea, useDetailDrawer,
-} from "../components/primitives";
-import { WorkspaceFooter, WorkspaceShell, FilterBar, defaultFabric, defaultMaturity } from "../components/bands";
-import { finopsPages } from "../pages";
+  Search, Trash2, DollarSign, ShieldCheck, Eye, AlertTriangle, TrendingUp, CheckCircle2, HelpCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const page = finopsPages.find((p) => p.slug === "idle-orphaned-resources")!;
+import FinOpsHeader from "../components/FinOpsHeader";
+import PageBands, { lifecycleWithActive } from "../components/PageBands";
+import AgentGrid, { type AgentChip } from "../components/AgentGrid";
+import SavingsFunnel from "../components/SavingsFunnel";
+import {
+  Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer, ConfidenceCell,
+  useDetailDrawer, toneMap, CostDriverBars, ProgressRow, LinkAction, type Kpi,
+} from "../components/primitives";
 
 const kpis: Kpi[] = [
-  { id: "found", icon: Search, label: "Resources detected", value: "1,142", sub: "Idle or orphaned", tone: "blue" },
-  { id: "save", icon: DollarSign, label: "Annual savings", value: "$1.81M", sub: "Reclaimable", tone: "emerald" },
-  { id: "safe", icon: CheckCircle2, label: "Safe to delete", value: "704", sub: "No dependencies", tone: "teal" },
-  { id: "owner", icon: Users, label: "Unowned assets", value: "218", sub: "No tag / no owner", tone: "amber" },
-  { id: "risk", icon: ShieldAlert, label: "Blocked", value: "63", sub: "Compliance / legal hold", tone: "rose" },
-  { id: "quar", icon: Archive, label: "In quarantine", value: "157", sub: "14-day soft delete", tone: "violet" },
-  { id: "age", icon: Clock, label: "Median idle age", value: "97d", sub: "Since last access", tone: "sky" },
-  { id: "reclaimed", icon: Trash2, label: "Reclaimed YTD", value: "$1.24M", sub: "Billing verified", tone: "slate" },
+  { id: "scan", icon: Search, label: "Total Resources Scanned", value: "18,428", sub: "6 accounts · 4 clouds", tone: "blue" },
+  { id: "cand", icon: Trash2, label: "Idle & Orphaned Candidates", value: "1,732", sub: "9.4% of fleet", tone: "sky" },
+  { id: "save", icon: DollarSign, label: "Potential Annual Savings", value: "$6.42M", sub: "gross opportunity", tone: "emerald" },
+  { id: "hc", icon: ShieldCheck, label: "High Confidence", value: "1,124", sub: "≥ 90% certainty", tone: "teal" },
+  { id: "rev", icon: Eye, label: "Requires Review", value: "486", sub: "ownership unclear", tone: "amber" },
+  { id: "lc", icon: AlertTriangle, label: "Low Confidence", value: "122", sub: "further evidence needed", tone: "rose" },
+  { id: "ytd", icon: TrendingUp, label: "Reclaimed YTD", value: "$2.31M", sub: "billing-verified", tone: "emerald" },
+  { id: "rate", icon: CheckCircle2, label: "Reclamation Success Rate", value: "93.7%", sub: "no rollback required", tone: "violet" },
 ];
 
-const candidates = [
-  { id: "I-3301", resource: "vol-0af23c9e (gp3, 4 TiB)", type: "Unattached volume", idle: "214d", save: "$412", conf: 99, risk: "Very Low" as const, owner: "Unowned" },
-  { id: "I-3312", resource: "nat-gw-legacy-dr", type: "Idle NAT gateway", idle: "168d", save: "$386", conf: 97, risk: "Low" as const, owner: "Network Eng" },
-  { id: "I-3318", resource: "eip-198.51.100.24", type: "Unassociated elastic IP", idle: "301d", save: "$41", conf: 100, risk: "Very Low" as const, owner: "Unowned" },
-  { id: "I-3325", resource: "rds-analytics-staging", type: "Stopped DB (storage billed)", idle: "121d", save: "$1,840", conf: 94, risk: "Medium" as const, owner: "Data Platform" },
-  { id: "I-3340", resource: "eks-dev-sandbox-04", type: "Zero-workload cluster", idle: "88d", save: "$2,210", conf: 92, risk: "Medium" as const, owner: "Dev Enablement" },
-  { id: "I-3351", resource: "snapshots-2019-archive", type: "Stale snapshots (2,318)", idle: "1,420d", save: "$3,105", conf: 88, risk: "Low" as const, owner: "Unowned" },
-  { id: "I-3366", resource: "lb-checkout-canary", type: "Load balancer, 0 targets", idle: "62d", save: "$178", conf: 96, risk: "Low" as const, owner: "Checkout" },
+interface Candidate {
+  name: string; type: string; cloud: string; account: string; region: string;
+  lastUsed: string; confidence: number; saving: string;
+}
+const candidates: Candidate[] = [
+  { name: "vol-0a91c4e7d2b", type: "EBS Volume (unattached)", cloud: "AWS", account: "prod-commerce", region: "us-east-1", lastUsed: "214 days ago", confidence: 98, saving: "$41,200" },
+  { name: "eip-52.14.88.201", type: "Elastic IP (unassociated)", cloud: "AWS", account: "prod-payments", region: "us-east-1", lastUsed: "182 days ago", confidence: 97, saving: "$3,840" },
+  { name: "legacy-etl-cluster", type: "EMR Cluster", cloud: "AWS", account: "analytics", region: "us-west-2", lastUsed: "141 days ago", confidence: 94, saving: "$286,400" },
+  { name: "snap-2019-archive-*", type: "EBS Snapshot set (412)", cloud: "AWS", account: "prod-commerce", region: "us-east-1", lastUsed: "3+ years", confidence: 96, saving: "$118,700" },
+  { name: "mktg-campaign-db-02", type: "RDS Instance", cloud: "AWS", account: "marketing", region: "us-east-1", lastUsed: "97 days ago", confidence: 88, saving: "$74,900" },
+  { name: "nsg-decomm-uat-vnet", type: "Load Balancer", cloud: "Azure", account: "uat-platform", region: "eastus", lastUsed: "156 days ago", confidence: 91, saving: "$22,300" },
+  { name: "gke-sandbox-pool-3", type: "Node Pool", cloud: "GCP", account: "sandbox", region: "us-central1", lastUsed: "63 days ago", confidence: 79, saving: "$96,500" },
+  { name: "dr-replica-orders-eu", type: "RDS Read Replica", cloud: "AWS", account: "prod-commerce", region: "eu-west-1", lastUsed: "Never promoted", confidence: 68, saving: "$142,000" },
+  { name: "img-build-cache-bkt", type: "S3 Bucket (2.4 TB)", cloud: "AWS", account: "platform", region: "us-east-1", lastUsed: "119 days ago", confidence: 92, saving: "$31,400" },
+  { name: "nat-gw-legacy-vpc", type: "NAT Gateway", cloud: "AWS", account: "legacy", region: "us-east-1", lastUsed: "88 days ago", confidence: 86, saving: "$48,600" },
 ];
 
-const funnel = [
-  { label: "Detected", value: 1142, amount: "$1.81M", tone: "blue" as const },
-  { label: "Dependency cleared", value: 918, amount: "$1.52M", tone: "sky" as const },
-  { label: "Owner confirmed", value: 762, amount: "$1.31M", tone: "teal" as const },
-  { label: "Quarantined", value: 704, amount: "$1.18M", tone: "violet" as const },
-  { label: "Deleted", value: 611, amount: "$0.97M", tone: "emerald" as const },
+const reasons = [
+  { name: "Detached / unattached", value: 34, display: "34%" },
+  { name: "Environment decommissioned", value: 22, display: "22%" },
+  { name: "Application retired", value: 16, display: "16%" },
+  { name: "Unsupported / deprecated", value: 11, display: "11%" },
+  { name: "Test / non-prod leftover", value: 10, display: "10%" },
+  { name: "Unknown ownership", value: 7, display: "7%" },
 ];
 
 const byType = [
-  { name: "Storage volumes & snapshots", value: 41, display: "$742K" },
-  { name: "Stopped databases", value: 21, display: "$380K" },
-  { name: "Idle clusters", value: 16, display: "$290K" },
-  { name: "Network resources", value: 12, display: "$217K" },
-  { name: "Load balancers", value: 6, display: "$109K" },
-  { name: "Other", value: 4, display: "$72K" },
+  { name: "Compute (EC2 / VM)", value: 1820, display: "$1.82M" },
+  { name: "Databases", value: 1410, display: "$1.41M" },
+  { name: "Block storage & snapshots", value: 1160, display: "$1.16M" },
+  { name: "Object storage", value: 780, display: "$780K" },
+  { name: "Networking", value: 690, display: "$690K" },
+  { name: "Managed services", value: 560, display: "$560K" },
 ];
 
-const reclaimTrend = [
-  { label: "Apr", value: 96 }, { label: "May", value: 121 }, { label: "Jun", value: 143 },
-  { label: "Jul", value: 158 }, { label: "Aug", value: 176 }, { label: "Sep", value: 194 },
+const agents: AgentChip[] = [
+  { name: "Discovery Agent", status: "Complete", confidence: 98, finding: "1,732 candidates enumerated" },
+  { name: "Ownership Agent", status: "Complete", confidence: 84, finding: "Owner inferred from tags + commits" },
+  { name: "Dependency Agent", status: "Complete", confidence: 96, finding: "No attachments or routes found" },
+  { name: "Risk Agent", status: "Complete", confidence: 93, finding: "No DR or compliance hold" },
+  { name: "Compliance Agent", status: "Complete", confidence: 90, finding: "Retention policy satisfied" },
+  { name: "Decision Agent", status: "Ready", confidence: 95, finding: "Recommends delete with snapshot" },
 ];
 
-export default function IdleOrphanedResourcesWorkspace() {
+const checklist: [string, boolean][] = [
+  ["No attachment to a running instance for 214 days", true],
+  ["No IAM or application access recorded in CloudTrail", true],
+  ["Not referenced by any Terraform state or IaC module", true],
+  ["Not part of a backup, DR, or legal-hold policy", true],
+  ["Owning team identified: Commerce Platform", true],
+  ["Snapshot retained for 30 days before deletion", true],
+];
+
+const evidenceNodes = [
+  "No compute dependency", "No network dependency", "No IAM dependency",
+  "No data pipeline dependency", "No backup dependency", "No cost allocation owner",
+];
+
+const explainerTabs = ["Evidence", "Topology", "Timeline", "Change History", "Policies"] as const;
+
+const capability: [string, string, string][] = [
+  ["Idle resource enumeration", "Yes", "Yes"],
+  ["Ownership inference where tags are missing", "No", "Yes"],
+  ["Dependency and reference verification", "No", "Yes"],
+  ["Compliance and retention hold checks", "Partial", "Yes"],
+  ["Confidence scoring per candidate", "No", "Yes"],
+  ["Safe reclamation with snapshot and rollback", "No", "Yes"],
+  ["Verified savings reconciliation", "No", "Yes"],
+];
+
+export default function IdleOrphanedResourceReclamationWorkspace() {
   const drawer = useDetailDrawer();
-  return (
-    <WorkspaceShell
-      title={page.title}
-      subtitle={page.subtitle}
-      actions={<FilterBar chips={["All accounts", "Idle ≥ 30 days", "Exclude legal hold", "Group by owner"]} />}
-    >
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({
-        title: k.label, subtitle: `${k.value} — ${k.sub ?? ""}`, tone: k.tone,
-        rows: [["Value", k.value], ["Detection window", "Trailing 90 days"], ["Evidence", "Access logs, IAM activity, flow logs, billing"], ["Quarantine", "14-day reversible soft delete"]],
-        bullets: ["Resources are only deleted after quarantine expiry with no access events.", "Snapshots covered by retention policy or legal hold are excluded automatically."],
-      })} />
+  const [selected, setSelected] = useState<Candidate>(candidates[0]);
+  const [tab, setTab] = useState<(typeof explainerTabs)[number]>("Evidence");
 
-      <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
-        <Panel index={1} title="Idle resource candidates" action="Ranked by monthly savings">
+  return (
+    <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
+      <FinOpsHeader
+        title="Idle & Orphaned Resource Reclamation Workspace"
+        tagline="Discover, validate, and reclaim unused cloud resources with full dependency, ownership, and risk analysis."
+        secondaryActions={[{ label: "Export Candidate List", icon: "export" }, { label: "Reclamation Simulator", icon: "simulate" }]}
+        meta={{ lastAnalysis: "8 minutes ago", freshness: "99.1% within SLA", resources: "18,428 resources scanned" }}
+        onPrimary={() => drawer.open({ title: "Discovery scan complete", tone: "blue", rows: [["New candidates", "63"], ["Resolved since last run", "41"], ["Scan duration", "2m 11s"]] })}
+        onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+      />
+
+      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value], ["Source", "Discovery agent"]] })} />
+
+      {/* 1 */}
+      <Panel index={1} title="Top idle & orphaned candidates" action={<LinkAction onClick={() => drawer.open({ title: "All 1,732 candidates", tone: "blue", bullets: ["Filtered views available by cloud, account, and owner."] })}>View all 1,732</LinkAction>}>
+        <div className="grid gap-4 xl:grid-cols-[3fr_1fr]">
           <DataTable head={<>
-            <Th>ID</Th><Th>Resource</Th><Th>Signal</Th><Th right>Idle</Th>
-            <Th right>Monthly</Th><Th right>Confidence</Th><Th>Risk</Th><Th>Owner</Th>
+            <Th>Resource name</Th><Th>Type</Th><Th>Cloud</Th><Th>Account</Th><Th>Region</Th><Th>Last used</Th><Th right>Confidence</Th><Th right>Annual saving</Th>
           </>}>
             {candidates.map((c) => (
-              <tr key={c.id} className="cursor-pointer hover:bg-slate-50" onClick={() => drawer.open({
-                title: `${c.id} · ${c.resource}`, subtitle: c.type, tone: "emerald",
-                rows: [["Idle duration", c.idle], ["Monthly saving", c.save], ["Confidence", `${c.conf}%`], ["Risk", c.risk], ["Owner", c.owner], ["Quarantine", "14 days, reversible"]],
-                bullets: [
-                  "No read, write, or attach events observed in CloudTrail for the idle window.",
-                  "No references from Terraform state, IaC modules, or active change records.",
-                  "Owner notified twice; no reclaim objection recorded.",
-                  "Restore path: snapshot retained for 30 days post deletion.",
-                ],
-              })}>
-                <Td className="font-medium text-slate-900">{c.id}</Td>
-                <Td>{c.resource}</Td>
-                <Td className="text-slate-500">{c.type}</Td>
-                <Td right>{c.idle}</Td>
-                <Td right className="font-semibold text-emerald-700">{c.save}</Td>
-                <ConfidenceCell pct={c.conf} right />
-                <RiskCell level={c.risk} />
-                <Td>{c.owner === "Unowned" ? <Badge tone="amber">Unowned</Badge> : c.owner}</Td>
+              <tr key={c.name} onClick={() => setSelected(c)} className={cn("cursor-pointer hover:bg-slate-50", selected.name === c.name && "bg-indigo-50/60")}>
+                <Td className="font-medium text-slate-900">{c.name}</Td>
+                <Td>{c.type}</Td>
+                <Td>{c.cloud}</Td>
+                <Td>{c.account}</Td>
+                <Td>{c.region}</Td>
+                <Td>{c.lastUsed}</Td>
+                <ConfidenceCell pct={c.confidence} right />
+                <Td right className="font-semibold text-emerald-700">{c.saving}</Td>
               </tr>
             ))}
           </DataTable>
-        </Panel>
 
-        <Panel index={2} title="Savings impact funnel" action="Detection → verified deletion">
-          <ul className="space-y-2">
-            {funnel.map((f, i) => (
-              <li key={f.label}>
-                <div className="mb-1 flex items-center justify-between text-[12px]">
-                  <span className="text-slate-600">{f.label}</span>
-                  <span className="font-medium text-slate-900">{f.value.toLocaleString()} · {f.amount}</span>
-                </div>
-                <div className="h-6 rounded bg-slate-100">
-                  <div
-                    className={cn("h-6 rounded", ["bg-blue-500", "bg-sky-500", "bg-teal-500", "bg-violet-500", "bg-emerald-500"][i])}
-                    style={{ width: `${(f.value / funnel[0].value) * 100}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-[11.5px] text-slate-500">
-            53.5% of detected resources complete the full reclamation path. Attrition is dominated by owner objections and compliance holds.
-          </p>
-        </Panel>
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-3">
-        <Panel index={3} title="Savings by resource type">
-          <DonutCard data={byType} total="$1.81M" totalLabel="Annualized" />
-        </Panel>
-        <Panel index={4} title="Reclamation velocity" action="$K reclaimed per month">
-          <TrendArea data={reclaimTrend} color="#10b981" yTickFormatter={(v) => `$${v}K`} />
-        </Panel>
-        <Panel index={5} title="Ownership hygiene">
-          <div className="space-y-2.5">
-            <ProgressRow label="Tagged with owner" pct={81} tone="emerald" />
-            <ProgressRow label="Cost center mapped" pct={76} tone="blue" />
-            <ProgressRow label="IaC managed" pct={64} tone="teal" />
-            <ProgressRow label="Retention policy set" pct={58} tone="amber" />
-            <ProgressRow label="Orphaned, no owner" pct={19} tone="rose" />
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-blue-800">
+              <HelpCircle className="h-3.5 w-3.5" /> What is an orphaned resource?
+            </div>
+            <p className="mt-1.5 text-[11.5px] leading-snug text-slate-700">
+              A resource that still bills every hour but has no owner, no attachment, and no reference from any running workload, pipeline, or infrastructure module.
+            </p>
+            <ul className="mt-2 space-y-1 text-[11.5px] text-slate-700">
+              {["Detached volumes and unassociated addresses", "Databases left behind by retired applications", "Snapshots and images past their retention window", "Clusters and node pools from finished projects"].map((x) => (
+                <li key={x} className="flex gap-1.5"><span className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-blue-400" />{x}</li>
+              ))}
+            </ul>
           </div>
-          <p className="mt-3 text-[11.5px] text-slate-500">
-            Unowned assets route to the platform owner of record after two unanswered notifications.
-          </p>
+        </div>
+      </Panel>
+
+      <div className="grid gap-5 xl:grid-cols-2">
+        {/* 2 */}
+        <Panel index={2} title="Why resources are idle">
+          <DonutCard data={reasons} total="1,732" totalLabel="Candidates" />
+        </Panel>
+
+        {/* 3 */}
+        <Panel index={3} title="Savings impact">
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-slate-500">Potential annual savings</div>
+              <div className="text-4xl font-bold leading-none text-emerald-700">$6.42M</div>
+            </div>
+            <div className="text-[11.5px] text-slate-500">$535K per month · 4.1% of total cloud spend</div>
+          </div>
+          <div className="mt-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Savings by resource type</div>
+            <div className="mt-2"><CostDriverBars data={byType} /></div>
+          </div>
+          <div className="mt-4">
+            <SavingsFunnel stages={[
+              { label: "Identified", value: "$6.42M", pct: 100, tone: "blue" },
+              { label: "Validated", value: "$4.86M", pct: 76, tone: "sky" },
+              { label: "Approved", value: "$3.14M", pct: 49, tone: "amber" },
+              { label: "Reclaimed YTD", value: "$2.31M", pct: 36, tone: "emerald" },
+            ]} />
+          </div>
         </Panel>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-3">
-        <Card title="Quarantine queue">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li className="flex justify-between"><span>Expiring in 48 hours</span><span className="font-medium">41</span></li>
-            <li className="flex justify-between"><span>Expiring this week</span><span className="font-medium">96</span></li>
-            <li className="flex justify-between"><span>Restored by owners</span><span className="font-medium">12</span></li>
-            <li className="flex justify-between"><span>Extended holds</span><span className="font-medium">8</span></li>
-          </ul>
-        </Card>
-        <Card title="Blocked reclamations">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li>Legal hold on audit log archives (2019–2021)</li>
-            <li>PCI evidence retention: 24 months minimum</li>
-            <li>Active DR runbook references standby cluster</li>
-            <li>Vendor contract requires warm standby capacity</li>
-          </ul>
-        </Card>
-        <Card title="Agent activity">
-          <ul className="space-y-1.5 text-[12.5px] text-slate-700">
-            <li>Scanned 214 accounts · 06:40 UTC</li>
-            <li>Promoted 88 candidates to quarantine</li>
-            <li>Notified 34 owners via Slack and email</li>
-            <li>Executed 61 deletions with snapshot retention</li>
-          </ul>
-        </Card>
+      {/* 4 */}
+      <Panel index={4} title="Agentic investigation workspace">
+        <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
+          <div className="space-y-3">
+            <AgentGrid agents={agents} columns="md:grid-cols-3 xl:grid-cols-6" engineLabel={null}
+              onSelect={(a) => drawer.open({ title: a.name, subtitle: a.finding, tone: "violet", rows: [["Status", a.status], ["Confidence", `${a.confidence}%`]] })} />
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Selected resource</div>
+              <div className="mt-1 text-[14px] font-bold text-slate-900">{selected.name}</div>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                <Badge tone="slate">{selected.type}</Badge>
+                <Badge tone="blue">{selected.cloud} · {selected.region}</Badge>
+                <Badge tone="amber">Last used {selected.lastUsed}</Badge>
+                <Badge tone="emerald">{selected.saving}/yr</Badge>
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Investigation summary</div>
+              <ul className="mt-1.5 grid gap-1 md:grid-cols-2">
+                {checklist.map(([label]) => (
+                  <li key={label} className="flex gap-1.5 text-[11.5px] text-slate-700">
+                    <CheckCircle2 className="mt-[2px] h-3 w-3 shrink-0 text-emerald-500" />{label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="rounded-lg border-2 border-emerald-300 bg-emerald-50 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Agent recommendation</div>
+            <div className="mt-1 text-[16px] font-bold text-slate-900">DELETE</div>
+            <dl className="mt-2 space-y-1 text-[12px]">
+              {[["Confidence", `${selected.confidence}%`], ["Risk", "Low"], ["Annual saving", selected.saving], ["Automation policy", "Auto-approve ≥ 95%"], ["Snapshot retention", "30 days"]].map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-2"><dt className="text-slate-500">{k}</dt><dd className="font-semibold text-slate-900">{v}</dd></div>
+              ))}
+            </dl>
+            <p className="mt-2 text-[11.5px] leading-snug text-slate-700">
+              Reason: no attachment, reference, or access recorded for {selected.lastUsed}; owning team confirmed the parent environment was decommissioned.
+            </p>
+            <button type="button" onClick={() => drawer.open({
+              title: `Reclamation plan · ${selected.name}`, tone: "emerald",
+              rows: [["Step 1", "Create retention snapshot"], ["Step 2", "Tag as pending-reclamation"], ["Step 3", "7-day quiet period"], ["Step 4", "Delete resource"], ["Step 5", "Verify against next invoice"]],
+            })} className="mt-3 w-full rounded-md bg-slate-900 px-2.5 py-1.5 text-[11.5px] font-semibold text-white hover:bg-slate-800">
+              Review Reclamation Plan
+            </button>
+          </div>
+        </div>
+      </Panel>
+
+      <div className="grid gap-5 xl:grid-cols-2">
+        {/* 5 */}
+        <Panel index={5} title="Confidence & risk overview">
+          <DonutCard total="1,732" totalLabel="Candidates" data={[
+            { name: "High confidence (≥90%)", value: 1124, display: "1,124", color: "#10b981" },
+            { name: "Requires review (70–89%)", value: 486, display: "486", color: "#f59e0b" },
+            { name: "Low confidence (<70%)", value: 122, display: "122", color: "#ef4444" },
+          ]} />
+          <div className="mt-3 space-y-2">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Risk level distribution</div>
+            <ProgressRow label="Very low risk" pct={58} tone="emerald" right="1,004" />
+            <ProgressRow label="Low risk" pct={26} tone="teal" right="451" />
+            <ProgressRow label="Medium risk" pct={12} tone="amber" right="208" />
+            <ProgressRow label="High risk" pct={4} tone="rose" right="69" />
+          </div>
+        </Panel>
+
+        {/* 6 */}
+        <Panel index={6} title="Orphaned resource explainer">
+          <div className="flex flex-wrap gap-1.5">
+            {explainerTabs.map((t) => (
+              <button key={t} type="button" onClick={() => setTab(t)}
+                className={cn("rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition",
+                  tab === t ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-indigo-300")}>
+                {t}
+              </button>
+            ))}
+          </div>
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            {evidenceNodes.map((n) => (
+              <div key={n} className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-center">
+                <div className="mx-auto grid h-6 w-6 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                </div>
+                <div className="mt-1 text-[11.5px] font-medium text-slate-700">{n}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Key evidence — {tab}</div>
+            <ul className="mt-1.5 space-y-1">
+              {{
+                Evidence: ["No CloudTrail access events in 214 days", "No attachment records in EC2 API history", "No Terraform state reference"],
+                Topology: ["Not present in the service dependency graph", "Parent VPC has no active workloads", "No route table or security group binding"],
+                Timeline: ["Created 2023-04-11 for a migration pilot", "Detached 2024-12-08 when the pilot ended", "No activity since detachment"],
+                "Change History": ["Last IaC change 18 months ago", "No manual console change in 12 months", "No change ticket references this resource"],
+                Policies: ["Not covered by backup policy BKP-07", "No legal hold applied", "Retention policy satisfied (>90 days)"],
+              }[tab].map((x) => (
+                <li key={x} className="flex gap-1.5 text-[11.5px] text-slate-700">
+                  <span className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-slate-400" />{x}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Panel>
       </div>
 
-      <WorkspaceFooter fabric={defaultFabric} maturity={defaultMaturity} />
+      {/* 7 */}
+      <Panel index={7} title="Existing tool vs Neurealm">
+        <DataTable head={<><Th>Capability</Th><Th right>Existing tooling</Th><Th right>Neurealm agentic FinOps</Th></>}>
+          {capability.map(([cap, ex, nr]) => (
+            <tr key={cap} className="hover:bg-slate-50">
+              <Td>{cap}</Td>
+              <Td right><Badge tone={ex === "Yes" ? "emerald" : ex === "Partial" ? "amber" : "rose"}>{ex}</Badge></Td>
+              <Td right><Badge tone="emerald">{nr}</Badge></Td>
+            </tr>
+          ))}
+        </DataTable>
+      </Panel>
+
+      {/* 8 */}
+      <Panel index={8} title="Responsibility model">
+        <DataTable head={<><Th>Function</Th><Th>Responsibility</Th><Th right>Role</Th></>}>
+          {[
+            ["FinOps", "Owns the reclamation backlog and savings target", "Accountable"],
+            ["Cloud Engineering", "Executes snapshot, tag, and delete workflow", "Responsible"],
+            ["SRE", "Confirms no DR or failover dependency", "Consulted"],
+            ["Application Owner", "Confirms the resource is no longer required", "Consulted"],
+            ["Security & Compliance", "Confirms retention and legal-hold posture", "Consulted"],
+            ["Neurealm Agents", "Continuous discovery, evidence, and verification", "Automated"],
+          ].map(([fn, resp, role]) => (
+            <tr key={fn} className="hover:bg-slate-50">
+              <Td className="font-medium text-slate-900">{fn}</Td><Td>{resp}</Td>
+              <Td right><Badge tone={role === "Accountable" ? "emerald" : role === "Automated" ? "violet" : "slate"}>{role}</Badge></Td>
+            </tr>
+          ))}
+        </DataTable>
+      </Panel>
+
+      <PageBands
+        lifecycle={lifecycleWithActive("Investigate")}
+        maturity={[
+          { level: "Level 1", title: "Manual sweeps", detail: "Quarterly clean-up campaigns driven by spreadsheets. Time to value: 1 quarter.", state: "future" },
+          { level: "Level 2", title: "Evidence-backed reclamation", detail: "Continuous discovery with ownership and dependency proof before deletion. Time to value: 30 days.", state: "current" },
+          { level: "Level 3", title: "Policy-driven autonomy", detail: "High-confidence candidates reclaim automatically with snapshot and rollback. Time to value: 2 quarters.", state: "next" },
+        ]}
+      />
+
       <DetailDrawer payload={drawer.payload} onClose={drawer.close} />
-    </WorkspaceShell>
+    </div>
   );
 }
