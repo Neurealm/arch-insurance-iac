@@ -265,9 +265,17 @@ export function InventoryPanel({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {rows.map((p) => (
+                    {rows.map((p) => {
+                      const isFinOps = p.teamName === "Cloud FinOps";
+                      return (
                       <Fragment key={p.id}>
-                        <tr className="cursor-pointer hover:bg-slate-50" onClick={() => onOpen(p)}>
+                        <tr
+                          className={cn(
+                            "cursor-pointer hover:bg-slate-50",
+                            isFinOps && "border-l-4 border-l-amber-400 bg-amber-50/60 hover:bg-amber-50",
+                          )}
+                          onClick={() => onOpen(p)}
+                        >
                           <td className="px-2 py-1.5" onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox" aria-label={`Select ${p.teamName}`}
@@ -275,19 +283,36 @@ export function InventoryPanel({
                             />
                           </td>
                           {columns.map((c) => (
-                            <td key={c.key} className={cn("max-w-[260px] px-2 text-slate-700", pad)}>{c.get(p)}</td>
+                            <td key={c.key} className={cn("max-w-[260px] px-2 text-slate-700", pad)}>
+                              {c.get(p)}
+                              {isFinOps && c.key === "team" && (
+                                <Link
+                                  to={ATTRIBUTE_STORE_ROUTE}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="ml-1.5 inline-flex items-center gap-1 rounded-full border border-amber-400 bg-amber-200 px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wide text-amber-900 hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                                  aria-label="Open Cloud FinOps Persona Attribute Store"
+                                >
+                                  Attribute Store
+                                  <ArrowUpRight className="h-2.5 w-2.5" aria-hidden />
+                                </Link>
+                              )}
+                            </td>
                           ))}
                           <td className={cn("whitespace-nowrap px-2", pad)} onClick={(e) => e.stopPropagation()}>
                             <div className="flex gap-1">
-                              {p.teamName === "Cloud FinOps" ? (
+                              {isFinOps ? (
                                 <Link
-                                  to="/enterprise-cognitive-fabric/modeling-memory/cloud-finops-attribute-store"
-                                  className="inline-flex h-6 items-center rounded-md border border-amber-300 bg-amber-300 px-2 text-[10.5px] font-medium text-slate-900 hover:bg-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                                  to={ATTRIBUTE_STORE_ROUTE}
+                                  className="inline-flex h-7 items-center gap-1 rounded-md border border-amber-500 bg-amber-300 px-2.5 text-[11px] font-semibold text-slate-900 shadow-sm hover:bg-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                                   aria-label="Open Cloud FinOps Persona Attribute Store"
-                                >Open</Link>
+                                >
+                                  Open Attribute Store
+                                  <ArrowUpRight className="h-3 w-3" aria-hidden />
+                                </Link>
                               ) : (
                                 <Button size="sm" variant="outline" className="h-6 text-[10.5px]" onClick={() => onOpen(p)}>Open</Button>
                               )}
+
                               <Button
                                 size="sm" variant="ghost" className="h-6 text-[10.5px]"
                                 aria-label={`Toggle summary for ${p.teamName}`}
