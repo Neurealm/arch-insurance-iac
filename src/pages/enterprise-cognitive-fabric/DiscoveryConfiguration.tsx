@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ChevronRight, Copy, Database, Filter, Gauge, Layers, MoreHorizontal, Play, Plus,
-  RefreshCw, ShieldCheck, SlidersHorizontal,
+  RefreshCw, Search, ShieldCheck, SlidersHorizontal,
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,7 @@ import {
   CadencePanel, ChangeDetectionPanel, ContentTypePolicyPanel, DiscoveryRulesPanel,
   DuplicatePolicyPanel, EnterpriseScopePanel, EvidencePanel, FreshnessPanel, LifecyclePanel,
   PermissionPolicyPanel, PreviewBreakdownPanel, PreviewPanel, ProcessingHandoffPanel,
-  Prompt2Placeholder, QualityPanel, SamplingPanel, SourcePlatformPanel, TraversalPanel,
+  QualityPanel, SamplingPanel, SourcePlatformPanel, TraversalPanel,
   WorkbenchHandoffRegion, WorkbenchPolicyRegion, WorkbenchScopeRegion, WorkbenchSourceRegion,
   AuthorityPanel,
 } from "./discovery-config/panels";
@@ -35,6 +36,31 @@ import {
   type DiscoveryPreviewWarning, type DiscoveryRule, type DraftState, type DryRunResult,
   type Filters, type ScopeState, type ViewMode,
 } from "./discovery-config/data";
+import {
+  ActivationPanel, ActivityPanel, AccessValidationPanel, ApprovalChainPanel, AuditHistoryPanel,
+  ChangeImpactPanel, ConflictsPanel, DriftPanel, EnvironmentPromotionPanel, ExceptionsPanel,
+  GovernanceSummaryPanel, InheritancePanel, NotificationsPanel, OwnershipPanel, PrecheckPanel,
+  PublishingHistoryPanel, ResidencyPanel, ReviewQueuePanel, ReviewWorkbench, RollbackPanel,
+  RuntimeCompatibilityPanel, ScenarioBanner, ValidationPanel, ValidationResultsPanel,
+  VersionComparisonPanel, VersionHistoryPanel,
+} from "./discovery-config/gov-panels";
+import {
+  ActivationWizard, ConflictResolutionDialog, DemoStoryOverlay, ExceptionDialog, ExportDialog,
+  GlobalSearchDialog, ReviewDecisionDialog, RollbackDialog, VersionDetailDialog,
+  type ActivationPlan,
+} from "./discovery-config/gov-dialogs";
+import {
+  activationExecutionSteps, buildSearchIndex, demoScenarios, demoStory, downloadFile,
+  scenarioStates, seedActivity, seedApprovals, seedAudit, seedDrift, seedExceptions, seedImpact,
+  seedNotifications, seedOwnership, seedReviews, seedRuleConflicts, seedValidation,
+  seedValidationResults, seedVersions, toCsv, toYaml,
+  type DemoScenario, type DiscoveryConfigurationApproval, type DiscoveryConfigurationAuditEvent,
+  type DiscoveryConfigurationDrift, type DiscoveryConfigurationException,
+  type DiscoveryConfigurationNotification, type DiscoveryConfigurationReview,
+  type DiscoveryConfigurationValidation, type DiscoveryConfigurationVersion,
+  type DiscoveryRuleConflict, type DiscoveryValidationResult, type SearchResult,
+} from "./discovery-config/gov-data";
+
 
 const PREF_KEY = "ecf.discoveryConfiguration.v2.prefs";
 
@@ -116,7 +142,53 @@ export default function DiscoveryConfiguration() {
   const [dryRunResult, setDryRunResult] = useState<DryRunResult | null>(null);
   const [spotlight, setSpotlight] = useState<string | null>(null);
 
+  /* ---------------------------------------------- prompt 2 governance state */
+
+  const [scenario, setScenario] = useState<DemoScenario>("Review Pending");
+  const scenarioState = scenarioStates[scenario];
+
+  const [validation, setValidation] = useState<DiscoveryConfigurationValidation>(seedValidation);
+  const [validating, setValidating] = useState(false);
+  const [results, setResults] = useState<DiscoveryValidationResult[]>(seedValidationResults);
+  const [conflicts, setConflicts] = useState<DiscoveryRuleConflict[]>(seedRuleConflicts);
+  const [ownership, setOwnership] = useState(seedOwnership);
+  const [reviews, setReviews] = useState<DiscoveryConfigurationReview[]>(seedReviews);
+  const [selectedReview, setSelectedReview] = useState("DCR-4201");
+  const [approvals, setApprovals] = useState<DiscoveryConfigurationApproval[]>(seedApprovals);
+  const [versions, setVersions] = useState<DiscoveryConfigurationVersion[]>(seedVersions);
+  const [compareFrom, setCompareFrom] = useState("4.2");
+  const [compareTo, setCompareTo] = useState("4.3");
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+  const [exceptions, setExceptions] = useState<DiscoveryConfigurationException[]>(seedExceptions);
+  const [promoted, setPromoted] = useState<Record<string, string>>({});
+  const [drift, setDrift] = useState<DiscoveryConfigurationDrift[]>(seedDrift);
+  const [audit, setAudit] = useState<DiscoveryConfigurationAuditEvent[]>(seedAudit);
+  const [notifications, setNotifications] = useState<DiscoveryConfigurationNotification[]>(seedNotifications);
+  const [activity, setActivity] = useState(seedActivity);
+  const [rollbacks, setRollbacks] = useState<{ id: string; fromVersion: string; toVersion: string; rollbackType: string; reason: string; owner: string; status: string; completedAt: string }[]>([]);
+  const [activation, setActivation] = useState({
+    status: "Draft" as string, mode: "Immediate", scheduledAt: "", scope: "Enterprise",
+    rollbackOwner: "Discovery Operations", rollbackVersion: "v4.2", activatedBy: "", completedAt: "",
+  });
+  const [activationStep, setActivationStep] = useState(0);
+  const [activating, setActivating] = useState(false);
+  const [rollbackRunning, setRollbackRunning] = useState(false);
+
+  const [conflictDialog, setConflictDialog] = useState<DiscoveryRuleConflict | null>(null);
+  const [conflictOpen, setConflictOpen] = useState(false);
+  const [reviewDialog, setReviewDialog] = useState<{ id: string; action: string } | null>(null);
+  const [exceptionOpen, setExceptionOpen] = useState(false);
+  const [activationOpen, setActivationOpen] = useState(false);
+  const [rollbackOpen, setRollbackOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [versionDetail, setVersionDetail] = useState<DiscoveryConfigurationVersion | null>(null);
+  const [versionDetailOpen, setVersionDetailOpen] = useState(false);
+  const [storyStep, setStoryStep] = useState<number | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
   const preview = useMemo(() => computePreview(draft), [draft]);
+
 
   useEffect(() => {
     const prefs: Prefs = { view, filters, savedView, density, columns, selectedConfiguration: selectedConfigId, selectedStage };
@@ -125,9 +197,191 @@ export default function DiscoveryConfiguration() {
 
   const focusPanel = useCallback((id: string) => {
     setSpotlight(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById(id)?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
     window.setTimeout(() => setSpotlight((s) => (s === id ? null : s)), 2600);
+  }, [reducedMotion]);
+
+  /* --------------------------------------------------- governance helpers */
+
+  const nowLabel = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  const logActivity = useCallback((text: string, kind: string) => {
+    setActivity((a) => [{ id: `ACT-${Date.now()}`, time: nowLabel(), text, kind }, ...a].slice(0, 40));
   }, []);
+
+  const logAudit = useCallback((action: string, elementType: string, elementId: string, previousState: string, newState: string, reason: string) => {
+    setAudit((a) => [{
+      id: `AE-${Date.now()}`, configurationId: "DISC-CFG-001", configurationVersion: "4.3",
+      timestamp: nowLabel(), actor: "Discovery Operations", actorRole: "Configuration Owner",
+      action, elementType, elementId, previousState, newState, reason, auditId: `AUD-${90000 + a.length}`,
+    }, ...a]);
+  }, []);
+
+  const notify = useCallback((type: string, title: string, description: string, severity: "Low" | "Medium" | "High" | "Critical") => {
+    setNotifications((n) => [{
+      id: `NTF-${Date.now()}`, configurationId: "DISC-CFG-001", configurationVersion: "4.3",
+      type, title, description, severity, owner: "Discovery Operations", status: "Unread", createdAt: nowLabel(),
+    }, ...n]);
+  }, []);
+
+  const activationBlocked = scenarioState.activationBlocked || validation.blockedCount > 0
+    || reviews.some((r) => r.severity === "High" && ["Open", "In Review", "Escalated"].includes(r.status));
+  const blockReason = validation.blockedCount > 0
+    ? "Validation reported blocking issues"
+    : scenarioState.blockReason
+      || (reviews.some((r) => r.severity === "High" && ["Open", "In Review", "Escalated"].includes(r.status))
+        ? "High severity governance reviews are still open"
+        : "");
+
+  const runValidation = useCallback(() => {
+    setValidating(true);
+    setValidation((v) => ({ ...v, status: "Running", startedAt: nowLabel(), completedAt: "" }));
+    window.setTimeout(() => {
+      setValidating(false);
+      setValidation({
+        ...seedValidation,
+        validationScore: scenarioState.validationScore,
+        passedCount: scenarioState.passedCount,
+        warningCount: scenarioState.warningCount,
+        reviewRequiredCount: scenarioState.reviewRequiredCount,
+        blockedCount: scenarioState.blockedCount,
+        status: scenarioState.blockedCount > 3 ? "Failed" : "Completed",
+        startedAt: nowLabel(), completedAt: nowLabel(),
+      });
+      logActivity(`Enterprise Knowledge Discovery v4.3 validation completed at ${scenarioState.validationScore} / 100`, "Validation");
+      logAudit("Validation Run", "Configuration", "DISC-CFG-001", "Validation Required", scenarioState.blockedCount > 3 ? "Validation Failed" : "Validation Warning", "Preapproval validation");
+      notify(scenarioState.blockedCount > 3 ? "Validation Failed" : "Validation Completed",
+        `Validation ${scenarioState.blockedCount > 3 ? "failed" : "completed"} at ${scenarioState.validationScore} / 100`,
+        `${scenarioState.warningCount} warnings and ${scenarioState.reviewRequiredCount} review required items`, "Medium");
+      toast.success("Configuration validation completed", { description: `Score ${scenarioState.validationScore} / 100. No downstream state was changed.` });
+    }, 900);
+  }, [scenarioState, logActivity, logAudit, notify]);
+
+  const runActivation = (plan: ActivationPlan) => {
+    if (plan.mode === "Scheduled") {
+      const when = plan.scheduledDate ? `${plan.scheduledDate}${plan.scheduledTime ? ` ${plan.scheduledTime}` : ""}` : "Awaiting date selection";
+      setActivation((a) => ({ ...a, status: "Scheduled", mode: plan.mode, scheduledAt: when, scope: plan.scope, rollbackOwner: plan.rollbackOwner }));
+      logActivity(`Activation scheduled for v${plan.version} (${when})`, "Activation");
+      logAudit("Activated", "Activation", "ACT-4301", "Approved", "Scheduled", "Scheduled activation created");
+      notify("Activation Scheduled", `Activation scheduled for v${plan.version}`, `Window ${when} · scope ${plan.scope}`, "Medium");
+      toast.success("Activation scheduled", { description: `${when} · rollback owner ${plan.rollbackOwner}` });
+      setActivationOpen(false);
+      return;
+    }
+    setActivating(true);
+    setActivation((a) => ({ ...a, status: "Activating", mode: plan.mode, scope: plan.scope, rollbackOwner: plan.rollbackOwner }));
+    let i = 0;
+    const tick = window.setInterval(() => {
+      i += 1;
+      setActivationStep(i);
+      if (i >= activationExecutionSteps.length) {
+        window.clearInterval(tick);
+        setActivating(false);
+        if (scenario === "Activation Failed") {
+          setActivation((a) => ({ ...a, status: "Activation Failed" }));
+          logActivity("Activation failed during scheduler update. v4.2 remains active.", "Activation");
+          notify("Activation Failed", "Activation halted on critical error", "Scheduler update failed. Previous version remains active.", "High");
+          toast.error("Activation failed", { description: "Paused on critical error. v4.2 remains the active configuration." });
+          return;
+        }
+        setVersions((vs) => vs.map((v) =>
+          v.version === plan.version
+            ? { ...v, status: "Active", approvalState: "Active", effectiveDate: new Date().toISOString().slice(0, 10) }
+            : v.status === "Active"
+              ? { ...v, status: "Superseded", approvalState: "Superseded", supersededDate: new Date().toISOString().slice(0, 10) }
+              : v));
+        setActivation((a) => ({ ...a, status: "Active", activatedBy: "Discovery Operations", completedAt: nowLabel(), rollbackVersion: "v4.2" }));
+        logActivity(`Enterprise Knowledge Discovery v${plan.version} activated. v4.2 preserved as superseded.`, "Activation");
+        logAudit("Activated", "Configuration", "DISC-CFG-001", "Approved", "Active", "Configuration published to discovery execution layer");
+        notify("Configuration Activated", `v${plan.version} is now active`, "Enterprise Source Discovery now executes this configuration reference.", "Medium");
+        toast.success(`Configuration v${plan.version} activated`, { description: "v4.2 preserved as superseded. Enterprise Source Discovery reference updated." });
+        setActivationOpen(false);
+      }
+    }, 160);
+  };
+
+  const runRollback = (payload: { toVersion: string; type: string; scope: string; reason: string; owner: string }) => {
+    setRollbackRunning(true);
+    const from = versions.find((v) => v.status === "Active")?.version ?? "4.3";
+    window.setTimeout(() => {
+      setRollbackRunning(false);
+      setVersions((vs) => vs.map((v) =>
+        v.version === payload.toVersion ? { ...v, status: "Active", approvalState: "Active", supersededDate: "" }
+          : v.version === from ? { ...v, status: "Rolled Back", approvalState: "Rolled Back" } : v));
+      setRollbacks((r) => [{
+        id: `RBK-${900 + r.length}`, fromVersion: from, toVersion: payload.toVersion,
+        rollbackType: payload.type, reason: payload.reason, owner: payload.owner,
+        status: "Rolled Back", completedAt: nowLabel(),
+      }, ...r]);
+      setActivation((a) => ({ ...a, status: "Active", rollbackVersion: `v${payload.toVersion}` }));
+      logActivity(`Rollback from v${from} to v${payload.toVersion} completed. Reconciliation job created.`, "Rollback");
+      logAudit("Rolled Back", "Configuration", "DISC-CFG-001", `v${from} Active`, `v${payload.toVersion} Active`, payload.reason);
+      notify("Rollback Completed", `Rolled back to v${payload.toVersion}`, "Historical versions preserved. Reconciliation job created.", "High");
+      toast.success(`Rolled back to v${payload.toVersion}`, { description: "Prior versions preserved. No historical record was modified." });
+      setRollbackOpen(false);
+    }, 900);
+  };
+
+  const searchIndex: SearchResult[] = useMemo(
+    () => buildSearchIndex({ reviews, conflicts, results, exceptions, drift, versions, approvals, draft }),
+    [reviews, conflicts, results, exceptions, drift, versions, approvals, draft]);
+
+  const applyScenario = (s: DemoScenario) => {
+    setScenario(s);
+    const st = scenarioStates[s];
+    setValidation((v) => ({
+      ...v, validationScore: st.validationScore, passedCount: st.passedCount, warningCount: st.warningCount,
+      reviewRequiredCount: st.reviewRequiredCount, blockedCount: st.blockedCount,
+      status: st.serviceState === "Validation Failed" ? "Failed" : st.validationScore === 0 ? "Not Run" : "Completed",
+    }));
+    setActivation((a) => ({ ...a, status: st.activationStatus }));
+    if (s === "Reset Demo Data") {
+      setResults(seedValidationResults); setConflicts(seedRuleConflicts); setReviews(seedReviews);
+      setApprovals(seedApprovals); setVersions(seedVersions); setExceptions(seedExceptions);
+      setDrift(seedDrift); setNotifications(seedNotifications); setActivity(seedActivity);
+      setAudit(seedAudit); setRollbacks([]); setOverrides({}); setPromoted({});
+      setActivation({ status: "Draft", mode: "Immediate", scheduledAt: "", scope: "Enterprise", rollbackOwner: "Discovery Operations", rollbackVersion: "v4.2", activatedBy: "", completedAt: "" });
+      setActivationStep(0); setOwnership(seedOwnership);
+    }
+    if (s === "Configuration Drift") {
+      setDrift([...seedDrift,
+        { ...seedDrift[0], id: "DRF-003", elementType: "Permission Policy", elementId: "Unknown permission handling", approvedState: "Restrict", observedState: "Metadata only", driftType: "Permission Policy Drift", severity: "High", detectedAt: nowLabel() },
+        { ...seedDrift[1], id: "DRF-004", elementType: "Owner", elementId: "Condition eligibility handoff", approvedState: "Assigned", observedState: "Unassigned", driftType: "Owner Drift", severity: "Medium", detectedAt: nowLabel() }]);
+    }
+    if (s === "Exception Expiring") {
+      setExceptions((e) => e.map((x) => (x.id === "EXC-502" ? { ...x, status: "Expiring" } : x)));
+    }
+    if (s === "Configuration Activated") {
+      setVersions((vs) => vs.map((v) => v.version === "4.3" ? { ...v, status: "Active", approvalState: "Active", effectiveDate: new Date().toISOString().slice(0, 10) }
+        : v.version === "4.2" ? { ...v, status: "Superseded", approvalState: "Superseded", supersededDate: new Date().toISOString().slice(0, 10) } : v));
+    }
+    logActivity(`Demo scenario applied: ${s}`, "Scenario");
+    toast.success(`Scenario: ${s}`, { description: st.note });
+  };
+
+  const doExport = (format: string, scope: string, options: string[]) => {
+    const rows: Record<string, unknown>[] = [
+      ...results.map((r) => ({ recordType: "Validation Result", id: r.id, category: r.category, element: r.configurationElementId, issue: r.issue, severity: r.severity, status: r.status, owner: r.owner })),
+      ...conflicts.map((c) => ({ recordType: "Rule Conflict", id: c.id, category: c.conflictType, element: `${c.ruleAId} vs ${c.ruleBId}`, issue: c.overlapScope, severity: c.severity, status: c.status, owner: "Discovery Governance" })),
+      ...reviews.map((r) => ({ recordType: "Review", id: r.id, category: r.reviewType, element: r.issue, issue: r.scope, severity: r.severity, status: r.status, owner: r.reviewer })),
+      ...versions.map((v) => ({ recordType: "Version", id: v.id, category: "Version", element: `v${v.version}`, issue: v.changeReason, severity: "Low", status: v.status, owner: v.createdBy })),
+    ];
+    const stamp = new Date().toISOString().slice(0, 10);
+    const name = `discovery-configuration-${scope.toLowerCase().replace(/\s+/g, "-")}-${stamp}`;
+    if (format === "CSV") downloadFile(`${name}.csv`, toCsv(rows), "text/csv");
+    else if (format === "JSON") downloadFile(`${name}.json`, JSON.stringify({ scope, options, generatedAt: stamp, records: rows }, null, 2), "application/json");
+    else if (format === "YAML") downloadFile(`${name}.yaml`, `scope: ${scope}\nrecords:\n${toYaml(rows)}`, "text/yaml");
+    else downloadFile(`${name}.txt`, `${format} — ${scope}\nIncluded: ${options.join(", ")}\n\n${rows.map((r) => Object.values(r).join(" · ")).join("\n")}`, "text/plain");
+    logActivity(`Governed export generated (${format} · ${scope})`, "Export");
+    toast.success(`Export generated as ${format}`, { description: `${rows.length} governed records · scope ${scope}` });
+  };
+
+  useEffect(() => {
+    if (storyStep === null) return;
+    focusPanel(demoStory[storyStep].target);
+  }, [storyStep, focusPanel]);
+
+
 
   /* ------------------------------------------------------------- mutators */
 
@@ -343,15 +597,16 @@ export default function DiscoveryConfiguration() {
             <Button size="sm" variant="outline" className="h-8 text-[12px]" onClick={() => { setNewMode("clone"); setNewOpen(true); }}>
               <Copy className="mr-1 h-3.5 w-3.5" aria-hidden /> Clone
             </Button>
-            <Button size="sm" variant="outline" className="h-8 text-[12px]"
-              onClick={() => toast.info("Validation arrives with configuration governance", { description: "Prompt 2 adds validation, review, and policy conflict analysis." })}>
-              Validate Configuration
+            <Button size="sm" variant="outline" className="h-8 text-[12px]" onClick={runValidation} disabled={validating}>
+              {validating ? "Validating…" : "Validate Configuration"}
             </Button>
             <Button size="sm" variant="outline" className="h-8 text-[12px]" onClick={startDryRun}>
               <Play className="mr-1 h-3.5 w-3.5" aria-hidden /> Run Preview
             </Button>
-            <Button size="sm" variant="outline" className="h-8 text-[12px]"
-              onClick={() => toast.info("Activation arrives with configuration governance", { description: "Approval, publishing, activation, and rollback are Prompt 2 capabilities." })}>
+            <Button size="sm" variant="outline" className="h-8 text-[12px]" onClick={() => setSearchOpen(true)} aria-label="Global search">
+              <Search className="mr-1 h-3.5 w-3.5" aria-hidden /> Search
+            </Button>
+            <Button size="sm" variant="outline" className="h-8 text-[12px]" onClick={() => setActivationOpen(true)}>
               Activate
             </Button>
             <DropdownMenu>
@@ -360,14 +615,28 @@ export default function DiscoveryConfiguration() {
                   <MoreHorizontal className="h-4 w-4" aria-hidden />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="max-h-[70vh] overflow-y-auto">
                 <DropdownMenuLabel className="text-[11px]">Configuration</DropdownMenuLabel>
                 <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-workbench")}>Open workbench</DropdownMenuItem>
                 <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-preview")}>Open preview</DropdownMenuItem>
                 <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-quality")}>Open quality</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-[12px]" onClick={() => toast.info("Governed export arrives with configuration governance")}>Governed export</DropdownMenuItem>
-                <DropdownMenuItem className="text-[12px]" onClick={() => toast.info("Version history arrives with configuration governance")}>Version history</DropdownMenuItem>
+                <DropdownMenuLabel className="text-[11px]">Governance</DropdownMenuLabel>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-validation")}>Validation</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-reviews")}>Review queue</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-approvals")}>Approval chain</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-versions")}>Version history</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-comparison")}>Version comparison</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => focusPanel("panel-drift")}>Configuration drift</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => setRollbackOpen(true)}>Rollback configuration</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-[12px]" onClick={() => setExportOpen(true)}>Governed export</DropdownMenuItem>
+                <DropdownMenuItem className="text-[12px]" onClick={() => setStoryStep(0)}>Demo Story</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-[11px]">Demo scenarios</DropdownMenuLabel>
+                {demoScenarios.map((s) => (
+                  <DropdownMenuItem key={s} className="text-[12px]" onClick={() => applyScenario(s)}>{s}</DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -375,11 +644,17 @@ export default function DiscoveryConfiguration() {
 
         <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
           <span className="text-[11px] text-slate-500">Configuration service state</span>
-          <StatusBadge tone={preview.blockingIssues.length ? "red" : "amber"}>{serviceState}</StatusBadge>
-          <StatusBadge tone="green">Active v4.2 in Production</StatusBadge>
+          <StatusBadge tone={activationBlocked ? "red" : preview.blockingIssues.length ? "red" : "amber"}>{scenarioState.serviceState}</StatusBadge>
+          <StatusBadge tone="green">
+            {versions.find((v) => v.status === "Active")?.version === "4.3" ? "Active v4.3 in Production" : "Active v4.2 in Production"}
+          </StatusBadge>
           <StatusBadge tone="blue">{draft.name}</StatusBadge>
+          <StatusBadge tone="slate">{serviceState}</StatusBadge>
           <span className="ml-auto text-[11px] text-slate-500">Refreshed {refreshedAt}</span>
         </div>
+
+        <ScenarioBanner scenario={scenario} state={scenarioState} />
+
 
         {/* filters */}
         <section className="mb-3 rounded-xl border border-slate-200 bg-white" aria-label="Global filters">
@@ -696,7 +971,208 @@ export default function DiscoveryConfiguration() {
           )}
           <QualityPanel draft={draft} preview={preview} spotlight={spotlight === "panel-quality"} />
 
-          <Prompt2Placeholder />
+          {/* ---------------------------- prompt 2 governance control plane */}
+
+          <GovernanceSummaryPanel state={scenarioState} draft={draft} onFocus={focusPanel} spotlight={spotlight === "panel-governance-summary"} />
+
+          <ValidationPanel
+            validation={validation} running={validating} onRun={runValidation}
+            onOpenResults={() => focusPanel("panel-validation-results")}
+            blocked={activationBlocked} spotlight={spotlight === "panel-validation"}
+          />
+          <ValidationResultsPanel
+            results={results}
+            spotlight={spotlight === "panel-validation-results"}
+            onAction={(r, action) => {
+              if (action === "Open") { focusPanel("panel-conflicts"); return; }
+              if (action === "Create Exception") { setExceptionOpen(true); return; }
+              if (action === "Request Review") {
+                setReviews((rs) => [{
+                  id: `DCR-${4300 + rs.length}`, configurationId: "DISC-CFG-001", configurationVersion: "4.3",
+                  reviewType: `${r.category} Review`, issue: r.issue, scope: r.affectedScopeIds.join(", ") || "Enterprise",
+                  severity: r.severity, reviewer: r.owner, reviewerRole: r.owner, status: "Open",
+                  decision: "", conditions: "", comments: "", requestedAt: nowLabel(), dueAt: "In 3 days", completedAt: "",
+                }, ...rs]);
+                notify("Review Requested", `Review requested for ${r.id}`, r.issue, r.severity);
+                toast.success("Review requested", { description: `${r.category} routed to ${r.owner}` });
+                return;
+              }
+              const status = action === "Resolve" ? "Resolved" : action === "Accept Warning" ? "Accepted" : r.status;
+              setResults((rs) => rs.map((x) => (x.id === r.id ? { ...x, status, owner: action === "Assign Owner" ? "Discovery Operations" : x.owner } : x)));
+              logAudit(action === "Accept Warning" ? "Warning Accepted" : "Validation Run", r.configurationElementType, r.configurationElementId, r.currentState, r.expectedState, `${action} on ${r.id}`);
+              logActivity(`${action} applied to validation finding ${r.id}`, "Validation");
+              toast.success(`${action} recorded for ${r.id}`);
+            }}
+          />
+          <ConflictsPanel
+            conflicts={conflicts}
+            spotlight={spotlight === "panel-conflicts"}
+            onResolve={(c) => { setConflictDialog(c); setConflictOpen(true); }}
+          />
+          <AccessValidationPanel spotlight={spotlight === "panel-access"} onReview={() => focusPanel("panel-reviews")} />
+          <ResidencyPanel spotlight={spotlight === "panel-residency"} />
+          <OwnershipPanel
+            rows={ownership} spotlight={spotlight === "panel-ownership"}
+            onAction={(id, action) => {
+              setOwnership((rows) => rows.map((o) => (o.id === id
+                ? { ...o, owner: action === "Assign Synthetic Owner" ? "Discovery Operations" : o.owner, status: action === "Assign Synthetic Owner" ? "Confirmed" : "Pending" }
+                : o)));
+              logActivity(`${action} for ownership record ${id}`, "Ownership");
+              toast.success(`${action} recorded`);
+            }}
+          />
+
+          <ChangeImpactPanel impact={seedImpact} spotlight={spotlight === "panel-impact"} onOpenComparison={() => focusPanel("panel-comparison")} />
+
+          <ReviewQueuePanel
+            reviews={reviews} selected={selectedReview} onSelect={setSelectedReview}
+            spotlight={spotlight === "panel-reviews"}
+            onAction={(r, action) => {
+              if (action === "Open Review") { focusPanel("panel-review-workbench"); return; }
+              if (action === "Assign") {
+                setReviews((rs) => rs.map((x) => (x.id === r.id ? { ...x, status: "In Review" } : x)));
+                toast.success(`${r.id} assigned to ${r.reviewer}`);
+                return;
+              }
+              if (action === "Approve") {
+                setReviews((rs) => rs.map((x) => (x.id === r.id ? { ...x, status: "Approved", decision: "Approved", completedAt: nowLabel() } : x)));
+                logAudit("Approved", "Review", r.id, "Open", "Approved", "Reviewer approval");
+                logActivity(`${r.id} approved by ${r.reviewer}`, "Review");
+                notify("Review Approved", `${r.id} approved`, r.issue, r.severity);
+                toast.success(`${r.id} approved`);
+                return;
+              }
+              setReviewDialog({ id: r.id, action });
+            }}
+          />
+          <ReviewWorkbench
+            review={reviews.find((r) => r.id === selectedReview) ?? null}
+            impact={seedImpact} preview={preview}
+            spotlight={spotlight === "panel-review-workbench"}
+            onAction={(action) => {
+              if (action === "Create Exception") { setExceptionOpen(true); return; }
+              if (action === "Approve") {
+                setReviews((rs) => rs.map((x) => (x.id === selectedReview ? { ...x, status: "Approved", decision: "Approved", completedAt: nowLabel() } : x)));
+                logActivity(`${selectedReview} approved from review workbench`, "Review");
+                toast.success(`${selectedReview} approved`);
+                return;
+              }
+              setReviewDialog({ id: selectedReview, action });
+            }}
+          />
+          <ApprovalChainPanel
+            approvals={approvals} approvalState={scenarioState.approvalState}
+            spotlight={spotlight === "panel-approvals"}
+            onDecide={(a, action) => {
+              setApprovals((as) => as.map((x) => (x.id === a.id
+                ? {
+                  ...x,
+                  status: action === "Approve" ? "Approved" : action === "Approve with Conditions" ? "Approved with Conditions" : "Rejected",
+                  decision: action,
+                  conditions: action === "Approve with Conditions" ? "Restricted transcript pilot must remain inside approved channels" : x.conditions,
+                  completedAt: nowLabel(),
+                }
+                : x)));
+              logAudit(action === "Reject" ? "Rejected" : "Approved", "Approval", a.id, a.status, action, `${a.approvalStage} decision`);
+              logActivity(`${a.approvalStage} ${action.toLowerCase()}`, "Approval");
+              notify("Configuration Approved", `${a.approvalStage} ${action.toLowerCase()}`, "Approved is not the same as Active. Activation remains a separate step.", "Medium");
+              toast.success(`${a.approvalStage}: ${action}`);
+            }}
+          />
+
+          <VersionHistoryPanel
+            versions={versions} spotlight={spotlight === "panel-versions"}
+            onOpen={(v) => { setVersionDetail(v); setVersionDetailOpen(true); }}
+            onCompare={(v) => { setCompareTo(v.version); focusPanel("panel-comparison"); }}
+            onClone={(v) => { setNewMode("clone"); setNewOpen(true); toast.info(`Cloning from v${v.version}`); }}
+            onExport={(v) => doExport("JSON", `Selected Version v${v.version}`, ["Scope", "Rules", "Validation"])}
+          />
+          <VersionComparisonPanel
+            fromVersion={compareFrom} toVersion={compareTo} versions={versions}
+            onFrom={setCompareFrom} onTo={setCompareTo}
+            onOpenElement={(row) => focusPanel(row.panel)}
+            spotlight={spotlight === "panel-comparison"}
+          />
+          <InheritancePanel
+            overrides={overrides} spotlight={spotlight === "panel-inheritance"}
+            onCreateOverride={(id, value) => { setOverrides((o) => ({ ...o, [id]: value })); toast.success("Draft override created", { description: `${value} · pending validation` }); }}
+            onRemoveOverride={(id) => { setOverrides((o) => { const n = { ...o }; delete n[id]; return n; }); toast.success("Draft override removed"); }}
+            onResetInherited={(id) => { setOverrides((o) => { const n = { ...o }; delete n[id]; return n; }); toast.success("Reset to inherited value"); }}
+          />
+          <ExceptionsPanel
+            exceptions={exceptions} spotlight={spotlight === "panel-exceptions"}
+            onCreate={() => setExceptionOpen(true)}
+            onAction={(e, action) => {
+              if (action === "Expire Now") {
+                setExceptions((xs) => xs.map((x) => (x.id === e.id ? { ...x, status: "Expired" } : x)));
+                toast.success(`${e.id} expired`);
+              } else if (action === "Extend") {
+                const next = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
+                setExceptions((xs) => xs.map((x) => (x.id === e.id ? { ...x, expirationDate: next, status: "Active" } : x)));
+                toast.success(`${e.id} extended to ${next}`, { description: "Extension recorded with governance review requirement" });
+              } else {
+                focusPanel("panel-reviews");
+              }
+              logActivity(`${action} on exception ${e.id}`, "Exception");
+            }}
+          />
+
+          <EnvironmentPromotionPanel
+            promoted={promoted} spotlight={spotlight === "panel-promotion"}
+            canPromoteProduction={!activationBlocked && validation.blockedCount === 0}
+            onPromote={(env) => {
+              setPromoted((p) => ({ ...p, [env]: "4.3 Draft" }));
+              logActivity(`Configuration promoted to ${env}`, "Promotion");
+              toast.success(`Promoted to ${env}`);
+            }}
+            onScheduleProduction={() => setActivationOpen(true)}
+          />
+          <PrecheckPanel blocked={activationBlocked} spotlight={spotlight === "panel-precheck"} onContinue={() => setActivationOpen(true)} />
+          <RuntimeCompatibilityPanel spotlight={spotlight === "panel-runtime"} />
+          <ActivationPanel
+            activation={activation} blocked={activationBlocked} blockReason={blockReason}
+            executionStep={activationStep} spotlight={spotlight === "panel-activation"}
+            onActivate={() => setActivationOpen(true)}
+            onCancelSchedule={() => { setActivation((a) => ({ ...a, status: "Draft", scheduledAt: "" })); toast.success("Scheduled activation cancelled"); }}
+            onReschedule={() => setActivationOpen(true)}
+            onRunValidation={runValidation}
+          />
+          <RollbackPanel history={rollbacks} spotlight={spotlight === "panel-rollback"} onRollback={() => setRollbackOpen(true)} />
+          <DriftPanel
+            drift={drift} spotlight={spotlight === "panel-drift"}
+            onAction={(d, action) => {
+              const status = action === "Reconcile to Approved" ? "Reconciled"
+                : action === "Accept Temporary Exception" ? "Exception Accepted"
+                  : action === "Escalate" ? "Escalated" : "Investigating";
+              setDrift((ds) => ds.map((x) => (x.id === d.id ? { ...x, status, resolution: action } : x)));
+              if (action === "Accept Temporary Exception") setExceptionOpen(true);
+              logAudit("Drift Detected", d.elementType, d.elementId, d.approvedState, d.observedState, action);
+              logActivity(`${action} on drift ${d.id}`, "Drift");
+              toast.success(`${action} recorded for ${d.id}`);
+            }}
+          />
+
+          <PublishingHistoryPanel
+            spotlight={spotlight === "panel-publishing"}
+            onOpen={(id, kind) => {
+              if (kind === "Open Version") focusPanel("panel-versions");
+              else if (kind === "Open Audit") focusPanel("panel-audit");
+              else toast.info(`Publishing event ${id}`);
+            }}
+          />
+          <AuditHistoryPanel audit={audit} spotlight={spotlight === "panel-audit"} />
+          <NotificationsPanel
+            notifications={notifications} spotlight={spotlight === "panel-notifications"}
+            onMarkAll={() => { setNotifications((ns) => ns.map((n) => ({ ...n, status: "Read" }))); toast.success("All notifications marked read"); }}
+            onAction={(n, action) => {
+              if (action === "Open") { focusPanel("panel-reviews"); return; }
+              const status = action === "Acknowledge" ? "Acknowledged" : "Read";
+              setNotifications((ns) => ns.map((x) => (x.id === n.id ? { ...x, status } : x)));
+              toast.success(`${action} · ${n.title}`);
+            }}
+          />
+          <ActivityPanel activity={activity} spotlight={spotlight === "panel-activity"} />
+
 
           <p className="pb-6 text-[11px] text-slate-500">
             Discovery Configuration is the policy and scope control plane. Enterprise Source Discovery executes approved
@@ -738,6 +1214,75 @@ export default function DiscoveryConfiguration() {
         onOpenWarnings={() => { setDryRunOpen(false); focusPanel("panel-breakdown"); }}
         onSaveDraft={() => toast.success("Draft configuration saved locally", { description: "No downstream ECF state was changed." })}
       />
+
+      {/* ------------------------------------------- prompt 2 governance overlays */}
+      <ConflictResolutionDialog
+        open={conflictOpen} onOpenChange={setConflictOpen} conflict={conflictDialog}
+        onResolve={(id, payload) => {
+          const c = conflicts.find((x) => x.id === id);
+          setConflicts((cs) => cs.map((x) => (x.id === id ? { ...x, status: "Resolved", resolution: payload.action, resolvedBy: payload.reviewer } : x)));
+          logAudit("Conflict Resolved", "Rule", id, c?.status ?? "Open", "Resolved", payload.reason || payload.action);
+          logActivity(`Conflict ${id} resolved as ${payload.action}`, "Conflict");
+          notify("Conflict Detected", `${id} resolved`, payload.action, c?.severity ?? "Medium");
+          toast.success(`Conflict ${id} resolved`, { description: `${payload.action} · effective ${payload.effectiveDate || "immediately"}` });
+          setConflictOpen(false);
+        }}
+      />
+      <ReviewDecisionDialog
+        open={!!reviewDialog} onOpenChange={(o) => !o && setReviewDialog(null)}
+        reviewId={reviewDialog?.id ?? ""} action={reviewDialog?.action ?? ""}
+        onSubmit={({ comments, conditions }) => {
+          const id = reviewDialog?.id ?? "";
+          const action = reviewDialog?.action ?? "";
+          const status = action === "Approve with Conditions" ? "Approved with Conditions"
+            : action === "Reject" ? "Rejected" : action === "Escalate" ? "Escalated" : "In Review";
+          setReviews((rs) => rs.map((x) => (x.id === id ? { ...x, status, decision: action, comments, conditions, completedAt: nowLabel() } : x)));
+          logAudit(action === "Reject" ? "Rejected" : action === "Escalate" ? "Escalated" : "Approved", "Review", id, "In Review", status, comments || action);
+          logActivity(`${id} ${status.toLowerCase()}`, "Review");
+          notify(action === "Escalate" ? "Escalation Raised" : "Review Approved", `${id} ${status}`, comments || action, action === "Escalate" ? "High" : "Medium");
+          toast.success(`${id}: ${status}`);
+          setReviewDialog(null);
+        }}
+      />
+      <ExceptionDialog
+        open={exceptionOpen} onOpenChange={setExceptionOpen}
+        onCreate={(e) => {
+          const id = `EXC-${600 + exceptions.length}`;
+          setExceptions((xs) => [{ ...e, id }, ...xs]);
+          logAudit("Exception Created", "Exception", id, "None", "Active", e.reason);
+          logActivity(`Exception ${id} created (${e.exceptionType})`, "Exception");
+          notify("Exception Created", `${id} created`, e.reason, "Medium");
+          toast.success(`Exception ${id} created`, { description: `Expires ${e.expirationDate} · approver ${e.approver}` });
+          setExceptionOpen(false);
+        }}
+      />
+      <ActivationWizard
+        open={activationOpen} onOpenChange={setActivationOpen} impact={seedImpact}
+        blocked={activationBlocked} blockReason={blockReason}
+        running={activating} executionStep={activationStep}
+        onActivate={runActivation}
+      />
+      <RollbackDialog
+        open={rollbackOpen} onOpenChange={setRollbackOpen} versions={versions} running={rollbackRunning}
+        onRollback={runRollback}
+      />
+      <GlobalSearchDialog
+        open={searchOpen} onOpenChange={setSearchOpen} index={searchIndex}
+        onOpenResult={(r) => { setSearchOpen(false); focusPanel(r.panel); }}
+      />
+      <ExportDialog open={exportOpen} onOpenChange={setExportOpen} onExport={(f, s, o) => { doExport(f, s, o); setExportOpen(false); }} />
+      <VersionDetailDialog open={versionDetailOpen} onOpenChange={setVersionDetailOpen} version={versionDetail} />
+      {storyStep !== null && (
+        <DemoStoryOverlay
+          step={storyStep} reducedMotion={reducedMotion}
+          onToggleMotion={(v) => setReducedMotion(v)}
+          onNext={() => setStoryStep((s) => Math.min((s ?? 0) + 1, demoStory.length - 1))}
+          onPrev={() => setStoryStep((s) => Math.max((s ?? 0) - 1, 0))}
+          onExit={() => setStoryStep(null)}
+        />
+      )}
+
+
     </div>
   );
 }
