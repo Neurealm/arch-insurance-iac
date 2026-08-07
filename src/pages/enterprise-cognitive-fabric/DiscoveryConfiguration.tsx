@@ -141,7 +141,53 @@ export default function DiscoveryConfiguration() {
   const [dryRunResult, setDryRunResult] = useState<DryRunResult | null>(null);
   const [spotlight, setSpotlight] = useState<string | null>(null);
 
+  /* ---------------------------------------------- prompt 2 governance state */
+
+  const [scenario, setScenario] = useState<DemoScenario>("Review Pending");
+  const scenarioState = scenarioStates[scenario];
+
+  const [validation, setValidation] = useState<DiscoveryConfigurationValidation>(seedValidation);
+  const [validating, setValidating] = useState(false);
+  const [results, setResults] = useState<DiscoveryValidationResult[]>(seedValidationResults);
+  const [conflicts, setConflicts] = useState<DiscoveryRuleConflict[]>(seedRuleConflicts);
+  const [ownership, setOwnership] = useState(seedOwnership);
+  const [reviews, setReviews] = useState<DiscoveryConfigurationReview[]>(seedReviews);
+  const [selectedReview, setSelectedReview] = useState("DCR-4201");
+  const [approvals, setApprovals] = useState<DiscoveryConfigurationApproval[]>(seedApprovals);
+  const [versions, setVersions] = useState<DiscoveryConfigurationVersion[]>(seedVersions);
+  const [compareFrom, setCompareFrom] = useState("4.2");
+  const [compareTo, setCompareTo] = useState("4.3");
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+  const [exceptions, setExceptions] = useState<DiscoveryConfigurationException[]>(seedExceptions);
+  const [promoted, setPromoted] = useState<Record<string, string>>({});
+  const [drift, setDrift] = useState<DiscoveryConfigurationDrift[]>(seedDrift);
+  const [audit, setAudit] = useState<DiscoveryConfigurationAuditEvent[]>(seedAudit);
+  const [notifications, setNotifications] = useState<DiscoveryConfigurationNotification[]>(seedNotifications);
+  const [activity, setActivity] = useState(seedActivity);
+  const [rollbacks, setRollbacks] = useState<{ id: string; fromVersion: string; toVersion: string; rollbackType: string; reason: string; owner: string; status: string; completedAt: string }[]>([]);
+  const [activation, setActivation] = useState({
+    status: "Draft" as string, mode: "Immediate", scheduledAt: "", scope: "Enterprise",
+    rollbackOwner: "Discovery Operations", rollbackVersion: "v4.2", activatedBy: "", completedAt: "",
+  });
+  const [activationStep, setActivationStep] = useState(0);
+  const [activating, setActivating] = useState(false);
+  const [rollbackRunning, setRollbackRunning] = useState(false);
+
+  const [conflictDialog, setConflictDialog] = useState<DiscoveryRuleConflict | null>(null);
+  const [conflictOpen, setConflictOpen] = useState(false);
+  const [reviewDialog, setReviewDialog] = useState<{ id: string; action: string } | null>(null);
+  const [exceptionOpen, setExceptionOpen] = useState(false);
+  const [activationOpen, setActivationOpen] = useState(false);
+  const [rollbackOpen, setRollbackOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [versionDetail, setVersionDetail] = useState<DiscoveryConfigurationVersion | null>(null);
+  const [versionDetailOpen, setVersionDetailOpen] = useState(false);
+  const [storyStep, setStoryStep] = useState<number | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
   const preview = useMemo(() => computePreview(draft), [draft]);
+
 
   useEffect(() => {
     const prefs: Prefs = { view, filters, savedView, density, columns, selectedConfiguration: selectedConfigId, selectedStage };
