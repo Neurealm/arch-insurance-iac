@@ -733,6 +733,19 @@ const App = () => (
           <Route path="/product-reliability-anatomy" element={<ProductReliabilityAnatomy />} />
           <Route path="/transformation-journey" element={<TransformationJourney />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
+          <Route path="/agentic-finops" element={<FinOpsLayout />}>
+            <Route index element={<FinOpsOverview />} />
+            <Route path="overview" element={<FinOpsOverview />} />
+            <Route path="resource-rightsizing" element={<ResourceRightsizingWorkspace />} />
+            <Route path="idle-orphaned-resources" element={<IdleOrphanedResourcesWorkspace />} />
+            <Route path="commitment-optimization" element={<CommitmentOptimizationWorkspace />} />
+            <Route path="elasticity-scheduling" element={<ElasticitySchedulingWorkspace />} />
+            <Route path="storage-data-lifecycle" element={<StorageDataLifecycleWorkspace />} />
+            <Route path="network-data-movement" element={<NetworkDataMovementWorkspace />} />
+            <Route path="platform-architecture-efficiency" element={<PlatformArchitectureEfficiencyWorkspace />} />
+            <Route path="kubernetes-economics" element={<KubernetesEconomicsWorkspace />} />
+            <Route path="governance-realization" element={<GovernanceRealizationWorkspace />} />
+          </Route>
           <Route path="/data-orchestration-twin" element={<DataOrchLayout />}>
             <Route index element={<DataOrchExecutiveControlPlane />} />
             <Route path="executive-control-plane" element={<DataOrchExecutiveControlPlane />} />
