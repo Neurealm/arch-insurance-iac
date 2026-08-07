@@ -370,6 +370,11 @@ const seeds: Seed[] = [
   S(78, "Decision", "Prior Outcome Reuse", "Decision Rule", "Use prior estimate and actual outcomes when comparable.", { section: "Decision Logic", severity: "Low", response: "Advisory", related: [60, 63] }),
   S(79, "Decision", "Evidence Gap", "Evidence Requirement", "If cost conclusion depends on missing demand, pricing, allocation, or commitment evidence, return Evidence Required.", { section: "Decision Logic", severity: "High", response: "Evidence Required", related: [10, 64, 80] }),
   S(80, "Decision", "FinOps Confidence", "Requirement", "FinOps conclusion must expose confidence and main uncertainty drivers.", { section: "Decision Logic", severity: "High", response: "Review Required", related: [77, 79] }),
+
+  // ---- Attached storage economics (081–082) --------------------------------
+  S(81, "Architecture", "VM Attached Storage Cost", "Metric", "Attaching, resizing, or changing the tier of a block volume on a cloud virtual machine must be evaluated for marginal monthly storage cost, snapshot and backup cost, IOPS or throughput charges, and the resulting annual run rate.", { section: "Unit Economics", severity: "Medium", response: "Evidence Required", subject: "vm_attached_storage_change", technologies: ["Compute", "Block Storage"], workTypes: ["Scale Increase", "New Cloud Service", "Architecture Change", "Backup Change", "Storage Retention Increase"], evidence: ["volume_sizing_and_tier_model", "provider_storage_rate_card", "snapshot_retention_plan"], related: [11, 18, 25, 82] }),
+  S(82, "Controls", "Attached Storage Budget Alarm", "Threshold", "Every new or expanded VM attached volume must be covered by a budget alarm on the owning cost centre, with a threshold, chargeback tag, and notified owner confirmed before provisioning.", { section: "Controls", policyVariable: "finops.storage.attached_volume_budget_alarm", severity: "High", response: "Approval Required", subject: "vm_attached_storage_change", technologies: ["Compute", "Block Storage"], workTypes: ["Scale Increase", "New Cloud Service", "Backup Change", "Storage Retention Increase"], evidence: ["budget_alarm_configuration", "chargeback_tag_confirmation"], related: [4, 16, 17, 81] }),
+
 ];
 
 export const fopId = (n: number) => `FOP-${String(n).padStart(3, "0")}`;
