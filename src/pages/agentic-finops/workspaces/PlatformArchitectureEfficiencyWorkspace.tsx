@@ -8,8 +8,10 @@ import PageBands, { lifecycleWithActive } from "../components/PageBands";
 import SavingsFunnel from "../components/SavingsFunnel";
 import {
   Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer, ConfidenceCell,
-  useDetailDrawer, GaugeRing, type Kpi,
+  useDetailDrawer, GaugeRing, type Kpi, ViewModeToggle, FullOnly, execKpis, type ViewMode,
 } from "../components/primitives";
+import { DomainContextBar } from "../components/bands";
+import { useState } from "react";
 
 const kpis: Kpi[] = [
   { id: "wl", icon: Boxes, label: "Total Workloads Analyzed", value: "184", sub: "across 6 portfolios", tone: "blue" },
@@ -127,20 +129,24 @@ const toneBg: Record<string, string> = {
 
 export default function PlatformArchitectureEfficiencyWorkspace() {
   const drawer = useDetailDrawer();
+  const [mode, setMode] = useState<ViewMode>("exec");
   const pos = Object.fromEntries(archNodes.map((n) => [n.id, n]));
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-5 px-6 py-6">
       <FinOpsHeader
         title="Platform & Architecture Efficiency Workspace"
-        tagline="Identify higher-value architectural alternatives based on cost, performance, resilience, operational complexity, and business outcomes."
+        tagline="Unlock $0.6M by moving workloads to the architecture that fits them best."
         secondaryActions={[{ label: "Export Architecture Review", icon: "export" }, { label: "Alternative Simulator", icon: "simulate" }]}
         meta={{ lastAnalysis: "44 minutes ago", freshness: "95.9% within SLA", resources: "184 workloads analyzed" }}
         onPrimary={() => drawer.open({ title: "Architecture analysis run", tone: "blue", rows: [["Workloads", "184"], ["Opportunities", "62"], ["Risk-adjusted value", "$7.21M"]] })}
         onSecondary={(l) => drawer.open({ title: l, tone: "slate", bullets: ["Synthetic demonstration action."] })}
+        extra={<span className="ml-auto"><ViewModeToggle mode={mode} onChange={setMode} /></span>}
       />
 
-      <KpiStrip kpis={kpis} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
+      <DomainContextBar headline="Opportunity in this domain: $0.6M · Confidence 68% · Risk High" nextSlug="kubernetes-economics" nextLabel="Kubernetes Economics" />
+
+      <KpiStrip kpis={execKpis(kpis, mode)} onSelect={(k) => drawer.open({ title: k.label, subtitle: k.sub, tone: k.tone, rows: [["Value", k.value]] })} />
 
       {/* 1 */}
       <Panel index={1} title="Architectural improvement opportunities (top 10)">
