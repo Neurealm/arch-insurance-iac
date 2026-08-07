@@ -8,7 +8,7 @@ import PageBands, { lifecycleWithActive } from "./components/PageBands";
 import SavingsFunnel from "./components/SavingsFunnel";
 import {
   Panel, Badge, KpiStrip, DataTable, Th, Td, DonutCard, DetailDrawer, ConfidenceCell,
-  useDetailDrawer, CostDriverBars, useDetailDrawer as _u, type Kpi,
+  useDetailDrawer, CostDriverBars, type Kpi,
 } from "./components/primitives";
 
 const kpis: Kpi[] = [
@@ -216,7 +216,7 @@ export default function CommitmentOptimizationWorkspace() {
             </tr>
           ))}
           <tr className="bg-slate-50">
-            <Td className="font-semibold text-slate-900">Net portfolio impact</Td><Td /><Td right className="text-[14px] font-bold text-emerald-700">+$2.31M</Td>
+            <Td className="font-semibold text-slate-900">Net portfolio impact</Td><Td>{""}</Td><Td right className="text-[14px] font-bold text-emerald-700">+$2.31M</Td>
           </tr>
         </DataTable>
       </Panel>
