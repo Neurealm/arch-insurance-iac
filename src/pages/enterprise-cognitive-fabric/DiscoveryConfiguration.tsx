@@ -971,7 +971,208 @@ export default function DiscoveryConfiguration() {
           )}
           <QualityPanel draft={draft} preview={preview} spotlight={spotlight === "panel-quality"} />
 
-          <Prompt2Placeholder />
+          {/* ---------------------------- prompt 2 governance control plane */}
+
+          <GovernanceSummaryPanel state={scenarioState} draft={draft} onFocus={focusPanel} spotlight={spotlight === "panel-governance-summary"} />
+
+          <ValidationPanel
+            validation={validation} running={validating} onRun={runValidation}
+            onOpenResults={() => focusPanel("panel-validation-results")}
+            blocked={activationBlocked} spotlight={spotlight === "panel-validation"}
+          />
+          <ValidationResultsPanel
+            results={results}
+            spotlight={spotlight === "panel-validation-results"}
+            onAction={(r, action) => {
+              if (action === "Open") { focusPanel("panel-conflicts"); return; }
+              if (action === "Create Exception") { setExceptionOpen(true); return; }
+              if (action === "Request Review") {
+                setReviews((rs) => [{
+                  id: `DCR-${4300 + rs.length}`, configurationId: "DISC-CFG-001", configurationVersion: "4.3",
+                  reviewType: `${r.category} Review`, issue: r.issue, scope: r.affectedScopeIds.join(", ") || "Enterprise",
+                  severity: r.severity, reviewer: r.owner, reviewerRole: r.owner, status: "Open",
+                  decision: "", conditions: "", comments: "", requestedAt: nowLabel(), dueAt: "In 3 days", completedAt: "",
+                }, ...rs]);
+                notify("Review Requested", `Review requested for ${r.id}`, r.issue, r.severity);
+                toast.success("Review requested", { description: `${r.category} routed to ${r.owner}` });
+                return;
+              }
+              const status = action === "Resolve" ? "Resolved" : action === "Accept Warning" ? "Accepted" : r.status;
+              setResults((rs) => rs.map((x) => (x.id === r.id ? { ...x, status, owner: action === "Assign Owner" ? "Discovery Operations" : x.owner } : x)));
+              logAudit(action === "Accept Warning" ? "Warning Accepted" : "Validation Run", r.configurationElementType, r.configurationElementId, r.currentState, r.expectedState, `${action} on ${r.id}`);
+              logActivity(`${action} applied to validation finding ${r.id}`, "Validation");
+              toast.success(`${action} recorded for ${r.id}`);
+            }}
+          />
+          <ConflictsPanel
+            conflicts={conflicts}
+            spotlight={spotlight === "panel-conflicts"}
+            onResolve={(c) => { setConflictDialog(c); setConflictOpen(true); }}
+          />
+          <AccessValidationPanel spotlight={spotlight === "panel-access"} onReview={() => focusPanel("panel-reviews")} />
+          <ResidencyPanel spotlight={spotlight === "panel-residency"} />
+          <OwnershipPanel
+            rows={ownership} spotlight={spotlight === "panel-ownership"}
+            onAction={(id, action) => {
+              setOwnership((rows) => rows.map((o) => (o.id === id
+                ? { ...o, owner: action === "Assign Synthetic Owner" ? "Discovery Operations" : o.owner, status: action === "Assign Synthetic Owner" ? "Confirmed" : "Pending" }
+                : o)));
+              logActivity(`${action} for ownership record ${id}`, "Ownership");
+              toast.success(`${action} recorded`);
+            }}
+          />
+
+          <ChangeImpactPanel impact={seedImpact} spotlight={spotlight === "panel-impact"} onOpenComparison={() => focusPanel("panel-comparison")} />
+
+          <ReviewQueuePanel
+            reviews={reviews} selected={selectedReview} onSelect={setSelectedReview}
+            spotlight={spotlight === "panel-reviews"}
+            onAction={(r, action) => {
+              if (action === "Open Review") { focusPanel("panel-review-workbench"); return; }
+              if (action === "Assign") {
+                setReviews((rs) => rs.map((x) => (x.id === r.id ? { ...x, status: "In Review" } : x)));
+                toast.success(`${r.id} assigned to ${r.reviewer}`);
+                return;
+              }
+              if (action === "Approve") {
+                setReviews((rs) => rs.map((x) => (x.id === r.id ? { ...x, status: "Approved", decision: "Approved", completedAt: nowLabel() } : x)));
+                logAudit("Approved", "Review", r.id, "Open", "Approved", "Reviewer approval");
+                logActivity(`${r.id} approved by ${r.reviewer}`, "Review");
+                notify("Review Approved", `${r.id} approved`, r.issue, r.severity);
+                toast.success(`${r.id} approved`);
+                return;
+              }
+              setReviewDialog({ id: r.id, action });
+            }}
+          />
+          <ReviewWorkbench
+            review={reviews.find((r) => r.id === selectedReview) ?? null}
+            impact={seedImpact} preview={preview}
+            spotlight={spotlight === "panel-review-workbench"}
+            onAction={(action) => {
+              if (action === "Create Exception") { setExceptionOpen(true); return; }
+              if (action === "Approve") {
+                setReviews((rs) => rs.map((x) => (x.id === selectedReview ? { ...x, status: "Approved", decision: "Approved", completedAt: nowLabel() } : x)));
+                logActivity(`${selectedReview} approved from review workbench`, "Review");
+                toast.success(`${selectedReview} approved`);
+                return;
+              }
+              setReviewDialog({ id: selectedReview, action });
+            }}
+          />
+          <ApprovalChainPanel
+            approvals={approvals} approvalState={scenarioState.approvalState}
+            spotlight={spotlight === "panel-approvals"}
+            onDecide={(a, action) => {
+              setApprovals((as) => as.map((x) => (x.id === a.id
+                ? {
+                  ...x,
+                  status: action === "Approve" ? "Approved" : action === "Approve with Conditions" ? "Approved with Conditions" : "Rejected",
+                  decision: action,
+                  conditions: action === "Approve with Conditions" ? "Restricted transcript pilot must remain inside approved channels" : x.conditions,
+                  completedAt: nowLabel(),
+                }
+                : x)));
+              logAudit(action === "Reject" ? "Rejected" : "Approved", "Approval", a.id, a.status, action, `${a.approvalStage} decision`);
+              logActivity(`${a.approvalStage} ${action.toLowerCase()}`, "Approval");
+              notify("Configuration Approved", `${a.approvalStage} ${action.toLowerCase()}`, "Approved is not the same as Active. Activation remains a separate step.", "Medium");
+              toast.success(`${a.approvalStage}: ${action}`);
+            }}
+          />
+
+          <VersionHistoryPanel
+            versions={versions} spotlight={spotlight === "panel-versions"}
+            onOpen={(v) => { setVersionDetail(v); setVersionDetailOpen(true); }}
+            onCompare={(v) => { setCompareTo(v.version); focusPanel("panel-comparison"); }}
+            onClone={(v) => { setNewMode("clone"); setNewOpen(true); toast.info(`Cloning from v${v.version}`); }}
+            onExport={(v) => doExport("JSON", `Selected Version v${v.version}`, ["Scope", "Rules", "Validation"])}
+          />
+          <VersionComparisonPanel
+            fromVersion={compareFrom} toVersion={compareTo} versions={versions}
+            onFrom={setCompareFrom} onTo={setCompareTo}
+            onOpenElement={(row) => focusPanel(row.panel)}
+            spotlight={spotlight === "panel-comparison"}
+          />
+          <InheritancePanel
+            overrides={overrides} spotlight={spotlight === "panel-inheritance"}
+            onCreateOverride={(id, value) => { setOverrides((o) => ({ ...o, [id]: value })); toast.success("Draft override created", { description: `${value} · pending validation` }); }}
+            onRemoveOverride={(id) => { setOverrides((o) => { const n = { ...o }; delete n[id]; return n; }); toast.success("Draft override removed"); }}
+            onResetInherited={(id) => { setOverrides((o) => { const n = { ...o }; delete n[id]; return n; }); toast.success("Reset to inherited value"); }}
+          />
+          <ExceptionsPanel
+            exceptions={exceptions} spotlight={spotlight === "panel-exceptions"}
+            onCreate={() => setExceptionOpen(true)}
+            onAction={(e, action) => {
+              if (action === "Expire Now") {
+                setExceptions((xs) => xs.map((x) => (x.id === e.id ? { ...x, status: "Expired" } : x)));
+                toast.success(`${e.id} expired`);
+              } else if (action === "Extend") {
+                const next = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
+                setExceptions((xs) => xs.map((x) => (x.id === e.id ? { ...x, expirationDate: next, status: "Active" } : x)));
+                toast.success(`${e.id} extended to ${next}`, { description: "Extension recorded with governance review requirement" });
+              } else {
+                focusPanel("panel-reviews");
+              }
+              logActivity(`${action} on exception ${e.id}`, "Exception");
+            }}
+          />
+
+          <EnvironmentPromotionPanel
+            promoted={promoted} spotlight={spotlight === "panel-promotion"}
+            canPromoteProduction={!activationBlocked && validation.blockedCount === 0}
+            onPromote={(env) => {
+              setPromoted((p) => ({ ...p, [env]: "4.3 Draft" }));
+              logActivity(`Configuration promoted to ${env}`, "Promotion");
+              toast.success(`Promoted to ${env}`);
+            }}
+            onScheduleProduction={() => setActivationOpen(true)}
+          />
+          <PrecheckPanel blocked={activationBlocked} spotlight={spotlight === "panel-precheck"} onContinue={() => setActivationOpen(true)} />
+          <RuntimeCompatibilityPanel spotlight={spotlight === "panel-runtime"} />
+          <ActivationPanel
+            activation={activation} blocked={activationBlocked} blockReason={blockReason}
+            executionStep={activationStep} spotlight={spotlight === "panel-activation"}
+            onActivate={() => setActivationOpen(true)}
+            onCancelSchedule={() => { setActivation((a) => ({ ...a, status: "Draft", scheduledAt: "" })); toast.success("Scheduled activation cancelled"); }}
+            onReschedule={() => setActivationOpen(true)}
+            onRunValidation={runValidation}
+          />
+          <RollbackPanel history={rollbacks} spotlight={spotlight === "panel-rollback"} onRollback={() => setRollbackOpen(true)} />
+          <DriftPanel
+            drift={drift} spotlight={spotlight === "panel-drift"}
+            onAction={(d, action) => {
+              const status = action === "Reconcile to Approved" ? "Reconciled"
+                : action === "Accept Temporary Exception" ? "Exception Accepted"
+                  : action === "Escalate" ? "Escalated" : "Investigating";
+              setDrift((ds) => ds.map((x) => (x.id === d.id ? { ...x, status, resolution: action } : x)));
+              if (action === "Accept Temporary Exception") setExceptionOpen(true);
+              logAudit("Drift Detected", d.elementType, d.elementId, d.approvedState, d.observedState, action);
+              logActivity(`${action} on drift ${d.id}`, "Drift");
+              toast.success(`${action} recorded for ${d.id}`);
+            }}
+          />
+
+          <PublishingHistoryPanel
+            spotlight={spotlight === "panel-publishing"}
+            onOpen={(id, kind) => {
+              if (kind === "Open Version") focusPanel("panel-versions");
+              else if (kind === "Open Audit") focusPanel("panel-audit");
+              else toast.info(`Publishing event ${id}`);
+            }}
+          />
+          <AuditHistoryPanel audit={audit} spotlight={spotlight === "panel-audit"} />
+          <NotificationsPanel
+            notifications={notifications} spotlight={spotlight === "panel-notifications"}
+            onMarkAll={() => { setNotifications((ns) => ns.map((n) => ({ ...n, status: "Read" }))); toast.success("All notifications marked read"); }}
+            onAction={(n, action) => {
+              if (action === "Open") { focusPanel("panel-reviews"); return; }
+              const status = action === "Acknowledge" ? "Acknowledged" : "Read";
+              setNotifications((ns) => ns.map((x) => (x.id === n.id ? { ...x, status } : x)));
+              toast.success(`${action} · ${n.title}`);
+            }}
+          />
+          <ActivityPanel activity={activity} spotlight={spotlight === "panel-activity"} />
+
 
           <p className="pb-6 text-[11px] text-slate-500">
             Discovery Configuration is the policy and scope control plane. Enterprise Source Discovery executes approved
