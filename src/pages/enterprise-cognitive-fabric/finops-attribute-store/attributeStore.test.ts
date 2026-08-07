@@ -5,11 +5,11 @@ import {
 } from "./data";
 
 describe("Cloud FinOps Persona Attribute Store data", () => {
-  it("exposes 80 atomic attributes with unique ids", () => {
-    expect(attributes).toHaveLength(80);
-    expect(new Set(attributes.map((a) => a.id)).size).toBe(80);
+  it("exposes 82 atomic attributes with unique ids", () => {
+    expect(attributes).toHaveLength(82);
+    expect(new Set(attributes.map((a) => a.id)).size).toBe(82);
     expect(attributes[0].id).toBe("FOP-001");
-    expect(attributes[79].id).toBe("FOP-080");
+    expect(attributes[81].id).toBe("FOP-082");
   });
 
   it("gives every attribute statement, provenance, evidence and applicability", () => {

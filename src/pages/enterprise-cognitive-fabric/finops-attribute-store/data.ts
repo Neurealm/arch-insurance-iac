@@ -233,7 +233,7 @@ export const relationshipTypes: RelationshipType[] = [
 ];
 
 /* ---------------------------------------------------------------------------
- * Seed register — the 80 atomic attributes decomposed from the source sheet.
+ * Seed register — the 82 atomic attributes decomposed from the source sheet.
  * Tuple: [n, category, name, primaryType, statement, opts]
  * ------------------------------------------------------------------------- */
 
@@ -370,6 +370,11 @@ const seeds: Seed[] = [
   S(78, "Decision", "Prior Outcome Reuse", "Decision Rule", "Use prior estimate and actual outcomes when comparable.", { section: "Decision Logic", severity: "Low", response: "Advisory", related: [60, 63] }),
   S(79, "Decision", "Evidence Gap", "Evidence Requirement", "If cost conclusion depends on missing demand, pricing, allocation, or commitment evidence, return Evidence Required.", { section: "Decision Logic", severity: "High", response: "Evidence Required", related: [10, 64, 80] }),
   S(80, "Decision", "FinOps Confidence", "Requirement", "FinOps conclusion must expose confidence and main uncertainty drivers.", { section: "Decision Logic", severity: "High", response: "Review Required", related: [77, 79] }),
+
+  // ---- Attached storage economics (081–082) --------------------------------
+  S(81, "Architecture", "VM Attached Storage Cost", "Metric", "Attaching, resizing, or changing the tier of a block volume on a cloud virtual machine must be evaluated for marginal monthly storage cost, snapshot and backup cost, IOPS or throughput charges, and the resulting annual run rate.", { section: "Unit Economics", severity: "Medium", response: "Evidence Required", subject: "vm_attached_storage_change", technologies: ["Compute", "Block Storage"], workTypes: ["Scale Increase", "New Cloud Service", "Architecture Change", "Backup Change", "Storage Retention Increase"], evidence: ["volume_sizing_and_tier_model", "provider_storage_rate_card", "snapshot_retention_plan"], related: [11, 18, 25, 82] }),
+  S(82, "Controls", "Attached Storage Budget Alarm", "Threshold", "Every new or expanded VM attached volume must be covered by a budget alarm on the owning cost centre, with a threshold, chargeback tag, and notified owner confirmed before provisioning.", { section: "Controls", policyVariable: "finops.storage.attached_volume_budget_alarm", severity: "High", response: "Approval Required", subject: "vm_attached_storage_change", technologies: ["Compute", "Block Storage"], workTypes: ["Scale Increase", "New Cloud Service", "Backup Change", "Storage Retention Increase"], evidence: ["budget_alarm_configuration", "chargeback_tag_confirmation"], related: [4, 16, 17, 81] }),
+
 ];
 
 export const fopId = (n: number) => `FOP-${String(n).padStart(3, "0")}`;
@@ -544,6 +549,7 @@ const policySeed: Array<[string, string, string, string, string, PolicyBinding["
   ["finops.unit_cost.variance_threshold", "Allowed movement in cost per value unit", "8", "%", "Cloud FinOps Practice", "Bound", true],
   ["finops.quota.materiality_threshold", "Quota increase size that triggers FinOps review", "Unresolved", "% of current", "Cloud Platform Engineering", "Unresolved", false],
   ["finops.experiment.spend_limit", "Maximum experiment spend before stop criteria apply", "15,000", "USD", "Cloud FinOps Practice", "Bound", true],
+  ["finops.storage.attached_volume_budget_alarm", "Monthly attached block storage spend per cost centre that requires a budget alarm and approval", "500", "USD / month", "Cloud Financial Governance", "Bound", true],
   ["finops.retention.materiality_threshold", "Retention increase that triggers lifecycle review", "30", "% volume growth", "Cloud Data Platform", "Review Required", true],
 ];
 
@@ -566,8 +572,8 @@ export const policyVariableCount = 34; // includes derived and inherited variabl
 /* ------------------------------ Work types -------------------------------- */
 
 const workTypeSeed: Array<[string, number[], AttributeCategory[], string[], string, EvaluationResponse]> = [
-  ["New Cloud Service", [11, 13, 15, 18, 47, 69, 79, 80], ["Planning", "Forecast", "Controls"], ["Cost estimate", "Demand model"], "New recurring spend and new allocation surface", "Review Required"],
-  ["Scale Increase", [11, 13, 14, 16, 21, 22, 31, 69, 80], ["Forecast", "Usage", "Rate"], ["Utilization metrics", "Forecast"], "Recurring spend and commitment position change", "Review Required"],
+  ["New Cloud Service", [11, 13, 15, 18, 47, 69, 79, 80, 81, 82], ["Planning", "Forecast", "Controls"], ["Cost estimate", "Demand model"], "New recurring spend and new allocation surface", "Review Required"],
+  ["Scale Increase", [11, 13, 14, 16, 21, 22, 31, 69, 80, 81, 82], ["Forecast", "Usage", "Rate"], ["Utilization metrics", "Forecast"], "Recurring spend and commitment position change", "Review Required"],
   ["Scale Decrease", [21, 23, 31, 33, 59, 60], ["Usage", "Rate", "Lifecycle"], ["Utilization metrics", "Commitment inventory"], "Stranded commitment and savings realization", "Review Required"],
   ["Region Expansion", [33, 37, 38, 39, 45, 68], ["Architecture", "Rate", "Sustainability"], ["Regional price model", "Transfer model"], "Region economics and egress exposure", "Review Required"],
   ["Multi Region HA", [37, 39, 45, 11, 16], ["Architecture", "Budget"], ["Duplication cost model"], "Duplicated recurring cost", "Review Required"],
@@ -643,7 +649,7 @@ export interface DecompositionStage {
 export const decompositionStages: DecompositionStage[] = [
   { id: "sections", name: "Source Sections", processed: 22, accepted: 22, needsReview: 0, rejected: 0, confidence: 0.99, detail: "All 22 source sections parsed from the Stakeholder Attribute Sheet." },
   { id: "candidates", name: "Candidate Statements", processed: 136, accepted: 118, needsReview: 12, rejected: 6, confidence: 0.94, detail: "Human readable statements extracted before atomicity resolution." },
-  { id: "atomic", name: "Atomic Attributes", processed: 80, accepted: 78, needsReview: 2, rejected: 0, confidence: 0.97, detail: "Individually addressable governed records FOP 001 – FOP 080." },
+  { id: "atomic", name: "Atomic Attributes", processed: 82, accepted: 80, needsReview: 2, rejected: 0, confidence: 0.97, detail: "Individually addressable governed records FOP 001 – FOP 082." },
   { id: "evidence", name: "Evidence Mappings", processed: 143, accepted: 138, needsReview: 5, rejected: 0, confidence: 0.95, detail: "Required and preferred evidence attached to attributes." },
   { id: "applicability", name: "Applicability Mappings", processed: 218, accepted: 214, needsReview: 4, rejected: 0, confidence: 0.93, detail: "Work type, technology, environment, and lifecycle routing." },
   { id: "policy", name: "Policy Variables", processed: 34, accepted: 29, needsReview: 5, rejected: 0, confidence: 0.9, detail: "Organization specific thresholds bound to governed policy variables." },
@@ -665,7 +671,7 @@ export interface StoreKpi {
 }
 
 export const kpis: StoreKpi[] = [
-  { id: "atomic", label: "Atomic Attributes", value: "80", support: "FOP 001 through FOP 080", tooltip: "Individually addressable governed attribute records.", status: "Healthy", trend: "+80 since draft", filter: { key: "all", value: "all" } },
+  { id: "atomic", label: "Atomic Attributes", value: "82", support: "FOP 001 through FOP 082", tooltip: "Individually addressable governed attribute records.", status: "Healthy", trend: "+82 since draft", filter: { key: "all", value: "all" } },
   { id: "categories", label: "Attribute Categories", value: "16", support: "Data, Planning, Forecast, Budget, Value, Usage, Rate, Architecture, Anomaly, Governance, Lifecycle, Learning, Licensing, Sustainability, Controls, Decision", tooltip: "Category taxonomy used for routing and reporting.", status: "Healthy", trend: "Stable" },
   { id: "hard", label: "Hard Constraints", value: "12", support: "Blocked or mandatory conditions", tooltip: "Attributes whose default response blocks or requires an exception.", status: "Attention", trend: "+1", filter: { key: "severity", value: "Critical" } },
   { id: "evidence", label: "Evidence Requirements", value: "58", support: "Required and preferred evidence mappings", tooltip: "Distinct evidence requirements across the store.", status: "Healthy", trend: "+6" },
@@ -702,16 +708,16 @@ export const validationIssues: ValidationIssue[] = [
 ];
 
 export const validationDimensions = [
-  { name: "Attribute ID Uniqueness", result: "80 / 80 unique", state: "Valid" },
-  { name: "Atomicity", result: "80 atomic records", state: "Valid" },
-  { name: "Statement Completeness", result: "80 / 80 complete", state: "Valid" },
-  { name: "Type Classification", result: "80 classified", state: "Valid" },
+  { name: "Attribute ID Uniqueness", result: "82 / 82 unique", state: "Valid" },
+  { name: "Atomicity", result: "82 atomic records", state: "Valid" },
+  { name: "Statement Completeness", result: "82 / 82 complete", state: "Valid" },
+  { name: "Type Classification", result: "82 classified", state: "Valid" },
   { name: "Category Classification", result: "16 categories", state: "Valid" },
   { name: "Evidence Mapping", result: "143 mappings", state: "Warning" },
   { name: "Applicability Mapping", result: "218 mappings", state: "Warning" },
   { name: "Policy Variable Binding", result: "29 / 34 resolved", state: "Warning" },
   { name: "Relationship Integrity", result: "426 edges resolved", state: "Valid" },
-  { name: "Provenance Completeness", result: "80 / 80 traced", state: "Valid" },
+  { name: "Provenance Completeness", result: "82 / 82 traced", state: "Valid" },
   { name: "Historical Version Integrity", result: "1 warning", state: "Warning" },
   { name: "Approval State", result: "78 approved · 2 in review", state: "Warning" },
   { name: "Confidence", result: "Mean 0.94", state: "Valid" },
@@ -725,7 +731,7 @@ export const publicationDestinations = [
 ];
 
 export const publishSteps = [
-  "Validate Persona", "Validate 80 Attributes", "Validate Evidence Mapping", "Validate Applicability",
+  "Validate Persona", "Validate 82 Attributes", "Validate Evidence Mapping", "Validate Applicability",
   "Validate Policy Bindings", "Validate Relationships", "Validate Provenance", "Create Attribute Store Version",
   "Build Applicability Index", "Create Semantic Index Placeholder Metadata", "Create Graph Projection",
   "Publish Context Service Contract", "Complete",
