@@ -114,6 +114,14 @@ const tree: Node[] = [
     statusDot: "green",
   },
   {
+    key: "agentic-finops",
+    label: "Agentic FinOps Digital Twin",
+    icon: Wallet,
+    to: "/agentic-finops",
+    pill: "NEW",
+    statusDot: "green",
+  },
+  {
     key: "enterprise-cognitive-fabric",
     label: "Enterprise Cognitive Fabric",
     icon: Brain,
