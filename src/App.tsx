@@ -365,6 +365,7 @@ import CognitiveIntake from "./pages/enterprise-cognitive-fabric/CognitiveIntake
 import PersonaImpactAnalysis from "./pages/enterprise-cognitive-fabric/PersonaImpactAnalysis.tsx";
 import CrossTeamImpactAnalysis from "./pages/enterprise-cognitive-fabric/CrossTeamImpactAnalysis.tsx";
 import DecisionIntelligence from "./pages/enterprise-cognitive-fabric/DecisionIntelligence.tsx";
+import OrganizationalLearning from "./pages/enterprise-cognitive-fabric/OrganizationalLearning.tsx";
 
 
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
@@ -791,6 +792,8 @@ const App = () => (
             <Route path="cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
             <Route path="evaluation/decision-intelligence" element={<DecisionIntelligence />} />
             <Route path="decision-intelligence" element={<DecisionIntelligence />} />
+            <Route path="learning/organizational-learning" element={<OrganizationalLearning />} />
+            <Route path="organizational-learning" element={<OrganizationalLearning />} />
 
             <Route path=":slug" element={<EcfPage />} />
           </Route>
