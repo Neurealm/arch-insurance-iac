@@ -94,8 +94,8 @@ export default function GuidanceInsights() {
       } else {
         setProfiles(new Map());
       }
-    } catch (e: any) {
-      toast.error(e.message ?? "Failed to load guidance interactions");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to load guidance interactions");
     } finally {
       setLoading(false);
     }
@@ -268,7 +268,7 @@ export default function GuidanceInsights() {
   );
 }
 
-function StatCard({ label, value, icon: Icon }: { label: string; value: number; icon: any }) {
+function StatCard({ label, value, icon: Icon }: { label: string; value: number; icon: LucideIcon }) {
   return (
     <Card>
       <CardContent className="p-4 flex items-center gap-3">
