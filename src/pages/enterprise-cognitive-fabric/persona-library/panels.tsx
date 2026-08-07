@@ -6,7 +6,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ChevronDown, ChevronUp, Search } from "lucide-react";
+import { ArrowUpRight, ChevronDown, ChevronUp, Search } from "lucide-react";
+
+export const ATTRIBUTE_STORE_ROUTE = "/enterprise-cognitive-fabric/modeling-memory/cloud-finops-attribute-store";
+
 import { Pill, type Tone } from "../persona-studio/primitives";
 import {
   attentionItems as seedAttention, coverageCounts, coverageDimensions, coverageSummary,
