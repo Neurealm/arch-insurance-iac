@@ -132,6 +132,7 @@ import Signup from "./pages/auth/Signup.tsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
 import ResetPassword from "./pages/auth/ResetPassword.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
+import { GuidanceAgentProvider } from "./components/guidance/GuidanceAgentProvider.tsx";
 import { ContextualAudioRoot } from "./platform/cae/ContextualAudioErrorBoundary.tsx";
 import CaeComponentFixture from "./platform/cae/dev/CaeComponentFixture.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
@@ -304,6 +305,7 @@ import Settings from "./pages/Settings.tsx";
 import AuthOrchestration from "./pages/AuthOrchestration.tsx";
 import Questionnaires from "./pages/Questionnaires.tsx";
 import UserManagement from "./pages/settings/UserManagement.tsx";
+import GuidanceInsights from "./pages/settings/GuidanceInsights.tsx";
 import ChangePassword from "./pages/settings/ChangePassword.tsx";
 import PendingApproval from "./pages/auth/PendingApproval.tsx";
 import UpdateProfile from "./pages/auth/UpdateProfile.tsx";
@@ -541,6 +543,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+        <GuidanceAgentProvider>
         <ContextualAudioRoot>
         <LazyRouteBoundary>
         <Routes>
@@ -1035,6 +1038,7 @@ const App = () => (
           <Route path="/admin/technology-taxonomy/domains/:domainId/edit" element={<ProtectedRoute requireAdmin><DomainProfilePage /></ProtectedRoute>} />
           <Route path="/settings/approvals" element={<Navigate to="/settings/user-management" replace />} />
           <Route path="/settings/user-management" element={<ProtectedRoute requireAdmin><UserManagement /></ProtectedRoute>} />
+          <Route path="/settings/guidance-insights" element={<ProtectedRoute requireAdmin><GuidanceInsights /></ProtectedRoute>} />
           <Route path="/settings/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
           <Route path="/settings/organization" element={<ProtectedRoute requireAdmin><OrganizationLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="business-units" replace />} />
@@ -1136,6 +1140,7 @@ const App = () => (
         </Routes>
         </LazyRouteBoundary>
         </ContextualAudioRoot>
+        </GuidanceAgentProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

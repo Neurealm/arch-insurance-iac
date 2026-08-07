@@ -22,6 +22,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTenantScope } from "@/hooks/useTenantScope";
 import { LogOut } from "lucide-react";
 import { AccountPanel } from "@/components/account/AccountPanel";
+import { useGuidanceAgent } from "@/components/guidance/GuidanceAgentProvider";
 
 /* ---------- Tree model ---------- */
 
@@ -625,6 +626,7 @@ export function EocSidebar({
   const { pathname } = useLocation();
   const { isAdmin } = useAuth();
   const { scoped, routes } = useTenantScope();
+  const { highlightedRoute } = useGuidanceAgent();
   const visibleTree = useMemo(() => {
     const base = isAdmin ? tree : tree.filter((n) => !ADMIN_ONLY_KEYS.has(n.key));
 
@@ -737,6 +739,25 @@ export function EocSidebar({
     // collapse manually-opened siblings.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTrail]);
+
+  // When the guidance agent points at a route nested inside a collapsed
+  // section, expand that section so the spotlighted item is actually visible.
+  // Merges into the existing open state (unlike the active-trail effect above)
+  // so it doesn't collapse sections the user opened manually.
+  useLayoutEffect(() => {
+    if (!highlightedRoute) return;
+    const spotlightTrail = findActiveTrail(visibleTree, highlightedRoute);
+    if (!spotlightTrail || spotlightTrail.length < 1) return;
+    setOpenByParent((prev) => {
+      const next: Record<string, Set<string>> = {};
+      for (const [k, v] of Object.entries(prev)) next[k] = new Set(v);
+      const spotlightOpenState = openStateFromTrail(spotlightTrail);
+      for (const [parent, children] of Object.entries(spotlightOpenState)) {
+        next[parent] = next[parent] ? new Set([...next[parent], ...children]) : new Set(children);
+      }
+      return next;
+    });
+  }, [highlightedRoute, visibleTree]);
 
   useLayoutEffect(() => {
     if (!restoreScrollPendingRef.current) return;
@@ -935,6 +956,7 @@ export function EocSidebar({
                           togglePin={togglePin}
                           pinned={pinned}
                           persistScroll={persistNavScroll}
+                          spotlightRoute={highlightedRoute}
                         />
                       ))}
                     </div>
@@ -967,6 +989,7 @@ export function EocSidebar({
                           togglePin={togglePin}
                           pinned={pinned}
                           persistScroll={persistNavScroll}
+                          spotlightRoute={highlightedRoute}
                         />
                       ))}
                     </div>
@@ -1034,10 +1057,12 @@ type NodeProps = {
   togglePin: (parent: string, child: string) => void;
   pinned: Set<string>;
   persistScroll: () => void;
+  /** Route the guidance agent just answered with — spotlighted in the nav. */
+  spotlightRoute?: string | null;
 };
 
 function SidebarNode(props: NodeProps) {
-  const { node, depth, parentKey, collapsed, pathname, isOpen, toggleOpen, togglePin, pinned, persistScroll } = props;
+  const { node, depth, parentKey, collapsed, pathname, isOpen, toggleOpen, togglePin, pinned, persistScroll, spotlightRoute } = props;
   const nav = useNavigate();
   const fav = React.useContext(FavCtx);
   const Icon = node.icon;
@@ -1053,6 +1078,20 @@ function SidebarNode(props: NodeProps) {
     const trail = findActiveTrail([node], pathname);
     return !!trail && trail.length > 1;
   }, [pathname, node, hasChildren]);
+
+  // Spotlight: the guidance agent just pointed at this route (or a route
+  // nested under this section). Distinct from `active` ("you're here now") —
+  // this means "the assistant is pointing you here."
+  const spotlighted = !!spotlightRoute && pathMatches(spotlightRoute, node.to, node.exact);
+  const spotlightTrail = useMemo(() => {
+    if (!hasChildren || !spotlightRoute) return false;
+    const trail = findActiveTrail([node], spotlightRoute);
+    return !!trail && trail.length > 1;
+  }, [spotlightRoute, node, hasChildren]);
+  const rowRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (spotlighted) rowRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [spotlighted]);
 
   const handleRowClick = (e: React.MouseEvent) => {
     if (collapsed) return;
@@ -1081,6 +1120,8 @@ function SidebarNode(props: NodeProps) {
           (active || trailActive)
             ? "bg-sidebar-primary/20 text-sidebar-primary"
             : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          (spotlighted || spotlightTrail) &&
+            "ring-2 ring-sidebar-primary/70 ring-offset-1 ring-offset-sidebar animate-spotlight-pulse motion-reduce:animate-none",
         )}
       >
         {Icon && <Icon className="h-[18px] w-[18px]" />}
@@ -1119,6 +1160,7 @@ function SidebarNode(props: NodeProps) {
   return (
     <div>
       <div
+        ref={rowRef}
         role={hasChildren ? "button" : "link"}
         tabIndex={0}
         aria-expanded={hasChildren ? open : undefined}
@@ -1138,6 +1180,8 @@ function SidebarNode(props: NodeProps) {
             : trailActive
               ? "bg-sidebar-accent/60 text-sidebar-accent-foreground font-medium"
               : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          (spotlighted || spotlightTrail) &&
+            "ring-2 ring-sidebar-primary/70 ring-offset-1 ring-offset-sidebar animate-spotlight-pulse motion-reduce:animate-none",
         )}
         onClick={handleRowClick}
       >
@@ -1263,6 +1307,7 @@ function SidebarNode(props: NodeProps) {
                   togglePin={togglePin}
                   pinned={pinned}
                   persistScroll={persistScroll}
+                  spotlightRoute={spotlightRoute}
                 />
               ))}
             </div>

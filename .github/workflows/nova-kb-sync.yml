@@ -1,0 +1,34 @@
+name: Nova KB Catalog Sync
+
+on:
+  push:
+    branches: [feature/meridian-epic-3d-digital-twin, main]
+    paths:
+      - "src/App.tsx"
+      - "src/pages/**"
+      - "scripts/extract-route-table.mjs"
+      - "scripts/sync-nova-kb.ts"
+      - ".github/workflows/nova-kb-sync.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: nova-kb-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Detect new pages and draft Nova KB entries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install deps
+        run: bun install --frozen-lockfile
+      - name: Sync Nova KB catalog
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LOVABLE_API_KEY: ${{ secrets.LOVABLE_API_KEY }}
+        run: bun run scripts/sync-nova-kb.ts

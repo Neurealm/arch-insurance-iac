@@ -4,6 +4,8 @@ import { EocSidebar } from "./Sidebar";
 import { useInModuleShell } from "./ModuleShellContext";
 import { PersonaProvider } from "@/context/PersonaContext";
 import { usePageActivityTracker } from "@/hooks/usePageActivityTracker";
+import { useAuth } from "@/context/AuthContext";
+import { GuidanceAgentWidget } from "@/components/guidance/GuidanceAgentWidget";
 
 function PageActivityTracker() {
   usePageActivityTracker();
@@ -15,6 +17,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // resets to closed on navigation (drawer auto-closes after picking a link).
   const [mobileOpen, setMobileOpen] = useState(false);
   const inModuleShell = useInModuleShell();
+  const { user } = useAuth();
 
   // Inside a module shell (e.g. Site Resilience Engineering) the module layout
   // already renders its own left navigation — render content only.
@@ -23,6 +26,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <>
         <PageActivityTracker />
         {children}
+        {user && <GuidanceAgentWidget />}
       </>
     );
   }
@@ -72,6 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
+      {user && <GuidanceAgentWidget />}
     </PersonaProvider>
   );
 }

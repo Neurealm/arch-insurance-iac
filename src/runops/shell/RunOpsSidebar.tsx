@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navSections, sectionLanding, type NavSection } from "@/runops/shell/routes";
+import { useGuidanceAgent } from "@/components/guidance/GuidanceAgentProvider";
 
 const iconFor: Record<NavSection, LucideIcon> = {
   "Command": LayoutGrid,
@@ -83,6 +84,11 @@ interface Props {
 export function RunOpsSidebar({ collapsed, onToggle, onNavigate }: Props) {
   const { pathname } = useLocation();
   const active = activeSectionForPath(pathname);
+  const { highlightedRoute } = useGuidanceAgent();
+  // Guidance-agent spotlight: reuses the same pathname->section mapping the
+  // active-page highlighting already uses, just fed the answer's route
+  // instead of the current one.
+  const spotlightSection = highlightedRoute ? activeSectionForPath(highlightedRoute) : null;
 
   return (
     <aside
@@ -138,6 +144,7 @@ export function RunOpsSidebar({ collapsed, onToggle, onNavigate }: Props) {
                 const landing = sectionLanding(section);
                 const Icon = iconFor[section];
                 const isActive = active === section;
+                const isSpotlighted = spotlightSection === section;
                 return (
                   <NavLink
                     key={section}
@@ -149,6 +156,8 @@ export function RunOpsSidebar({ collapsed, onToggle, onNavigate }: Props) {
                       isActive
                         ? "bg-slate-900 text-white"
                         : "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
+                      isSpotlighted &&
+                        "ring-2 ring-slate-900/70 ring-offset-1 animate-spotlight-pulse motion-reduce:animate-none",
                     )}
                     title={collapsed ? section : undefined}
                   >

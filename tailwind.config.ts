@@ -154,11 +154,16 @@ export default {
           "0%": { opacity: "0", transform: "translateY(6px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "spotlight-pulse": {
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(var(--sidebar-primary) / 0.55)" },
+          "50%": { boxShadow: "0 0 0 6px hsl(var(--sidebar-primary) / 0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.35s ease-out",
+        "spotlight-pulse": "spotlight-pulse 1.6s ease-out 3",
       },
     },
   },
