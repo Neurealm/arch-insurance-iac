@@ -795,6 +795,8 @@ const App = () => (
             <Route path="decision-intelligence" element={<DecisionIntelligence />} />
             <Route path="learning/organizational-learning" element={<OrganizationalLearning />} />
             <Route path="organizational-learning" element={<OrganizationalLearning />} />
+            <Route path="health/enterprise-cognitive-health" element={<EnterpriseCognitiveHealth />} />
+            <Route path="enterprise-cognitive-health" element={<EnterpriseCognitiveHealth />} />
 
             <Route path=":slug" element={<EcfPage />} />
           </Route>
