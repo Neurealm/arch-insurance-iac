@@ -15,9 +15,7 @@ const subNavBySlug: Record<string, { to: string; label: string }[]> = {
     { to: "/enterprise-cognitive-fabric/discovery/pipelines", label: "Discovery Pipelines" },
     { to: "/enterprise-cognitive-fabric/discovery/source-registry", label: "Source Registry" },
     { to: "/enterprise-cognitive-fabric/discovery/connector-health", label: "Connector Health" },
-    { to: "/enterprise-cognitive-fabric/discovery/artifact-ingestion", label: "Artifact Ingestion" },
-    { to: "/enterprise-cognitive-fabric/discovery/artifact-normalization", label: "Artifact Normalization" },
-    { to: "/enterprise-cognitive-fabric/discovery/business-condition-extraction", label: "Business Condition Extraction" },
+  ],
   ],
   "team-persona-construction": [
     { to: "/enterprise-cognitive-fabric/persona-studio/team-persona-library", label: "Team Persona Library" },
