@@ -880,12 +880,18 @@ const App = () => (
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
             <Route path="change-engineering" element={<ChangeEngineering />} />
             <Route path="change-engineering/:assetId" element={<ChangeEngineering />} />
+            <Route path="change-review" element={<ChangeReviewApproval />} />
+            <Route path="change-review/:packageId" element={<ChangeReviewApproval />} />
           </Route>
           <Route path="/intelligent-iac" element={<IacLayout />}>
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
             <Route path="change-engineering" element={<ChangeEngineering />} />
             <Route path="change-engineering/:assetId" element={<ChangeEngineering />} />
+            <Route path="change-review" element={<ChangeReviewApproval />} />
+            <Route path="change-review/:packageId" element={<ChangeReviewApproval />} />
+            <Route path="execution/:packageId" element={<ExecutionCenterPlaceholder />} />
           </Route>
+
 
 
           <Route element={<SreLayout />}>
