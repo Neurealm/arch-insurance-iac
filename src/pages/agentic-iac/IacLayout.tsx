@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Boxes, GitPullRequest, PlayCircle, ClipboardCheck,
   Settings, Search, Bell, HelpCircle, ChevronDown, Home, Cloud, CircleDot, Activity,
+  Network, Plug, KeyRound, Scale, FileSearch, SlidersHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +14,18 @@ const NAV = [
   { label: "Change Review & Approval", to: "/intelligent-iac/change-review/CP-2026-01842", icon: ClipboardCheck, enabled: true },
   { label: "Execution Center", to: "/intelligent-iac/execution/CP-2026-01842", icon: PlayCircle, enabled: true },
   { label: "Validation & Evidence", to: "/intelligent-iac/validation/CP-2026-01842", icon: ClipboardCheck, enabled: true },
+  { label: "Customer-hosted Intelligent IaC", to: "/intelligent-iac/platform/deployment-architecture", icon: Network, enabled: true },
 ];
+
+const PLATFORM_NAV = [
+  { label: "Deployment Architecture", to: "/intelligent-iac/platform/deployment-architecture", icon: Network, enabled: true },
+  { label: "Integrations & Connectivity", to: "/intelligent-iac/platform/integrations", icon: Plug, enabled: true },
+  { label: "Access & Security", to: "/intelligent-iac/platform/access-security", icon: KeyRound, enabled: true },
+  { label: "Policies & Governance", to: "/intelligent-iac/platform/policies-governance", icon: Scale, enabled: true },
+  { label: "Audit & Compliance", to: "/intelligent-iac/platform/audit-compliance", icon: FileSearch, enabled: true },
+  { label: "System Settings", to: "/intelligent-iac/platform/system-settings", icon: SlidersHorizontal, enabled: true },
+];
+
 
 /** Module shell for Intelligent Infrastructure as Code (Agentic IaC Engineering). */
 export default function IacLayout() {
