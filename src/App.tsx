@@ -486,6 +486,7 @@ import DeploymentArchitecture from "./pages/agentic-iac/DeploymentArchitecture.t
 import PlatformAdminPlaceholder from "./pages/agentic-iac/PlatformAdminPlaceholder.tsx";
 import IntegrationsConnectivity from "./pages/agentic-iac/IntegrationsConnectivity.tsx";
 import AccessGovernance from "./pages/agentic-iac/AccessGovernance.tsx";
+import PoliciesGovernance from "./pages/agentic-iac/PoliciesGovernance.tsx";
 
 
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
