@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { label: "Asset Digital Twin", to: "/agentic-iac-engineering", icon: Boxes, enabled: true },
-  { label: "Action Library", to: "/agentic-iac-engineering/action-library", icon: Library, enabled: false },
   { label: "Remediation Intelligence", to: "/agentic-iac-engineering/remediation-intelligence/sql-prod-07", icon: Activity, enabled: true },
+  { label: "Action Library", to: "/agentic-iac-engineering/action-library", icon: Library, enabled: false },
   { label: "Change Engineering", to: "/agentic-iac-engineering/change-engineering", icon: GitPullRequest, enabled: false },
   { label: "IaC Studio", to: "/agentic-iac-engineering/iac-studio", icon: FileCode2, enabled: false },
   { label: "Execution Center", to: "/agentic-iac-engineering/execution-center", icon: PlayCircle, enabled: false },
