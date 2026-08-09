@@ -482,6 +482,9 @@ import ChangeEngineering from "./pages/agentic-iac/ChangeEngineering.tsx";
 import ChangeReviewApproval from "./pages/agentic-iac/ChangeReviewApproval.tsx";
 import ExecutionCenter from "./pages/agentic-iac/ExecutionCenter.tsx";
 import ValidationEvidence from "./pages/agentic-iac/ValidationEvidence.tsx";
+import DeploymentArchitecture from "./pages/agentic-iac/DeploymentArchitecture.tsx";
+import PlatformAdminPlaceholder from "./pages/agentic-iac/PlatformAdminPlaceholder.tsx";
+
 
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
 import SreAgenticOpticalOperationsCenter from "./pages/operations/sre-agentic-noc/SreAgenticOpticalOperationsCenter.tsx";
