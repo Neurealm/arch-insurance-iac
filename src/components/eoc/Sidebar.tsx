@@ -176,6 +176,12 @@ const tree: Node[] = [
     to: "/runops",
   },
   {
+    key: "agentic-iac",
+    label: "Agentic IaC Engineering",
+    icon: Sparkles2,
+    to: "/agentic-iac-engineering",
+  },
+  {
     key: "sead",
     label: "S.E.A.D. RunOps",
     icon: Sparkles2,
