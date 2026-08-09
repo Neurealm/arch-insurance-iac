@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Boxes, Library, GitPullRequest, FileCode2, PlayCircle, ShieldCheck, ClipboardCheck,
-  Settings, Search, Bell, HelpCircle, ChevronDown, Home, Cloud, CircleDot,
+  Settings, Search, Bell, HelpCircle, ChevronDown, Home, Cloud, CircleDot, Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
