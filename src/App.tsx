@@ -487,6 +487,7 @@ import PlatformAdminPlaceholder from "./pages/agentic-iac/PlatformAdminPlacehold
 import IntegrationsConnectivity from "./pages/agentic-iac/IntegrationsConnectivity.tsx";
 import AccessGovernance from "./pages/agentic-iac/AccessGovernance.tsx";
 import PoliciesGovernance from "./pages/agentic-iac/PoliciesGovernance.tsx";
+import SystemSettingsPage from "./pages/agentic-iac/SystemSettings.tsx";
 
 
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
@@ -910,7 +911,7 @@ const App = () => (
             <Route path="platform/access-security" element={<AccessGovernance />} />
             <Route path="platform/policies-governance" element={<PoliciesGovernance />} />
             <Route path="platform/audit-compliance" element={<PlatformAdminPlaceholder />} />
-            <Route path="platform/system-settings" element={<PlatformAdminPlaceholder />} />
+            <Route path="platform/system-settings" element={<SystemSettingsPage />} />
 
           </Route>
 
