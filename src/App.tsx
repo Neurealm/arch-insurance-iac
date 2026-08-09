@@ -475,6 +475,8 @@ import HumanApprovalActionCenter from "./pages/agentic-sre-noc/HumanApprovalActi
 import AutonomousRecoveryMonitor from "./pages/agentic-sre-noc/AutonomousRecoveryMonitor.tsx";
 import GlhtProductionArchitecture from "./pages/agentic-sre-noc/ProductionArchitecture.tsx";
 import PredictiveOpticalLinkIntelligence from "./pages/agentic-sre-noc/PredictiveOpticalLinkIntelligence.tsx";
+import IacLayout from "./pages/agentic-iac/IacLayout.tsx";
+import AssetDigitalTwin from "./pages/agentic-iac/AssetDigitalTwin.tsx";
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
 import SreAgenticOpticalOperationsCenter from "./pages/operations/sre-agentic-noc/SreAgenticOpticalOperationsCenter.tsx";
 import SreAgenticNocPlaceholder from "./pages/operations/sre-agentic-noc/SreAgenticNocPlaceholder.tsx";
