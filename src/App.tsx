@@ -480,7 +480,8 @@ import AssetDigitalTwin from "./pages/agentic-iac/AssetDigitalTwin.tsx";
 import RemediationIntelligence from "./pages/agentic-iac/RemediationIntelligence.tsx";
 import ChangeEngineering from "./pages/agentic-iac/ChangeEngineering.tsx";
 import ChangeReviewApproval from "./pages/agentic-iac/ChangeReviewApproval.tsx";
-import ExecutionCenterPlaceholder from "./pages/agentic-iac/ExecutionCenterPlaceholder.tsx";
+import ExecutionCenter from "./pages/agentic-iac/ExecutionCenter.tsx";
+import ValidationEvidencePlaceholder from "./pages/agentic-iac/ValidationEvidencePlaceholder.tsx";
 
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
 import SreAgenticOpticalOperationsCenter from "./pages/operations/sre-agentic-noc/SreAgenticOpticalOperationsCenter.tsx";
@@ -885,6 +886,8 @@ const App = () => (
             <Route path="change-engineering/:assetId" element={<ChangeEngineering />} />
             <Route path="change-review" element={<ChangeReviewApproval />} />
             <Route path="change-review/:packageId" element={<ChangeReviewApproval />} />
+            <Route path="execution-center" element={<ExecutionCenter />} />
+            <Route path="execution-center/:packageId" element={<ExecutionCenter />} />
           </Route>
           <Route path="/intelligent-iac" element={<IacLayout />}>
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
@@ -892,7 +895,9 @@ const App = () => (
             <Route path="change-engineering/:assetId" element={<ChangeEngineering />} />
             <Route path="change-review" element={<ChangeReviewApproval />} />
             <Route path="change-review/:packageId" element={<ChangeReviewApproval />} />
-            <Route path="execution/:packageId" element={<ExecutionCenterPlaceholder />} />
+            <Route path="execution" element={<ExecutionCenter />} />
+            <Route path="execution/:packageId" element={<ExecutionCenter />} />
+            <Route path="validation/:packageId" element={<ValidationEvidencePlaceholder />} />
           </Route>
 
 
