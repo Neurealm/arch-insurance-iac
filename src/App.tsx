@@ -908,7 +908,7 @@ const App = () => (
             <Route path="platform/deployment-architecture" element={<DeploymentArchitecture />} />
             <Route path="platform/integrations" element={<IntegrationsConnectivity />} />
             <Route path="platform/access-security" element={<AccessGovernance />} />
-            <Route path="platform/policies-governance" element={<PlatformAdminPlaceholder />} />
+            <Route path="platform/policies-governance" element={<PoliciesGovernance />} />
             <Route path="platform/audit-compliance" element={<PlatformAdminPlaceholder />} />
             <Route path="platform/system-settings" element={<PlatformAdminPlaceholder />} />
 
