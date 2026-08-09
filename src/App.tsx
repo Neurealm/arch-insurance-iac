@@ -902,6 +902,13 @@ const App = () => (
             <Route path="execution/:packageId" element={<ExecutionCenter />} />
             <Route path="validation/:packageId" element={<ValidationEvidence />} />
             <Route path="validation" element={<ValidationEvidence />} />
+            <Route path="platform/deployment-architecture" element={<DeploymentArchitecture />} />
+            <Route path="platform/integrations" element={<PlatformAdminPlaceholder />} />
+            <Route path="platform/access-security" element={<PlatformAdminPlaceholder />} />
+            <Route path="platform/policies-governance" element={<PlatformAdminPlaceholder />} />
+            <Route path="platform/audit-compliance" element={<PlatformAdminPlaceholder />} />
+            <Route path="platform/system-settings" element={<PlatformAdminPlaceholder />} />
+
           </Route>
 
 
