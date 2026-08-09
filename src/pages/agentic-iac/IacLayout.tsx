@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Boxes, GitPullRequest, PlayCircle, ClipboardCheck,
   Settings, Search, Bell, HelpCircle, ChevronDown, Home, Cloud, CircleDot, Activity,
+  Network, Plug, KeyRound, Scale, FileSearch, SlidersHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +14,18 @@ const NAV = [
   { label: "Change Review & Approval", to: "/intelligent-iac/change-review/CP-2026-01842", icon: ClipboardCheck, enabled: true },
   { label: "Execution Center", to: "/intelligent-iac/execution/CP-2026-01842", icon: PlayCircle, enabled: true },
   { label: "Validation & Evidence", to: "/intelligent-iac/validation/CP-2026-01842", icon: ClipboardCheck, enabled: true },
+  { label: "Customer-hosted Intelligent IaC", to: "/intelligent-iac/platform/deployment-architecture", icon: Network, enabled: true },
 ];
+
+const PLATFORM_NAV = [
+  { label: "Deployment Architecture", to: "/intelligent-iac/platform/deployment-architecture", icon: Network, enabled: true },
+  { label: "Integrations & Connectivity", to: "/intelligent-iac/platform/integrations", icon: Plug, enabled: true },
+  { label: "Access & Security", to: "/intelligent-iac/platform/access-security", icon: KeyRound, enabled: true },
+  { label: "Policies & Governance", to: "/intelligent-iac/platform/policies-governance", icon: Scale, enabled: true },
+  { label: "Audit & Compliance", to: "/intelligent-iac/platform/audit-compliance", icon: FileSearch, enabled: true },
+  { label: "System Settings", to: "/intelligent-iac/platform/system-settings", icon: SlidersHorizontal, enabled: true },
+];
+
 
 /** Module shell for Intelligent Infrastructure as Code (Agentic IaC Engineering). */
 export default function IacLayout() {
@@ -68,7 +80,32 @@ export default function IacLayout() {
               </NavLink>
             );
           })}
+
+          <div className="mt-3 px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Platform Administration
+          </div>
+          {PLATFORM_NAV.map((item) => {
+            const Icon = item.icon;
+            const active = pathname === item.to;
+            return (
+              <NavLink
+                key={item.label}
+                to={item.to}
+                end
+                className={cn(
+                  "mx-2 my-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[12.5px] transition-colors",
+                  active
+                    ? "bg-[#EFF4FB] font-medium text-[#1B4F91] ring-1 ring-inset ring-[#CFE0F3]"
+                    : "text-slate-700 hover:bg-slate-50",
+                )}
+              >
+                <Icon className={cn("h-4 w-4 shrink-0", active ? "text-[#1B4F91]" : "text-slate-500")} />
+                <span className="truncate">{item.label}</span>
+              </NavLink>
+            );
+          })}
         </nav>
+
 
         <div className="border-t border-[#E2E8F0] py-2">
           <div className="mx-2 my-0.5 flex cursor-not-allowed items-center gap-2.5 rounded-md px-2.5 py-2 text-[12.5px] text-slate-400">
