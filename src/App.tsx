@@ -479,6 +479,9 @@ import IacLayout from "./pages/agentic-iac/IacLayout.tsx";
 import AssetDigitalTwin from "./pages/agentic-iac/AssetDigitalTwin.tsx";
 import RemediationIntelligence from "./pages/agentic-iac/RemediationIntelligence.tsx";
 import ChangeEngineering from "./pages/agentic-iac/ChangeEngineering.tsx";
+import ChangeReviewApproval from "./pages/agentic-iac/ChangeReviewApproval.tsx";
+import ExecutionCenterPlaceholder from "./pages/agentic-iac/ExecutionCenterPlaceholder.tsx";
+
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
 import SreAgenticOpticalOperationsCenter from "./pages/operations/sre-agentic-noc/SreAgenticOpticalOperationsCenter.tsx";
 import SreAgenticNocPlaceholder from "./pages/operations/sre-agentic-noc/SreAgenticNocPlaceholder.tsx";
