@@ -478,7 +478,7 @@ import PredictiveOpticalLinkIntelligence from "./pages/agentic-sre-noc/Predictiv
 import IacLayout from "./pages/agentic-iac/IacLayout.tsx";
 import AssetDigitalTwin from "./pages/agentic-iac/AssetDigitalTwin.tsx";
 import RemediationIntelligence from "./pages/agentic-iac/RemediationIntelligence.tsx";
-import ChangeEngineeringPlaceholder from "./pages/agentic-iac/ChangeEngineeringPlaceholder.tsx";
+import ChangeEngineering from "./pages/agentic-iac/ChangeEngineering.tsx";
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
 import SreAgenticOpticalOperationsCenter from "./pages/operations/sre-agentic-noc/SreAgenticOpticalOperationsCenter.tsx";
 import SreAgenticNocPlaceholder from "./pages/operations/sre-agentic-noc/SreAgenticNocPlaceholder.tsx";
@@ -878,11 +878,13 @@ const App = () => (
             <Route index element={<AssetDigitalTwin />} />
             <Route path="remediation-intelligence" element={<RemediationIntelligence />} />
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
-            <Route path="change-engineering/:assetId" element={<ChangeEngineeringPlaceholder />} />
+            <Route path="change-engineering" element={<ChangeEngineering />} />
+            <Route path="change-engineering/:assetId" element={<ChangeEngineering />} />
           </Route>
           <Route path="/intelligent-iac" element={<IacLayout />}>
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
-            <Route path="change-engineering/:assetId" element={<ChangeEngineeringPlaceholder />} />
+            <Route path="change-engineering" element={<ChangeEngineering />} />
+            <Route path="change-engineering/:assetId" element={<ChangeEngineering />} />
           </Route>
 
 
