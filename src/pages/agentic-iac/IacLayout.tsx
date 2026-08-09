@@ -13,10 +13,6 @@ const NAV = [
   { label: "Change Review & Approval", to: "/intelligent-iac/change-review/CP-2026-01842", icon: ClipboardCheck, enabled: true },
   { label: "Execution Center", to: "/intelligent-iac/execution/CP-2026-01842", icon: PlayCircle, enabled: true },
   { label: "Validation & Evidence", to: "/intelligent-iac/validation/CP-2026-01842", icon: ClipboardCheck, enabled: true },
-  { label: "Action Library", to: "/agentic-iac-engineering/action-library", icon: Library, enabled: false },
-  { label: "IaC Studio", to: "/agentic-iac-engineering/iac-studio", icon: FileCode2, enabled: false },
-
-  { label: "Governance", to: "/agentic-iac-engineering/governance", icon: ShieldCheck, enabled: false },
 ];
 
 /** Module shell for Intelligent Infrastructure as Code (Agentic IaC Engineering). */
