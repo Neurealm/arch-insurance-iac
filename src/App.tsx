@@ -486,6 +486,7 @@ import DeploymentArchitecture from "./pages/agentic-iac/DeploymentArchitecture.t
 import PlatformAdminPlaceholder from "./pages/agentic-iac/PlatformAdminPlaceholder.tsx";
 import IntegrationsConnectivity from "./pages/agentic-iac/IntegrationsConnectivity.tsx";
 import AccessGovernance from "./pages/agentic-iac/AccessGovernance.tsx";
+import PoliciesGovernance from "./pages/agentic-iac/PoliciesGovernance.tsx";
 
 
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
@@ -907,7 +908,7 @@ const App = () => (
             <Route path="platform/deployment-architecture" element={<DeploymentArchitecture />} />
             <Route path="platform/integrations" element={<IntegrationsConnectivity />} />
             <Route path="platform/access-security" element={<AccessGovernance />} />
-            <Route path="platform/policies-governance" element={<PlatformAdminPlaceholder />} />
+            <Route path="platform/policies-governance" element={<PoliciesGovernance />} />
             <Route path="platform/audit-compliance" element={<PlatformAdminPlaceholder />} />
             <Route path="platform/system-settings" element={<PlatformAdminPlaceholder />} />
 
