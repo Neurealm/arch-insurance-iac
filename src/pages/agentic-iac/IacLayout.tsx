@@ -80,7 +80,32 @@ export default function IacLayout() {
               </NavLink>
             );
           })}
+
+          <div className="mt-3 px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Platform Administration
+          </div>
+          {PLATFORM_NAV.map((item) => {
+            const Icon = item.icon;
+            const active = pathname === item.to;
+            return (
+              <NavLink
+                key={item.label}
+                to={item.to}
+                end
+                className={cn(
+                  "mx-2 my-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[12.5px] transition-colors",
+                  active
+                    ? "bg-[#EFF4FB] font-medium text-[#1B4F91] ring-1 ring-inset ring-[#CFE0F3]"
+                    : "text-slate-700 hover:bg-slate-50",
+                )}
+              >
+                <Icon className={cn("h-4 w-4 shrink-0", active ? "text-[#1B4F91]" : "text-slate-500")} />
+                <span className="truncate">{item.label}</span>
+              </NavLink>
+            );
+          })}
         </nav>
+
 
         <div className="border-t border-[#E2E8F0] py-2">
           <div className="mx-2 my-0.5 flex cursor-not-allowed items-center gap-2.5 rounded-md px-2.5 py-2 text-[12.5px] text-slate-400">
