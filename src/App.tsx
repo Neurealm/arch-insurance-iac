@@ -870,6 +870,10 @@ const App = () => (
             <Route path="slo-error-budget" element={<NocPage slug="slo-error-budget" />} />
             <Route path="executive-value" element={<NocPage slug="executive-value" />} />
           </Route>
+          <Route path="/agentic-iac-engineering" element={<IacLayout />}>
+            <Route index element={<AssetDigitalTwin />} />
+          </Route>
+
           <Route element={<SreLayout />}>
             <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
             <Route path="/product-line-map" element={<ProductLineMap />} />
