@@ -100,7 +100,7 @@ export function RelationshipMap({ selectedId, onSelect }: Props) {
               onClick={() => onSelect(selectedId === n.id ? null : n)}
               style={{ left: `${n.x}%`, top: `${n.y}%` }}
               className={cn(
-                "absolute -translate-x-1/2 -translate-y-1/2 rounded-md border bg-white px-2 py-1 text-left transition-colors",
+                "absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-md border bg-white px-2 py-1 text-left transition-colors",
                 selectedId === n.id
                   ? "border-[#1B4F91] ring-1 ring-[#1B4F91]/30"
                   : "border-[#E2E8F0] hover:border-slate-300",
