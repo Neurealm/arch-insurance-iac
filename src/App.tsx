@@ -874,7 +874,15 @@ const App = () => (
           </Route>
           <Route path="/agentic-iac-engineering" element={<IacLayout />}>
             <Route index element={<AssetDigitalTwin />} />
+            <Route path="remediation-intelligence" element={<RemediationIntelligence />} />
+            <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
+            <Route path="change-engineering/:assetId" element={<ChangeEngineeringPlaceholder />} />
           </Route>
+          <Route path="/intelligent-iac" element={<IacLayout />}>
+            <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
+            <Route path="change-engineering/:assetId" element={<ChangeEngineeringPlaceholder />} />
+          </Route>
+
 
           <Route element={<SreLayout />}>
             <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
