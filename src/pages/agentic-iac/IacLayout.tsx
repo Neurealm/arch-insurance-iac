@@ -16,7 +16,6 @@ const NAV = [
   { label: "IaC Studio", to: "/agentic-iac-engineering/iac-studio", icon: FileCode2, enabled: false },
   { label: "Validation & Evidence", to: "/agentic-iac-engineering/validation", icon: ClipboardCheck, enabled: false },
 
-  { label: "Validation & Evidence", to: "/agentic-iac-engineering/validation", icon: ClipboardCheck, enabled: false },
   { label: "Governance", to: "/agentic-iac-engineering/governance", icon: ShieldCheck, enabled: false },
 ];
 
