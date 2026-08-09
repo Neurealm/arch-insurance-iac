@@ -484,6 +484,7 @@ import ExecutionCenter from "./pages/agentic-iac/ExecutionCenter.tsx";
 import ValidationEvidence from "./pages/agentic-iac/ValidationEvidence.tsx";
 import DeploymentArchitecture from "./pages/agentic-iac/DeploymentArchitecture.tsx";
 import PlatformAdminPlaceholder from "./pages/agentic-iac/PlatformAdminPlaceholder.tsx";
+import IntegrationsConnectivity from "./pages/agentic-iac/IntegrationsConnectivity.tsx";
 
 
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
@@ -903,7 +904,7 @@ const App = () => (
             <Route path="validation/:packageId" element={<ValidationEvidence />} />
             <Route path="validation" element={<ValidationEvidence />} />
             <Route path="platform/deployment-architecture" element={<DeploymentArchitecture />} />
-            <Route path="platform/integrations" element={<PlatformAdminPlaceholder />} />
+            <Route path="platform/integrations" element={<IntegrationsConnectivity />} />
             <Route path="platform/access-security" element={<PlatformAdminPlaceholder />} />
             <Route path="platform/policies-governance" element={<PlatformAdminPlaceholder />} />
             <Route path="platform/audit-compliance" element={<PlatformAdminPlaceholder />} />
