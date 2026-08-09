@@ -20,7 +20,7 @@ const NAV = [
 const PLATFORM_NAV = [
   { label: "Deployment Architecture", to: "/intelligent-iac/platform/deployment-architecture", icon: Network, enabled: true },
   { label: "Integrations & Connectivity", to: "/intelligent-iac/platform/integrations", icon: Plug, enabled: true },
-  { label: "Access & Security", to: "/intelligent-iac/platform/access-security", icon: KeyRound, enabled: true },
+  { label: "Access & Governance", to: "/intelligent-iac/platform/access-security", icon: KeyRound, enabled: true },
   { label: "Policies & Governance", to: "/intelligent-iac/platform/policies-governance", icon: Scale, enabled: true },
   { label: "Audit & Compliance", to: "/intelligent-iac/platform/audit-compliance", icon: FileSearch, enabled: true },
   { label: "System Settings", to: "/intelligent-iac/platform/system-settings", icon: SlidersHorizontal, enabled: true },
