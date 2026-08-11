@@ -68,8 +68,8 @@ export default function NeurealmAgenticAI() {
                 const isActive = t.id === active;
                 const Icon = t.icon;
                 return (
+                  <div key={t.id} className="contents">
                   <button
-                    key={t.id}
                     onClick={() => setActive(t.id)}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-md border-b-2 transition-colors",
@@ -81,16 +81,19 @@ export default function NeurealmAgenticAI() {
                     <Icon className="h-3.5 w-3.5" />
                     {t.label}
                   </button>
+                  {/* Context / Evidence Layer administration — separate module */}
+                  {ti === 0 && (
+                    <Link
+                      to="/context-evidence/overview"
+                      className="flex items-center gap-1.5 rounded-t-md border-b-2 border-amber-300 bg-amber-300 px-3 py-2 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-200"
+                    >
+                      <Layers className="h-3.5 w-3.5" />
+                      Context / Evidence Layer
+                    </Link>
+                  )}
+                  </div>
                 );
               })}
-              {/* Context / Evidence Layer administration — separate module */}
-              <Link
-                to="/context-evidence/overview"
-                className="order-none flex items-center gap-1.5 rounded-t-md border-b-2 border-amber-300 bg-amber-300 px-3 py-2 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-200"
-              >
-                <Layers className="h-3.5 w-3.5" />
-                Context / Evidence Layer
-              </Link>
             </div>
           </div>
         </section>
