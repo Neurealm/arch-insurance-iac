@@ -494,6 +494,9 @@ import ContextEvidencePlaceholder from "./pages/context-evidence/Placeholder.tsx
 import ModelsRoutingLayout from "./pages/models-routing/ModelsRoutingLayout.tsx";
 import ModelsRoutingOverview from "./pages/models-routing/Overview.tsx";
 import ModelsRoutingPlaceholder from "./pages/models-routing/Placeholder.tsx";
+import AgentOrchestrationLayout from "./pages/agent-orchestration/AgentOrchestrationLayout.tsx";
+import AgentOrchestrationOverview from "./pages/agent-orchestration/Overview.tsx";
+import AgentOrchestrationPlaceholder from "./pages/agent-orchestration/Placeholder.tsx";
 
 
 
@@ -925,6 +928,19 @@ const App = () => (
             <Route path="cost" element={<ModelsRoutingPlaceholder />} />
             <Route path="access" element={<ModelsRoutingPlaceholder />} />
             <Route path="settings" element={<ModelsRoutingPlaceholder />} />
+          </Route>
+
+          <Route path="/agent-orchestration" element={<AgentOrchestrationLayout />}>
+            <Route index element={<Navigate to="/agent-orchestration/overview" replace />} />
+            <Route path="overview" element={<AgentOrchestrationOverview />} />
+            <Route path="workflows" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="participants" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="state" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="policies" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="tools" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="runs" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="evaluation" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="settings" element={<AgentOrchestrationPlaceholder />} />
           </Route>
 
           <Route path="/intelligent-iac" element={<IacLayout />}>
