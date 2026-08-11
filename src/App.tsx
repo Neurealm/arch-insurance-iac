@@ -497,6 +497,9 @@ import ModelsRoutingPlaceholder from "./pages/models-routing/Placeholder.tsx";
 import AgentOrchestrationLayout from "./pages/agent-orchestration/AgentOrchestrationLayout.tsx";
 import AgentOrchestrationOverview from "./pages/agent-orchestration/Overview.tsx";
 import AgentOrchestrationPlaceholder from "./pages/agent-orchestration/Placeholder.tsx";
+import FinOpsAdminLayout from "./pages/finops-admin/FinOpsAdminLayout.tsx";
+import FinOpsAdminOverview from "./pages/finops-admin/Overview.tsx";
+import FinOpsAdminPlaceholder from "./pages/finops-admin/Placeholder.tsx";
 
 
 
