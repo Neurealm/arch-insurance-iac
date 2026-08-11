@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { railTop, railBottom } from "@/pages/_admin/rail";
 import {
   Bell, HelpCircle, ChevronDown, ChevronRight, PanelLeftClose, PanelLeft, Plus,
   Building2, Users, Database, Boxes, Bot, Cpu, Workflow, FileSearch, Settings, Search,
@@ -26,18 +27,9 @@ const SUB_NAV = [
   { to: "/context-evidence/settings", label: "Settings" },
 ];
 
-const RAIL_TOP = [
-  { label: "Tenant Overview", icon: Building2, to: "/context-evidence/overview" },
-  { label: "Identity & Access", icon: Users, to: "/iam-admin/overview" },
-];
+const RAIL_TOP = railTop("context");
 
-const RAIL_BOTTOM = [
-  { label: "Agents & Coworkers", icon: Bot },
-  { label: "Models & Routing", icon: Cpu },
-  { label: "Workflows", icon: Workflow },
-  { label: "Audit & Compliance", icon: FileSearch },
-  { label: "Settings", icon: Settings },
-];
+const RAIL_BOTTOM = railBottom({ auditTo: "/iam-admin/audit", settingsTo: "/context-evidence/settings" });
 
 const CE_CHILDREN = [
   { label: "Overview", to: "/context-evidence/overview" },
@@ -113,11 +105,7 @@ export default function ContextEvidenceLayout() {
           </div>
 
           {RAIL_BOTTOM.map((i) => (
-            <button key={i.label} onClick={() => toast.info(`${i.label} is administered outside the Context / Evidence Layer.`)}
-              className="mx-2 my-0.5 flex w-[calc(100%-16px)] items-center gap-2 rounded-md px-2.5 py-2 text-[12.5px] text-slate-700 transition-colors hover:bg-slate-50">
-              <i.icon className="h-4 w-4 shrink-0 text-slate-500" />
-              {!collapsed && <span className="truncate">{i.label}</span>}
-            </button>
+            <RailLink key={i.label} {...i} collapsed={collapsed} />
           ))}
         </nav>
 

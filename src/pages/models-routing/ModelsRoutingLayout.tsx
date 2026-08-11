@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { railTop, railBottom } from "@/pages/_admin/rail";
 import {
   Bell, HelpCircle, ChevronDown, PanelLeftClose, PanelLeft, Plus, Building2, Users,
   Database, Bot, Cpu, Workflow, FileSearch, Settings, Search, CircleDot,
@@ -28,18 +29,9 @@ const SUB_NAV = [
   { to: "/models-routing/settings", label: "Settings" },
 ];
 
-const RAIL_TOP = [
-  { label: "Tenant Overview", icon: Building2, to: "/context-evidence/overview" },
-  { label: "Identity & Access", icon: Users, to: "/models-routing/access" },
-  { label: "Context / Evidence Layer", icon: Database, to: "/context-evidence/overview" },
-  { label: "Agents & Coworkers", icon: Bot, to: "/models-routing/overview" },
-];
+const RAIL_TOP = railTop("models");
 
-const RAIL_BOTTOM = [
-  { label: "Workflows", icon: Workflow, to: "/models-routing/settings" },
-  { label: "Audit & Compliance", icon: FileSearch, to: "/models-routing/access" },
-  { label: "Settings", icon: Settings, to: "/models-routing/settings" },
-];
+const RAIL_BOTTOM = railBottom({ auditTo: "/models-routing/access", settingsTo: "/models-routing/settings" });
 
 export default function ModelsRoutingLayout() {
   const [params] = useSearchParams();

@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { railTop, railBottom } from "@/pages/_admin/rail";
 import {
   Bell, HelpCircle, ChevronDown, PanelLeftClose, PanelLeft, Plus, Building2, Users,
   Database, Bot, Cpu, Workflow, FileSearch, Settings, Wallet, CircleDot, MoreHorizontal,
@@ -27,20 +28,9 @@ const SUB_NAV = [
   { to: "/finops-admin/access-security", label: "Access & Security" },
 ];
 
-const RAIL_TOP = [
-  { label: "Tenant Overview", icon: Building2, to: "/context-evidence/overview" },
-  { label: "Identity & Access", icon: Users, to: "/iam-admin/overview" },
-  { label: "Context / Evidence Layer", icon: Database, to: "/context-evidence/overview" },
-  { label: "Agents & Coworkers", icon: Bot, to: "/agent-orchestration/participants" },
-  { label: "Models & Routing", icon: Cpu, to: "/models-routing/overview" },
-  { label: "Agent Orchestration", icon: Workflow, to: "/agent-orchestration/overview" },
-];
+const RAIL_TOP = railTop("finops");
 
-const RAIL_BOTTOM = [
-  { label: "Workflows", icon: Workflow, to: "/agent-orchestration/workflows" },
-  { label: "Audit & Compliance", icon: FileSearch, to: "/finops-admin/savings-validation" },
-  { label: "Settings", icon: Settings, to: "/finops-admin/settings" },
-];
+const RAIL_BOTTOM = railBottom({ auditTo: "/finops-admin/savings-validation", settingsTo: "/finops-admin/settings" });
 
 const OVERFLOW = [
   { label: "Add Cloud Account", detail: "Register a provider account, subscription, project or cluster for billing and telemetry ingestion." },
@@ -82,7 +72,7 @@ export default function FinOpsAdminLayout() {
 
             <div className="mx-2 my-0.5 flex items-center gap-2 rounded-md bg-white/10 px-2.5 py-2 text-[12.5px] font-medium text-white">
               <Wallet className="h-4 w-4 shrink-0 text-emerald-300" />
-              {!collapsed && <><span className="flex-1">FinOps &amp; Cost Management</span><ChevronDown className="h-3.5 w-3.5 text-slate-400" /></>}
+              {!collapsed && <><span className="flex-1">AI Cost Management</span><ChevronDown className="h-3.5 w-3.5 text-slate-400" /></>}
             </div>
             {!collapsed && SUB_NAV.map((c) => (
               <NavLink key={c.to} to={{ pathname: c.to, search: params.toString() }} end
