@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   Search, RefreshCw, Download, SlidersHorizontal, Columns3, ArrowUpDown,
-  ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus,
+  ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, FlaskConical, Command,
 } from "lucide-react";
 import {
   Panel, RichTip, InspectDrawer, KV, SubHead, Bullets, StatePill, KpiCard, Btn,
@@ -23,7 +23,14 @@ import {
   SAVINGS_CHAIN, REALIZATION_METRICS, CHANNELS, RIGHTSIZING_POLICY, CONTRACT,
   type Opportunity,
 } from "./data";
+import { buildEngineeringDrawer } from "./ExplainDrawers";
+import {
+  ConflictBanner, RecommendationPanel, AnomalyPanel, GovernancePanels,
+  PolicySimulator, GlobalSearch,
+} from "./EngineeringPanels";
+import { FILTERS, RECOMMENDATIONS, ROLES, can, CAP_REASON, type RoleId } from "./engineering";
 import { exportCsv } from "@/lib/operations/exports";
+
 
 const ALL_COLUMNS = [
   { id: "type", label: "Opportunity Type", locked: true },
@@ -48,10 +55,20 @@ export default function FinOpsAdminOverview() {
   const q = params.get("q") ?? "";
   const statusFilter = params.get("status") ?? "All";
   const riskFilter = params.get("risk") ?? "All";
+  const providerFilter = params.get("provider") ?? "All";
+  const envFilter = params.get("environment") ?? "All";
+  const buFilter = params.get("bu") ?? "All";
+  const categoryFilter = params.get("category") ?? "All";
+  const confidenceFilter = params.get("confidence") ?? "All";
+  const approvalFilter = params.get("approval") ?? "All";
+  const executionFilter = params.get("execution") ?? "All";
+  const validationFilter = params.get("validation") ?? "All";
+  const role = (params.get("role") ?? "finops_admin") as RoleId;
   const sort = (params.get("sort") ?? "savings") as SortKey;
   const dir = params.get("dir") === "asc" ? "asc" : "desc";
   const page = Math.max(1, Number(params.get("page") ?? 1));
   const dense = params.get("density") !== "comfortable";
+
 
   const setParam = useCallback((patch: Record<string, string | null>) => {
     const next = new URLSearchParams(params);
@@ -86,17 +103,61 @@ export default function FinOpsAdminOverview() {
   }, [colMenu, filterMenu]);
   const show = (id: string) => cols.includes(id);
 
+  /* --------------------- simulation + global search ---------------------- */
+  const [simOpen, setSimOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
   /* ------------------------------- table --------------------------------- */
   const riskOrder = ["Very Low", "Low", "Medium", "High"];
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
+    const text = (o: Opportunity) => [o.id, o.type, o.scope, o.domain, o.owner, o.approval, o.execution].join(" ").toLowerCase();
     return OPPORTUNITIES.filter((o) => {
       if (statusFilter !== "All" && o.status !== statusFilter) return false;
       if (riskFilter !== "All" && o.risk !== riskFilter) return false;
+      if (categoryFilter !== "All" && o.type !== categoryFilter) return false;
+      if (providerFilter !== "All" && !text(o).includes(providerFilter.toLowerCase())) return false;
+      if (buFilter !== "All" && !text(o).includes(buFilter.toLowerCase())) return false;
+      if (envFilter !== "All") {
+        const prod = /prod|underwriting|claims api|tenant-wide/i.test(o.scope);
+        if (envFilter === "Production" && !prod) return false;
+        if (envFilter !== "Production" && prod) return false;
+      }
+      if (confidenceFilter !== "All") {
+        if (confidenceFilter === "≥ 90%" && o.confidence < 90) return false;
+        if (confidenceFilter === "80–89%" && (o.confidence < 80 || o.confidence >= 90)) return false;
+        if (confidenceFilter === "< 80%" && o.confidence >= 80) return false;
+      }
+      if (approvalFilter !== "All") {
+        const required = !/no approval/i.test(o.approval);
+        if (approvalFilter === "Not required" && required) return false;
+        if (approvalFilter === "Pending" && !required) return false;
+        if (approvalFilter === "Blocked" && o.status !== "Attention") return false;
+        if (approvalFilter === "Approved" && o.status !== "Healthy") return false;
+      }
+      if (executionFilter !== "All") {
+        if (executionFilter === "Scheduled" && !/schedul|window/i.test(o.execution)) return false;
+        if (executionFilter === "Executed" && o.status !== "Healthy") return false;
+        if (executionFilter === "Rolled Back" && !/rollback/i.test(o.rollback)) return false;
+        if (executionFilter === "Not started" && o.status !== "Attention") return false;
+      }
+      if (validationFilter !== "All") {
+        if (validationFilter === "Realized" && o.status !== "Healthy") return false;
+        if (validationFilter === "Disputed" && o.type !== "Governance & Realization") return false;
+      }
       if (!needle) return true;
-      return [o.id, o.type, o.scope, o.domain, o.owner].join(" ").toLowerCase().includes(needle);
+      return text(o).includes(needle);
     });
-  }, [q, statusFilter, riskFilter]);
+  }, [q, statusFilter, riskFilter, categoryFilter, providerFilter, buFilter, envFilter,
+    confidenceFilter, approvalFilter, executionFilter, validationFilter]);
+
+  const activeFilters = [statusFilter, riskFilter, providerFilter, envFilter, buFilter, categoryFilter,
+    confidenceFilter, approvalFilter, executionFilter, validationFilter].filter((v) => v !== "All").length;
+
+  const clearFilters = () => setParam({
+    q: null, status: null, risk: null, provider: null, environment: null, bu: null, category: null,
+    confidence: null, approval: null, execution: null, validation: null, page: "1",
+  });
 
   const sorted = useMemo(() => {
     const s = [...filtered].sort((a, b) => {
@@ -119,7 +180,9 @@ export default function FinOpsAdminOverview() {
   const toggleSort = (k: SortKey) =>
     setParam({ sort: k, dir: sort === k && dir === "desc" ? "asc" : "desc", page: "1" });
 
+  const canExport = can(role, "export");
   const exportRegistry = () => {
+    if (!canExport) return;
     exportCsv("finops-optimization-registry.csv", [
       ["ID", "Opportunity Type", "Scope", "Domain", "Recommendations", "Potential Monthly Savings", "Confidence", "Risk", "Status", "Owner", "Last Evaluated"],
       ...sorted.map((o) => [o.id, o.type, o.scope, o.domain, o.recs, o.savings, `${o.confidence}%`, o.risk, o.status, o.owner, o.evaluated]),
@@ -128,12 +191,38 @@ export default function FinOpsAdminOverview() {
   };
 
   /* ------------------------------- drawer -------------------------------- */
-  const drawerNode = useMemo(() => buildDrawer(drawer), [drawer]);
+  const drawerNode = useMemo(() => buildEngineeringDrawer(drawer) ?? buildDrawer(drawer), [drawer]);
+
 
   const totalPotential = sorted.reduce((s, o) => s + o.savings, 0);
 
   return (
     <div className="space-y-4">
+      {/* ------------------- operator context + global search ------------- */}
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+        <button onClick={() => setSearchOpen(true)}
+          className="inline-flex h-7 min-w-[280px] flex-1 items-center gap-2 rounded-md border border-slate-200 px-2 text-left text-[12px] text-slate-500 hover:border-slate-300 hover:bg-slate-50">
+          <Search className="h-3.5 w-3.5" />
+          <span className="flex-1 truncate">Search opportunities, policies, cloud accounts, applications, resources, savings records…</span>
+          <kbd className="rounded border border-slate-200 bg-slate-50 px-1 text-[10px] text-slate-500">/</kbd>
+        </button>
+        <label className="flex items-center gap-1.5 text-[11.5px] text-slate-600">
+          Acting role
+          <select value={role} onChange={(e) => setParam({ role: e.target.value })}
+            className="h-7 rounded border border-slate-200 px-1.5 text-[12px]" aria-label="Acting role">
+            {ROLES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
+          </select>
+        </label>
+        <Btn onClick={() => openDrawer("roles:all")}>Permissions</Btn>
+        <Btn onClick={() => setSimOpen(true)} disabled={!can(role, "simulate")} title={can(role, "simulate") ? undefined : CAP_REASON.simulate}>
+          <FlaskConical className="h-3.5 w-3.5" /> Test Policy
+        </Btn>
+        <Btn onClick={() => openDrawer("audit:all")}><Command className="h-3.5 w-3.5" /> Audit trail</Btn>
+      </div>
+
+      {/* --------------------- conflicts and degradations ----------------- */}
+      <ConflictBanner openDrawer={openDrawer} />
+
       {/* --------------------------- KPI row ------------------------------ */}
       <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
         {KPIS.map((k) => (
@@ -160,17 +249,25 @@ export default function FinOpsAdminOverview() {
             <div className="relative">
               <Btn onClick={() => { setFilterMenu((v) => !v); setColMenu(false); }} title="Filter">
                 <SlidersHorizontal className="h-3.5 w-3.5" /> Filter
-                {(statusFilter !== "All" || riskFilter !== "All") && <span className="ml-1 rounded bg-blue-100 px-1 text-[10px] text-blue-700">on</span>}
+                {activeFilters > 0 && <span className="ml-1 rounded bg-blue-100 px-1 text-[10px] text-blue-700">{activeFilters}</span>}
               </Btn>
               {filterMenu && (
-                <div className="absolute right-0 top-8 z-40 w-[240px] rounded-md border border-slate-200 bg-white p-3 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                <div className="absolute right-0 top-8 z-40 max-h-[420px] w-[260px] overflow-y-auto rounded-md border border-slate-200 bg-white p-3 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                  <FilterSelect label="Provider" value={providerFilter} options={FILTERS.provider} onChange={(v) => setParam({ provider: v, page: "1" })} />
+                  <FilterSelect label="Business unit" value={buFilter} options={FILTERS.businessUnit} onChange={(v) => setParam({ bu: v, page: "1" })} />
+                  <FilterSelect label="Environment" value={envFilter} options={FILTERS.environment} onChange={(v) => setParam({ environment: v, page: "1" })} />
+                  <FilterSelect label="Category" value={categoryFilter} options={FILTERS.category} onChange={(v) => setParam({ category: v, page: "1" })} />
+                  <FilterSelect label="Confidence" value={confidenceFilter} options={FILTERS.confidence} onChange={(v) => setParam({ confidence: v, page: "1" })} />
+                  <FilterSelect label="Risk" value={riskFilter} options={FILTERS.risk} onChange={(v) => setParam({ risk: v, page: "1" })} />
+                  <FilterSelect label="Approval state" value={approvalFilter} options={FILTERS.approvalState} onChange={(v) => setParam({ approval: v, page: "1" })} />
+                  <FilterSelect label="Execution state" value={executionFilter} options={FILTERS.executionState} onChange={(v) => setParam({ execution: v, page: "1" })} />
+                  <FilterSelect label="Validation state" value={validationFilter} options={FILTERS.validationState} onChange={(v) => setParam({ validation: v, page: "1" })} />
                   <FilterSelect label="Status" value={statusFilter} options={["All", "Healthy", "Attention"]} onChange={(v) => setParam({ status: v, page: "1" })} />
-                  <FilterSelect label="Risk" value={riskFilter} options={["All", "Very Low", "Low", "Medium", "High"]} onChange={(v) => setParam({ risk: v, page: "1" })} />
-                  <button className="mt-2 text-[11.5px] text-blue-700 hover:underline"
-                    onClick={() => setParam({ status: null, risk: null, q: null, page: "1" })}>Clear all filters</button>
+                  <button className="mt-2 text-[11.5px] text-blue-700 hover:underline" onClick={clearFilters}>Clear all filters</button>
                 </div>
               )}
             </div>
+
             <div className="relative">
               <Btn onClick={() => { setColMenu((v) => !v); setFilterMenu(false); }} title="Choose columns"><Columns3 className="h-3.5 w-3.5" /> Columns</Btn>
               {colMenu && (
@@ -187,7 +284,7 @@ export default function FinOpsAdminOverview() {
             </div>
             <Btn onClick={() => setParam({ density: dense ? "comfortable" : "dense" })} title="Toggle row density">{dense ? "Comfortable" : "Dense"}</Btn>
             <Btn onClick={refresh} title="Re-score registry"><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} /> Refresh</Btn>
-            <Btn onClick={exportRegistry} title="Export current view"><Download className="h-3.5 w-3.5" /> Export</Btn>
+            <Btn onClick={exportRegistry} disabled={!canExport} title={canExport ? "Export current view" : CAP_REASON.export}><Download className="h-3.5 w-3.5" /> Export</Btn>
           </>
         }
         bodyClassName="p-0"
@@ -198,8 +295,9 @@ export default function FinOpsAdminOverview() {
           <div className="p-4">
             <EmptyState title="No opportunities match this view"
               body="No opportunity group satisfies the current search and filter combination. Clear the filters to return to the full registry."
-              cta="Clear filters" onCta={() => setParam({ q: null, status: null, risk: null, page: "1" })} />
+              cta="Clear filters" onCta={clearFilters} />
           </div>
+
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1080px] border-collapse text-[12px]">
@@ -266,10 +364,19 @@ export default function FinOpsAdminOverview() {
                     {show("status") && <td className="px-3"><StatePill tone={healthTone(o.status)} label={o.status} /></td>}
                     {show("owner") && <td className="px-3 text-slate-700">{o.owner}</td>}
                     {show("evaluated") && <td className="px-3 text-slate-500">{o.evaluated}</td>}
-                    <td className="px-3 text-right">
-                      <button onClick={(e) => { e.stopPropagation(); openDrawer(`opp:${o.id}`); }}
-                        className="text-[11.5px] font-medium text-blue-700 hover:underline">Inspect</button>
+                    <td className="px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex flex-wrap justify-end gap-1.5">
+                        <button onClick={() => openDrawer(`opp:${o.id}`)}
+                          className="text-[11.5px] font-medium text-blue-700 hover:underline">Inspect</button>
+                        {RECOMMENDATIONS.filter((r) => r.opportunityId === o.id).map((r) => (
+                          <button key={r.id} onClick={() => openDrawer(`rec:${r.id}`)}
+                            className="text-[11.5px] font-medium text-blue-700 hover:underline">
+                            {r.state === "Rejected" ? "Explain Rejection" : "Explain Recommendation"}
+                          </button>
+                        ))}
+                      </div>
                     </td>
+
                   </tr>
                 ))}
               </tbody>
@@ -320,6 +427,14 @@ export default function FinOpsAdminOverview() {
           </ol>
         </div>
       </Panel>
+
+      {/* ------------------ recommendation engineering registry ----------- */}
+      <RecommendationPanel role={role} drawer={drawer} openDrawer={openDrawer} loading={loading} />
+
+      {/* ---------------------------- anomalies --------------------------- */}
+      <AnomalyPanel drawer={drawer} openDrawer={openDrawer} />
+
+
 
       {/* ------------------ unit economics + policy governance ------------ */}
       <div className="grid gap-4 2xl:grid-cols-[1.35fr_1fr]">
@@ -435,6 +550,13 @@ export default function FinOpsAdminOverview() {
         </Panel>
 
         <Panel title="Savings Validation & Realization" help="savings"
+          actions={
+            <>
+              <Btn onClick={() => openDrawer("svg:SVG-2026-04122")}>Explain Savings</Btn>
+              <Btn onClick={() => openDrawer("svg:SVG-2026-04150")} title="Validation exception after demand normalization">Exception case</Btn>
+              <Btn onClick={() => openDrawer("baseline:v6")}>Baseline</Btn>
+            </>
+          }
           subtitle="Annualized savings state chain. Only realized savings are reported to Finance." bodyClassName="p-3">
           <div className="grid gap-3 lg:grid-cols-[1.5fr_1fr]">
             <div className="space-y-1.5">
@@ -513,6 +635,9 @@ export default function FinOpsAdminOverview() {
         </div>
       </Panel>
 
+      {/* ------------- attribution, baselines and governance --------------- */}
+      <GovernancePanels role={role} openDrawer={openDrawer} />
+
       {/* ------------------------ service contract ------------------------ */}
       <Panel title="What this layer guarantees to neugain.io"
         subtitle="Technical service contract for the FinOps and cost management plane." bodyClassName="p-3">
@@ -528,9 +653,14 @@ export default function FinOpsAdminOverview() {
 
       {drawerNode && (
         <InspectDrawer open onClose={closeDrawer} objectType={drawerNode.objectType} name={drawerNode.name}
-          status={drawerNode.status} statusTone={drawerNode.statusTone} tabs={drawerNode.tabs} />
+          status={drawerNode.status} statusTone={drawerNode.statusTone} tabs={drawerNode.tabs}
+          canEdit={can(role, "edit_policy")} />
       )}
+
+      <PolicySimulator role={role} open={simOpen} onClose={() => setSimOpen(false)} />
+      <GlobalSearch open={searchOpen} onOpen={() => setSearchOpen(true)} onClose={() => setSearchOpen(false)} openDrawer={openDrawer} />
     </div>
+
   );
 }
 
