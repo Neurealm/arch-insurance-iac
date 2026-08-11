@@ -28,7 +28,7 @@ const SUB_NAV = [
 
 const RAIL_TOP = [
   { label: "Tenant Overview", icon: Building2, to: "/context-evidence/overview" },
-  { label: "Identity & Access", icon: Users, to: "/context-evidence/access" },
+  { label: "Identity & Access", icon: Users, to: "/iam-admin/overview" },
 ];
 
 const RAIL_BOTTOM = [

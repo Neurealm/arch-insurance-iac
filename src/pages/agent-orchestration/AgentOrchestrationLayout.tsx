@@ -29,7 +29,7 @@ const SUB_NAV = [
 
 const RAIL_TOP = [
   { label: "Tenant Overview", icon: Building2, to: "/context-evidence/overview" },
-  { label: "Identity & Access", icon: Users, to: "/agent-orchestration/settings" },
+  { label: "Identity & Access", icon: Users, to: "/iam-admin/overview" },
   { label: "Context / Evidence Layer", icon: Database, to: "/context-evidence/overview" },
   { label: "Models & Routing", icon: Cpu, to: "/models-routing/overview" },
   { label: "Agents & Coworkers", icon: Bot, to: "/agent-orchestration/participants" },

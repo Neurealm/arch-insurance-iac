@@ -497,6 +497,9 @@ import ModelsRoutingPlaceholder from "./pages/models-routing/Placeholder.tsx";
 import AgentOrchestrationLayout from "./pages/agent-orchestration/AgentOrchestrationLayout.tsx";
 import AgentOrchestrationOverview from "./pages/agent-orchestration/Overview.tsx";
 import AgentOrchestrationPlaceholder from "./pages/agent-orchestration/Placeholder.tsx";
+import IamAdminLayout from "./pages/iam-admin/IamAdminLayout.tsx";
+import IamAdminOverview from "./pages/iam-admin/Overview.tsx";
+import IamAdminPlaceholder from "./pages/iam-admin/Placeholder.tsx";
 import FinOpsAdminLayout from "./pages/finops-admin/FinOpsAdminLayout.tsx";
 import FinOpsAdminOverview from "./pages/finops-admin/Overview.tsx";
 import FinOpsAdminPlaceholder from "./pages/finops-admin/Placeholder.tsx";
@@ -944,6 +947,20 @@ const App = () => (
             <Route path="runs" element={<AgentOrchestrationPlaceholder />} />
             <Route path="evaluation" element={<AgentOrchestrationPlaceholder />} />
             <Route path="settings" element={<AgentOrchestrationPlaceholder />} />
+          </Route>
+
+          <Route path="/iam-admin" element={<IamAdminLayout />}>
+            <Route index element={<Navigate to="/iam-admin/overview" replace />} />
+            <Route path="overview" element={<IamAdminOverview />} />
+            <Route path="identities" element={<IamAdminPlaceholder />} />
+            <Route path="digital-coworkers" element={<IamAdminPlaceholder />} />
+            <Route path="roles" element={<IamAdminPlaceholder />} />
+            <Route path="policies" element={<IamAdminPlaceholder />} />
+            <Route path="delegation" element={<IamAdminPlaceholder />} />
+            <Route path="credentials" element={<IamAdminPlaceholder />} />
+            <Route path="reviews" element={<IamAdminPlaceholder />} />
+            <Route path="audit" element={<IamAdminPlaceholder />} />
+            <Route path="settings" element={<IamAdminPlaceholder />} />
           </Route>
 
           <Route path="/finops-admin" element={<FinOpsAdminLayout />}>
