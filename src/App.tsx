@@ -488,6 +488,9 @@ import IntegrationsConnectivity from "./pages/agentic-iac/IntegrationsConnectivi
 import AccessGovernance from "./pages/agentic-iac/AccessGovernance.tsx";
 import PoliciesGovernance from "./pages/agentic-iac/PoliciesGovernance.tsx";
 import SystemSettingsPage from "./pages/agentic-iac/SystemSettings.tsx";
+import ContextEvidenceLayout from "./pages/context-evidence/ContextEvidenceLayout.tsx";
+import ContextEvidenceOverview from "./pages/context-evidence/Overview.tsx";
+import ContextEvidencePlaceholder from "./pages/context-evidence/Placeholder.tsx";
 
 
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
@@ -895,6 +898,17 @@ const App = () => (
             <Route path="change-review/:packageId" element={<ChangeReviewApproval />} />
             <Route path="execution-center" element={<ExecutionCenter />} />
             <Route path="execution-center/:packageId" element={<ExecutionCenter />} />
+          </Route>
+          <Route path="/context-evidence" element={<ContextEvidenceLayout />}>
+            <Route index element={<Navigate to="/context-evidence/overview" replace />} />
+            <Route path="overview" element={<ContextEvidenceOverview />} />
+            <Route path="sources" element={<ContextEvidencePlaceholder />} />
+            <Route path="data-model" element={<ContextEvidencePlaceholder />} />
+            <Route path="indexing" element={<ContextEvidencePlaceholder />} />
+            <Route path="policies" element={<ContextEvidencePlaceholder />} />
+            <Route path="quality" element={<ContextEvidencePlaceholder />} />
+            <Route path="access" element={<ContextEvidencePlaceholder />} />
+            <Route path="settings" element={<ContextEvidencePlaceholder />} />
           </Route>
           <Route path="/intelligent-iac" element={<IacLayout />}>
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
