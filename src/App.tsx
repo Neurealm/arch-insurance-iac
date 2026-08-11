@@ -491,6 +491,10 @@ import SystemSettingsPage from "./pages/agentic-iac/SystemSettings.tsx";
 import ContextEvidenceLayout from "./pages/context-evidence/ContextEvidenceLayout.tsx";
 import ContextEvidenceOverview from "./pages/context-evidence/Overview.tsx";
 import ContextEvidencePlaceholder from "./pages/context-evidence/Placeholder.tsx";
+import ModelsRoutingLayout from "./pages/models-routing/ModelsRoutingLayout.tsx";
+import ModelsRoutingOverview from "./pages/models-routing/Overview.tsx";
+import ModelsRoutingPlaceholder from "./pages/models-routing/Placeholder.tsx";
+
 
 
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
@@ -910,6 +914,19 @@ const App = () => (
             <Route path="access" element={<ContextEvidencePlaceholder />} />
             <Route path="settings" element={<ContextEvidencePlaceholder />} />
           </Route>
+          <Route path="/models-routing" element={<ModelsRoutingLayout />}>
+            <Route index element={<Navigate to="/models-routing/overview" replace />} />
+            <Route path="overview" element={<ModelsRoutingOverview />} />
+            <Route path="models" element={<ModelsRoutingPlaceholder />} />
+            <Route path="providers" element={<ModelsRoutingPlaceholder />} />
+            <Route path="policies" element={<ModelsRoutingPlaceholder />} />
+            <Route path="guardrails" element={<ModelsRoutingPlaceholder />} />
+            <Route path="evaluations" element={<ModelsRoutingPlaceholder />} />
+            <Route path="cost" element={<ModelsRoutingPlaceholder />} />
+            <Route path="access" element={<ModelsRoutingPlaceholder />} />
+            <Route path="settings" element={<ModelsRoutingPlaceholder />} />
+          </Route>
+
           <Route path="/intelligent-iac" element={<IacLayout />}>
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
             <Route path="change-engineering" element={<ChangeEngineering />} />
