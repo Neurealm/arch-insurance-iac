@@ -72,7 +72,7 @@ export default function FinOpsAdminLayout() {
 
             <div className="mx-2 my-0.5 flex items-center gap-2 rounded-md bg-white/10 px-2.5 py-2 text-[12.5px] font-medium text-white">
               <Wallet className="h-4 w-4 shrink-0 text-emerald-300" />
-              {!collapsed && <><span className="flex-1">FinOps &amp; Cost Management</span><ChevronDown className="h-3.5 w-3.5 text-slate-400" /></>}
+              {!collapsed && <><span className="flex-1">AI Cost Management</span><ChevronDown className="h-3.5 w-3.5 text-slate-400" /></>}
             </div>
             {!collapsed && SUB_NAV.map((c) => (
               <NavLink key={c.to} to={{ pathname: c.to, search: params.toString() }} end
