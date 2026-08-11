@@ -2,11 +2,21 @@
 // administration plane: panels, rich tooltips, help popovers, the reusable
 // right-side inspection drawer, KPI cards and state placeholders.
 
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { HelpCircle, X, Copy, Pencil, History, Settings2, MoreHorizontal, AlertTriangle, CheckCircle2, MinusCircle, XCircle } from "lucide-react";
 import { HELP, type Health } from "./data";
+
+/* --------------------- Help registry (module-scoped) ---------------------- */
+
+type HelpMap = Record<string, { what: string; why: string; how: string; controls: string }>;
+const HelpContext = createContext<HelpMap>(HELP);
+
+/** Lets another administration module supply its own help topics to HelpDot. */
+export function HelpRegistry({ value, children }: { value: HelpMap; children: ReactNode }) {
+  return <HelpContext.Provider value={value}>{children}</HelpContext.Provider>;
+}
 
 /* -------------------------------- Panel ---------------------------------- */
 
@@ -109,7 +119,8 @@ export function RichTip({
 
 export function HelpDot({ topic }: { topic: string }) {
   const [open, setOpen] = useState(false);
-  const h = HELP[topic];
+  const registry = useContext(HelpContext);
+  const h = registry[topic];
   if (!h) return null;
   return (
     <span className="relative inline-flex">
