@@ -46,7 +46,7 @@ export interface TipContent {
 
 export function RichTip({
   tip, children, className, as = "span",
-}: { tip: TipContent; children: ReactNode; className?: string; as?: "span" | "div" }) {
+}: { tip: TipContent; children: ReactNode; className?: string; as?: "span" | "div" | "li" | "tr" }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const timer = useRef<number>();
