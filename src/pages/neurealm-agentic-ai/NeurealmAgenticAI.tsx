@@ -91,6 +91,16 @@ export default function NeurealmAgenticAI() {
                       Context / Evidence Layer
                     </Link>
                   )}
+                  {/* Agent Orchestration administration — separate module */}
+                  {ti === 0 && (
+                    <Link
+                      to="/agent-orchestration/overview"
+                      className="flex items-center gap-1.5 rounded-t-md border-b-2 border-amber-300 bg-amber-300 px-3 py-2 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-200"
+                    >
+                      <Layers className="h-3.5 w-3.5" />
+                      Agent Orchestration Administration
+                    </Link>
+                  )}
                   </div>
                 );
               })}
