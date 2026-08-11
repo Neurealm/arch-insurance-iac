@@ -812,7 +812,7 @@ export default function ModelsRoutingOverview() {
         status={latency?.value} statusTone="ok" tabs={latency ? [{ id: "m", label: "Measurement", content: <p className="text-[12px] leading-relaxed text-slate-700">{latency.detail}</p> }] : []} />
 
       <InspectDrawer open={!!costPolicy} onClose={closeDrawer} objectType="Cost Control Policy" name={costPolicy?.name ?? ""}
-        status={costPolicy?.kind} statusTone={costPolicy?.kind === "Hard block" ? "bad" : "muted"} tabs={costPolicy ? [{ id: "o", label: "Overview", content: (<div>
+        status={costPolicy?.kind} statusTone={costPolicy?.kind === "Hard block" ? "bad" : "warn"} tabs={costPolicy ? [{ id: "o", label: "Overview", content: (<div>
           <KV rows={[["Limit", costPolicy.limit], ["Enforcement", costPolicy.kind]]} />
           <SubHead>Behaviour</SubHead><p className="text-[11.5px] leading-relaxed text-slate-700">{costPolicy.detail}</p>
         </div>) }] : []} />
