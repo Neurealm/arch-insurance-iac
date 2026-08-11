@@ -491,6 +491,10 @@ import SystemSettingsPage from "./pages/agentic-iac/SystemSettings.tsx";
 import ContextEvidenceLayout from "./pages/context-evidence/ContextEvidenceLayout.tsx";
 import ContextEvidenceOverview from "./pages/context-evidence/Overview.tsx";
 import ContextEvidencePlaceholder from "./pages/context-evidence/Placeholder.tsx";
+import ModelsRoutingLayout from "./pages/models-routing/ModelsRoutingLayout.tsx";
+import ModelsRoutingOverview from "./pages/models-routing/Overview.tsx";
+import ModelsRoutingPlaceholder from "./pages/models-routing/Placeholder.tsx";
+
 
 
 import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
