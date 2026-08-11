@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { AppShell } from "@/components/eoc/AppShell";
 import {
   LayoutDashboard, Network, Cloud, Bot, GitBranch, ShieldCheck,
@@ -63,7 +64,7 @@ export default function NeurealmAgenticAI() {
           {/* Tabs */}
           <div className="max-w-[1600px] mx-auto px-6">
             <div className="flex flex-wrap gap-1 -mb-px">
-              {TABS.map((t) => {
+              {TABS.map((t, ti) => {
                 const isActive = t.id === active;
                 const Icon = t.icon;
                 return (
@@ -82,6 +83,14 @@ export default function NeurealmAgenticAI() {
                   </button>
                 );
               })}
+              {/* Context / Evidence Layer administration — separate module */}
+              <Link
+                to="/context-evidence/overview"
+                className="order-none flex items-center gap-1.5 rounded-t-md border-b-2 border-amber-300 bg-amber-300 px-3 py-2 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-200"
+              >
+                <Layers className="h-3.5 w-3.5" />
+                Context / Evidence Layer
+              </Link>
             </div>
           </div>
         </section>
