@@ -497,6 +497,9 @@ import ModelsRoutingPlaceholder from "./pages/models-routing/Placeholder.tsx";
 import AgentOrchestrationLayout from "./pages/agent-orchestration/AgentOrchestrationLayout.tsx";
 import AgentOrchestrationOverview from "./pages/agent-orchestration/Overview.tsx";
 import AgentOrchestrationPlaceholder from "./pages/agent-orchestration/Placeholder.tsx";
+import FinOpsAdminLayout from "./pages/finops-admin/FinOpsAdminLayout.tsx";
+import FinOpsAdminOverview from "./pages/finops-admin/Overview.tsx";
+import FinOpsAdminPlaceholder from "./pages/finops-admin/Placeholder.tsx";
 
 
 
@@ -942,6 +945,21 @@ const App = () => (
             <Route path="evaluation" element={<AgentOrchestrationPlaceholder />} />
             <Route path="settings" element={<AgentOrchestrationPlaceholder />} />
           </Route>
+
+          <Route path="/finops-admin" element={<FinOpsAdminLayout />}>
+            <Route index element={<Navigate to="/finops-admin/overview" replace />} />
+            <Route path="overview" element={<FinOpsAdminOverview />} />
+            <Route path="cost-policies" element={<FinOpsAdminPlaceholder />} />
+            <Route path="cloud-accounts" element={<FinOpsAdminPlaceholder />} />
+            <Route path="optimization-registry" element={<FinOpsAdminPlaceholder />} />
+            <Route path="unit-economics" element={<FinOpsAdminPlaceholder />} />
+            <Route path="approval-execution" element={<FinOpsAdminPlaceholder />} />
+            <Route path="savings-validation" element={<FinOpsAdminPlaceholder />} />
+            <Route path="evaluations" element={<FinOpsAdminPlaceholder />} />
+            <Route path="access-security" element={<FinOpsAdminPlaceholder />} />
+            <Route path="settings" element={<FinOpsAdminPlaceholder />} />
+          </Route>
+
 
           <Route path="/intelligent-iac" element={<IacLayout />}>
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
