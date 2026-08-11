@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { railTop, railBottom } from "@/pages/_admin/rail";
 import {
   Bell, HelpCircle, ChevronDown, PanelLeftClose, PanelLeft, Plus, Building2, Users,
   Database, Bot, Cpu, Workflow, FileSearch, Settings, Wallet, CircleDot, MoreHorizontal,
@@ -27,20 +28,9 @@ const SUB_NAV = [
   { to: "/finops-admin/access-security", label: "Access & Security" },
 ];
 
-const RAIL_TOP = [
-  { label: "Tenant Overview", icon: Building2, to: "/context-evidence/overview" },
-  { label: "Identity & Access", icon: Users, to: "/iam-admin/overview" },
-  { label: "Context / Evidence Layer", icon: Database, to: "/context-evidence/overview" },
-  { label: "Agents & Coworkers", icon: Bot, to: "/agent-orchestration/participants" },
-  { label: "Models & Routing", icon: Cpu, to: "/models-routing/overview" },
-  { label: "Agent Orchestration", icon: Workflow, to: "/agent-orchestration/overview" },
-];
+const RAIL_TOP = railTop("finops");
 
-const RAIL_BOTTOM = [
-  { label: "Workflows", icon: Workflow, to: "/agent-orchestration/workflows" },
-  { label: "Audit & Compliance", icon: FileSearch, to: "/finops-admin/savings-validation" },
-  { label: "Settings", icon: Settings, to: "/finops-admin/settings" },
-];
+const RAIL_BOTTOM = railBottom({ auditTo: "/finops-admin/savings-validation", settingsTo: "/finops-admin/settings" });
 
 const OVERFLOW = [
   { label: "Add Cloud Account", detail: "Register a provider account, subscription, project or cluster for billing and telemetry ingestion." },

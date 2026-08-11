@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { railTop, railBottom } from "@/pages/_admin/rail";
 import {
   Bell, HelpCircle, ChevronDown, PanelLeftClose, PanelLeft, Plus, Building2, Users,
   Database, Bot, Cpu, Workflow, FileSearch, Settings, Search, CircleDot,
@@ -27,18 +28,9 @@ const SUB_NAV = [
   { to: "/agent-orchestration/settings", label: "Settings" },
 ];
 
-const RAIL_TOP = [
-  { label: "Tenant Overview", icon: Building2, to: "/context-evidence/overview" },
-  { label: "Identity & Access", icon: Users, to: "/iam-admin/overview" },
-  { label: "Context / Evidence Layer", icon: Database, to: "/context-evidence/overview" },
-  { label: "Models & Routing", icon: Cpu, to: "/models-routing/overview" },
-  { label: "Agents & Coworkers", icon: Bot, to: "/agent-orchestration/participants" },
-];
+const RAIL_TOP = railTop("orchestration");
 
-const RAIL_BOTTOM = [
-  { label: "Audit & Compliance", icon: FileSearch, to: "/agent-orchestration/runs" },
-  { label: "Settings", icon: Settings, to: "/agent-orchestration/settings" },
-];
+const RAIL_BOTTOM = railBottom({ auditTo: "/agent-orchestration/runs", settingsTo: "/agent-orchestration/settings" });
 
 export default function AgentOrchestrationLayout() {
   const [params] = useSearchParams();

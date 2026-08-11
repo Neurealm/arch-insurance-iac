@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { railTop, railBottom } from "@/pages/_admin/rail";
 import {
   Bell, HelpCircle, ChevronDown, PanelLeftClose, PanelLeft, Plus, Building2, Users,
   Database, Bot, Cpu, Workflow, FileSearch, Settings, ShieldCheck, CircleDot, MoreHorizontal,
@@ -26,19 +27,9 @@ const SUB_NAV = [
   { to: "/iam-admin/audit", label: "Audit & Evidence" },
 ];
 
-const RAIL_TOP = [
-  { label: "Tenant Overview", icon: Building2, to: "/context-evidence/overview" },
-  { label: "Context / Evidence Layer", icon: Database, to: "/context-evidence/overview" },
-  { label: "Agents & Coworkers", icon: Bot, to: "/agent-orchestration/participants" },
-  { label: "Models & Routing", icon: Cpu, to: "/models-routing/overview" },
-  { label: "Agent Orchestration", icon: Workflow, to: "/agent-orchestration/overview" },
-];
+const RAIL_TOP = railTop("iam");
 
-const RAIL_BOTTOM = [
-  { label: "Workflows", icon: Workflow, to: "/agent-orchestration/workflows" },
-  { label: "Audit & Compliance", icon: FileSearch, to: "/iam-admin/audit" },
-  { label: "Settings", icon: Settings, to: "/iam-admin/settings" },
-];
+const RAIL_BOTTOM = railBottom({ auditTo: "/iam-admin/audit", settingsTo: "/iam-admin/settings" });
 
 const OVERFLOW = [
   { label: "Create Role", detail: "Define a scoped bundle of permissions, constraints and model capability entitlements." },
