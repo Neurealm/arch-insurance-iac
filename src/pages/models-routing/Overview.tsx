@@ -246,7 +246,7 @@ export default function ModelsRoutingOverview() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {kpis.map((k) => (
           <KpiCard key={k.id} label={k.label} value={k.value} secondary={k.secondary} change={k.change}
-            help={k.help} tip={k.tip} onClick={() => openDrawer(k.drawer)} selected={drawer === k.drawer} />
+            help={k.help} tip={{ ...k.tip, rows: k.tip.rows as [string, string][] }} onClick={() => openDrawer(k.drawer)} selected={drawer === k.drawer} />
         ))}
       </div>
 
