@@ -29,7 +29,7 @@ const SUB_NAV = [
 
 const RAIL_TOP = [
   { label: "Tenant Overview", icon: Building2, to: "/context-evidence/overview" },
-  { label: "Identity & Access", icon: Users, to: "/finops-admin/access-security" },
+  { label: "Identity & Access", icon: Users, to: "/iam-admin/overview" },
   { label: "Context / Evidence Layer", icon: Database, to: "/context-evidence/overview" },
   { label: "Agents & Coworkers", icon: Bot, to: "/agent-orchestration/participants" },
   { label: "Models & Routing", icon: Cpu, to: "/models-routing/overview" },
