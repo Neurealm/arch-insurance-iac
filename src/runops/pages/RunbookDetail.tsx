@@ -71,7 +71,8 @@ function writeLS<T>(key: string, value: T): void {
 
 type TabValue =
   | "overview" | "workflow" | "live" | "executions" | "tests" | "versions"
-  | "incidents" | "changes" | "evidence" | "approvals" | "knowledge" | "history";
+  | "incidents" | "changes" | "evidence" | "approvals" | "knowledge" | "history"
+  | "architecture";
 
 const TABS: { label: string; value: TabValue }[] = [
   { label: "Overview",            value: "overview" },
@@ -86,7 +87,9 @@ const TABS: { label: string; value: TabValue }[] = [
   { label: "Approvals",           value: "approvals" },
   { label: "Knowledge",           value: "knowledge" },
   { label: "Improvement History", value: "history" },
+  { label: "Architecture",        value: "architecture" },
 ];
+
 
 type Applicability = "Applicable" | "Conditionally applicable" | "Not applicable" | "Certification expired";
 
@@ -410,18 +413,37 @@ export default function RunbookDetail() {
         }
       />
 
-      <EntityTabs
-        tabs={TABS.map((t) => ({
-          ...t,
-          badge:
-            t.value === "executions" ? String(executions.length) :
-            t.value === "versions"   ? "3" :
-            t.value === "approvals"  ? String(runbookRecerts.length + runbookDeprecates.length + (ops.approval.runbookId === runbook.id ? 1 : 0)) :
-            undefined,
-        }))}
-        value={tab}
-        onChange={(v) => setTab(v as TabValue)}
-      />
+      <div className="flex items-center gap-2 border-b border-border">
+        <div className="flex-1 min-w-0">
+          <EntityTabs
+            tabs={TABS.map((t) => ({
+              ...t,
+              badge:
+                t.value === "executions" ? String(executions.length) :
+                t.value === "versions"   ? "3" :
+                t.value === "approvals"  ? String(runbookRecerts.length + runbookDeprecates.length + (ops.approval.runbookId === runbook.id ? 1 : 0)) :
+                undefined,
+            }))}
+            value={tab}
+            onChange={(v) => {
+              if (v === "architecture") {
+                navigate("/runops/aws-cots-digital-twin");
+                return;
+              }
+              setTab(v as TabValue);
+            }}
+
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mr-3 shrink-0 border-indigo/40 text-indigo hover:bg-indigo/10"
+          onClick={() => navigate(`/runops/runbooks/${runbook.id}/builder`)}
+        >
+          <Sparkles className="h-3.5 w-3.5 mr-1" /> Object-Oriented Runbook Builder
+        </Button>
+      </div>
 
       {stale && (
         <div className="px-4 pt-4">

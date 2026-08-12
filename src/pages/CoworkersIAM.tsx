@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Plus, AudioWaveform, ArrowRight, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/eoc/AppShell";
+import { CoworkersBackLink } from "@/components/eoc/CoworkersBackLink";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ const CoworkersIAM = () => {
   const nav = useNavigate();
   return (
     <AppShell>
+      <CoworkersBackLink />
       <header className="bg-card border-b border-border">
         <div className="px-8 pt-5 pb-5 flex items-start gap-6">
           <div className="flex-1 min-w-0">

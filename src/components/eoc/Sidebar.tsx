@@ -10,7 +10,7 @@ import {
   Sparkles as Sparkles2, CheckCircle2 as CheckCircle2b,
   ShieldHalf,
   ClipboardList,
-  ArrowRightLeft, Rocket, Compass, Gauge, X, Database,
+  ArrowRightLeft, Rocket, Compass, Gauge, X, Database, Brain, Wallet,
   Search as SearchIcon, Star, Clock, Circle,
   type LucideIcon,
 } from "lucide-react";
@@ -21,6 +21,8 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/context/AuthContext";
 import { useTenantScope } from "@/hooks/useTenantScope";
 import { LogOut } from "lucide-react";
+import { AccountPanel } from "@/components/account/AccountPanel";
+import { useGuidanceAgent } from "@/components/guidance/GuidanceAgentProvider";
 
 /* ---------- Tree model ---------- */
 
@@ -47,6 +49,7 @@ const coworkerChildren: Node[] = [
   { key: "vuln",   label: "Vulnerability Management",                to: "/coworkers/vulnerability-management",            icon: ShieldX  },
   { key: "net",    label: "Network & Connectivity Engineering",      to: "/coworkers/network-connectivity-engineering",    icon: NetIcon  },
   { key: "infra",  label: "Infrastructure Automation",               to: "/coworkers/infrastructure-automation",           icon: Server   },
+  { key: "citrix", label: "Citrix Platform Digital Coworkers",       to: "/coworkers/citrix-platform-digital-coworkers",   icon: Layers, pill: "NEW" },
   { key: "appsup", label: "Application Support",                     to: "/coworkers/application-support",                 icon: Headphones },
   { key: "carve",  label: "IT Carve-Out & Separation",               to: "/coworkers/it-carve-out-and-separation",         icon: Scissors },
   { key: "hcpayer",label: "Healthcare Payer",                        to: "/coworkers/healthcare-payer",                    icon: Activity },
@@ -71,9 +74,9 @@ const itsmChildren: Node[] = [
     children: [
       { key: "ecc",   label: "Executive Command Center",                       to: "/itsm/exec-biz-ops/executive-command-center", icon: LayoutGrid },
       { key: "bsh",   label: "Business Services (Service Portfolio & Health)", to: "/itsm/exec-biz-ops/business-services",        icon: Boxes },
-      { key: "cxjh",  label: "Customer Experience & Journey Health (XLA)",    to: "/itsm/exec-biz-ops/customer-experience",      icon: Smile },
-      { key: "slo",   label: "SLA / SLO / Error Budget Performance",          to: "/itsm/exec-biz-ops/sla-slo-error-budget",     icon: Target },
-      { key: "risk",  label: "Risk & Operational Exposure View",              to: "/itsm/exec-biz-ops/risk-exposure",            icon: ShieldX },
+      { key: "cxjh",  label: "Customer Experience & Journey Health (XLA)",     to: "/itsm/exec-biz-ops/customer-experience",      icon: Smile },
+      { key: "slo",   label: "SLA / SLO / Error Budget Performance",           to: "/itsm/exec-biz-ops/sla-slo-error-budget",     icon: Target },
+      { key: "risk",  label: "Risk & Operational Exposure View",               to: "/itsm/exec-biz-ops/risk-exposure",            icon: ShieldX },
     ],
   },
   { key: "incidents",  label: "Incidents",         icon: AlertTriangle, to: "/incidents", badge: "342", badgeTone: "critical" },
@@ -81,115 +84,28 @@ const itsmChildren: Node[] = [
   { key: "change",     label: "Change Management", icon: GitBranch,     to: "/change",    badge: "1.2k", badgeTone: "critical" },
 ];
 
+
 const tree: Node[] = [
-  { key: "home",       label: "Command Center",      icon: Home,          to: "/app" },
   {
-    key: "aocp",
-    label: "App Ops Control Plane",
-    icon: Package,
-    to: "/aocp/claims-processing",
-    navOnClick: true,
-    children: [
-      {
-        key: "aocp-intel", label: "Application Intelligence", icon: Layers,
-        children: [
-          { key: "aocp-profile",   label: "Application Profile",       icon: Package,     to: "/aocp/claims-processing", exact: true },
-          { key: "aocp-env",       label: "Environment Model",         icon: Server,      to: "/aocp/claims-processing/environments" },
-          { key: "aocp-crit",      label: "Business Criticality",      icon: ShieldAlert, to: "/aocp/claims-processing/criticality" },
-          { key: "aocp-outcomes",  label: "Desired Outcomes",          icon: Target,      to: "/aocp/claims-processing/outcomes" },
-          { key: "aocp-lifecycle", label: "Lifecycle & Tech Debt",     icon: GitBranch,   to: "/aocp/claims-processing/lifecycle" },
-          { key: "aocp-admin",     label: "Admin Model",               icon: Settings,    to: "/aocp/claims-processing/admin" },
-        ],
-      },
-      {
-        key: "aocp-infra", label: "Infrastructure", icon: Server,
-        children: [
-          { key: "aocp-hosting",  label: "Hosting Platform",     icon: Cloud,    to: "/aocp/claims-processing/hosting" },
-          { key: "aocp-compute",  label: "Compute Services",     icon: Server,   to: "/aocp/claims-processing/compute" },
-          { key: "aocp-storage",  label: "Storage & Data",       icon: Boxes,    to: "/aocp/claims-processing/storage" },
-          { key: "aocp-db",       label: "Database Services",    icon: Workflow, to: "/aocp/claims-processing/databases" },
-          { key: "aocp-net",      label: "Network & Edge",       icon: NetIcon,  to: "/aocp/claims-processing/network" },
-          { key: "aocp-drift",    label: "Config & Drift",       icon: ShieldAlert, to: "/aocp/claims-processing/config-drift" },
-        ],
-      },
-      {
-        key: "aocp-ops", label: "Operations", icon: Activity,
-        children: [
-          { key: "aocp-tasks",     label: "Task Inventory",       icon: ClipboardList, to: "/aocp/claims-processing/tasks" },
-          { key: "aocp-support",   label: "Support Scope L1–L4",  icon: Headphones,    to: "/aocp/claims-processing/support-scope" },
-          { key: "aocp-workload",  label: "Workload Profile",     icon: BarChart3,     to: "/aocp/claims-processing/workload" },
-          { key: "aocp-catalog",   label: "Service Catalog",      icon: BookOpen,      to: "/aocp/claims-processing/service-catalog" },
-          { key: "aocp-escalation",label: "Escalation & On-Call", icon: Bell,          to: "/aocp/claims-processing/escalation" },
-        ],
-      },
-      {
-        key: "aocp-ai", label: "Automation & AI", icon: Bot,
-        children: [
-          { key: "aocp-auto-cat",  label: "Automation Catalog",      icon: Zap,      to: "/aocp/claims-processing/automation-catalog" },
-          { key: "aocp-heatmap",   label: "Opportunity Heatmap",     icon: BarChart3,to: "/aocp/claims-processing/automation-heatmap" },
-          { key: "aocp-remediate", label: "Auto Remediation",        icon: Workflow, to: "/aocp/claims-processing/auto-remediation" },
-          { key: "aocp-dc-cat",    label: "Digital Coworker Catalog",icon: Bot,      to: "/aocp/claims-processing/coworker-catalog" },
-          { key: "aocp-agentic",   label: "Agentic Workflow Library", icon: Sparkles2, to: "/aocp/claims-processing/agentic-workflows" },
-          { key: "aocp-raci",      label: "RACI Matrix",             icon: Users,    to: "/aocp/claims-processing/raci" },
-          { key: "aocp-gov",       label: "Agentic Governance",      icon: ShieldCheck, to: "/aocp/claims-processing/agentic-governance" },
-          { key: "aocp-roi",       label: "Automation Value & ROI",  icon: TrendingUp2, to: "/aocp/claims-processing/automation-roi" },
-        ],
-      },
-      {
-        key: "aocp-exec", label: "Executive", icon: Briefcase,
-        children: [
-          { key: "aocp-maturity",  label: "Maturity Model",       icon: Target,      to: "/aocp/claims-processing/maturity" },
-          { key: "aocp-cost",      label: "Internal Cost Model",  icon: DollarSign2, to: "/aocp/claims-processing/cost-model" },
-          { key: "aocp-pricing",   label: "Customer Pricing",     icon: FileBarChart2, to: "/aocp/claims-processing/pricing" },
-          { key: "aocp-scenario",  label: "Scenario Modeling",    icon: LayoutGrid,  to: "/aocp/claims-processing/scenarios" },
-          { key: "aocp-runops",    label: "Final RunOps Model",   icon: CheckCircle2b, to: "/aocp/claims-processing/runops-model" },
-        ],
-      },
-    ],
-  },
-  { key: "ops",        label: "Operations Overview", icon: LayoutGrid,    to: "/operations" },
-  {
-    key: "ai-engineering",
-    label: "AI Engineering",
-    icon: Bot,
-    children: [
-      { key: "ai-eng-backlog", label: "AI Engineering Backlog", icon: LayoutGrid, to: "/ai-engineering/backlog" },
-      { key: "ai-eng-adf", label: "Agentic Data Foundation", icon: Database, to: "/ai-engineering/agentic-data-foundation" },
-    ],
-  },
-  {
-    key: "sre-practice",
-    label: "Site Resilience Engineering",
-    icon: ShieldCheck,
+    key: "ome",
+    label: "Operating Model Evolution",
+    icon: Compass,
     children: [
       { key: "sre-ofi", label: "Enterprise Friction Index", icon: TrendingUp2, to: "/operational-friction-index" },
       { key: "sre-fnd", label: "Enterprise Operating Shifts", icon: Compass, to: "/reliability-foundations" },
       { key: "sre-anat", label: "Anatomy of a Modern Product Reliability Organization", icon: Compass, to: "/product-reliability-anatomy" },
       { key: "sre-tj", label: "Production Reliability Transformation Journey", icon: TrendingUp2, to: "/transformation-journey" },
       { key: "sre-ms", label: "Measuring Success", icon: Gauge, to: "/measuring-success" },
-      
-      { key: "sre-cmd", label: "PROD Resilience Command Center", icon: Activity, to: "/prod-resilience-twin" },
-      { key: "sre-plm", label: "Client Product Line Map", icon: Package, to: "/product-line-map" },
-      { key: "sre-gwm", label: "Client Golden Workflow Map", icon: Workflow, to: "/golden-workflow-map" },
-      { key: "sre-topo", label: "Client Production Topology Digital Twin", icon: NetIcon, to: "/production-topology" },
-      { key: "sre-opmodel", label: "Client SRE Operating Model Cockpit", icon: Activity, to: "/sre-operating-model" },
-      { key: "sre-signal", label: "Signal Intelligence", icon: Activity, to: "/signal-intelligence" },
-      { key: "sre-ecdt", label: "Enterprise Cloud Application Digital Twin", icon: Cloud, to: "/enterprise-cloud-twin" },
-      { key: "sre-awsrat", label: "AWS Resilience Architecture Twin", icon: Cloud, to: "/aws-resilience-architecture-twin" },
-      { key: "sre-pef", label: "Platform Engineering & Golden Environment Factory", icon: Package, to: "/platform-engineering-factory" },
-      { key: "sre-hcw", label: "Hybrid Cloud, Data & Modernization Workbench", icon: Cloud, to: "/hybrid-cloud-workbench" },
-      { key: "sre-amp", label: "Product Reliability Automation Marketplace", icon: Boxes, to: "/automation-marketplace" },
-      { key: "sre-admf", label: "Application & Data Modernization Factory", icon: Cloud, to: "/modernization-factory" },
-      { key: "sre-cyber", label: "Cyber Resilience Overlay", icon: ShieldCheck, to: "/cyber-resilience-overlay" },
-      { key: "sre-aicr", label: "Automation & AI Digital Coworker Control Room", icon: Bot, to: "/ai-coworker-control-room" },
-      { key: "sre-tdr", label: "Transition & Dual-Run Command Center", icon: ArrowRightLeft, to: "/transition-dual-run" },
-      { key: "sre-aof", label: "Acquisition-to-SRE Onboarding Factory", icon: Rocket, to: "/acquisition-onboarding-factory" },
-      { key: "sre-vcb", label: "Value Creation & PE / Board Dashboard", icon: TrendingUp2, to: "/value-creation-board" },
-      { key: "sre-mrm", label: "Modernization Roadmap", icon: FileBarChart2, to: "/modernization-roadmap" },
-      { key: "sre-idc", label: "Interactive Demo Experience Center", icon: Sparkles2, to: "/interactive-demo-center" },
-      { key: "sre-mrm2", label: "Modernization Roadmap", icon: FileBarChart2, to: "/modernization-roadmap-v2" },
     ],
   },
+
+  {
+    key: "sre-practice",
+    label: "Site Resilience Engineering",
+    icon: ShieldCheck,
+    to: "/prod-resilience-twin",
+  },
+
   {
     key: "sre-data-orch",
     label: "SRE Data Orchestration",
@@ -197,6 +113,18 @@ const tree: Node[] = [
     to: "/data-orchestration-twin",
     pill: "LIVE",
     statusDot: "green",
+  },
+  {
+    key: "agentic-finops",
+    label: "Agentic FinOps Digital Twin",
+    icon: Wallet,
+    to: "/agentic-finops",
+  },
+  {
+    key: "enterprise-cognitive-fabric",
+    label: "Enterprise Cognitive Fabric",
+    icon: Brain,
+    to: "/enterprise-cognitive-fabric",
   },
   {
     key: "runops",
@@ -236,10 +164,22 @@ const tree: Node[] = [
     ],
   },
   {
-    key: "runops",
-    label: "RunOps Runbooks",
+    key: "agentic-sre-noc",
+    label: "Agentic SRE NOC",
+    icon: Activity,
+    to: "/agentic-sre-noc",
+  },
+  {
+    key: "runops-runbooks",
+    label: "Runbook Engineering",
     icon: Sparkles2,
     to: "/runops",
+  },
+  {
+    key: "agentic-iac",
+    label: "Agentic IaC Engineering",
+    icon: Sparkles2,
+    to: "/agentic-iac-engineering",
   },
   {
     key: "sead",
@@ -248,39 +188,52 @@ const tree: Node[] = [
     to: "/sead/command-center",
   },
   {
-    key: "semi",
-    label: "Semiconductor Ops Command Center",
-    icon: Activity,
-    to: "/semiconductor/command-center",
-    navOnClick: true,
-    children: [
-      { key: "semi-cc",   label: "Command Center",           icon: LayoutGrid, to: "/semiconductor/command-center" },
-      { key: "semi-twin", label: "Factory Digital Twin",     icon: Boxes,      to: "/semiconductor/digital-twin" },
-      { key: "semi-flow", label: "Production Flow",          icon: Workflow,   to: "/semiconductor/production-flow" },
-      { key: "semi-phys", label: "Physical Automation",      icon: Bot,        to: "/semiconductor/physical-automation" },
-      { key: "semi-vis",  label: "Vision Operations",        icon: Activity,   to: "/semiconductor/vision-operations" },
-      { key: "semi-ops",  label: "Operations Intelligence",  icon: Sparkles2,  to: "/semiconductor/operations-intelligence" },
-      { key: "semi-res",  label: "Resource Optimization",    icon: Zap,        to: "/semiconductor/resource-optimization" },
-      { key: "semi-kg",   label: "Knowledge Graph",          icon: NetIcon,    to: "/semiconductor/knowledge-graph" },
-      { key: "semi-pov",  label: "Proof of Value",           icon: Target,     to: "/semiconductor/proof-of-value" },
-    ],
-  },
-  {
-    key: "factory-ops-intel",
-    label: "Factory Operations Intelligence",
-    icon: Boxes,
-    children: [
-      { key: "factory-maint-copilot", label: "Factory Maintenance Copilot", icon: Bot, to: "/factory-ops-intelligence/maintenance-copilot" },
-    ],
+    key: "ai-vlsi",
+    label: "AI VLSI Engineering",
+    icon: Sparkles2,
+    to: "/avep/program",
   },
   { key: "carve-op",   label: "IT Carve-Out & Separation Operating Model", icon: Scissors, to: "/carve-out", children: carveOpModelChildren },
   { key: "itsm",       label: "IT Service Desk & ITSM Operations", icon: Headphones, to: "/itsm", children: itsmChildren },
-  { key: "coworkers",  label: "Digital Coworkers",   icon: Bot,           to: "/coworkers", children: coworkerChildren },
-  { key: "questionnaires", label: "Questionnaires", icon: ClipboardList, to: "/questionnaires" },
-  { key: "services",   label: "Business Services",   icon: Boxes,         to: "/itsm/exec-biz-ops/business-services" },
-  { key: "crm", label: "Customer Relation Manager", icon: Building2, to: "/crm" },
-  { key: "settings",   label: "Settings",            icon: Settings,      to: "/settings", exact: true },
-  { key: "auth-orch",  label: "Auth Orchestration",  icon: ShieldCheck,   to: "/auth-orchestration" },
+
+
+  {
+    key: "coworkers",
+    label: "Digital Coworkers",
+    icon: Bot,
+    to: "/coworkers",
+    navOnClick: true,
+    children: [
+      {
+        key: "neurealm-agentic",
+        label: "Agentic AI Studio",
+        icon: Bot,
+        to: "/neurealm-agentic-ai",
+        pill: "NEW",
+      },
+    ],
+  },
+  {
+    key: "commercial",
+    label: "Commercial",
+    icon: TrendingUp2,
+    to: "/commercial",
+  },
+  {
+    key: "platform",
+    label: "Platform",
+    icon: ShieldCheck,
+    to: "/platform",
+  },
+  {
+    key: "settings",
+    label: "Settings",
+    icon: Settings,
+    to: "/settings",
+    exact: true,
+  },
+
+
 ];
 
 /* ---------- Quick actions ---------- */
@@ -329,7 +282,7 @@ function useFavorites() {
     try { return JSON.parse(window.localStorage.getItem(FAV_KEY) || "[]"); } catch { return []; }
   });
   useEffect(() => {
-    try { window.localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch {}
+    try { window.localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch { /* ignore quota/private-mode errors */ }
   }, [favs]);
   const toggle = (to: string) =>
     setFavs((prev) => (prev.includes(to) ? prev.filter((x) => x !== to) : [to, ...prev].slice(0, 12)));
@@ -345,10 +298,9 @@ function useRecents(pathname: string) {
     if (!pathname) return;
     setRec((prev) => {
       const next = [pathname, ...prev.filter((p) => p !== pathname)].slice(0, 5);
-      try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch {}
+      try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch { /* ignore quota/private-mode errors */ }
       return next;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
   return rec;
 }
@@ -506,13 +458,28 @@ function NavRecent({ tree, pathname }: { tree: Node[]; pathname: string }) {
     .map((path) => flat.find((f) => f.to === path))
     .filter((x): x is FlatItem => !!x)
     .slice(0, 4);
+  const [open, setOpen] = React.useState(() => {
+    try { return localStorage.getItem("eoc.recent.open") !== "0"; } catch { return true; }
+  });
+  const toggleOpen = () => setOpen((v) => {
+    const next = !v;
+    try { localStorage.setItem("eoc.recent.open", next ? "1" : "0"); } catch { /* ignore */ }
+    return next;
+  });
   if (items.length === 0) return null;
   return (
     <div className="pt-1">
-      <div className="px-3 pt-2 pb-1.5 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.16em] text-sidebar-foreground/45">
+      <button
+        type="button"
+        onClick={toggleOpen}
+        aria-expanded={open}
+        className="w-full px-3 pt-2 pb-1.5 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.16em] text-sidebar-foreground/45 hover:text-sidebar-foreground/70 transition-colors"
+      >
         <Clock className="h-2.5 w-2.5" /> RECENT
-      </div>
-      <div className="space-y-0.5">
+        <ChevronDown className={cn("h-3 w-3 ml-auto transition-transform", !open && "-rotate-90")} />
+      </button>
+      <div className={cn("space-y-0.5", !open && "hidden")}>
+
         {items.map((r) => {
           const Icon = r.icon;
           const active = pathMatches(pathname, r.to);
@@ -554,16 +521,22 @@ function useIsDesktop() {
 }
 
 function UserPill({ collapsed }: { collapsed: boolean }) {
-  const { displayName, initials, email, signOut } = useUserProfile();
+  const { displayName, initials, email, avatarUrl, signOut } = useUserProfile();
   const navigate = useNavigate();
   const handleSignOut = async () => { await signOut(); navigate("/"); };
 
   if (collapsed) {
     return (
       <div className="px-2 py-2 shrink-0 flex flex-col items-center gap-1.5 border-t border-sidebar-border">
-        <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold" title={displayName}>
-          {initials}
-        </div>
+        <AccountPanel>
+          <button
+            title={`${displayName} — open profile`}
+            aria-label="Open profile"
+            className="h-7 w-7 rounded-full overflow-hidden bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold hover:ring-2 hover:ring-sidebar-accent transition"
+          >
+            {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : initials}
+          </button>
+        </AccountPanel>
         <button
           onClick={handleSignOut}
           title="Sign out"
@@ -577,12 +550,19 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
 
   return (
     <div className="px-3 h-10 flex items-center gap-2 shrink-0 border-t border-sidebar-border">
-      <div className="h-6 w-6 rounded-full bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold shrink-0">
-        {initials}
-      </div>
-      <div className="min-w-0 flex-1 text-[12px] font-medium text-sidebar-foreground truncate" title={email || displayName}>
-        {displayName}
-      </div>
+      <AccountPanel>
+        <button
+          title="Open profile"
+          className="flex items-center gap-2 min-w-0 flex-1 -mx-1 px-1 py-1 rounded hover:bg-sidebar-accent/60 transition-colors"
+        >
+          <span className="h-6 w-6 rounded-full overflow-hidden bg-gradient-to-br from-indigo to-ai grid place-items-center text-white text-[10px] font-bold shrink-0">
+            {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : initials}
+          </span>
+          <span className="min-w-0 flex-1 text-left text-[12px] font-medium text-sidebar-foreground truncate" title={email || displayName}>
+            {displayName}
+          </span>
+        </button>
+      </AccountPanel>
       <button
         onClick={handleSignOut}
         title="Sign out"
@@ -596,15 +576,17 @@ function UserPill({ collapsed }: { collapsed: boolean }) {
 }
 
 const SECTIONS: { label: string; keys: string[] }[] = [
-  { label: "PLATFORM",       keys: ["home", "ops"] },
-  { label: "DIGITAL TWINS",  keys: ["aocp", "sre-practice", "runops", "sead", "semi", "factory-ops-intel"] },
-  { label: "AI & DATA",      keys: ["ai-engineering", "sre-data-orch"] },
+  { label: "",       keys: ["home", "ops", "ome"] },
+  { label: "AGENTIC OPERATIONS", keys: ["sre-practice", "sre-data-orch", "agentic-finops", "enterprise-cognitive-fabric", "agentic-sre-noc", "runops-runbooks", "agentic-iac"] },
+  { label: "AI SILICON ENGINEERING", keys: ["sead", "ai-vlsi"] },
+  { label: "",  keys: ["neurealm-agentic"] },
+
   { label: "PRACTICES",      keys: ["runops", "cyber"] },
   { label: "OPERATIONS",     keys: ["carve-op", "itsm", "coworkers"] },
-  { label: "ADMIN WORKSPACE", keys: ["questionnaires", "services", "crm", "settings", "auth-orch"] },
+  { label: "ADMIN WORKSPACE", keys: ["crm", "etdm", "settings"] },
 ];
 
-const ADMIN_ONLY_KEYS = new Set(["questionnaires", "crm"]);
+const ADMIN_ONLY_KEYS = new Set(["crm", "etdm"]);
 
 
 function findActiveTrail(nodes: Node[], pathname: string, trail: string[] = []): string[] | null {
@@ -649,6 +631,7 @@ export function EocSidebar({
   const { pathname } = useLocation();
   const { isAdmin } = useAuth();
   const { scoped, routes } = useTenantScope();
+  const { highlightedRoute } = useGuidanceAgent();
   const visibleTree = useMemo(() => {
     const base = isAdmin ? tree : tree.filter((n) => !ADMIN_ONLY_KEYS.has(n.key));
 
@@ -761,6 +744,25 @@ export function EocSidebar({
     // collapse manually-opened siblings.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTrail]);
+
+  // When the guidance agent points at a route nested inside a collapsed
+  // section, expand that section so the spotlighted item is actually visible.
+  // Merges into the existing open state (unlike the active-trail effect above)
+  // so it doesn't collapse sections the user opened manually.
+  useLayoutEffect(() => {
+    if (!highlightedRoute) return;
+    const spotlightTrail = findActiveTrail(visibleTree, highlightedRoute);
+    if (!spotlightTrail || spotlightTrail.length < 1) return;
+    setOpenByParent((prev) => {
+      const next: Record<string, Set<string>> = {};
+      for (const [k, v] of Object.entries(prev)) next[k] = new Set(v);
+      const spotlightOpenState = openStateFromTrail(spotlightTrail);
+      for (const [parent, children] of Object.entries(spotlightOpenState)) {
+        next[parent] = next[parent] ? new Set([...next[parent], ...children]) : new Set(children);
+      }
+      return next;
+    });
+  }, [highlightedRoute, visibleTree]);
 
   useLayoutEffect(() => {
     if (!restoreScrollPendingRef.current) return;
@@ -939,8 +941,8 @@ export function EocSidebar({
                   });
                 if (!nodes.length) return null;
                 return (
-                  <div key={section.label} className="pt-3">
-                    {!collapsed && (
+                  <div key={section.label || section.keys[0]} className="pt-3">
+                    {!collapsed && section.label && (
                       <div className="px-3 pt-2 pb-1.5 text-[10px] font-semibold tracking-[0.16em] text-sidebar-foreground/45">
                         {section.label}
                       </div>
@@ -959,6 +961,7 @@ export function EocSidebar({
                           togglePin={togglePin}
                           pinned={pinned}
                           persistScroll={persistNavScroll}
+                          spotlightRoute={highlightedRoute}
                         />
                       ))}
                     </div>
@@ -991,6 +994,7 @@ export function EocSidebar({
                           togglePin={togglePin}
                           pinned={pinned}
                           persistScroll={persistNavScroll}
+                          spotlightRoute={highlightedRoute}
                         />
                       ))}
                     </div>
@@ -1058,10 +1062,12 @@ type NodeProps = {
   togglePin: (parent: string, child: string) => void;
   pinned: Set<string>;
   persistScroll: () => void;
+  /** Route the guidance agent just answered with — spotlighted in the nav. */
+  spotlightRoute?: string | null;
 };
 
 function SidebarNode(props: NodeProps) {
-  const { node, depth, parentKey, collapsed, pathname, isOpen, toggleOpen, togglePin, pinned, persistScroll } = props;
+  const { node, depth, parentKey, collapsed, pathname, isOpen, toggleOpen, togglePin, pinned, persistScroll, spotlightRoute } = props;
   const nav = useNavigate();
   const fav = React.useContext(FavCtx);
   const Icon = node.icon;
@@ -1077,6 +1083,20 @@ function SidebarNode(props: NodeProps) {
     const trail = findActiveTrail([node], pathname);
     return !!trail && trail.length > 1;
   }, [pathname, node, hasChildren]);
+
+  // Spotlight: the guidance agent just pointed at this route (or a route
+  // nested under this section). Distinct from `active` ("you're here now") —
+  // this means "the assistant is pointing you here."
+  const spotlighted = !!spotlightRoute && pathMatches(spotlightRoute, node.to, node.exact);
+  const spotlightTrail = useMemo(() => {
+    if (!hasChildren || !spotlightRoute) return false;
+    const trail = findActiveTrail([node], spotlightRoute);
+    return !!trail && trail.length > 1;
+  }, [spotlightRoute, node, hasChildren]);
+  const rowRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (spotlighted) rowRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [spotlighted]);
 
   const handleRowClick = (e: React.MouseEvent) => {
     if (collapsed) return;
@@ -1105,6 +1125,8 @@ function SidebarNode(props: NodeProps) {
           (active || trailActive)
             ? "bg-sidebar-primary/20 text-sidebar-primary"
             : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          (spotlighted || spotlightTrail) &&
+            "ring-2 ring-sidebar-primary/70 ring-offset-1 ring-offset-sidebar animate-spotlight-pulse motion-reduce:animate-none",
         )}
       >
         {Icon && <Icon className="h-[18px] w-[18px]" />}
@@ -1143,6 +1165,7 @@ function SidebarNode(props: NodeProps) {
   return (
     <div>
       <div
+        ref={rowRef}
         role={hasChildren ? "button" : "link"}
         tabIndex={0}
         aria-expanded={hasChildren ? open : undefined}
@@ -1162,6 +1185,8 @@ function SidebarNode(props: NodeProps) {
             : trailActive
               ? "bg-sidebar-accent/60 text-sidebar-accent-foreground font-medium"
               : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          (spotlighted || spotlightTrail) &&
+            "ring-2 ring-sidebar-primary/70 ring-offset-1 ring-offset-sidebar animate-spotlight-pulse motion-reduce:animate-none",
         )}
         onClick={handleRowClick}
       >
@@ -1287,6 +1312,7 @@ function SidebarNode(props: NodeProps) {
                   togglePin={togglePin}
                   pinned={pinned}
                   persistScroll={persistScroll}
+                  spotlightRoute={spotlightRoute}
                 />
               ))}
             </div>

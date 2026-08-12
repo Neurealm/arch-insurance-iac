@@ -53,6 +53,52 @@ All colors MUST be HSL.
     --status-info: 215 90% 55%;
     --status-info-soft: 215 100% 96%;
 
+    /* Program timeline categories */
+    --tl-planning: 142 71% 36%;
+    --tl-planning-soft: 142 60% 92%;
+    --tl-build: 217 91% 60%;
+    --tl-build-soft: 217 92% 94%;
+    --tl-testing: 262 83% 58%;
+    --tl-testing-soft: 262 85% 95%;
+    --tl-deployment: 32 95% 44%;
+    --tl-deployment-soft: 36 92% 92%;
+    --tl-customer: 183 84% 36%;
+    --tl-customer-soft: 183 70% 92%;
+    --tl-commercial: 214 78% 20%;
+    --tl-commercial-soft: 214 45% 92%;
+    --tl-governance: 231 60% 45%;
+    --tl-governance-soft: 231 70% 94%;
+    --tl-readiness: 199 89% 40%;
+    --tl-readiness-soft: 199 85% 93%;
+    --tl-risk: 0 72% 51%;
+    --tl-risk-soft: 0 85% 95%;
+    --tl-complete: 152 60% 34%;
+    --tl-complete-soft: 152 60% 92%;
+    --tl-today: 221 83% 53%;
+
+    /* Neurealm governance palette */
+    --gv-navy: 214 74% 16%;
+    --gv-navy-soft: 214 45% 94%;
+    --gv-nav: 213 88% 19%;
+    --gv-blue: 221 83% 53%;
+    --gv-blue-soft: 221 90% 96%;
+    --gv-teal: 183 83% 36%;
+    --gv-teal-soft: 183 70% 94%;
+    --gv-purple: 256 63% 57%;
+    --gv-purple-soft: 256 80% 96%;
+    --gv-success: 142 72% 36%;
+    --gv-success-soft: 142 60% 94%;
+    --gv-warning: 32 95% 44%;
+    --gv-warning-soft: 36 92% 94%;
+    --gv-risk: 0 72% 51%;
+    --gv-risk-soft: 0 85% 96%;
+    --gv-canvas: 214 43% 98%;
+    --gv-border: 216 30% 89%;
+    --gv-muted-text: 216 20% 45%;
+
+
+
+
     /* AI / Digital coworkers */
     --ai: 265 85% 60%;
     --ai-soft: 265 100% 97%;
@@ -171,4 +217,12 @@ All colors MUST be HSL.
 }
 .sidebar-scroll:hover::-webkit-scrollbar-thumb {
   background-color: hsl(var(--sidebar-foreground) / 0.3);
+}
+
+/* Commercial Guide — "Show on Page" target highlight */
+.commercial-guide-highlight {
+  outline: 2px dashed hsl(var(--ring));
+  outline-offset: 4px;
+  border-radius: var(--radius);
+  scroll-margin-top: 6rem;
 }

@@ -122,7 +122,13 @@ export default function UserManagement() {
   const [activityDays, setActivityDays] = useState<number>(7);
   const [actionBusy, setActionBusy] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteFirst, setInviteFirst] = useState("");
+  const [inviteLast, setInviteLast] = useState("");
+  const [inviteJob, setInviteJob] = useState("");
+  const [inviteDept, setInviteDept] = useState("");
   const [inviteResult, setInviteResult] = useState<{ email: string; tempPassword: string; emailSent: boolean } | null>(null);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+
 
   const invoke = async (action: string, payload: Record<string, unknown> = {}) => {
     const { data, error } = await supabase.functions.invoke("admin-users", {
@@ -241,10 +247,20 @@ export default function UserManagement() {
     if (!email) return;
     setActionBusy(true);
     try {
-      const res = await invoke("invite_user", { email });
+      const first = inviteFirst.trim();
+      const last = inviteLast.trim();
+      const full_name = [first, last].filter(Boolean).join(" ") || undefined;
+      const res = await invoke("invite_user", {
+        email,
+        full_name,
+        first_name: first || undefined,
+        last_name: last || undefined,
+        job_title: inviteJob.trim() || undefined,
+        department: inviteDept.trim() || undefined,
+      });
       setInviteResult({ email: res.email ?? email, tempPassword: res.temp_password, emailSent: !!res.email_sent });
       toast.success(res.email_sent ? `Invite email sent to ${email}` : `Account created for ${email} — email failed, share the password manually`);
-      setInviteEmail("");
+      setInviteEmail(""); setInviteFirst(""); setInviteLast(""); setInviteJob(""); setInviteDept("");
       await load();
     } catch (e: any) {
       toast.error(e.message ?? "Invite failed");
@@ -298,6 +314,13 @@ export default function UserManagement() {
               />
               <Button onClick={sendInvite} disabled={actionBusy || !inviteEmail.trim()}>Create invite</Button>
             </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-w-3xl">
+              <Input value={inviteFirst} onChange={(e) => setInviteFirst(e.target.value)} placeholder="First name (optional)" disabled={actionBusy} className="h-9" />
+              <Input value={inviteLast} onChange={(e) => setInviteLast(e.target.value)} placeholder="Last name (optional)" disabled={actionBusy} className="h-9" />
+              <Input value={inviteJob} onChange={(e) => setInviteJob(e.target.value)} placeholder="Job title (optional)" disabled={actionBusy} className="h-9" />
+              <Input value={inviteDept} onChange={(e) => setInviteDept(e.target.value)} placeholder="Department (optional)" disabled={actionBusy} className="h-9" />
+            </div>
+            <p className="text-[11px] text-muted-foreground">Pre-fill helps the invitee land in a filled-out profile. All fields optional — they can edit anything later.</p>
             {inviteResult && (
               <div className={`rounded-md border p-3 space-y-2 max-w-xl ${inviteResult.emailSent ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
                 <div className={`text-[13px] font-medium ${inviteResult.emailSent ? "text-emerald-900" : "text-amber-900"}`}>
@@ -502,6 +525,12 @@ export default function UserManagement() {
                       <div><div className="text-muted-foreground text-xs">Last sign-in</div><div className="font-medium">{selected.last_sign_in_at ? new Date(selected.last_sign_in_at).toLocaleString() : "Never"}</div></div>
                     </CardContent>
                   </Card>
+
+                  <ProfileDetailsCard
+                    profile={selected.profile}
+                    onEdit={() => setEditProfileOpen(true)}
+                  />
+
                 </TabsContent>
 
                 <TabsContent value="history" className="mt-4 space-y-3">
@@ -699,9 +728,21 @@ export default function UserManagement() {
           )}
         </SheetContent>
       </Sheet>
+
+      <EditProfileDialog
+        open={editProfileOpen}
+        onOpenChange={setEditProfileOpen}
+        user={selected}
+        busy={actionBusy}
+        onSave={async (patch) => {
+          await runAction("Profile updated", () => invoke("update_profile", { user_id: selected!.id, patch }));
+          setEditProfileOpen(false);
+        }}
+      />
     </AppShell>
   );
 }
+
 
 function StatCard({ label, value, icon: Icon }: { label: string; value: number; icon: any }) {
   return (
@@ -713,6 +754,94 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: number; 
         <div>
           <div className="text-2xl font-bold leading-none">{value}</div>
           <div className="text-xs text-muted-foreground mt-1">{label}</div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="text-muted-foreground text-xs">{label}</div>
+      <div className="font-medium text-sm break-words">{children ?? <span className="text-muted-foreground">—</span>}</div>
+    </div>
+  );
+}
+
+function fmtDate(v: any) {
+  if (!v) return null;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? String(v) : d.toLocaleDateString();
+}
+
+function ProfileDetailsCard({ profile, onEdit }: { profile: any; onEdit?: () => void }) {
+  if (!profile) {
+    return (
+      <Card>
+        <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm">Profile details</CardTitle>
+          {onEdit && <Button size="sm" variant="outline" onClick={onEdit}>Edit</Button>}
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">No profile record.</CardContent>
+      </Card>
+    );
+  }
+  const nn = (v: any) => (v === null || v === undefined || v === "" ? null : v);
+  const hybrid = Array.isArray(profile.hybrid_days) && profile.hybrid_days.length ? profile.hybrid_days.join(", ") : null;
+  const ooo =
+    profile.ooo_enabled && (profile.ooo_start || profile.ooo_end)
+      ? `${fmtDate(profile.ooo_start) ?? "—"} → ${fmtDate(profile.ooo_end) ?? "—"}`
+      : profile.ooo_enabled ? "Enabled" : "Off";
+
+  return (
+    <Card>
+      <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-sm">Profile details</CardTitle>
+        {onEdit && <Button size="sm" variant="outline" onClick={onEdit}>Edit</Button>}
+      </CardHeader>
+
+      <CardContent className="space-y-4 text-sm">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Identity</div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="First name">{nn(profile.first_name)}</Field>
+            <Field label="Last name">{nn(profile.last_name)}</Field>
+            <Field label="Display name">{nn(profile.display_name) ?? nn(profile.full_name)}</Field>
+            <Field label="Job title">{nn(profile.job_title)}</Field>
+            <Field label="Department">{nn(profile.department)}</Field>
+            <Field label="Company">
+              {profile.company_id && nn(profile.company) ? (
+                <Link to={`/crm/companies/${profile.company_id}`} className="text-primary hover:underline">
+                  {profile.company}
+                </Link>
+              ) : nn(profile.company)}
+            </Field>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Contact & location</div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Phone">{nn(profile.phone)}</Field>
+            <Field label="Preferred contact">{nn(profile.preferred_contact_method)}</Field>
+            <Field label="Working location">{nn(profile.working_location_type)}</Field>
+            <Field label="Office site">{nn(profile.office_site)}</Field>
+            <Field label="Hybrid days">{hybrid}</Field>
+            <Field label="Location">{nn(profile.location)}</Field>
+            <Field label="Time zone">{nn(profile.time_zone)}</Field>
+            <Field label="Preferred language">{nn(profile.preferred_language)}</Field>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Status</div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="User category">{nn(profile.user_category)}</Field>
+            <Field label="Profile completed">{fmtDate(profile.profile_completed_at) ?? "Incomplete"}</Field>
+            <Field label="Must change password">{profile.must_change_password ? "Yes" : "No"}</Field>
+            <Field label="Out of office">{ooo}</Field>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -832,6 +961,159 @@ function SetPasswordCard({ onSubmit, busy }: { onSubmit: (pwd: string) => Promis
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function EditProfileDialog({
+  open, onOpenChange, user, busy, onSave,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  user: ManagedUser | null;
+  busy: boolean;
+  onSave: (patch: Record<string, unknown>) => Promise<void> | void;
+}) {
+  const [form, setForm] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    if (!open || !user) return;
+    const p = user.profile ?? {};
+    setForm({
+      first_name: p.first_name ?? "",
+      last_name: p.last_name ?? "",
+      display_name: p.display_name ?? "",
+      job_title: p.job_title ?? "",
+      department: p.department ?? "",
+      company: p.company ?? "",
+      phone: p.phone ?? "",
+      preferred_contact_method: p.preferred_contact_method ?? "",
+      working_location_type: p.working_location_type ?? "",
+      office_site: p.office_site ?? "",
+      hybrid_days: Array.isArray(p.hybrid_days) ? p.hybrid_days.join(", ") : "",
+      location: p.location ?? "",
+      time_zone: p.time_zone ?? "",
+      preferred_language: p.preferred_language ?? "",
+      ooo_enabled: !!p.ooo_enabled,
+      ooo_start: p.ooo_start ?? "",
+      ooo_end: p.ooo_end ?? "",
+    });
+  }, [open, user]);
+
+  const set = (k: string, v: any) => setForm((f) => ({ ...f, [k]: v }));
+
+  const submit = async () => {
+    const patch: Record<string, unknown> = { ...form };
+    patch.hybrid_days = String(form.hybrid_days ?? "")
+      .split(",").map((s) => s.trim()).filter(Boolean);
+    if (!patch.ooo_start) patch.ooo_start = null;
+    if (!patch.ooo_end) patch.ooo_end = null;
+    await onSave(patch);
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Edit profile</SheetTitle>
+          <SheetDescription>{user?.email}</SheetDescription>
+        </SheetHeader>
+        <div className="mt-4 space-y-5">
+          <section className="space-y-2">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Identity</div>
+            <div className="grid grid-cols-2 gap-3">
+              <LabeledInput label="First name" value={form.first_name} onChange={(v) => set("first_name", v)} />
+              <LabeledInput label="Last name" value={form.last_name} onChange={(v) => set("last_name", v)} />
+              <LabeledInput label="Display name" value={form.display_name} onChange={(v) => set("display_name", v)} />
+              <LabeledInput label="Job title" value={form.job_title} onChange={(v) => set("job_title", v)} />
+              <LabeledInput label="Department" value={form.department} onChange={(v) => set("department", v)} />
+              <LabeledInput label="Company" value={form.company} onChange={(v) => set("company", v)} />
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Contact & location</div>
+            <div className="grid grid-cols-2 gap-3">
+              <LabeledInput label="Phone" value={form.phone} onChange={(v) => set("phone", v)} />
+              <LabeledSelect
+                label="Preferred contact"
+                value={form.preferred_contact_method}
+                onChange={(v) => set("preferred_contact_method", v)}
+                options={[
+                  { value: "", label: "—" },
+                  { value: "email", label: "Email" },
+                  { value: "phone", label: "Phone" },
+                  { value: "sms", label: "SMS" },
+                  { value: "push", label: "Push" },
+                ]}
+              />
+              <LabeledSelect
+                label="Working location"
+                value={form.working_location_type}
+                onChange={(v) => set("working_location_type", v)}
+                options={[
+                  { value: "", label: "—" },
+                  { value: "remote", label: "Remote" },
+                  { value: "onsite", label: "On-site" },
+                  { value: "hybrid", label: "Hybrid" },
+                ]}
+              />
+              <LabeledInput label="Office site" value={form.office_site} onChange={(v) => set("office_site", v)} />
+              <LabeledInput label="Hybrid days (comma separated)" value={form.hybrid_days} onChange={(v) => set("hybrid_days", v)} />
+              <LabeledInput label="Location" value={form.location} onChange={(v) => set("location", v)} />
+              <LabeledInput label="Time zone" value={form.time_zone} onChange={(v) => set("time_zone", v)} />
+              <LabeledInput label="Preferred language" value={form.preferred_language} onChange={(v) => set("preferred_language", v)} />
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Out of office</div>
+            <div className="flex items-center justify-between rounded-md border px-3 py-2">
+              <div className="text-sm">Enabled</div>
+              <Switch checked={!!form.ooo_enabled} onCheckedChange={(v) => set("ooo_enabled", v)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <LabeledInput type="date" label="Start" value={form.ooo_start} onChange={(v) => set("ooo_start", v)} />
+              <LabeledInput type="date" label="End" value={form.ooo_end} onChange={(v) => set("ooo_end", v)} />
+            </div>
+          </section>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>Cancel</Button>
+            <Button onClick={submit} disabled={busy}>{busy ? "Saving…" : "Save changes"}</Button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function LabeledInput({
+  label, value, onChange, type = "text",
+}: { label: string; value: any; onChange: (v: string) => void; type?: string }) {
+  return (
+    <div>
+      <div className="text-xs text-muted-foreground mb-1">{label}</div>
+      <Input type={type} value={value ?? ""} onChange={(e) => onChange(e.target.value)} className="h-9" />
+    </div>
+  );
+}
+
+function LabeledSelect({
+  label, value, onChange, options,
+}: { label: string; value: any; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
+  return (
+    <div>
+      <div className="text-xs text-muted-foreground mb-1">{label}</div>
+      <Select value={value ? String(value) : "__none__"} onValueChange={(v) => onChange(v === "__none__" ? "" : v)}>
+        <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          {options.map((o) => (
+            <SelectItem key={o.value || "_none"} value={o.value || "__none__"}>{o.label}</SelectItem>
+
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

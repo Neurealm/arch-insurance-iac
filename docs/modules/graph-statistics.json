@@ -1,0 +1,226 @@
+{
+  "schemaVersion": "1.0.0",
+  "generator": "src/modules/graph/populate.ts@1.0.0",
+  "contentHash": "e889b604",
+  "version": 1,
+  "totals": {
+    "nodes": 1291,
+    "edges": 889,
+    "candidateEdges": 4,
+    "connectedComponents": 669,
+    "orphanNodes": 318,
+    "unregisteredNodes": 710,
+    "ownershipConflicts": 0,
+    "averageEdgesPerNode": 1.377,
+    "maxGraphDepth": 4
+  },
+  "nodesByType": {
+    "api": 39,
+    "capability": 16,
+    "component": 197,
+    "customer-extension": 3,
+    "database-entity": 16,
+    "module": 1,
+    "page": 471,
+    "permission": 10,
+    "persona": 9,
+    "platform-capability": 11,
+    "route": 431,
+    "service": 64,
+    "shared-capability": 7,
+    "sub-capability": 16
+  },
+  "edgesByType": {
+    "BELONGS_TO": 102,
+    "EXPOSES": 136,
+    "EXTENDS": 22,
+    "IMPLEMENTS": 98,
+    "CONSUMES": 12,
+    "DEPENDS_ON": 3,
+    "PROVIDES": 8,
+    "USES": 8,
+    "REFERENCES": 436,
+    "SECURES": 35,
+    "OWNS": 8,
+    "STORES": 21
+  },
+  "nodesByOwnership": {
+    "module-owned": 110,
+    "shared": 124,
+    "platform-owned": 133,
+    "customer-owned": 3,
+    "unassigned": 921
+  },
+  "nodesByEvidenceStrength": {
+    "not-assessed": 1249,
+    "client-side-functional": 11,
+    "static-data": 15,
+    "visual-only": 8,
+    "database-backed": 8
+  },
+  "edgesByEvidenceClassification": {
+    "declared": 460,
+    "deterministically-discovered": 429
+  },
+  "mostConnectedNodes": [
+    {
+      "id": "module:sre",
+      "label": "SRE Practice",
+      "degree": 138
+    },
+    {
+      "id": "capability:sre.reliability-foundations",
+      "label": "Reliability Foundations Library",
+      "degree": 29
+    },
+    {
+      "id": "capability:sre.transformation-narrative",
+      "label": "Transformation & Value Narrative",
+      "degree": 25
+    },
+    {
+      "id": "capability:sre.production-digital-twin",
+      "label": "Production Resilience Digital Twin",
+      "degree": 20
+    },
+    {
+      "id": "permission:commercial.view",
+      "label": "commercial.view",
+      "degree": 19
+    },
+    {
+      "id": "capability:sre.platform-and-modernization-factories",
+      "label": "Platform & Modernization Factories",
+      "degree": 17
+    },
+    {
+      "id": "platform-capability:platform.administration",
+      "label": "Platform Administration",
+      "degree": 15
+    },
+    {
+      "id": "platform-capability:platform.authentication",
+      "label": "Authentication",
+      "degree": 13
+    },
+    {
+      "id": "shared-capability:shared.contextual-audio-enrichment",
+      "label": "Contextual Audio Enrichment",
+      "degree": 13
+    },
+    {
+      "id": "capability:sre.cloud-architecture-twins",
+      "label": "Cloud & Resilience Architecture Twins",
+      "degree": 11
+    },
+    {
+      "id": "platform-capability:platform.tenant-isolation",
+      "label": "Tenant Isolation",
+      "degree": 11
+    },
+    {
+      "id": "page:src/pages/prod-twin/EnterpriseCloudTwin.tsx",
+      "label": "EnterpriseCloudTwin.tsx",
+      "degree": 10
+    },
+    {
+      "id": "platform-capability:platform.rbac",
+      "label": "Role-Based Access Control",
+      "degree": 10
+    },
+    {
+      "id": "capability:sre.automation-marketplace",
+      "label": "Reliability Automation Marketplace",
+      "degree": 9
+    },
+    {
+      "id": "sub-capability:sre.digital-twin.production",
+      "label": "Production Resilience Twin",
+      "degree": 9
+    }
+  ],
+  "modulesByDependencyCount": [
+    {
+      "moduleId": "sre",
+      "dependencies": 16
+    }
+  ],
+  "capabilitiesByImplementationSurface": [
+    {
+      "id": "capability:sre.reliability-foundations",
+      "label": "Reliability Foundations Library",
+      "implementations": 10
+    },
+    {
+      "id": "capability:sre.transformation-narrative",
+      "label": "Transformation & Value Narrative",
+      "implementations": 8
+    },
+    {
+      "id": "capability:sre.platform-and-modernization-factories",
+      "label": "Platform & Modernization Factories",
+      "implementations": 5
+    },
+    {
+      "id": "capability:sre.production-digital-twin",
+      "label": "Production Resilience Digital Twin",
+      "implementations": 5
+    },
+    {
+      "id": "capability:sre.cloud-architecture-twins",
+      "label": "Cloud & Resilience Architecture Twins",
+      "implementations": 3
+    },
+    {
+      "id": "sub-capability:sre.enablement.platform-engineering",
+      "label": "Platform Engineering Foundations",
+      "implementations": 3
+    },
+    {
+      "id": "sub-capability:sre.enablement.team-topologies",
+      "label": "Team Topologies",
+      "implementations": 3
+    },
+    {
+      "id": "sub-capability:sre.modernization.app-factory",
+      "label": "Application Modernization Factory",
+      "implementations": 3
+    },
+    {
+      "id": "sub-capability:sre.value-narrative.journey",
+      "label": "Transformation Journey",
+      "implementations": 3
+    },
+    {
+      "id": "sub-capability:sre.value-narrative.value-board",
+      "label": "Value and Risk Overlays",
+      "implementations": 3
+    },
+    {
+      "id": "capability:sre.automation",
+      "label": "Reliability Automation Catalogue",
+      "implementations": 2
+    },
+    {
+      "id": "capability:sre.automation-marketplace",
+      "label": "Reliability Automation Marketplace",
+      "implementations": 2
+    },
+    {
+      "id": "sub-capability:sre.digital-twin.cloud",
+      "label": "Cloud Architecture Twin",
+      "implementations": 2
+    },
+    {
+      "id": "sub-capability:sre.digital-twin.production",
+      "label": "Production Resilience Twin",
+      "implementations": 2
+    },
+    {
+      "id": "sub-capability:sre.enablement.google-sre",
+      "label": "Google SRE Model",
+      "implementations": 2
+    }
+  ]
+}
+

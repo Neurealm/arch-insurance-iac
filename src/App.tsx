@@ -1,12 +1,12 @@
+import { lazy } from "react";
+import { LazyRouteBoundary } from "@/components/routing/LazyRouteBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
-import AiEngineeringBacklog from "./pages/ai-engineering/Backlog.tsx";
-import AnswersActions from "./pages/ai-engineering/AnswersActions.tsx";
-import AgenticDataFoundation from "./pages/ai-engineering/AgenticDataFoundation.tsx";
+
 import EnterpriseCertificateManagement from "./pages/enterprise-cert/EnterpriseCertificateManagement.tsx";
 import RiskExposureMap from "./pages/enterprise-cert/RiskExposureMap.tsx";
 import LifecycleJourney from "./pages/enterprise-cert/LifecycleJourney.tsx";
@@ -23,9 +23,9 @@ import ComplianceCenter from "./pages/enterprise-cert/ComplianceCenter.tsx";
 import AuditEvidenceCenter from "./pages/enterprise-cert/AuditEvidenceCenter.tsx";
 import PolicyEngine from "./pages/enterprise-cert/PolicyEngine.tsx";
 import CtLogsMonitor from "./pages/enterprise-cert/CtLogsMonitor.tsx";
-import SemiCommandCenter from "./pages/semiconductor/CommandCenter.tsx";
-import SeadCommandCenter from "./pages/sead/CommandCenter.tsx";
-import SeadEquipmentHealth from "./pages/sead/EquipmentHealthIntelligence.tsx";
+
+const SeadCommandCenter = lazy(() => import("./pages/sead/CommandCenter.tsx"));
+const SeadEquipmentHealth = lazy(() => import("./pages/sead/EquipmentHealthIntelligence.tsx"));
 import SeadCrossDomain from "./pages/sead/CrossDomainContextTwin.tsx";
 import SeadMaintenanceSim from "./pages/sead/MaintenanceDecisionSimulator.tsx";
 import SeadFactoryImpact from "./pages/sead/FactoryImpactSimulator.tsx";
@@ -44,18 +44,78 @@ import SeadEngineeringSandbox from "./pages/sead/EngineeringSandbox.tsx";
 import SeadDigitalCoworkerConversation from "./pages/sead/DigitalCoworkerConversation.tsx";
 import SeadIotAiArchitecture from "./pages/sead/IotAiArchitecture.tsx";
 import SeadSimulationComparison from "./pages/sead/SimulationComparison.tsx";
-import SemiDigitalTwin from "./pages/semiconductor/DigitalTwin.tsx";
-import SemiProductionFlow from "./pages/semiconductor/ProductionFlow.tsx";
-import SemiPhysicalAutomation from "./pages/semiconductor/PhysicalAutomation.tsx";
-import SemiVisionOperations from "./pages/semiconductor/VisionOperations.tsx";
-import SemiOperationsIntelligence from "./pages/semiconductor/OperationsIntelligence.tsx";
-import SemiResourceOptimization from "./pages/semiconductor/ResourceOptimization.tsx";
-import SemiKnowledgeGraph from "./pages/semiconductor/KnowledgeGraph.tsx";
-import SemiProofOfValue from "./pages/semiconductor/ProofOfValue.tsx";
-import SemiFacilitator from "./pages/semiconductor/Facilitator.tsx";
-import { ScenarioProvider } from "./features/semiconductor/state/ScenarioContext.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
+import { SiliconLayout } from "./silicon/shell/SiliconLayout";
+import FoundationStatus from "./silicon/pages/FoundationStatus";
+import { AvepLayout } from "./avep/shell/AvepLayout";
+import { ModulePlaceholder } from "./avep/pages/ModulePlaceholder";
+import { ProgramWorkspace } from "./avep/pages/ProgramWorkspace";
+import RequirementsIntakeWorkspace from "./avep/pages/RequirementsIntakeWorkspace";
+import RequirementsQualityWorkspace from "./avep/pages/RequirementsQualityWorkspace";
+import EngineeringTraceabilityWorkspace from "./avep/pages/EngineeringTraceabilityWorkspace";
+import LogicalArchitectureWorkspace from "./avep/pages/LogicalArchitectureWorkspace";
+import EngineeringSpecVerificationWorkspace from "./avep/pages/EngineeringSpecVerificationWorkspace";
+import RtlGenerationStudio from "./avep/pages/RtlGenerationStudio";
+import RtlChangeImpactAnalysis from "./avep/pages/RtlChangeImpactAnalysis";
+import VerificationEnvironmentBuilder from "./avep/pages/VerificationEnvironmentBuilder";
+import TestFactory from "./avep/pages/TestFactory";
+import SimulationOperations from "./avep/pages/SimulationOperations";
+import FailureDiagnosis from "./avep/pages/FailureDiagnosis";
+import CoverageClosureReadiness from "./avep/pages/CoverageClosureReadiness";
+import SignoffReadiness from "./avep/pages/SignoffReadiness";
+import ReleasePackage from "./avep/pages/ReleasePackage";
+import AiGovernanceValue from "./avep/pages/AiGovernanceValue";
+import PhysicalDesignIntake from "./avep/pages/PhysicalDesignIntake";
+import EndToEndStory from "./avep/pages/EndToEndStory";
+import Overview from "./avep/pages/Overview";
+import { AVEP_NAV } from "./avep/shell/navigation";
+import NeurealmAgenticAI from "./pages/neurealm-agentic-ai/NeurealmAgenticAI.tsx";
+import PlatformLayout from "./platform/shell/PlatformLayout";
+import PlatformHome from "./platform/pages/PlatformHome";
+import PlatformMembers from "./platform/pages/MemberAdmin";
+import PlatformRoles from "./platform/pages/RoleAdmin";
+import PlatformAudit from "./platform/pages/AuditExplorer";
+import PlatformTenantSettings from "./platform/pages/TenantSettings";
+import AcceptInvitation from "./platform/pages/AcceptInvitation";
+import PlatformProfile from "./platform/pages/Profile";
+import PlatformTestHub from "./platform/pages/TestHub";
+const PlatformModuleRegistry = lazy(() => import("./platform/pages/ModuleRegistryDiagnostics"));
+import { capabilityIntelligenceRoutes } from "./platform/capability-intelligence/routes";
+
+import CaeNarrativeLibrary from "./platform/cae/admin/NarrativeLibrary";
+import CaeNarrativeDetail from "./platform/cae/admin/NarrativeDetail";
+import CaeNarrativeEditor from "./platform/cae/admin/NarrativeEditor";
+import CaeSpeechProfileManager from "./platform/cae/admin/SpeechProfileManager";
+import CaePlacementMap from "./platform/cae/admin/PlacementMap";
+import CaePronunciationDictionary from "./platform/cae/admin/PronunciationDictionary";
+import CaeAudioAnalytics from "./platform/cae/admin/AudioAnalytics";
+import CommercialLayout from "./commercial/shell/CommercialLayout";
+import CommercialOverview from "./commercial/pages/CommercialOverview";
+import CommercialProgram from "./commercial/pages/CommercialProgram";
+import CommercialProgramTimeline from "./commercial/pages/CommercialProgramTimeline";
+import CommercialStaffingResources from "./commercial/pages/CommercialStaffingResources";
+
+import CommercialScenarios from "./commercial/pages/CommercialScenarios";
+import CommercialPortfolio from "./commercial/pages/CommercialPortfolio";
+import CommercialSources from "./commercial/pages/CommercialSources";
+import CommercialRevenue from "./commercial/pages/CommercialRevenue";
+import CommercialPnl from "./commercial/pages/CommercialPnl";
+import CommercialCash from "./commercial/pages/CommercialCash";
+import CommercialAssumptions from "./commercial/pages/CommercialAssumptions";
+import CommercialAssumptionChangeSet from "./commercial/pages/CommercialAssumptionChangeSet";
+import CommercialCompare from "./commercial/pages/CommercialCompare";
+import CommercialCompareDetail from "./commercial/pages/CommercialCompareDetail";
+import CommercialSensitivity from "./commercial/pages/CommercialSensitivity";
+import CommercialSensitivityDetail from "./commercial/pages/CommercialSensitivityDetail";
+import CommercialRelease from "./commercial/pages/CommercialRelease";
+import CommercialReleaseDetail from "./commercial/pages/CommercialReleaseDetail";
+
+import CommercialNeurealmGovernance from "./commercial/pages/CommercialNeurealmGovernance";
+
+
+
+import { PermissionRoute, PlatformAdminRoute } from "./components/auth/PermissionRoute";
 import Landing from "./pages/Landing.tsx";
 import Login from "./pages/auth/Login.tsx";
 import CyberMasterDashboard from "./pages/practice-library/dashboards/cyber/CyberMasterDashboard.tsx";
@@ -72,7 +132,14 @@ import Signup from "./pages/auth/Signup.tsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
 import ResetPassword from "./pages/auth/ResetPassword.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
+import { GuidanceAgentProvider } from "./components/guidance/GuidanceAgentProvider.tsx";
+import { ContextualAudioRoot } from "./platform/cae/ContextualAudioErrorBoundary.tsx";
+import CaeComponentFixture from "./platform/cae/dev/CaeComponentFixture.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
+import TechnologyTaxonomyPage from "./pages/admin/technology-taxonomy/TechnologyTaxonomyPage.tsx";
+import TechnologyProfilePage from "./pages/admin/technology-taxonomy/TechnologyProfilePage.tsx";
+import DomainsPage from "./pages/admin/technology-taxonomy/domains/DomainsPage.tsx";
+import DomainProfilePage from "./pages/admin/technology-taxonomy/domains/DomainProfilePage.tsx";
 import Coworkers from "./pages/Coworkers.tsx";
 import CoworkersNetwork from "./pages/CoworkersNetwork.tsx";
 import CoworkersSRE from "./pages/CoworkersSRE.tsx";
@@ -83,11 +150,12 @@ import PrivilegedAccessDashboard from "./pages/coworkers/iam/PrivilegedAccessDas
 import ReleaseDeploymentRollout from "./pages/coworkers/sre/ReleaseDeploymentRollout.tsx";
 import SloSlaSliMonitoring from "./pages/coworkers/sre/SloSlaSliMonitoring.tsx";
 import CoworkersInfra from "./pages/CoworkersInfra.tsx";
+import CitrixPlatformDigitalCoworkers from "./pages/coworkers/CitrixPlatformDigitalCoworkers.tsx";
 import CoworkersApplicationSupport from "./pages/CoworkersApplicationSupport.tsx";
 import HadoopHealthPrecheckAgent from "./pages/coworkers/appsupport/HadoopHealthPrecheckAgent.tsx";
 import IntegrationMonitoringAgent from "./pages/coworkers/appsupport/IntegrationMonitoringAgent.tsx";
 import EtlPipelineTraceCoworker from "./pages/coworkers/appsupport/EtlPipelineTraceCoworker.tsx";
-import FactoryMaintenanceCopilot from "./pages/factory-ops/FactoryMaintenanceCopilot.tsx";
+
 import VmwareCapacityContention from "./pages/coworkers/infra/VmwareCapacityContention.tsx";
 import ServerProvisioningDeprovisioning from "./pages/coworkers/infra/ServerProvisioningDeprovisioning.tsx";
 import HostFailureEarlyWarning from "./pages/coworkers/infra/HostFailureEarlyWarning.tsx";
@@ -151,7 +219,7 @@ import CmmOverview from "./pages/carveout/CmmOverview.tsx";
 import CmmSolutionDesign from "./pages/carveout/CmmSolutionDesign.tsx";
 import CmmDashboard from "./pages/carveout/CmmDashboard.tsx";
 import DeployCoworker from "./pages/DeployCoworker.tsx";
-import Operations from "./pages/Operations.tsx";
+
 import Incidents from "./pages/Incidents.tsx";
 import Alerts from "./pages/Alerts.tsx";
 import ChangeManagement from "./pages/ChangeManagement.tsx";
@@ -211,20 +279,38 @@ import LiveExecution from "./pages/assurance/LiveExecution.tsx";
 import Itsm from "./pages/itsm/Itsm.tsx";
 import ExecBizOps from "./pages/itsm/ExecBizOps.tsx";
 import ExecutiveCommandCenter from "./pages/itsm/ExecutiveCommandCenter.tsx";
-import Placeholder from "./pages/itsm/Placeholder.tsx";
-import CustomerExperience from "./pages/itsm/CustomerExperience.tsx";
-import SlaSloErrorBudget from "./pages/itsm/SlaSloErrorBudget.tsx";
-import RiskExposure from "./pages/itsm/RiskExposure.tsx";
-import BusinessServices from "./pages/itsm/BusinessServices.tsx";
+import ItsmCustomerExperience from "./pages/itsm/CustomerExperience.tsx";
+import ItsmSlaSloErrorBudget from "./pages/itsm/SlaSloErrorBudget.tsx";
+import ItsmRiskExposure from "./pages/itsm/RiskExposure.tsx";
+import ItsmBusinessServices from "./pages/itsm/BusinessServices.tsx";
+import AutoTicketCategorization from "./pages/itsm/AutoTicketCategorization.tsx";
+import AtcIncidentConsole from "./pages/itsm/atc/IncidentConsole.tsx";
+import AtcTicketQueue from "./pages/itsm/atc/TicketQueue.tsx";
+import AtcMyTeam from "./pages/itsm/atc/MyTeam.tsx";
+import AtcSlaKpis from "./pages/itsm/atc/SlaKpis.tsx";
+import AtcKnowledgeBase from "./pages/itsm/atc/KnowledgeBase.tsx";
+import AtcReports from "./pages/itsm/atc/Reports.tsx";
+import AtcAutoConfig from "./pages/itsm/atc/AutoConfig.tsx";
+import AtcMajorIncidents from "./pages/itsm/atc/MajorIncidents.tsx";
+import AtcEscalations from "./pages/itsm/atc/Escalations.tsx";
+import AtcChangeCalendar from "./pages/itsm/atc/ChangeCalendar.tsx";
+import AtcOnCallSchedule from "./pages/itsm/atc/OnCallSchedule.tsx";
+import AtcBusinessServices from "./pages/itsm/atc/BusinessServices.tsx";
+import AtcAssignments from "./pages/itsm/atc/Assignments.tsx";
+import AtcCategorizationRules from "./pages/itsm/atc/CategorizationRules.tsx";
+import AtcIntegrations from "./pages/itsm/atc/Integrations.tsx";
+
 import StakeholderRegister from "./pages/settings/StakeholderRegister.tsx";
 import Settings from "./pages/Settings.tsx";
 import AuthOrchestration from "./pages/AuthOrchestration.tsx";
 import Questionnaires from "./pages/Questionnaires.tsx";
 import UserManagement from "./pages/settings/UserManagement.tsx";
+import GuidanceInsights from "./pages/settings/GuidanceInsights.tsx";
 import ChangePassword from "./pages/settings/ChangePassword.tsx";
 import PendingApproval from "./pages/auth/PendingApproval.tsx";
 import UpdateProfile from "./pages/auth/UpdateProfile.tsx";
 import SetInitialPassword from "./pages/auth/SetInitialPassword.tsx";
+import CompleteProfile from "./pages/auth/CompleteProfile.tsx";
 import OrganizationLayout from "./pages/settings/organization/OrganizationLayout.tsx";
 import EntityListPage from "./pages/settings/organization/EntityListPage.tsx";
 import EntityDetailPage from "./pages/settings/organization/EntityDetailPage.tsx";
@@ -256,21 +342,55 @@ import SqlTransactionLogJobReliability from "./pages/practice-library/dashboards
 import SreDashboard from "./pages/practice-library/dashboards/SreDashboard.tsx";
 import EhrDashboard from "./pages/practice-library/dashboards/EhrDashboard.tsx";
 import WorkforceDashboard from "./pages/practice-library/dashboards/WorkforceDashboard.tsx";
-import ApplicationProfile from "./pages/aocp/ApplicationProfile.tsx";
-import EnvironmentModel from "./pages/aocp/EnvironmentModel.tsx";
-import BusinessCriticality from "./pages/aocp/BusinessCriticality.tsx";
-import DesiredOutcomes from "./pages/aocp/DesiredOutcomes.tsx";
-import LifecycleTechDebt from "./pages/aocp/LifecycleTechDebt.tsx";
-import AdminModel from "./pages/aocp/AdminModel.tsx";
-import AocpPlaceholder from "./pages/aocp/AocpPlaceholder.tsx";
 import ProdResilienceTwin from "./pages/prod-twin/ProdResilienceTwin.tsx";
 import DataOrchLayout from "./pages/data-orchestration-twin/DataOrchLayout.tsx";
+import FinOpsLayout from "./pages/agentic-finops/FinOpsLayout.tsx";
+import FinOpsOverview from "./pages/agentic-finops/workspaces/FinOpsOverview.tsx";
+import ResourceRightsizingWorkspace from "./pages/agentic-finops/workspaces/ResourceRightsizingWorkspace.tsx";
+import IdleOrphanedResourcesWorkspace from "./pages/agentic-finops/workspaces/IdleOrphanedResourcesWorkspace.tsx";
+import CommitmentOptimizationWorkspace from "./pages/agentic-finops/workspaces/CommitmentOptimizationWorkspace.tsx";
+import ElasticitySchedulingWorkspace from "./pages/agentic-finops/workspaces/ElasticitySchedulingWorkspace.tsx";
+import StorageDataLifecycleWorkspace from "./pages/agentic-finops/workspaces/StorageDataLifecycleWorkspace.tsx";
+import NetworkDataMovementWorkspace from "./pages/agentic-finops/workspaces/NetworkDataMovementWorkspace.tsx";
+import PlatformArchitectureEfficiencyWorkspace from "./pages/agentic-finops/workspaces/PlatformArchitectureEfficiencyWorkspace.tsx";
+import KubernetesEconomicsWorkspace from "./pages/agentic-finops/workspaces/KubernetesEconomicsWorkspace.tsx";
+import GovernanceRealizationWorkspace from "./pages/agentic-finops/workspaces/GovernanceRealizationWorkspace.tsx";
+import EcfLayout from "./pages/enterprise-cognitive-fabric/EcfLayout.tsx";
+import EcfLanding from "./pages/enterprise-cognitive-fabric/EcfLanding.tsx";
+import EcfPage from "./pages/enterprise-cognitive-fabric/EcfPage.tsx";
+import EnterpriseCommandCenter from "./pages/enterprise-cognitive-fabric/EnterpriseCommandCenter.tsx";
+import EnterpriseSourceDiscovery from "./pages/enterprise-cognitive-fabric/EnterpriseSourceDiscovery.tsx";
+import DiscoveryScaffold from "./pages/enterprise-cognitive-fabric/DiscoveryScaffold.tsx";
+import DiscoveryConfiguration from "./pages/enterprise-cognitive-fabric/DiscoveryConfiguration.tsx";
+import DiscoveryPipeline from "./pages/enterprise-cognitive-fabric/DiscoveryPipeline.tsx";
+import DiscoveryRegistry from "./pages/enterprise-cognitive-fabric/DiscoveryRegistry.tsx";
+import DiscoveryConnectorHealth from "./pages/enterprise-cognitive-fabric/DiscoveryConnectorHealth.tsx";
+import ArtifactIngestion from "./pages/enterprise-cognitive-fabric/ArtifactIngestion.tsx";
+import ArtifactNormalization from "./pages/enterprise-cognitive-fabric/ArtifactNormalization.tsx";
+import BusinessConditionScaffold from "./pages/enterprise-cognitive-fabric/BusinessConditionScaffold.tsx";
+import BusinessConditionExtraction from "./pages/enterprise-cognitive-fabric/BusinessConditionExtraction.tsx";
+import TeamPersonaConstruction from "./pages/enterprise-cognitive-fabric/TeamPersonaConstruction.tsx";
+import TeamPersonaLibrary from "./pages/enterprise-cognitive-fabric/TeamPersonaLibrary.tsx";
+import CloudFinOpsAttributeStore from "./pages/enterprise-cognitive-fabric/finops-attribute-store/CloudFinOpsAttributeStore";
+import PersonaStudioScaffold from "./pages/enterprise-cognitive-fabric/PersonaStudioScaffold.tsx";
+import PersonaValidation from "./pages/enterprise-cognitive-fabric/PersonaValidation.tsx";
+import EnterpriseCognitiveMemory from "./pages/enterprise-cognitive-fabric/EnterpriseCognitiveMemory.tsx";
+import CognitiveIntake from "./pages/enterprise-cognitive-fabric/CognitiveIntake.tsx";
+import CognitiveReadinessAssessment from "./pages/enterprise-cognitive-fabric/CognitiveReadinessAssessment.tsx";
+
+import PersonaImpactAnalysis from "./pages/enterprise-cognitive-fabric/PersonaImpactAnalysis.tsx";
+import CrossTeamImpactAnalysis from "./pages/enterprise-cognitive-fabric/CrossTeamImpactAnalysis.tsx";
+import DecisionIntelligence from "./pages/enterprise-cognitive-fabric/DecisionIntelligence.tsx";
+import OrganizationalLearning from "./pages/enterprise-cognitive-fabric/OrganizationalLearning.tsx";
+import EnterpriseCognitiveHealth from "./pages/enterprise-cognitive-fabric/EnterpriseCognitiveHealth.tsx";
+
+
 import DataOrchPage from "./pages/data-orchestration-twin/DataOrchPage.tsx";
 import DataOrchExecutiveControlPlane from "./pages/data-orchestration-twin/ExecutiveControlPlane.tsx";
 import UseCaseToDataContractMapper from "./pages/data-orchestration-twin/UseCaseToDataContractMapper.tsx";
 import SiteResilienceCoworker from "./pages/data-orchestration-twin/SiteResilienceCoworker.tsx";
 import LogSourceInventoryAndScopeRegistry from "./pages/data-orchestration-twin/LogSourceInventoryAndScopeRegistry.tsx";
-import DataDogLogProfile from "./pages/data-orchestration-twin/DataDogLogProfile.tsx";
+const DataDogLogProfile = lazy(() => import("./pages/data-orchestration-twin/DataDogLogProfile.tsx"));
 import CyberThreatIntelligenceAndIocAnalysis from "./pages/data-orchestration-twin/CyberThreatIntelligenceAndIocAnalysis.tsx";
 import DataPlacementDecisionEngine from "./pages/data-orchestration-twin/DataPlacementDecisionEngine.tsx";
 import PlacementScenarioModeler from "./pages/data-orchestration-twin/PlacementScenarioModeler.tsx";
@@ -280,7 +400,7 @@ import OptionsAndTradeoffMatrix from "./pages/data-orchestration-twin/OptionsAnd
 import ConnectorAccessGovernanceRegistry from "./pages/data-orchestration-twin/ConnectorAccessGovernanceRegistry.tsx";
 import ConnectionMethodProfile from "./pages/data-orchestration-twin/ConnectionMethodProfile.tsx";
 import FetchOrchestrationScheduler from "./pages/data-orchestration-twin/FetchOrchestrationScheduler.tsx";
-import ScheduleBuilder from "./pages/data-orchestration-twin/ScheduleBuilder.tsx";
+const ScheduleBuilder = lazy(() => import("./pages/data-orchestration-twin/ScheduleBuilder.tsx"));
 import SourceOnboardingFactory from "./pages/data-orchestration-twin/SourceOnboardingFactory.tsx";
 import AssistedSchemaDiscoveryAndFieldMapping from "./pages/data-orchestration-twin/AssistedSchemaDiscoveryAndFieldMapping.tsx";
 import SchemaDriftAndExceptionWorkbench from "./pages/data-orchestration-twin/SchemaDriftAndExceptionWorkbench.tsx";
@@ -303,7 +423,7 @@ import ProductionTopology from "./pages/prod-twin/ProductionTopology.tsx";
 import SreOperatingModel from "./pages/prod-twin/SreOperatingModel.tsx";
 import SignalIntelligence from "./pages/prod-twin/SignalIntelligence.tsx";
 import EnterpriseCloudTwin from "./pages/prod-twin/EnterpriseCloudTwin.tsx";
-import AWSResilienceArchitectureTwin from "./pages/prod-twin/AWSResilienceArchitectureTwin.tsx";
+const AWSResilienceArchitectureTwin = lazy(() => import("./pages/prod-twin/AWSResilienceArchitectureTwin.tsx"));
 import { ScenarioStateProvider } from "./context/ScenarioStateContext.tsx";
 import PlatformEngineeringFactory from "./pages/prod-twin/PlatformEngineeringFactory.tsx";
 import HybridCloudWorkbench from "./pages/prod-twin/HybridCloudWorkbench.tsx";
@@ -340,6 +460,55 @@ import DiscoveryLibraryDemo from "./pages/crm-demo/DiscoveryLibraryDemo.tsx";
 import DiscoveryConfidenceDemo from "./pages/crm-demo/DiscoveryConfidenceDemo.tsx";
 import PublicQuestionnaire from "./pages/PublicQuestionnaire.tsx";
 import RunOpsLayout from "./runops/shell/RunOpsLayout.tsx";
+import SreLayout from "./pages/prod-twin/SreLayout.tsx";
+import NocLayout from "./pages/agentic-sre-noc/NocLayout.tsx";
+import NocPage from "./pages/agentic-sre-noc/NocPage.tsx";
+import GlobalOpticalOperationsCenter from "./pages/agentic-sre-noc/GlobalOpticalOperationsCenter.tsx";
+import TraditionalNocOperationsCenter from "./pages/operations/traditional-noc/GlobalOpticalOperationsCenter.tsx";
+import CustomerServiceHealthExplorer from "./pages/agentic-sre-noc/CustomerServiceHealthExplorer.tsx";
+import GlobalLinkHealthTwin from "./pages/agentic-sre-noc/GlobalLinkHealthTwin.tsx";
+import GlobalOpticalServiceTopology from "./pages/agentic-sre-noc/GlobalOpticalServiceTopology.tsx";
+import PredictiveLinkRiskCenter from "./pages/agentic-sre-noc/PredictiveLinkRiskCenter.tsx";
+import ActiveSituationRoom from "./pages/agentic-sre-noc/ActiveSituationRoom.tsx";
+import AgenticInvestigationWorkspace from "./pages/agentic-sre-noc/AgenticInvestigationWorkspace.tsx";
+import HumanApprovalActionCenter from "./pages/agentic-sre-noc/HumanApprovalActionCenter.tsx";
+import AutonomousRecoveryMonitor from "./pages/agentic-sre-noc/AutonomousRecoveryMonitor.tsx";
+import GlhtProductionArchitecture from "./pages/agentic-sre-noc/ProductionArchitecture.tsx";
+import PredictiveOpticalLinkIntelligence from "./pages/agentic-sre-noc/PredictiveOpticalLinkIntelligence.tsx";
+import IacLayout from "./pages/agentic-iac/IacLayout.tsx";
+import AssetDigitalTwin from "./pages/agentic-iac/AssetDigitalTwin.tsx";
+import RemediationIntelligence from "./pages/agentic-iac/RemediationIntelligence.tsx";
+import ChangeEngineering from "./pages/agentic-iac/ChangeEngineering.tsx";
+import ChangeReviewApproval from "./pages/agentic-iac/ChangeReviewApproval.tsx";
+import ExecutionCenter from "./pages/agentic-iac/ExecutionCenter.tsx";
+import ValidationEvidence from "./pages/agentic-iac/ValidationEvidence.tsx";
+import DeploymentArchitecture from "./pages/agentic-iac/DeploymentArchitecture.tsx";
+import PlatformAdminPlaceholder from "./pages/agentic-iac/PlatformAdminPlaceholder.tsx";
+import IntegrationsConnectivity from "./pages/agentic-iac/IntegrationsConnectivity.tsx";
+import AccessGovernance from "./pages/agentic-iac/AccessGovernance.tsx";
+import PoliciesGovernance from "./pages/agentic-iac/PoliciesGovernance.tsx";
+import SystemSettingsPage from "./pages/agentic-iac/SystemSettings.tsx";
+import ContextEvidenceLayout from "./pages/context-evidence/ContextEvidenceLayout.tsx";
+import ContextEvidenceOverview from "./pages/context-evidence/Overview.tsx";
+import ContextEvidencePlaceholder from "./pages/context-evidence/Placeholder.tsx";
+import ModelsRoutingLayout from "./pages/models-routing/ModelsRoutingLayout.tsx";
+import ModelsRoutingOverview from "./pages/models-routing/Overview.tsx";
+import ModelsRoutingPlaceholder from "./pages/models-routing/Placeholder.tsx";
+import AgentOrchestrationLayout from "./pages/agent-orchestration/AgentOrchestrationLayout.tsx";
+import AgentOrchestrationOverview from "./pages/agent-orchestration/Overview.tsx";
+import AgentOrchestrationPlaceholder from "./pages/agent-orchestration/Placeholder.tsx";
+import IamAdminLayout from "./pages/iam-admin/IamAdminLayout.tsx";
+import IamAdminOverview from "./pages/iam-admin/Overview.tsx";
+import IamAdminPlaceholder from "./pages/iam-admin/Placeholder.tsx";
+import FinOpsAdminLayout from "./pages/finops-admin/FinOpsAdminLayout.tsx";
+import FinOpsAdminOverview from "./pages/finops-admin/Overview.tsx";
+import FinOpsAdminPlaceholder from "./pages/finops-admin/Placeholder.tsx";
+
+
+
+import SreAgenticNocLayout, { sreNocNav } from "./pages/operations/sre-agentic-noc/SreAgenticNocLayout.tsx";
+import SreAgenticOpticalOperationsCenter from "./pages/operations/sre-agentic-noc/SreAgenticOpticalOperationsCenter.tsx";
+import SreAgenticNocPlaceholder from "./pages/operations/sre-agentic-noc/SreAgenticNocPlaceholder.tsx";
 import RunOpsCommand from "./runops/pages/Command.tsx";
 import RunOpsExperienceEntry from "./runops/pages/ExperienceEntry.tsx";
 import RunOpsPlaceholder from "./runops/pages/RunOpsPlaceholder.tsx";
@@ -353,6 +522,8 @@ import RunOpsObservabilityExplorer from "./runops/pages/ObservabilityExplorer.ts
 import RunOpsOperationalReadiness from "./runops/pages/OperationalReadiness.tsx";
 import RunOpsRunbookLibrary from "./runops/pages/RunbookLibrary.tsx";
 import RunOpsRunbookDetail from "./runops/pages/RunbookDetail.tsx";
+import RunOpsRunbookObjectBuilder from "./runops/pages/RunbookObjectBuilder.tsx";
+import { AwsCotsDigitalTwinPage } from "./runops/features/aws-cots-twin";
 import RunOpsRunbookNew from "./runops/pages/RunbookNew.tsx";
 import RunOpsRunbookDesigner from "./runops/pages/RunbookDesigner.tsx";
 import RunOpsRunbookStepBuilder from "./runops/pages/RunbookStepBuilder.tsx";
@@ -403,6 +574,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+        <GuidanceAgentProvider>
+        <ContextualAudioRoot>
+        <LazyRouteBoundary>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/q/:token" element={<PublicQuestionnaire />} />
@@ -414,6 +588,7 @@ const App = () => (
           <Route path="/no-access" element={<Navigate to="/app" replace />} />
           <Route path="/profile" element={<UpdateProfile />} />
           <Route path="/set-password" element={<ProtectedRoute><SetInitialPassword /></ProtectedRoute>} />
+          <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
           <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/runops" element={<ProtectedRoute><RunOpsLayout /></ProtectedRoute>}>
             <Route index element={<RunOpsExperienceEntry />} />
@@ -425,9 +600,11 @@ const App = () => (
             <Route path="services/:serviceId/topology" element={<RunOpsTopologyExplorer />} />
             <Route path="services/:serviceId/observability" element={<RunOpsObservabilityExplorer />} />
             <Route path="services/:serviceId/readiness" element={<RunOpsOperationalReadiness />} />
+            <Route path="aws-cots-digital-twin" element={<AwsCotsDigitalTwinPage />} />
             <Route path="runbooks" element={<RunOpsRunbookLibrary />} />
             <Route path="runbooks/new" element={<RunOpsRunbookNew />} />
             <Route path="runbooks/:runbookId" element={<RunOpsRunbookDetail />} />
+            <Route path="runbooks/:runbookId/builder" element={<RunOpsRunbookObjectBuilder />} />
             <Route path="runbooks/:runbookId/designer" element={<RunOpsRunbookDesigner />} />
             <Route path="runbooks/:runbookId/steps/:stepId" element={<RunOpsRunbookStepBuilder />} />
             <Route path="runbooks/:runbookId/policy" element={<RunOpsRunbookPolicyDesigner />} />
@@ -495,20 +672,8 @@ const App = () => (
           <Route path="/sead/iot-ai-architecture" element={<ProtectedRoute><SeadIotAiArchitecture /></ProtectedRoute>} />
           <Route path="/sead/simulation-comparison" element={<ProtectedRoute><SeadSimulationComparison /></ProtectedRoute>} />
 
-          <Route path="/semiconductor/command-center" element={<ProtectedRoute><ScenarioProvider><SemiCommandCenter /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/digital-twin" element={<ProtectedRoute><ScenarioProvider><SemiDigitalTwin /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/production-flow" element={<ProtectedRoute><ScenarioProvider><SemiProductionFlow /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/physical-automation" element={<ProtectedRoute><ScenarioProvider><SemiPhysicalAutomation /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/vision-operations" element={<ProtectedRoute><ScenarioProvider><SemiVisionOperations /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/operations-intelligence" element={<ProtectedRoute><ScenarioProvider><SemiOperationsIntelligence /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/resource-optimization" element={<ProtectedRoute><ScenarioProvider><SemiResourceOptimization /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/knowledge-graph" element={<ProtectedRoute><ScenarioProvider><SemiKnowledgeGraph /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/proof-of-value" element={<ProtectedRoute><ScenarioProvider><SemiProofOfValue /></ScenarioProvider></ProtectedRoute>} />
-          <Route path="/semiconductor/facilitator" element={<ProtectedRoute><ScenarioProvider><SemiFacilitator /></ScenarioProvider></ProtectedRoute>} />
 
-          <Route path="/ai-engineering/backlog" element={<ProtectedRoute><AiEngineeringBacklog /></ProtectedRoute>} />
-          <Route path="/ai-engineering/answers-actions" element={<ProtectedRoute><AnswersActions /></ProtectedRoute>} />
-          <Route path="/ai-engineering/agentic-data-foundation" element={<ProtectedRoute><AgenticDataFoundation /></ProtectedRoute>} />
+          
 
           <Route path="/coworkers" element={<Coworkers />} />
           <Route path="/coworkers/network-connectivity-engineering" element={<CoworkersNetwork />} />
@@ -520,6 +685,8 @@ const App = () => (
           <Route path="/coworkers/site-reliability-engineering/release-deployment-rollout" element={<ReleaseDeploymentRollout />} />
           <Route path="/coworkers/site-reliability-engineering/slo-sla-sli-monitoring" element={<SloSlaSliMonitoring />} />
           <Route path="/coworkers/infrastructure-automation" element={<CoworkersInfra />} />
+          <Route path="/coworkers/citrix-platform-digital-coworkers" element={<CitrixPlatformDigitalCoworkers />} />
+
           <Route path="/coworkers/application-support" element={<CoworkersApplicationSupport />} />
           <Route path="/coworkers/application-support/hadoop-health-precheck-agent" element={<HadoopHealthPrecheckAgent />} />
           <Route path="/coworkers/application-support/integration-monitoring-agent" element={<IntegrationMonitoringAgent />} />
@@ -535,7 +702,7 @@ const App = () => (
           <Route path="/coworkers/network-connectivity-engineering/firewall-rule-optimizer" element={<FirewallRuleOptimizer />} />
           <Route path="/coworkers/network-connectivity-engineering/zero-touch-policy-implementation" element={<ZeroTouchPolicyImplementation />} />
           <Route path="/coworkers/network-connectivity-engineering/zero-touch-s2s-vpn-implementation" element={<ZeroTouchS2SVPNImplementation />} />
-          <Route path="/factory-ops-intelligence/maintenance-copilot" element={<FactoryMaintenanceCopilot />} />
+          
           <Route path="/coworkers/it-carve-out-and-separation" element={<CoworkersCarveOut />} />
           <Route path="/coworkers/healthcare-payer" element={<HealthcarePayer />} />
           <Route path="/coworkers/healthcare-payer/prior-authorization" element={<PriorAuthorization />} />
@@ -588,7 +755,7 @@ const App = () => (
           <Route path="/coworkers/it-carve-out-and-separation/cmm/solution-design" element={<CmmSolutionDesign />} />
           <Route path="/coworkers/it-carve-out-and-separation/cmm/operational-dashboard" element={<CmmDashboard />} />
           <Route path="/coworkers/deploy" element={<DeployCoworker />} />
-          <Route path="/operations" element={<Operations />} />
+          
           <Route path="/operational-friction-index" element={<OperationalFrictionIndex />} />
           <Route path="/reliability-foundations" element={<ReliabilityFoundations />} />
           <Route path="/reliability-foundations/google-sre" element={<GoogleSre />} />
@@ -603,7 +770,19 @@ const App = () => (
           <Route path="/product-reliability-anatomy" element={<ProductReliabilityAnatomy />} />
           <Route path="/transformation-journey" element={<TransformationJourney />} />
           <Route path="/product-reliability-transformation-index" element={<OperationalFrictionIndex />} />
-          <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
+          <Route path="/agentic-finops" element={<FinOpsLayout />}>
+            <Route index element={<FinOpsOverview />} />
+            <Route path="overview" element={<FinOpsOverview />} />
+            <Route path="resource-rightsizing" element={<ResourceRightsizingWorkspace />} />
+            <Route path="idle-orphaned-resources" element={<IdleOrphanedResourcesWorkspace />} />
+            <Route path="commitment-optimization" element={<CommitmentOptimizationWorkspace />} />
+            <Route path="elasticity-scheduling" element={<ElasticitySchedulingWorkspace />} />
+            <Route path="storage-data-lifecycle" element={<StorageDataLifecycleWorkspace />} />
+            <Route path="network-data-movement" element={<NetworkDataMovementWorkspace />} />
+            <Route path="platform-architecture-efficiency" element={<PlatformArchitectureEfficiencyWorkspace />} />
+            <Route path="kubernetes-economics" element={<KubernetesEconomicsWorkspace />} />
+            <Route path="governance-realization" element={<GovernanceRealizationWorkspace />} />
+          </Route>
           <Route path="/data-orchestration-twin" element={<DataOrchLayout />}>
             <Route index element={<DataOrchExecutiveControlPlane />} />
             <Route path="executive-control-plane" element={<DataOrchExecutiveControlPlane />} />
@@ -636,30 +815,212 @@ const App = () => (
             <Route path="sow-execution-plan-and-acceptance-dashboard" element={<SowExecutionPlanAndAcceptanceDashboard />} />
             <Route path=":slug" element={<DataOrchPage />} />
           </Route>
+          <Route path="/enterprise-cognitive-fabric" element={<EcfLayout />}>
+            <Route index element={<EcfLanding />} />
+            <Route path="command-center" element={<EnterpriseCommandCenter />} />
+            <Route path="enterprise-overview" element={<EnterpriseCommandCenter />} />
+            <Route path="enterprise-source-discovery" element={<EnterpriseSourceDiscovery />} />
+            <Route path="discovery/source-discovery" element={<EnterpriseSourceDiscovery />} />
+            <Route path="discovery/ingestion-normalization" element={<DiscoveryScaffold />} />
+            <Route path="discovery/configuration" element={<DiscoveryConfiguration />} />
+            <Route path="discovery/discovery-configuration" element={<DiscoveryConfiguration />} />
+            <Route path="discovery-configuration" element={<DiscoveryConfiguration />} />
+
+            <Route path="discovery/pipelines" element={<DiscoveryPipeline />} />
+            <Route path="discovery/pipeline" element={<DiscoveryPipeline />} />
+
+            <Route path="discovery/source-registry" element={<DiscoveryRegistry />} />
+            <Route path="discovery/registry" element={<DiscoveryRegistry />} />
+            <Route path="discovery/connector-health" element={<DiscoveryConnectorHealth />} />
+            <Route path="discovery/artifact-ingestion" element={<ArtifactIngestion />} />
+            <Route path="artifact-ingestion" element={<ArtifactIngestion />} />
+            <Route path="discovery/artifact-normalization" element={<ArtifactNormalization />} />
+            <Route path="artifact-normalization" element={<ArtifactNormalization />} />
+            <Route path="discovery/business-condition-extraction" element={<BusinessConditionExtraction />} />
+            <Route path="business-condition-extraction" element={<BusinessConditionExtraction />} />
+            <Route path="persona-studio/team-persona-construction" element={<TeamPersonaConstruction />} />
+            <Route path="team-persona-construction" element={<TeamPersonaConstruction />} />
+            <Route path="persona-studio/team-persona-library" element={<TeamPersonaLibrary />} />
+            <Route path="team-persona-library" element={<TeamPersonaLibrary />} />
+            <Route path="modeling-memory/cloud-finops-attribute-store" element={<CloudFinOpsAttributeStore />} />
+            <Route path="persona-studio/cloud-finops-attribute-store" element={<CloudFinOpsAttributeStore />} />
+            <Route path="persona-studio/persona-validation" element={<PersonaValidation />} />
+            <Route path="persona-validation" element={<PersonaValidation />} />
+            <Route path="cognitive-memory/enterprise-cognitive-memory" element={<EnterpriseCognitiveMemory />} />
+            <Route path="enterprise-cognitive-memory" element={<EnterpriseCognitiveMemory />} />
+            <Route path="persona-studio/persona-version-history" element={<PersonaStudioScaffold title="Persona Version History" purpose="Version lineage, change summaries, and approval history for Team Personas." />} />
+            <Route path="evaluation/cognitive-intake" element={<CognitiveIntake />} />
+            <Route path="cognitive-intake" element={<CognitiveIntake />} />
+            <Route path="evaluation/cognitive-readiness-assessment" element={<CognitiveReadinessAssessment />} />
+            <Route path="cognitive-readiness-assessment" element={<CognitiveReadinessAssessment />} />
+
+            <Route path="evaluation/persona-impact-analysis" element={<PersonaImpactAnalysis />} />
+            <Route path="persona-impact-analysis" element={<PersonaImpactAnalysis />} />
+            <Route path="evaluation/cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
+            <Route path="evaluation/cross-team-impact-analysis" element={<CrossTeamImpactAnalysis />} />
+            <Route path="cross-team-impact-matrix" element={<CrossTeamImpactAnalysis />} />
+            <Route path="evaluation/decision-intelligence" element={<DecisionIntelligence />} />
+            <Route path="decision-intelligence" element={<DecisionIntelligence />} />
+            <Route path="learning/organizational-learning" element={<OrganizationalLearning />} />
+            <Route path="organizational-learning" element={<OrganizationalLearning />} />
+            <Route path="health/enterprise-cognitive-health" element={<EnterpriseCognitiveHealth />} />
+            <Route path="enterprise-cognitive-health" element={<EnterpriseCognitiveHealth />} />
+
+            <Route path=":slug" element={<EcfPage />} />
+          </Route>
           <Route path="/measuring-success" element={<MeasuringSuccess />} />
           
-          <Route path="/product-line-map" element={<ProductLineMap />} />
-          <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
-          <Route path="/production-topology" element={<ProductionTopology />} />
-          <Route path="/sre-operating-model" element={<SreOperatingModel />} />
-          <Route path="/signal-intelligence" element={<SignalIntelligence />} />
-          <Route path="/enterprise-cloud-twin" element={<ScenarioStateProvider><EnterpriseCloudTwin /></ScenarioStateProvider>} />
-          <Route path="/aws-resilience-architecture-twin" element={<AWSResilienceArchitectureTwin />} />
-          <Route path="/platform-engineering-factory" element={<PlatformEngineeringFactory />} />
-          <Route path="/hybrid-cloud-workbench" element={<HybridCloudWorkbench />} />
-          <Route path="/automation-marketplace" element={<AutomationMarketplace />} />
-          <Route path="/modernization-factory" element={<ModernizationFactory />} />
-          <Route path="/cyber-resilience-overlay" element={<CyberResilienceOverlay />} />
-          <Route path="/ai-coworker-control-room" element={<AiCoworkerControlRoom />} />
-          <Route path="/transition-dual-run" element={<TransitionDualRun />} />
-          <Route path="/acquisition-onboarding-factory" element={<AcquisitionOnboardingFactory />} />
-          <Route path="/value-creation-board" element={<ValueCreationBoard />} />
-          <Route path="/modernization-roadmap" element={<ModernizationRoadmap />} />
-          <Route path="/interactive-demo-center" element={<InteractiveDemoCenter />} />
-          <Route path="/modernization-roadmap-v2" element={<ModernizationRoadmapV2 />} />
           <Route path="/executive-service-owner-twin" element={<ExecutiveServiceOwnerTwin />} />
           <Route path="/delivery-org-twin" element={<DeliveryOrgTwin />} />
           <Route path="/engagement-manager-twin" element={<EngagementManagerTwin />} />
+          <Route element={<NocLayout />}>
+            <Route path="/operations/traditional-noc/global-optical-operations" element={<TraditionalNocOperationsCenter />} />
+          </Route>
+          <Route element={<SreAgenticNocLayout />}>
+            <Route path="/operations/sre-agentic-noc" element={<SreAgenticOpticalOperationsCenter />} />
+            <Route path="/operations/sre-agentic-noc/global-optical-operations" element={<SreAgenticOpticalOperationsCenter />} />
+            {sreNocNav
+              .filter((item) => item.to !== "/operations/sre-agentic-noc/global-optical-operations")
+              .map((item) => (
+                <Route key={item.to} path={item.to} element={<SreAgenticNocPlaceholder />} />
+              ))}
+          </Route>
+          <Route path="/agentic-sre-noc" element={<NocLayout />}>
+
+            <Route index element={<GlobalOpticalOperationsCenter />} />
+            <Route path="customer-service-health" element={<CustomerServiceHealthExplorer />} />
+            <Route path="global-link-health-twin" element={<GlobalLinkHealthTwin />} />
+            <Route path="global-link-health-twin/production-architecture" element={<GlhtProductionArchitecture />} />
+            <Route path="global-link-health-twin/predictive-optical-link-intelligence" element={<PredictiveOpticalLinkIntelligence />} />
+            <Route path="service-topology" element={<GlobalOpticalServiceTopology />} />
+            <Route path="predictive-link-risk" element={<PredictiveLinkRiskCenter />} />
+            <Route path="situation-room" element={<ActiveSituationRoom />} />
+            <Route path="investigation" element={<AgenticInvestigationWorkspace />} />
+            <Route path="approvals" element={<HumanApprovalActionCenter />} />
+            <Route path="recovery" element={<AutonomousRecoveryMonitor />} />
+            <Route path="slo-error-budget" element={<NocPage slug="slo-error-budget" />} />
+            <Route path="executive-value" element={<NocPage slug="executive-value" />} />
+          </Route>
+          <Route path="/agentic-iac-engineering" element={<IacLayout />}>
+            <Route index element={<AssetDigitalTwin />} />
+            <Route path="remediation-intelligence" element={<RemediationIntelligence />} />
+            <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
+            <Route path="change-engineering" element={<ChangeEngineering />} />
+            <Route path="change-engineering/:assetId" element={<ChangeEngineering />} />
+            <Route path="change-review" element={<ChangeReviewApproval />} />
+            <Route path="change-review/:packageId" element={<ChangeReviewApproval />} />
+            <Route path="execution-center" element={<ExecutionCenter />} />
+            <Route path="execution-center/:packageId" element={<ExecutionCenter />} />
+          </Route>
+          <Route path="/context-evidence" element={<ContextEvidenceLayout />}>
+            <Route index element={<Navigate to="/context-evidence/overview" replace />} />
+            <Route path="overview" element={<ContextEvidenceOverview />} />
+            <Route path="sources" element={<ContextEvidencePlaceholder />} />
+            <Route path="data-model" element={<ContextEvidencePlaceholder />} />
+            <Route path="indexing" element={<ContextEvidencePlaceholder />} />
+            <Route path="policies" element={<ContextEvidencePlaceholder />} />
+            <Route path="quality" element={<ContextEvidencePlaceholder />} />
+            <Route path="access" element={<ContextEvidencePlaceholder />} />
+            <Route path="settings" element={<ContextEvidencePlaceholder />} />
+          </Route>
+          <Route path="/models-routing" element={<ModelsRoutingLayout />}>
+            <Route index element={<Navigate to="/models-routing/overview" replace />} />
+            <Route path="overview" element={<ModelsRoutingOverview />} />
+            <Route path="models" element={<ModelsRoutingPlaceholder />} />
+            <Route path="providers" element={<ModelsRoutingPlaceholder />} />
+            <Route path="policies" element={<ModelsRoutingPlaceholder />} />
+            <Route path="guardrails" element={<ModelsRoutingPlaceholder />} />
+            <Route path="evaluations" element={<ModelsRoutingPlaceholder />} />
+            <Route path="cost" element={<ModelsRoutingPlaceholder />} />
+            <Route path="access" element={<ModelsRoutingPlaceholder />} />
+            <Route path="settings" element={<ModelsRoutingPlaceholder />} />
+          </Route>
+
+          <Route path="/agent-orchestration" element={<AgentOrchestrationLayout />}>
+            <Route index element={<Navigate to="/agent-orchestration/overview" replace />} />
+            <Route path="overview" element={<AgentOrchestrationOverview />} />
+            <Route path="workflows" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="participants" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="state" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="policies" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="tools" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="runs" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="evaluation" element={<AgentOrchestrationPlaceholder />} />
+            <Route path="settings" element={<AgentOrchestrationPlaceholder />} />
+          </Route>
+
+          <Route path="/iam-admin" element={<IamAdminLayout />}>
+            <Route index element={<Navigate to="/iam-admin/overview" replace />} />
+            <Route path="overview" element={<IamAdminOverview />} />
+            <Route path="identities" element={<IamAdminPlaceholder />} />
+            <Route path="digital-coworkers" element={<IamAdminPlaceholder />} />
+            <Route path="roles" element={<IamAdminPlaceholder />} />
+            <Route path="policies" element={<IamAdminPlaceholder />} />
+            <Route path="delegation" element={<IamAdminPlaceholder />} />
+            <Route path="credentials" element={<IamAdminPlaceholder />} />
+            <Route path="reviews" element={<IamAdminPlaceholder />} />
+            <Route path="audit" element={<IamAdminPlaceholder />} />
+            <Route path="settings" element={<IamAdminPlaceholder />} />
+          </Route>
+
+          <Route path="/finops-admin" element={<FinOpsAdminLayout />}>
+            <Route index element={<Navigate to="/finops-admin/overview" replace />} />
+            <Route path="overview" element={<FinOpsAdminOverview />} />
+            <Route path="cost-policies" element={<FinOpsAdminPlaceholder />} />
+            <Route path="cloud-accounts" element={<FinOpsAdminPlaceholder />} />
+            <Route path="optimization-registry" element={<FinOpsAdminPlaceholder />} />
+            <Route path="unit-economics" element={<FinOpsAdminPlaceholder />} />
+            <Route path="approval-execution" element={<FinOpsAdminPlaceholder />} />
+            <Route path="savings-validation" element={<FinOpsAdminPlaceholder />} />
+            <Route path="evaluations" element={<FinOpsAdminPlaceholder />} />
+            <Route path="access-security" element={<FinOpsAdminPlaceholder />} />
+            <Route path="settings" element={<FinOpsAdminPlaceholder />} />
+          </Route>
+
+
+          <Route path="/intelligent-iac" element={<IacLayout />}>
+            <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
+            <Route path="change-engineering" element={<ChangeEngineering />} />
+            <Route path="change-engineering/:assetId" element={<ChangeEngineering />} />
+            <Route path="change-review" element={<ChangeReviewApproval />} />
+            <Route path="change-review/:packageId" element={<ChangeReviewApproval />} />
+            <Route path="execution" element={<ExecutionCenter />} />
+            <Route path="execution/:packageId" element={<ExecutionCenter />} />
+            <Route path="validation/:packageId" element={<ValidationEvidence />} />
+            <Route path="validation" element={<ValidationEvidence />} />
+            <Route path="platform/deployment-architecture" element={<DeploymentArchitecture />} />
+            <Route path="platform/integrations" element={<IntegrationsConnectivity />} />
+            <Route path="platform/access-security" element={<AccessGovernance />} />
+            <Route path="platform/policies-governance" element={<PoliciesGovernance />} />
+            <Route path="platform/audit-compliance" element={<PlatformAdminPlaceholder />} />
+            <Route path="platform/system-settings" element={<SystemSettingsPage />} />
+
+          </Route>
+
+
+
+          <Route element={<SreLayout />}>
+            <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
+            <Route path="/product-line-map" element={<ProductLineMap />} />
+            <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
+            <Route path="/production-topology" element={<ProductionTopology />} />
+            <Route path="/sre-operating-model" element={<SreOperatingModel />} />
+            <Route path="/signal-intelligence" element={<SignalIntelligence />} />
+            <Route path="/enterprise-cloud-twin" element={<ScenarioStateProvider><EnterpriseCloudTwin /></ScenarioStateProvider>} />
+            <Route path="/aws-resilience-architecture-twin" element={<AWSResilienceArchitectureTwin />} />
+            <Route path="/platform-engineering-factory" element={<PlatformEngineeringFactory />} />
+            <Route path="/hybrid-cloud-workbench" element={<HybridCloudWorkbench />} />
+            <Route path="/automation-marketplace" element={<AutomationMarketplace />} />
+            <Route path="/modernization-factory" element={<ModernizationFactory />} />
+            <Route path="/cyber-resilience-overlay" element={<CyberResilienceOverlay />} />
+            <Route path="/ai-coworker-control-room" element={<AiCoworkerControlRoom />} />
+            <Route path="/transition-dual-run" element={<TransitionDualRun />} />
+            <Route path="/acquisition-onboarding-factory" element={<AcquisitionOnboardingFactory />} />
+            <Route path="/value-creation-board" element={<ValueCreationBoard />} />
+            <Route path="/modernization-roadmap" element={<ModernizationRoadmap />} />
+            <Route path="/interactive-demo-center" element={<InteractiveDemoCenter />} />
+            <Route path="/modernization-roadmap-v2" element={<ModernizationRoadmapV2 />} />
+          </Route>
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/change" element={<ChangeManagement />} />
@@ -717,12 +1078,29 @@ const App = () => (
           <Route path="/assurance/workflow-detail" element={<WorkflowDetail />} />
           <Route path="/assurance/execute" element={<LiveExecution />} />
           <Route path="/itsm" element={<Itsm />} />
+          <Route path="/itsm/auto-ticket-categorization" element={<AutoTicketCategorization />} />
+          <Route path="/itsm/auto-ticket-categorization/incident-console" element={<AtcIncidentConsole />} />
+          <Route path="/itsm/auto-ticket-categorization/ticket-queue" element={<AtcTicketQueue />} />
+          <Route path="/itsm/auto-ticket-categorization/my-team" element={<AtcMyTeam />} />
+          <Route path="/itsm/auto-ticket-categorization/sla-kpis" element={<AtcSlaKpis />} />
+          <Route path="/itsm/auto-ticket-categorization/knowledge-base" element={<AtcKnowledgeBase />} />
+          <Route path="/itsm/auto-ticket-categorization/reports" element={<AtcReports />} />
+          <Route path="/itsm/auto-ticket-categorization/auto" element={<AtcAutoConfig />} />
+          <Route path="/itsm/auto-ticket-categorization/major-incidents" element={<AtcMajorIncidents />} />
+          <Route path="/itsm/auto-ticket-categorization/escalations" element={<AtcEscalations />} />
+          <Route path="/itsm/auto-ticket-categorization/change-calendar" element={<AtcChangeCalendar />} />
+          <Route path="/itsm/auto-ticket-categorization/on-call-schedule" element={<AtcOnCallSchedule />} />
+          <Route path="/itsm/auto-ticket-categorization/business-services" element={<AtcBusinessServices />} />
+          <Route path="/itsm/auto-ticket-categorization/assignments" element={<AtcAssignments />} />
+          <Route path="/itsm/auto-ticket-categorization/categorization-rules" element={<AtcCategorizationRules />} />
+          <Route path="/itsm/auto-ticket-categorization/integrations" element={<AtcIntegrations />} />
           <Route path="/itsm/exec-biz-ops" element={<ExecBizOps />} />
           <Route path="/itsm/exec-biz-ops/executive-command-center" element={<ExecutiveCommandCenter />} />
-          <Route path="/itsm/exec-biz-ops/business-services" element={<BusinessServices />} />
-          <Route path="/itsm/exec-biz-ops/customer-experience" element={<CustomerExperience />} />
-          <Route path="/itsm/exec-biz-ops/sla-slo-error-budget" element={<SlaSloErrorBudget />} />
-          <Route path="/itsm/exec-biz-ops/risk-exposure" element={<RiskExposure />} />
+          <Route path="/itsm/exec-biz-ops/business-services" element={<ItsmBusinessServices />} />
+          <Route path="/itsm/exec-biz-ops/customer-experience" element={<ItsmCustomerExperience />} />
+          <Route path="/itsm/exec-biz-ops/sla-slo-error-budget" element={<ItsmSlaSloErrorBudget />} />
+          <Route path="/itsm/exec-biz-ops/risk-exposure" element={<ItsmRiskExposure />} />
+
           <Route path="/crm" element={<ProtectedRoute><CompaniesList /></ProtectedRoute>} />
           <Route path="/crm/companies/:companyId" element={<ProtectedRoute><CompanyWorkspace /></ProtectedRoute>} />
           <Route path="/crm/companies/:companyId/stakeholders/new" element={<ProtectedRoute><StakeholderFormPage /></ProtectedRoute>} />
@@ -779,8 +1157,17 @@ const App = () => (
           <Route path="/auth-orchestration" element={<AuthOrchestration />} />
           <Route path="/data-orchestration-twin/site-resilience-detect-and-isolate-network-issue" element={<SiteResilienceCoworker />} />
           <Route path="/questionnaires" element={<ProtectedRoute><Questionnaires /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy" element={<ProtectedRoute requireAdmin><TechnologyTaxonomyPage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/technologies/new" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/technologies/:technologyId" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/technologies/:technologyId/edit" element={<ProtectedRoute requireAdmin><TechnologyProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/domains" element={<ProtectedRoute requireAdmin><DomainsPage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/domains/new" element={<ProtectedRoute requireAdmin><DomainProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/domains/:domainId" element={<ProtectedRoute requireAdmin><DomainProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/technology-taxonomy/domains/:domainId/edit" element={<ProtectedRoute requireAdmin><DomainProfilePage /></ProtectedRoute>} />
           <Route path="/settings/approvals" element={<Navigate to="/settings/user-management" replace />} />
           <Route path="/settings/user-management" element={<ProtectedRoute requireAdmin><UserManagement /></ProtectedRoute>} />
+          <Route path="/settings/guidance-insights" element={<ProtectedRoute requireAdmin><GuidanceInsights /></ProtectedRoute>} />
           <Route path="/settings/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
           <Route path="/settings/organization" element={<ProtectedRoute requireAdmin><OrganizationLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="business-units" replace />} />
@@ -788,38 +1175,6 @@ const App = () => (
             <Route path=":levelSlug" element={<EntityListPage />} />
             <Route path=":levelSlug/:id" element={<EntityDetailPage />} />
           </Route>
-          {/* AOCP — Application Intelligence */}
-          <Route path="/aocp/:appId" element={<ApplicationProfile />} />
-          <Route path="/aocp/:appId/environments" element={<EnvironmentModel />} />
-          <Route path="/aocp/:appId/criticality" element={<BusinessCriticality />} />
-          <Route path="/aocp/:appId/outcomes" element={<DesiredOutcomes />} />
-          <Route path="/aocp/:appId/lifecycle" element={<LifecycleTechDebt />} />
-          <Route path="/aocp/:appId/admin" element={<AdminModel />} />
-          {/* AOCP — Placeholders (coming soon) */}
-          <Route path="/aocp/:appId/hosting" element={<AocpPlaceholder title="Hosting Platform" />} />
-          <Route path="/aocp/:appId/compute" element={<AocpPlaceholder title="Compute Services" />} />
-          <Route path="/aocp/:appId/storage" element={<AocpPlaceholder title="Storage & Data Services" />} />
-          <Route path="/aocp/:appId/databases" element={<AocpPlaceholder title="Database Services" />} />
-          <Route path="/aocp/:appId/network" element={<AocpPlaceholder title="Network & Edge Services" />} />
-          <Route path="/aocp/:appId/config-drift" element={<AocpPlaceholder title="Configuration & Drift Management" />} />
-          <Route path="/aocp/:appId/tasks" element={<AocpPlaceholder title="Operational Task Inventory" />} />
-          <Route path="/aocp/:appId/support-scope" element={<AocpPlaceholder title="Support Scope L1–L4" />} />
-          <Route path="/aocp/:appId/workload" element={<AocpPlaceholder title="Workload Profile" />} />
-          <Route path="/aocp/:appId/service-catalog" element={<AocpPlaceholder title="Service Catalog & Request Model" />} />
-          <Route path="/aocp/:appId/escalation" element={<AocpPlaceholder title="Escalation & On-Call" />} />
-          <Route path="/aocp/:appId/automation-catalog" element={<AocpPlaceholder title="Automation Catalog" />} />
-          <Route path="/aocp/:appId/automation-heatmap" element={<AocpPlaceholder title="Automation Opportunity Heatmap" />} />
-          <Route path="/aocp/:appId/auto-remediation" element={<AocpPlaceholder title="Auto Remediation Center" />} />
-          <Route path="/aocp/:appId/coworker-catalog" element={<AocpPlaceholder title="Digital Coworker Catalog" />} />
-          <Route path="/aocp/:appId/agentic-workflows" element={<AocpPlaceholder title="Agentic Workflow Library" />} />
-          <Route path="/aocp/:appId/raci" element={<AocpPlaceholder title="Human, Automation & Digital Coworker RACI" />} />
-          <Route path="/aocp/:appId/agentic-governance" element={<AocpPlaceholder title="Agentic Governance, Guardrails & Audit" />} />
-          <Route path="/aocp/:appId/automation-roi" element={<AocpPlaceholder title="Automation Value & ROI" />} />
-          <Route path="/aocp/:appId/maturity" element={<AocpPlaceholder title="AOCP Maturity Model" />} />
-          <Route path="/aocp/:appId/cost-model" element={<AocpPlaceholder title="Internal Cost Model" />} />
-          <Route path="/aocp/:appId/pricing" element={<AocpPlaceholder title="Customer Pricing" />} />
-          <Route path="/aocp/:appId/scenarios" element={<AocpPlaceholder title="Scenario Modeling" />} />
-          <Route path="/aocp/:appId/runops-model" element={<AocpPlaceholder title="Final RunOps Support Model" />} />
           <Route path="/crm-demo" element={<CustomerSelectionDemo />} />
           <Route path="/crm-demo/engagement" element={<EngagementProfileDemo />} />
           <Route path="/crm-demo/stakeholders" element={<StakeholderMapDemo />} />
@@ -827,9 +1182,94 @@ const App = () => (
           <Route path="/crm-demo/confidence" element={<DiscoveryConfidenceDemo />} />
           <Route path="/settings/stakeholder-register" element={<Navigate to="/crm" replace />} />
           <Route path="/settings/stakeholder-register-legacy" element={<ProtectedRoute><StakeholderRegister /></ProtectedRoute>} />
+          <Route path="/silicon" element={<SiliconLayout />}>
+            <Route index element={<FoundationStatus />} />
+          </Route>
+          <Route path="/avep" element={<AvepLayout />}>
+            <Route index element={<Navigate to="/avep/overview" replace />} />
+            <Route path="overview" element={<Overview />} />
+            <Route path="program" element={<ProgramWorkspace />} />
+            <Route path="context/engineering-context" element={<ProgramWorkspace />} />
+            <Route path="requirements" element={<RequirementsIntakeWorkspace />} />
+            <Route path="requirements-review" element={<RequirementsQualityWorkspace />} />
+            <Route path="specification" element={<EngineeringTraceabilityWorkspace />} />
+            <Route path="architecture" element={<LogicalArchitectureWorkspace />} />
+            <Route path="rtl" element={<EngineeringSpecVerificationWorkspace />} />
+            <Route path="design/rtl-generation" element={<RtlGenerationStudio />} />
+            <Route path="design/change-impact" element={<RtlChangeImpactAnalysis />} />
+            <Route path="verification/environment-builder" element={<VerificationEnvironmentBuilder />} />
+            <Route path="verification/test-factory" element={<TestFactory />} />
+            <Route path="verification/simulation-operations" element={<SimulationOperations />} />
+            <Route path="verification/failure-diagnosis" element={<FailureDiagnosis />} />
+            <Route path="readiness/coverage-closure" element={<CoverageClosureReadiness />} />
+            <Route path="readiness/signoff" element={<SignoffReadiness />} />
+            <Route path="readiness/release-package" element={<ReleasePackage />} />
+            <Route path="governance/ai-value" element={<AiGovernanceValue />} />
+            <Route path="readiness/physical-design-intake" element={<PhysicalDesignIntake />} />
+            <Route path="demo/end-to-end-story" element={<EndToEndStory />} />
+            {AVEP_NAV.filter((n) => !["/avep", "/avep/overview", "/avep/program", "/avep/requirements", "/avep/requirements-review", "/avep/specification", "/avep/architecture", "/avep/rtl", "/avep/design/rtl-generation", "/avep/design/change-impact", "/avep/verification/environment-builder", "/avep/verification/test-factory", "/avep/verification/simulation-operations", "/avep/verification/failure-diagnosis", "/avep/readiness/coverage-closure", "/avep/readiness/signoff", "/avep/readiness/release-package", "/avep/governance/ai-value", "/avep/readiness/physical-design-intake", "/avep/demo/end-to-end-story"].includes(n.path)).map((n) => (
+              <Route key={n.id} path={n.path.replace(/^\/avep\//, "")} element={<ModulePlaceholder />} />
+            ))}
+          </Route>
+          <Route path="/neurealm-agentic-ai" element={<NeurealmAgenticAI />} />
+          <Route path="/invitations/:token" element={<AcceptInvitation />} />
+          <Route path="/platform" element={<PlatformLayout />}>
+            <Route index element={<PermissionRoute permission="tenant.view"><PlatformHome /></PermissionRoute>} />
+            <Route path="members" element={<PermissionRoute permission="members.view"><PlatformMembers /></PermissionRoute>} />
+            <Route path="roles" element={<PermissionRoute permission="roles.view"><PlatformRoles /></PermissionRoute>} />
+            <Route path="audit" element={<PermissionRoute permission="audit.view"><PlatformAudit /></PermissionRoute>} />
+            <Route path="settings" element={<PermissionRoute permission="tenant.view"><PlatformTenantSettings /></PermissionRoute>} />
+            <Route path="profile" element={<PlatformProfile />} />
+            <Route path="test-hub" element={<PlatformTestHub />} />
+            <Route path="modules" element={<PlatformModuleRegistry />} />
+            {capabilityIntelligenceRoutes}
+
+            <Route path="audio" element={<PermissionRoute permission="audio.view"><CaeNarrativeLibrary /></PermissionRoute>} />
+            <Route path="audio/narratives/new" element={<PermissionRoute permission="audio.narrative.author"><CaeNarrativeEditor /></PermissionRoute>} />
+            <Route path="audio/narratives/:narrativeId" element={<PermissionRoute permission="audio.view"><CaeNarrativeDetail /></PermissionRoute>} />
+            <Route path="audio/narratives/:narrativeId/edit" element={<PermissionRoute permission="audio.narrative.author"><CaeNarrativeEditor /></PermissionRoute>} />
+            <Route path="audio/profiles" element={<PermissionRoute permission="audio.view"><CaeSpeechProfileManager /></PermissionRoute>} />
+            <Route path="audio/placements" element={<PermissionRoute permission="audio.view"><CaePlacementMap /></PermissionRoute>} />
+            <Route path="audio/pronunciation" element={<PermissionRoute permission="audio.view"><CaePronunciationDictionary /></PermissionRoute>} />
+            <Route path="audio/analytics" element={<PermissionRoute permission="audio.analytics.view"><CaeAudioAnalytics /></PermissionRoute>} />
+          </Route>
+          <Route path="/commercial" element={<CommercialLayout />}>
+            <Route index element={<PermissionRoute permission="commercial.view"><CommercialOverview /></PermissionRoute>} />
+            <Route path="program" element={<PermissionRoute permission="commercial.view"><CommercialProgram /></PermissionRoute>} />
+            <Route path="program-timeline" element={<PermissionRoute permission="commercial.view"><CommercialProgramTimeline /></PermissionRoute>} />
+            <Route path="staffing-resources" element={<PermissionRoute permission="commercial.view"><CommercialStaffingResources /></PermissionRoute>} />
+            <Route path="neurealm-governance" element={<PermissionRoute permission="commercial.view"><CommercialNeurealmGovernance /></PermissionRoute>} />
+
+            <Route path="scenarios" element={<PermissionRoute permission="commercial.view"><CommercialScenarios /></PermissionRoute>} />
+            <Route path="portfolio" element={<PermissionRoute permission="commercial.view"><CommercialPortfolio /></PermissionRoute>} />
+            <Route path="sources" element={<PermissionRoute permission="commercial.view"><CommercialSources /></PermissionRoute>} />
+            <Route path="model/revenue" element={<PermissionRoute permission="commercial.view"><CommercialRevenue /></PermissionRoute>} />
+            <Route path="model/pnl" element={<PermissionRoute permission="commercial.view"><CommercialPnl /></PermissionRoute>} />
+            <Route path="model/cash" element={<PermissionRoute permission="commercial.view"><CommercialCash /></PermissionRoute>} />
+            <Route path="model/assumptions" element={<PermissionRoute permission="commercial.view"><CommercialAssumptions /></PermissionRoute>} />
+            <Route path="model/assumptions/change-sets/:id" element={<PermissionRoute permission="commercial.view"><CommercialAssumptionChangeSet /></PermissionRoute>} />
+            <Route path="model/compare" element={<PermissionRoute permission="commercial.view"><CommercialCompare /></PermissionRoute>} />
+            <Route path="model/compare/:id" element={<PermissionRoute permission="commercial.view"><CommercialCompareDetail /></PermissionRoute>} />
+            <Route path="model/sensitivity" element={<PermissionRoute permission="commercial.view"><CommercialSensitivity /></PermissionRoute>} />
+            <Route path="model/sensitivity/:id" element={<PermissionRoute permission="commercial.view"><CommercialSensitivityDetail /></PermissionRoute>} />
+            <Route path="model/release" element={<PermissionRoute permission="commercial.view"><CommercialRelease /></PermissionRoute>} />
+            <Route path="model/release/:versionId" element={<PermissionRoute permission="commercial.view"><CommercialReleaseDetail /></PermissionRoute>} />
+            
+
+
+
+
+          </Route>
+          {/* Internal CAE component fixture — development builds only, never in navigation */}
+          {import.meta.env.DEV && (
+            <Route path="/_dev/cae-components" element={<CaeComponentFixture />} />
+          )}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </LazyRouteBoundary>
+        </ContextualAudioRoot>
+        </GuidanceAgentProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

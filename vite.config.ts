@@ -13,10 +13,15 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  // maplibre-gl ships its own web worker; pre-bundling breaks the worker URL.
+  optimizeDeps: {
+    exclude: ["maplibre-gl"],
+  },
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core", "d3-selection", "d3-zoom", "d3-drag"],
+    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core", "d3-selection", "d3-zoom", "d3-drag", "three", "@react-three/fiber", "@react-three/drei"],
   },
 }));

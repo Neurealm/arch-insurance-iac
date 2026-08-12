@@ -170,6 +170,2739 @@ export type Database = {
           },
         ]
       }
+      audio_narrative_versions: {
+        Row: {
+          approved_at: string | null
+          approver_user_id: string | null
+          author_user_id: string | null
+          change_summary: string | null
+          content_hash: string | null
+          created_at: string
+          created_by: string | null
+          effective_end_at: string | null
+          effective_start_at: string | null
+          estimated_duration_seconds: number | null
+          id: string
+          narrative_id: string
+          published_at: string | null
+          retired_at: string | null
+          reviewer_user_id: string | null
+          source_text: string
+          speech_markup: string | null
+          speech_profile_id: string | null
+          speech_text: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          version_no: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_user_id?: string | null
+          author_user_id?: string | null
+          change_summary?: string | null
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_end_at?: string | null
+          effective_start_at?: string | null
+          estimated_duration_seconds?: number | null
+          id?: string
+          narrative_id: string
+          published_at?: string | null
+          retired_at?: string | null
+          reviewer_user_id?: string | null
+          source_text: string
+          speech_markup?: string | null
+          speech_profile_id?: string | null
+          speech_text?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version_no: number
+        }
+        Update: {
+          approved_at?: string | null
+          approver_user_id?: string | null
+          author_user_id?: string | null
+          change_summary?: string | null
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_end_at?: string | null
+          effective_start_at?: string | null
+          estimated_duration_seconds?: number | null
+          id?: string
+          narrative_id?: string
+          published_at?: string | null
+          retired_at?: string | null
+          reviewer_user_id?: string | null
+          source_text?: string
+          speech_markup?: string | null
+          speech_profile_id?: string | null
+          speech_text?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version_no?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_narrative_versions_narrative_id_fkey"
+            columns: ["narrative_id"]
+            isOneToOne: false
+            referencedRelation: "audio_narratives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_narrative_versions_speech_profile_id_fkey"
+            columns: ["speech_profile_id"]
+            isOneToOne: false
+            referencedRelation: "audio_speech_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_narrative_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_narratives: {
+        Row: {
+          active_version_id: string | null
+          audience: string
+          call_id: string
+          created_at: string
+          created_by: string | null
+          default_locale: string
+          default_speech_profile_id: string | null
+          description: string | null
+          id: string
+          module_key: string
+          name: string
+          owner_user_id: string | null
+          scope_reference: string | null
+          scope_type: string
+          status: string
+          tenant_id: string
+          topic_key: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active_version_id?: string | null
+          audience?: string
+          call_id: string
+          created_at?: string
+          created_by?: string | null
+          default_locale?: string
+          default_speech_profile_id?: string | null
+          description?: string | null
+          id?: string
+          module_key: string
+          name: string
+          owner_user_id?: string | null
+          scope_reference?: string | null
+          scope_type?: string
+          status?: string
+          tenant_id: string
+          topic_key: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active_version_id?: string | null
+          audience?: string
+          call_id?: string
+          created_at?: string
+          created_by?: string | null
+          default_locale?: string
+          default_speech_profile_id?: string | null
+          description?: string | null
+          id?: string
+          module_key?: string
+          name?: string
+          owner_user_id?: string | null
+          scope_reference?: string | null
+          scope_type?: string
+          status?: string
+          tenant_id?: string
+          topic_key?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_narratives_active_version_fk"
+            columns: ["active_version_id"]
+            isOneToOne: false
+            referencedRelation: "audio_narrative_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_narratives_default_speech_profile_id_fkey"
+            columns: ["default_speech_profile_id"]
+            isOneToOne: false
+            referencedRelation: "audio_speech_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_narratives_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_placements: {
+        Row: {
+          audience: string
+          button_label: string | null
+          call_id: string
+          component_key: string | null
+          created_at: string
+          created_by: string | null
+          display_variant: string
+          id: string
+          is_enabled: boolean
+          module_key: string
+          narrative_id: string
+          page_key: string | null
+          placement_key: string
+          record_context_type: string | null
+          required_permission_code: string | null
+          route_pattern: string | null
+          section_key: string | null
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          audience?: string
+          button_label?: string | null
+          call_id: string
+          component_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_variant?: string
+          id?: string
+          is_enabled?: boolean
+          module_key: string
+          narrative_id: string
+          page_key?: string | null
+          placement_key: string
+          record_context_type?: string | null
+          required_permission_code?: string | null
+          route_pattern?: string | null
+          section_key?: string | null
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          audience?: string
+          button_label?: string | null
+          call_id?: string
+          component_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_variant?: string
+          id?: string
+          is_enabled?: boolean
+          module_key?: string
+          narrative_id?: string
+          page_key?: string | null
+          placement_key?: string
+          record_context_type?: string | null
+          required_permission_code?: string | null
+          route_pattern?: string | null
+          section_key?: string | null
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_placements_narrative_id_fkey"
+            columns: ["narrative_id"]
+            isOneToOne: false
+            referencedRelation: "audio_narratives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_placements_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_playback_events: {
+        Row: {
+          audience: string | null
+          browser_capability: string | null
+          browser_supported: boolean | null
+          call_id: string | null
+          char_count: number | null
+          duration_ms: number | null
+          error_category: string | null
+          error_code: string | null
+          event_type: string
+          id: string
+          locale: string | null
+          module_key: string | null
+          narrative_id: string | null
+          narrative_version_id: string | null
+          occurred_at: string
+          page_key: string | null
+          placement_key: string | null
+          playback_state: string | null
+          section_key: string | null
+          tenant_id: string
+          user_id: string | null
+          version_no: number | null
+          voice_name: string | null
+        }
+        Insert: {
+          audience?: string | null
+          browser_capability?: string | null
+          browser_supported?: boolean | null
+          call_id?: string | null
+          char_count?: number | null
+          duration_ms?: number | null
+          error_category?: string | null
+          error_code?: string | null
+          event_type: string
+          id?: string
+          locale?: string | null
+          module_key?: string | null
+          narrative_id?: string | null
+          narrative_version_id?: string | null
+          occurred_at?: string
+          page_key?: string | null
+          placement_key?: string | null
+          playback_state?: string | null
+          section_key?: string | null
+          tenant_id: string
+          user_id?: string | null
+          version_no?: number | null
+          voice_name?: string | null
+        }
+        Update: {
+          audience?: string | null
+          browser_capability?: string | null
+          browser_supported?: boolean | null
+          call_id?: string | null
+          char_count?: number | null
+          duration_ms?: number | null
+          error_category?: string | null
+          error_code?: string | null
+          event_type?: string
+          id?: string
+          locale?: string | null
+          module_key?: string | null
+          narrative_id?: string | null
+          narrative_version_id?: string | null
+          occurred_at?: string
+          page_key?: string | null
+          placement_key?: string | null
+          playback_state?: string | null
+          section_key?: string | null
+          tenant_id?: string
+          user_id?: string | null
+          version_no?: number | null
+          voice_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_playback_events_narrative_id_fkey"
+            columns: ["narrative_id"]
+            isOneToOne: false
+            referencedRelation: "audio_narratives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_playback_events_narrative_version_id_fkey"
+            columns: ["narrative_version_id"]
+            isOneToOne: false
+            referencedRelation: "audio_narrative_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_playback_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_pronunciation_rules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_enabled: boolean
+          locale: string | null
+          match_text: string
+          match_type: string
+          module_key: string | null
+          priority: number
+          replacement_text: string
+          scope: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_enabled?: boolean
+          locale?: string | null
+          match_text: string
+          match_type?: string
+          module_key?: string | null
+          priority?: number
+          replacement_text: string
+          scope?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_enabled?: boolean
+          locale?: string | null
+          match_text?: string
+          match_type?: string
+          module_key?: string | null
+          priority?: number
+          replacement_text?: string
+          scope?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_pronunciation_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_speech_profiles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_name: string
+          fallback_locale: string
+          fallback_profile_id: string | null
+          id: string
+          is_default: boolean
+          is_enabled: boolean
+          locale: string
+          pitch: number
+          preferred_voice_names: string[]
+          profile_key: string
+          rate: number
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          volume: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_name: string
+          fallback_locale?: string
+          fallback_profile_id?: string | null
+          id?: string
+          is_default?: boolean
+          is_enabled?: boolean
+          locale?: string
+          pitch?: number
+          preferred_voice_names?: string[]
+          profile_key: string
+          rate?: number
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          volume?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_name?: string
+          fallback_locale?: string
+          fallback_profile_id?: string | null
+          id?: string
+          is_default?: boolean
+          is_enabled?: boolean
+          locale?: string
+          pitch?: number
+          preferred_voice_names?: string[]
+          profile_key?: string
+          rate?: number
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          volume?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_speech_profiles_fallback_profile_id_fkey"
+            columns: ["fallback_profile_id"]
+            isOneToOne: false
+            referencedRelation: "audio_speech_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_speech_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_variable_definitions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_format: string
+          display_name: string
+          id: string
+          is_enabled: boolean
+          missing_fallback: string
+          module_key: string
+          required_context: string[]
+          required_permission_code: string | null
+          resolver_key: string
+          sensitivity: string
+          spoken_format: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          value_type: string
+          variable_key: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_format?: string
+          display_name: string
+          id?: string
+          is_enabled?: boolean
+          missing_fallback?: string
+          module_key: string
+          required_context?: string[]
+          required_permission_code?: string | null
+          resolver_key: string
+          sensitivity?: string
+          spoken_format?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          value_type?: string
+          variable_key: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_format?: string
+          display_name?: string
+          id?: string
+          is_enabled?: boolean
+          missing_fallback?: string
+          module_key?: string
+          required_context?: string[]
+          required_permission_code?: string | null
+          resolver_key?: string
+          sensitivity?: string
+          spoken_format?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          value_type?: string
+          variable_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_variable_definitions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_events: {
+        Row: {
+          action_code: string
+          actor_user_id: string | null
+          after_values: Json | null
+          before_values: Json | null
+          correlation_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          object_id: string | null
+          object_type: string
+          occurred_at: string
+          reason: string | null
+          source: string
+          tenant_id: string | null
+        }
+        Insert: {
+          action_code: string
+          actor_user_id?: string | null
+          after_values?: Json | null
+          before_values?: Json | null
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          object_id?: string | null
+          object_type: string
+          occurred_at?: string
+          reason?: string | null
+          source?: string
+          tenant_id?: string | null
+        }
+        Update: {
+          action_code?: string
+          actor_user_id?: string | null
+          after_values?: Json | null
+          before_values?: Json | null
+          correlation_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          object_id?: string | null
+          object_type?: string
+          occurred_at?: string
+          reason?: string | null
+          source?: string
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_accounts: {
+        Row: {
+          account_name: string
+          account_status: string
+          arr_amount: number | null
+          arr_currency: string | null
+          created_at: string
+          created_by: string | null
+          external_key: string
+          id: string
+          metadata: Json
+          partner_status: string
+          program_id: string
+          renewal_date: string | null
+          source_reference_id: string | null
+          source_status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          account_name: string
+          account_status?: string
+          arr_amount?: number | null
+          arr_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          external_key: string
+          id?: string
+          metadata?: Json
+          partner_status?: string
+          program_id: string
+          renewal_date?: string | null
+          source_reference_id?: string | null
+          source_status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          account_name?: string
+          account_status?: string
+          arr_amount?: number | null
+          arr_currency?: string | null
+          created_at?: string
+          created_by?: string | null
+          external_key?: string
+          id?: string
+          metadata?: Json
+          partner_status?: string
+          program_id?: string
+          renewal_date?: string | null
+          source_reference_id?: string | null
+          source_status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_accounts_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_accounts_source_reference_id_fkey"
+            columns: ["source_reference_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_source_references"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_assumption_apply_log: {
+        Row: {
+          applied_at: string
+          applied_by: string | null
+          change_set_id: string
+          content_hash: string
+          id: string
+          impacted_scopes: string[]
+          model_version_id: string
+          program_id: string
+          scenario_ids: string[]
+          tenant_id: string
+        }
+        Insert: {
+          applied_at?: string
+          applied_by?: string | null
+          change_set_id: string
+          content_hash: string
+          id?: string
+          impacted_scopes: string[]
+          model_version_id: string
+          program_id: string
+          scenario_ids: string[]
+          tenant_id: string
+        }
+        Update: {
+          applied_at?: string
+          applied_by?: string | null
+          change_set_id?: string
+          content_hash?: string
+          id?: string
+          impacted_scopes?: string[]
+          model_version_id?: string
+          program_id?: string
+          scenario_ids?: string[]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_assumption_apply_log_change_set_id_fkey"
+            columns: ["change_set_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_assumption_change_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_apply_log_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_apply_log_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_apply_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_assumption_change_set_items: {
+        Row: {
+          assumption_code: string
+          change_set_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          impact_scopes: string[]
+          previous_value_numeric: number | null
+          previous_value_text: string | null
+          proposed_value_numeric: number | null
+          proposed_value_text: string | null
+          rationale: string | null
+          scenario_id: string
+          tenant_id: string
+          unit: string | null
+          updated_at: string
+          updated_by: string | null
+          validation_message: string | null
+          validation_status: string
+          value_type: string
+        }
+        Insert: {
+          assumption_code: string
+          change_set_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          impact_scopes?: string[]
+          previous_value_numeric?: number | null
+          previous_value_text?: string | null
+          proposed_value_numeric?: number | null
+          proposed_value_text?: string | null
+          rationale?: string | null
+          scenario_id: string
+          tenant_id: string
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          validation_message?: string | null
+          validation_status?: string
+          value_type?: string
+        }
+        Update: {
+          assumption_code?: string
+          change_set_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          impact_scopes?: string[]
+          previous_value_numeric?: number | null
+          previous_value_text?: string | null
+          proposed_value_numeric?: number | null
+          proposed_value_text?: string | null
+          rationale?: string | null
+          scenario_id?: string
+          tenant_id?: string
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          validation_message?: string | null
+          validation_status?: string
+          value_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_assumption_change_set_items_change_set_id_fkey"
+            columns: ["change_set_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_assumption_change_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_change_set_items_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_change_set_items_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_assumption_change_sets: {
+        Row: {
+          applied_at: string | null
+          applied_by: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          change_count: number
+          content_hash: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          model_version_id: string
+          program_id: string
+          source_change_set_id: string | null
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          validated_at: string | null
+          validated_by: string | null
+          validation_summary: Json
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          change_count?: number
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          model_version_id: string
+          program_id: string
+          source_change_set_id?: string | null
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_summary?: Json
+        }
+        Update: {
+          applied_at?: string | null
+          applied_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          change_count?: number
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          model_version_id?: string
+          program_id?: string
+          source_change_set_id?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_summary?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_assumption_change_sets_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_change_sets_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_change_sets_source_change_set_id_fkey"
+            columns: ["source_change_set_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_assumption_change_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_assumption_change_sets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_metric_directionality: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          higher_is_favorable: boolean
+          metric_code: string
+          metric_group: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          higher_is_favorable: boolean
+          metric_code: string
+          metric_group: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          higher_is_favorable?: boolean
+          metric_code?: string
+          metric_group?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      commercial_model_activations: {
+        Row: {
+          activated_at: string
+          activated_by: string | null
+          activation_reason: string
+          activation_snapshot: Json
+          blocking_failure_count: number
+          certification_hash: string | null
+          certification_id: string
+          id: string
+          lineage_summary: Json
+          manifest_hash: string | null
+          model_version_id: string
+          prior_activation_id: string | null
+          prior_active_version_id: string | null
+          program_id: string
+          readiness_hash: string | null
+          snapshot_hash: string | null
+          status: string
+          superseded_at: string | null
+          superseded_by_activation_id: string | null
+          tenant_id: string
+          warning_count: number
+        }
+        Insert: {
+          activated_at?: string
+          activated_by?: string | null
+          activation_reason: string
+          activation_snapshot?: Json
+          blocking_failure_count?: number
+          certification_hash?: string | null
+          certification_id: string
+          id?: string
+          lineage_summary?: Json
+          manifest_hash?: string | null
+          model_version_id: string
+          prior_activation_id?: string | null
+          prior_active_version_id?: string | null
+          program_id: string
+          readiness_hash?: string | null
+          snapshot_hash?: string | null
+          status?: string
+          superseded_at?: string | null
+          superseded_by_activation_id?: string | null
+          tenant_id: string
+          warning_count?: number
+        }
+        Update: {
+          activated_at?: string
+          activated_by?: string | null
+          activation_reason?: string
+          activation_snapshot?: Json
+          blocking_failure_count?: number
+          certification_hash?: string | null
+          certification_id?: string
+          id?: string
+          lineage_summary?: Json
+          manifest_hash?: string | null
+          model_version_id?: string
+          prior_activation_id?: string | null
+          prior_active_version_id?: string | null
+          program_id?: string
+          readiness_hash?: string | null
+          snapshot_hash?: string | null
+          status?: string
+          superseded_at?: string | null
+          superseded_by_activation_id?: string | null
+          tenant_id?: string
+          warning_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_model_activations_certification_id_fkey"
+            columns: ["certification_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_release_certifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_activations_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_activations_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_activations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_model_results: {
+        Row: {
+          created_at: string
+          fiscal_period: string | null
+          formula_code: string
+          id: string
+          is_approximation: boolean
+          lineage_json: Json
+          metric_code: string
+          metric_group: string
+          period_sequence: number | null
+          run_id: string
+          tenant_id: string
+          unit: string | null
+          value_numeric: number | null
+          value_text: string | null
+        }
+        Insert: {
+          created_at?: string
+          fiscal_period?: string | null
+          formula_code: string
+          id?: string
+          is_approximation?: boolean
+          lineage_json?: Json
+          metric_code: string
+          metric_group: string
+          period_sequence?: number | null
+          run_id: string
+          tenant_id: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          created_at?: string
+          fiscal_period?: string | null
+          formula_code?: string
+          id?: string
+          is_approximation?: boolean
+          lineage_json?: Json
+          metric_code?: string
+          metric_group?: string
+          period_sequence?: number | null
+          run_id?: string
+          tenant_id?: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_model_results_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_results_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_model_run_inputs: {
+        Row: {
+          assumption_code: string
+          confidence: string | null
+          created_at: string
+          id: string
+          input_sequence: number
+          run_id: string
+          scenario_id: string
+          source_reference_id: string | null
+          tenant_id: string
+          unit: string | null
+          value_numeric: number | null
+          value_text: string | null
+        }
+        Insert: {
+          assumption_code: string
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          input_sequence: number
+          run_id: string
+          scenario_id: string
+          source_reference_id?: string | null
+          tenant_id: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          assumption_code?: string
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          input_sequence?: number
+          run_id?: string
+          scenario_id?: string
+          source_reference_id?: string | null
+          tenant_id?: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_model_run_inputs_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_run_inputs_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_run_inputs_source_reference_id_fkey"
+            columns: ["source_reference_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_source_references"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_run_inputs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_model_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          error_code: string | null
+          error_message: string | null
+          failed_at: string | null
+          id: string
+          input_hash: string
+          model_version_id: string
+          program_id: string
+          run_scope: string
+          scenario_id: string
+          started_at: string | null
+          status: string
+          supersedes_run_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          failed_at?: string | null
+          id?: string
+          input_hash: string
+          model_version_id: string
+          program_id: string
+          run_scope: string
+          scenario_id: string
+          started_at?: string | null
+          status?: string
+          supersedes_run_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          failed_at?: string | null
+          id?: string
+          input_hash?: string
+          model_version_id?: string
+          program_id?: string
+          run_scope?: string
+          scenario_id?: string
+          started_at?: string | null
+          status?: string
+          supersedes_run_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_model_runs_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_runs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_runs_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_runs_supersedes_run_id_fkey"
+            columns: ["supersedes_run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_model_versions: {
+        Row: {
+          activated_at: string | null
+          activated_by: string | null
+          activation_id: string | null
+          created_at: string
+          created_by: string | null
+          effective_from: string | null
+          formula_catalog_version: string
+          id: string
+          name: string
+          notes: string | null
+          program_id: string
+          source_file_name: string | null
+          source_fingerprint: string | null
+          status: string
+          superseded_at: string | null
+          superseded_by_version_id: string | null
+          supersedes_version_id: string | null
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          version_code: string
+        }
+        Insert: {
+          activated_at?: string | null
+          activated_by?: string | null
+          activation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string | null
+          formula_catalog_version: string
+          id?: string
+          name: string
+          notes?: string | null
+          program_id: string
+          source_file_name?: string | null
+          source_fingerprint?: string | null
+          status?: string
+          superseded_at?: string | null
+          superseded_by_version_id?: string | null
+          supersedes_version_id?: string | null
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version_code: string
+        }
+        Update: {
+          activated_at?: string | null
+          activated_by?: string | null
+          activation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string | null
+          formula_catalog_version?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          program_id?: string
+          source_file_name?: string | null
+          source_fingerprint?: string | null
+          status?: string
+          superseded_at?: string | null
+          superseded_by_version_id?: string | null
+          supersedes_version_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_model_versions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_model_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_narrations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          instructions: string
+          is_active: boolean
+          narration_key: string
+          script: string
+          speed: number
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+          voice: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          instructions?: string
+          is_active?: boolean
+          narration_key: string
+          script: string
+          speed?: number
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          voice?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          instructions?: string
+          is_active?: boolean
+          narration_key?: string
+          script?: string
+          speed?: number
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          voice?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_narrations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_program_metrics: {
+        Row: {
+          confidence: string
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          metric_code: string
+          metric_date: string | null
+          notes: string | null
+          numeric_value: number | null
+          program_id: string
+          source_reference_id: string | null
+          tenant_id: string
+          text_value: string | null
+          unit: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          confidence?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          metric_code: string
+          metric_date?: string | null
+          notes?: string | null
+          numeric_value?: number | null
+          program_id: string
+          source_reference_id?: string | null
+          tenant_id: string
+          text_value?: string | null
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          confidence?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          metric_code?: string
+          metric_date?: string | null
+          notes?: string | null
+          numeric_value?: number | null
+          program_id?: string
+          source_reference_id?: string | null
+          tenant_id?: string
+          text_value?: string | null
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_program_metrics_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_program_metrics_source_reference_id_fkey"
+            columns: ["source_reference_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_source_references"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_program_metrics_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_programs: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          current_gate_code: string | null
+          description: string | null
+          id: string
+          market_segment: string | null
+          metadata: Json
+          name: string
+          partner_name: string | null
+          source_status: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          current_gate_code?: string | null
+          description?: string | null
+          id?: string
+          market_segment?: string | null
+          metadata?: Json
+          name: string
+          partner_name?: string | null
+          source_status?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          current_gate_code?: string | null
+          description?: string | null
+          id?: string
+          market_segment?: string | null
+          metadata?: Json
+          name?: string
+          partner_name?: string | null
+          source_status?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_programs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_release_certifications: {
+        Row: {
+          blocking_failure_count: number
+          certified_at: string | null
+          certified_by: string | null
+          content_hash: string | null
+          control_count: number
+          created_at: string
+          created_by: string | null
+          id: string
+          invalidated_at: string | null
+          invalidated_by: string | null
+          invalidation_reason: string | null
+          manifest_hash: string | null
+          model_version_id: string
+          notes: string | null
+          pass_count: number
+          program_id: string
+          readiness_hash: string | null
+          readiness_snapshot: Json
+          release_manifest: Json
+          source_evidence: Json
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          warning_count: number
+        }
+        Insert: {
+          blocking_failure_count?: number
+          certified_at?: string | null
+          certified_by?: string | null
+          content_hash?: string | null
+          control_count?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invalidated_at?: string | null
+          invalidated_by?: string | null
+          invalidation_reason?: string | null
+          manifest_hash?: string | null
+          model_version_id: string
+          notes?: string | null
+          pass_count?: number
+          program_id: string
+          readiness_hash?: string | null
+          readiness_snapshot?: Json
+          release_manifest?: Json
+          source_evidence?: Json
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_count?: number
+        }
+        Update: {
+          blocking_failure_count?: number
+          certified_at?: string | null
+          certified_by?: string | null
+          content_hash?: string | null
+          control_count?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invalidated_at?: string | null
+          invalidated_by?: string | null
+          invalidation_reason?: string | null
+          manifest_hash?: string | null
+          model_version_id?: string
+          notes?: string | null
+          pass_count?: number
+          program_id?: string
+          readiness_hash?: string | null
+          readiness_snapshot?: Json
+          release_manifest?: Json
+          source_evidence?: Json
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_release_certifications_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_release_certifications_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_release_certifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_release_lineage: {
+        Row: {
+          certification_id: string
+          created_at: string
+          downstream_id: string | null
+          downstream_type: string
+          id: string
+          metric_code: string | null
+          model_version_id: string
+          relationship: string
+          scenario_id: string | null
+          scope: string | null
+          source_hash: string | null
+          target_hash: string | null
+          tenant_id: string
+          upstream_id: string | null
+          upstream_type: string
+        }
+        Insert: {
+          certification_id: string
+          created_at?: string
+          downstream_id?: string | null
+          downstream_type: string
+          id?: string
+          metric_code?: string | null
+          model_version_id: string
+          relationship: string
+          scenario_id?: string | null
+          scope?: string | null
+          source_hash?: string | null
+          target_hash?: string | null
+          tenant_id: string
+          upstream_id?: string | null
+          upstream_type: string
+        }
+        Update: {
+          certification_id?: string
+          created_at?: string
+          downstream_id?: string | null
+          downstream_type?: string
+          id?: string
+          metric_code?: string | null
+          model_version_id?: string
+          relationship?: string
+          scenario_id?: string | null
+          scope?: string | null
+          source_hash?: string | null
+          target_hash?: string | null
+          tenant_id?: string
+          upstream_id?: string | null
+          upstream_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_release_lineage_certification_id_fkey"
+            columns: ["certification_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_release_certifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_release_lineage_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_release_lineage_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_scenario_assumptions: {
+        Row: {
+          assumption_code: string
+          confidence: string
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          notes: string | null
+          numeric_value: number | null
+          scenario_id: string
+          source_reference_id: string | null
+          tenant_id: string
+          text_value: string | null
+          unit: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assumption_code: string
+          confidence?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          notes?: string | null
+          numeric_value?: number | null
+          scenario_id: string
+          source_reference_id?: string | null
+          tenant_id: string
+          text_value?: string | null
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assumption_code?: string
+          confidence?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          notes?: string | null
+          numeric_value?: number | null
+          scenario_id?: string
+          source_reference_id?: string | null
+          tenant_id?: string
+          text_value?: string | null
+          unit?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_scenario_assumptions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_assumptions_source_reference_id_fkey"
+            columns: ["source_reference_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_source_references"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_assumptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_scenario_comparison_results: {
+        Row: {
+          absolute_variance: number | null
+          baseline_run_id: string | null
+          baseline_scenario_id: string
+          baseline_value: number | null
+          compared_run_id: string | null
+          compared_scenario_id: string
+          compared_value: number | null
+          comparison_id: string
+          comparison_rule: string
+          created_at: string
+          direction_reason: string | null
+          fiscal_period: string | null
+          id: string
+          lineage_refs: Json
+          metric_code: string
+          metric_group: string
+          percentage_variance: number | null
+          period_sequence: number | null
+          source_refs: Json
+          tenant_id: string
+          unit: string | null
+          variance_direction: string
+        }
+        Insert: {
+          absolute_variance?: number | null
+          baseline_run_id?: string | null
+          baseline_scenario_id: string
+          baseline_value?: number | null
+          compared_run_id?: string | null
+          compared_scenario_id: string
+          compared_value?: number | null
+          comparison_id: string
+          comparison_rule?: string
+          created_at?: string
+          direction_reason?: string | null
+          fiscal_period?: string | null
+          id?: string
+          lineage_refs?: Json
+          metric_code: string
+          metric_group: string
+          percentage_variance?: number | null
+          period_sequence?: number | null
+          source_refs?: Json
+          tenant_id: string
+          unit?: string | null
+          variance_direction?: string
+        }
+        Update: {
+          absolute_variance?: number | null
+          baseline_run_id?: string | null
+          baseline_scenario_id?: string
+          baseline_value?: number | null
+          compared_run_id?: string | null
+          compared_scenario_id?: string
+          compared_value?: number | null
+          comparison_id?: string
+          comparison_rule?: string
+          created_at?: string
+          direction_reason?: string | null
+          fiscal_period?: string | null
+          id?: string
+          lineage_refs?: Json
+          metric_code?: string
+          metric_group?: string
+          percentage_variance?: number | null
+          period_sequence?: number | null
+          source_refs?: Json
+          tenant_id?: string
+          unit?: string | null
+          variance_direction?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_scenario_comparison_result_baseline_scenario_id_fkey"
+            columns: ["baseline_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparison_result_compared_scenario_id_fkey"
+            columns: ["compared_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparison_results_baseline_run_id_fkey"
+            columns: ["baseline_run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparison_results_compared_run_id_fkey"
+            columns: ["compared_run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparison_results_comparison_id_fkey"
+            columns: ["comparison_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenario_comparisons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparison_results_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_scenario_comparisons: {
+        Row: {
+          archived_at: string | null
+          archived_by: string | null
+          baseline_scenario_id: string
+          compared_scenario_ids: string[]
+          content_hash: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          included_scopes: string[]
+          mode: string
+          model_version_id: string
+          program_id: string
+          saved_at: string | null
+          saved_by: string | null
+          source_run_manifest: Json
+          source_run_manifest_hash: string | null
+          stale_at_creation: boolean
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          warning_summary: Json
+        }
+        Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
+          baseline_scenario_id: string
+          compared_scenario_ids: string[]
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          included_scopes?: string[]
+          mode: string
+          model_version_id: string
+          program_id: string
+          saved_at?: string | null
+          saved_by?: string | null
+          source_run_manifest?: Json
+          source_run_manifest_hash?: string | null
+          stale_at_creation?: boolean
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_summary?: Json
+        }
+        Update: {
+          archived_at?: string | null
+          archived_by?: string | null
+          baseline_scenario_id?: string
+          compared_scenario_ids?: string[]
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          included_scopes?: string[]
+          mode?: string
+          model_version_id?: string
+          program_id?: string
+          saved_at?: string | null
+          saved_by?: string | null
+          source_run_manifest?: Json
+          source_run_manifest_hash?: string | null
+          stale_at_creation?: boolean
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_summary?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_scenario_comparisons_baseline_scenario_id_fkey"
+            columns: ["baseline_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparisons_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparisons_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenario_comparisons_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_scenarios: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_baseline: boolean
+          name: string
+          program_id: string
+          source_status: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_baseline?: boolean
+          name: string
+          program_id: string
+          source_status?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_baseline?: boolean
+          name?: string
+          program_id?: string
+          source_status?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_scenarios_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_scenarios_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_sensitivity_experiments: {
+        Row: {
+          archived_at: string | null
+          archived_by: string | null
+          assumption_code: string
+          baseline_run_manifest: Json
+          baseline_run_manifest_hash: string | null
+          baseline_scenario_id: string
+          completed_at: string | null
+          completed_by: string | null
+          content_hash: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          error_code: string | null
+          error_message: string | null
+          id: string
+          included_scopes: string[]
+          model_version_id: string
+          perturbation_config: Json
+          perturbation_strategy: string
+          program_id: string
+          stale_at_creation: boolean
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          warning_summary: Json
+        }
+        Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
+          assumption_code: string
+          baseline_run_manifest?: Json
+          baseline_run_manifest_hash?: string | null
+          baseline_scenario_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          included_scopes?: string[]
+          model_version_id: string
+          perturbation_config?: Json
+          perturbation_strategy: string
+          program_id: string
+          stale_at_creation?: boolean
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_summary?: Json
+        }
+        Update: {
+          archived_at?: string | null
+          archived_by?: string | null
+          assumption_code?: string
+          baseline_run_manifest?: Json
+          baseline_run_manifest_hash?: string | null
+          baseline_scenario_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          content_hash?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          included_scopes?: string[]
+          model_version_id?: string
+          perturbation_config?: Json
+          perturbation_strategy?: string
+          program_id?: string
+          stale_at_creation?: boolean
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          warning_summary?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_sensitivity_experiments_baseline_scenario_id_fkey"
+            columns: ["baseline_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_experiments_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_experiments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_experiments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_sensitivity_perturbations: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          experiment_id: string
+          id: string
+          input_hash: string | null
+          perturbation_index: number
+          perturbation_label: string
+          perturbed_value: number
+          runtime_fingerprint: string | null
+          started_at: string | null
+          status: string
+          temp_run_ids: Json
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          experiment_id: string
+          id?: string
+          input_hash?: string | null
+          perturbation_index: number
+          perturbation_label: string
+          perturbed_value: number
+          runtime_fingerprint?: string | null
+          started_at?: string | null
+          status?: string
+          temp_run_ids?: Json
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          experiment_id?: string
+          id?: string
+          input_hash?: string | null
+          perturbation_index?: number
+          perturbation_label?: string
+          perturbed_value?: number
+          runtime_fingerprint?: string | null
+          started_at?: string | null
+          status?: string
+          temp_run_ids?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_sensitivity_perturbations_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_perturbations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_sensitivity_results: {
+        Row: {
+          absolute_delta: number | null
+          baseline_value: number | null
+          created_at: string
+          direction_reason: string | null
+          elasticity: number | null
+          elasticity_reason: string | null
+          experiment_id: string
+          fiscal_period: string | null
+          id: string
+          impact_rank: number | null
+          metric_code: string
+          metric_group: string
+          percentage_delta: number | null
+          period_sequence: number | null
+          perturbation_id: string
+          perturbed_value: number | null
+          scope: string
+          tenant_id: string
+          unit: string | null
+          variance_direction: string
+        }
+        Insert: {
+          absolute_delta?: number | null
+          baseline_value?: number | null
+          created_at?: string
+          direction_reason?: string | null
+          elasticity?: number | null
+          elasticity_reason?: string | null
+          experiment_id: string
+          fiscal_period?: string | null
+          id?: string
+          impact_rank?: number | null
+          metric_code: string
+          metric_group: string
+          percentage_delta?: number | null
+          period_sequence?: number | null
+          perturbation_id: string
+          perturbed_value?: number | null
+          scope: string
+          tenant_id: string
+          unit?: string | null
+          variance_direction?: string
+        }
+        Update: {
+          absolute_delta?: number | null
+          baseline_value?: number | null
+          created_at?: string
+          direction_reason?: string | null
+          elasticity?: number | null
+          elasticity_reason?: string | null
+          experiment_id?: string
+          fiscal_period?: string | null
+          id?: string
+          impact_rank?: number | null
+          metric_code?: string
+          metric_group?: string
+          percentage_delta?: number | null
+          period_sequence?: number | null
+          perturbation_id?: string
+          perturbed_value?: number | null
+          scope?: string
+          tenant_id?: string
+          unit?: string | null
+          variance_direction?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_sensitivity_results_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_results_perturbation_id_fkey"
+            columns: ["perturbation_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_perturbations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_results_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_sensitivity_run_results: {
+        Row: {
+          created_at: string
+          fiscal_period: string | null
+          id: string
+          metric_code: string
+          metric_group: string
+          period_sequence: number | null
+          sensitivity_run_id: string
+          tenant_id: string
+          unit: string | null
+          value_numeric: number | null
+          value_text: string | null
+        }
+        Insert: {
+          created_at?: string
+          fiscal_period?: string | null
+          id?: string
+          metric_code: string
+          metric_group: string
+          period_sequence?: number | null
+          sensitivity_run_id: string
+          tenant_id: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          created_at?: string
+          fiscal_period?: string | null
+          id?: string
+          metric_code?: string
+          metric_group?: string
+          period_sequence?: number | null
+          sensitivity_run_id?: string
+          tenant_id?: string
+          unit?: string | null
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_sensitivity_run_results_sensitivity_run_id_fkey"
+            columns: ["sensitivity_run_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_sensitivity_runs: {
+        Row: {
+          completed_at: string | null
+          error_code: string | null
+          error_message: string | null
+          experiment_id: string
+          id: string
+          input_hash: string
+          model_version_id: string
+          perturbation_id: string
+          run_scope: string
+          runtime_fingerprint: string
+          scenario_id: string
+          started_at: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          experiment_id: string
+          id?: string
+          input_hash: string
+          model_version_id: string
+          perturbation_id: string
+          run_scope: string
+          runtime_fingerprint: string
+          scenario_id: string
+          started_at?: string
+          status: string
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          experiment_id?: string
+          id?: string
+          input_hash?: string
+          model_version_id?: string
+          perturbation_id?: string
+          run_scope?: string
+          runtime_fingerprint?: string
+          scenario_id?: string
+          started_at?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_sensitivity_runs_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_runs_perturbation_id_fkey"
+            columns: ["perturbation_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_sensitivity_perturbations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_sensitivity_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_source_references: {
+        Row: {
+          confidentiality: string
+          created_at: string
+          created_by: string | null
+          external_filename: string | null
+          id: string
+          notes: string | null
+          program_id: string
+          source_code: string
+          source_date: string | null
+          source_type: string
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          confidentiality?: string
+          created_at?: string
+          created_by?: string | null
+          external_filename?: string | null
+          id?: string
+          notes?: string | null
+          program_id: string
+          source_code: string
+          source_date?: string | null
+          source_type: string
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          confidentiality?: string
+          created_at?: string
+          created_by?: string | null
+          external_filename?: string | null
+          id?: string
+          notes?: string | null
+          program_id?: string
+          source_code?: string
+          source_date?: string | null
+          source_type?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_source_references_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_source_references_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_stage_gates: {
+        Row: {
+          account_scope_count: number | null
+          account_scope_label: string | null
+          created_at: string
+          created_by: string | null
+          economic_objective: string | null
+          gate_code: string
+          id: string
+          name: string
+          operating_objective: string | null
+          program_id: string
+          sequence_number: number
+          status: string
+          tenant_id: string
+          unlock_conditions: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          account_scope_count?: number | null
+          account_scope_label?: string | null
+          created_at?: string
+          created_by?: string | null
+          economic_objective?: string | null
+          gate_code: string
+          id?: string
+          name: string
+          operating_objective?: string | null
+          program_id: string
+          sequence_number: number
+          status?: string
+          tenant_id: string
+          unlock_conditions?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          account_scope_count?: number | null
+          account_scope_label?: string | null
+          created_at?: string
+          created_by?: string | null
+          economic_objective?: string | null
+          gate_code?: string
+          id?: string
+          name?: string
+          operating_objective?: string | null
+          program_id?: string
+          sequence_number?: number
+          status?: string
+          tenant_id?: string
+          unlock_conditions?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_stage_gates_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_stage_gates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_activities: {
         Row: {
           company_id: string
@@ -816,6 +3549,680 @@ export type Database = {
           },
         ]
       }
+      etdm_domains: {
+        Row: {
+          approval_status: Database["public"]["Enums"]["etdm_domain_approval"]
+          business_criticality: Database["public"]["Enums"]["etdm_domain_criticality"]
+          business_purpose: string | null
+          cloned_from_domain_id: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          description: string | null
+          display_order: number
+          domain_display_name: string
+          effective_date: string | null
+          expiration_date: string | null
+          external_reference_id: string | null
+          governance_notes: string | null
+          id: string
+          is_active: boolean
+          is_deleted: boolean
+          lifecycle_status: Database["public"]["Enums"]["etdm_domain_lifecycle"]
+          master_domain_id: string
+          published_version: number
+          review_date: string | null
+          scope_summary: string | null
+          short_name: string | null
+          slug: string
+          source_of_record: string | null
+          tags: string[]
+          technology_id: string
+          tenant_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          approval_status?: Database["public"]["Enums"]["etdm_domain_approval"]
+          business_criticality?: Database["public"]["Enums"]["etdm_domain_criticality"]
+          business_purpose?: string | null
+          cloned_from_domain_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          description?: string | null
+          display_order?: number
+          domain_display_name: string
+          effective_date?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          governance_notes?: string | null
+          id?: string
+          is_active?: boolean
+          is_deleted?: boolean
+          lifecycle_status?: Database["public"]["Enums"]["etdm_domain_lifecycle"]
+          master_domain_id: string
+          published_version?: number
+          review_date?: string | null
+          scope_summary?: string | null
+          short_name?: string | null
+          slug: string
+          source_of_record?: string | null
+          tags?: string[]
+          technology_id: string
+          tenant_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          approval_status?: Database["public"]["Enums"]["etdm_domain_approval"]
+          business_criticality?: Database["public"]["Enums"]["etdm_domain_criticality"]
+          business_purpose?: string | null
+          cloned_from_domain_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          description?: string | null
+          display_order?: number
+          domain_display_name?: string
+          effective_date?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          governance_notes?: string | null
+          id?: string
+          is_active?: boolean
+          is_deleted?: boolean
+          lifecycle_status?: Database["public"]["Enums"]["etdm_domain_lifecycle"]
+          master_domain_id?: string
+          published_version?: number
+          review_date?: string | null
+          scope_summary?: string | null
+          short_name?: string | null
+          slug?: string
+          source_of_record?: string | null
+          tags?: string[]
+          technology_id?: string
+          tenant_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "etdm_domains_cloned_from_domain_id_fkey"
+            columns: ["cloned_from_domain_id"]
+            isOneToOne: false
+            referencedRelation: "etdm_domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "etdm_domains_master_domain_id_fkey"
+            columns: ["master_domain_id"]
+            isOneToOne: false
+            referencedRelation: "etdm_master_domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "etdm_domains_technology_id_fkey"
+            columns: ["technology_id"]
+            isOneToOne: false
+            referencedRelation: "etdm_technologies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "etdm_domains_technology_id_fkey"
+            columns: ["technology_id"]
+            isOneToOne: false
+            referencedRelation: "etdm_technologies_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      etdm_master_domains: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      etdm_record_audit_log: {
+        Row: {
+          action: string
+          changed_at: string
+          changed_by: string | null
+          changed_fields: string[] | null
+          correlation_id: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          new_values: Json | null
+          previous_values: Json | null
+          reason: string | null
+          source: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          action: string
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          correlation_id?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          new_values?: Json | null
+          previous_values?: Json | null
+          reason?: string | null
+          source?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          action?: string
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          correlation_id?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          new_values?: Json | null
+          previous_values?: Json | null
+          reason?: string | null
+          source?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: []
+      }
+      etdm_technologies: {
+        Row: {
+          agent_required: boolean | null
+          agentless_supported: boolean | null
+          ai_maturity_score: number | null
+          ai_opportunity_summary: string | null
+          ai_playbooks_available: boolean | null
+          ai_ready: boolean | null
+          api_available: boolean | null
+          approval_status: string
+          assessed_by_id: string | null
+          audit_logging_supported: boolean | null
+          authentication_methods: string[] | null
+          authentication_types: string[] | null
+          authorization_model: string | null
+          automation_integrations: Json | null
+          automation_maturity_score: number | null
+          automation_opportunity_summary: string | null
+          automation_ready: boolean | null
+          automations_available: boolean | null
+          available_automation_interfaces: Json | null
+          backup_supported: boolean | null
+          banner_image_url: string | null
+          business_criticality: string | null
+          business_impact_if_unavailable: string | null
+          business_outcome_summary: string | null
+          business_owner_id: string | null
+          business_purpose: string | null
+          category: string | null
+          cli_available: boolean | null
+          cloned_from_technology_id: string | null
+          clustering_supported: boolean | null
+          color_theme: string | null
+          community_url: string | null
+          compliance_standards: string[] | null
+          created_at: string
+          created_by: string | null
+          data_classification: string | null
+          data_integrations: Json | null
+          data_owner_id: string | null
+          data_residency_requirements: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deployment_models: string[] | null
+          description: string | null
+          digital_coworkers_available: boolean | null
+          digital_twin_readiness_score: number | null
+          disaster_recovery_supported: boolean | null
+          documentation_completeness_percentage: number | null
+          documentation_url: string | null
+          edition: string | null
+          effective_date: string | null
+          encryption_at_rest: boolean | null
+          encryption_in_transit: boolean | null
+          end_of_extended_support_date: string | null
+          end_of_life_date: string | null
+          end_of_mainstream_support_date: string | null
+          end_of_sale_date: string | null
+          engineering_owner_id: string | null
+          escalation_group: string | null
+          expiration_date: string | null
+          external_reference_id: string | null
+          general_availability_date: string | null
+          governance_notes: string | null
+          graphql_available: boolean | null
+          high_availability_supported: boolean | null
+          id: string
+          infrastructure_as_code_supported: boolean | null
+          integration_notes: string | null
+          is_active: boolean
+          is_deleted: boolean
+          is_sample: boolean
+          itsm_integrations: Json | null
+          knowledge_articles_available: boolean | null
+          known_security_considerations: string | null
+          last_assessment_date: string | null
+          licensing_model: string | null
+          lifecycle_notes: string | null
+          lifecycle_status: string | null
+          mfa_supported: boolean | null
+          monitoring_integrations: Json | null
+          multi_region_supported: boolean | null
+          native_integrations: Json | null
+          neurealm_practice: string | null
+          operational_maturity_score: number | null
+          operations_owner_id: string | null
+          overall_maturity_notes: string | null
+          powershell_available: boolean | null
+          primary_domain: string | null
+          product_family: string | null
+          product_name: string | null
+          product_website_url: string | null
+          published_version: number
+          rbac_supported: boolean | null
+          record_steward_id: string | null
+          replacement_technology_id: string | null
+          required_security_controls: Json | null
+          rest_api_available: boolean | null
+          review_date: string | null
+          runbooks_available: boolean | null
+          scalability_model: string | null
+          sdk_available: boolean | null
+          secondary_domains: string[] | null
+          security_certifications: string[] | null
+          security_maturity_score: number | null
+          security_owner_id: string | null
+          short_name: string | null
+          siem_integrations: Json | null
+          slug: string
+          sop_library_available: boolean | null
+          source_of_record: string | null
+          strategic_importance: string | null
+          support_contract_reference: string | null
+          support_group: string | null
+          support_readiness_score: number | null
+          support_url: string | null
+          supported_architectures: string[] | null
+          supported_business_services: Json | null
+          supported_cloud_providers: string[] | null
+          supported_databases: string[] | null
+          supported_hypervisors: string[] | null
+          supported_industries: string[] | null
+          supported_operating_systems: string[] | null
+          tags: string[] | null
+          target_audiences: string[] | null
+          technical_limitations: string | null
+          technical_prerequisites: string | null
+          technology_icon_url: string | null
+          technology_image_crop_metadata: Json | null
+          technology_image_height: number | null
+          technology_image_last_updated: string | null
+          technology_image_last_updated_by: string | null
+          technology_image_original_filename: string | null
+          technology_image_scale: number | null
+          technology_image_storage_path: string | null
+          technology_image_type: string | null
+          technology_image_url: string | null
+          technology_image_width: number | null
+          technology_maturity: string | null
+          technology_name: string
+          technology_owner_id: string | null
+          technology_tower: string | null
+          technology_type: string | null
+          tenant_id: string | null
+          tenant_scope: string | null
+          third_party_integrations: Json | null
+          typical_deployment_size: string | null
+          typical_use_cases: Json | null
+          updated_at: string
+          updated_by: string | null
+          upgrade_path: string | null
+          vendor_name: string | null
+          version: string | null
+          visibility: string
+          webhooks_available: boolean | null
+        }
+        Insert: {
+          agent_required?: boolean | null
+          agentless_supported?: boolean | null
+          ai_maturity_score?: number | null
+          ai_opportunity_summary?: string | null
+          ai_playbooks_available?: boolean | null
+          ai_ready?: boolean | null
+          api_available?: boolean | null
+          approval_status?: string
+          assessed_by_id?: string | null
+          audit_logging_supported?: boolean | null
+          authentication_methods?: string[] | null
+          authentication_types?: string[] | null
+          authorization_model?: string | null
+          automation_integrations?: Json | null
+          automation_maturity_score?: number | null
+          automation_opportunity_summary?: string | null
+          automation_ready?: boolean | null
+          automations_available?: boolean | null
+          available_automation_interfaces?: Json | null
+          backup_supported?: boolean | null
+          banner_image_url?: string | null
+          business_criticality?: string | null
+          business_impact_if_unavailable?: string | null
+          business_outcome_summary?: string | null
+          business_owner_id?: string | null
+          business_purpose?: string | null
+          category?: string | null
+          cli_available?: boolean | null
+          cloned_from_technology_id?: string | null
+          clustering_supported?: boolean | null
+          color_theme?: string | null
+          community_url?: string | null
+          compliance_standards?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          data_classification?: string | null
+          data_integrations?: Json | null
+          data_owner_id?: string | null
+          data_residency_requirements?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deployment_models?: string[] | null
+          description?: string | null
+          digital_coworkers_available?: boolean | null
+          digital_twin_readiness_score?: number | null
+          disaster_recovery_supported?: boolean | null
+          documentation_completeness_percentage?: number | null
+          documentation_url?: string | null
+          edition?: string | null
+          effective_date?: string | null
+          encryption_at_rest?: boolean | null
+          encryption_in_transit?: boolean | null
+          end_of_extended_support_date?: string | null
+          end_of_life_date?: string | null
+          end_of_mainstream_support_date?: string | null
+          end_of_sale_date?: string | null
+          engineering_owner_id?: string | null
+          escalation_group?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          general_availability_date?: string | null
+          governance_notes?: string | null
+          graphql_available?: boolean | null
+          high_availability_supported?: boolean | null
+          id?: string
+          infrastructure_as_code_supported?: boolean | null
+          integration_notes?: string | null
+          is_active?: boolean
+          is_deleted?: boolean
+          is_sample?: boolean
+          itsm_integrations?: Json | null
+          knowledge_articles_available?: boolean | null
+          known_security_considerations?: string | null
+          last_assessment_date?: string | null
+          licensing_model?: string | null
+          lifecycle_notes?: string | null
+          lifecycle_status?: string | null
+          mfa_supported?: boolean | null
+          monitoring_integrations?: Json | null
+          multi_region_supported?: boolean | null
+          native_integrations?: Json | null
+          neurealm_practice?: string | null
+          operational_maturity_score?: number | null
+          operations_owner_id?: string | null
+          overall_maturity_notes?: string | null
+          powershell_available?: boolean | null
+          primary_domain?: string | null
+          product_family?: string | null
+          product_name?: string | null
+          product_website_url?: string | null
+          published_version?: number
+          rbac_supported?: boolean | null
+          record_steward_id?: string | null
+          replacement_technology_id?: string | null
+          required_security_controls?: Json | null
+          rest_api_available?: boolean | null
+          review_date?: string | null
+          runbooks_available?: boolean | null
+          scalability_model?: string | null
+          sdk_available?: boolean | null
+          secondary_domains?: string[] | null
+          security_certifications?: string[] | null
+          security_maturity_score?: number | null
+          security_owner_id?: string | null
+          short_name?: string | null
+          siem_integrations?: Json | null
+          slug: string
+          sop_library_available?: boolean | null
+          source_of_record?: string | null
+          strategic_importance?: string | null
+          support_contract_reference?: string | null
+          support_group?: string | null
+          support_readiness_score?: number | null
+          support_url?: string | null
+          supported_architectures?: string[] | null
+          supported_business_services?: Json | null
+          supported_cloud_providers?: string[] | null
+          supported_databases?: string[] | null
+          supported_hypervisors?: string[] | null
+          supported_industries?: string[] | null
+          supported_operating_systems?: string[] | null
+          tags?: string[] | null
+          target_audiences?: string[] | null
+          technical_limitations?: string | null
+          technical_prerequisites?: string | null
+          technology_icon_url?: string | null
+          technology_image_crop_metadata?: Json | null
+          technology_image_height?: number | null
+          technology_image_last_updated?: string | null
+          technology_image_last_updated_by?: string | null
+          technology_image_original_filename?: string | null
+          technology_image_scale?: number | null
+          technology_image_storage_path?: string | null
+          technology_image_type?: string | null
+          technology_image_url?: string | null
+          technology_image_width?: number | null
+          technology_maturity?: string | null
+          technology_name: string
+          technology_owner_id?: string | null
+          technology_tower?: string | null
+          technology_type?: string | null
+          tenant_id?: string | null
+          tenant_scope?: string | null
+          third_party_integrations?: Json | null
+          typical_deployment_size?: string | null
+          typical_use_cases?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+          upgrade_path?: string | null
+          vendor_name?: string | null
+          version?: string | null
+          visibility?: string
+          webhooks_available?: boolean | null
+        }
+        Update: {
+          agent_required?: boolean | null
+          agentless_supported?: boolean | null
+          ai_maturity_score?: number | null
+          ai_opportunity_summary?: string | null
+          ai_playbooks_available?: boolean | null
+          ai_ready?: boolean | null
+          api_available?: boolean | null
+          approval_status?: string
+          assessed_by_id?: string | null
+          audit_logging_supported?: boolean | null
+          authentication_methods?: string[] | null
+          authentication_types?: string[] | null
+          authorization_model?: string | null
+          automation_integrations?: Json | null
+          automation_maturity_score?: number | null
+          automation_opportunity_summary?: string | null
+          automation_ready?: boolean | null
+          automations_available?: boolean | null
+          available_automation_interfaces?: Json | null
+          backup_supported?: boolean | null
+          banner_image_url?: string | null
+          business_criticality?: string | null
+          business_impact_if_unavailable?: string | null
+          business_outcome_summary?: string | null
+          business_owner_id?: string | null
+          business_purpose?: string | null
+          category?: string | null
+          cli_available?: boolean | null
+          cloned_from_technology_id?: string | null
+          clustering_supported?: boolean | null
+          color_theme?: string | null
+          community_url?: string | null
+          compliance_standards?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          data_classification?: string | null
+          data_integrations?: Json | null
+          data_owner_id?: string | null
+          data_residency_requirements?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deployment_models?: string[] | null
+          description?: string | null
+          digital_coworkers_available?: boolean | null
+          digital_twin_readiness_score?: number | null
+          disaster_recovery_supported?: boolean | null
+          documentation_completeness_percentage?: number | null
+          documentation_url?: string | null
+          edition?: string | null
+          effective_date?: string | null
+          encryption_at_rest?: boolean | null
+          encryption_in_transit?: boolean | null
+          end_of_extended_support_date?: string | null
+          end_of_life_date?: string | null
+          end_of_mainstream_support_date?: string | null
+          end_of_sale_date?: string | null
+          engineering_owner_id?: string | null
+          escalation_group?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          general_availability_date?: string | null
+          governance_notes?: string | null
+          graphql_available?: boolean | null
+          high_availability_supported?: boolean | null
+          id?: string
+          infrastructure_as_code_supported?: boolean | null
+          integration_notes?: string | null
+          is_active?: boolean
+          is_deleted?: boolean
+          is_sample?: boolean
+          itsm_integrations?: Json | null
+          knowledge_articles_available?: boolean | null
+          known_security_considerations?: string | null
+          last_assessment_date?: string | null
+          licensing_model?: string | null
+          lifecycle_notes?: string | null
+          lifecycle_status?: string | null
+          mfa_supported?: boolean | null
+          monitoring_integrations?: Json | null
+          multi_region_supported?: boolean | null
+          native_integrations?: Json | null
+          neurealm_practice?: string | null
+          operational_maturity_score?: number | null
+          operations_owner_id?: string | null
+          overall_maturity_notes?: string | null
+          powershell_available?: boolean | null
+          primary_domain?: string | null
+          product_family?: string | null
+          product_name?: string | null
+          product_website_url?: string | null
+          published_version?: number
+          rbac_supported?: boolean | null
+          record_steward_id?: string | null
+          replacement_technology_id?: string | null
+          required_security_controls?: Json | null
+          rest_api_available?: boolean | null
+          review_date?: string | null
+          runbooks_available?: boolean | null
+          scalability_model?: string | null
+          sdk_available?: boolean | null
+          secondary_domains?: string[] | null
+          security_certifications?: string[] | null
+          security_maturity_score?: number | null
+          security_owner_id?: string | null
+          short_name?: string | null
+          siem_integrations?: Json | null
+          slug?: string
+          sop_library_available?: boolean | null
+          source_of_record?: string | null
+          strategic_importance?: string | null
+          support_contract_reference?: string | null
+          support_group?: string | null
+          support_readiness_score?: number | null
+          support_url?: string | null
+          supported_architectures?: string[] | null
+          supported_business_services?: Json | null
+          supported_cloud_providers?: string[] | null
+          supported_databases?: string[] | null
+          supported_hypervisors?: string[] | null
+          supported_industries?: string[] | null
+          supported_operating_systems?: string[] | null
+          tags?: string[] | null
+          target_audiences?: string[] | null
+          technical_limitations?: string | null
+          technical_prerequisites?: string | null
+          technology_icon_url?: string | null
+          technology_image_crop_metadata?: Json | null
+          technology_image_height?: number | null
+          technology_image_last_updated?: string | null
+          technology_image_last_updated_by?: string | null
+          technology_image_original_filename?: string | null
+          technology_image_scale?: number | null
+          technology_image_storage_path?: string | null
+          technology_image_type?: string | null
+          technology_image_url?: string | null
+          technology_image_width?: number | null
+          technology_maturity?: string | null
+          technology_name?: string
+          technology_owner_id?: string | null
+          technology_tower?: string | null
+          technology_type?: string | null
+          tenant_id?: string | null
+          tenant_scope?: string | null
+          third_party_integrations?: Json | null
+          typical_deployment_size?: string | null
+          typical_use_cases?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+          upgrade_path?: string | null
+          vendor_name?: string | null
+          version?: string | null
+          visibility?: string
+          webhooks_available?: boolean | null
+        }
+        Relationships: []
+      }
       evidence_files: {
         Row: {
           answer_id: string
@@ -847,6 +4254,59 @@ export type Database = {
             columns: ["answer_id"]
             isOneToOne: false
             referencedRelation: "answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guidance_agent_interactions: {
+        Row: {
+          answer: string | null
+          confidence: number | null
+          created_at: string
+          escalated: boolean
+          escalated_at: string | null
+          escalation_note: string | null
+          id: string
+          matched_catalog_ids: string[]
+          question: string
+          status: string
+          tenant_id: string | null
+          user_id: string
+        }
+        Insert: {
+          answer?: string | null
+          confidence?: number | null
+          created_at?: string
+          escalated?: boolean
+          escalated_at?: string | null
+          escalation_note?: string | null
+          id?: string
+          matched_catalog_ids?: string[]
+          question: string
+          status?: string
+          tenant_id?: string | null
+          user_id: string
+        }
+        Update: {
+          answer?: string | null
+          confidence?: number | null
+          created_at?: string
+          escalated?: boolean
+          escalated_at?: string | null
+          escalation_note?: string | null
+          id?: string
+          matched_catalog_ids?: string[]
+          question?: string
+          status?: string
+          tenant_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guidance_agent_interactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -886,6 +4346,135 @@ export type Database = {
           is_active?: boolean
           key?: string
           name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      membership_roles: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          membership_id: string
+          role_id: string
+          tenant_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          membership_id: string
+          role_id: string
+          tenant_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          membership_id?: string
+          role_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_roles_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memberships: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deactivated_at: string | null
+          id: string
+          joined_at: string | null
+          last_active_at: string | null
+          status: Database["public"]["Enums"]["membership_status"]
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
+          id?: string
+          joined_at?: string | null
+          last_active_at?: string | null
+          status?: Database["public"]["Enums"]["membership_status"]
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
+          id?: string
+          joined_at?: string | null
+          last_active_at?: string | null
+          status?: Database["public"]["Enums"]["membership_status"]
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memberships_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nova_knowledge_base: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          route: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          route: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          route?: string
+          sort_order?: number
+          title?: string
           updated_at?: string
         }
         Relationships: []
@@ -1407,6 +4996,33 @@ export type Database = {
           },
         ]
       }
+      permissions: {
+        Row: {
+          category: string
+          code: string
+          created_at: string
+          description: string
+          is_system: boolean
+          required_for_tenant_administration: boolean
+        }
+        Insert: {
+          category: string
+          code: string
+          created_at?: string
+          description: string
+          is_system?: boolean
+          required_for_tenant_administration?: boolean
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string
+          description?: string
+          is_system?: boolean
+          required_for_tenant_administration?: boolean
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           approval_status: string
@@ -1414,21 +5030,34 @@ export type Database = {
           approved_by: string | null
           avatar_url: string | null
           company: string | null
+          company_id: string | null
           created_at: string
           department: string | null
           display_name: string | null
           email: string | null
+          first_name: string | null
           full_name: string | null
+          hybrid_days: string[] | null
           id: string
           job_title: string | null
+          last_name: string | null
           location: string | null
           must_change_password: boolean
+          office_site: string | null
+          ooo_delegate_user_id: string | null
+          ooo_enabled: boolean
+          ooo_end: string | null
+          ooo_start: string | null
           phone: string | null
+          preferred_contact_method: string | null
           preferred_language: string | null
+          profile_completed_at: string | null
           time_zone: string | null
           updated_at: string
           user_category: Database["public"]["Enums"]["user_category"] | null
           user_id: string
+          weekly_hours: Json | null
+          working_location_type: string | null
         }
         Insert: {
           approval_status?: string
@@ -1436,21 +5065,34 @@ export type Database = {
           approved_by?: string | null
           avatar_url?: string | null
           company?: string | null
+          company_id?: string | null
           created_at?: string
           department?: string | null
           display_name?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
+          hybrid_days?: string[] | null
           id?: string
           job_title?: string | null
+          last_name?: string | null
           location?: string | null
           must_change_password?: boolean
+          office_site?: string | null
+          ooo_delegate_user_id?: string | null
+          ooo_enabled?: boolean
+          ooo_end?: string | null
+          ooo_start?: string | null
           phone?: string | null
+          preferred_contact_method?: string | null
           preferred_language?: string | null
+          profile_completed_at?: string | null
           time_zone?: string | null
           updated_at?: string
           user_category?: Database["public"]["Enums"]["user_category"] | null
           user_id: string
+          weekly_hours?: Json | null
+          working_location_type?: string | null
         }
         Update: {
           approval_status?: string
@@ -1458,23 +5100,51 @@ export type Database = {
           approved_by?: string | null
           avatar_url?: string | null
           company?: string | null
+          company_id?: string | null
           created_at?: string
           department?: string | null
           display_name?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
+          hybrid_days?: string[] | null
           id?: string
           job_title?: string | null
+          last_name?: string | null
           location?: string | null
           must_change_password?: boolean
+          office_site?: string | null
+          ooo_delegate_user_id?: string | null
+          ooo_enabled?: boolean
+          ooo_end?: string | null
+          ooo_start?: string | null
           phone?: string | null
+          preferred_contact_method?: string | null
           preferred_language?: string | null
+          profile_completed_at?: string | null
           time_zone?: string | null
           updated_at?: string
           user_category?: Database["public"]["Enums"]["user_category"] | null
           user_id?: string
+          weekly_hours?: Json | null
+          working_location_type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "crm_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_ooo_delegate_fk"
+            columns: ["ooo_delegate_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       programs: {
         Row: {
@@ -5196,6 +8866,243 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_invitation_roles: {
+        Row: {
+          assigned_at: string
+          invitation_id: string
+          role_id: string
+          tenant_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          invitation_id: string
+          role_id: string
+          tenant_id: string
+        }
+        Update: {
+          assigned_at?: string
+          invitation_id?: string
+          role_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invitation_roles_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_invitation_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_invitation_roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          normalized_email: string
+          status: Database["public"]["Enums"]["invitation_status"]
+          tenant_id: string
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invited_by?: string | null
+          normalized_email: string
+          status?: Database["public"]["Enums"]["invitation_status"]
+          tenant_id: string
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          normalized_email?: string
+          status?: Database["public"]["Enums"]["invitation_status"]
+          tenant_id?: string
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invitations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_role_permissions: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          permission_code: string
+          role_id: string
+          tenant_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          permission_code: string
+          role_id: string
+          tenant_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          permission_code?: string
+          role_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_role_permissions_permission_code_fkey"
+            columns: ["permission_code"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "tenant_role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_role_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_roles: {
+        Row: {
+          archived_at: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_system_protected: boolean
+          name: string
+          status: Database["public"]["Enums"]["tenant_role_status"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system_protected?: boolean
+          name: string
+          status?: Database["public"]["Enums"]["tenant_role_status"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system_protected?: boolean
+          name?: string
+          status?: Database["public"]["Enums"]["tenant_role_status"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          default_currency_code: string
+          default_timezone: string
+          id: string
+          name: string
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_currency_code?: string
+          default_timezone?: string
+          id?: string
+          name: string
+          slug: string
+          status?: Database["public"]["Enums"]["tenant_status"]
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_currency_code?: string
+          default_timezone?: string
+          id?: string
+          name?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["tenant_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tools_catalog: {
         Row: {
           category: string | null
@@ -5235,6 +9142,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_contact_methods: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          method_type: string
+          updated_at: string
+          user_id: string
+          value: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          method_type: string
+          updated_at?: string
+          user_id: string
+          value: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          method_type?: string
+          updated_at?: string
+          user_id?: string
+          value?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_contact_methods_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       user_login_events: {
         Row: {
           action: string
@@ -5273,6 +9221,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_notification_rules: {
+        Row: {
+          channels: string[]
+          created_at: string
+          escalate_after_minutes: number | null
+          id: string
+          priority: string
+          timing: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channels?: string[]
+          created_at?: string
+          escalate_after_minutes?: number | null
+          id?: string
+          priority: string
+          timing?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channels?: string[]
+          created_at?: string
+          escalate_after_minutes?: number | null
+          id?: string
+          priority?: string
+          timing?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_rules_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_page_activity: {
         Row: {
@@ -5359,9 +9348,448 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      etdm_technologies_active: {
+        Row: {
+          agent_required: boolean | null
+          agentless_supported: boolean | null
+          ai_maturity_score: number | null
+          ai_opportunity_summary: string | null
+          ai_playbooks_available: boolean | null
+          ai_ready: boolean | null
+          api_available: boolean | null
+          approval_status: string | null
+          assessed_by_id: string | null
+          audit_logging_supported: boolean | null
+          authentication_methods: string[] | null
+          authentication_types: string[] | null
+          authorization_model: string | null
+          automation_integrations: Json | null
+          automation_maturity_score: number | null
+          automation_opportunity_summary: string | null
+          automation_ready: boolean | null
+          automations_available: boolean | null
+          available_automation_interfaces: Json | null
+          backup_supported: boolean | null
+          banner_image_url: string | null
+          business_criticality: string | null
+          business_impact_if_unavailable: string | null
+          business_outcome_summary: string | null
+          business_owner_id: string | null
+          business_purpose: string | null
+          category: string | null
+          cli_available: boolean | null
+          cloned_from_technology_id: string | null
+          clustering_supported: boolean | null
+          color_theme: string | null
+          community_url: string | null
+          compliance_standards: string[] | null
+          created_at: string | null
+          created_by: string | null
+          data_classification: string | null
+          data_integrations: Json | null
+          data_owner_id: string | null
+          data_residency_requirements: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deployment_models: string[] | null
+          description: string | null
+          digital_coworkers_available: boolean | null
+          digital_twin_readiness_score: number | null
+          disaster_recovery_supported: boolean | null
+          documentation_completeness_percentage: number | null
+          documentation_url: string | null
+          edition: string | null
+          effective_date: string | null
+          encryption_at_rest: boolean | null
+          encryption_in_transit: boolean | null
+          end_of_extended_support_date: string | null
+          end_of_life_date: string | null
+          end_of_mainstream_support_date: string | null
+          end_of_sale_date: string | null
+          engineering_owner_id: string | null
+          escalation_group: string | null
+          expiration_date: string | null
+          external_reference_id: string | null
+          general_availability_date: string | null
+          governance_notes: string | null
+          graphql_available: boolean | null
+          high_availability_supported: boolean | null
+          id: string | null
+          infrastructure_as_code_supported: boolean | null
+          integration_notes: string | null
+          is_active: boolean | null
+          is_deleted: boolean | null
+          is_sample: boolean | null
+          itsm_integrations: Json | null
+          knowledge_articles_available: boolean | null
+          known_security_considerations: string | null
+          last_assessment_date: string | null
+          licensing_model: string | null
+          lifecycle_notes: string | null
+          lifecycle_status: string | null
+          mfa_supported: boolean | null
+          monitoring_integrations: Json | null
+          multi_region_supported: boolean | null
+          native_integrations: Json | null
+          operational_maturity_score: number | null
+          operations_owner_id: string | null
+          overall_maturity_notes: string | null
+          powershell_available: boolean | null
+          primary_domain: string | null
+          product_family: string | null
+          product_name: string | null
+          product_website_url: string | null
+          published_version: number | null
+          rbac_supported: boolean | null
+          record_steward_id: string | null
+          replacement_technology_id: string | null
+          required_security_controls: Json | null
+          rest_api_available: boolean | null
+          review_date: string | null
+          runbooks_available: boolean | null
+          scalability_model: string | null
+          sdk_available: boolean | null
+          secondary_domains: string[] | null
+          security_certifications: string[] | null
+          security_maturity_score: number | null
+          security_owner_id: string | null
+          short_name: string | null
+          siem_integrations: Json | null
+          slug: string | null
+          sop_library_available: boolean | null
+          source_of_record: string | null
+          strategic_importance: string | null
+          support_contract_reference: string | null
+          support_group: string | null
+          support_readiness_score: number | null
+          support_url: string | null
+          supported_architectures: string[] | null
+          supported_business_services: Json | null
+          supported_cloud_providers: string[] | null
+          supported_databases: string[] | null
+          supported_hypervisors: string[] | null
+          supported_industries: string[] | null
+          supported_operating_systems: string[] | null
+          tags: string[] | null
+          target_audiences: string[] | null
+          technical_limitations: string | null
+          technical_prerequisites: string | null
+          technology_icon_url: string | null
+          technology_maturity: string | null
+          technology_name: string | null
+          technology_owner_id: string | null
+          technology_tower: string | null
+          technology_type: string | null
+          tenant_id: string | null
+          tenant_scope: string | null
+          third_party_integrations: Json | null
+          typical_deployment_size: string | null
+          typical_use_cases: Json | null
+          updated_at: string | null
+          updated_by: string | null
+          upgrade_path: string | null
+          vendor_name: string | null
+          version: string | null
+          visibility: string | null
+          webhooks_available: boolean | null
+        }
+        Insert: {
+          agent_required?: boolean | null
+          agentless_supported?: boolean | null
+          ai_maturity_score?: number | null
+          ai_opportunity_summary?: string | null
+          ai_playbooks_available?: boolean | null
+          ai_ready?: boolean | null
+          api_available?: boolean | null
+          approval_status?: string | null
+          assessed_by_id?: string | null
+          audit_logging_supported?: boolean | null
+          authentication_methods?: string[] | null
+          authentication_types?: string[] | null
+          authorization_model?: string | null
+          automation_integrations?: Json | null
+          automation_maturity_score?: number | null
+          automation_opportunity_summary?: string | null
+          automation_ready?: boolean | null
+          automations_available?: boolean | null
+          available_automation_interfaces?: Json | null
+          backup_supported?: boolean | null
+          banner_image_url?: string | null
+          business_criticality?: string | null
+          business_impact_if_unavailable?: string | null
+          business_outcome_summary?: string | null
+          business_owner_id?: string | null
+          business_purpose?: string | null
+          category?: string | null
+          cli_available?: boolean | null
+          cloned_from_technology_id?: string | null
+          clustering_supported?: boolean | null
+          color_theme?: string | null
+          community_url?: string | null
+          compliance_standards?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          data_classification?: string | null
+          data_integrations?: Json | null
+          data_owner_id?: string | null
+          data_residency_requirements?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deployment_models?: string[] | null
+          description?: string | null
+          digital_coworkers_available?: boolean | null
+          digital_twin_readiness_score?: number | null
+          disaster_recovery_supported?: boolean | null
+          documentation_completeness_percentage?: number | null
+          documentation_url?: string | null
+          edition?: string | null
+          effective_date?: string | null
+          encryption_at_rest?: boolean | null
+          encryption_in_transit?: boolean | null
+          end_of_extended_support_date?: string | null
+          end_of_life_date?: string | null
+          end_of_mainstream_support_date?: string | null
+          end_of_sale_date?: string | null
+          engineering_owner_id?: string | null
+          escalation_group?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          general_availability_date?: string | null
+          governance_notes?: string | null
+          graphql_available?: boolean | null
+          high_availability_supported?: boolean | null
+          id?: string | null
+          infrastructure_as_code_supported?: boolean | null
+          integration_notes?: string | null
+          is_active?: boolean | null
+          is_deleted?: boolean | null
+          is_sample?: boolean | null
+          itsm_integrations?: Json | null
+          knowledge_articles_available?: boolean | null
+          known_security_considerations?: string | null
+          last_assessment_date?: string | null
+          licensing_model?: string | null
+          lifecycle_notes?: string | null
+          lifecycle_status?: string | null
+          mfa_supported?: boolean | null
+          monitoring_integrations?: Json | null
+          multi_region_supported?: boolean | null
+          native_integrations?: Json | null
+          operational_maturity_score?: number | null
+          operations_owner_id?: string | null
+          overall_maturity_notes?: string | null
+          powershell_available?: boolean | null
+          primary_domain?: string | null
+          product_family?: string | null
+          product_name?: string | null
+          product_website_url?: string | null
+          published_version?: number | null
+          rbac_supported?: boolean | null
+          record_steward_id?: string | null
+          replacement_technology_id?: string | null
+          required_security_controls?: Json | null
+          rest_api_available?: boolean | null
+          review_date?: string | null
+          runbooks_available?: boolean | null
+          scalability_model?: string | null
+          sdk_available?: boolean | null
+          secondary_domains?: string[] | null
+          security_certifications?: string[] | null
+          security_maturity_score?: number | null
+          security_owner_id?: string | null
+          short_name?: string | null
+          siem_integrations?: Json | null
+          slug?: string | null
+          sop_library_available?: boolean | null
+          source_of_record?: string | null
+          strategic_importance?: string | null
+          support_contract_reference?: string | null
+          support_group?: string | null
+          support_readiness_score?: number | null
+          support_url?: string | null
+          supported_architectures?: string[] | null
+          supported_business_services?: Json | null
+          supported_cloud_providers?: string[] | null
+          supported_databases?: string[] | null
+          supported_hypervisors?: string[] | null
+          supported_industries?: string[] | null
+          supported_operating_systems?: string[] | null
+          tags?: string[] | null
+          target_audiences?: string[] | null
+          technical_limitations?: string | null
+          technical_prerequisites?: string | null
+          technology_icon_url?: string | null
+          technology_maturity?: string | null
+          technology_name?: string | null
+          technology_owner_id?: string | null
+          technology_tower?: string | null
+          technology_type?: string | null
+          tenant_id?: string | null
+          tenant_scope?: string | null
+          third_party_integrations?: Json | null
+          typical_deployment_size?: string | null
+          typical_use_cases?: Json | null
+          updated_at?: string | null
+          updated_by?: string | null
+          upgrade_path?: string | null
+          vendor_name?: string | null
+          version?: string | null
+          visibility?: string | null
+          webhooks_available?: boolean | null
+        }
+        Update: {
+          agent_required?: boolean | null
+          agentless_supported?: boolean | null
+          ai_maturity_score?: number | null
+          ai_opportunity_summary?: string | null
+          ai_playbooks_available?: boolean | null
+          ai_ready?: boolean | null
+          api_available?: boolean | null
+          approval_status?: string | null
+          assessed_by_id?: string | null
+          audit_logging_supported?: boolean | null
+          authentication_methods?: string[] | null
+          authentication_types?: string[] | null
+          authorization_model?: string | null
+          automation_integrations?: Json | null
+          automation_maturity_score?: number | null
+          automation_opportunity_summary?: string | null
+          automation_ready?: boolean | null
+          automations_available?: boolean | null
+          available_automation_interfaces?: Json | null
+          backup_supported?: boolean | null
+          banner_image_url?: string | null
+          business_criticality?: string | null
+          business_impact_if_unavailable?: string | null
+          business_outcome_summary?: string | null
+          business_owner_id?: string | null
+          business_purpose?: string | null
+          category?: string | null
+          cli_available?: boolean | null
+          cloned_from_technology_id?: string | null
+          clustering_supported?: boolean | null
+          color_theme?: string | null
+          community_url?: string | null
+          compliance_standards?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          data_classification?: string | null
+          data_integrations?: Json | null
+          data_owner_id?: string | null
+          data_residency_requirements?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deployment_models?: string[] | null
+          description?: string | null
+          digital_coworkers_available?: boolean | null
+          digital_twin_readiness_score?: number | null
+          disaster_recovery_supported?: boolean | null
+          documentation_completeness_percentage?: number | null
+          documentation_url?: string | null
+          edition?: string | null
+          effective_date?: string | null
+          encryption_at_rest?: boolean | null
+          encryption_in_transit?: boolean | null
+          end_of_extended_support_date?: string | null
+          end_of_life_date?: string | null
+          end_of_mainstream_support_date?: string | null
+          end_of_sale_date?: string | null
+          engineering_owner_id?: string | null
+          escalation_group?: string | null
+          expiration_date?: string | null
+          external_reference_id?: string | null
+          general_availability_date?: string | null
+          governance_notes?: string | null
+          graphql_available?: boolean | null
+          high_availability_supported?: boolean | null
+          id?: string | null
+          infrastructure_as_code_supported?: boolean | null
+          integration_notes?: string | null
+          is_active?: boolean | null
+          is_deleted?: boolean | null
+          is_sample?: boolean | null
+          itsm_integrations?: Json | null
+          knowledge_articles_available?: boolean | null
+          known_security_considerations?: string | null
+          last_assessment_date?: string | null
+          licensing_model?: string | null
+          lifecycle_notes?: string | null
+          lifecycle_status?: string | null
+          mfa_supported?: boolean | null
+          monitoring_integrations?: Json | null
+          multi_region_supported?: boolean | null
+          native_integrations?: Json | null
+          operational_maturity_score?: number | null
+          operations_owner_id?: string | null
+          overall_maturity_notes?: string | null
+          powershell_available?: boolean | null
+          primary_domain?: string | null
+          product_family?: string | null
+          product_name?: string | null
+          product_website_url?: string | null
+          published_version?: number | null
+          rbac_supported?: boolean | null
+          record_steward_id?: string | null
+          replacement_technology_id?: string | null
+          required_security_controls?: Json | null
+          rest_api_available?: boolean | null
+          review_date?: string | null
+          runbooks_available?: boolean | null
+          scalability_model?: string | null
+          sdk_available?: boolean | null
+          secondary_domains?: string[] | null
+          security_certifications?: string[] | null
+          security_maturity_score?: number | null
+          security_owner_id?: string | null
+          short_name?: string | null
+          siem_integrations?: Json | null
+          slug?: string | null
+          sop_library_available?: boolean | null
+          source_of_record?: string | null
+          strategic_importance?: string | null
+          support_contract_reference?: string | null
+          support_group?: string | null
+          support_readiness_score?: number | null
+          support_url?: string | null
+          supported_architectures?: string[] | null
+          supported_business_services?: Json | null
+          supported_cloud_providers?: string[] | null
+          supported_databases?: string[] | null
+          supported_hypervisors?: string[] | null
+          supported_industries?: string[] | null
+          supported_operating_systems?: string[] | null
+          tags?: string[] | null
+          target_audiences?: string[] | null
+          technical_limitations?: string | null
+          technical_prerequisites?: string | null
+          technology_icon_url?: string | null
+          technology_maturity?: string | null
+          technology_name?: string | null
+          technology_owner_id?: string | null
+          technology_tower?: string | null
+          technology_type?: string | null
+          tenant_id?: string | null
+          tenant_scope?: string | null
+          third_party_integrations?: Json | null
+          typical_deployment_size?: string | null
+          typical_use_cases?: Json | null
+          updated_at?: string | null
+          updated_by?: string | null
+          upgrade_path?: string | null
+          vendor_name?: string | null
+          version?: string | null
+          visibility?: string | null
+          webhooks_available?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      _commercial_require_perm: {
+        Args: { _perm: string; _tenant_id: string }
+        Returns: undefined
+      }
+      accept_invitation: { Args: { _token: string }; Returns: Json }
       admin_get_user_login_history: {
         Args: { _email?: string; _limit?: number; _user_id: string }
         Returns: {
@@ -5387,6 +9815,804 @@ export type Database = {
           user_agent: string
         }[]
       }
+      archive_tenant_role: { Args: { _role_id: string }; Returns: undefined }
+      assign_membership_role: {
+        Args: { _membership_id: string; _role_id: string }
+        Returns: string
+      }
+      assign_role_permission: {
+        Args: { _permission_code: string; _role_id: string }
+        Returns: undefined
+      }
+      audio_admin_create_narrative: {
+        Args: {
+          _audience?: string
+          _call_id: string
+          _change_summary?: string
+          _default_locale?: string
+          _description?: string
+          _estimated_duration_seconds?: number
+          _module_key: string
+          _name: string
+          _scope_reference?: string
+          _scope_type?: string
+          _source_text?: string
+          _speech_profile_id?: string
+          _speech_text?: string
+          _tenant_id: string
+          _topic_key: string
+        }
+        Returns: string
+      }
+      audio_admin_duplicate_narrative: {
+        Args: { _narrative_id: string; _new_call_id: string; _new_name: string }
+        Returns: string
+      }
+      audio_admin_list_narratives: {
+        Args: { _tenant_id: string }
+        Returns: {
+          active_version_id: string
+          active_version_no: number
+          audience: string
+          call_id: string
+          default_locale: string
+          description: string
+          enabled_placement_count: number
+          id: string
+          module_key: string
+          name: string
+          owner_name: string
+          owner_user_id: string
+          placement_count: number
+          scope_reference: string
+          scope_type: string
+          speech_profile_id: string
+          speech_profile_name: string
+          status: string
+          tenant_id: string
+          topic_key: string
+          updated_at: string
+          version_count: number
+        }[]
+      }
+      audio_admin_narrative_audit: {
+        Args: { _narrative_id: string }
+        Returns: {
+          action_code: string
+          actor_name: string
+          actor_user_id: string
+          comment: string
+          id: string
+          new_status: string
+          object_id: string
+          object_type: string
+          occurred_at: string
+          previous_status: string
+          version_no: number
+        }[]
+      }
+      audio_admin_set_narrative_status: {
+        Args: { _narrative_id: string; _status: string }
+        Returns: undefined
+      }
+      audio_analytics_overview: {
+        Args: { _days?: number; _tenant_id: string }
+        Returns: Json
+      }
+      audio_can_manage: {
+        Args: { _permission_code: string; _tenant_id: string }
+        Returns: boolean
+      }
+      audio_can_view: { Args: { _tenant_id: string }; Returns: boolean }
+      audio_record_event: {
+        Args: {
+          _audience?: string
+          _browser_capability?: string
+          _call_id?: string
+          _char_count?: number
+          _duration_ms?: number
+          _error_category?: string
+          _error_code?: string
+          _event_type: string
+          _locale?: string
+          _module_key?: string
+          _page_key?: string
+          _placement_key?: string
+          _playback_state?: string
+          _section_key?: string
+          _version_no?: number
+          _voice_name?: string
+        }
+        Returns: boolean
+      }
+      audio_resolve_call: {
+        Args: { _call_id: string; _placement_key?: string }
+        Returns: Json
+      }
+      audio_variable_registry: {
+        Args: { _tenant_id?: string }
+        Returns: {
+          description: string
+          display_format: string
+          display_name: string
+          is_authorized: boolean
+          is_enabled: boolean
+          missing_fallback: string
+          module_key: string
+          required_context: string[]
+          required_permission_code: string
+          resolver_key: string
+          sensitivity: string
+          spoken_format: string
+          value_type: string
+          variable_key: string
+        }[]
+      }
+      audio_version_create_draft_from: {
+        Args: { _change_summary?: string; _source_version_id: string }
+        Returns: string
+      }
+      audio_version_transition: {
+        Args: { _action: string; _comment?: string; _version_id: string }
+        Returns: Json
+      }
+      bootstrap_commercial_workspace: { Args: never; Returns: Json }
+      bootstrap_tenant_default_roles: {
+        Args: { _actor: string; _tenant_id: string }
+        Returns: undefined
+      }
+      cancel_invitation: {
+        Args: { _invitation_id: string }
+        Returns: undefined
+      }
+      commercial_assumption_impact: {
+        Args: { _code: string }
+        Returns: string[]
+      }
+      commercial_can_write: {
+        Args: { _permission_code: string; _tenant_id: string }
+        Returns: boolean
+      }
+      commercial_change_set_apply: {
+        Args: { _change_set_id: string }
+        Returns: Json
+      }
+      commercial_change_set_cancel: {
+        Args: { _change_set_id: string; _reason: string }
+        Returns: undefined
+      }
+      commercial_change_set_compute_hash: {
+        Args: { _change_set_id: string }
+        Returns: string
+      }
+      commercial_change_set_create: {
+        Args: {
+          _description: string
+          _model_version_id: string
+          _program_id: string
+          _tenant_id: string
+          _title: string
+        }
+        Returns: string
+      }
+      commercial_change_set_hash: {
+        Args: { _change_set_id: string }
+        Returns: string
+      }
+      commercial_change_set_remove_item: {
+        Args: { _item_id: string }
+        Returns: undefined
+      }
+      commercial_change_set_upsert_item: {
+        Args: {
+          _assumption_code: string
+          _change_set_id: string
+          _proposed_value_numeric: number
+          _proposed_value_text: string
+          _rationale: string
+          _scenario_id: string
+        }
+        Returns: string
+      }
+      commercial_change_set_validate: {
+        Args: { _change_set_id: string }
+        Returns: Json
+      }
+      commercial_classify_impact: { Args: { _code: string }; Returns: string[] }
+      commercial_comparison_archive: {
+        Args: { _comparison_id: string }
+        Returns: undefined
+      }
+      commercial_comparison_assumptions: {
+        Args: { _comparison_id: string }
+        Returns: {
+          assumption_code: string
+          differs_from_baseline: boolean
+          is_baseline: boolean
+          label: string
+          numeric_value: number
+          scenario_id: string
+          text_value: string
+          unit: string
+        }[]
+      }
+      commercial_comparison_build_manifest: {
+        Args: { _comparison_id: string }
+        Returns: Json
+      }
+      commercial_comparison_calculate: {
+        Args: { _comparison_id: string }
+        Returns: {
+          absolute_variance: number
+          baseline_run_id: string
+          baseline_value: number
+          compared_run_id: string
+          compared_scenario_id: string
+          compared_value: number
+          direction_reason: string
+          fiscal_period: string
+          metric_code: string
+          metric_group: string
+          percentage_variance: number
+          period_sequence: number
+          unit: string
+          variance_direction: string
+        }[]
+      }
+      commercial_comparison_compute_hash: {
+        Args: { _comparison_id: string }
+        Returns: string
+      }
+      commercial_comparison_create: {
+        Args: {
+          _baseline_scenario_id: string
+          _compared_scenario_ids: string[]
+          _description?: string
+          _included_scopes: string[]
+          _mode: string
+          _model_version_id: string
+          _program_id: string
+          _title: string
+        }
+        Returns: string
+      }
+      commercial_comparison_list_selectable_runs: {
+        Args: {
+          _model_version_id: string
+          _program_id: string
+          _scenario_id: string
+          _scope: string
+        }
+        Returns: {
+          completed_at: string
+          input_hash: string
+          is_latest: boolean
+          run_id: string
+          run_scope: string
+          status: string
+        }[]
+      }
+      commercial_comparison_readiness: {
+        Args: { _comparison_id: string }
+        Returns: {
+          is_missing: boolean
+          is_stale: boolean
+          latest_apply_at: string
+          latest_completed_at: string
+          latest_run_id: string
+          scenario_id: string
+          scope: string
+        }[]
+      }
+      commercial_comparison_save: {
+        Args: { _comparison_id: string }
+        Returns: Json
+      }
+      commercial_comparison_update_draft: {
+        Args: {
+          _baseline_scenario_id?: string
+          _compared_scenario_ids?: string[]
+          _comparison_id: string
+          _description?: string
+          _included_scopes?: string[]
+          _mode?: string
+          _title?: string
+        }
+        Returns: undefined
+      }
+      commercial_compute_input_hash: {
+        Args: {
+          _formula_catalog_version: string
+          _inputs: Json
+          _model_version_id: string
+          _run_scope: string
+          _scenario_id: string
+        }
+        Returns: string
+      }
+      commercial_is_member_with_view: {
+        Args: { _tenant_id: string }
+        Returns: boolean
+      }
+      commercial_model_run_complete: {
+        Args: { _run_id: string }
+        Returns: undefined
+      }
+      commercial_model_run_fail: {
+        Args: { _error_code: string; _error_message: string; _run_id: string }
+        Returns: undefined
+      }
+      commercial_model_run_mark_running: {
+        Args: { _run_id: string }
+        Returns: undefined
+      }
+      commercial_model_run_persist_result: {
+        Args: {
+          _fiscal_period: string
+          _formula_code: string
+          _is_approximation: boolean
+          _lineage: Json
+          _metric_code: string
+          _metric_group: string
+          _period_sequence: number
+          _run_id: string
+          _unit: string
+          _value_numeric: number
+          _value_text: string
+        }
+        Returns: string
+      }
+      commercial_model_run_persist_results_batch: {
+        Args: { _results: Json; _run_id: string }
+        Returns: number
+      }
+      commercial_model_run_start: {
+        Args: {
+          _model_version_id: string
+          _program_id: string
+          _run_scope: string
+          _scenario_id: string
+        }
+        Returns: Json
+      }
+      commercial_model_run_supersede: {
+        Args: { _run_id: string; _superseded_by: string }
+        Returns: undefined
+      }
+      commercial_model_version_activate: {
+        Args: {
+          _certification_id: string
+          _model_version_id: string
+          _reason: string
+        }
+        Returns: string
+      }
+      commercial_model_version_create_successor: {
+        Args: {
+          _model_version_id: string
+          _name?: string
+          _version_code: string
+        }
+        Returns: string
+      }
+      commercial_program_run_staleness: {
+        Args: { _program_id: string }
+        Returns: {
+          is_stale: boolean
+          last_apply_at: string
+          latest_completed_at: string
+          latest_run_id: string
+          run_scope: string
+          scenario_id: string
+        }[]
+      }
+      commercial_release_authoritative_runs: {
+        Args: { _model_version_id: string; _program_id: string }
+        Returns: {
+          completed_at: string
+          input_count: number
+          input_hash: string
+          result_count: number
+          run_id: string
+          run_scope: string
+          scenario_id: string
+          supersedes_run_id: string
+        }[]
+      }
+      commercial_release_build_manifest: {
+        Args: { _model_version_id: string }
+        Returns: Json
+      }
+      commercial_release_certification_certify: {
+        Args: { _certification_id: string; _note?: string }
+        Returns: string
+      }
+      commercial_release_certification_create: {
+        Args: { _model_version_id: string; _notes?: string }
+        Returns: string
+      }
+      commercial_release_certification_invalidate: {
+        Args: { _certification_id: string; _reason: string }
+        Returns: string
+      }
+      commercial_release_certification_refresh: {
+        Args: { _certification_id: string }
+        Returns: string
+      }
+      commercial_release_hash: { Args: { _payload: Json }; Returns: string }
+      commercial_release_readiness: {
+        Args: { _model_version_id: string }
+        Returns: {
+          actual_value: string
+          blocking: boolean
+          category: string
+          control_code: string
+          evidence_reference: string
+          expected_value: string
+          label: string
+          object_id: string
+          object_type: string
+          remediation_hint: string
+          severity: string
+          status: string
+        }[]
+      }
+      commercial_release_readiness_snapshot: {
+        Args: { _model_version_id: string }
+        Returns: Json
+      }
+      commercial_sensitivity_archive: {
+        Args: { _experiment_id: string }
+        Returns: undefined
+      }
+      commercial_sensitivity_build_manifest: {
+        Args: { _experiment_id: string }
+        Returns: Json
+      }
+      commercial_sensitivity_compute_hash: {
+        Args: { _experiment_id: string }
+        Returns: string
+      }
+      commercial_sensitivity_create: {
+        Args: {
+          _assumption_code: string
+          _baseline_scenario_id: string
+          _description?: string
+          _included_scopes: string[]
+          _model_version_id: string
+          _perturbation_config: Json
+          _perturbation_strategy: string
+          _program_id: string
+          _title: string
+        }
+        Returns: string
+      }
+      commercial_sensitivity_fail: {
+        Args: {
+          _error_code: string
+          _error_message: string
+          _experiment_id: string
+        }
+        Returns: undefined
+      }
+      commercial_sensitivity_finalize: {
+        Args: { _experiment_id: string }
+        Returns: Json
+      }
+      commercial_sensitivity_list_baseline_runs: {
+        Args: {
+          _model_version_id: string
+          _program_id: string
+          _scenario_id: string
+          _scopes: string[]
+        }
+        Returns: {
+          completed_at: string
+          input_hash: string
+          run_id: string
+          scope: string
+        }[]
+      }
+      commercial_sensitivity_readiness: {
+        Args: { _experiment_id: string }
+        Returns: {
+          is_missing: boolean
+          is_stale: boolean
+          latest_completed_at: string
+          latest_run_id: string
+          scope: string
+        }[]
+      }
+      commercial_sensitivity_record_perturbation_run: {
+        Args: {
+          _input_hash: string
+          _perturbation_id: string
+          _results: Json
+          _run_scope: string
+          _runtime_fingerprint: string
+        }
+        Returns: string
+      }
+      commercial_sensitivity_reset_to_draft: {
+        Args: { _experiment_id: string; _reason?: string }
+        Returns: {
+          experiment_id: string
+          perturbations_removed: number
+          reset_at: string
+          status: string
+        }[]
+      }
+      commercial_sensitivity_start_execution: {
+        Args: { _experiment_id: string; _perturbations: Json }
+        Returns: Json
+      }
+      commercial_sensitivity_update_draft: {
+        Args: {
+          _description: string
+          _experiment_id: string
+          _included_scopes: string[]
+          _perturbation_config: Json
+          _perturbation_strategy: string
+          _title: string
+        }
+        Returns: undefined
+      }
+      commercial_snapshot_scenario_assumptions: {
+        Args: { _scenario_id: string }
+        Returns: Json
+      }
+      count_active_tenant_admins: {
+        Args: { _exclude_membership?: string; _tenant_id: string }
+        Returns: number
+      }
+      create_tenant_role: {
+        Args: {
+          _code: string
+          _description?: string
+          _name: string
+          _tenant_id: string
+        }
+        Returns: string
+      }
+      emit_audit_event: {
+        Args: {
+          _action_code: string
+          _after?: Json
+          _before?: Json
+          _metadata?: Json
+          _object_id: string
+          _object_type: string
+          _reason?: string
+          _tenant_id: string
+        }
+        Returns: string
+      }
+      etdm_auto_build_domains: {
+        Args: { _master_domain_ids: string[]; _technology_id: string }
+        Returns: Json
+      }
+      etdm_clone_domain: {
+        Args: { _source_id: string }
+        Returns: {
+          approval_status: Database["public"]["Enums"]["etdm_domain_approval"]
+          business_criticality: Database["public"]["Enums"]["etdm_domain_criticality"]
+          business_purpose: string | null
+          cloned_from_domain_id: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          description: string | null
+          display_order: number
+          domain_display_name: string
+          effective_date: string | null
+          expiration_date: string | null
+          external_reference_id: string | null
+          governance_notes: string | null
+          id: string
+          is_active: boolean
+          is_deleted: boolean
+          lifecycle_status: Database["public"]["Enums"]["etdm_domain_lifecycle"]
+          master_domain_id: string
+          published_version: number
+          review_date: string | null
+          scope_summary: string | null
+          short_name: string | null
+          slug: string
+          source_of_record: string | null
+          tags: string[]
+          technology_id: string
+          tenant_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "etdm_domains"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      etdm_clone_technology: {
+        Args: { _source_id: string }
+        Returns: {
+          agent_required: boolean | null
+          agentless_supported: boolean | null
+          ai_maturity_score: number | null
+          ai_opportunity_summary: string | null
+          ai_playbooks_available: boolean | null
+          ai_ready: boolean | null
+          api_available: boolean | null
+          approval_status: string
+          assessed_by_id: string | null
+          audit_logging_supported: boolean | null
+          authentication_methods: string[] | null
+          authentication_types: string[] | null
+          authorization_model: string | null
+          automation_integrations: Json | null
+          automation_maturity_score: number | null
+          automation_opportunity_summary: string | null
+          automation_ready: boolean | null
+          automations_available: boolean | null
+          available_automation_interfaces: Json | null
+          backup_supported: boolean | null
+          banner_image_url: string | null
+          business_criticality: string | null
+          business_impact_if_unavailable: string | null
+          business_outcome_summary: string | null
+          business_owner_id: string | null
+          business_purpose: string | null
+          category: string | null
+          cli_available: boolean | null
+          cloned_from_technology_id: string | null
+          clustering_supported: boolean | null
+          color_theme: string | null
+          community_url: string | null
+          compliance_standards: string[] | null
+          created_at: string
+          created_by: string | null
+          data_classification: string | null
+          data_integrations: Json | null
+          data_owner_id: string | null
+          data_residency_requirements: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deployment_models: string[] | null
+          description: string | null
+          digital_coworkers_available: boolean | null
+          digital_twin_readiness_score: number | null
+          disaster_recovery_supported: boolean | null
+          documentation_completeness_percentage: number | null
+          documentation_url: string | null
+          edition: string | null
+          effective_date: string | null
+          encryption_at_rest: boolean | null
+          encryption_in_transit: boolean | null
+          end_of_extended_support_date: string | null
+          end_of_life_date: string | null
+          end_of_mainstream_support_date: string | null
+          end_of_sale_date: string | null
+          engineering_owner_id: string | null
+          escalation_group: string | null
+          expiration_date: string | null
+          external_reference_id: string | null
+          general_availability_date: string | null
+          governance_notes: string | null
+          graphql_available: boolean | null
+          high_availability_supported: boolean | null
+          id: string
+          infrastructure_as_code_supported: boolean | null
+          integration_notes: string | null
+          is_active: boolean
+          is_deleted: boolean
+          is_sample: boolean
+          itsm_integrations: Json | null
+          knowledge_articles_available: boolean | null
+          known_security_considerations: string | null
+          last_assessment_date: string | null
+          licensing_model: string | null
+          lifecycle_notes: string | null
+          lifecycle_status: string | null
+          mfa_supported: boolean | null
+          monitoring_integrations: Json | null
+          multi_region_supported: boolean | null
+          native_integrations: Json | null
+          neurealm_practice: string | null
+          operational_maturity_score: number | null
+          operations_owner_id: string | null
+          overall_maturity_notes: string | null
+          powershell_available: boolean | null
+          primary_domain: string | null
+          product_family: string | null
+          product_name: string | null
+          product_website_url: string | null
+          published_version: number
+          rbac_supported: boolean | null
+          record_steward_id: string | null
+          replacement_technology_id: string | null
+          required_security_controls: Json | null
+          rest_api_available: boolean | null
+          review_date: string | null
+          runbooks_available: boolean | null
+          scalability_model: string | null
+          sdk_available: boolean | null
+          secondary_domains: string[] | null
+          security_certifications: string[] | null
+          security_maturity_score: number | null
+          security_owner_id: string | null
+          short_name: string | null
+          siem_integrations: Json | null
+          slug: string
+          sop_library_available: boolean | null
+          source_of_record: string | null
+          strategic_importance: string | null
+          support_contract_reference: string | null
+          support_group: string | null
+          support_readiness_score: number | null
+          support_url: string | null
+          supported_architectures: string[] | null
+          supported_business_services: Json | null
+          supported_cloud_providers: string[] | null
+          supported_databases: string[] | null
+          supported_hypervisors: string[] | null
+          supported_industries: string[] | null
+          supported_operating_systems: string[] | null
+          tags: string[] | null
+          target_audiences: string[] | null
+          technical_limitations: string | null
+          technical_prerequisites: string | null
+          technology_icon_url: string | null
+          technology_image_crop_metadata: Json | null
+          technology_image_height: number | null
+          technology_image_last_updated: string | null
+          technology_image_last_updated_by: string | null
+          technology_image_original_filename: string | null
+          technology_image_scale: number | null
+          technology_image_storage_path: string | null
+          technology_image_type: string | null
+          technology_image_url: string | null
+          technology_image_width: number | null
+          technology_maturity: string | null
+          technology_name: string
+          technology_owner_id: string | null
+          technology_tower: string | null
+          technology_type: string | null
+          tenant_id: string | null
+          tenant_scope: string | null
+          third_party_integrations: Json | null
+          typical_deployment_size: string | null
+          typical_use_cases: Json | null
+          updated_at: string
+          updated_by: string | null
+          upgrade_path: string | null
+          vendor_name: string | null
+          version: string | null
+          visibility: string
+          webhooks_available: boolean | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "etdm_technologies"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      etdm_reorder_domains: {
+        Args: { _ordered_ids: string[]; _technology_id: string }
+        Returns: undefined
+      }
+      get_current_access_context: {
+        Args: { _tenant_id?: string }
+        Returns: Json
+      }
+      get_platform_home_summary: {
+        Args: { p_tenant_id: string }
+        Returns: Json
+      }
+      has_permission: {
+        Args: { _permission_code: string; _tenant_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -5394,8 +10620,121 @@ export type Database = {
         }
         Returns: boolean
       }
+      invite_member: {
+        Args: {
+          _email: string
+          _expires_in_days?: number
+          _role_codes?: string[]
+          _tenant_id: string
+        }
+        Returns: Json
+      }
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       is_user_approved: { Args: { _user_id: string }; Returns: boolean }
+      is_valid_timezone: { Args: { _tz: string }; Returns: boolean }
+      list_audit_events: {
+        Args: {
+          p_action?: string
+          p_actor?: string
+          p_from?: string
+          p_limit?: number
+          p_object_type?: string
+          p_offset?: number
+          p_search?: string
+          p_tenant_id: string
+          p_to?: string
+        }
+        Returns: {
+          action_code: string
+          actor_email: string
+          actor_user_id: string
+          after_values: Json
+          before_values: Json
+          correlation_id: string
+          event_id: string
+          object_id: string
+          object_type: string
+          occurred_at: string
+          reason: string
+          source: string
+          total_count: number
+        }[]
+      }
+      list_authorized_tenants: {
+        Args: never
+        Returns: {
+          default_currency_code: string
+          default_timezone: string
+          membership_status: string
+          name: string
+          platform_admin: boolean
+          slug: string
+          status: string
+          tenant_id: string
+        }[]
+      }
+      list_tenant_invitations: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_status?: string
+          p_tenant_id: string
+        }
+        Returns: {
+          created_at: string
+          email: string
+          expires_at: string
+          invitation_id: string
+          invited_by: string
+          roles: Json
+          status: string
+          total_count: number
+        }[]
+      }
+      list_tenant_members: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_status?: string
+          p_tenant_id: string
+        }
+        Returns: {
+          display_name: string
+          email: string
+          joined_at: string
+          last_active_at: string
+          membership_id: string
+          roles: Json
+          status: string
+          total_count: number
+          user_id: string
+        }[]
+      }
+      list_tenant_roles: {
+        Args: { p_include_archived?: boolean; p_tenant_id: string }
+        Returns: {
+          code: string
+          description: string
+          is_system_protected: boolean
+          member_count: number
+          name: string
+          permission_codes: string[]
+          role_id: string
+          status: string
+        }[]
+      }
+      normalize_slug: { Args: { _s: string }; Returns: string }
+      provision_tenant: {
+        Args: {
+          _admin_user_id: string
+          _currency?: string
+          _name: string
+          _slug: string
+          _timezone?: string
+        }
+        Returns: Json
+      }
       record_user_login_event: {
         Args: {
           _action?: string
@@ -5408,6 +10747,18 @@ export type Database = {
           _user_id: string
         }
         Returns: string
+      }
+      remove_membership_role: {
+        Args: { _membership_id: string; _role_id: string }
+        Returns: undefined
+      }
+      remove_role_permission: {
+        Args: { _permission_code: string; _role_id: string }
+        Returns: undefined
+      }
+      resend_invitation: {
+        Args: { _expires_in_days?: number; _invitation_id: string }
+        Returns: Json
       }
       runops_advance_scenario: {
         Args: { _actor: string; _scenario_id: string }
@@ -5547,6 +10898,51 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      seed_project_momentous_foundation: { Args: never; Returns: Json }
+      seed_project_momentous_scenarios: { Args: never; Returns: Json }
+      seed_user_defaults: {
+        Args: { _email: string; _user_id: string }
+        Returns: undefined
+      }
+      set_membership_status: {
+        Args: {
+          _membership_id: string
+          _reason?: string
+          _status: Database["public"]["Enums"]["membership_status"]
+        }
+        Returns: Json
+      }
+      update_tenant: {
+        Args: {
+          p_default_currency_code: string
+          p_default_timezone: string
+          p_name: string
+          p_slug: string
+          p_tenant_id: string
+        }
+        Returns: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          default_currency_code: string
+          default_timezone: string
+          id: string
+          name: string
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenants"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      update_tenant_role: {
+        Args: { _description: string; _name: string; _role_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       answer_status:
@@ -5559,6 +10955,30 @@ export type Database = {
         | "Deferred"
         | "Not Applicable"
       app_role: "platform_admin" | "platform_support"
+      etdm_domain_approval:
+        | "Draft"
+        | "In Review"
+        | "Approved"
+        | "Rejected"
+        | "Retired"
+      etdm_domain_criticality:
+        | "Mission Critical"
+        | "Business Critical"
+        | "Important"
+        | "Standard"
+        | "Noncritical"
+      etdm_domain_lifecycle:
+        | "Emerging"
+        | "Evaluation"
+        | "Strategic"
+        | "Active"
+        | "Maintenance"
+        | "Legacy"
+        | "Deprecated"
+        | "End of Support"
+        | "Retired"
+      invitation_status: "pending" | "accepted" | "expired" | "cancelled"
+      membership_status: "invited" | "active" | "suspended" | "deactivated"
       runops_approval_state:
         | "Pending"
         | "Approved"
@@ -5672,6 +11092,8 @@ export type Database = {
         | "Validating"
         | "Paused"
         | "Disabled"
+      tenant_role_status: "active" | "archived"
+      tenant_status: "active" | "suspended" | "archived"
       user_category: "neurealm_employee" | "customer"
     }
     CompositeTypes: {
@@ -5811,6 +11233,33 @@ export const Constants = {
         "Not Applicable",
       ],
       app_role: ["platform_admin", "platform_support"],
+      etdm_domain_approval: [
+        "Draft",
+        "In Review",
+        "Approved",
+        "Rejected",
+        "Retired",
+      ],
+      etdm_domain_criticality: [
+        "Mission Critical",
+        "Business Critical",
+        "Important",
+        "Standard",
+        "Noncritical",
+      ],
+      etdm_domain_lifecycle: [
+        "Emerging",
+        "Evaluation",
+        "Strategic",
+        "Active",
+        "Maintenance",
+        "Legacy",
+        "Deprecated",
+        "End of Support",
+        "Retired",
+      ],
+      invitation_status: ["pending", "accepted", "expired", "cancelled"],
+      membership_status: ["invited", "active", "suspended", "deactivated"],
       runops_approval_state: [
         "Pending",
         "Approved",
@@ -5937,6 +11386,8 @@ export const Constants = {
         "Paused",
         "Disabled",
       ],
+      tenant_role_status: ["active", "archived"],
+      tenant_status: ["active", "suspended", "archived"],
       user_category: ["neurealm_employee", "customer"],
     },
   },

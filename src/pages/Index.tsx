@@ -2,6 +2,8 @@ import { AppShell } from "@/components/eoc/AppShell";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
+import { AccountPanel } from "@/components/account/AccountPanel";
+import { useEffect, useState } from "react";
 import {
   Search, Bell, HelpCircle, ChevronDown, Star, ArrowRight, ChevronRight,
   Sparkles, ShieldCheck, CheckCircle2, Activity, Database, Cloud, Box,
@@ -32,7 +34,7 @@ export default Index;
 
 /* ---------- TOP BAR ---------- */
 function CommandTopBar() {
-  const { displayName, initials, role, signOut } = useUserProfile();
+  const { displayName, initials, role, avatarUrl, signOut } = useUserProfile();
   const navigate = useNavigate();
   return (
     <header className="border-b border-border bg-card">
@@ -52,6 +54,7 @@ function CommandTopBar() {
             className="w-full h-9 pl-9 pr-3 rounded-lg border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ai/20"
           />
         </div>
+        <LiveClockCST />
         <button className="relative h-9 w-9 grid place-items-center rounded-lg hover:bg-accent">
           <Bell className="h-4 w-4 text-muted-foreground" />
           <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-status-critical text-[10px] font-bold text-white grid place-items-center">0</span>
@@ -59,25 +62,51 @@ function CommandTopBar() {
         <button className="h-9 w-9 grid place-items-center rounded-lg hover:bg-accent">
           <HelpCircle className="h-4 w-4 text-muted-foreground" />
         </button>
-        <div className="flex items-center gap-2 pl-3 border-l border-border">
-          <div className="h-9 w-9 rounded-full bg-foreground text-background grid place-items-center text-xs font-bold">{initials}</div>
-          <div className="leading-tight">
-            <div className="text-[13px] font-semibold">{displayName}</div>
-            <div className="text-[11px] text-muted-foreground">{role}</div>
-          </div>
-          <button
-            onClick={async () => { await signOut(); navigate("/"); }}
-            className="ml-1 h-9 w-9 grid place-items-center rounded-lg hover:bg-accent"
-            title="Sign out"
-          >
-            <LogOut className="h-4 w-4 text-muted-foreground" />
+        <AccountPanel>
+          <button className="flex items-center gap-2 pl-3 border-l border-border outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-r-lg" aria-label="Open account panel">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
+            ) : (
+              <div className="h-9 w-9 rounded-full bg-foreground text-background grid place-items-center text-xs font-bold">{initials}</div>
+            )}
+            <div className="leading-tight text-left">
+              <div className="text-[13px] font-semibold">{displayName}</div>
+              <div className="text-[11px] text-muted-foreground">{role}</div>
+            </div>
           </button>
-        </div>
+        </AccountPanel>
       </div>
     </header>
   );
 }
 function Divider() { return <div className="h-8 w-px bg-border" />; }
+
+function LiveClockCST() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const dateStr = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    weekday: "short", month: "short", day: "numeric",
+  }).format(now);
+  const timeStr = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: true, timeZoneName: "short",
+  }).format(now);
+  return (
+    <div
+      className="h-9 px-3 flex flex-col justify-center rounded-lg border border-border bg-background leading-tight"
+      aria-live="polite"
+      title="Central Time"
+    >
+      <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{dateStr}</div>
+      <div className="text-[13px] font-semibold font-mono tabular-nums" suppressHydrationWarning>{timeStr}</div>
+    </div>
+  );
+}
 function TopField({ label, value, dotColor, icon: Icon, hasChevron }: any) {
   return (
     <div className="flex flex-col">

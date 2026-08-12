@@ -25,6 +25,7 @@ import {
   ShieldCheck, Sparkles, Target, Wrench,
 } from "lucide-react";
 import { useOperations, useRightDrawer } from "@/runops/state/RunOpsProviders";
+import incidentVideo from "@/assets/incident-clinical-integration.mp4.asset.json";
 import { useScenarioStore } from "@/runops/scenario/ScenarioStore";
 import {
   EntityHeader, EntityTabs, MetricCard, StatusIndicator, ReadinessScore,
@@ -169,6 +170,18 @@ export default function ServiceDigitalTwin() {
   const serviceComponents: Component[] = ops.components.filter((c) => service.componentIds.includes(c.id));
   const activeIncident = ops.incident.serviceId === service.id && ops.incident.state !== "Resolved" ? ops.incident : undefined;
   const serviceRunbooks: Runbook[] = [ops.runbook].filter((r) => r.serviceId === service.id);
+  if (service.id === "svc-hc-clinical-care-delivery") {
+    serviceRunbooks.push({
+      id: "RB-0117",
+      title: "Clinical Interface Queue Saturation and Message Recovery",
+      version: "v2.4",
+      state: "Certified",
+      autonomy: "Approval Gated Automation",
+      serviceId: service.id,
+      fitnessScore: 92,
+      steps: [],
+    });
+  }
   const serviceChanges: Change[] = ops.changes.filter((c) => c.serviceId === service.id);
   const serviceSlos = ops.slos.filter((s) => s.serviceId === service.id);
   const serviceWorkers: DigitalWorker[] = ops.digitalWorkers.slice(0, 4);
@@ -469,7 +482,8 @@ function OverviewTab(props: {
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
       {/* Purpose + narrative */}
-      <Card className="xl:col-span-2">
+      <Card className="h-full">
+
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Service purpose & reliability narrative</CardTitle>
         </CardHeader>
@@ -497,8 +511,31 @@ function OverviewTab(props: {
         </CardContent>
       </Card>
 
+      {/* Incident briefing video */}
+      <Card className="h-full">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Incident briefing video</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <video
+            src={incidentVideo.url}
+            controls
+            controlsList="nodownload"
+            preload="metadata"
+            playsInline
+            className="aspect-video w-full rounded border border-slate-200 bg-black object-contain"
+          >
+            Your browser does not support embedded video.
+          </video>
+        </CardContent>
+      </Card>
+
+
+
+
       {/* Readiness + KPIs */}
-      <Card>
+      <Card className="h-full">
+
         <CardHeader className="pb-2"><CardTitle className="text-sm">Operational readiness</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <ReadinessScore score={readinessScore} />
@@ -804,6 +841,7 @@ function OperationsTab({ activeExecution, workers, drafts }: {
 function RunbooksTab({ runbooks, onLaunch, disabled }: {
   runbooks: Runbook[]; onLaunch: (id: string) => void; disabled: boolean;
 }) {
+  const navigate = useNavigate();
   if (runbooks.length === 0) return <EmptyState title="No runbooks" description="No runbooks mapped to this service. Consider authoring one." />;
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -811,16 +849,32 @@ function RunbooksTab({ runbooks, onLaunch, disabled }: {
         <Card key={r.id}>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center justify-between text-sm">
-              <span>{r.id} · {r.title}</span>
+              <button
+                type="button"
+                onClick={() => navigate(`/runops/runbooks/${r.id}`)}
+                className="text-left hover:underline"
+              >
+                {r.id} · {r.title}
+              </button>
               <Badge variant="outline">{r.state}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-xs">
             <div className="text-slate-500">Version {r.version} · autonomy {r.autonomy}</div>
             <RunbookFitnessScore score={r.fitnessScore} />
-            <Button size="sm" disabled={disabled} onClick={() => onLaunch(r.id)}>
-              <Play className="mr-1 h-3.5 w-3.5" /> Launch
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                disabled={disabled}
+                onClick={() => navigate(`/runops/runbooks/${r.id}`)}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                <Play className="mr-1 h-3.5 w-3.5" /> Launch
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => navigate(`/runops/runbooks/${r.id}`)}>
+                Open {r.id}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ))}

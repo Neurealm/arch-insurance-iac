@@ -48,7 +48,7 @@ const kpis = [
 ];
 
 const workflows = [
-  { key: "evv",     name: "Caregiver Visit / EVV", desc: "Digital visit verification and caregiver engagement", health: 97, owner: "Caregiver Platform Team", status: "healthy", deps: [
+  { key: "evv",     name: "Caregiver Visit / EVV", desc: "Digital visit verification and caregiver engagement", health: 97, owner: "Caregiver Platform Team", status: "healthy", route: "/runops/services/svc-hc-clinical-integration", deps: [
     { name: "Mobile Services", icon: Smartphone }, { name: "Identity", icon: Key }, { name: "API Gateway", icon: Network }, { name: "AWS Platform", icon: Cloud }, { name: "SQL Cluster", icon: Database },
   ], insight: { tone: "ai", text: "AI Recommendation", sub: "Move API workload to managed container platform" } },
   { key: "claims",  name: "Claims Processing", desc: "Claims intake, adjudication and payment", health: 93, owner: "Revenue Operations", status: "healthy", deps: [
@@ -337,6 +337,48 @@ export default function ProdResilienceTwin() {
           </div>
         </div>
 
+        {/* Agentic FinOps */}
+        <div className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-200/80 px-6 py-3">
+          <div className="flex items-center gap-4">
+            <a href="/agentic-finops" className="shrink-0 min-w-[180px] group cursor-pointer">
+              <div className="text-[11px] font-semibold text-indigo-600 uppercase tracking-wide group-hover:text-indigo-700 flex items-center gap-1">
+                Agentic FinOps
+                <span className="text-indigo-400 group-hover:translate-x-0.5 transition-transform">→</span>
+              </div>
+              <div className="text-[11px] text-slate-600 mt-0.5 group-hover:text-slate-800">Open Agentic FinOps Digital Twin module</div>
+            </a>
+            <div className="flex items-center gap-2 overflow-x-auto flex-1">
+              {[
+                { label: "Governed Spend", value: "$28.7M", sub: "92% under governance", tone: "emerald", status: "Healthy" },
+                { label: "Realized Savings YTD", value: "$5.8M", sub: "billing-verified", tone: "emerald", status: "Verified" },
+                { label: "Identified Opportunity", value: "$9.4M", sub: "19.5% of spend", tone: "blue", status: "In pipeline" },
+                { label: "Policy Compliance", value: "94.2%", sub: "+2.8% vs prior 30d", tone: "blue", status: "Trending up" },
+                { label: "Waste Ratio", value: "14.8%", sub: "-4.2 pts QoQ", tone: "amber", status: "Improving" },
+              ].map((k) => {
+                const toneMap: Record<string, string> = {
+                  emerald: "text-emerald-600 border-emerald-200 bg-emerald-50/60",
+                  blue: "text-blue-600 border-blue-200 bg-blue-50/60",
+                  amber: "text-amber-600 border-amber-200 bg-amber-50/60",
+                };
+                return (
+                  <a
+                    key={k.label}
+                    href="/agentic-finops"
+                    className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded-lg border ${toneMap[k.tone]} hover:shadow-sm transition`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-600">{k.label}</div>
+                      <span className={`text-[9px] font-semibold ${toneMap[k.tone].split(' ')[0]}`}>{k.status}</span>
+                    </div>
+                    <div className={`text-2xl font-bold leading-tight mt-0.5 ${toneMap[k.tone].split(' ')[0]}`}>{k.value}</div>
+                    <div className="text-[10px] text-slate-500 leading-tight">{k.sub}</div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
 
         {/* Content */}
         <div className="px-6 py-4 space-y-4">
@@ -525,7 +567,13 @@ export default function ProdResilienceTwin() {
                     return (
                       <div
                         key={w.key}
-                        onClick={() => openDrawer(`Workflow Detail: ${w.name}`, w.desc, w)}
+                        onClick={() => {
+                          if ((w as any).route) {
+                            navigate((w as any).route);
+                          } else {
+                            openDrawer(`Workflow Detail: ${w.name}`, w.desc, w);
+                          }
+                        }}
                         className="grid grid-cols-12 items-center py-2.5 group hover:bg-blue-50/30 cursor-pointer rounded-lg px-1 -mx-1"
                       >
                         <div className="col-span-3 flex items-center gap-2">
