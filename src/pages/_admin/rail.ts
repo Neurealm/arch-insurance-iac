@@ -3,24 +3,24 @@
 // omitted from the peer list because it is rendered as the expanded branch.
 
 import {
-  Building2, Users, Database, Cpu, Workflow, Bot, Wallet, FileSearch, Settings,
+  Users, Database, Cpu, Workflow, Bot, Wallet, FileSearch, Settings,
 } from "lucide-react";
 
 export type AdminPlaneId =
-  | "tenant" | "iam" | "context" | "models" | "orchestration" | "coworkers" | "finops";
+  | "iam" | "context" | "models" | "orchestration" | "coworkers" | "finops";
 
 export type RailItem = { id: string; label: string; icon: any; to: string };
 
 /** Ordered peer navigation shown at the top of every administration rail. */
 export const ADMIN_PLANES: RailItem[] = [
-  { id: "tenant", label: "Tenant Overview", icon: Building2, to: "/context-evidence/overview" },
   { id: "iam", label: "Identity & Access", icon: Users, to: "/iam-admin/overview" },
   { id: "context", label: "Context / Evidence Layer", icon: Database, to: "/context-evidence/overview" },
   { id: "models", label: "Models & Routing", icon: Cpu, to: "/models-routing/overview" },
   { id: "orchestration", label: "Agent Orchestration", icon: Workflow, to: "/agent-orchestration/overview" },
-  { id: "coworkers", label: "Agents & Coworkers", icon: Bot, to: "/agent-orchestration/participants" },
+  { id: "coworkers", label: "Agents & Coworkers", icon: Bot, to: "/iam-admin/digital-coworkers" },
   { id: "finops", label: "AI Cost Management", icon: Wallet, to: "/finops-admin/overview" },
 ];
+
 
 /**
  * Peer planes rendered above the active plane's expanded branch.
