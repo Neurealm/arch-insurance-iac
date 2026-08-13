@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Activity, ArrowRightLeft, Boxes, ChevronLeft, ChevronRight, Cloud, FileBarChart2,
-  Home, Network, Package, Rocket, ShieldCheck, Sparkles, TrendingUp, Workflow,
+  Home, Menu, Network, Package, Rocket, ShieldCheck, Sparkles, TrendingUp, Workflow,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
