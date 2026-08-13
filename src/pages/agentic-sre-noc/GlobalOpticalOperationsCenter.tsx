@@ -272,6 +272,42 @@ export default function GlobalOpticalOperationsCenter() {
         })}
       </div>
 
+      {/* 3 — Global optical connectivity map */}
+      <Panel
+        title="Global Optical Connectivity"
+        subtitle={`${filtered.length} optical links in scope. Locations and conditions are synthetic.`}
+        className={cn(mapFullScreen && "fixed inset-3 z-50 overflow-auto")}
+        action={
+          <div className="flex flex-wrap gap-1.5">
+            <ToolbarButton onClick={() => setMapView("geographic")} active={mapView === "geographic"}>Geographic view</ToolbarButton>
+            <ToolbarButton onClick={() => setMapView("topology")} active={mapView === "topology"}>Topology view</ToolbarButton>
+            <ToolbarButton onClick={() => setOverlays((o) => ({ ...o, weather: !o.weather }))} active={overlays.weather}>Weather overlay</ToolbarButton>
+            <ToolbarButton onClick={() => setOverlays((o) => ({ ...o, fallback: !o.fallback }))} active={overlays.fallback}>Fallback readiness</ToolbarButton>
+            <ToolbarButton onClick={() => setOverlays((o) => ({ ...o, impact: !o.impact }))} active={overlays.impact}>Customer impact</ToolbarButton>
+            <ToolbarButton onClick={() => setOverlays((o) => ({ ...o, predicted: !o.predicted }))} active={overlays.predicted}>Predicted risk</ToolbarButton>
+            <ToolbarButton onClick={() => setZoom((z) => Math.min(6, Number((z + 0.4).toFixed(2))))}>Zoom in</ToolbarButton>
+            <ToolbarButton onClick={() => setZoom((z) => Math.max(0.8, Number((z - 0.4).toFixed(2))))}>Zoom out</ToolbarButton>
+            <ToolbarButton onClick={() => setMapFullScreen((v) => !v)}>{mapFullScreen ? "Exit full screen" : "Full screen"}</ToolbarButton>
+            <ToolbarButton onClick={() => { setZoom(1); setMapView("geographic"); }}>Reset</ToolbarButton>
+          </div>
+        }
+      >
+        <GoocMap
+          links={filtered}
+          selectedId={selectedLink}
+          highlightId={scenarioActive ? "lnk-chennai-041" : null}
+          view={mapView}
+          overlays={overlays}
+          zoom={zoom}
+          onZoomChange={setZoom}
+          onSelect={(id) => setSelectedLink(id)}
+        />
+        <p className="mt-2 text-[10.5px] text-slate-500">
+          Select a link to open its operational detail. Scroll to zoom, drag to pan.
+        </p>
+      </Panel>
+
+
       {/* 3 — Active situations */}
       <Panel
         title="Active Situations"
