@@ -20,24 +20,21 @@ export default defineConfig(({ mode }) => ({
 
   build: {
     sourcemap: false,
-    chunkSizeWarningLimit: 4000,
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       maxParallelFileOps: 2,
       cache: false,
       output: {
+        // Route-level React.lazy in src/App.tsx does the application splitting.
+        // Only heavy third-party libraries are pinned to their own chunks so
+        // they are not duplicated across route chunks.
         manualChunks(id: string) {
-          if (id.includes("node_modules")) {
-            if (/maplibre-gl/.test(id)) return "vendor-maplibre";
-            if (/three|@react-three/.test(id)) return "vendor-three";
-            if (/recharts|d3-/.test(id)) return "vendor-charts";
-            if (/react-dom|react-router|@tanstack/.test(id)) return "vendor-react";
-            return "vendor";
-          }
-          const m = id.match(/src\/pages\/([^/]+)\//);
-          if (m) return `page-${m[1]}`;
-          const f = id.match(/src\/(commercial|platform|runops|silicon|avep|features|modules|components)\//);
-          if (f) return `app-${f[1]}`;
-          return undefined;
+          if (!id.includes("node_modules")) return undefined;
+          if (/maplibre-gl/.test(id)) return "vendor-maplibre";
+          if (/three|@react-three/.test(id)) return "vendor-three";
+          if (/recharts|d3-/.test(id)) return "vendor-charts";
+          if (/react-dom|react-router|@tanstack/.test(id)) return "vendor-react";
+          return "vendor";
         },
       },
     },
