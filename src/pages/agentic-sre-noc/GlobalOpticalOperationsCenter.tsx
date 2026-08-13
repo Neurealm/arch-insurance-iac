@@ -53,7 +53,11 @@ export default function GlobalOpticalOperationsCenter() {
   const [statusFilter, setStatusFilter] = useState<string>("All statuses");
   const [refreshedAt, setRefreshedAt] = useState(() => "11:04:22 UTC");
 
-  // Map state removed with the Global Optical Connectivity panel.
+  // Global Optical Connectivity map state
+  const [mapView, setMapView] = useState<"geographic" | "topology">("geographic");
+  const [zoom, setZoom] = useState(1);
+  const [mapFullScreen, setMapFullScreen] = useState(false);
+  const [overlays, setOverlays] = useState<MapOverlays>({ weather: true, fallback: true, impact: true, predicted: true });
 
 
   // Drawers
