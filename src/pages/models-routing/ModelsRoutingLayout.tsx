@@ -188,7 +188,7 @@ export default function ModelsRoutingLayout() {
         </section>
 
         {/* Secondary tabs */}
-        <nav className="sticky top-0 z-20 flex gap-0.5 overflow-x-auto border-b border-slate-200 bg-white px-5" aria-label="Model routing sections">
+        <nav className="sticky top-[86px] z-20 flex gap-0.5 overflow-x-auto border-b border-slate-200 bg-white px-5" aria-label="Model routing sections">
           {SUB_NAV.map((t) => (
             <NavLink key={t.to} to={{ pathname: t.to, search: params.toString() }} className={({ isActive }) => cn(
               "whitespace-nowrap border-b-2 px-3 py-2.5 text-[12.5px] transition-colors",

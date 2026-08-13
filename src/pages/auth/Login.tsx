@@ -14,7 +14,13 @@ import { friendlyAuthError } from "@/lib/authErrors";
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const dest = (location.state as any)?.from || "/app";
+  // Post-login destination: router state (set by guards) first, then a `next`
+  // query param (used by invitation links), then the app home.
+  const nextParam = new URLSearchParams(location.search).get("next");
+  const dest =
+    (location.state as any)?.from ||
+    (nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null) ||
+    "/app";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);

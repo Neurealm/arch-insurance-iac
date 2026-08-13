@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Activity, ArrowRightLeft, Boxes, ChevronLeft, ChevronRight, Cloud, FileBarChart2,
-  Home, Network, Package, Rocket, ShieldCheck, Sparkles, TrendingUp, Workflow,
+  Home, Menu, Network, Package, Rocket, ShieldCheck, Sparkles, TrendingUp, Workflow,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -43,17 +43,32 @@ const SRE_GROUPS = ["Command", "Client Twins", "Cloud & Platform", "Automation",
 
 const COLLAPSE_KEY = "sre.moduleNav.collapsed";
 
-function SreModuleSidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+function SreModuleSidebar({
+  collapsed,
+  onToggle,
+  variant = "desktop",
+}: {
+  collapsed: boolean;
+  onToggle: () => void;
+  /** "mobile" renders the same nav as a fixed off-canvas drawer. */
+  variant?: "desktop" | "mobile";
+}) {
   const { pathname } = useLocation();
 
   return (
     <aside
       className={cn(
-        "sticky top-0 z-30 hidden h-screen shrink-0 flex-col border-r border-slate-200 bg-white transition-[width] duration-150 md:flex",
-        collapsed ? "w-14" : "w-64",
+        "flex-col border-r border-slate-200 bg-white",
+        variant === "mobile"
+          ? "fixed inset-y-0 left-0 z-50 flex w-64 overflow-y-auto md:hidden"
+          : cn(
+              "sticky top-0 z-30 hidden h-screen shrink-0 transition-[width] duration-150 md:flex",
+              collapsed ? "w-14" : "w-64",
+            ),
       )}
       aria-label="Site Resilience Engineering navigation"
     >
+
       <div className="flex items-center gap-2 border-b border-slate-200 px-3 py-3">
         <div className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-slate-900 text-white">
           <ShieldCheck className="h-4 w-4" />
@@ -137,11 +152,46 @@ export default function SreLayout() {
     window.localStorage.setItem(COLLAPSE_KEY, collapsed ? "1" : "0");
   }, [collapsed]);
 
+  // Mobile drawer — the desktop rail is hidden below `md`, so narrow viewports
+  // get a hamburger + off-canvas copy of the same module navigation.
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
+
   return (
     <PersonaProvider>
       <div className="flex min-h-screen w-full bg-background text-foreground overflow-x-clip">
         <SreModuleSidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+
+        {mobileOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-40 bg-black/50 md:hidden"
+              aria-hidden="true"
+              onClick={() => setMobileOpen(false)}
+            />
+            <SreModuleSidebar collapsed={false} onToggle={() => setMobileOpen(false)} variant="mobile" />
+          </>
+        )}
+
         <main className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-clip">
+          <div className="md:hidden sticky top-0 z-30 flex items-center gap-3 h-12 px-4 border-b border-slate-200 bg-white/95 backdrop-blur">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation menu"
+              className="h-8 w-8 grid place-items-center rounded-md text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="grid h-6 w-6 place-items-center rounded-md bg-slate-900 text-white">
+                <ShieldCheck className="h-3.5 w-3.5" />
+              </div>
+              <span className="text-[12.5px] font-semibold text-slate-900">Site Resilience Engineering</span>
+            </div>
+          </div>
+
           <ModuleShellProvider>
             <Outlet />
           </ModuleShellProvider>

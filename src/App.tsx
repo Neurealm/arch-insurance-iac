@@ -979,6 +979,8 @@ const App = () => (
 
 
           <Route path="/intelligent-iac" element={<IacLayout />}>
+            <Route index element={<AssetDigitalTwin />} />
+            <Route path="remediation-intelligence" element={<RemediationIntelligence />} />
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
             <Route path="change-engineering" element={<ChangeEngineering />} />
             <Route path="change-engineering/:assetId" element={<ChangeEngineering />} />
