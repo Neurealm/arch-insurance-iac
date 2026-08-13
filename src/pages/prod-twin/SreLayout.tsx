@@ -152,11 +152,46 @@ export default function SreLayout() {
     window.localStorage.setItem(COLLAPSE_KEY, collapsed ? "1" : "0");
   }, [collapsed]);
 
+  // Mobile drawer — the desktop rail is hidden below `md`, so narrow viewports
+  // get a hamburger + off-canvas copy of the same module navigation.
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
+
   return (
     <PersonaProvider>
       <div className="flex min-h-screen w-full bg-background text-foreground overflow-x-clip">
         <SreModuleSidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+
+        {mobileOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-40 bg-black/50 md:hidden"
+              aria-hidden="true"
+              onClick={() => setMobileOpen(false)}
+            />
+            <SreModuleSidebar collapsed={false} onToggle={() => setMobileOpen(false)} variant="mobile" />
+          </>
+        )}
+
         <main className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-clip">
+          <div className="md:hidden sticky top-0 z-30 flex items-center gap-3 h-12 px-4 border-b border-slate-200 bg-white/95 backdrop-blur">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation menu"
+              className="h-8 w-8 grid place-items-center rounded-md text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="grid h-6 w-6 place-items-center rounded-md bg-slate-900 text-white">
+                <ShieldCheck className="h-3.5 w-3.5" />
+              </div>
+              <span className="text-[12.5px] font-semibold text-slate-900">Site Resilience Engineering</span>
+            </div>
+          </div>
+
           <ModuleShellProvider>
             <Outlet />
           </ModuleShellProvider>
