@@ -35,6 +35,8 @@ export default defineConfig(({ mode }) => ({
           }
           const m = id.match(/src\/pages\/([^/]+)\//);
           if (m) return `page-${m[1]}`;
+          const f = id.match(/src\/(commercial|platform|runops|silicon|avep|features|modules|components)\//);
+          if (f) return `app-${f[1]}`;
           return undefined;
         },
       },
