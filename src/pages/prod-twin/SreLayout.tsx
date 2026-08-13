@@ -43,17 +43,32 @@ const SRE_GROUPS = ["Command", "Client Twins", "Cloud & Platform", "Automation",
 
 const COLLAPSE_KEY = "sre.moduleNav.collapsed";
 
-function SreModuleSidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+function SreModuleSidebar({
+  collapsed,
+  onToggle,
+  variant = "desktop",
+}: {
+  collapsed: boolean;
+  onToggle: () => void;
+  /** "mobile" renders the same nav as a fixed off-canvas drawer. */
+  variant?: "desktop" | "mobile";
+}) {
   const { pathname } = useLocation();
 
   return (
     <aside
       className={cn(
-        "sticky top-0 z-30 hidden h-screen shrink-0 flex-col border-r border-slate-200 bg-white transition-[width] duration-150 md:flex",
-        collapsed ? "w-14" : "w-64",
+        "flex-col border-r border-slate-200 bg-white",
+        variant === "mobile"
+          ? "fixed inset-y-0 left-0 z-50 flex w-64 overflow-y-auto md:hidden"
+          : cn(
+              "sticky top-0 z-30 hidden h-screen shrink-0 transition-[width] duration-150 md:flex",
+              collapsed ? "w-14" : "w-64",
+            ),
       )}
       aria-label="Site Resilience Engineering navigation"
     >
+
       <div className="flex items-center gap-2 border-b border-slate-200 px-3 py-3">
         <div className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-slate-900 text-white">
           <ShieldCheck className="h-4 w-4" />
