@@ -29,7 +29,8 @@ import {
   transportMix, trafficSeries,
   type Agent, type LinkStatus, type OpticalLink, type Situation, type TimelineEventRow,
 } from "./data/goocFixtures";
-import { Field, Panel, Select } from "./components/NocPrimitives";
+import { Field, Panel, Select, ToolbarButton } from "./components/NocPrimitives";
+import { GoocMap, type MapOverlays } from "./components/GoocMap";
 
 
 /* ------------------------------ primitives ----------------------------- */
