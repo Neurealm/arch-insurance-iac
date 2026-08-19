@@ -10,7 +10,7 @@ import { useEventFeed } from "./useEventFeed";
 import { cn } from "@/lib/utils";
 import { DeploymentCards } from "./DeploymentCardGrid";
 import {
-  availability30d, changes, deployments, events, regions, risks, slos,
+  availability30d, changes, deployments, regions, risks, slos,
 } from "./data";
 import { overviewKpis } from "./kpiDetail";
 import {
