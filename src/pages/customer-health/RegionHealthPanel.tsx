@@ -43,10 +43,10 @@ export function RegionMap({ height = "h-64" }: { height?: string }) {
   const { open } = useImpactDrawer();
   const [hover, setHover] = useState<string | null>(null);
   return (
-    <div className={cn("relative overflow-hidden rounded-lg border border-slate-200 bg-slate-50", height)}>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(56,189,248,0.12),transparent_60%)]" aria-hidden />
+    <div className={cn("relative rounded-lg border border-slate-200 bg-slate-50", height)}>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-lg bg-[radial-gradient(circle_at_30%_40%,rgba(56,189,248,0.12),transparent_60%)]" aria-hidden />
       <div
-        className="absolute inset-0 opacity-[0.35]"
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-lg opacity-[0.35]"
         aria-hidden
         style={{
           backgroundImage:

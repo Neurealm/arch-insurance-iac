@@ -214,7 +214,7 @@ export const regions: RegionRow[] = [
     exposure: "22% of your traffic", potentialImpact: "Low",
   },
   {
-    id: "r-eu", name: "North Europe", status: "healthy", note: "Your service healthy", x: 46, y: 27, contextId: "region-eu",
+    id: "r-eu", name: "North Europe", status: "healthy", note: "Your service healthy", x: 50, y: 24, contextId: "region-eu",
     geo: "Dublin, Ireland",
     infraStatus: "healthy", infraLabel: "Healthy",
     serviceStatus: "healthy", serviceLabel: "Healthy",
@@ -223,7 +223,7 @@ export const regions: RegionRow[] = [
     exposure: "26% of your traffic", potentialImpact: "None",
   },
   {
-    id: "r-uk", name: "UK South", status: "advisory", note: "No customer deployment in this region", x: 47, y: 31, contextId: "region-uk",
+    id: "r-uk", name: "UK South", status: "advisory", note: "No customer deployment in this region", x: 45, y: 36, contextId: "region-uk",
     geo: "London, UK",
     infraStatus: "advisory", infraLabel: "Advisory",
     serviceStatus: "healthy", serviceLabel: "Not applicable",
