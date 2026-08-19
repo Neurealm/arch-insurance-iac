@@ -3,12 +3,12 @@
 // single component. It always separates the underlying infrastructure
 // condition from the actual customer impact.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChangeDetail, CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail, RegionDetail, RiskDetail, SloDetail } from "./types";
 import { getImpactContext } from "./data";
-import { impactStyles, Sparkline, statusStyles, StatusChip } from "./primitives";
+import { impactStyles, Sparkline, StaleNotice, statusStyles, StatusChip, StatusDot } from "./primitives";
 import { classificationStyles } from "./eventDetail";
 import { riskLevelStyles, trendStyles } from "./RiskEarlyWarningPanel";
 import { protectedWindow } from "./changeDetail";
@@ -39,7 +39,7 @@ function LayerButton({
         <span className="block truncate text-[11px] text-slate-500">{note}</span>
       </span>
       <span className={cn("shrink-0 text-[11.5px] font-medium", s.text)}>{s.label}</span>
-      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-500" />
     </button>
   );
 }
@@ -211,7 +211,7 @@ function DependencySections({ d, onDrill }: { d: DependencyDetail; onDrill: (id:
         <ul className="space-y-2">
           {d.affectedDeployments.map((a) => (
             <li key={a.name} className="flex items-start gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2">
-              <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", statusStyles[a.status].dot)} aria-hidden />
+              <StatusDot status={a.status} className="mt-1" />
               <div className="min-w-0">
                 <div className="text-[12.5px] font-medium text-slate-900">{a.name}</div>
                 <div className="text-[11.5px] text-slate-500">{a.note}</div>
@@ -286,7 +286,7 @@ function Expandable({ title, children }: { title: string; children: React.ReactN
         className="flex w-full items-center justify-between px-3 py-2 text-left text-[12.5px] font-medium text-slate-700"
       >
         {title}
-        <ChevronDown className={cn("h-4 w-4 text-slate-400 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("h-4 w-4 text-slate-500 transition-transform", open && "rotate-180")} />
       </button>
       {open && <div className="border-t border-slate-200 px-3 py-2">{children}</div>}
     </div>
@@ -471,7 +471,7 @@ function DeploymentSections({ d, onDrill }: { d: DeploymentDetail; onDrill: (id:
                     s.chip,
                   )}
                 >
-                  {n.depth > 0 && <span className="text-[11px] text-slate-400" aria-hidden>&#8627;</span>}
+                  {n.depth > 0 && <span className="text-[11px] text-slate-500" aria-hidden>&#8627;</span>}
                   <span className={cn("h-2 w-2 shrink-0 rounded-full", s.dot)} aria-hidden />
                   <span className="min-w-0 flex-1">
                     <span className="block text-[12px] font-medium text-slate-900">{n.label}</span>
@@ -524,7 +524,7 @@ function RiskSections({ r }: { r: RiskDetail }) {
                 <span className="text-[12px] text-slate-500">{s.label}</span>
                 <span className={cn("text-right text-[12.5px] font-semibold", statusStyles[s.status].text)}>{s.value}</span>
               </div>
-              <div className="mt-1 text-[10.5px] font-medium uppercase tracking-[0.1em] text-slate-400">
+              <div className="mt-1 text-[10.5px] font-medium uppercase tracking-[0.1em] text-slate-500">
                 {s.raisesRisk ? "Raises risk" : "Does not raise risk"}
               </div>
             </li>
@@ -583,7 +583,7 @@ function RiskSections({ r }: { r: RiskDetail }) {
               />
               <span>
                 {a.label}
-                {!a.done && <span className="text-slate-400"> · standing by</span>}
+                {!a.done && <span className="text-slate-500"> · standing by</span>}
               </span>
             </li>
           ))}
@@ -824,7 +824,7 @@ function SloSections({ d, onDrill }: { d: SloDetail; onDrill: (id: string) => vo
           <p className="mt-1 text-[11.5px] leading-snug text-slate-500">{h.note}</p>
         </div>
 
-        <div className="mt-2 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+        <div className="mt-2 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-500">
           Customer-impacting time
         </div>
         <ul className="mt-1.5 space-y-1.5">
@@ -898,7 +898,7 @@ function SloSections({ d, onDrill }: { d: SloDetail; onDrill: (id: string) => vo
                     <span className="block text-[12.5px] font-medium text-slate-900">{c.title}</span>
                     <span className="block text-[11px] text-slate-500">{c.classification} · {c.when}</span>
                   </span>
-                  <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                  <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
                 </div>
                 <div className="mt-1.5 grid grid-cols-2 gap-x-3">
                   <span className="text-[11px] text-slate-500">
@@ -936,20 +936,113 @@ function SloSections({ d, onDrill }: { d: SloDetail; onDrill: (id: string) => vo
   );
 }
 
+/**
+ * The four questions every object must answer, rendered above the fold and
+ * before any technical material: what is true now, what could become true,
+ * what we are doing, and what (if anything) the customer must do.
+ */
+function AnswerBand({ c }: { c: CustomerImpactContext }) {
+  const a = c.answers ?? {};
+  const infra = statusStyles[c.infrastructureStatus];
+  const currentImpact =
+    a.currentImpact ??
+    (c.impact === "NO CURRENT IMPACT"
+      ? "Your service is available and behaving normally right now."
+      : c.whatIsHappening);
+  const potentialRisk =
+    a.potentialRisk ??
+    (c.impact === "NO CURRENT IMPACT"
+      ? "No elevated probability of impact is being tracked for this object."
+      : "There is an elevated probability of further impact while this condition persists. This is a possibility, not a certainty.");
+  const providerAction = a.providerAction ?? c.whatIsBeingDone[0] ?? "We are monitoring this continuously and will update you if anything changes.";
+  const customerAction = a.customerAction ?? c.customerAction;
+
+  return (
+    <div className="border-b border-slate-200 bg-white px-5 py-4">
+      {c.telemetry && c.telemetry.state !== "fresh" && <StaleNotice telemetry={c.telemetry} className="mb-3" />}
+
+      <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[c.impact])}>
+        <div className="flex items-center gap-2">
+          <StatusDot status={c.infrastructureStatus} labelled={false} />
+          <span className="text-[15px] font-semibold tracking-tight">{c.impact}</span>
+        </div>
+        <p className="mt-1 text-[11.5px] leading-snug text-slate-700">{currentImpact}</p>
+      </div>
+
+      <dl className="mt-2.5 space-y-2">
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+          <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Potential risk (not current impact)</dt>
+          <dd className="mt-0.5 text-[12px] leading-snug text-slate-700">{potentialRisk}</dd>
+        </div>
+        <div className="rounded-lg border border-sky-600/30 bg-sky-500/5 px-3 py-2">
+          <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-sky-800">What we are doing</dt>
+          <dd className="mt-0.5 text-[12px] leading-snug text-slate-700">{providerAction}</dd>
+        </div>
+        <div
+          className={cn(
+            "rounded-lg border px-3 py-2",
+            c.noActionRequired ? "border-emerald-600/35 bg-emerald-500/5" : "border-orange-600/40 bg-orange-500/5",
+          )}
+        >
+          <dt className={cn("text-[10px] font-semibold uppercase tracking-[0.12em]", c.noActionRequired ? "text-emerald-800" : "text-orange-800")}>
+            {c.noActionRequired ? "What you need to do — nothing" : "What you need to do"}
+          </dt>
+          <dd className="mt-0.5 text-[12px] leading-snug text-slate-700">{customerAction}</dd>
+        </div>
+      </dl>
+
+      <p className="mt-2 text-[10.5px] leading-snug text-slate-500">
+        Underlying provider condition: <span className={infra.text}>{infra.label}</span> — {c.infrastructureNote}
+      </p>
+    </div>
+  );
+}
+
 export function CustomerImpactDrawer({
   context, onClose,
 }: { context: CustomerImpactContext | null; onClose: () => void }) {
   const [showTechnical, setShowTechnical] = useState(false);
   const [stack, setStack] = useState<CustomerImpactContext[]>([]);
+  const panelRef = useRef<HTMLElement | null>(null);
+  const restoreRef = useRef<HTMLElement | null>(null);
+  const wasOpen = useRef(false);
 
   useEffect(() => {
     setShowTechnical(false);
     setStack([]);
   }, [context?.id]);
 
+  // Focus management: remember the trigger, move focus into the panel on open,
+  // and hand focus back to where the customer was when it closes.
+  useEffect(() => {
+    if (context && !wasOpen.current) {
+      restoreRef.current = document.activeElement as HTMLElement | null;
+      wasOpen.current = true;
+      window.requestAnimationFrame(() => panelRef.current?.focus());
+    } else if (!context && wasOpen.current) {
+      wasOpen.current = false;
+      restoreRef.current?.focus?.();
+    }
+  }, [context]);
+
   useEffect(() => {
     if (!context) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      // Keep keyboard focus inside the panel while it is open.
+      const focusables = panelRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0], last = focusables[focusables.length - 1];
+      const activeEl = document.activeElement;
+      if (e.shiftKey && (activeEl === first || activeEl === panelRef.current)) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && activeEl === last) {
+        e.preventDefault(); first.focus();
+      }
+    };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [context, onClose]);
@@ -964,36 +1057,43 @@ export function CustomerImpactDrawer({
     <div className="fixed inset-0 z-50 flex justify-end">
       <button
         type="button" aria-label="Close panel" tabIndex={-1}
-        className="absolute inset-0 bg-white/30 backdrop-blur-[1px]" onClick={onClose}
+        className="absolute inset-0 bg-white/30 backdrop-blur-[1px] transition-opacity duration-200" onClick={onClose}
       />
       <aside
-        role="dialog" aria-modal="true" aria-label={context.title}
-        className="ch-drawer relative flex h-full w-full max-w-[460px] flex-col border-l border-slate-200 bg-slate-50 shadow-2xl"
+        ref={panelRef}
+        tabIndex={-1}
+        role="dialog" aria-modal="true" aria-labelledby="ch-drawer-title"
+        className="animate-in slide-in-from-right-6 fade-in duration-300 ease-out relative flex h-full w-full max-w-[460px] flex-col border-l border-slate-200 bg-slate-50 shadow-2xl focus:outline-none"
       >
+        {/* Selecting a different object swaps the content in place; this
+            announces the change without the panel closing. */}
+        <span aria-live="polite" className="sr-only">{`Showing ${current.title}. ${current.impact}.`}</span>
+
         <header className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
           <div className="flex min-w-0 items-start gap-2.5">
             {stack.length > 0 && (
               <button
-                type="button" onClick={back} aria-label="Back"
-                className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 transition-colors duration-200 hover:border-slate-300 hover:text-slate-900"
+                type="button" onClick={back} aria-label="Back to the previous object"
+                className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-700 transition-colors duration-200 hover:border-slate-300 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
               >
-                <ArrowLeft className="h-3.5 w-3.5" /> Back
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> Back
               </button>
             )}
             <div className="min-w-0">
-              <h2 className="truncate text-[15px] font-semibold text-slate-900">{current.title}</h2>
-              {current.subtitle && <p className="mt-0.5 text-[11.5px] text-slate-500">{current.subtitle}</p>}
+              <h2 id="ch-drawer-title" className="truncate text-[15px] font-semibold text-slate-900">{current.title}</h2>
+              {current.subtitle && <p className="mt-0.5 text-[11.5px] text-slate-600">{current.subtitle}</p>}
             </div>
           </div>
           <button
-            type="button" onClick={onClose} aria-label="Close panel"
-            className="grid h-7 w-7 shrink-0 place-items-center rounded-md border border-slate-200 text-slate-500 transition-colors duration-200 hover:border-slate-300 hover:text-slate-900"
+            type="button" onClick={onClose} aria-label="Close detail panel"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-slate-200 text-slate-600 transition-colors duration-200 hover:border-slate-300 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden />
           </button>
         </header>
 
-        <div className="flex-1 overflow-y-auto">
+        <div key={current.id} className="animate-in fade-in duration-200 flex-1 overflow-y-auto">
+          <AnswerBand c={current} />
           {current.deployment && <DeploymentSections d={current.deployment} onDrill={drill} />}
           {current.dependency && <DependencySections d={current.dependency} onDrill={drill} />}
           {current.event && <EventSections e={current.event} />}
@@ -1008,24 +1108,13 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.slo && !current.region && (
-          <Section title="Does this affect me?">
-            <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[current.impact])}>
-              <div className="text-[16px] font-semibold tracking-tight">{current.impact}</div>
-              <p className="mt-1 text-[11.5px] leading-snug text-slate-600">
-                Underlying infrastructure condition:{" "}
-                <span className={infra.text}>{infra.label}</span> — {current.infrastructureNote}
-              </p>
-            </div>
-          </Section>
-          )}
 
           {!current.dependency && !current.event && !current.region && !current.risk && !current.slo && (
           <Section title="What of mine is affected?">
             <ul className="space-y-2">
               {current.affected.map((a) => (
                 <li key={a.label} className="flex items-start gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2">
-                  <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", statusStyles[a.status].dot)} aria-hidden />
+                  <StatusDot status={a.status} className="mt-1" />
                   <div className="min-w-0">
                     <div className="text-[12.5px] font-medium text-slate-900">{a.label}</div>
                     <div className="text-[11.5px] text-slate-500">{a.detail}</div>
@@ -1058,7 +1147,7 @@ export function CustomerImpactDrawer({
                   <li key={r.label} className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="flex items-center gap-2 text-[12.5px] font-medium text-slate-900">
-                        <span className={cn("h-2 w-2 shrink-0 rounded-full", statusStyles[r.status].dot)} aria-hidden />
+                        <StatusDot status={r.status} />
                         {r.label}
                       </span>
                       {r.impact && (
@@ -1111,23 +1200,6 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.slo && !current.region && (
-          <Section title="Do I need to do anything?">
-            <div
-              className={cn(
-                "rounded-lg border px-3.5 py-3 text-[12.5px] leading-relaxed",
-                current.noActionRequired
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700"
-                  : "border-sky-500/40 bg-sky-500/10 text-sky-700",
-              )}
-            >
-              <div className="text-[13px] font-semibold">
-                {current.noActionRequired ? "No action required" : "Recommended action"}
-              </div>
-              <p className="mt-1 text-slate-600">{current.customerAction}</p>
-            </div>
-          </Section>
-          )}
 
           {!current.event && !current.region && !current.risk && !current.slo && (
           <Section title="Timeline">
@@ -1183,14 +1255,9 @@ export function CustomerImpactDrawer({
         </div>
 
         <footer className="border-t border-slate-200 px-5 py-3">
-          <StatusChip status={current.infrastructureStatus} label={`Infrastructure: ${infra.label}`} />
+          <StatusChip status={current.infrastructureStatus} label={`Underlying provider condition: ${infra.label}`} />
         </footer>
 
-        <style>{`
-          @keyframes chDrawerIn { from { transform: translateX(24px); opacity: 0.4 } to { transform: none; opacity: 1 } }
-          .ch-drawer { animation: chDrawerIn 200ms ease-out; }
-          @media (prefers-reduced-motion: reduce) { .ch-drawer { animation: none } }
-        `}</style>
       </aside>
     </div>
   );

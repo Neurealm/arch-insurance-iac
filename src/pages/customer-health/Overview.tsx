@@ -62,7 +62,7 @@ export default function CustomerHealthOverview() {
                 <div className="min-w-0">
                   <div className="text-[11px] font-medium text-slate-500">{k.label}</div>
                   {k.question && (
-                    <div className="text-[10.5px] leading-snug text-slate-400">{k.question}</div>
+                    <div className="text-[10.5px] leading-snug text-slate-500">{k.question}</div>
                   )}
                 </div>
               </div>

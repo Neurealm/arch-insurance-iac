@@ -65,10 +65,17 @@ export const deployments: DeploymentCard[] = [
     id: "d-eu", name: "Production, North Europe", region: "North Europe", nodes: 9, tier: "Customer Production",
     environment: "Production", resources: "9 nodes · 52 resources", advisoryCount: 0,
     availability: "99.996%", status: "healthy", alerts: "0 Alerts",
+    // Telemetry from this deployment is arriving late, so we do not claim it is
+    // healthy — we say health cannot currently be verified.
+    telemetry: {
+      state: "stale",
+      lastConfirmedHealthy: "7 minutes ago",
+      note: "Health reporting from this region is arriving late. Your service has not reported any problem.",
+    },
     spark: [60, 63, 61, 65, 64, 66, 65, 68, 66, 69, 68, 70], contextId: "dep-eu",
     hover: {
-      overallHealth: "Healthy", customerImpact: "None", availability: "99.996% (24h)",
-      infrastructureRisk: "Low — no abnormal layer", advisories: "0 active", lastHealthChange: "No change in 9 days",
+      overallHealth: "Health verification delayed", customerImpact: "None reported", availability: "99.996% (24h)",
+      infrastructureRisk: "Low — no abnormal layer", advisories: "0 active", lastHealthChange: "Last confirmed healthy 7 minutes ago",
     },
   },
   {
@@ -500,12 +507,23 @@ export const impactContexts: Record<string, CustomerImpactContext> = {
   },
   "dep-eu": {
     id: "dep-eu", title: "Production – North Europe", subtitle: "9 nodes · Customer Production",
-    infrastructureStatus: "healthy", infrastructureNote: "All dependencies healthy in North Europe.",
+    infrastructureStatus: "healthy", infrastructureNote: "No provider condition is being reported in North Europe.",
+    telemetry: {
+      state: "stale",
+      lastConfirmedHealthy: "7 minutes ago",
+      note: "Health reporting from this region is arriving late. Your service has not reported any problem.",
+    },
     impact: "NO CURRENT IMPACT",
-    whatIsHappening: "Your European production deployment is healthy and unaffected by the North American storage advisory.",
-    affected: [{ label: "North Europe workloads", detail: "9 nodes in service", status: "healthy" }],
-    signals: [{ label: "Availability (24h)", value: "99.996%", interpretation: "Above commitment.", status: "healthy" }],
-    whatIsBeingDone: ["Routine monitoring"],
+    whatIsHappening: "Health reporting from your North Europe deployment is arriving later than expected, so we cannot confirm its health right now. Nothing has reported a problem, and no customer impact has been observed.",
+    answers: {
+      currentImpact: "No impact has been reported. Health was last confirmed 7 minutes ago; until fresh reporting resumes we will not claim this service is healthy.",
+      potentialRisk: "If reporting stays delayed, a change in service behaviour could go unnoticed for longer than usual. There is no evidence of a problem today.",
+      providerAction: "We are re-establishing health reporting for this region and will confirm the service state as soon as fresh data arrives.",
+      customerAction: "Nothing to do. If your users report a problem in Europe before reporting resumes, contact support and we will prioritise it.",
+    },
+    affected: [{ label: "North Europe workloads", detail: "9 nodes in service · last confirmed healthy 7 minutes ago", status: "stale" }],
+    signals: [{ label: "Availability (24h)", value: "99.996%", interpretation: "Above your commitment, measured up to the last confirmed reading.", status: "healthy" }],
+    whatIsBeingDone: ["Re-establishing health reporting for North Europe", "Watching customer-facing signals independently of the delayed feed"],
     customerAction: noAction, noActionRequired: true,
     timeline: [{ stage: "Latest observation", at: "40s ago", note: "All nodes healthy." }],
     technical: [{ label: "Data residency", value: "EU data stays in North Europe" }],

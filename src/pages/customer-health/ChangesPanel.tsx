@@ -25,7 +25,7 @@ const kindStyles: Record<ChangeKind, string> = {
 function Field({ label, value, className }: { label: string; value: string; className?: string }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <div className="text-[10px] uppercase tracking-[0.1em] text-slate-400">{label}</div>
+      <div className="text-[10px] uppercase tracking-[0.1em] text-slate-500">{label}</div>
       <div className="truncate text-[11.5px] text-slate-700">{value}</div>
     </div>
   );
@@ -91,7 +91,7 @@ export function ProtectedWindowCard() {
       </div>
       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-slate-700">
         <span className="inline-flex items-center gap-1.5">
-          <CalendarClock className="h-3.5 w-3.5 text-slate-400" aria-hidden />
+          <CalendarClock className="h-3.5 w-3.5 text-slate-500" aria-hidden />
           {protectedWindow.days}
         </span>
         <span>{protectedWindow.hours}</span>
