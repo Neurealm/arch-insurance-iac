@@ -1009,7 +1009,20 @@ const App = () => (
 
 
 
+          <Route path="/customer-health" element={<CustomerHealthLayout />}>
+            <Route index element={<CustomerHealthOverview />} />
+            <Route path="deployments" element={<CustomerHealthDeployments />} />
+            <Route path="events" element={<CustomerHealthEvents />} />
+            <Route path="regions" element={<CustomerHealthRegions />} />
+            <Route path="dependencies" element={<CustomerHealthDependencies />} />
+            <Route path="slos" element={<CustomerHealthSlos />} />
+            <Route path="reports" element={<CustomerHealthReports />} />
+            <Route path="alerts" element={<CustomerHealthAlerts />} />
+            <Route path="settings" element={<CustomerHealthSettings />} />
+          </Route>
+
           <Route element={<SreLayout />}>
+
             <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
             <Route path="/product-line-map" element={<ProductLineMap />} />
             <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
