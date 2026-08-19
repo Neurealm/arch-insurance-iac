@@ -29,6 +29,7 @@ export default function DependencyHealthPanel({ dense = false }: { dense?: boole
               <Interactive
                 tooltip={row.customerRelevance ?? "How this supporting layer is behaving — and whether its condition is reaching your users."}
                 onClick={() => open(row.contextId)}
+                correlationKey={`dependency:${row.id}`}
                 className={cn(
                   "rounded-lg border px-2.5 py-2.5 transition-colors duration-200",
                   inChain ? "border-sky-300 bg-sky-50/70" : "border-transparent",
