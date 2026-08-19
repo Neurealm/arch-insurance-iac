@@ -1,0 +1,173 @@
+// Canonical types for the Customer Health Dashboard (customer-facing cloud
+// service health experience). These models intentionally separate the
+// *underlying infrastructure condition* from the *customer impact*.
+
+export type HealthStatus =
+  | "healthy"
+  | "advisory"
+  | "degraded"
+  | "at-risk"
+  | "incident"
+  | "info";
+
+/** Customer-facing impact verdict shown at the top of every drawer. */
+export type ImpactLevel =
+  | "NO CURRENT IMPACT"
+  | "POTENTIAL IMPACT"
+  | "DEGRADED EXPERIENCE"
+  | "SERVICE IMPACT";
+
+export interface TimelineEntry {
+  /** Detected / Validated / Action initiated / Provider contacted / ... */
+  stage:
+    | "Detected"
+    | "Validated"
+    | "Action initiated"
+    | "Provider contacted"
+    | "Latest observation"
+    | "Next update";
+  at: string;
+  note: string;
+  /** Future/unreached steps render muted. */
+  pending?: boolean;
+}
+
+export interface SignalReading {
+  label: string;
+  value: string;
+  /** Plain-language interpretation of the reading. */
+  interpretation: string;
+  status: HealthStatus;
+}
+
+export interface TechnicalDetail {
+  label: string;
+  value: string;
+}
+
+/** Everything the universal CustomerImpactDrawer needs to render. */
+export interface CustomerImpactContext {
+  id: string;
+  title: string;
+  subtitle?: string;
+  /** Underlying infrastructure condition (may differ from customer impact). */
+  infrastructureStatus: HealthStatus;
+  infrastructureNote: string;
+  /** Customer-facing verdict. */
+  impact: ImpactLevel;
+  whatIsHappening: string;
+  affected: { label: string; detail: string; status: HealthStatus }[];
+  signals: SignalReading[];
+  whatIsBeingDone: string[];
+  customerAction: string;
+  /** True when the action is simply "No action required". */
+  noActionRequired: boolean;
+  timeline: TimelineEntry[];
+  technical: TechnicalDetail[];
+}
+
+export interface KpiTile {
+  id: string;
+  label: string;
+  value: string;
+  caption: string;
+  status: HealthStatus;
+  icon: "shield" | "layers" | "box" | "trend" | "bell" | "warning" | "cloud";
+  contextId: string;
+}
+
+export interface DeploymentCard {
+  id: string;
+  name: string;
+  region: string;
+  nodes: number;
+  tier: string;
+  availability: string;
+  status: HealthStatus;
+  alerts: string;
+  spark: number[];
+  contextId: string;
+}
+
+export interface DependencyRow {
+  id: string;
+  layer: string;
+  description: string;
+  status: HealthStatus;
+  contextId: string;
+}
+
+export interface ServiceEvent {
+  id: string;
+  kind: "Advisory" | "Incident" | "Maintenance" | "Information";
+  title: string;
+  started: string;
+  updated: string;
+  summary: string;
+  impactToYou: string;
+  affectedDeployment: string;
+  affectedDependency: string;
+  response: string;
+  providerReference: string;
+  nextUpdate: string;
+  status: HealthStatus;
+  contextId: string;
+}
+
+export interface RegionRow {
+  id: string;
+  name: string;
+  status: HealthStatus;
+  note: string;
+  x: number;
+  y: number;
+  contextId: string;
+}
+
+export interface SloRow {
+  id: string;
+  name: string;
+  target: string;
+  current: string;
+  attainment: number;
+  errorBudget: number;
+  status: HealthStatus;
+  contextId: string;
+}
+
+export interface RiskSignal {
+  id: string;
+  label: string;
+  level: "Low" | "Moderate" | "Elevated" | "High";
+  status: HealthStatus;
+  spark: number[];
+  contextId: string;
+}
+
+export interface ChangeRecord {
+  id: string;
+  title: string;
+  window: string;
+  potentialImpact: "None" | "Low" | "Moderate";
+  kind: "Provider maintenance" | "Platform update";
+  contextId: string;
+}
+
+export interface AlertRule {
+  id: string;
+  name: string;
+  scope: string;
+  channel: string;
+  enabled: boolean;
+  lastFired: string;
+  contextId: string;
+}
+
+export interface ReportItem {
+  id: string;
+  name: string;
+  period: string;
+  format: string;
+  description: string;
+  contextId: string;
+}
