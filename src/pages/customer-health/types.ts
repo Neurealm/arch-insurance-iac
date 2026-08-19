@@ -80,6 +80,8 @@ export interface CustomerImpactContext {
   risk?: RiskDetail;
   /** Optional service level objective decomposition. */
   slo?: SloDetail;
+  /** Optional planned-change decomposition. */
+  change?: ChangeDetail;
 }
 
 /** Compact figure rendered in the drawer's metric grid. */
@@ -426,13 +428,55 @@ export interface RiskDetail {
   spark: number[];
 }
 
+export type ChangeKind =
+  | "Azure maintenance"
+  | "Platform maintenance"
+  | "Infrastructure change"
+  | "Service change"
+  | "Customer-specific maintenance";
+
+export type ChangeRelevance = "Not relevant to you" | "Informational" | "Relevant" | "Action required";
+
 export interface ChangeRecord {
   id: string;
   title: string;
   window: string;
   potentialImpact: "None" | "Low" | "Moderate";
-  kind: "Provider maintenance" | "Platform update";
+  kind: ChangeKind;
   contextId: string;
+  /** Computed relevance of this change to the customer. */
+  relevance: ChangeRelevance;
+  region: string;
+  deployment: string;
+  customerAction: string;
+  /** True when the window overlaps the customer's protected business window. */
+  inProtectedWindow: boolean;
+}
+
+/** Customer-configured window during which changes get elevated attention. */
+export interface ProtectedWindow {
+  label: string;
+  days: string;
+  hours: string;
+  timezone: string;
+  note: string;
+}
+
+export interface ChangeDetail {
+  headline: string;
+  kind: ChangeKind;
+  window: string;
+  affectsMe: { verdict: string; explanation: string; status: HealthStatus };
+  yourEnvironment: { label: string; note: string; status: HealthStatus }[];
+  expectedImpact: "None" | "Low" | "Moderate";
+  serviceInterruptionExpected: boolean;
+  interruptionNote: string;
+  resilience: string[];
+  customerAction: string;
+  actionRequired: boolean;
+  timeline: { stage: string; at: string; note: string; pending?: boolean }[];
+  validation: { group: string; items: { label: string; state: "Passed" | "Scheduled" | "In progress"; note: string }[] }[];
+  protectedWindow?: { overlaps: boolean; note: string };
 }
 
 export interface AlertRule {
