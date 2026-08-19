@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail } from "./types";
+import type { CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail, RegionDetail } from "./types";
 import { getImpactContext } from "./data";
 import { impactStyles, statusStyles, StatusChip } from "./primitives";
 import { classificationStyles } from "./eventDetail";
@@ -39,6 +39,126 @@ function LayerButton({
       <span className={cn("shrink-0 text-[11.5px] font-medium", s.text)}>{s.label}</span>
       <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
     </button>
+  );
+}
+
+
+/* -------------------- region-specific drawer sections -------------------- */
+
+function RegionSections({ r, onDrill }: { r: RegionDetail; onDrill: (id: string) => void }) {
+  const infra = statusStyles[r.infrastructure.status];
+  const svc = statusStyles[r.service.status];
+  return (
+    <>
+      <Section title="Region Condition">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+            <div className="text-[10.5px] uppercase tracking-wide text-slate-500">Infrastructure condition</div>
+            <div className={cn("mt-0.5 flex items-center gap-1.5 text-[13.5px] font-semibold", infra.text)}>
+              <span className={cn("h-2 w-2 rounded-full", infra.dot)} aria-hidden />{r.infrastructure.label}
+            </div>
+            <p className="mt-1 text-[11px] leading-snug text-slate-500">{r.infrastructure.note}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+            <div className="text-[10.5px] uppercase tracking-wide text-slate-500">Your service</div>
+            <div className={cn("mt-0.5 flex items-center gap-1.5 text-[13.5px] font-semibold", r.hasDeployment ? svc.text : "text-slate-500")}>
+              {r.hasDeployment && <span className={cn("h-2 w-2 rounded-full", svc.dot)} aria-hidden />}
+              {r.hasDeployment ? r.service.label : "Not applicable"}
+            </div>
+            <p className="mt-1 text-[11px] leading-snug text-slate-500">{r.service.note}</p>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Your Footprint">
+        {r.hasDeployment ? (
+          <ul className="space-y-1.5">
+            {r.footprint.map((f) => (
+              <li key={f} className="flex gap-2 text-[12.5px] leading-snug text-slate-600">
+                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-sky-400" aria-hidden />{f}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="rounded-lg border border-slate-300 bg-slate-100 px-3.5 py-3">
+            <div className="text-[13px] font-semibold text-slate-700">No customer deployment in this region</div>
+            <p className="mt-1 text-[11.5px] leading-snug text-slate-600">
+              Regional conditions are shown so you can inspect them, but nothing you run depends on this region.
+            </p>
+          </div>
+        )}
+      </Section>
+
+      <Section title="What's happening?">
+        <p className="text-[13px] leading-relaxed text-slate-600">{r.whatsHappening}</p>
+      </Section>
+
+      <Section title="Does this affect me?">
+        <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[r.affectsMe.verdict])}>
+          <div className="text-[16px] font-semibold tracking-tight">{r.affectsMe.verdict}</div>
+          <p className="mt-1 text-[11.5px] leading-snug text-slate-600">{r.affectsMe.explanation}</p>
+        </div>
+      </Section>
+
+      <Section title="Your Dependencies">
+        <ul className="space-y-2">
+          {r.dependencies.map((d) =>
+            d.contextId ? (
+              <li key={d.label}>
+                <LayerButton label={d.label} status={d.status} note={d.note} onClick={() => onDrill(d.contextId!)} />
+              </li>
+            ) : (
+              <li key={d.label} className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2">
+                <span className={cn("h-2 w-2 shrink-0 rounded-full", statusStyles[d.status].dot)} aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[12.5px] font-medium text-slate-900">{d.label}</span>
+                  <span className="block truncate text-[11px] text-slate-500">{d.note}</span>
+                </span>
+                <span className={cn("shrink-0 text-[11.5px] font-medium", statusStyles[d.status].text)}>{statusStyles[d.status].label}</span>
+              </li>
+            ),
+          )}
+        </ul>
+      </Section>
+
+      <Section title="Other Regional Signals">
+        <div className="grid grid-cols-2 gap-2">
+          {r.regionalSignals.map((s) => (
+            <div key={s.label} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <div className="text-[11px] text-slate-500">{s.label}</div>
+              <div className={cn("text-[12.5px] font-semibold", statusStyles[s.status].text)}>{s.value}</div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Risk">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[11px] text-slate-500">Current impact</div>
+            <div className="text-[12.5px] font-semibold text-slate-900">{r.risk.current}</div>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[11px] text-slate-500">Potential impact</div>
+            <div className="text-[12.5px] font-semibold text-slate-900">{r.risk.potential}</div>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[11px] text-slate-500">Trend</div>
+            <div className={cn("text-[12.5px] font-semibold", statusStyles[r.risk.trendStatus].text)}>{r.risk.trend}</div>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Response">
+        <ul className="space-y-1.5">
+          {r.response.map((x) => (
+            <li key={x} className="flex gap-2 text-[12.5px] leading-snug text-slate-600">
+              <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-sky-400" aria-hidden />{x}
+            </li>
+          ))}
+        </ul>
+      </Section>
+    </>
   );
 }
 
@@ -427,14 +547,15 @@ export function CustomerImpactDrawer({
           {current.deployment && <DeploymentSections d={current.deployment} onDrill={drill} />}
           {current.dependency && <DependencySections d={current.dependency} onDrill={drill} />}
           {current.event && <EventSections e={current.event} />}
+          {current.region && <RegionSections r={current.region} onDrill={drill} />}
 
-          {!current.deployment && !current.dependency && !current.event && (
+          {!current.deployment && !current.dependency && !current.event && !current.region && !current.region && (
           <Section title="What is happening?">
             <p className="text-[13px] leading-relaxed text-slate-600">{current.whatIsHappening}</p>
           </Section>
           )}
 
-          {!current.deployment && !current.dependency && !current.event && (
+          {!current.deployment && !current.dependency && !current.event && !current.region && !current.region && (
           <Section title="Does this affect me?">
             <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[current.impact])}>
               <div className="text-[16px] font-semibold tracking-tight">{current.impact}</div>
@@ -446,7 +567,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.dependency && !current.event && (
+          {!current.dependency && !current.event && !current.region && (
           <Section title="What of mine is affected?">
             <ul className="space-y-2">
               {current.affected.map((a) => (
@@ -508,7 +629,7 @@ export function CustomerImpactDrawer({
             </Section>
           ))}
 
-          {!current.dependency && !current.event && (
+          {!current.dependency && !current.event && !current.region && (
           <Section title="What are we seeing?">
             <ul className="space-y-2">
               {current.signals.map((s) => (
@@ -524,7 +645,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.dependency && !current.event && (
+          {!current.dependency && !current.event && !current.region && (
           <Section title="What is being done?">
             <ul className="space-y-1.5">
               {current.whatIsBeingDone.map((w) => (
@@ -537,7 +658,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.deployment && !current.dependency && !current.event && (
+          {!current.deployment && !current.dependency && !current.event && !current.region && !current.region && (
           <Section title="Do I need to do anything?">
             <div
               className={cn(
@@ -555,7 +676,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.event && (
+          {!current.event && !current.region && (
           <Section title="Timeline">
             <ol className="space-y-0">
               {current.timeline.map((t, i) => (

@@ -74,6 +74,8 @@ export interface CustomerImpactContext {
   dependency?: DependencyDetail;
   /** Optional event decomposition. */
   event?: EventDetail;
+  /** Optional region decomposition (infrastructure vs. customer service health). */
+  region?: RegionDetail;
 }
 
 /** Compact figure rendered in the drawer's metric grid. */
@@ -278,11 +280,43 @@ export interface EventDetail {
 export interface RegionRow {
   id: string;
   name: string;
+  /** Legacy combined status — kept for existing callers. */
   status: HealthStatus;
   note: string;
   x: number;
   y: number;
   contextId: string;
+  /** Azure / provider infrastructure condition in this region. */
+  infraStatus: HealthStatus;
+  infraLabel: string;
+  /** Customer service health in this region — independent of infrastructure. */
+  serviceStatus: HealthStatus;
+  serviceLabel: string;
+  /** False when the customer runs nothing in this region. */
+  hasDeployment: boolean;
+  deploymentCount: number;
+  deploymentSummary: string;
+  nodes: number;
+  activeEvents: number;
+  activeEventSummary: string;
+  exposure: string;
+  potentialImpact: "None" | "Low" | "Moderate" | "High";
+  geo: string;
+}
+
+/** Region-specific drawer payload rendered above the generic sections. */
+export interface RegionDetail {
+  headline: string;
+  hasDeployment: boolean;
+  infrastructure: { status: HealthStatus; label: string; note: string };
+  service: { status: HealthStatus; label: string; note: string };
+  footprint: string[];
+  whatsHappening: string;
+  affectsMe: { verdict: ImpactLevel; explanation: string };
+  dependencies: { label: string; status: HealthStatus; note: string; contextId?: string }[];
+  regionalSignals: { label: string; value: string; status: HealthStatus }[];
+  risk: { current: string; potential: string; trend: string; trendStatus: HealthStatus };
+  response: string[];
 }
 
 export interface SloRow {
