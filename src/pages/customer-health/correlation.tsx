@@ -28,12 +28,13 @@ const EDGES: Record<string, string[]> = {
   // ── Deployments ────────────────────────────────────────────────────────
   "deployment:d-east": [
     "region:r-east", "dependency:dep-your", "dependency:dep-layer", "dependency:dep-compute",
-    "event:evt-api-slow", "risk:risk-compute", "risk:risk-overall",
+    "event:evt-api-slow", "event:evt-az-host-maintenance", "risk:risk-compute",
+    "risk:risk-capacity", "risk:risk-overall",
   ],
   "deployment:d-west": [
     "region:r-west", "dependency:dep-your", "dependency:dep-storage", "dependency:dep-azure",
-    "dependency:dep-region", "event:evt-blob-latency", "risk:risk-storage", "risk:risk-regional",
-    "risk:risk-overall",
+    "dependency:dep-region", "event:evt-blob-latency", "event:evt-region-advisory",
+    "risk:risk-storage", "risk:risk-regional", "risk:risk-overall",
   ],
   "deployment:d-dr": [
     "region:r-central", "dependency:dep-your", "dependency:dep-network",
@@ -41,9 +42,12 @@ const EDGES: Record<string, string[]> = {
   ],
   "deployment:d-eu": [
     "region:r-eu", "dependency:dep-your", "dependency:dep-layer", "dependency:dep-azure",
-    "event:evt-identity-incident", "risk:risk-overall",
+    "event:evt-identity-incident", "event:evt-dns-failover", "risk:risk-overall",
   ],
-  "deployment:d-stg": ["region:r-east", "dependency:dep-your", "dependency:dep-compute"],
+  "deployment:d-stg": [
+    "region:r-east", "dependency:dep-your", "dependency:dep-compute",
+    "event:evt-az-host-maintenance",
+  ],
 
   // ── Events ─────────────────────────────────────────────────────────────
   "event:evt-blob-latency": [
@@ -62,6 +66,17 @@ const EDGES: Record<string, string[]> = {
     "dependency:dep-layer", "deployment:d-east", "deployment:d-west", "deployment:d-eu",
     "region:r-east", "region:r-west", "region:r-eu",
   ],
+  "event:evt-region-advisory": [
+    "dependency:dep-region", "dependency:dep-azure", "region:r-west",
+    "deployment:d-west", "risk:risk-regional",
+  ],
+  "event:evt-az-host-maintenance": [
+    "dependency:dep-compute", "region:r-east", "deployment:d-east", "deployment:d-stg",
+    "risk:risk-compute", "risk:risk-capacity",
+  ],
+  "event:evt-dns-failover": [
+    "dependency:dep-network", "dependency:dep-azure", "region:r-eu", "deployment:d-eu",
+  ],
   "event:evt-net-jitter": [
     "dependency:dep-network", "region:r-central", "deployment:d-dr", "risk:risk-network",
   ],
@@ -77,8 +92,10 @@ const EDGES: Record<string, string[]> = {
 
   // ── Risk signals ───────────────────────────────────────────────────────
   "risk:risk-regional": ["region:r-west"],
+  "risk:risk-capacity": ["dependency:dep-compute", "region:r-east", "deployment:d-east"],
   "risk:risk-overall": [
     "risk:risk-storage", "risk:risk-compute", "risk:risk-network", "risk:risk-regional",
+    "risk:risk-capacity",
   ],
 };
 

@@ -72,6 +72,9 @@ const EVENT_AGE_HOURS: Record<string, number> = {
   "evt-identity-incident": 2.1,
   "evt-cert-rotation": 0,
   "evt-net-jitter": 13,
+  "evt-region-advisory": 3.2,
+  "evt-az-host-maintenance": 0,
+  "evt-dns-failover": 408,
 };
 const RANGE_HOURS: Record<TimeRange, number> = { "24h": 24, "7d": 168, "30d": 720, "90d": 2160 };
 
