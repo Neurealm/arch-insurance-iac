@@ -17,6 +17,7 @@ interface SreNavItem {
 }
 
 export const SRE_MODULE_NAV: SreNavItem[] = [
+  { group: "Command", label: "Customer Health Dashboard", to: "/customer-health", icon: Activity },
   { group: "Command", label: "PROD Resilience Command Center", to: "/prod-resilience-twin", icon: Activity },
   { group: "Client Twins", label: "Client Product Line Map", to: "/product-line-map", icon: Package },
   { group: "Client Twins", label: "Client Golden Workflow Map", to: "/golden-workflow-map", icon: Workflow },
