@@ -60,6 +60,14 @@ export default function CustomerHealthLayout() {
           <Cloud className="h-5 w-5" />
         </div>
         <nav className="mt-4 flex w-full flex-1 flex-col items-center gap-1">
+          <NavLink
+            to="/prod-resilience-twin"
+            className="flex w-[76px] flex-col items-center gap-1 rounded-lg px-1 py-2.5 text-[10.5px] text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
+          >
+            <ArrowLeft className="h-[18px] w-[18px]" />
+            <span className="text-center leading-tight">PROD Resilience</span>
+          </NavLink>
+          <div className="my-1 h-px w-[60px] bg-slate-200" />
           {NAV.map((item) => {
             const active = item.to === "/customer-health"
               ? pathname === "/customer-health" || pathname === "/customer-health/"
