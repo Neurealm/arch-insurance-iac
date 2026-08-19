@@ -6,11 +6,12 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail, RegionDetail, RiskDetail } from "./types";
+import type { CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail, RegionDetail, RiskDetail, SloDetail } from "./types";
 import { getImpactContext } from "./data";
 import { impactStyles, Sparkline, statusStyles, StatusChip } from "./primitives";
 import { classificationStyles } from "./eventDetail";
 import { riskLevelStyles, trendStyles } from "./RiskEarlyWarningPanel";
+import { sloDetails } from "./sloDetail";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -601,6 +602,185 @@ function RiskSections({ r }: { r: RiskDetail }) {
   );
 }
 
+/* ---------------------- SLO-specific drawer sections ---------------------- */
+
+function SloSections({ d, onDrill }: { d: SloDetail; onDrill: (id: string) => void }) {
+  const [win, setWin] = useState(d.history[2]?.window ?? d.history[0].window);
+  const h = d.history.find((x) => x.window === win) ?? d.history[0];
+  const eb = d.errorBudget;
+  const trend = trendStyles[d.trend];
+  const times = [
+    { label: "Unavailable minutes", value: h.unavailableMinutes, hint: "Time your service could not be reached.", customer: true },
+    { label: "Degraded minutes", value: h.degradedMinutes, hint: "Time your service worked but was slower or partial.", customer: true },
+    { label: "Infrastructure event minutes", value: h.infrastructureEventMinutes, hint: "Time an underlying provider condition was open — not necessarily felt by you.", customer: false },
+    { label: "Customer-impacting event minutes", value: h.customerImpactingEventMinutes, hint: "Of that event time, the portion that actually reached your users.", customer: true },
+  ];
+  return (
+    <>
+      <Section title="Objective">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Target</div>
+            <div className="text-[15px] font-semibold tabular-nums text-slate-900">{d.target}</div>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Current attainment</div>
+            <div className={cn("text-[15px] font-semibold tabular-nums", statusStyles[d.status].text)}>{d.current}</div>
+          </div>
+          <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2">
+            <div className="text-[10.5px] text-emerald-700/80">Status</div>
+            <div className="text-[15px] font-semibold text-emerald-700">{d.statusLabel}</div>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Error budget remaining</div>
+            <div className="text-[15px] font-semibold tabular-nums text-slate-900">{eb.remainingPct}%</div>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="What this means for you">
+        <p className="text-[13px] leading-relaxed text-slate-600">{d.meaning}</p>
+        <p className="mt-1.5 text-[11.5px] leading-snug text-slate-500">{d.measurement}</p>
+      </Section>
+
+      <Section title="Reliability history">
+        <div className="flex flex-wrap gap-1.5">
+          {d.history.map((x) => (
+            <button
+              key={x.window}
+              type="button"
+              onClick={() => setWin(x.window)}
+              className={cn(
+                "rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors duration-200",
+                x.window === win
+                  ? "border-sky-500/50 bg-sky-500/10 text-sky-700"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900",
+              )}
+            >
+              {x.window}
+            </button>
+          ))}
+        </div>
+        <div className="mt-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-[12px] text-slate-500">Attainment over {h.window}</span>
+            <span className={cn("text-[14px] font-semibold tabular-nums", statusStyles[h.status].text)}>{h.attainment}</span>
+          </div>
+          <p className="mt-1 text-[11.5px] leading-snug text-slate-500">{h.note}</p>
+        </div>
+
+        <div className="mt-2 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+          Customer-impacting time
+        </div>
+        <ul className="mt-1.5 space-y-1.5">
+          {times.map((t) => (
+            <li key={t.label} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-[12px] text-slate-600">{t.label}</span>
+                <span
+                  className={cn(
+                    "text-[13px] font-semibold tabular-nums",
+                    t.value === 0 ? "text-emerald-600" : t.customer ? "text-amber-600" : "text-slate-700",
+                  )}
+                >
+                  {t.value.toLocaleString()} min
+                </span>
+              </div>
+              <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{t.hint}</p>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-[11.5px] leading-snug text-slate-500">
+          Infrastructure event minutes and customer-impacting minutes are counted separately on purpose. Provider
+          conditions only count against your experience when telemetry shows they reached your users.
+        </p>
+      </Section>
+
+      <Section title="Error budget">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Remaining</div>
+            <div className="text-[15px] font-semibold tabular-nums text-slate-900">{eb.remainingPct}%</div>
+            <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{eb.remainingPlain}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Consumed</div>
+            <div className="text-[15px] font-semibold tabular-nums text-slate-900">{eb.consumedPct}%</div>
+            <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{eb.consumedPlain}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Burn rate</div>
+            <div className="text-[15px] font-semibold tabular-nums text-slate-900">{eb.burnRate}</div>
+            <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{eb.burnRateNote}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Projected position</div>
+            <div className={cn("text-[12.5px] font-semibold leading-snug", statusStyles[eb.projectedStatus].text)}>
+              {eb.projected}
+            </div>
+          </div>
+        </div>
+        <div className="mt-2 rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-2.5">
+          <div className="text-[11.5px] font-semibold text-sky-700">What an error budget is</div>
+          <p className="mt-1 text-[12px] leading-relaxed text-slate-600">{eb.explanation}</p>
+        </div>
+      </Section>
+
+      <Section title="Event contribution">
+        <p className="mb-2 text-[11.5px] leading-snug text-slate-500">
+          Events that contributed to this objective. Select one to inspect it without leaving the dashboard.
+        </p>
+        <ul className="space-y-2">
+          {d.contributions.map((c) => (
+            <li key={`${c.contextId}-${c.title}`}>
+              <button
+                type="button"
+                onClick={() => onDrill(c.contextId)}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left transition-all duration-200 hover:-translate-y-[1px] hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/70"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="min-w-0">
+                    <span className="block text-[12.5px] font-medium text-slate-900">{c.title}</span>
+                    <span className="block text-[11px] text-slate-500">{c.classification} · {c.when}</span>
+                  </span>
+                  <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                </div>
+                <div className="mt-1.5 grid grid-cols-2 gap-x-3">
+                  <span className="text-[11px] text-slate-500">
+                    Contributed <span className="font-semibold tabular-nums text-slate-700">{c.minutes} min</span>
+                  </span>
+                  <span className="text-right text-[11px] text-slate-500">
+                    Budget used <span className="font-semibold tabular-nums text-slate-700">{c.budgetPct}%</span>
+                  </span>
+                </div>
+                <div
+                  className={cn(
+                    "mt-1.5 inline-block rounded-full border px-2 py-0.5 text-[10px] font-semibold",
+                    c.customerImpacting
+                      ? "border-amber-500/40 bg-amber-500/10 text-amber-700"
+                      : "border-slate-200 bg-slate-50 text-slate-500",
+                  )}
+                >
+                  {c.customerImpacting ? "Customer-impacting" : "Infrastructure only"}
+                </div>
+                <p className="mt-1 text-[11.5px] leading-snug text-slate-500">{c.note}</p>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Reliability trend">
+        <div className={cn("flex items-center gap-1.5 text-[13px] font-semibold", trend.text)}>
+          <trend.Icon className="h-4 w-4 shrink-0" aria-hidden />
+          {d.trend}
+        </div>
+        <p className="mt-1 text-[11.5px] leading-snug text-slate-500">{d.trendNote}</p>
+      </Section>
+    </>
+  );
+}
+
 export function CustomerImpactDrawer({
   context, onClose,
 }: { context: CustomerImpactContext | null; onClose: () => void }) {
@@ -664,14 +844,15 @@ export function CustomerImpactDrawer({
           {current.event && <EventSections e={current.event} />}
           {current.region && <RegionSections r={current.region} onDrill={drill} />}
           {current.risk && <RiskSections r={current.risk} />}
+          {current.slo && <SloSections d={current.slo} onDrill={drill} />}
 
-          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.region && (
+          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.slo && !current.region && (
           <Section title="What is happening?">
             <p className="text-[13px] leading-relaxed text-slate-600">{current.whatIsHappening}</p>
           </Section>
           )}
 
-          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.region && (
+          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.slo && !current.region && (
           <Section title="Does this affect me?">
             <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[current.impact])}>
               <div className="text-[16px] font-semibold tracking-tight">{current.impact}</div>
@@ -683,7 +864,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.dependency && !current.event && !current.region && !current.risk && (
+          {!current.dependency && !current.event && !current.region && !current.risk && !current.slo && (
           <Section title="What of mine is affected?">
             <ul className="space-y-2">
               {current.affected.map((a) => (
@@ -745,7 +926,7 @@ export function CustomerImpactDrawer({
             </Section>
           ))}
 
-          {!current.dependency && !current.event && !current.region && !current.risk && (
+          {!current.dependency && !current.event && !current.region && !current.risk && !current.slo && (
           <Section title="What are we seeing?">
             <ul className="space-y-2">
               {current.signals.map((s) => (
@@ -761,7 +942,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.dependency && !current.event && !current.region && !current.risk && (
+          {!current.dependency && !current.event && !current.region && !current.risk && !current.slo && (
           <Section title="What is being done?">
             <ul className="space-y-1.5">
               {current.whatIsBeingDone.map((w) => (
@@ -774,7 +955,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.region && (
+          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.slo && !current.region && (
           <Section title="Do I need to do anything?">
             <div
               className={cn(
@@ -792,7 +973,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.event && !current.region && !current.risk && (
+          {!current.event && !current.region && !current.risk && !current.slo && (
           <Section title="Timeline">
             <ol className="space-y-0">
               {current.timeline.map((t, i) => (
