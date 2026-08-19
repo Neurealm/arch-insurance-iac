@@ -5,6 +5,7 @@
 import { cn } from "@/lib/utils";
 import { classificationStyles } from "./eventDetail";
 import { Interactive, useImpactDrawer } from "./primitives";
+import { WhyThisMatters } from "./whyThisMatters";
 import type { ServiceEvent } from "./types";
 
 const impactTone = (e: ServiceEvent) =>
@@ -22,6 +23,7 @@ export function EventCard({ e, compact = false }: { e: ServiceEvent; compact?: b
       tooltip="Events are ranked by how much they affect you — not by infrastructure severity alone."
       onClick={() => open(e.contextId)}
       correlationKey={`event:${e.id}`}
+      footer={<WhyThisMatters objectKey={`event:${e.id}`} align="right" />}
       className={cn(
         "rounded-xl border bg-white px-4 py-3.5",
         (e.ranking?.actualImpact ?? 0) >= 3

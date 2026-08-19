@@ -86,10 +86,12 @@ export function Panel({
  * describing what the object means to the customer. Clicking opens the drawer.
  */
 export function Interactive({
-  tooltip, onClick, className, children, ariaLabel, correlationKey,
+  tooltip, onClick, className, children, ariaLabel, correlationKey, footer,
 }: {
   tooltip: string; onClick: () => void; className?: string; children: ReactNode;
   ariaLabel?: string;
+  /** Rendered below the clickable body (never nested inside the button). */
+  footer?: ReactNode;
   /** Optional key that wires this object into the cross-highlight graph. */
   correlationKey?: string;
 }) {
@@ -111,6 +113,7 @@ export function Interactive({
       >
         {children}
       </button>
+      {footer && <div className="mt-1.5 flex justify-end">{footer}</div>}
       <span
         role="tooltip"
         className="pointer-events-none absolute left-3 top-full z-40 mt-1 hidden max-w-xs rounded-md border border-slate-300 bg-white/95 px-2.5 py-1.5 text-[11px] leading-snug text-slate-600 shadow-xl group-hover/int:block"

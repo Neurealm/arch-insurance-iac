@@ -2,6 +2,7 @@
 // states: the Azure / infrastructure condition, and the customer's own
 // service health in that region.
 
+import { WhyThisMatters } from "./whyThisMatters";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { regions } from "./data";
@@ -159,6 +160,9 @@ function RegionListItem({
                 {r.hasDeployment ? r.activeEventSummary : "No customer deployment in this region"}
               </p>
             </button>
+      <div className="mt-1.5 flex justify-end">
+        <WhyThisMatters objectKey={`region:${r.id}`} align="right" />
+      </div>
       {hover === r.id && <HoverCard r={r} />}
     </li>
   );
