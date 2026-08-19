@@ -57,7 +57,7 @@ function RegionMarker({
       <button
         type="button"
         onClick={() => open(r.contextId)}
-        onMouseEnter={(e) => { setHover(r.id); bind.onMouseEnter?.(); }}
+        onMouseEnter={() => { setHover(r.id); bind.onMouseEnter?.(); }}
         onMouseLeave={() => { setHover((h) => (h === r.id ? null : h)); bind.onMouseLeave?.(); }}
         onFocus={() => { setHover(r.id); bind.onFocus?.(); }}
         onBlur={() => { setHover((h) => (h === r.id ? null : h)); bind.onBlur?.(); }}

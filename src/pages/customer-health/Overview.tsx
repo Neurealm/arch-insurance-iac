@@ -92,7 +92,8 @@ export default function CustomerHealthOverview() {
       </div>
 
       <p className="text-[11px] leading-snug text-slate-500">
-        Underlying cloud conditions are reported separately from your experience. A degraded Azure dependency is only
+        Hover any event, dependency, region or deployment to quietly reveal everything related to it elsewhere on this
+        page — event → dependency → region → your deployment → your impact. Underlying cloud conditions are reported separately from your experience. A degraded Azure dependency is only
         shown as a degraded service when telemetry demonstrates impact to your users.
       </p>
 
