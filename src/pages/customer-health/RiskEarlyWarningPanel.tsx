@@ -28,6 +28,7 @@ export function RiskTile({ r, onOpen }: { r: RiskSignal; onOpen: (id: string) =>
     <Interactive
       tooltip={r.question ?? "A forward-looking signal — it describes what could happen, not what has happened."}
       onClick={() => onOpen(r.contextId)}
+      correlationKey={`risk:${r.id}`}
       className="rounded-lg border border-slate-200 bg-white px-3 py-2.5"
     >
       <div className="flex items-start justify-between gap-2">

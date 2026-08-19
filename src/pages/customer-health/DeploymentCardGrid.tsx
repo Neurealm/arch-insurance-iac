@@ -5,6 +5,7 @@
 import { cn } from "@/lib/utils";
 import type { DeploymentCard } from "./types";
 import { Sparkline, StatusDot, statusStyles, useImpactDrawer } from "./primitives";
+import { useCorrelation } from "./correlation";
 
 function HoverSummary({ d }: { d: DeploymentCard }) {
   if (!d.hover) return null;
@@ -37,21 +38,23 @@ function HoverSummary({ d }: { d: DeploymentCard }) {
   );
 }
 
-export function DeploymentCards({ items }: { items: DeploymentCard[] }) {
+function DeploymentCardItem({ d }: { d: DeploymentCard }) {
   const { open } = useImpactDrawer();
+  const { bind, className: corrClass } = useCorrelation(`deployment:${d.id}`);
+  const s = statusStyles[d.status];
+  const clean = d.status === "healthy";
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-      {items.map((d) => {
-        const s = statusStyles[d.status];
-        const clean = d.status === "healthy";
-        return (
-          <div key={d.id} className="group/dep relative">
-            <button
-              type="button"
-              onClick={() => open(d.contextId)}
-              aria-label={`Open health detail for ${d.name}`}
-              className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white text-left transition-all duration-200 ease-out hover:-translate-y-[1px] hover:border-slate-300 hover:shadow-lg hover:shadow-slate-300/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/70"
-            >
+    <div className="group/dep relative">
+      <button
+        type="button"
+        onClick={() => open(d.contextId)}
+        {...bind}
+        aria-label={`Open health detail for ${d.name}`}
+        className={cn(
+          "w-full overflow-hidden rounded-xl border border-slate-200 bg-white text-left transition-all duration-200 ease-out hover:-translate-y-[1px] hover:border-slate-300 hover:shadow-lg hover:shadow-slate-300/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/70",
+          corrClass,
+        )}
+      >
               {/* Service health leads the card */}
               <div className={cn("flex items-center justify-between gap-2 border-b px-3.5 py-2.5", s.chip)}>
                 <span className="flex items-center gap-2">
@@ -87,11 +90,18 @@ export function DeploymentCards({ items }: { items: DeploymentCard[] }) {
                   <span className="text-[10.5px] text-slate-400">{d.resources ?? `${d.nodes} nodes`}</span>
                 </div>
               </div>
-            </button>
-            <HoverSummary d={d} />
-          </div>
-        );
-      })}
+      </button>
+      <HoverSummary d={d} />
+    </div>
+  );
+}
+
+export function DeploymentCards({ items }: { items: DeploymentCard[] }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      {items.map((d) => (
+        <DeploymentCardItem key={d.id} d={d} />
+      ))}
     </div>
   );
 }

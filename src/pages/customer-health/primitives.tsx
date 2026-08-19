@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { HealthStatus, ImpactLevel } from "./types";
 import { getImpactContext } from "./data";
 import type { CustomerImpactContext } from "./types";
+import { useCorrelation } from "./correlation";
 
 /* ------------------------------ status tokens ----------------------------- */
 
@@ -85,19 +86,27 @@ export function Panel({
  * describing what the object means to the customer. Clicking opens the drawer.
  */
 export function Interactive({
-  tooltip, onClick, className, children, ariaLabel,
-}: { tooltip: string; onClick: () => void; className?: string; children: ReactNode; ariaLabel?: string }) {
+  tooltip, onClick, className, children, ariaLabel, correlationKey,
+}: {
+  tooltip: string; onClick: () => void; className?: string; children: ReactNode;
+  ariaLabel?: string;
+  /** Optional key that wires this object into the cross-highlight graph. */
+  correlationKey?: string;
+}) {
+  const { bind, className: corrClass } = useCorrelation(correlationKey);
   return (
     <div className="group/int relative">
       <button
         type="button"
         onClick={onClick}
         aria-label={ariaLabel}
+        {...bind}
         className={cn(
           "w-full cursor-pointer text-left transition-all duration-200 ease-out",
           "hover:-translate-y-[1px] hover:border-slate-300 hover:bg-slate-100 hover:shadow-lg hover:shadow-slate-300/40",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/70",
           className,
+          corrClass,
         )}
       >
         {children}

@@ -21,6 +21,7 @@ export function EventCard({ e, compact = false }: { e: ServiceEvent; compact?: b
     <Interactive
       tooltip="Events are ranked by how much they affect you — not by infrastructure severity alone."
       onClick={() => open(e.contextId)}
+      correlationKey={`event:${e.id}`}
       className={cn(
         "rounded-xl border bg-white px-4 py-3.5",
         (e.ranking?.actualImpact ?? 0) >= 3
