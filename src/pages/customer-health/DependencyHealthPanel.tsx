@@ -25,12 +25,10 @@ export default function DependencyHealthPanel({ dense = false }: { dense?: boole
           const isHovered = hovered === row.id;
           const s = statusStyles[row.status];
           return (
-            <li key={row.id}>
+            <li key={row.id} onMouseEnter={() => setHovered(row.id)} onFocus={() => setHovered(row.id)}>
               <Interactive
                 tooltip={row.customerRelevance ?? "How this supporting layer is behaving — and whether its condition is reaching your users."}
                 onClick={() => open(row.contextId)}
-                onMouseEnter={() => setHovered(row.id)}
-                onFocus={() => setHovered(row.id)}
                 className={cn(
                   "rounded-lg border px-2.5 py-2.5 transition-colors duration-200",
                   inChain ? "border-sky-300 bg-sky-50/70" : "border-transparent",
