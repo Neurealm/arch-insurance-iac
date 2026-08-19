@@ -62,8 +62,8 @@ export const deploymentDetails: Record<string, DeploymentDetail> = {
       sloStatus: "Within target · 99.99% monthly", sloStatusLevel: "advisory",
     },
     infrastructure: layers({
-      Storage: { status: "degraded", note: "Azure Blob access latency elevated against baseline", contextId: "layer-storage" } as never,
-      "Azure Region": { status: "advisory", note: "Provider advisory open for West US 2", contextId: "layer-azure-region" } as never,
+      Storage: { status: "degraded", note: "Azure Blob access latency elevated against baseline" },
+      "Azure Region": { status: "advisory", note: "Provider advisory open for West US 2" },
     }),
     impact: {
       statement: "Your service remains available.",
