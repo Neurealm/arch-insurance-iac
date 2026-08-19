@@ -16,20 +16,20 @@ export default function CustomerHealthAlerts() {
             <Interactive
               tooltip="When this rule notifies you, who receives it, and what condition triggers it."
               onClick={() => open(a.contextId)}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3"
             >
               <span className="min-w-[220px]">
-                <span className="block text-[13.5px] font-semibold text-slate-100">{a.name}</span>
-                <span className="block text-[11.5px] text-slate-400">{a.scope}</span>
+                <span className="block text-[13.5px] font-semibold text-slate-900">{a.name}</span>
+                <span className="block text-[11.5px] text-slate-500">{a.scope}</span>
               </span>
-              <span className="text-[12px] text-slate-400">{a.channel}</span>
+              <span className="text-[12px] text-slate-500">{a.channel}</span>
               <span className="text-[11.5px] text-slate-500">Last fired {a.lastFired}</span>
               <span
                 className={cn(
                   "rounded-full border px-2 py-0.5 text-[11px] font-medium",
                   a.enabled
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                    : "border-slate-700 bg-slate-800/60 text-slate-400",
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700"
+                    : "border-slate-300 bg-slate-100 text-slate-500",
                 )}
               >
                 {a.enabled ? "Enabled" : "Disabled"}
