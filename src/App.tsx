@@ -481,6 +481,8 @@ const DcfReconciliation = lazy(() => import("./pages/direct-commerce/Reconciliat
 const DcfCustomerTimeline = lazy(() => import("./pages/direct-commerce/CustomerTimeline.tsx"));
 const DcfCatalog = lazy(() => import("./pages/direct-commerce/Catalog.tsx"));
 const DcfIntegrations = lazy(() => import("./pages/direct-commerce/Integrations.tsx"));
+const DcfWorkflowOverview = lazy(() => import("./pages/direct-commerce/WorkflowOverview.tsx"));
+
 import NocLayout from "./pages/agentic-sre-noc/NocLayout.tsx";
 import NocPage from "./pages/agentic-sre-noc/NocPage.tsx";
 import GlobalOpticalOperationsCenter from "./pages/agentic-sre-noc/GlobalOpticalOperationsCenter.tsx";
@@ -1042,6 +1044,8 @@ const App = () => (
             <Route path="catalog" element={<DcfCatalog />} />
             <Route path="integrations" element={<DcfIntegrations />} />
           </Route>
+          <Route path="/direct-commerce/workflow-overview" element={<DcfWorkflowOverview />} />
+
 
           <Route element={<SreLayout />}>
 

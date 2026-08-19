@@ -1,12 +1,14 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
 import {
   Home, LayoutDashboard, ShoppingCart, KeyRound, Repeat, Cloud, Scale,
-  GitBranch, BookOpen, Plug, ShieldCheck,
+  GitBranch, BookOpen, Plug, ShieldCheck, Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { label: "Overview", to: "/direct-commerce", icon: LayoutDashboard, end: true },
+  { label: "Operational Workflow Overview", to: "/direct-commerce/workflow-overview", icon: Activity },
+
   { label: "Orders", to: "/direct-commerce/orders", icon: ShoppingCart },
   { label: "Entitlements", to: "/direct-commerce/entitlements", icon: KeyRound },
   { label: "Lifter Fulfillment", to: "/direct-commerce/lifter-fulfillment", icon: Repeat },
