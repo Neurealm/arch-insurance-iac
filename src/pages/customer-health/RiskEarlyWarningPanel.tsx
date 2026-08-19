@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import type { RiskLevel, RiskSignal, RiskTrend } from "./types";
 import { riskSignals } from "./riskDetail";
 import { Interactive, Sparkline, statusStyles } from "./primitives";
+import { WhyThisMatters } from "./whyThisMatters";
 
 export const riskLevelStyles: Record<RiskLevel | "None", string> = {
   None: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
@@ -29,6 +30,7 @@ export function RiskTile({ r, onOpen }: { r: RiskSignal; onOpen: (id: string) =>
       tooltip={r.question ?? "A forward-looking signal — it describes what could happen, not what has happened."}
       onClick={() => onOpen(r.contextId)}
       correlationKey={`risk:${r.id}`}
+      footer={<WhyThisMatters objectKey={`risk:${r.id}`} align="right" />}
       className="rounded-lg border border-slate-200 bg-white px-3 py-2.5"
     >
       <div className="flex items-start justify-between gap-2">
