@@ -1042,6 +1042,8 @@ const App = () => (
             <Route path="catalog" element={<DcfCatalog />} />
             <Route path="integrations" element={<DcfIntegrations />} />
           </Route>
+          <Route path="/direct-commerce/workflow-overview" element={<DcfWorkflowOverview />} />
+
 
           <Route element={<SreLayout />}>
 
