@@ -9,6 +9,7 @@ import { regions } from "./data";
 import { statusStyles, useImpactDrawer } from "./primitives";
 import { useObjectHighlight } from "./filters";
 import type { RegionRow } from "./types";
+import { WORLD_PATH } from "./worldPath";
 
 function HoverCard({ r }: { r: RegionRow }) {
   const infra = statusStyles[r.infraStatus];
