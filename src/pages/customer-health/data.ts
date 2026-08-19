@@ -3,6 +3,7 @@
 
 import { kpiContexts, kpiOverlays } from "./kpiDetail";
 import { deploymentDetails } from "./deploymentDetail";
+import { dependencyDetails } from "./dependencyDetail";
 import type {
   AlertRule, ChangeRecord, CustomerImpactContext, DependencyRow, DeploymentCard,
   KpiTile, RegionRow, ReportItem, RiskSignal, ServiceEvent, SloRow,
@@ -79,13 +80,48 @@ export const deployments: DeploymentCard[] = [
 ];
 
 export const dependencies: DependencyRow[] = [
-  { id: "dep-your", layer: "Your Service", description: "Your deployments and user experience", status: "healthy", contextId: "layer-your-service" },
-  { id: "dep-layer", layer: "Service Layer", description: "Service control and orchestration", status: "healthy", contextId: "layer-service" },
-  { id: "dep-compute", layer: "Compute", description: "Virtual machines and host infrastructure", status: "healthy", contextId: "layer-compute" },
-  { id: "dep-storage", layer: "Storage", description: "Storage accounts and blob services", status: "degraded", contextId: "layer-storage" },
-  { id: "dep-network", layer: "Network", description: "Virtual network and connectivity", status: "healthy", contextId: "layer-network" },
-  { id: "dep-azure", layer: "Azure Services", description: "Platform services and dependencies", status: "degraded", contextId: "layer-azure-services" },
-  { id: "dep-region", layer: "Azure Region", description: "West US 2 experiencing issues", status: "at-risk", contextId: "layer-azure-region" },
+  {
+    id: "dep-your", layer: "Your Service", description: "Your deployments and the experience your users see",
+    status: "healthy", contextId: "layer-your-service", depth: 0,
+    customerRelevance: "This is what your customers actually experience.",
+    chain: ["dep-your"],
+  },
+  {
+    id: "dep-layer", layer: "Service Layer", description: "Service control, routing and orchestration",
+    status: "healthy", contextId: "layer-service", depth: 1,
+    customerRelevance: "Keeps requests routed and scaled; absorbs conditions underneath it.",
+    chain: ["dep-layer", "dep-your"],
+  },
+  {
+    id: "dep-compute", layer: "Compute", description: "Machines running your service (Azure Virtual Machines)",
+    status: "healthy", contextId: "layer-compute", depth: 2,
+    customerRelevance: "Provides the processing capacity behind every request.",
+    chain: ["dep-region", "dep-azure", "dep-compute", "dep-layer", "dep-your"],
+  },
+  {
+    id: "dep-storage", layer: "Storage", description: "Storage accounts and object services (Azure Storage)",
+    status: "degraded", contextId: "layer-storage", depth: 2,
+    customerRelevance: "Holds your data; latency here is currently absorbed before it reaches users.",
+    chain: ["dep-region", "dep-azure", "dep-storage", "dep-layer", "dep-your"],
+  },
+  {
+    id: "dep-network", layer: "Network", description: "Connectivity and traffic paths (Azure Virtual Network)",
+    status: "healthy", contextId: "layer-network", depth: 2,
+    customerRelevance: "Carries traffic between your users, your service and its dependencies.",
+    chain: ["dep-region", "dep-azure", "dep-network", "dep-layer", "dep-your"],
+  },
+  {
+    id: "dep-azure", layer: "Azure Services", description: "Cloud platform services your deployments depend on",
+    status: "degraded", contextId: "layer-azure-services", depth: 3,
+    customerRelevance: "17 of 18 platform dependencies healthy; one open provider advisory.",
+    chain: ["dep-region", "dep-azure", "dep-storage", "dep-layer", "dep-your"],
+  },
+  {
+    id: "dep-region", layer: "Azure Region", description: "West US 2 — open provider advisory being tracked",
+    status: "at-risk", contextId: "layer-azure-region", depth: 4,
+    customerRelevance: "Hosting location for one deployment; failover target is verified and standing by.",
+    chain: ["dep-region", "dep-azure", "dep-storage", "dep-layer", "dep-your"],
+  },
 ];
 
 export const events: ServiceEvent[] = [
@@ -900,5 +936,8 @@ export function getImpactContext(id: string): CustomerImpactContext {
   const overlay = kpiOverlays[base.id];
   const merged = overlay ? { ...base, ...overlay } : base;
   const deployment = deploymentDetails[base.id];
-  return deployment ? { ...merged, deployment, title: deployment.headline } : merged;
+  if (deployment) return { ...merged, deployment, title: deployment.headline };
+  const dependency = dependencyDetails[base.id];
+  if (dependency) return { ...merged, dependency, title: dependency.headline, subtitle: dependency.conditionLabel };
+  return merged;
 }

@@ -70,6 +70,8 @@ export interface CustomerImpactContext {
   groups?: DetailGroup[];
   /** Optional deployment-specific decomposition (customer-first deployment view). */
   deployment?: DeploymentDetail;
+  /** Optional supporting-dependency decomposition. */
+  dependency?: DependencyDetail;
 }
 
 /** Compact figure rendered in the drawer's metric grid. */
@@ -188,6 +190,33 @@ export interface DependencyRow {
   description: string;
   status: HealthStatus;
   contextId: string;
+  /** Indentation depth in the hierarchical dependency list. */
+  depth?: number;
+  /** Plain-language reason this layer matters to the customer. */
+  customerRelevance?: string;
+  /** Ids of the dependency rows forming the chain highlighted on hover. */
+  chain?: string[];
+}
+
+/** Specialised drawer payload for a supporting dependency layer. */
+export interface DependencyDetail {
+  headline: string;
+  conditionLabel: string;
+  conditionStatus: HealthStatus;
+  impactVerdict: string;
+  impactLevel: ImpactLevel;
+  affectedDeployments: { name: string; note: string; status: HealthStatus }[];
+  signals: { label: string; value: string; status: HealthStatus }[];
+  interpretation: string;
+  trend: {
+    caption: string;
+    unit: string;
+    baseline: number;
+    warning: number;
+    series: number[];
+  };
+  related: { label: string; technical: string; status: HealthStatus; contextId: string }[];
+  response: string[];
 }
 
 export interface ServiceEvent {

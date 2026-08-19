@@ -4,10 +4,11 @@
 import {
   AlertTriangle, Bell, Box, Cloud, Layers, ShieldCheck, TrendingUp, Wrench, type LucideIcon,
 } from "lucide-react";
+import DependencyHealthPanel from "./DependencyHealthPanel";
 import { cn } from "@/lib/utils";
 import { DeploymentCards } from "./DeploymentCardGrid";
 import {
-  availability30d, changes, dependencies, deployments, events, regions, risks, slos,
+  availability30d, changes, deployments, events, regions, risks, slos,
 } from "./data";
 import { overviewKpis } from "./kpiDetail";
 import {
@@ -95,22 +96,8 @@ export default function CustomerHealthOverview() {
           <DeploymentCards items={deployments.slice(0, 3)} />
         </Panel>
 
-        <Panel title="Service Dependency Health" subtitle="Health across layers that support your services">
-          <ul className="divide-y divide-slate-200">
-            {dependencies.map((row) => (
-              <li key={row.id}>
-                <Interactive
-                  tooltip="How this supporting layer is behaving — and whether its condition is reaching your users."
-                  onClick={() => open(row.contextId)}
-                  className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-lg border border-transparent px-2.5 py-2.5 sm:grid-cols-[180px_120px_1fr]"
-                >
-                  <span className="text-[12.5px] font-medium text-slate-900">{row.layer}</span>
-                  <StatusChip status={row.status} />
-                  <span className="hidden text-[11.5px] text-slate-500 sm:block">{row.description}</span>
-                </Interactive>
-              </li>
-            ))}
-          </ul>
+        <Panel title="Service Dependency Health" subtitle="Customer service context for the Azure dependencies beneath your service">
+          <DependencyHealthPanel dense />
         </Panel>
       </div>
 
