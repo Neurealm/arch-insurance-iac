@@ -229,7 +229,7 @@ export const events: ServiceEvent[] = [
 
 export const regions: RegionRow[] = [
   {
-    id: "r-east", name: "East US", status: "healthy", note: "Your service healthy", x: 27, y: 40, contextId: "region-east",
+    id: "r-east", lat: 38.9, lon: -77.5, name: "East US", status: "healthy", note: "Your service healthy", x: 27, y: 40, contextId: "region-east",
     geo: "Virginia, US",
     infraStatus: "healthy", infraLabel: "Healthy",
     serviceStatus: "healthy", serviceLabel: "Healthy",
@@ -238,7 +238,7 @@ export const regions: RegionRow[] = [
     exposure: "46% of your traffic", potentialImpact: "None",
   },
   {
-    id: "r-central", name: "Central US", status: "healthy", note: "DR standby healthy", x: 22, y: 43, contextId: "region-central",
+    id: "r-central", lat: 41.6, lon: -93.6, name: "Central US", status: "healthy", note: "DR standby healthy", x: 22, y: 43, contextId: "region-central",
     geo: "Iowa, US",
     infraStatus: "healthy", infraLabel: "Healthy",
     serviceStatus: "healthy", serviceLabel: "Healthy",
@@ -247,7 +247,7 @@ export const regions: RegionRow[] = [
     exposure: "Standby only", potentialImpact: "None",
   },
   {
-    id: "r-west", name: "West US 2", status: "degraded", note: "Azure degraded · your service healthy", x: 14, y: 37, contextId: "region-west",
+    id: "r-west", lat: 47.2, lon: -119.8, name: "West US 2", status: "degraded", note: "Azure degraded · your service healthy", x: 14, y: 37, contextId: "region-west",
     geo: "Quincy, WA, US",
     infraStatus: "degraded", infraLabel: "Degraded",
     serviceStatus: "healthy", serviceLabel: "Healthy",
@@ -256,7 +256,7 @@ export const regions: RegionRow[] = [
     exposure: "22% of your traffic", potentialImpact: "Low",
   },
   {
-    id: "r-eu", name: "North Europe", status: "healthy", note: "Your service healthy", x: 50, y: 24, contextId: "region-eu",
+    id: "r-eu", lat: 53.3, lon: -6.3, name: "North Europe", status: "healthy", note: "Your service healthy", x: 50, y: 24, contextId: "region-eu",
     geo: "Dublin, Ireland",
     infraStatus: "healthy", infraLabel: "Healthy",
     serviceStatus: "healthy", serviceLabel: "Healthy",
@@ -265,7 +265,7 @@ export const regions: RegionRow[] = [
     exposure: "26% of your traffic", potentialImpact: "None",
   },
   {
-    id: "r-uk", name: "UK South", status: "advisory", note: "No customer deployment in this region", x: 45, y: 36, contextId: "region-uk",
+    id: "r-uk", lat: 51.5, lon: -0.1, name: "UK South", status: "advisory", note: "No customer deployment in this region", x: 45, y: 36, contextId: "region-uk",
     geo: "London, UK",
     infraStatus: "advisory", infraLabel: "Advisory",
     serviceStatus: "healthy", serviceLabel: "Not applicable",
@@ -274,7 +274,7 @@ export const regions: RegionRow[] = [
     exposure: "None", potentialImpact: "None",
   },
   {
-    id: "r-sea", name: "Southeast Asia", status: "healthy", note: "No customer deployment in this region", x: 74, y: 58, contextId: "region-sea",
+    id: "r-sea", lat: 1.35, lon: 103.8, name: "Southeast Asia", status: "healthy", note: "No customer deployment in this region", x: 74, y: 58, contextId: "region-sea",
     geo: "Singapore",
     infraStatus: "healthy", infraLabel: "Healthy",
     serviceStatus: "healthy", serviceLabel: "Not applicable",
