@@ -1,5 +1,6 @@
 import { PageHeader, useImpactDrawer } from "./primitives";
 import { SloTiles } from "./SloStatusPanel";
+import { BudgetTacticsPanel, EarlySurveillancePanel } from "./SloEarlySignals";
 
 export default function CustomerHealthSlos() {
   const { open } = useImpactDrawer();
@@ -15,6 +16,9 @@ export default function CustomerHealthSlos() {
         being consumed, and which events contributed. Infrastructure event time is kept distinct from
         customer-impacting time.
       </p>
+      <BudgetTacticsPanel />
+      <EarlySurveillancePanel />
     </div>
   );
 }
+
