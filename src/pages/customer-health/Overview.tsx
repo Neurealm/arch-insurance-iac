@@ -5,6 +5,7 @@ import {
   AlertTriangle, Bell, Box, Cloud, Layers, ShieldCheck, TrendingUp, Wrench, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DeploymentCards } from "./DeploymentCardGrid";
 import {
   availability30d, changes, dependencies, deployments, events, regions, risks, slos,
 } from "./data";
@@ -90,39 +91,8 @@ export default function CustomerHealthOverview() {
 
       {/* Deployments + dependency health */}
       <div className="grid gap-4 xl:grid-cols-2">
-        <Panel title="Your Deployments" subtitle="Health of your service deployments">
-          <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
-            {deployments.slice(0, 3).map((d) => {
-              const s = statusStyles[d.status];
-              return (
-                <Interactive
-                  key={d.id}
-                  tooltip={`What this deployment of yours is doing right now, and whether anything underneath it puts your users at risk.`}
-                  onClick={() => open(d.contextId)}
-                  className="overflow-hidden rounded-xl border border-slate-200 bg-white"
-                >
-                  <div className={cn("flex items-center gap-2 border-b px-3 py-2", s.chip)}>
-                    <StatusDot status={d.status} />
-                    <span className="text-[12px] font-medium">{s.label}</span>
-                  </div>
-                  <div className="px-3 py-3">
-                    <div className="text-[13.5px] font-semibold text-slate-900">{d.name}</div>
-                    <div className="mt-0.5 text-[11.5px] text-slate-500">{d.region}</div>
-                    <div className="text-[11.5px] text-slate-500">{d.nodes} Nodes</div>
-                    <div className="text-[11.5px] text-slate-500">{d.tier}</div>
-                    <div className="mt-2.5 flex items-end justify-between gap-2 border-t border-slate-200 pt-2.5">
-                      <div>
-                        <div className="text-[16px] font-semibold text-slate-900">{d.availability}</div>
-                        <div className="text-[10.5px] text-slate-500">Availability (24h)</div>
-                      </div>
-                      <div className="w-24"><Sparkline points={d.spark} status={d.status} /></div>
-                    </div>
-                    <div className={cn("mt-2 text-[11.5px]", d.status === "healthy" ? "text-slate-500" : s.text)}>{d.alerts}</div>
-                  </div>
-                </Interactive>
-              );
-            })}
-          </div>
+        <Panel title="Your Deployments" subtitle="Service health first, infrastructure second">
+          <DeploymentCards items={deployments.slice(0, 3)} />
         </Panel>
 
         <Panel title="Service Dependency Health" subtitle="Health across layers that support your services">
