@@ -6,11 +6,12 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail, RegionDetail, RiskDetail, SloDetail } from "./types";
+import type { ChangeDetail, CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail, RegionDetail, RiskDetail, SloDetail } from "./types";
 import { getImpactContext } from "./data";
 import { impactStyles, Sparkline, statusStyles, StatusChip } from "./primitives";
 import { classificationStyles } from "./eventDetail";
 import { riskLevelStyles, trendStyles } from "./RiskEarlyWarningPanel";
+import { protectedWindow } from "./changeDetail";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -601,7 +602,162 @@ function RiskSections({ r }: { r: RiskDetail }) {
   );
 }
 
+
+/* --------------------- Change-specific drawer sections -------------------- */
+
+const validationStateStyles: Record<"Passed" | "Scheduled" | "In progress", string> = {
+  Passed: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
+  "In progress": "border-amber-500/40 bg-amber-500/10 text-amber-700",
+  Scheduled: "border-slate-300 bg-slate-100 text-slate-600",
+};
+
+function ChangeSections({ c }: { c: ChangeDetail }) {
+  const affects = statusStyles[c.affectsMe.status];
+  return (
+    <>
+      <Section title="Planned change">
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+          <div className="text-[13px] font-semibold text-slate-900">{c.headline}</div>
+          <div className="mt-0.5 text-[11.5px] text-slate-500">{c.kind} · {c.window}</div>
+        </div>
+        {c.protectedWindow?.overlaps && (
+          <div className="mt-2 rounded-lg border border-amber-400/60 bg-amber-500/10 px-3 py-2.5">
+            <div className="text-[12px] font-semibold uppercase tracking-[0.1em] text-amber-800">
+              Inside your protected business window
+            </div>
+            <p className="mt-1 text-[12px] leading-relaxed text-slate-700">{c.protectedWindow.note}</p>
+          </div>
+        )}
+      </Section>
+
+      <Section title="Does this affect me?">
+        <div className={cn("rounded-lg border px-3.5 py-3", affects.chip)}>
+          <div className="text-[17px] font-semibold uppercase tracking-tight">{c.affectsMe.verdict}</div>
+        </div>
+        <p className="mt-2 text-[12.5px] leading-relaxed text-slate-600">{c.affectsMe.explanation}</p>
+      </Section>
+
+      <Section title="Your environment">
+        <ul className="space-y-2">
+          {c.yourEnvironment.map((e) => (
+            <li key={e.label} className="flex items-start gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", statusStyles[e.status].dot)} aria-hidden />
+              <div className="min-w-0">
+                <div className="text-[12.5px] font-medium text-slate-900">{e.label}</div>
+                <div className="text-[11.5px] text-slate-500">{e.note}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Expected impact">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Expected impact</div>
+            <div className="text-[14px] font-semibold text-slate-900">{c.expectedImpact}</div>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Service interruption expected</div>
+            <div className="text-[14px] font-semibold text-slate-900">{c.serviceInterruptionExpected ? "Yes" : "No"}</div>
+          </div>
+        </div>
+        <p className="mt-1.5 text-[11.5px] leading-snug text-slate-500">{c.interruptionNote}</p>
+      </Section>
+
+      <Section title="Protection / resilience">
+        <ul className="space-y-1.5">
+          {c.resilience.map((r) => (
+            <li key={r} className="flex items-start gap-2 text-[12.5px] leading-snug text-slate-600">
+              <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
+              <span>{r}</span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Customer action">
+        <div
+          className={cn(
+            "rounded-lg border px-3.5 py-3",
+            c.actionRequired ? "border-amber-500/40 bg-amber-500/10" : "border-emerald-500/40 bg-emerald-500/10",
+          )}
+        >
+          <div className={cn("text-[13px] font-semibold", c.actionRequired ? "text-amber-800" : "text-emerald-700")}>
+            {c.customerAction}
+          </div>
+          <p className="mt-1 text-[12px] leading-relaxed text-slate-600">
+            {c.actionRequired
+              ? "We will follow up with you directly and confirm once the action is complete."
+              : "We will carry out and verify this change on your behalf, and contact you if anything changes."}
+          </p>
+        </div>
+      </Section>
+
+      <Section title="Timeline">
+        <ol className="space-y-2.5">
+          {c.timeline.map((t) => (
+            <li key={t.stage} className="flex gap-3">
+              <span
+                className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", t.pending ? "bg-sky-400" : "bg-slate-300")}
+                aria-hidden
+              />
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-[12.5px] font-medium text-slate-900">{t.stage}</span>
+                  <span className="text-[11px] tabular-nums text-slate-500">{t.at}</span>
+                </div>
+                <div className="text-[11.5px] leading-snug text-slate-500">{t.note}</div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      <Section title="Validation">
+        <div className="space-y-2">
+          {c.validation.map((g) => (
+            <Expandable key={g.group} title={g.group}>
+              <ul className="space-y-1.5">
+                {g.items.map((i) => (
+                  <li key={i.label} className="flex items-start justify-between gap-3">
+                    <span className="min-w-0">
+                      <span className="block text-[12px] text-slate-800">{i.label}</span>
+                      <span className="block text-[11px] text-slate-500">{i.note}</span>
+                    </span>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full border px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wide",
+                        validationStateStyles[i.state],
+                      )}
+                    >
+                      {i.state}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </Expandable>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Your protected operating window">
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+          <div className="text-[12.5px] font-medium text-slate-900">{protectedWindow.label}</div>
+          <div className="mt-0.5 text-[11.5px] text-slate-600">
+            {protectedWindow.days} · {protectedWindow.hours} · {protectedWindow.timezone}
+          </div>
+          <p className="mt-1.5 text-[11.5px] leading-snug text-slate-500">
+            {c.protectedWindow?.note ?? protectedWindow.note}
+          </p>
+        </div>
+      </Section>
+    </>
+  );
+}
+
 /* ---------------------- SLO-specific drawer sections ---------------------- */
+
 
 function SloSections({ d, onDrill }: { d: SloDetail; onDrill: (id: string) => void }) {
   const [win, setWin] = useState(d.history[2]?.window ?? d.history[0].window);
@@ -844,6 +1000,7 @@ export function CustomerImpactDrawer({
           {current.region && <RegionSections r={current.region} onDrill={drill} />}
           {current.risk && <RiskSections r={current.risk} />}
           {current.slo && <SloSections d={current.slo} onDrill={drill} />}
+          {current.change && <ChangeSections c={current.change} />}
 
           {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.slo && !current.region && (
           <Section title="What is happening?">

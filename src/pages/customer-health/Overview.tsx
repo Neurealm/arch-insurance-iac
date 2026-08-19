@@ -2,18 +2,19 @@
 // is anything happening underneath that affects me?"
 
 import {
-  AlertTriangle, Bell, Box, Cloud, Layers, ShieldCheck, TrendingUp, Wrench, type LucideIcon,
+  AlertTriangle, Bell, Box, Cloud, Layers, ShieldCheck, TrendingUp, type LucideIcon,
 } from "lucide-react";
 import DependencyHealthPanel from "./DependencyHealthPanel";
 import { RegionList, RegionMap } from "./RegionHealthPanel";
 import { RiskTiles } from "./RiskEarlyWarningPanel";
 import { SloTiles } from "./SloStatusPanel";
+import { ChangesPanel } from "./ChangesPanel";
 import { EventCard } from "./EventCards";
 import { useEventFeed } from "./useEventFeed";
 import { cn } from "@/lib/utils";
 import { DeploymentCards } from "./DeploymentCardGrid";
 import {
-  availability30d, changes, deployments, risks, slos,
+  availability30d, deployments, risks, slos,
 } from "./data";
 import { overviewKpis } from "./kpiDetail";
 import {
@@ -170,32 +171,8 @@ export default function CustomerHealthOverview() {
           </p>
         </Panel>
 
-        <Panel title="Recent Changes & Maintenance" subtitle="Upcoming changes that may affect your environment">
-          <ul className="space-y-2">
-            {changes.map((c) => (
-              <li key={c.id}>
-                <Interactive
-                  tooltip="A planned change in your environment or at the cloud provider, with our assessment of what it could mean for you."
-                  onClick={() => open(c.contextId)}
-                  className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2.5"
-                >
-                  <span className="flex min-w-0 items-start gap-2.5">
-                    <Wrench className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
-                    <span className="min-w-0">
-                      <span className="block truncate text-[12.5px] text-slate-900">{c.title}</span>
-                      <span className="block text-[11px] text-slate-500">{c.window}</span>
-                    </span>
-                  </span>
-                  <span className="shrink-0 text-right">
-                    <span className="block text-[10.5px] text-slate-500">Potential impact</span>
-                    <span className={cn("text-[12px]", c.potentialImpact === "None" ? "text-emerald-600" : "text-amber-600")}>
-                      {c.potentialImpact}
-                    </span>
-                  </span>
-                </Interactive>
-              </li>
-            ))}
-          </ul>
+        <Panel title="Recent Changes & Maintenance" subtitle="Planned changes scored for relevance to your environment">
+          <ChangesPanel onOpen={open} />
         </Panel>
       </div>
     </div>
