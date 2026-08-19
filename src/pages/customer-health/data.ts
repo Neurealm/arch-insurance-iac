@@ -65,10 +65,17 @@ export const deployments: DeploymentCard[] = [
     id: "d-eu", name: "Production, North Europe", region: "North Europe", nodes: 9, tier: "Customer Production",
     environment: "Production", resources: "9 nodes · 52 resources", advisoryCount: 0,
     availability: "99.996%", status: "healthy", alerts: "0 Alerts",
+    // Telemetry from this deployment is arriving late, so we do not claim it is
+    // healthy — we say health cannot currently be verified.
+    telemetry: {
+      state: "stale",
+      lastConfirmedHealthy: "7 minutes ago",
+      note: "Health reporting from this region is arriving late. Your service has not reported any problem.",
+    },
     spark: [60, 63, 61, 65, 64, 66, 65, 68, 66, 69, 68, 70], contextId: "dep-eu",
     hover: {
-      overallHealth: "Healthy", customerImpact: "None", availability: "99.996% (24h)",
-      infrastructureRisk: "Low — no abnormal layer", advisories: "0 active", lastHealthChange: "No change in 9 days",
+      overallHealth: "Health verification delayed", customerImpact: "None reported", availability: "99.996% (24h)",
+      infrastructureRisk: "Low — no abnormal layer", advisories: "0 active", lastHealthChange: "Last confirmed healthy 7 minutes ago",
     },
   },
   {
