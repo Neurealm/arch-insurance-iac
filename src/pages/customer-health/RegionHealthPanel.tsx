@@ -9,6 +9,7 @@ import { regions } from "./data";
 import { statusStyles, useImpactDrawer } from "./primitives";
 import { useObjectHighlight } from "./filters";
 import type { RegionRow } from "./types";
+import { WORLD_PATH } from "./worldPath";
 
 function HoverCard({ r }: { r: RegionRow }) {
   const infra = statusStyles[r.infraStatus];
@@ -42,19 +43,51 @@ function HoverCard({ r }: { r: RegionRow }) {
 }
 
 
+/* Equirectangular projection helpers: x = lon + 180, y = 90 - lat. */
+type MapViewId = "world" | "americas" | "europe" | "apac";
+const MAP_VIEWS: { id: MapViewId; label: string; lon: [number, number]; lat: [number, number] }[] = [
+  { id: "world", label: "World", lon: [-180, 180], lat: [-58, 84] },
+  { id: "americas", label: "Americas", lon: [-170, -30], lat: [-56, 72] },
+  { id: "europe", label: "Europe", lon: [-26, 46], lat: [33, 71] },
+  { id: "apac", label: "Asia Pacific", lon: [62, 180], lat: [-46, 56] },
+];
+
+function viewBoxOf(v: (typeof MAP_VIEWS)[number]) {
+  const x = v.lon[0] + 180;
+  const y = 90 - v.lat[1];
+  return { x, y, w: v.lon[1] - v.lon[0], h: v.lat[1] - v.lat[0] };
+}
+
+function projectRegion(r: RegionRow, v: (typeof MAP_VIEWS)[number]) {
+  const box = viewBoxOf(v);
+  if (r.lat === undefined || r.lon === undefined) return { left: r.x, top: r.y, visible: true };
+  const px = r.lon + 180;
+  const py = 90 - r.lat;
+  const left = ((px - box.x) / box.w) * 100;
+  const top = ((py - box.y) / box.h) * 100;
+  return { left, top, visible: left >= -2 && left <= 102 && top >= -2 && top <= 102 };
+}
+
 function RegionMarker({
-  r, hover, setHover, open,
+  r, hover, setHover, open, view,
 }: {
   r: RegionRow;
   hover: string | null;
   setHover: (fn: string | null | ((h: string | null) => string | null)) => void;
   open: (id: string) => void;
+  view: (typeof MAP_VIEWS)[number];
 }) {
   const infra = statusStyles[r.infraStatus];
   const svc = statusStyles[r.serviceStatus];
   const { bind, className: corrClass } = useObjectHighlight(`region:${r.id}`);
+  const pos = projectRegion(r, view);
+  if (!pos.visible) return null;
+  const attention = r.infraStatus !== "healthy";
   return (
-    <div className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${r.x}%`, top: `${r.y}%` }}>
+    <div
+      className="absolute z-10 -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
+      style={{ left: `${pos.left}%`, top: `${pos.top}%` }}
+    >
       <button
         type="button"
         onClick={() => open(r.contextId)}
@@ -69,13 +102,16 @@ function RegionMarker({
         )}
       >
         <span className="relative block">
+          {attention && (
+            <span className={cn("absolute -inset-1 animate-ping rounded-full opacity-40", infra.dot)} aria-hidden />
+          )}
           {/* outer ring = Azure infrastructure, inner dot = your service */}
-          <span className={cn("block h-4 w-4 rounded-full ring-2 ring-white", infra.dot, r.hasDeployment ? "" : "opacity-50")} />
+          <span className={cn("relative block h-4 w-4 rounded-full ring-2 ring-white shadow", infra.dot, r.hasDeployment ? "" : "opacity-50")} />
           {r.hasDeployment && (
             <span className={cn("absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-1 ring-white", svc.dot)} />
           )}
         </span>
-        <span className="mt-1 whitespace-nowrap rounded bg-white/85 px-1 text-[9.5px] font-medium text-slate-600">{r.name}</span>
+        <span className="mt-1 whitespace-nowrap rounded bg-white/85 px-1 text-[9.5px] font-medium text-slate-700 shadow-sm">{r.name}</span>
       </button>
       {hover === r.id && <HoverCard r={r} />}
     </div>
@@ -85,28 +121,76 @@ function RegionMarker({
 export function RegionMap({ height = "h-64" }: { height?: string }) {
   const { open } = useImpactDrawer();
   const [hover, setHover] = useState<string | null>(null);
+  const [viewId, setViewId] = useState<MapViewId>("world");
+  const view = MAP_VIEWS.find((v) => v.id === viewId) ?? MAP_VIEWS[0];
+  const box = viewBoxOf(view);
+  const graticule: number[] = [];
+  for (let lon = -180; lon <= 180; lon += 30) graticule.push(lon);
+  const parallels: number[] = [];
+  for (let lat = -60; lat <= 80; lat += 20) parallels.push(lat);
+
   return (
-    <div className={cn("relative rounded-lg border border-slate-200 bg-slate-50", height)}>
-      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-lg bg-[radial-gradient(circle_at_30%_40%,rgba(56,189,248,0.12),transparent_60%)]" aria-hidden />
-      <div
-        className="pointer-events-none absolute inset-0 overflow-hidden rounded-lg opacity-[0.35]"
-        aria-hidden
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, rgba(148,163,184,0.25) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.25) 1px, transparent 1px)",
-          backgroundSize: "8% 16%",
-        }}
-      />
+    <div className={cn("relative overflow-hidden rounded-lg border border-slate-200 bg-[#eef4fa]", height)}>
+      <svg
+        className="absolute inset-0 h-full w-full transition-all duration-500"
+        viewBox={`${box.x} ${box.y} ${box.w} ${box.h}`}
+        preserveAspectRatio="none"
+        role="img"
+        aria-label="World map showing Azure regions where your services run"
+      >
+        <defs>
+          <linearGradient id="ch-ocean" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#e8f1fb" />
+            <stop offset="100%" stopColor="#dfeaf6" />
+          </linearGradient>
+        </defs>
+        <rect x={box.x} y={box.y} width={box.w} height={box.h} fill="url(#ch-ocean)" />
+        <g stroke="#c3d4e6" strokeWidth={box.w / 1600} opacity={0.9}>
+          {graticule.map((lon) => (
+            <line key={`m${lon}`} x1={lon + 180} y1={box.y} x2={lon + 180} y2={box.y + box.h} />
+          ))}
+          {parallels.map((lat) => (
+            <line key={`p${lat}`} x1={box.x} y1={90 - lat} x2={box.x + box.w} y2={90 - lat} />
+          ))}
+        </g>
+        <path
+          d={WORLD_PATH}
+          fill="#cbd8e6"
+          stroke="#93a8bf"
+          strokeWidth={box.w / 1400}
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+
+      <div className="absolute right-2 top-2 z-20 flex gap-1 rounded-md border border-slate-200 bg-white/90 p-0.5 shadow-sm backdrop-blur">
+        {MAP_VIEWS.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            onClick={() => setViewId(v.id)}
+            aria-pressed={viewId === v.id}
+            className={cn(
+              "rounded px-2 py-0.5 text-[10px] font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/70",
+              viewId === v.id ? "bg-sky-600 text-white" : "text-slate-600 hover:bg-slate-100",
+            )}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
+
       {regions.map((r) => (
-        <RegionMarker key={r.id} r={r} hover={hover} setHover={setHover} open={open} />
+        <RegionMarker key={r.id} r={r} hover={hover} setHover={setHover} open={open} view={view} />
       ))}
-      <div className="absolute bottom-2 left-3 flex flex-wrap gap-3 text-[10px] text-slate-500">
-        <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-full bg-slate-300" aria-hidden />Outer ring: Azure infrastructure</span>
+      <div className="absolute bottom-2 left-3 z-20 flex flex-wrap gap-3 rounded bg-white/75 px-1.5 py-0.5 text-[10px] text-slate-600">
+        <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-full bg-slate-300 ring-2 ring-white" aria-hidden />Outer ring: Azure infrastructure</span>
         <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-slate-500" aria-hidden />Inner dot: your service</span>
       </div>
     </div>
   );
 }
+
 
 
 function RegionListItem({

@@ -334,6 +334,9 @@ export interface RegionRow {
   note: string;
   x: number;
   y: number;
+  /** Geographic position used by the world map projection. */
+  lat?: number;
+  lon?: number;
   contextId: string;
   /** Azure / provider infrastructure condition in this region. */
   infraStatus: HealthStatus;
