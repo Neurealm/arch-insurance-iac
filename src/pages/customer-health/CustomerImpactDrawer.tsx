@@ -192,10 +192,13 @@ export function CustomerImpactDrawer({
         <div className="flex-1 overflow-y-auto">
           {current.deployment && <DeploymentSections d={current.deployment} onDrill={drill} />}
 
+          {!current.deployment && (
           <Section title="What is happening?">
             <p className="text-[13px] leading-relaxed text-slate-600">{current.whatIsHappening}</p>
           </Section>
+          )}
 
+          {!current.deployment && (
           <Section title="Does this affect me?">
             <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[current.impact])}>
               <div className="text-[16px] font-semibold tracking-tight">{current.impact}</div>
@@ -205,6 +208,7 @@ export function CustomerImpactDrawer({
               </p>
             </div>
           </Section>
+          )}
 
           <Section title="What of mine is affected?">
             <ul className="space-y-2">
@@ -291,6 +295,7 @@ export function CustomerImpactDrawer({
             </ul>
           </Section>
 
+          {!current.deployment && (
           <Section title="Do I need to do anything?">
             <div
               className={cn(
@@ -306,6 +311,7 @@ export function CustomerImpactDrawer({
               <p className="mt-1 text-slate-600">{current.customerAction}</p>
             </div>
           </Section>
+          )}
 
           <Section title="Timeline">
             <ol className="space-y-0">
