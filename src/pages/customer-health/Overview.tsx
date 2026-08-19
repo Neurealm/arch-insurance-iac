@@ -7,6 +7,7 @@ import {
 import DependencyHealthPanel from "./DependencyHealthPanel";
 import { RegionList, RegionMap } from "./RegionHealthPanel";
 import { RiskTiles } from "./RiskEarlyWarningPanel";
+import { SloTiles } from "./SloStatusPanel";
 import { EventCard } from "./EventCards";
 import { useEventFeed } from "./useEventFeed";
 import { cn } from "@/lib/utils";
@@ -162,22 +163,11 @@ export default function CustomerHealthOverview() {
           </p>
         </Panel>
 
-        <Panel title="SLO Status" subtitle="Your service level objectives">
-          <div className="grid grid-cols-2 gap-3">
-            {slos.map((s) => (
-              <Interactive
-                key={s.id}
-                tooltip="How your service is performing against a commitment we make to you, and how much error budget remains."
-                onClick={() => open(s.contextId)}
-                className="rounded-lg border border-slate-200 px-3 py-2.5"
-              >
-                <div className="text-[11px] text-slate-500">{s.name}</div>
-                <div className="text-[15px] font-semibold text-slate-900">{s.target}</div>
-                <div className={cn("text-[11.5px]", statusStyles[s.status].text)}>{s.current} current</div>
-                <div className="mt-2"><MetricBar value={s.errorBudget} status={s.status} /></div>
-              </Interactive>
-            ))}
-          </div>
+        <Panel title="SLO Status" subtitle="Objectives, attainment and error budget">
+          <SloTiles onOpen={open} />
+          <p className="mt-2.5 text-[10.5px] leading-snug text-slate-500">
+            Error budget is the small amount of imperfect service each objective allows. What you have not used is what remains.
+          </p>
         </Panel>
 
         <Panel title="Recent Changes & Maintenance" subtitle="Upcoming changes that may affect your environment">

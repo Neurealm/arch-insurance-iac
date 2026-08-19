@@ -11,7 +11,6 @@ import { getImpactContext } from "./data";
 import { impactStyles, Sparkline, statusStyles, StatusChip } from "./primitives";
 import { classificationStyles } from "./eventDetail";
 import { riskLevelStyles, trendStyles } from "./RiskEarlyWarningPanel";
-import { sloDetails } from "./sloDetail";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
