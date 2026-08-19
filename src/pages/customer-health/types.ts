@@ -181,6 +181,8 @@ export interface DeploymentCard {
   resources?: string;
   /** Number of active advisories/alerts against this deployment. */
   advisoryCount?: number;
+  /** Freshness of the telemetry behind this card's status. */
+  telemetry?: TelemetryFreshness;
   /** Compact floating summary shown on hover. */
   hover?: {
     overallHealth: string;
