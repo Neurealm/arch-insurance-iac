@@ -4,6 +4,7 @@
 import { kpiContexts, kpiOverlays } from "./kpiDetail";
 import { deploymentDetails } from "./deploymentDetail";
 import { dependencyDetails } from "./dependencyDetail";
+import { regionDetails } from "./regionDetail";
 import { eventDetails } from "./eventDetail";
 import type {
   AlertRule, ChangeRecord, CustomerImpactContext, DependencyRow, DeploymentCard,
@@ -185,11 +186,60 @@ export const events: ServiceEvent[] = [
 
 
 export const regions: RegionRow[] = [
-  { id: "r-east", name: "East US", status: "healthy", note: "Your service", x: 27, y: 40, contextId: "region-east" },
-  { id: "r-central", name: "Central US", status: "healthy", note: "No deployments impacted", x: 23, y: 42, contextId: "region-central" },
-  { id: "r-west", name: "West US 2", status: "degraded", note: "Your service affected", x: 15, y: 38, contextId: "region-west" },
-  { id: "r-eu", name: "North Europe", status: "healthy", note: "No deployments impacted", x: 48, y: 30, contextId: "region-eu" },
-  { id: "r-sea", name: "Southeast Asia", status: "healthy", note: "No deployments", x: 74, y: 58, contextId: "region-sea" },
+  {
+    id: "r-east", name: "East US", status: "healthy", note: "Your service healthy", x: 27, y: 40, contextId: "region-east",
+    geo: "Virginia, US",
+    infraStatus: "healthy", infraLabel: "Healthy",
+    serviceStatus: "healthy", serviceLabel: "Healthy",
+    hasDeployment: true, deploymentCount: 2, deploymentSummary: "Production + Staging", nodes: 16,
+    activeEvents: 0, activeEventSummary: "No active events",
+    exposure: "46% of your traffic", potentialImpact: "None",
+  },
+  {
+    id: "r-central", name: "Central US", status: "healthy", note: "DR standby healthy", x: 22, y: 43, contextId: "region-central",
+    geo: "Iowa, US",
+    infraStatus: "healthy", infraLabel: "Healthy",
+    serviceStatus: "healthy", serviceLabel: "Healthy",
+    hasDeployment: true, deploymentCount: 1, deploymentSummary: "DR warm standby", nodes: 6,
+    activeEvents: 0, activeEventSummary: "No active events",
+    exposure: "Standby only", potentialImpact: "None",
+  },
+  {
+    id: "r-west", name: "West US 2", status: "degraded", note: "Azure degraded · your service healthy", x: 14, y: 37, contextId: "region-west",
+    geo: "Quincy, WA, US",
+    infraStatus: "degraded", infraLabel: "Degraded",
+    serviceStatus: "healthy", serviceLabel: "Healthy",
+    hasDeployment: true, deploymentCount: 1, deploymentSummary: "Production", nodes: 8,
+    activeEvents: 1, activeEventSummary: "1 active advisory (storage latency)",
+    exposure: "22% of your traffic", potentialImpact: "Low",
+  },
+  {
+    id: "r-eu", name: "North Europe", status: "healthy", note: "Your service healthy", x: 46, y: 27, contextId: "region-eu",
+    geo: "Dublin, Ireland",
+    infraStatus: "healthy", infraLabel: "Healthy",
+    serviceStatus: "healthy", serviceLabel: "Healthy",
+    hasDeployment: true, deploymentCount: 1, deploymentSummary: "Production", nodes: 9,
+    activeEvents: 0, activeEventSummary: "Maintenance scheduled Jun 7",
+    exposure: "26% of your traffic", potentialImpact: "None",
+  },
+  {
+    id: "r-uk", name: "UK South", status: "advisory", note: "No customer deployment in this region", x: 47, y: 31, contextId: "region-uk",
+    geo: "London, UK",
+    infraStatus: "advisory", infraLabel: "Advisory",
+    serviceStatus: "healthy", serviceLabel: "Not applicable",
+    hasDeployment: false, deploymentCount: 0, deploymentSummary: "No customer deployment in this region", nodes: 0,
+    activeEvents: 1, activeEventSummary: "1 provider advisory (provisioning)",
+    exposure: "None", potentialImpact: "None",
+  },
+  {
+    id: "r-sea", name: "Southeast Asia", status: "healthy", note: "No customer deployment in this region", x: 74, y: 58, contextId: "region-sea",
+    geo: "Singapore",
+    infraStatus: "healthy", infraLabel: "Healthy",
+    serviceStatus: "healthy", serviceLabel: "Not applicable",
+    hasDeployment: false, deploymentCount: 0, deploymentSummary: "No customer deployment in this region", nodes: 0,
+    activeEvents: 0, activeEventSummary: "No active events",
+    exposure: "Edge reads only", potentialImpact: "None",
+  },
 ];
 
 export const slos: SloRow[] = [
@@ -690,6 +740,18 @@ export const impactContexts: Record<string, CustomerImpactContext> = {
     timeline: [{ stage: "Latest observation", at: "40s ago", note: "Region healthy." }],
     technical: [{ label: "Data residency", value: "EU only" }],
   },
+  "region-uk": {
+    id: "region-uk", title: "UK South", subtitle: "No customer deployment in this region",
+    infrastructureStatus: "advisory", infrastructureNote: "Provider advisory open for resource provisioning delays.",
+    impact: "NO CURRENT IMPACT",
+    whatIsHappening: "Azure has an open advisory for slower resource provisioning in UK South. You have no footprint in this region.",
+    affected: [{ label: "No customer deployment in this region", detail: "Shown for regional awareness only", status: "healthy" }],
+    signals: [{ label: "Your footprint", value: "None", interpretation: "Nothing you run depends on this region.", status: "healthy" }],
+    whatIsBeingDone: ["Tracked for expansion planning only"],
+    customerAction: noAction, noActionRequired: true,
+    timeline: [{ stage: "Latest observation", at: "3m ago", note: "Provider advisory still open." }],
+    technical: [{ label: "Footprint", value: "None" }],
+  },
   "region-sea": {
     id: "region-sea", title: "Southeast Asia", subtitle: "No deployments",
     infrastructureStatus: "healthy", infrastructureNote: "Region healthy; you have no footprint here.",
@@ -969,6 +1031,8 @@ export function getImpactContext(id: string): CustomerImpactContext {
   if (deployment) return { ...merged, deployment, title: deployment.headline };
   const dependency = dependencyDetails[base.id];
   if (dependency) return { ...merged, dependency, title: dependency.headline, subtitle: dependency.conditionLabel };
+  const region = regionDetails[base.id];
+  if (region) return { ...merged, region, title: region.headline };
   const event = eventDetails[base.id];
   if (event) return { ...merged, event, title: event.headline, subtitle: `${event.classification} · Next update ${event.nextUpdate}` };
   return merged;
