@@ -8,7 +8,32 @@ export type HealthStatus =
   | "degraded"
   | "at-risk"
   | "incident"
+  /** Customer-visible loss of service. */
+  | "disrupted"
+  /** Telemetry is older than the freshness budget — health cannot be confirmed. */
+  | "stale"
+  /** Telemetry never arrived / object is not reporting. */
+  | "unknown"
+  /** No telemetry exists for this object (e.g. nothing deployed here). */
+  | "no-data"
+  /** Health is being (re)established. */
+  | "loading"
+  /** A previous condition has closed with no remaining impact. */
+  | "resolved"
   | "info";
+
+/**
+ * Freshness of the telemetry behind a health verdict. When `state` is
+ * `"stale"` the UI must NEVER present the object as Healthy; it shows
+ * "Health verification delayed" plus when health was last confirmed.
+ */
+export interface TelemetryFreshness {
+  state: "fresh" | "stale" | "missing";
+  /** Human phrase, e.g. "7 minutes ago". */
+  lastConfirmedHealthy?: string;
+  /** Why verification is delayed, in customer language. */
+  note?: string;
+}
 
 /** Customer-facing impact verdict shown at the top of every drawer. */
 export type ImpactLevel =
@@ -40,6 +65,18 @@ export interface SignalReading {
   status: HealthStatus;
 }
 
+/** The five questions every drawer must answer above the fold. */
+export interface AnswerBand {
+  /** What is true right now. */
+  currentImpact: string;
+  /** What could become true — always probabilistic, never certain. */
+  potentialRisk: string;
+  /** What we / the provider are doing. */
+  providerAction: string;
+  /** What the customer must do (or that nothing is required). */
+  customerAction: string;
+}
+
 export interface TechnicalDetail {
   label: string;
   value: string;
@@ -62,6 +99,10 @@ export interface CustomerImpactContext {
   customerAction: string;
   /** True when the action is simply "No action required". */
   noActionRequired: boolean;
+  /** Optional explicit split of current impact vs. potential risk and actions. */
+  answers?: Partial<AnswerBand>;
+  /** Optional telemetry freshness for this object. */
+  telemetry?: TelemetryFreshness;
   timeline: TimelineEntry[];
   technical: TechnicalDetail[];
   /** Optional headline figures rendered as a compact metric grid in the drawer. */
