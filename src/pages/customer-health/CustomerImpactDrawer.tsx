@@ -6,9 +6,10 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CustomerImpactContext, DependencyDetail, DeploymentDetail } from "./types";
+import type { CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail } from "./types";
 import { getImpactContext } from "./data";
 import { impactStyles, statusStyles, StatusChip } from "./primitives";
+import { classificationStyles } from "./eventDetail";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -134,6 +135,141 @@ function DependencySections({ d, onDrill }: { d: DependencyDetail; onDrill: (id:
             </li>
           ))}
         </ul>
+      </Section>
+    </>
+  );
+}
+
+/* --------------------- event-specific drawer sections --------------------- */
+
+function Grid({ rows }: { rows: { label: string; value: string; status: CustomerImpactContext["infrastructureStatus"] }[] }) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {rows.map((r) => (
+        <div key={r.label} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+          <div className="text-[11px] text-slate-500">{r.label}</div>
+          <div className={cn("text-[13px] font-semibold", statusStyles[r.status].text)}>{r.value}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Expandable({ title, children }: { title: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white">
+      <button
+        type="button" onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between px-3 py-2 text-left text-[12.5px] font-medium text-slate-700"
+      >
+        {title}
+        <ChevronDown className={cn("h-4 w-4 text-slate-400 transition-transform", open && "rotate-180")} />
+      </button>
+      {open && <div className="border-t border-slate-200 px-3 py-2">{children}</div>}
+    </div>
+  );
+}
+
+function EventSections({ e }: { e: EventDetail }) {
+  const cls = classificationStyles[e.classification] ?? classificationStyles.Advisory;
+  return (
+    <>
+      <Section title="Does this affect me?">
+        <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[e.impactVerdict])}>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-semibold", cls.chip)}>{cls.label}</span>
+          </div>
+          <div className="mt-1.5 text-[16px] font-semibold tracking-tight">{e.impactVerdict}</div>
+          <p className="mt-1 text-[11.5px] leading-snug text-slate-600">{cls.blurb}</p>
+        </div>
+      </Section>
+
+      <Section title="Situation">
+        <p className="text-[13px] leading-relaxed text-slate-600">{e.situation}</p>
+      </Section>
+
+      <Section title="Your Environment">
+        <ul className="space-y-2">
+          {e.environment.map((d) => (
+            <li key={d.name} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <span className="flex items-center gap-2 text-[12.5px] font-medium text-slate-900">
+                <span className={cn("h-2 w-2 shrink-0 rounded-full", statusStyles[d.status].dot)} aria-hidden />
+                {d.name}
+              </span>
+              <span className="text-[11.5px] text-slate-500">
+                <span className={d.exposure === "Exposed" ? "font-medium text-amber-600" : "text-slate-500"}>{d.exposure}</span>
+                {" · "}
+                <span className={statusStyles[d.status].text}>{d.health}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Customer Experience"><Grid rows={e.customerExperience} /></Section>
+      <Section title="Infrastructure Condition"><Grid rows={e.infrastructureCondition} /></Section>
+
+      <Section title="Actions Underway">
+        <ul className="space-y-1.5">
+          {e.actionsUnderway.map((a) => (
+            <li key={a.label} className="flex items-center gap-2 text-[12.5px] text-slate-600">
+              <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", a.done ? "bg-emerald-500" : "border border-slate-300 bg-transparent")} aria-hidden />
+              <span className={a.done ? "" : "text-slate-500"}>{a.label}{a.done ? "" : " (in progress)"}</span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Event Timeline">
+        <ol className="space-y-0">
+          {e.eventTimeline.map((t, i) => (
+            <li key={`${t.time}-${i}`} className="flex gap-3">
+              <div className="flex flex-col items-center">
+                <span className="mt-1.5 h-2 w-2 rounded-full bg-sky-400" aria-hidden />
+                {i < e.eventTimeline.length - 1 && <span className="w-px flex-1 bg-slate-200" aria-hidden />}
+              </div>
+              <div className="pb-3">
+                <div className="text-[12px] font-medium tabular-nums text-slate-900">{t.time}</div>
+                <div className="text-[11.5px] text-slate-500">{t.entry}</div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      <Section title="Customer Action">
+        <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3.5 py-3 text-[12.5px] leading-relaxed text-slate-600">
+          {e.customerAction}
+        </div>
+      </Section>
+
+      <Section title="Next Update">
+        <div className="text-[13.5px] font-semibold text-slate-900">{e.nextUpdate}</div>
+      </Section>
+
+      <Section title="More detail">
+        <div className="space-y-2">
+          <Expandable title="Technical details">
+            <dl className="grid gap-x-3 gap-y-1">
+              {e.technical.map((t) => (
+                <div key={t.label} className="flex items-baseline justify-between gap-3 border-b border-slate-100 py-0.5">
+                  <dt className="text-[11px] text-slate-500">{t.label}</dt>
+                  <dd className="text-right text-[11.5px] font-medium text-slate-700">{t.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </Expandable>
+          <Expandable title="Event history">
+            <ul className="space-y-1.5">
+              {e.history.map((h) => (
+                <li key={h.time} className="text-[11.5px] text-slate-600">
+                  <span className="font-medium text-slate-900">{h.time}</span> — {h.entry}
+                </li>
+              ))}
+            </ul>
+          </Expandable>
+        </div>
       </Section>
     </>
   );
@@ -290,14 +426,15 @@ export function CustomerImpactDrawer({
         <div className="flex-1 overflow-y-auto">
           {current.deployment && <DeploymentSections d={current.deployment} onDrill={drill} />}
           {current.dependency && <DependencySections d={current.dependency} onDrill={drill} />}
+          {current.event && <EventSections e={current.event} />}
 
-          {!current.deployment && !current.dependency && (
+          {!current.deployment && !current.dependency && !current.event && (
           <Section title="What is happening?">
             <p className="text-[13px] leading-relaxed text-slate-600">{current.whatIsHappening}</p>
           </Section>
           )}
 
-          {!current.deployment && !current.dependency && (
+          {!current.deployment && !current.dependency && !current.event && (
           <Section title="Does this affect me?">
             <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[current.impact])}>
               <div className="text-[16px] font-semibold tracking-tight">{current.impact}</div>
@@ -309,7 +446,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.dependency && (
+          {!current.dependency && !current.event && (
           <Section title="What of mine is affected?">
             <ul className="space-y-2">
               {current.affected.map((a) => (
@@ -371,7 +508,7 @@ export function CustomerImpactDrawer({
             </Section>
           ))}
 
-          {!current.dependency && (
+          {!current.dependency && !current.event && (
           <Section title="What are we seeing?">
             <ul className="space-y-2">
               {current.signals.map((s) => (
@@ -387,7 +524,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.dependency && (
+          {!current.dependency && !current.event && (
           <Section title="What is being done?">
             <ul className="space-y-1.5">
               {current.whatIsBeingDone.map((w) => (
@@ -400,7 +537,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.deployment && !current.dependency && (
+          {!current.deployment && !current.dependency && !current.event && (
           <Section title="Do I need to do anything?">
             <div
               className={cn(
@@ -418,6 +555,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
+          {!current.event && (
           <Section title="Timeline">
             <ol className="space-y-0">
               {current.timeline.map((t, i) => (
@@ -443,7 +581,9 @@ export function CustomerImpactDrawer({
               ))}
             </ol>
           </Section>
+          )}
 
+          {!current.event && (
           <div className="border-t border-slate-200 px-5 py-3">
             <button
               type="button"
@@ -465,6 +605,7 @@ export function CustomerImpactDrawer({
               </dl>
             )}
           </div>
+          )}
         </div>
 
         <footer className="border-t border-slate-200 px-5 py-3">

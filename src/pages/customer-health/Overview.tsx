@@ -5,10 +5,12 @@ import {
   AlertTriangle, Bell, Box, Cloud, Layers, ShieldCheck, TrendingUp, Wrench, type LucideIcon,
 } from "lucide-react";
 import DependencyHealthPanel from "./DependencyHealthPanel";
+import { EventCard } from "./EventCards";
+import { useEventFeed } from "./useEventFeed";
 import { cn } from "@/lib/utils";
 import { DeploymentCards } from "./DeploymentCardGrid";
 import {
-  availability30d, changes, deployments, events, regions, risks, slos,
+  availability30d, changes, deployments, regions, risks, slos,
 } from "./data";
 import { overviewKpis } from "./kpiDetail";
 import {
@@ -32,7 +34,7 @@ const KPI_TOOLTIPS: Record<string, string> = {
 
 export default function CustomerHealthOverview() {
   const { open } = useImpactDrawer();
-  const activeEvent = events[0];
+  const { active: activeEvents } = useEventFeed();
 
   return (
     <div className="space-y-4">
@@ -103,27 +105,12 @@ export default function CustomerHealthOverview() {
 
       {/* Active event / regional health / availability */}
       <div className="grid gap-4 xl:grid-cols-3">
-        <Panel title="Active Event" subtitle="Events currently open against your services">
-          <Interactive
-            tooltip="An open advisory. Advisories describe an underlying condition we are managing; they do not mean your service is impacted."
-            onClick={() => open(activeEvent.contextId)}
-            className="rounded-lg border border-amber-500/40 bg-amber-500/5 px-3.5 py-3"
-          >
-            <StatusChip status="advisory" label={activeEvent.kind.toUpperCase()} />
-            <div className="mt-2 text-[13.5px] font-semibold text-slate-900">{activeEvent.title}</div>
-            <div className="mt-0.5 text-[11px] text-slate-500">
-              Started {activeEvent.started} · Updated {activeEvent.updated}
-            </div>
-            <p className="mt-2 text-[12px] leading-relaxed text-slate-600">{activeEvent.summary}</p>
-            <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-slate-200 pt-2.5 text-[11px]">
-              <div><dt className="text-slate-500">Impact to you</dt><dd className="text-emerald-600">{activeEvent.impactToYou}</dd></div>
-              <div><dt className="text-slate-500">Affected deployment</dt><dd className="text-slate-700">{activeEvent.affectedDeployment}</dd></div>
-              <div><dt className="text-slate-500">Affected dependency</dt><dd className="text-slate-700">{activeEvent.affectedDependency}</dd></div>
-              <div><dt className="text-slate-500">Our response</dt><dd className="text-slate-700">{activeEvent.response}</dd></div>
-              <div><dt className="text-slate-500">Provider reference</dt><dd className="font-mono text-slate-700">{activeEvent.providerReference}</dd></div>
-              <div><dt className="text-slate-500">Next update</dt><dd className="text-slate-700">{activeEvent.nextUpdate}</dd></div>
-            </dl>
-          </Interactive>
+        <Panel title="Active Events" subtitle="Ranked by customer impact — highest impact first">
+          <div className="space-y-3">
+            {activeEvents.slice(0, 2).map((e) => (
+              <EventCard key={e.id} e={e} compact />
+            ))}
+          </div>
         </Panel>
 
         <Panel title="Regional Health" subtitle="Health of cloud regions relevant to your services">

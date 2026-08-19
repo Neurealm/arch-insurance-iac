@@ -72,6 +72,8 @@ export interface CustomerImpactContext {
   deployment?: DeploymentDetail;
   /** Optional supporting-dependency decomposition. */
   dependency?: DependencyDetail;
+  /** Optional event decomposition. */
+  event?: EventDetail;
 }
 
 /** Compact figure rendered in the drawer's metric grid. */
@@ -219,9 +221,25 @@ export interface DependencyDetail {
   response: string[];
 }
 
+export type EventClassification = "Information" | "Advisory" | "Degradation" | "Incident";
+
+/** Ranking inputs — customer impact leads, infrastructure severity is last. */
+export interface EventRanking {
+  /** Impact users are experiencing right now, 0 (none) to 3 (full outage). */
+  actualImpact: 0 | 1 | 2 | 3;
+  /** Impact that could reach users if the condition worsens, 0 to 3. */
+  potentialImpact: 0 | 1 | 2 | 3;
+  /** How many of the customer's deployments are exposed. */
+  exposedDeployments: number;
+  /** Duration in minutes. */
+  durationMinutes: number;
+  /** Underlying infrastructure severity, 0 to 3 — lowest ranking weight. */
+  infrastructureSeverity: 0 | 1 | 2 | 3;
+}
+
 export interface ServiceEvent {
   id: string;
-  kind: "Advisory" | "Incident" | "Maintenance" | "Information";
+  kind: EventClassification | "Maintenance";
   title: string;
   started: string;
   updated: string;
@@ -234,6 +252,27 @@ export interface ServiceEvent {
   nextUpdate: string;
   status: HealthStatus;
   contextId: string;
+  ranking?: EventRanking;
+  customerImpact?: string;
+  responseStatus?: string;
+  active?: boolean;
+}
+
+/** Specialised event drawer payload. */
+export interface EventDetail {
+  headline: string;
+  classification: EventClassification | "Maintenance";
+  impactVerdict: ImpactLevel;
+  situation: string;
+  environment: { name: string; exposure: "Exposed" | "Not exposed"; health: string; status: HealthStatus }[];
+  customerExperience: { label: string; value: string; status: HealthStatus }[];
+  infrastructureCondition: { label: string; value: string; status: HealthStatus }[];
+  actionsUnderway: { label: string; done: boolean }[];
+  eventTimeline: { time: string; entry: string }[];
+  customerAction: string;
+  nextUpdate: string;
+  technical: { label: string; value: string }[];
+  history: { time: string; entry: string }[];
 }
 
 export interface RegionRow {
