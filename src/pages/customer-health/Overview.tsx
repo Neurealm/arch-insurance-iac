@@ -2,7 +2,7 @@
 // is anything happening underneath that affects me?"
 
 import {
-  AlertTriangle, Bell, Box, Cloud, Layers, ShieldCheck, TrendingUp, Wrench, type LucideIcon,
+  AlertTriangle, Bell, Box, Cloud, Layers, ShieldCheck, TrendingUp, type LucideIcon,
 } from "lucide-react";
 import DependencyHealthPanel from "./DependencyHealthPanel";
 import { RegionList, RegionMap } from "./RegionHealthPanel";
@@ -14,7 +14,7 @@ import { useEventFeed } from "./useEventFeed";
 import { cn } from "@/lib/utils";
 import { DeploymentCards } from "./DeploymentCardGrid";
 import {
-  availability30d, changes, deployments, risks, slos,
+  availability30d, deployments, risks, slos,
 } from "./data";
 import { overviewKpis } from "./kpiDetail";
 import {
