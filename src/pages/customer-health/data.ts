@@ -23,10 +23,10 @@ export const tenant = {
 export const kpis: KpiTile[] = [
   { id: "k-health", label: "Overall Health", value: "Healthy", caption: "No impact to your services", status: "healthy", icon: "shield", contextId: "overall-health" },
   { id: "k-services", label: "Services", value: "6 / 6", caption: "All services healthy", status: "healthy", icon: "layers", contextId: "services" },
-  { id: "k-deploy", label: "Deployments", value: "8", caption: "Across 3 regions", status: "info", icon: "box", contextId: "deployments" },
+  { id: "k-deploy", label: "Deployments", value: "5", caption: "Across 4 Azure regions", status: "info", icon: "box", contextId: "deployments" },
   { id: "k-avail", label: "Availability (24h)", value: "99.997%", caption: "Above your 99.99% target", status: "healthy", icon: "trend", contextId: "availability-24h" },
-  { id: "k-events", label: "Active Events", value: "1 Advisory", caption: "0 Incidents", status: "advisory", icon: "bell", contextId: "evt-blob-latency" },
-  { id: "k-risk", label: "At Risk", value: "1", caption: "Deployment", status: "at-risk", icon: "warning", contextId: "risk-storage" },
+  { id: "k-events", label: "Active Events", value: "4 Active", caption: "1 incident recovering · 2 advisories", status: "advisory", icon: "bell", contextId: "evt-blob-latency" },
+  { id: "k-risk", label: "At Risk", value: "2", caption: "Deployments carrying a risk signal", status: "at-risk", icon: "warning", contextId: "risk-storage" },
   { id: "k-azure", label: "Azure Dependencies", value: "17 / 18", caption: "Healthy", status: "info", icon: "cloud", contextId: "azure-dependencies" },
 ];
 
