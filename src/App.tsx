@@ -1021,6 +1021,18 @@ const App = () => (
             <Route path="settings" element={<CustomerHealthSettings />} />
           </Route>
 
+          <Route path="/direct-commerce" element={<DcfLayout />}>
+            <Route index element={<DcfOverview />} />
+            <Route path="orders" element={<DcfOrders />} />
+            <Route path="entitlements" element={<DcfEntitlements />} />
+            <Route path="lifter-fulfillment" element={<DcfLifterFulfillment />} />
+            <Route path="provisioning" element={<DcfProvisioning />} />
+            <Route path="reconciliation" element={<DcfReconciliation />} />
+            <Route path="timeline" element={<DcfCustomerTimeline />} />
+            <Route path="catalog" element={<DcfCatalog />} />
+            <Route path="integrations" element={<DcfIntegrations />} />
+          </Route>
+
           <Route element={<SreLayout />}>
 
             <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
