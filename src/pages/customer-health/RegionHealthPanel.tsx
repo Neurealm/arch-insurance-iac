@@ -134,11 +134,7 @@ export function RegionList({ limit, dense = false }: { limit?: number; dense?: b
                 {r.hasDeployment ? r.activeEventSummary : "No customer deployment in this region"}
               </p>
             </button>
-            {hover === r.id && (
-              <div className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 w-60 -translate-x-1/2">
-                <HoverCard r={r} />
-              </div>
-            )}
+            {hover === r.id && <HoverCard r={r} />}
           </li>
         );
       })}

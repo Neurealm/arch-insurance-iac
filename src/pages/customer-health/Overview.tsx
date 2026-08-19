@@ -113,40 +113,11 @@ export default function CustomerHealthOverview() {
           </div>
         </Panel>
 
-        <Panel title="Regional Health" subtitle="Health of cloud regions relevant to your services">
-          <div className="relative mb-3 h-32 overflow-hidden rounded-lg border border-slate-200 bg-white">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(56,189,248,0.10),transparent_60%)]" aria-hidden />
-            {regions.map((r) => (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => open(r.contextId)}
-                aria-label={`${r.name} region health`}
-                title={`${r.name} — ${r.note}`}
-                className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full p-1 transition-transform duration-200 hover:scale-125"
-                style={{ left: `${r.x}%`, top: `${r.y}%` }}
-              >
-                <span className={cn("block h-2.5 w-2.5 rounded-full ring-4 ring-slate-200", statusStyles[r.status].dot)} />
-              </button>
-            ))}
+        <Panel title="Regional Health" subtitle="Azure infrastructure health vs. your service health, per region">
+          <RegionMap height="h-40" />
+          <div className="mt-3">
+            <RegionList limit={4} dense />
           </div>
-          <ul className="space-y-1.5">
-            {regions.slice(0, 4).map((r) => (
-              <li key={r.id}>
-                <Interactive
-                  tooltip="Whether this cloud region is healthy, and whether anything you run there is affected."
-                  onClick={() => open(r.contextId)}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2"
-                >
-                  <span className="text-[12.5px] text-slate-700">{r.name}</span>
-                  <span className="text-right">
-                    <span className={cn("text-[12px] font-medium", statusStyles[r.status].text)}>{statusStyles[r.status].label}</span>
-                    <span className="block text-[10.5px] text-slate-500">{r.note}</span>
-                  </span>
-                </Interactive>
-              </li>
-            ))}
-          </ul>
         </Panel>
 
         <Panel title="Availability (30 Days)" subtitle="Your service availability over time">
