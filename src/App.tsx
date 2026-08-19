@@ -461,6 +461,16 @@ import DiscoveryConfidenceDemo from "./pages/crm-demo/DiscoveryConfidenceDemo.ts
 import PublicQuestionnaire from "./pages/PublicQuestionnaire.tsx";
 import RunOpsLayout from "./runops/shell/RunOpsLayout.tsx";
 import SreLayout from "./pages/prod-twin/SreLayout.tsx";
+const CustomerHealthLayout = lazy(() => import("./pages/customer-health/CustomerHealthLayout.tsx"));
+const CustomerHealthOverview = lazy(() => import("./pages/customer-health/Overview.tsx"));
+const CustomerHealthDeployments = lazy(() => import("./pages/customer-health/Deployments.tsx"));
+const CustomerHealthEvents = lazy(() => import("./pages/customer-health/Events.tsx"));
+const CustomerHealthRegions = lazy(() => import("./pages/customer-health/Regions.tsx"));
+const CustomerHealthDependencies = lazy(() => import("./pages/customer-health/Dependencies.tsx"));
+const CustomerHealthSlos = lazy(() => import("./pages/customer-health/Slos.tsx"));
+const CustomerHealthReports = lazy(() => import("./pages/customer-health/Reports.tsx"));
+const CustomerHealthAlerts = lazy(() => import("./pages/customer-health/Alerts.tsx"));
+const CustomerHealthSettings = lazy(() => import("./pages/customer-health/Settings.tsx"));
 import NocLayout from "./pages/agentic-sre-noc/NocLayout.tsx";
 import NocPage from "./pages/agentic-sre-noc/NocPage.tsx";
 import GlobalOpticalOperationsCenter from "./pages/agentic-sre-noc/GlobalOpticalOperationsCenter.tsx";
@@ -999,7 +1009,20 @@ const App = () => (
 
 
 
+          <Route path="/customer-health" element={<CustomerHealthLayout />}>
+            <Route index element={<CustomerHealthOverview />} />
+            <Route path="deployments" element={<CustomerHealthDeployments />} />
+            <Route path="events" element={<CustomerHealthEvents />} />
+            <Route path="regions" element={<CustomerHealthRegions />} />
+            <Route path="dependencies" element={<CustomerHealthDependencies />} />
+            <Route path="slos" element={<CustomerHealthSlos />} />
+            <Route path="reports" element={<CustomerHealthReports />} />
+            <Route path="alerts" element={<CustomerHealthAlerts />} />
+            <Route path="settings" element={<CustomerHealthSettings />} />
+          </Route>
+
           <Route element={<SreLayout />}>
+
             <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
             <Route path="/product-line-map" element={<ProductLineMap />} />
             <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
