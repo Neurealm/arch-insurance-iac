@@ -68,6 +68,8 @@ export interface CustomerImpactContext {
   metrics?: DetailMetric[];
   /** Optional structured decomposition (services, deployments, dependencies…). */
   groups?: DetailGroup[];
+  /** Optional deployment-specific decomposition (customer-first deployment view). */
+  deployment?: DeploymentDetail;
 }
 
 /** Compact figure rendered in the drawer's metric grid. */
@@ -120,6 +122,64 @@ export interface DeploymentCard {
   alerts: string;
   spark: number[];
   contextId: string;
+  /** Environment classification shown on the card (Production / DR / Non-production). */
+  environment?: string;
+  /** Human description of the resource footprint, e.g. "8 nodes · 46 resources". */
+  resources?: string;
+  /** Number of active advisories/alerts against this deployment. */
+  advisoryCount?: number;
+  /** Compact floating summary shown on hover. */
+  hover?: {
+    overallHealth: string;
+    customerImpact: string;
+    availability: string;
+    infrastructureRisk: string;
+    advisories: string;
+    lastHealthChange: string;
+  };
+}
+
+/** One clickable supporting-infrastructure layer inside a deployment drawer. */
+export interface InfraLayerRef {
+  label: string;
+  status: HealthStatus;
+  note: string;
+  contextId: string;
+}
+
+/** A node in the compact deployment dependency tree. */
+export interface DependencyTreeNode {
+  id: string;
+  label: string;
+  depth: number;
+  status: HealthStatus;
+  note: string;
+  contextId: string;
+}
+
+/** Deployment-specific drawer payload rendered above the generic sections. */
+export interface DeploymentDetail {
+  headline: string;
+  service: {
+    health: HealthStatus;
+    healthLabel: string;
+    availability: string;
+    customerImpact: string;
+    sloStatus: string;
+    sloStatusLevel: HealthStatus;
+  };
+  infrastructure: InfraLayerRef[];
+  impact: {
+    statement: string;
+    current: string;
+    potential: string;
+    functionality: string;
+    action: string;
+    level: ImpactLevel;
+  };
+  seeing: string;
+  doing: string;
+  tree: DependencyTreeNode[];
 }
 
 export interface DependencyRow {
