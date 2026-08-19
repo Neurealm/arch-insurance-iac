@@ -244,15 +244,13 @@ export const regions: RegionRow[] = [
   },
 ];
 
+import { changeDetails, changeRows } from "./changeDetail";
+
 export const slos: SloRow[] = sloRows;
 
 export const risks: RiskSignal[] = riskSignals;
 
-export const changes: ChangeRecord[] = [
-  { id: "chg-az", title: "Azure Maintenance – West US 2", window: "Jun 6, 02:00 – 06:00 AM PT", potentialImpact: "Low", kind: "Provider maintenance", contextId: "chg-azure-westus2" },
-  { id: "chg-plat", title: "Platform Update – Orchestration Service", window: "Jun 7, 10:00 – 11:00 AM PT", potentialImpact: "None", kind: "Platform update", contextId: "chg-platform-update" },
-  { id: "chg-dr", title: "DR readiness verification – Central US", window: "Jun 9, 01:00 – 03:00 AM PT", potentialImpact: "None", kind: "Platform update", contextId: "chg-dr-verification" },
-];
+export const changes: ChangeRecord[] = changeRows;
 
 export const availability30d = [
   99.99, 100, 99.998, 99.995, 100, 99.999, 99.997, 100, 99.994, 99.999, 100, 99.998,
@@ -1063,6 +1061,8 @@ export function getImpactContext(id: string): CustomerImpactContext {
   if (region) return { ...merged, region, title: region.headline };
   const slo = sloDetails[base.id];
   if (slo) return { ...merged, slo, title: `${slo.headline} – ${slo.statusLabel}`, subtitle: `Target ${slo.target} · current ${slo.current}` };
+  const change = changeDetails[base.id];
+  if (change) return { ...merged, change, title: change.headline, subtitle: `${change.kind} · ${change.window}` };
   const risk = riskDetails[base.id];
   if (risk) return { ...merged, risk, title: `${risk.headline} – ${risk.level}`, subtitle: "Forward-looking risk signal — separate from current health" };
   const event = eventDetails[base.id];
