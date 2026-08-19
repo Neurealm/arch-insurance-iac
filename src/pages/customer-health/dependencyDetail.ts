@@ -24,7 +24,7 @@ export const dependencyDetails: Record<string, DependencyDetail> = {
     conditionLabel: "Degraded underlying dependency",
     conditionStatus: "degraded",
     impactVerdict: "NO CURRENT SERVICE IMPACT",
-    impactLevel: "No impact",
+    impactLevel: "NO CURRENT IMPACT",
     affectedDeployments: [
       { name: "Production, West US 2", note: "Reads served normally; retries absorbed by the platform", status: "degraded" },
     ],
@@ -64,7 +64,7 @@ export const dependencyDetails: Record<string, DependencyDetail> = {
     conditionLabel: "Healthy underlying dependency",
     conditionStatus: "healthy",
     impactVerdict: "NO CURRENT SERVICE IMPACT",
-    impactLevel: "No impact",
+    impactLevel: "NO CURRENT IMPACT",
     affectedDeployments: [
       { name: "Production, East US", note: "All capacity healthy", status: "healthy" },
       { name: "Production, West US 2", note: "All capacity healthy", status: "healthy" },
@@ -105,7 +105,7 @@ export const dependencyDetails: Record<string, DependencyDetail> = {
     conditionLabel: "Healthy underlying dependency",
     conditionStatus: "healthy",
     impactVerdict: "NO CURRENT SERVICE IMPACT",
-    impactLevel: "No impact",
+    impactLevel: "NO CURRENT IMPACT",
     affectedDeployments: [
       { name: "Production, West US 2", note: "Connectivity healthy on all paths", status: "healthy" },
     ],
@@ -145,7 +145,7 @@ export const dependencyDetails: Record<string, DependencyDetail> = {
     conditionLabel: "One platform dependency degraded",
     conditionStatus: "degraded",
     impactVerdict: "NO CURRENT SERVICE IMPACT",
-    impactLevel: "No impact",
+    impactLevel: "NO CURRENT IMPACT",
     affectedDeployments: [
       { name: "Production, West US 2", note: "Blob Storage advisory absorbed by retry and caching", status: "degraded" },
     ],
@@ -185,7 +185,7 @@ export const dependencyDetails: Record<string, DependencyDetail> = {
     conditionLabel: "Regional condition being tracked",
     conditionStatus: "at-risk",
     impactVerdict: "NO CURRENT SERVICE IMPACT",
-    impactLevel: "No impact",
+    impactLevel: "NO CURRENT IMPACT",
     affectedDeployments: [
       { name: "Production, West US 2", note: "Running in-region; failover target verified", status: "at-risk" },
       { name: "DR, Central US", note: "Standby ready, no failover initiated", status: "healthy" },
@@ -226,7 +226,7 @@ export const dependencyDetails: Record<string, DependencyDetail> = {
     conditionLabel: "Healthy control and orchestration layer",
     conditionStatus: "healthy",
     impactVerdict: "NO CURRENT SERVICE IMPACT",
-    impactLevel: "No impact",
+    impactLevel: "NO CURRENT IMPACT",
     affectedDeployments: [
       { name: "All deployments", note: "Routing, scaling and orchestration healthy", status: "healthy" },
     ],
@@ -266,7 +266,7 @@ export const dependencyDetails: Record<string, DependencyDetail> = {
     conditionLabel: "Operating normally",
     conditionStatus: "healthy",
     impactVerdict: "NO CURRENT SERVICE IMPACT",
-    impactLevel: "No impact",
+    impactLevel: "NO CURRENT IMPACT",
     affectedDeployments: [
       { name: "Production, East US", note: "Healthy · 99.99% availability", status: "healthy" },
       { name: "Production, West US 2", note: "Healthy · supported by a degraded storage dependency", status: "healthy" },
