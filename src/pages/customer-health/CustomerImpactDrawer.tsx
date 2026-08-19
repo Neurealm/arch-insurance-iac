@@ -555,6 +555,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
+          {!current.event && (
           <Section title="Timeline">
             <ol className="space-y-0">
               {current.timeline.map((t, i) => (
@@ -580,7 +581,9 @@ export function CustomerImpactDrawer({
               ))}
             </ol>
           </Section>
+          )}
 
+          {!current.event && (
           <div className="border-t border-slate-200 px-5 py-3">
             <button
               type="button"
@@ -602,6 +605,7 @@ export function CustomerImpactDrawer({
               </dl>
             )}
           </div>
+          )}
         </div>
 
         <footer className="border-t border-slate-200 px-5 py-3">
