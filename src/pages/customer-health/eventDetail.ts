@@ -213,18 +213,18 @@ export const eventDetails: Record<string, EventDetail> = {
     situation:
       "Some users in EU North were unable to sign in due to an identity provider fault. Authentication has been failed over to a secondary path and sign-ins are recovering. Sessions already established were not affected.",
     environment: [
-      { name: "Production, EU North", exposure: "Exposed", health: "Impaired", status: "unhealthy" },
+      { name: "Production, EU North", exposure: "Exposed", health: "Impaired", status: "incident" },
       { name: "Production, East US", exposure: "Not exposed", health: "Healthy", status: "healthy" },
       { name: "Production, West US 2", exposure: "Not exposed", health: "Healthy", status: "healthy" },
     ],
     customerExperience: [
-      { label: "Availability", value: "Impaired for new sign-ins", status: "unhealthy" },
+      { label: "Availability", value: "Impaired for new sign-ins", status: "incident" },
       { label: "Service responsiveness", value: "Normal", status: "healthy" },
       { label: "Data access", value: "Normal", status: "healthy" },
       { label: "Connectivity", value: "Normal", status: "healthy" },
     ],
     infrastructureCondition: [
-      { label: "Identity provider", value: "Faulted", status: "unhealthy" },
+      { label: "Identity provider", value: "Faulted", status: "incident" },
       { label: "Token issuance", value: "Recovering", status: "degraded" },
       { label: "Storage latency", value: "Normal", status: "healthy" },
       { label: "Network", value: "Normal", status: "healthy" },
