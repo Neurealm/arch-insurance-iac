@@ -44,14 +44,14 @@ export default function CustomerHealthOverview() {
               tooltip={KPI_TOOLTIPS[k.id]}
               onClick={() => open(k.contextId)}
               ariaLabel={`${k.label}: ${k.value}`}
-              className="rounded-xl border border-slate-800/80 bg-slate-900/60 px-3.5 py-3"
+              className="rounded-xl border border-slate-200 bg-white px-3.5 py-3"
             >
               <div className="flex items-start gap-3">
                 <div className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-lg border", s.chip)}>
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[11px] text-slate-400">{k.label}</div>
+                  <div className="text-[11px] text-slate-500">{k.label}</div>
                   <div className={cn("truncate text-[17px] font-semibold leading-tight", s.text)}>{k.value}</div>
                   <div className="truncate text-[11px] text-slate-500">{k.caption}</div>
                 </div>
@@ -72,20 +72,20 @@ export default function CustomerHealthOverview() {
                   key={d.id}
                   tooltip={`What this deployment of yours is doing right now, and whether anything underneath it puts your users at risk.`}
                   onClick={() => open(d.contextId)}
-                  className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/70"
+                  className="overflow-hidden rounded-xl border border-slate-200 bg-white"
                 >
                   <div className={cn("flex items-center gap-2 border-b px-3 py-2", s.chip)}>
                     <StatusDot status={d.status} />
                     <span className="text-[12px] font-medium">{s.label}</span>
                   </div>
                   <div className="px-3 py-3">
-                    <div className="text-[13.5px] font-semibold text-slate-100">{d.name}</div>
-                    <div className="mt-0.5 text-[11.5px] text-slate-400">{d.region}</div>
-                    <div className="text-[11.5px] text-slate-400">{d.nodes} Nodes</div>
-                    <div className="text-[11.5px] text-slate-400">{d.tier}</div>
-                    <div className="mt-2.5 flex items-end justify-between gap-2 border-t border-slate-800 pt-2.5">
+                    <div className="text-[13.5px] font-semibold text-slate-900">{d.name}</div>
+                    <div className="mt-0.5 text-[11.5px] text-slate-500">{d.region}</div>
+                    <div className="text-[11.5px] text-slate-500">{d.nodes} Nodes</div>
+                    <div className="text-[11.5px] text-slate-500">{d.tier}</div>
+                    <div className="mt-2.5 flex items-end justify-between gap-2 border-t border-slate-200 pt-2.5">
                       <div>
-                        <div className="text-[16px] font-semibold text-slate-100">{d.availability}</div>
+                        <div className="text-[16px] font-semibold text-slate-900">{d.availability}</div>
                         <div className="text-[10.5px] text-slate-500">Availability (24h)</div>
                       </div>
                       <div className="w-24"><Sparkline points={d.spark} status={d.status} /></div>
@@ -99,7 +99,7 @@ export default function CustomerHealthOverview() {
         </Panel>
 
         <Panel title="Service Dependency Health" subtitle="Health across layers that support your services">
-          <ul className="divide-y divide-slate-800/80">
+          <ul className="divide-y divide-slate-200">
             {dependencies.map((row) => (
               <li key={row.id}>
                 <Interactive
@@ -107,9 +107,9 @@ export default function CustomerHealthOverview() {
                   onClick={() => open(row.contextId)}
                   className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-lg border border-transparent px-2.5 py-2.5 sm:grid-cols-[180px_120px_1fr]"
                 >
-                  <span className="text-[12.5px] font-medium text-slate-100">{row.layer}</span>
+                  <span className="text-[12.5px] font-medium text-slate-900">{row.layer}</span>
                   <StatusChip status={row.status} />
-                  <span className="hidden text-[11.5px] text-slate-400 sm:block">{row.description}</span>
+                  <span className="hidden text-[11.5px] text-slate-500 sm:block">{row.description}</span>
                 </Interactive>
               </li>
             ))}
@@ -126,24 +126,24 @@ export default function CustomerHealthOverview() {
             className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-3.5 py-3"
           >
             <StatusChip status="advisory" label={activeEvent.kind.toUpperCase()} />
-            <div className="mt-2 text-[13.5px] font-semibold text-slate-100">{activeEvent.title}</div>
+            <div className="mt-2 text-[13.5px] font-semibold text-slate-900">{activeEvent.title}</div>
             <div className="mt-0.5 text-[11px] text-slate-500">
               Started {activeEvent.started} · Updated {activeEvent.updated}
             </div>
-            <p className="mt-2 text-[12px] leading-relaxed text-slate-300">{activeEvent.summary}</p>
-            <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-slate-800 pt-2.5 text-[11px]">
+            <p className="mt-2 text-[12px] leading-relaxed text-slate-600">{activeEvent.summary}</p>
+            <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-slate-200 pt-2.5 text-[11px]">
               <div><dt className="text-slate-500">Impact to you</dt><dd className="text-emerald-400">{activeEvent.impactToYou}</dd></div>
-              <div><dt className="text-slate-500">Affected deployment</dt><dd className="text-slate-200">{activeEvent.affectedDeployment}</dd></div>
-              <div><dt className="text-slate-500">Affected dependency</dt><dd className="text-slate-200">{activeEvent.affectedDependency}</dd></div>
-              <div><dt className="text-slate-500">Our response</dt><dd className="text-slate-200">{activeEvent.response}</dd></div>
-              <div><dt className="text-slate-500">Provider reference</dt><dd className="font-mono text-slate-200">{activeEvent.providerReference}</dd></div>
-              <div><dt className="text-slate-500">Next update</dt><dd className="text-slate-200">{activeEvent.nextUpdate}</dd></div>
+              <div><dt className="text-slate-500">Affected deployment</dt><dd className="text-slate-700">{activeEvent.affectedDeployment}</dd></div>
+              <div><dt className="text-slate-500">Affected dependency</dt><dd className="text-slate-700">{activeEvent.affectedDependency}</dd></div>
+              <div><dt className="text-slate-500">Our response</dt><dd className="text-slate-700">{activeEvent.response}</dd></div>
+              <div><dt className="text-slate-500">Provider reference</dt><dd className="font-mono text-slate-700">{activeEvent.providerReference}</dd></div>
+              <div><dt className="text-slate-500">Next update</dt><dd className="text-slate-700">{activeEvent.nextUpdate}</dd></div>
             </dl>
           </Interactive>
         </Panel>
 
         <Panel title="Regional Health" subtitle="Health of cloud regions relevant to your services">
-          <div className="relative mb-3 h-32 overflow-hidden rounded-lg border border-slate-800 bg-slate-900">
+          <div className="relative mb-3 h-32 overflow-hidden rounded-lg border border-slate-200 bg-white">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(56,189,248,0.10),transparent_60%)]" aria-hidden />
             {regions.map((r) => (
               <button
@@ -155,7 +155,7 @@ export default function CustomerHealthOverview() {
                 className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full p-1 transition-transform duration-200 hover:scale-125"
                 style={{ left: `${r.x}%`, top: `${r.y}%` }}
               >
-                <span className={cn("block h-2.5 w-2.5 rounded-full ring-4 ring-slate-900", statusStyles[r.status].dot)} />
+                <span className={cn("block h-2.5 w-2.5 rounded-full ring-4 ring-slate-200", statusStyles[r.status].dot)} />
               </button>
             ))}
           </div>
@@ -165,9 +165,9 @@ export default function CustomerHealthOverview() {
                 <Interactive
                   tooltip="Whether this cloud region is healthy, and whether anything you run there is affected."
                   onClick={() => open(r.contextId)}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 px-3 py-2"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2"
                 >
-                  <span className="text-[12.5px] text-slate-200">{r.name}</span>
+                  <span className="text-[12.5px] text-slate-700">{r.name}</span>
                   <span className="text-right">
                     <span className={cn("text-[12px] font-medium", statusStyles[r.status].text)}>{statusStyles[r.status].label}</span>
                     <span className="block text-[10.5px] text-slate-500">{r.note}</span>
@@ -182,9 +182,9 @@ export default function CustomerHealthOverview() {
           <Interactive
             tooltip="Daily availability for the last 30 days measured at the customer edge, compared with your contractual target."
             onClick={() => open("slo-availability")}
-            className="rounded-lg border border-slate-800 px-3 py-3"
+            className="rounded-lg border border-slate-200 px-3 py-3"
           >
-            <div className="text-[24px] font-semibold leading-none text-slate-50">99.991%</div>
+            <div className="text-[24px] font-semibold leading-none text-slate-900">99.991%</div>
             <div className="text-[11px] text-slate-500">30-day availability</div>
             <div className="mt-3 flex h-24 items-end gap-[3px]">
               {availability30d.map((v, i) => {
@@ -195,14 +195,14 @@ export default function CustomerHealthOverview() {
             </div>
           </Interactive>
           <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
-            <div className="rounded-lg border border-slate-800 px-2.5 py-2">
-              <div className="text-slate-500">SLO Target</div><div className="text-[13px] text-slate-100">99.99%</div>
+            <div className="rounded-lg border border-slate-200 px-2.5 py-2">
+              <div className="text-slate-500">SLO Target</div><div className="text-[13px] text-slate-900">99.99%</div>
             </div>
-            <div className="rounded-lg border border-slate-800 px-2.5 py-2">
+            <div className="rounded-lg border border-slate-200 px-2.5 py-2">
               <div className="text-slate-500">SLO Status</div><div className="text-[13px] text-emerald-400">Met</div>
             </div>
-            <div className="rounded-lg border border-slate-800 px-2.5 py-2">
-              <div className="text-slate-500">Error Budget</div><div className="text-[13px] text-slate-100">93.4%</div>
+            <div className="rounded-lg border border-slate-200 px-2.5 py-2">
+              <div className="text-slate-500">Error Budget</div><div className="text-[13px] text-slate-900">93.4%</div>
             </div>
           </div>
         </Panel>
@@ -217,7 +217,7 @@ export default function CustomerHealthOverview() {
                 key={r.id}
                 tooltip="A prediction of how likely this area is to affect your users in the near future — not a statement that it already has."
                 onClick={() => open(r.contextId)}
-                className="rounded-lg border border-slate-800 px-3 py-2.5"
+                className="rounded-lg border border-slate-200 px-3 py-2.5"
               >
                 <div className="text-[11px] text-slate-500">{r.label}</div>
                 <div className={cn("text-[14px] font-semibold", statusStyles[r.status].text)}>{r.level}</div>
@@ -235,10 +235,10 @@ export default function CustomerHealthOverview() {
                 key={s.id}
                 tooltip="How your service is performing against a commitment we make to you, and how much error budget remains."
                 onClick={() => open(s.contextId)}
-                className="rounded-lg border border-slate-800 px-3 py-2.5"
+                className="rounded-lg border border-slate-200 px-3 py-2.5"
               >
                 <div className="text-[11px] text-slate-500">{s.name}</div>
-                <div className="text-[15px] font-semibold text-slate-100">{s.target}</div>
+                <div className="text-[15px] font-semibold text-slate-900">{s.target}</div>
                 <div className={cn("text-[11.5px]", statusStyles[s.status].text)}>{s.current} current</div>
                 <div className="mt-2"><MetricBar value={s.errorBudget} status={s.status} /></div>
               </Interactive>
@@ -253,12 +253,12 @@ export default function CustomerHealthOverview() {
                 <Interactive
                   tooltip="A planned change in your environment or at the cloud provider, with our assessment of what it could mean for you."
                   onClick={() => open(c.contextId)}
-                  className="flex items-start justify-between gap-3 rounded-lg border border-slate-800 px-3 py-2.5"
+                  className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2.5"
                 >
                   <span className="flex min-w-0 items-start gap-2.5">
                     <Wrench className="mt-0.5 h-4 w-4 shrink-0 text-sky-400" />
                     <span className="min-w-0">
-                      <span className="block truncate text-[12.5px] text-slate-100">{c.title}</span>
+                      <span className="block truncate text-[12.5px] text-slate-900">{c.title}</span>
                       <span className="block text-[11px] text-slate-500">{c.window}</span>
                     </span>
                   </span>

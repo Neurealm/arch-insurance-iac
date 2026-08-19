@@ -26,9 +26,9 @@ export default function CustomerHealthSettings() {
               { label: "Subscription tier", value: "Enterprise" },
               { label: "Support plan", value: "24×7 with named service manager" },
             ].map((row) => (
-              <div key={row.label} className="flex items-center justify-between gap-4 rounded-lg border border-slate-800 px-3 py-2.5">
-                <dt className="text-[12px] text-slate-400">{row.label}</dt>
-                <dd className="text-[12.5px] text-slate-100">{row.value}</dd>
+              <div key={row.label} className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 px-3 py-2.5">
+                <dt className="text-[12px] text-slate-500">{row.label}</dt>
+                <dd className="text-[12.5px] text-slate-900">{row.value}</dd>
               </div>
             ))}
           </dl>
@@ -36,9 +36,9 @@ export default function CustomerHealthSettings() {
         <Panel title="Preferences" subtitle="Presentation and notification behaviour">
           <dl className="space-y-2">
             {preferences.map((row) => (
-              <div key={row.label} className="flex items-center justify-between gap-4 rounded-lg border border-slate-800 px-3 py-2.5">
-                <dt className="text-[12px] text-slate-400">{row.label}</dt>
-                <dd className="text-right text-[12.5px] text-slate-100">{row.value}</dd>
+              <div key={row.label} className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 px-3 py-2.5">
+                <dt className="text-[12px] text-slate-500">{row.label}</dt>
+                <dd className="text-right text-[12.5px] text-slate-900">{row.value}</dd>
               </div>
             ))}
           </dl>

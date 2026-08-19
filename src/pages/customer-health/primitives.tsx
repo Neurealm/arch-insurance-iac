@@ -67,11 +67,11 @@ export function Panel({
   title, subtitle, action, children, className,
 }: { title: string; subtitle?: string; action?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-xl border border-slate-800/80 bg-slate-900/60 shadow-lg shadow-black/20", className)}>
+    <section className={cn("rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-200/50", className)}>
       <header className="flex items-start justify-between gap-3 px-4 pt-3.5 pb-2.5">
         <div className="min-w-0">
-          <h2 className="text-[14px] font-semibold text-slate-100">{title}</h2>
-          {subtitle && <p className="mt-0.5 text-[11.5px] text-slate-400">{subtitle}</p>}
+          <h2 className="text-[14px] font-semibold text-slate-900">{title}</h2>
+          {subtitle && <p className="mt-0.5 text-[11.5px] text-slate-500">{subtitle}</p>}
         </div>
         {action}
       </header>
@@ -95,7 +95,7 @@ export function Interactive({
         aria-label={ariaLabel}
         className={cn(
           "w-full cursor-pointer text-left transition-all duration-200 ease-out",
-          "hover:-translate-y-[1px] hover:border-slate-600 hover:bg-slate-800/60 hover:shadow-lg hover:shadow-black/30",
+          "hover:-translate-y-[1px] hover:border-slate-300 hover:bg-slate-100 hover:shadow-lg hover:shadow-slate-300/40",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/70",
           className,
         )}
@@ -104,7 +104,7 @@ export function Interactive({
       </button>
       <span
         role="tooltip"
-        className="pointer-events-none absolute left-3 top-full z-40 mt-1 hidden max-w-xs rounded-md border border-slate-700 bg-slate-950/95 px-2.5 py-1.5 text-[11px] leading-snug text-slate-300 shadow-xl group-hover/int:block"
+        className="pointer-events-none absolute left-3 top-full z-40 mt-1 hidden max-w-xs rounded-md border border-slate-300 bg-white/95 px-2.5 py-1.5 text-[11px] leading-snug text-slate-600 shadow-xl group-hover/int:block"
       >
         {tooltip}
       </span>
@@ -128,7 +128,7 @@ export function Sparkline({ points, status, className }: { points: number[]; sta
 
 export function MetricBar({ value, status }: { value: number; status: HealthStatus }) {
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
       <div
         className={cn("h-full rounded-full transition-[width] duration-200", statusStyles[status].dot)}
         style={{ width: `${Math.max(2, Math.min(100, value))}%` }}
@@ -141,8 +141,8 @@ export function PageHeader({ title, subtitle, right }: { title: string; subtitle
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 className="text-[22px] font-semibold tracking-tight text-slate-50">{title}</h1>
-        <p className="mt-0.5 text-[12.5px] text-slate-400">{subtitle}</p>
+        <h1 className="text-[22px] font-semibold tracking-tight text-slate-900">{title}</h1>
+        <p className="mt-0.5 text-[12.5px] text-slate-500">{subtitle}</p>
       </div>
       {right}
     </div>

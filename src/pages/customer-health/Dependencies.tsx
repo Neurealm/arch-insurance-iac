@@ -15,10 +15,10 @@ export default function CustomerHealthDependencies() {
             <Interactive
               tooltip="How this supporting layer is behaving — and whether its condition is reaching your users."
               onClick={() => open(d.contextId)}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3"
             >
-              <span className="min-w-[180px] text-[13.5px] font-semibold text-slate-100">{d.layer}</span>
-              <span className="flex-1 text-[12px] text-slate-400">{d.description}</span>
+              <span className="min-w-[180px] text-[13.5px] font-semibold text-slate-900">{d.layer}</span>
+              <span className="flex-1 text-[12px] text-slate-500">{d.description}</span>
               <StatusChip status={d.status} />
             </Interactive>
           </li>

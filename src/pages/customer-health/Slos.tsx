@@ -16,10 +16,10 @@ export default function CustomerHealthSlos() {
             key={s.id}
             tooltip="How your service is performing against a commitment we make to you, and how much error budget remains."
             onClick={() => open(s.contextId)}
-            className="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3.5"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-3.5"
           >
-            <div className="text-[11.5px] text-slate-400">{s.name}</div>
-            <div className="mt-1 text-[22px] font-semibold leading-none text-slate-50">{s.current}</div>
+            <div className="text-[11.5px] text-slate-500">{s.name}</div>
+            <div className="mt-1 text-[22px] font-semibold leading-none text-slate-900">{s.current}</div>
             <div className="mt-1 text-[11.5px] text-slate-500">Target {s.target}</div>
             <div className={cn("mt-2 text-[12px] font-medium", statusStyles[s.status].text)}>
               {statusStyles[s.status].label} · attainment {s.attainment}%
