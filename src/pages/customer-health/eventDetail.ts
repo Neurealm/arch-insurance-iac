@@ -412,7 +412,7 @@ export const eventDetails: Record<string, EventDetail> = {
   "evt-dns-failover": {
     headline: "Name resolution failures, North Europe (resolved)",
     classification: "Incident",
-    impactVerdict: "RESOLVED",
+    impactVerdict: "NO CURRENT IMPACT",
     situation:
       "On May 28 a platform DNS fault in North Europe prevented some client requests from resolving the service endpoint for 52 minutes. Requests that did resolve continued to succeed. Traffic was moved to a secondary resolver, resolution recovered, and the fault was confirmed resolved by the provider. A written review has been published to your account team.",
     environment: [
