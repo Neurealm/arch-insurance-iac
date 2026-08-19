@@ -159,6 +159,9 @@ function RegionListItem({
                 {r.hasDeployment ? r.activeEventSummary : "No customer deployment in this region"}
               </p>
             </button>
+      <div className="mt-1.5 flex justify-end">
+        <WhyThisMatters objectKey={`region:${r.id}`} align="right" />
+      </div>
       {hover === r.id && <HoverCard r={r} />}
     </li>
   );
