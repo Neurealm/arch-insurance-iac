@@ -2,6 +2,7 @@
 // states: the Azure / infrastructure condition, and the customer's own
 // service health in that region.
 
+import { WhyThisMatters } from "./whyThisMatters";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { regions } from "./data";
