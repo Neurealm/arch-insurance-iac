@@ -5,7 +5,7 @@
 import { cn } from "@/lib/utils";
 import type { DeploymentCard } from "./types";
 import { Sparkline, StatusDot, statusStyles, useImpactDrawer } from "./primitives";
-import { useCorrelation } from "./correlation";
+import { useObjectHighlight } from "./filters";
 
 function HoverSummary({ d }: { d: DeploymentCard }) {
   if (!d.hover) return null;
@@ -40,7 +40,7 @@ function HoverSummary({ d }: { d: DeploymentCard }) {
 
 function DeploymentCardItem({ d }: { d: DeploymentCard }) {
   const { open } = useImpactDrawer();
-  const { bind, className: corrClass } = useCorrelation(`deployment:${d.id}`);
+  const { bind, className: corrClass } = useObjectHighlight(`deployment:${d.id}`);
   const s = statusStyles[d.status];
   const clean = d.status === "healthy";
   return (
