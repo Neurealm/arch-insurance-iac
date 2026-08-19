@@ -89,6 +89,52 @@ export function CustomerImpactDrawer({
             </ul>
           </Section>
 
+          {context.metrics && context.metrics.length > 0 && (
+            <Section title="Key figures">
+              <div className="grid grid-cols-2 gap-2">
+                {context.metrics.map((m) => (
+                  <div key={m.label} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                    <div className="text-[11px] text-slate-500">{m.label}</div>
+                    <div className={cn("text-[14px] font-semibold tabular-nums", m.status ? statusStyles[m.status].text : "text-slate-900")}>{m.value}</div>
+                    {m.caption && <div className="text-[10.5px] leading-snug text-slate-500">{m.caption}</div>}
+                  </div>
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {context.groups?.map((g) => (
+            <Section key={g.title} title={g.title}>
+              {g.caption && <p className="mb-2 text-[11.5px] leading-snug text-slate-500">{g.caption}</p>}
+              <ul className="space-y-2">
+                {g.rows.map((r) => (
+                  <li key={r.label} className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="flex items-center gap-2 text-[12.5px] font-medium text-slate-900">
+                        <span className={cn("h-2 w-2 shrink-0 rounded-full", statusStyles[r.status].dot)} aria-hidden />
+                        {r.label}
+                      </span>
+                      {r.impact && (
+                        <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-semibold", impactStyles[r.impact])}>
+                          {r.impact}
+                        </span>
+                      )}
+                    </div>
+                    {r.note && <p className="mt-1 text-[11.5px] leading-snug text-slate-500">{r.note}</p>}
+                    <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
+                      {r.fields.map((f) => (
+                        <div key={f.label} className="flex items-baseline justify-between gap-2 border-b border-slate-100 py-0.5">
+                          <dt className="text-[11px] text-slate-500">{f.label}</dt>
+                          <dd className={cn("text-right text-[11.5px] font-medium tabular-nums", f.status ? statusStyles[f.status].text : "text-slate-700")}>{f.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          ))}
+
           <Section title="What are we seeing?">
             <ul className="space-y-2">
               {context.signals.map((s) => (

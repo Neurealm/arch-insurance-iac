@@ -1,6 +1,7 @@
 // Realistic mock data for the Customer Health Dashboard. All impact contexts
 // are keyed by id so any object on any page can open the same universal drawer.
 
+import { kpiContexts, kpiOverlays } from "./kpiDetail";
 import type {
   AlertRule, ChangeRecord, CustomerImpactContext, DependencyRow, DeploymentCard,
   KpiTile, RegionRow, ReportItem, RiskSignal, ServiceEvent, SloRow,
@@ -849,5 +850,7 @@ export const impactContexts: Record<string, CustomerImpactContext> = {
 };
 
 export function getImpactContext(id: string): CustomerImpactContext {
-  return impactContexts[id] ?? impactContexts["overall-health"];
+  const base = impactContexts[id] ?? kpiContexts[id] ?? impactContexts["overall-health"];
+  const overlay = kpiOverlays[base.id];
+  return overlay ? { ...base, ...overlay } : base;
 }

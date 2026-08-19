@@ -64,17 +64,50 @@ export interface CustomerImpactContext {
   noActionRequired: boolean;
   timeline: TimelineEntry[];
   technical: TechnicalDetail[];
+  /** Optional headline figures rendered as a compact metric grid in the drawer. */
+  metrics?: DetailMetric[];
+  /** Optional structured decomposition (services, deployments, dependencies…). */
+  groups?: DetailGroup[];
+}
+
+/** Compact figure rendered in the drawer's metric grid. */
+export interface DetailMetric {
+  label: string;
+  value: string;
+  caption?: string;
+  status?: HealthStatus;
+}
+
+/** One decomposed entity (a service, a deployment, a dependency…). */
+export interface DetailRow {
+  label: string;
+  status: HealthStatus;
+  /** Customer-facing verdict for this specific entity. */
+  impact?: ImpactLevel;
+  note?: string;
+  fields: { label: string; value: string; status?: HealthStatus }[];
+}
+
+export interface DetailGroup {
+  title: string;
+  caption?: string;
+  rows: DetailRow[];
 }
 
 export interface KpiTile {
   id: string;
   label: string;
+  /** The customer question this card answers. */
+  question?: string;
   value: string;
   caption: string;
   status: HealthStatus;
   icon: "shield" | "layers" | "box" | "trend" | "bell" | "warning" | "cloud";
   contextId: string;
+  /** Small breakdown chips rendered under the value. */
+  facets?: { label: string; value: string; status: HealthStatus }[];
 }
+
 
 export interface DeploymentCard {
   id: string;

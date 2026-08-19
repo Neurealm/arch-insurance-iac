@@ -6,8 +6,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  availability30d, changes, dependencies, deployments, events, kpis, regions, risks, slos,
+  availability30d, changes, dependencies, deployments, events, regions, risks, slos,
 } from "./data";
+import { overviewKpis } from "./kpiDetail";
 import {
   Interactive, MetricBar, Panel, Sparkline, StatusChip, StatusDot, statusStyles, useImpactDrawer,
 } from "./primitives";
@@ -33,9 +34,9 @@ export default function CustomerHealthOverview() {
 
   return (
     <div className="space-y-4">
-      {/* KPI strip */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-7">
-        {kpis.map((k) => {
+      {/* KPI strip — each card answers a customer question */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
+        {overviewKpis.map((k) => {
           const Icon = ICONS[k.icon];
           const s = statusStyles[k.status];
           return (
@@ -43,23 +44,49 @@ export default function CustomerHealthOverview() {
               key={k.id}
               tooltip={KPI_TOOLTIPS[k.id]}
               onClick={() => open(k.contextId)}
-              ariaLabel={`${k.label}: ${k.value}`}
-              className="rounded-xl border border-slate-200 bg-white px-3.5 py-3"
+              ariaLabel={`${k.label}: ${k.value}. ${k.caption}`}
+              className="flex h-full flex-col rounded-xl border border-slate-200 bg-white px-3.5 py-3"
             >
-              <div className="flex items-start gap-3">
-                <div className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-lg border", s.chip)}>
+              <div className="flex items-start gap-2.5">
+                <div className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-lg border", s.chip)}>
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[11px] text-slate-500">{k.label}</div>
-                  <div className={cn("truncate text-[17px] font-semibold leading-tight", s.text)}>{k.value}</div>
-                  <div className="truncate text-[11px] text-slate-500">{k.caption}</div>
+                  <div className="text-[11px] font-medium text-slate-500">{k.label}</div>
+                  {k.question && (
+                    <div className="text-[10.5px] leading-snug text-slate-400">{k.question}</div>
+                  )}
                 </div>
               </div>
+              <div className="mt-2">
+                <div className={cn("truncate text-[17px] font-semibold leading-tight", s.text)}>{k.value}</div>
+                <div className="text-[11px] leading-snug text-slate-500">{k.caption}</div>
+              </div>
+              {k.facets && (
+                <div className="mt-2.5 flex flex-wrap gap-1.5 border-t border-slate-100 pt-2">
+                  {k.facets.map((f) => (
+                    <span
+                      key={f.label}
+                      className={cn(
+                        "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium",
+                        statusStyles[f.status].chip,
+                      )}
+                    >
+                      <span className="text-slate-500">{f.label}</span>
+                      <span className="tabular-nums">{f.value}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
             </Interactive>
           );
         })}
       </div>
+
+      <p className="text-[11px] leading-snug text-slate-500">
+        Underlying cloud conditions are reported separately from your experience. A degraded Azure dependency is only
+        shown as a degraded service when telemetry demonstrates impact to your users.
+      </p>
 
       {/* Deployments + dependency health */}
       <div className="grid gap-4 xl:grid-cols-2">
