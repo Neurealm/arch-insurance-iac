@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { HealthStatus, ImpactLevel } from "./types";
 import { getImpactContext } from "./data";
 import type { CustomerImpactContext } from "./types";
+import { useCorrelation } from "./correlation";
 
 /* ------------------------------ status tokens ----------------------------- */
 
