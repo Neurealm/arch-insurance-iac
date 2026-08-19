@@ -76,6 +76,8 @@ export interface CustomerImpactContext {
   event?: EventDetail;
   /** Optional region decomposition (infrastructure vs. customer service health). */
   region?: RegionDetail;
+  /** Optional forward-looking risk decomposition. */
+  risk?: RiskDetail;
 }
 
 /** Compact figure rendered in the drawer's metric grid. */
@@ -330,13 +332,45 @@ export interface SloRow {
   contextId: string;
 }
 
+export type RiskLevel = "Low" | "Moderate" | "Elevated" | "High";
+export type RiskTrend = "Deteriorating" | "Stable" | "Improving";
+
 export interface RiskSignal {
   id: string;
   label: string;
-  level: "Low" | "Moderate" | "Elevated" | "High";
+  level: RiskLevel;
   status: HealthStatus;
   spark: number[];
   contextId: string;
+  /** Current health of the same area — deliberately independent of risk. */
+  currentHealth?: HealthStatus;
+  currentHealthLabel?: string;
+  trend?: RiskTrend;
+  trendNote?: string;
+  affectedDeployments?: string[];
+  question?: string;
+}
+
+/** Forward-looking risk decomposition rendered in the drawer. */
+export interface RiskDetail {
+  headline: string;
+  level: RiskLevel;
+  levelStatus: HealthStatus;
+  currentImpact: ImpactLevel;
+  currentHealthLabel: string;
+  currentHealthStatus: HealthStatus;
+  /** Correlated contributing signals — each says whether it raises risk. */
+  contributingSignals: { label: string; value: string; status: HealthStatus; raisesRisk: boolean }[];
+  whatCouldHappen: string;
+  estimatedExposure: RiskLevel | "None";
+  trend: RiskTrend;
+  trendNote: string;
+  confidence: number;
+  confidenceNote: string;
+  affectedDeployments: { name: string; note: string; status: HealthStatus }[];
+  preventiveActions: { label: string; done: boolean }[];
+  customerAction: string;
+  spark: number[];
 }
 
 export interface ChangeRecord {
