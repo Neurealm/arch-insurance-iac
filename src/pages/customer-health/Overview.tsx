@@ -5,6 +5,7 @@ import {
   AlertTriangle, Bell, Box, Cloud, Layers, ShieldCheck, TrendingUp, Wrench, type LucideIcon,
 } from "lucide-react";
 import DependencyHealthPanel from "./DependencyHealthPanel";
+import { RegionList, RegionMap } from "./RegionHealthPanel";
 import { EventCard } from "./EventCards";
 import { useEventFeed } from "./useEventFeed";
 import { cn } from "@/lib/utils";
