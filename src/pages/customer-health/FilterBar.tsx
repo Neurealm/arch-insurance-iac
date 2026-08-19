@@ -49,7 +49,7 @@ export function FilterBar() {
   return (
     <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
+        <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
           <Filter className="h-3.5 w-3.5" aria-hidden /> View
         </span>
 

@@ -54,7 +54,7 @@ export function RiskTile({ r, onOpen }: { r: RiskSignal; onOpen: (id: string) =>
       </div>
 
       <div className="mt-1.5 border-t border-slate-100 pt-1.5">
-        <div className="text-[9.5px] uppercase tracking-[0.12em] text-slate-400">Affected deployments</div>
+        <div className="text-[9.5px] uppercase tracking-[0.12em] text-slate-500">Affected deployments</div>
         <div className="truncate text-[11px] text-slate-600">{(r.affectedDeployments ?? []).join(", ") || "None"}</div>
       </div>
     </Interactive>

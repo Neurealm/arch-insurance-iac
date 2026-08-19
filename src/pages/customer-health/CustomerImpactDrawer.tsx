@@ -39,7 +39,7 @@ function LayerButton({
         <span className="block truncate text-[11px] text-slate-500">{note}</span>
       </span>
       <span className={cn("shrink-0 text-[11.5px] font-medium", s.text)}>{s.label}</span>
-      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-500" />
     </button>
   );
 }
@@ -286,7 +286,7 @@ function Expandable({ title, children }: { title: string; children: React.ReactN
         className="flex w-full items-center justify-between px-3 py-2 text-left text-[12.5px] font-medium text-slate-700"
       >
         {title}
-        <ChevronDown className={cn("h-4 w-4 text-slate-400 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("h-4 w-4 text-slate-500 transition-transform", open && "rotate-180")} />
       </button>
       {open && <div className="border-t border-slate-200 px-3 py-2">{children}</div>}
     </div>
@@ -471,7 +471,7 @@ function DeploymentSections({ d, onDrill }: { d: DeploymentDetail; onDrill: (id:
                     s.chip,
                   )}
                 >
-                  {n.depth > 0 && <span className="text-[11px] text-slate-400" aria-hidden>&#8627;</span>}
+                  {n.depth > 0 && <span className="text-[11px] text-slate-500" aria-hidden>&#8627;</span>}
                   <span className={cn("h-2 w-2 shrink-0 rounded-full", s.dot)} aria-hidden />
                   <span className="min-w-0 flex-1">
                     <span className="block text-[12px] font-medium text-slate-900">{n.label}</span>
@@ -524,7 +524,7 @@ function RiskSections({ r }: { r: RiskDetail }) {
                 <span className="text-[12px] text-slate-500">{s.label}</span>
                 <span className={cn("text-right text-[12.5px] font-semibold", statusStyles[s.status].text)}>{s.value}</span>
               </div>
-              <div className="mt-1 text-[10.5px] font-medium uppercase tracking-[0.1em] text-slate-400">
+              <div className="mt-1 text-[10.5px] font-medium uppercase tracking-[0.1em] text-slate-500">
                 {s.raisesRisk ? "Raises risk" : "Does not raise risk"}
               </div>
             </li>
@@ -583,7 +583,7 @@ function RiskSections({ r }: { r: RiskDetail }) {
               />
               <span>
                 {a.label}
-                {!a.done && <span className="text-slate-400"> · standing by</span>}
+                {!a.done && <span className="text-slate-500"> · standing by</span>}
               </span>
             </li>
           ))}
@@ -824,7 +824,7 @@ function SloSections({ d, onDrill }: { d: SloDetail; onDrill: (id: string) => vo
           <p className="mt-1 text-[11.5px] leading-snug text-slate-500">{h.note}</p>
         </div>
 
-        <div className="mt-2 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+        <div className="mt-2 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-500">
           Customer-impacting time
         </div>
         <ul className="mt-1.5 space-y-1.5">
@@ -898,7 +898,7 @@ function SloSections({ d, onDrill }: { d: SloDetail; onDrill: (id: string) => vo
                     <span className="block text-[12.5px] font-medium text-slate-900">{c.title}</span>
                     <span className="block text-[11px] text-slate-500">{c.classification} · {c.when}</span>
                   </span>
-                  <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                  <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
                 </div>
                 <div className="mt-1.5 grid grid-cols-2 gap-x-3">
                   <span className="text-[11px] text-slate-500">
