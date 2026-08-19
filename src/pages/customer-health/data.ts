@@ -2,6 +2,7 @@
 // are keyed by id so any object on any page can open the same universal drawer.
 
 import { kpiContexts, kpiOverlays } from "./kpiDetail";
+import { deploymentDetails } from "./deploymentDetail";
 import type {
   AlertRule, ChangeRecord, CustomerImpactContext, DependencyRow, DeploymentCard,
   KpiTile, RegionRow, ReportItem, RiskSignal, ServiceEvent, SloRow,
@@ -25,11 +26,56 @@ export const kpis: KpiTile[] = [
 ];
 
 export const deployments: DeploymentCard[] = [
-  { id: "d-east", name: "Production – East US", region: "East US", nodes: 12, tier: "Customer Production", availability: "99.999%", status: "healthy", alerts: "0 Alerts", spark: [58, 62, 60, 66, 63, 68, 65, 70, 67, 72, 69, 74], contextId: "dep-east" },
-  { id: "d-west", name: "Production – West US 2", region: "West US 2", nodes: 8, tier: "Customer Production", availability: "99.982%", status: "degraded", alerts: "1 Advisory", spark: [62, 58, 70, 52, 74, 48, 66, 54, 71, 50, 63, 57], contextId: "dep-west" },
-  { id: "d-dr", name: "DR – Central US", region: "Central US", nodes: 6, tier: "Customer DR", availability: "100.00%", status: "healthy", alerts: "0 Alerts", spark: [64, 66, 65, 67, 66, 68, 67, 69, 68, 70, 69, 71], contextId: "dep-dr" },
-  { id: "d-eu", name: "Production – North Europe", region: "North Europe", nodes: 9, tier: "Customer Production", availability: "99.996%", status: "healthy", alerts: "0 Alerts", spark: [60, 63, 61, 65, 64, 66, 65, 68, 66, 69, 68, 70], contextId: "dep-eu" },
-  { id: "d-stg", name: "Staging – East US", region: "East US", nodes: 4, tier: "Non-production", availability: "99.940%", status: "healthy", alerts: "0 Alerts", spark: [55, 60, 57, 62, 58, 64, 60, 63, 61, 66, 62, 65], contextId: "dep-stg" },
+  {
+    id: "d-east", name: "Production, East US", region: "East US", nodes: 12, tier: "Customer Production",
+    environment: "Production", resources: "12 nodes · 64 resources", advisoryCount: 0,
+    availability: "99.999%", status: "healthy", alerts: "0 Alerts",
+    spark: [58, 62, 60, 66, 63, 68, 65, 70, 67, 72, 69, 74], contextId: "dep-east",
+    hover: {
+      overallHealth: "Healthy", customerImpact: "None", availability: "99.999% (24h)",
+      infrastructureRisk: "Low — no abnormal layer", advisories: "0 active", lastHealthChange: "No change in 14 days",
+    },
+  },
+  {
+    id: "d-west", name: "Production, West US 2", region: "West US 2", nodes: 8, tier: "Customer Production",
+    environment: "Production", resources: "8 nodes · 46 resources", advisoryCount: 1,
+    availability: "99.982%", status: "healthy", alerts: "1 Advisory (not reaching users)",
+    spark: [62, 58, 70, 52, 74, 48, 66, 54, 71, 50, 63, 57], contextId: "dep-west",
+    hover: {
+      overallHealth: "Healthy — service available", customerImpact: "None measurable", availability: "99.982% (24h)",
+      infrastructureRisk: "Elevated — storage latency", advisories: "1 active advisory", lastHealthChange: "Advisory raised 08:41 AM PT",
+    },
+  },
+  {
+    id: "d-dr", name: "DR, Central US", region: "Central US", nodes: 6, tier: "Customer DR",
+    environment: "Disaster Recovery", resources: "6 nodes · 31 resources", advisoryCount: 0,
+    availability: "100.00%", status: "healthy", alerts: "0 Alerts",
+    spark: [64, 66, 65, 67, 66, 68, 67, 69, 68, 70, 69, 71], contextId: "dep-dr",
+    hover: {
+      overallHealth: "Healthy — standby ready", customerImpact: "None", availability: "100.00% (24h)",
+      infrastructureRisk: "Low — replication within objective", advisories: "0 active", lastHealthChange: "No change in 30 days",
+    },
+  },
+  {
+    id: "d-eu", name: "Production, North Europe", region: "North Europe", nodes: 9, tier: "Customer Production",
+    environment: "Production", resources: "9 nodes · 52 resources", advisoryCount: 0,
+    availability: "99.996%", status: "healthy", alerts: "0 Alerts",
+    spark: [60, 63, 61, 65, 64, 66, 65, 68, 66, 69, 68, 70], contextId: "dep-eu",
+    hover: {
+      overallHealth: "Healthy", customerImpact: "None", availability: "99.996% (24h)",
+      infrastructureRisk: "Low — no abnormal layer", advisories: "0 active", lastHealthChange: "No change in 9 days",
+    },
+  },
+  {
+    id: "d-stg", name: "Staging, East US", region: "East US", nodes: 4, tier: "Non-production",
+    environment: "Non-production", resources: "4 nodes · 18 resources", advisoryCount: 0,
+    availability: "99.940%", status: "healthy", alerts: "0 Alerts",
+    spark: [55, 60, 57, 62, 58, 64, 60, 63, 61, 66, 62, 65], contextId: "dep-stg",
+    hover: {
+      overallHealth: "Healthy — non-production", customerImpact: "None (no customer traffic)", availability: "99.940% (24h)",
+      infrastructureRisk: "Low", advisories: "0 active", lastHealthChange: "No change in 4 days",
+    },
+  },
 ];
 
 export const dependencies: DependencyRow[] = [
@@ -852,5 +898,7 @@ export const impactContexts: Record<string, CustomerImpactContext> = {
 export function getImpactContext(id: string): CustomerImpactContext {
   const base = impactContexts[id] ?? kpiContexts[id] ?? impactContexts["overall-health"];
   const overlay = kpiOverlays[base.id];
-  return overlay ? { ...base, ...overlay } : base;
+  const merged = overlay ? { ...base, ...overlay } : base;
+  const deployment = deploymentDetails[base.id];
+  return deployment ? { ...merged, deployment, title: deployment.headline } : merged;
 }
