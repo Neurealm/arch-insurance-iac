@@ -78,6 +78,8 @@ export interface CustomerImpactContext {
   region?: RegionDetail;
   /** Optional forward-looking risk decomposition. */
   risk?: RiskDetail;
+  /** Optional service level objective decomposition. */
+  slo?: SloDetail;
 }
 
 /** Compact figure rendered in the drawer's metric grid. */
@@ -330,6 +332,57 @@ export interface SloRow {
   errorBudget: number;
   status: HealthStatus;
   contextId: string;
+}
+
+export type SloWindow = "24 hours" | "7 days" | "30 days" | "90 days";
+export type ReliabilityTrend = "Improving" | "Stable" | "Deteriorating";
+
+export interface SloWindowStats {
+  window: SloWindow;
+  attainment: string;
+  status: HealthStatus;
+  /** Customer-impacting time, kept strictly distinct per category. */
+  unavailableMinutes: number;
+  degradedMinutes: number;
+  infrastructureEventMinutes: number;
+  customerImpactingEventMinutes: number;
+  note: string;
+}
+
+export interface SloEventContribution {
+  contextId: string;
+  title: string;
+  classification: string;
+  when: string;
+  minutes: number;
+  budgetPct: number;
+  customerImpacting: boolean;
+  note: string;
+}
+
+export interface SloDetail {
+  headline: string;
+  target: string;
+  current: string;
+  statusLabel: string;
+  status: HealthStatus;
+  meaning: string;
+  measurement: string;
+  errorBudget: {
+    remainingPct: number;
+    consumedPct: number;
+    remainingPlain: string;
+    consumedPlain: string;
+    burnRate: string;
+    burnRateNote: string;
+    projected: string;
+    projectedStatus: HealthStatus;
+    explanation: string;
+  };
+  history: SloWindowStats[];
+  contributions: SloEventContribution[];
+  trend: ReliabilityTrend;
+  trendNote: string;
 }
 
 export type RiskLevel = "Low" | "Moderate" | "Elevated" | "High";

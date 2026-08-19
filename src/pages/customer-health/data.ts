@@ -6,6 +6,7 @@ import { deploymentDetails } from "./deploymentDetail";
 import { dependencyDetails } from "./dependencyDetail";
 import { regionDetails } from "./regionDetail";
 import { riskDetails, riskSignals } from "./riskDetail";
+import { sloDetails, sloRows } from "./sloDetail";
 import { eventDetails } from "./eventDetail";
 import type {
   AlertRule, ChangeRecord, CustomerImpactContext, DependencyRow, DeploymentCard,
@@ -243,12 +244,7 @@ export const regions: RegionRow[] = [
   },
 ];
 
-export const slos: SloRow[] = [
-  { id: "slo-avail", name: "Availability SLO", target: "99.99%", current: "99.997%", attainment: 99.997, errorBudget: 93.4, status: "healthy", contextId: "slo-availability" },
-  { id: "slo-latency", name: "Latency SLO", target: "99.5%", current: "99.7%", attainment: 99.7, errorBudget: 78.2, status: "healthy", contextId: "slo-latency" },
-  { id: "slo-reliability", name: "Reliability SLO", target: "99.98%", current: "99.986%", attainment: 99.986, errorBudget: 88.1, status: "healthy", contextId: "slo-reliability" },
-  { id: "slo-durability", name: "Durability SLO", target: "99.999%", current: "100%", attainment: 100, errorBudget: 100, status: "healthy", contextId: "slo-durability" },
-];
+export const slos: SloRow[] = sloRows;
 
 export const risks: RiskSignal[] = riskSignals;
 
@@ -775,6 +771,30 @@ export const impactContexts: Record<string, CustomerImpactContext> = {
     timeline: [{ stage: "Latest observation", at: "12s ago", note: "Objective met." }],
     technical: [{ label: "Window", value: "Calendar month, rolling display" }, { label: "Measurement", value: "Edge availability, maintenance excluded" }],
   },
+  "slo-infrastructure": {
+    id: "slo-infrastructure", title: "Infrastructure Reliability SLO", subtitle: "Target 99.95% · current 99.962%",
+    infrastructureStatus: "advisory", infrastructureNote: "One provider advisory is open in the measurement window.",
+    impact: "NO CURRENT IMPACT",
+    whatIsHappening: "The infrastructure beneath your service is meeting its objective while absorbing an open regional advisory.",
+    affected: [{ label: "Production – West US 2", detail: "Consuming most of the infrastructure budget", status: "advisory" }],
+    signals: [{ label: "Error budget remaining", value: "71.6%", interpretation: "Comfortable, though burning faster than usual.", status: "advisory" }],
+    whatIsBeingDone: ["Infrastructure budget tracked continuously"],
+    customerAction: noAction, noActionRequired: true,
+    timeline: [{ stage: "Latest observation", at: "1m ago", note: "Objective met." }],
+    technical: [{ label: "Window", value: "Calendar month, rolling display" }],
+  },
+  "slo-dependency": {
+    id: "slo-dependency", title: "Dependency Availability SLO", subtitle: "Target 99.9% · current 99.934%",
+    infrastructureStatus: "advisory", infrastructureNote: "Identity dependency degraded earlier today; storage dependency remains degraded.",
+    impact: "NO CURRENT IMPACT",
+    whatIsHappening: "Dependencies in your critical path are meeting their objective. Retries and failover absorbed the degraded ones.",
+    affected: [{ label: "Identity services", detail: "Recovered after failover", status: "advisory" }],
+    signals: [{ label: "Error budget remaining", value: "66.2%", interpretation: "Reduced by the identity incident, still healthy.", status: "advisory" }],
+    whatIsBeingDone: ["Dependency budget tracked continuously"],
+    customerAction: noAction, noActionRequired: true,
+    timeline: [{ stage: "Latest observation", at: "1m ago", note: "Objective met." }],
+    technical: [{ label: "Window", value: "Calendar month, rolling display" }],
+  },
   "slo-latency": {
     id: "slo-latency", title: "Latency SLO", subtitle: "Target 99.5% of requests under 500 ms",
     infrastructureStatus: "advisory", infrastructureNote: "West US 2 writes are elevated but within objective.",
@@ -1041,6 +1061,8 @@ export function getImpactContext(id: string): CustomerImpactContext {
   if (dependency) return { ...merged, dependency, title: dependency.headline, subtitle: dependency.conditionLabel };
   const region = regionDetails[base.id];
   if (region) return { ...merged, region, title: region.headline };
+  const slo = sloDetails[base.id];
+  if (slo) return { ...merged, slo, title: `${slo.headline} – ${slo.statusLabel}`, subtitle: `Target ${slo.target} · current ${slo.current}` };
   const risk = riskDetails[base.id];
   if (risk) return { ...merged, risk, title: `${risk.headline} – ${risk.level}`, subtitle: "Forward-looking risk signal — separate from current health" };
   const event = eventDetails[base.id];
