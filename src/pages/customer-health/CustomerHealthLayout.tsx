@@ -32,10 +32,29 @@ export default function CustomerHealthLayout() {
   const { pathname } = useLocation();
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50 text-slate-700">
+    <div className="ch-root flex min-h-dvh w-full bg-slate-50 text-slate-700">
+      {/* Keyboard users always get a visible focus ring, and animations are
+          suppressed for anyone who prefers reduced motion. */}
+      <style>{`
+        .ch-root :is(button, a, [tabindex]:not([tabindex="-1"]), select, input):focus-visible {
+          outline: 2px solid #0284c7; outline-offset: 2px; border-radius: 8px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ch-root *, .ch-drawer, .ch-root [class*="animate-"] {
+            animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+      `}</style>
+      <a
+        href="#ch-main"
+        className="sr-only left-2 top-2 z-50 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-900 focus:not-sr-only focus:absolute"
+      >
+        Skip to service health content
+      </a>
       <aside
         aria-label="Service health navigation"
-        className="sticky top-0 hidden h-screen w-[92px] shrink-0 flex-col items-center border-r border-slate-200 bg-white py-3 md:flex"
+        className="sticky top-0 hidden h-dvh w-[92px] shrink-0 flex-col items-center border-r border-slate-200 bg-white py-3 md:flex"
       >
         <div className="grid h-9 w-9 place-items-center rounded-lg bg-sky-500/15 text-sky-600">
           <Cloud className="h-5 w-5" />
@@ -88,7 +107,7 @@ export default function CustomerHealthLayout() {
               <div className="flex items-center gap-2">
                 <span className="text-[11.5px] text-slate-500">Last updated: {tenant.lastUpdated}</span>
                 <button
-                  type="button" aria-label="Refresh"
+                  type="button" aria-label="Refresh service health data"
                   className="grid h-8 w-8 place-items-center rounded-md border border-slate-200 text-slate-500 transition-colors duration-200 hover:border-slate-300 hover:text-slate-900"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
@@ -97,18 +116,18 @@ export default function CustomerHealthLayout() {
                   type="button"
                   className="flex h-8 items-center gap-2 rounded-md border border-slate-200 px-3 text-[12px] text-slate-600 transition-colors duration-200 hover:border-slate-300 hover:text-slate-900"
                 >
-                  <Activity className="h-3.5 w-3.5" /> {tenant.window}
+                  <Activity className="h-3.5 w-3.5" aria-hidden /> {tenant.window}
                 </button>
                 <button
                   type="button"
                   className="flex h-8 items-center gap-2 rounded-md border border-slate-200 px-3 text-[12px] text-slate-600 transition-colors duration-200 hover:border-slate-300 hover:text-slate-900"
                 >
-                  <Sliders className="h-3.5 w-3.5" /> Customize
+                  <Sliders className="h-3.5 w-3.5" aria-hidden /> Customize
                 </button>
               </div>
             </header>
 
-            <div className="flex-1 space-y-4 px-5 py-4">
+            <div id="ch-main" className="flex-1 space-y-4 px-5 py-4">
               <FilterBar />
               <Outlet />
             </div>
