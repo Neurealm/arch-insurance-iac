@@ -378,7 +378,7 @@ export function RegionMap({ height = "h-72" }: { height?: string }) {
           {[
             { label: "Open impact detail", run: () => open(selected.contextId) },
             { label: "Focus dashboard on this region", run: () => setFilter("region", selected.id) },
-            { label: "Show only what affects me", run: () => setFilter("view", "affecting-me") },
+            { label: "Show only what affects me", run: () => setFilter("view", "affecting") },
             { label: "Clear selection", run: () => { setSelectedId(null); setFilter("region", "all"); } },
           ].map((a) => (
             <button
