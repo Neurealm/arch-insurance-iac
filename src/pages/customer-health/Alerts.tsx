@@ -28,7 +28,7 @@ export default function CustomerHealthAlerts() {
                 className={cn(
                   "rounded-full border px-2 py-0.5 text-[11px] font-medium",
                   a.enabled
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700"
                     : "border-slate-300 bg-slate-100 text-slate-500",
                 )}
               >

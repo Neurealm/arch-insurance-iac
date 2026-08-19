@@ -119,8 +119,8 @@ export function CustomerImpactDrawer({
               className={cn(
                 "rounded-lg border px-3.5 py-3 text-[12.5px] leading-relaxed",
                 context.noActionRequired
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
-                  : "border-sky-500/30 bg-sky-500/10 text-sky-200",
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+                  : "border-sky-500/40 bg-sky-500/10 text-sky-200",
               )}
             >
               <div className="text-[13px] font-semibold">

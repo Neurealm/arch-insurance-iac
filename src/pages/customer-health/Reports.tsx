@@ -23,7 +23,7 @@ export default function CustomerHealthReports() {
                 <div className="text-[13.5px] font-semibold text-slate-900">{r.name}</div>
                 <div className="mt-0.5 text-[11px] text-slate-500">{r.period} · {r.format}</div>
               </div>
-              <Download className="h-4 w-4 shrink-0 text-sky-400" />
+              <Download className="h-4 w-4 shrink-0 text-sky-600" />
             </div>
             <p className="mt-2 text-[12px] leading-relaxed text-slate-500">{r.description}</p>
           </Interactive>

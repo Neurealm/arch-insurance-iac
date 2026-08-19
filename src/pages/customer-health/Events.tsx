@@ -25,7 +25,7 @@ export default function CustomerHealthEvents() {
               <div className="mt-1 text-[11px] text-slate-500">Started {e.started} · Updated {e.updated} · Next update {e.nextUpdate}</div>
               <p className="mt-2 max-w-4xl text-[12.5px] leading-relaxed text-slate-600">{e.summary}</p>
               <dl className="mt-3 grid gap-3 border-t border-slate-200 pt-2.5 text-[11px] sm:grid-cols-4">
-                <div><dt className="text-slate-500">Impact to you</dt><dd className={cn(e.impactToYou.toLowerCase().includes("no ") ? "text-emerald-400" : "text-amber-400")}>{e.impactToYou}</dd></div>
+                <div><dt className="text-slate-500">Impact to you</dt><dd className={cn(e.impactToYou.toLowerCase().includes("no ") ? "text-emerald-600" : "text-amber-600")}>{e.impactToYou}</dd></div>
                 <div><dt className="text-slate-500">Affected deployment</dt><dd className="text-slate-700">{e.affectedDeployment}</dd></div>
                 <div><dt className="text-slate-500">Affected dependency</dt><dd className="text-slate-700">{e.affectedDependency}</dd></div>
                 <div><dt className="text-slate-500">Provider reference</dt><dd className="font-mono text-slate-700">{e.providerReference}</dd></div>

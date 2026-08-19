@@ -123,7 +123,7 @@ export default function CustomerHealthOverview() {
           <Interactive
             tooltip="An open advisory. Advisories describe an underlying condition we are managing; they do not mean your service is impacted."
             onClick={() => open(activeEvent.contextId)}
-            className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-3.5 py-3"
+            className="rounded-lg border border-amber-500/40 bg-amber-500/5 px-3.5 py-3"
           >
             <StatusChip status="advisory" label={activeEvent.kind.toUpperCase()} />
             <div className="mt-2 text-[13.5px] font-semibold text-slate-900">{activeEvent.title}</div>
@@ -132,7 +132,7 @@ export default function CustomerHealthOverview() {
             </div>
             <p className="mt-2 text-[12px] leading-relaxed text-slate-600">{activeEvent.summary}</p>
             <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-slate-200 pt-2.5 text-[11px]">
-              <div><dt className="text-slate-500">Impact to you</dt><dd className="text-emerald-400">{activeEvent.impactToYou}</dd></div>
+              <div><dt className="text-slate-500">Impact to you</dt><dd className="text-emerald-600">{activeEvent.impactToYou}</dd></div>
               <div><dt className="text-slate-500">Affected deployment</dt><dd className="text-slate-700">{activeEvent.affectedDeployment}</dd></div>
               <div><dt className="text-slate-500">Affected dependency</dt><dd className="text-slate-700">{activeEvent.affectedDependency}</dd></div>
               <div><dt className="text-slate-500">Our response</dt><dd className="text-slate-700">{activeEvent.response}</dd></div>
@@ -199,7 +199,7 @@ export default function CustomerHealthOverview() {
               <div className="text-slate-500">SLO Target</div><div className="text-[13px] text-slate-900">99.99%</div>
             </div>
             <div className="rounded-lg border border-slate-200 px-2.5 py-2">
-              <div className="text-slate-500">SLO Status</div><div className="text-[13px] text-emerald-400">Met</div>
+              <div className="text-slate-500">SLO Status</div><div className="text-[13px] text-emerald-600">Met</div>
             </div>
             <div className="rounded-lg border border-slate-200 px-2.5 py-2">
               <div className="text-slate-500">Error Budget</div><div className="text-[13px] text-slate-900">93.4%</div>
@@ -256,7 +256,7 @@ export default function CustomerHealthOverview() {
                   className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2.5"
                 >
                   <span className="flex min-w-0 items-start gap-2.5">
-                    <Wrench className="mt-0.5 h-4 w-4 shrink-0 text-sky-400" />
+                    <Wrench className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
                     <span className="min-w-0">
                       <span className="block truncate text-[12.5px] text-slate-900">{c.title}</span>
                       <span className="block text-[11px] text-slate-500">{c.window}</span>
@@ -264,7 +264,7 @@ export default function CustomerHealthOverview() {
                   </span>
                   <span className="shrink-0 text-right">
                     <span className="block text-[10.5px] text-slate-500">Potential impact</span>
-                    <span className={cn("text-[12px]", c.potentialImpact === "None" ? "text-emerald-400" : "text-amber-400")}>
+                    <span className={cn("text-[12px]", c.potentialImpact === "None" ? "text-emerald-600" : "text-amber-600")}>
                       {c.potentialImpact}
                     </span>
                   </span>

@@ -9,19 +9,19 @@ import type { CustomerImpactContext } from "./types";
 /* ------------------------------ status tokens ----------------------------- */
 
 export const statusStyles: Record<HealthStatus, { label: string; text: string; dot: string; chip: string; stroke: string }> = {
-  healthy:  { label: "Healthy",  text: "text-emerald-400", dot: "bg-emerald-400", chip: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300", stroke: "#34d399" },
-  advisory: { label: "Advisory", text: "text-amber-400",   dot: "bg-amber-400",   chip: "border-amber-500/30 bg-amber-500/10 text-amber-300",     stroke: "#fbbf24" },
-  degraded: { label: "Degraded", text: "text-amber-400",   dot: "bg-amber-400",   chip: "border-amber-500/30 bg-amber-500/10 text-amber-300",     stroke: "#fbbf24" },
-  "at-risk":{ label: "At Risk",  text: "text-orange-400",  dot: "bg-orange-400",  chip: "border-orange-500/30 bg-orange-500/10 text-orange-300",  stroke: "#fb923c" },
-  incident: { label: "Incident", text: "text-rose-400",    dot: "bg-rose-400",    chip: "border-rose-500/30 bg-rose-500/10 text-rose-300",        stroke: "#fb7185" },
-  info:     { label: "Info",     text: "text-sky-400",     dot: "bg-sky-400",     chip: "border-sky-500/30 bg-sky-500/10 text-sky-300",           stroke: "#38bdf8" },
+  healthy:  { label: "Healthy",  text: "text-emerald-600", dot: "bg-emerald-400", chip: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700", stroke: "#34d399" },
+  advisory: { label: "Advisory", text: "text-amber-600",   dot: "bg-amber-400",   chip: "border-amber-500/40 bg-amber-500/10 text-amber-700",     stroke: "#fbbf24" },
+  degraded: { label: "Degraded", text: "text-amber-600",   dot: "bg-amber-400",   chip: "border-amber-500/40 bg-amber-500/10 text-amber-700",     stroke: "#fbbf24" },
+  "at-risk":{ label: "At Risk",  text: "text-orange-600",  dot: "bg-orange-400",  chip: "border-orange-500/40 bg-orange-500/10 text-orange-700",  stroke: "#fb923c" },
+  incident: { label: "Incident", text: "text-rose-600",    dot: "bg-rose-400",    chip: "border-rose-500/40 bg-rose-500/10 text-rose-700",        stroke: "#fb7185" },
+  info:     { label: "Info",     text: "text-sky-600",     dot: "bg-sky-400",     chip: "border-sky-500/40 bg-sky-500/10 text-sky-700",           stroke: "#38bdf8" },
 };
 
 export const impactStyles: Record<ImpactLevel, string> = {
-  "NO CURRENT IMPACT": "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  "POTENTIAL IMPACT": "border-amber-500/40 bg-amber-500/10 text-amber-300",
-  "DEGRADED EXPERIENCE": "border-orange-500/40 bg-orange-500/10 text-orange-300",
-  "SERVICE IMPACT": "border-rose-500/40 bg-rose-500/10 text-rose-300",
+  "NO CURRENT IMPACT": "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
+  "POTENTIAL IMPACT": "border-amber-500/40 bg-amber-500/10 text-amber-700",
+  "DEGRADED EXPERIENCE": "border-orange-500/40 bg-orange-500/10 text-orange-700",
+  "SERVICE IMPACT": "border-rose-500/40 bg-rose-500/10 text-rose-700",
 };
 
 /* ------------------------------ drawer context ---------------------------- */

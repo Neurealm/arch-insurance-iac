@@ -34,7 +34,7 @@ export default function CustomerHealthLayout() {
         aria-label="Service health navigation"
         className="sticky top-0 hidden h-screen w-[92px] shrink-0 flex-col items-center border-r border-slate-200 bg-white py-3 md:flex"
       >
-        <div className="grid h-9 w-9 place-items-center rounded-lg bg-sky-500/15 text-sky-400">
+        <div className="grid h-9 w-9 place-items-center rounded-lg bg-sky-500/15 text-sky-600">
           <Cloud className="h-5 w-5" />
         </div>
         <nav className="mt-4 flex w-full flex-1 flex-col items-center gap-1">
@@ -51,8 +51,8 @@ export default function CustomerHealthLayout() {
                 className={cn(
                   "flex w-[76px] flex-col items-center gap-1 rounded-lg px-1 py-2.5 text-[10.5px] transition-all duration-200",
                   active
-                    ? "bg-sky-500/15 text-sky-300 ring-1 ring-sky-500/30"
-                    : "text-slate-500 hover:bg-slate-200/70 hover:text-slate-900",
+                    ? "bg-sky-500/15 text-sky-700 ring-1 ring-sky-500/30"
+                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
                 )}
               >
                 <Icon className="h-[18px] w-[18px]" />
