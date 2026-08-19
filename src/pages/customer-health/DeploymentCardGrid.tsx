@@ -19,7 +19,7 @@ function HoverSummary({ d }: { d: DeploymentCard }) {
   return (
     <div
       role="tooltip"
-      className="pointer-events-none absolute left-3 right-3 top-2 z-40 hidden rounded-lg border border-slate-300 bg-white/97 p-3 shadow-xl backdrop-blur-sm group-hover/dep:block"
+      className="pointer-events-none absolute left-2 right-2 top-[calc(100%-10px)] z-50 hidden rounded-lg border border-slate-300 bg-white p-3 shadow-2xl group-hover/dep:block"
     >
       <div className="mb-1.5 flex items-center gap-2">
         <StatusDot status={d.status} />
