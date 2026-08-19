@@ -4,6 +4,7 @@
 import { kpiContexts, kpiOverlays } from "./kpiDetail";
 import { deploymentDetails } from "./deploymentDetail";
 import { dependencyDetails } from "./dependencyDetail";
+import { eventDetails } from "./eventDetail";
 import type {
   AlertRule, ChangeRecord, CustomerImpactContext, DependencyRow, DeploymentCard,
   KpiTile, RegionRow, ReportItem, RiskSignal, ServiceEvent, SloRow,
@@ -127,32 +128,61 @@ export const dependencies: DependencyRow[] = [
 export const events: ServiceEvent[] = [
   {
     id: "evt-blob-latency", kind: "Advisory",
-    title: "Elevated Azure Blob Storage Latency – West US 2",
+    title: "Elevated Cloud Storage Latency, West US 2",
     started: "08:41 AM PT", updated: "5m ago",
-    summary: "We are observing elevated latency when accessing Azure Blob Storage in West US 2. Your services remain available. No action is required.",
-    impactToYou: "None", affectedDeployment: "Production – West US 2", affectedDependency: "Azure Blob Storage",
-    response: "Monitoring & Microsoft case open", providerReference: "AZ-80456", nextUpdate: "10:00 AM PT",
-    status: "advisory", contextId: "evt-blob-latency",
+    summary: "We are observing elevated latency within an Azure storage dependency. Your services remain available.",
+    impactToYou: "None", affectedDeployment: "Production, West US 2", affectedDependency: "Cloud storage (Azure Blob Storage)",
+    response: "Monitoring & provider case open", providerReference: "AZ-80456", nextUpdate: "10:00 AM PT",
+    status: "advisory", contextId: "evt-blob-latency", active: true,
+    customerImpact: "No current impact", responseStatus: "Monitoring, provider escalation open",
+    ranking: { actualImpact: 0, potentialImpact: 1, exposedDeployments: 1, durationMinutes: 92, infrastructureSeverity: 2 },
   },
   {
-    id: "evt-net-jitter", kind: "Information",
-    title: "Transient network jitter – Central US peering",
-    started: "Yesterday 21:12 PT", updated: "Resolved 22:04 PT",
-    summary: "A short period of packet re-transmission was observed on a peering path serving Central US. Traffic was automatically re-routed.",
-    impactToYou: "None", affectedDeployment: "DR – Central US", affectedDependency: "Azure Virtual Network",
-    response: "Auto-remediated by traffic steering", providerReference: "AZ-79912", nextUpdate: "Closed",
-    status: "info", contextId: "evt-net-jitter",
+    id: "evt-api-slow", kind: "Degradation",
+    title: "Reduced responsiveness for order lookups, East US",
+    started: "09:02 AM PT", updated: "2m ago",
+    summary: "Some order lookup requests are completing more slowly than normal. Requests are succeeding; a portion of traffic has been shifted while capacity scales.",
+    impactToYou: "Slower responses for some users", affectedDeployment: "Production, East US", affectedDependency: "Service layer (order-lookup-api)",
+    response: "Traffic shifted, capacity scaling", providerReference: "CHG-24219", nextUpdate: "09:45 AM PT",
+    status: "degraded", contextId: "evt-api-slow", active: true,
+    customerImpact: "Degraded experience for some users", responseStatus: "Mitigation in progress",
+    ranking: { actualImpact: 2, potentialImpact: 2, exposedDeployments: 1, durationMinutes: 31, infrastructureSeverity: 2 },
+  },
+  {
+    id: "evt-identity-incident", kind: "Incident",
+    title: "Sign-in failures for a subset of users, EU North",
+    started: "07:58 AM PT", updated: "just now",
+    summary: "Some users in EU North could not sign in. Authentication has failed over to a secondary path and sign-ins are recovering.",
+    impactToYou: "New sign-ins impaired in EU North", affectedDeployment: "Production, EU North", affectedDependency: "Identity services (Microsoft Entra ID)",
+    response: "Failover complete, recovery validating", providerReference: "AZ-80511", nextUpdate: "09:30 AM PT",
+    status: "incident", contextId: "evt-identity-incident", active: true,
+    customerImpact: "Service impact — new sign-ins", responseStatus: "Recovering after failover",
+    ranking: { actualImpact: 3, potentialImpact: 3, exposedDeployments: 1, durationMinutes: 95, infrastructureSeverity: 3 },
   },
   {
     id: "evt-cert-rotation", kind: "Maintenance",
-    title: "Scheduled certificate rotation – Orchestration endpoints",
+    title: "Scheduled certificate rotation, orchestration endpoints",
     started: "Jun 7, 10:00 PT", updated: "Scheduled",
     summary: "Routine rotation of TLS certificates on orchestration endpoints. Connections are drained gracefully; no downtime is expected.",
-    impactToYou: "None expected", affectedDeployment: "All production deployments", affectedDependency: "Service Layer",
+    impactToYou: "None expected", affectedDeployment: "All production deployments", affectedDependency: "Service layer",
     response: "Change approved, staged rollout", providerReference: "CHG-24188", nextUpdate: "Jun 7, 11:00 PT",
-    status: "info", contextId: "evt-cert-rotation",
+    status: "info", contextId: "evt-cert-rotation", active: true,
+    customerImpact: "No impact expected", responseStatus: "Change staged",
+    ranking: { actualImpact: 0, potentialImpact: 1, exposedDeployments: 2, durationMinutes: 0, infrastructureSeverity: 0 },
+  },
+  {
+    id: "evt-net-jitter", kind: "Information",
+    title: "Transient network jitter, Central US peering",
+    started: "Yesterday 21:12 PT", updated: "Resolved 22:04 PT",
+    summary: "A short period of packet re-transmission was observed on a peering path serving Central US. Traffic was automatically re-routed.",
+    impactToYou: "None", affectedDeployment: "DR, Central US", affectedDependency: "Network (Azure Virtual Network)",
+    response: "Auto-remediated by traffic steering", providerReference: "AZ-79912", nextUpdate: "Closed",
+    status: "info", contextId: "evt-net-jitter", active: false,
+    customerImpact: "No impact", responseStatus: "Closed",
+    ranking: { actualImpact: 0, potentialImpact: 0, exposedDeployments: 1, durationMinutes: 52, infrastructureSeverity: 1 },
   },
 ];
+
 
 export const regions: RegionRow[] = [
   { id: "r-east", name: "East US", status: "healthy", note: "Your service", x: 27, y: 40, contextId: "region-east" },
@@ -939,5 +969,7 @@ export function getImpactContext(id: string): CustomerImpactContext {
   if (deployment) return { ...merged, deployment, title: deployment.headline };
   const dependency = dependencyDetails[base.id];
   if (dependency) return { ...merged, dependency, title: dependency.headline, subtitle: dependency.conditionLabel };
+  const event = eventDetails[base.id];
+  if (event) return { ...merged, event, title: event.headline, subtitle: `${event.classification} · Next update ${event.nextUpdate}` };
   return merged;
 }

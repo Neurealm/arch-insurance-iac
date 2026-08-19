@@ -72,6 +72,8 @@ export interface CustomerImpactContext {
   deployment?: DeploymentDetail;
   /** Optional supporting-dependency decomposition. */
   dependency?: DependencyDetail;
+  /** Optional event decomposition. */
+  event?: EventDetail;
 }
 
 /** Compact figure rendered in the drawer's metric grid. */
