@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CustomerImpactContext, DeploymentDetail } from "./types";
+import type { CustomerImpactContext, DependencyDetail, DeploymentDetail } from "./types";
 import { getImpactContext } from "./data";
 import { impactStyles, statusStyles, StatusChip } from "./primitives";
 
@@ -38,6 +38,104 @@ function LayerButton({
       <span className={cn("shrink-0 text-[11.5px] font-medium", s.text)}>{s.label}</span>
       <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
     </button>
+  );
+}
+
+/* ------------------ dependency-specific drawer sections ------------------ */
+
+function TelemetryTrend({ t, status }: { t: DependencyDetail["trend"]; status: CustomerImpactContext["infrastructureStatus"] }) {
+  const w = 320, h = 84, pad = 6;
+  const vals = [...t.series, t.baseline, t.warning];
+  const max = Math.max(...vals), min = Math.min(...vals);
+  const span = max - min || 1;
+  const y = (v: number) => pad + (1 - (v - min) / span) * (h - pad * 2);
+  const x = (i: number) => pad + (i / (t.series.length - 1)) * (w - pad * 2);
+  const path = t.series.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const last = t.series[t.series.length - 1];
+  const stroke = status === "healthy" ? "#059669" : status === "degraded" ? "#d97706" : "#dc2626";
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+      <div className="text-[11.5px] text-slate-500">{t.caption}</div>
+      <svg viewBox={`0 0 ${w} ${h}`} className="mt-1 w-full" role="img" aria-label={t.caption}>
+        <line x1={pad} x2={w - pad} y1={y(t.warning)} y2={y(t.warning)} stroke="#f59e0b" strokeWidth="1" strokeDasharray="4 3" />
+        <line x1={pad} x2={w - pad} y1={y(t.baseline)} y2={y(t.baseline)} stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 3" />
+        <path d={path} fill="none" stroke={stroke} strokeWidth="1.8" />
+        <circle cx={x(t.series.length - 1)} cy={y(last)} r="3" fill={stroke} />
+      </svg>
+      <div className="mt-1 flex flex-wrap gap-3 text-[10.5px] text-slate-500">
+        <span className="flex items-center gap-1"><span className="h-px w-3 bg-slate-400" aria-hidden />Normal baseline {t.baseline}{t.unit}</span>
+        <span className="flex items-center gap-1"><span className="h-px w-3 bg-amber-500" aria-hidden />Warning threshold {t.warning}{t.unit}</span>
+        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: stroke }} aria-hidden />Current {last}{t.unit}</span>
+      </div>
+    </div>
+  );
+}
+
+function DependencySections({ d, onDrill }: { d: DependencyDetail; onDrill: (id: string) => void }) {
+  const cond = statusStyles[d.conditionStatus];
+  return (
+    <>
+      <Section title="Customer Impact">
+        <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[d.impactLevel])}>
+          <div className="text-[16px] font-semibold tracking-tight">{d.impactVerdict}</div>
+          <p className="mt-1 text-[11.5px] leading-snug text-slate-600">
+            Underlying dependency condition: <span className={cond.text}>{cond.label}</span> — {d.conditionLabel}
+          </p>
+        </div>
+      </Section>
+
+      <Section title="Affected Deployments">
+        <ul className="space-y-2">
+          {d.affectedDeployments.map((a) => (
+            <li key={a.name} className="flex items-start gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", statusStyles[a.status].dot)} aria-hidden />
+              <div className="min-w-0">
+                <div className="text-[12.5px] font-medium text-slate-900">{a.name}</div>
+                <div className="text-[11.5px] text-slate-500">{a.note}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Signals">
+        <div className="grid grid-cols-2 gap-2">
+          {d.signals.map((s) => (
+            <div key={s.label} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <div className="text-[11px] text-slate-500">{s.label}</div>
+              <div className={cn("text-[13px] font-semibold", statusStyles[s.status].text)}>{s.value}</div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Interpretation">
+        <p className="text-[13px] leading-relaxed text-slate-600">{d.interpretation}</p>
+      </Section>
+
+      <Section title="Trend">
+        <TelemetryTrend t={d.trend} status={d.conditionStatus} />
+      </Section>
+
+      <Section title="Related Infrastructure">
+        <div className="space-y-2">
+          {d.related.map((r) => (
+            <LayerButton key={r.label} label={r.label} status={r.status} note={r.technical} onClick={() => onDrill(r.contextId)} />
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Response">
+        <ul className="space-y-1.5">
+          {d.response.map((r) => (
+            <li key={r} className="flex gap-2 text-[12.5px] leading-snug text-slate-600">
+              <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-sky-400" aria-hidden />
+              {r}
+            </li>
+          ))}
+        </ul>
+      </Section>
+    </>
   );
 }
 
@@ -191,14 +289,15 @@ export function CustomerImpactDrawer({
 
         <div className="flex-1 overflow-y-auto">
           {current.deployment && <DeploymentSections d={current.deployment} onDrill={drill} />}
+          {current.dependency && <DependencySections d={current.dependency} onDrill={drill} />}
 
-          {!current.deployment && (
+          {!current.deployment && !current.dependency && (
           <Section title="What is happening?">
             <p className="text-[13px] leading-relaxed text-slate-600">{current.whatIsHappening}</p>
           </Section>
           )}
 
-          {!current.deployment && (
+          {!current.deployment && !current.dependency && (
           <Section title="Does this affect me?">
             <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[current.impact])}>
               <div className="text-[16px] font-semibold tracking-tight">{current.impact}</div>
@@ -210,6 +309,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
+          {!current.dependency && (
           <Section title="What of mine is affected?">
             <ul className="space-y-2">
               {current.affected.map((a) => (
@@ -223,6 +323,7 @@ export function CustomerImpactDrawer({
               ))}
             </ul>
           </Section>
+          )}
 
           {current.metrics && current.metrics.length > 0 && (
             <Section title="Key figures">
@@ -270,6 +371,7 @@ export function CustomerImpactDrawer({
             </Section>
           ))}
 
+          {!current.dependency && (
           <Section title="What are we seeing?">
             <ul className="space-y-2">
               {current.signals.map((s) => (
@@ -283,7 +385,9 @@ export function CustomerImpactDrawer({
               ))}
             </ul>
           </Section>
+          )}
 
+          {!current.dependency && (
           <Section title="What is being done?">
             <ul className="space-y-1.5">
               {current.whatIsBeingDone.map((w) => (
@@ -294,8 +398,9 @@ export function CustomerImpactDrawer({
               ))}
             </ul>
           </Section>
+          )}
 
-          {!current.deployment && (
+          {!current.deployment && !current.dependency && (
           <Section title="Do I need to do anything?">
             <div
               className={cn(
