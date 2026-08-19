@@ -101,19 +101,20 @@ export const deploymentDetails: Record<string, DeploymentDetail> = {
   "dep-eu": {
     headline: "Production, North Europe",
     service: {
-      health: "healthy", healthLabel: "Healthy",
+      // Reporting is delayed, so health is not asserted as Healthy here.
+      health: "stale", healthLabel: "Health verification delayed",
       availability: "99.996% (24h)",
-      customerImpact: "None — European traffic is served normally",
-      sloStatus: "Within target · 99.99%", sloStatusLevel: "healthy",
+      customerImpact: "None reported — no user-facing problem has been observed",
+      sloStatus: "Within target · 99.99% (to last confirmed reading)", sloStatusLevel: "healthy",
     },
     infrastructure: layers(),
     impact: {
-      statement: "Your service remains available.",
-      current: "None", potential: "None", functionality: "None observed",
+      statement: "No impact reported. We cannot confirm health until reporting resumes.",
+      current: "None reported", potential: "A change could go unnoticed for longer than usual", functionality: "None observed",
       action: "None required", level: "NO CURRENT IMPACT",
     },
-    seeing: "Regional request success rate and latency are steady, with no supporting dependency reporting a condition against this deployment.",
-    doing: "Standard monitoring only. No escalation is open with the cloud provider for this region.",
+    seeing: "Health reporting from North Europe is arriving later than expected. Independent customer-facing signals show requests succeeding normally.",
+    doing: "We are re-establishing health reporting for this region and continuing to watch customer-facing signals in the meantime.",
     tree: tree(),
   },
 
