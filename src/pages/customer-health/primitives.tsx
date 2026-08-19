@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import type { HealthStatus, ImpactLevel } from "./types";
 import { getImpactContext } from "./data";
 import type { CustomerImpactContext } from "./types";
-import { useCorrelation } from "./correlation";
+import { useObjectHighlight } from "./filters";
 
 /* ------------------------------ status tokens ----------------------------- */
 
@@ -93,7 +93,7 @@ export function Interactive({
   /** Optional key that wires this object into the cross-highlight graph. */
   correlationKey?: string;
 }) {
-  const { bind, className: corrClass } = useCorrelation(correlationKey);
+  const { bind, className: corrClass } = useObjectHighlight(correlationKey);
   return (
     <div className="group/int relative">
       <button

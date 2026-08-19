@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { tenant } from "./data";
 import { ImpactDrawerProvider } from "./primitives";
 import { CorrelationProvider } from "./correlation";
+import { FilterProvider } from "./filters";
+import { FilterBar } from "./FilterBar";
 import { CustomerImpactDrawer } from "./CustomerImpactDrawer";
 
 interface NavItem { label: string; to: string; icon: LucideIcon }
@@ -71,6 +73,7 @@ export default function CustomerHealthLayout() {
         </NavLink>
       </aside>
 
+      <FilterProvider>
       <CorrelationProvider>
       <ImpactDrawerProvider>
         {(api) => (
@@ -105,7 +108,8 @@ export default function CustomerHealthLayout() {
               </div>
             </header>
 
-            <div className="flex-1 px-5 py-4">
+            <div className="flex-1 space-y-4 px-5 py-4">
+              <FilterBar />
               <Outlet />
             </div>
 
@@ -114,6 +118,7 @@ export default function CustomerHealthLayout() {
         )}
       </ImpactDrawerProvider>
       </CorrelationProvider>
+      </FilterProvider>
     </div>
   );
 }

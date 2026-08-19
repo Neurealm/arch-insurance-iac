@@ -6,7 +6,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { regions } from "./data";
 import { statusStyles, useImpactDrawer } from "./primitives";
-import { useCorrelation } from "./correlation";
+import { useObjectHighlight } from "./filters";
 import type { RegionRow } from "./types";
 
 function HoverCard({ r }: { r: RegionRow }) {
@@ -51,7 +51,7 @@ function RegionMarker({
 }) {
   const infra = statusStyles[r.infraStatus];
   const svc = statusStyles[r.serviceStatus];
-  const { bind, className: corrClass } = useCorrelation(`region:${r.id}`);
+  const { bind, className: corrClass } = useObjectHighlight(`region:${r.id}`);
   return (
     <div className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${r.x}%`, top: `${r.y}%` }}>
       <button
@@ -118,7 +118,7 @@ function RegionListItem({
   infra: (typeof statusStyles)[keyof typeof statusStyles];
   svc: (typeof statusStyles)[keyof typeof statusStyles];
 }) {
-  const { bind, className: corrClass } = useCorrelation(`region:${r.id}`);
+  const { bind, className: corrClass } = useObjectHighlight(`region:${r.id}`);
   return (
     <li className="relative">
       <button
