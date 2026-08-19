@@ -471,6 +471,16 @@ const CustomerHealthSlos = lazy(() => import("./pages/customer-health/Slos.tsx")
 const CustomerHealthReports = lazy(() => import("./pages/customer-health/Reports.tsx"));
 const CustomerHealthAlerts = lazy(() => import("./pages/customer-health/Alerts.tsx"));
 const CustomerHealthSettings = lazy(() => import("./pages/customer-health/Settings.tsx"));
+const DcfLayout = lazy(() => import("./pages/direct-commerce/DcfLayout.tsx"));
+const DcfOverview = lazy(() => import("./pages/direct-commerce/Overview.tsx"));
+const DcfOrders = lazy(() => import("./pages/direct-commerce/Orders.tsx"));
+const DcfEntitlements = lazy(() => import("./pages/direct-commerce/Entitlements.tsx"));
+const DcfLifterFulfillment = lazy(() => import("./pages/direct-commerce/LifterFulfillment.tsx"));
+const DcfProvisioning = lazy(() => import("./pages/direct-commerce/Provisioning.tsx"));
+const DcfReconciliation = lazy(() => import("./pages/direct-commerce/Reconciliation.tsx"));
+const DcfCustomerTimeline = lazy(() => import("./pages/direct-commerce/CustomerTimeline.tsx"));
+const DcfCatalog = lazy(() => import("./pages/direct-commerce/Catalog.tsx"));
+const DcfIntegrations = lazy(() => import("./pages/direct-commerce/Integrations.tsx"));
 import NocLayout from "./pages/agentic-sre-noc/NocLayout.tsx";
 import NocPage from "./pages/agentic-sre-noc/NocPage.tsx";
 import GlobalOpticalOperationsCenter from "./pages/agentic-sre-noc/GlobalOpticalOperationsCenter.tsx";
@@ -1019,6 +1029,18 @@ const App = () => (
             <Route path="reports" element={<CustomerHealthReports />} />
             <Route path="alerts" element={<CustomerHealthAlerts />} />
             <Route path="settings" element={<CustomerHealthSettings />} />
+          </Route>
+
+          <Route path="/direct-commerce" element={<DcfLayout />}>
+            <Route index element={<DcfOverview />} />
+            <Route path="orders" element={<DcfOrders />} />
+            <Route path="entitlements" element={<DcfEntitlements />} />
+            <Route path="lifter-fulfillment" element={<DcfLifterFulfillment />} />
+            <Route path="provisioning" element={<DcfProvisioning />} />
+            <Route path="reconciliation" element={<DcfReconciliation />} />
+            <Route path="timeline" element={<DcfCustomerTimeline />} />
+            <Route path="catalog" element={<DcfCatalog />} />
+            <Route path="integrations" element={<DcfIntegrations />} />
           </Route>
 
           <Route element={<SreLayout />}>

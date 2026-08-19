@@ -220,6 +220,13 @@ const tree: Node[] = [
     to: "/commercial",
   },
   {
+    key: "dcf",
+    label: "Direct Commerce Fulfillment",
+    icon: Package,
+    to: "/direct-commerce",
+    pill: "NEW",
+  },
+  {
     key: "platform",
     label: "Platform",
     icon: ShieldCheck,
