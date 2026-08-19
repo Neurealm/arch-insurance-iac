@@ -6,10 +6,11 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail, RegionDetail } from "./types";
+import type { CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail, RegionDetail, RiskDetail } from "./types";
 import { getImpactContext } from "./data";
-import { impactStyles, statusStyles, StatusChip } from "./primitives";
+import { impactStyles, Sparkline, statusStyles, StatusChip } from "./primitives";
 import { classificationStyles } from "./eventDetail";
+import { riskLevelStyles, trendStyles } from "./RiskEarlyWarningPanel";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -486,6 +487,120 @@ function DeploymentSections({ d, onDrill }: { d: DeploymentDetail; onDrill: (id:
   );
 }
 
+/* --------------------- risk-specific drawer sections ---------------------- */
+
+function RiskSections({ r }: { r: RiskDetail }) {
+  const trend = trendStyles[r.trend];
+  const health = statusStyles[r.currentHealthStatus];
+  return (
+    <>
+      <Section title="Current risk">
+        <div className="grid grid-cols-2 gap-2">
+          <div className={cn("rounded-lg border px-3 py-2.5", riskLevelStyles[r.level])}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] opacity-75">Current risk</div>
+            <div className="text-[17px] font-semibold uppercase tracking-tight">{r.level}</div>
+          </div>
+          <div className={cn("rounded-lg border px-3 py-2.5", impactStyles[r.currentImpact])}>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] opacity-75">Current customer impact</div>
+            <div className="text-[17px] font-semibold uppercase tracking-tight">NONE</div>
+          </div>
+        </div>
+        <div className="mt-2 flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+          <span className={cn("h-2 w-2 shrink-0 rounded-full", health.dot)} aria-hidden />
+          <span className={cn("text-[12.5px] font-medium", health.text)}>{r.currentHealthLabel}</span>
+        </div>
+        <p className="mt-2 text-[11.5px] leading-snug text-slate-500">
+          Risk is forward-looking. A healthy service can carry elevated risk — this describes what could
+          potentially develop, not something that has already reached your users.
+        </p>
+      </Section>
+
+      <Section title={`Why risk is ${r.level.toLowerCase()}`}>
+        <ul className="space-y-2">
+          {r.contributingSignals.map((s) => (
+            <li key={s.label} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-[12px] text-slate-500">{s.label}</span>
+                <span className={cn("text-right text-[12.5px] font-semibold", statusStyles[s.status].text)}>{s.value}</span>
+              </div>
+              <div className="mt-1 text-[10.5px] font-medium uppercase tracking-[0.1em] text-slate-400">
+                {s.raisesRisk ? "Raises risk" : "Does not raise risk"}
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-[11.5px] leading-snug text-slate-500">
+          These are correlated signals observed together. Individually none of them is customer-facing.
+        </p>
+      </Section>
+
+      <Section title="What could happen?">
+        <p className="text-[13px] leading-relaxed text-slate-600">{r.whatCouldHappen}</p>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Estimated exposure</div>
+            <div className="text-[14px] font-semibold text-slate-900">{r.estimatedExposure}</div>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+            <div className="text-[10.5px] text-slate-500">Confidence</div>
+            <div className="text-[14px] font-semibold tabular-nums text-slate-900">{r.confidence}%</div>
+          </div>
+        </div>
+        <p className="mt-1.5 text-[11px] leading-snug text-slate-500">{r.confidenceNote}</p>
+      </Section>
+
+      <Section title="Observed trend">
+        <div className={cn("flex items-center gap-1.5 text-[13px] font-semibold", trend.text)}>
+          <trend.Icon className="h-4 w-4 shrink-0" aria-hidden />
+          {r.trend}
+        </div>
+        <Sparkline points={r.spark} status={r.levelStatus} className="mt-1.5" />
+        <p className="mt-1 text-[11.5px] leading-snug text-slate-500">{r.trendNote}</p>
+      </Section>
+
+      <Section title="Affected deployments">
+        <ul className="space-y-2">
+          {r.affectedDeployments.map((d) => (
+            <li key={d.name} className="flex items-start gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", statusStyles[d.status].dot)} aria-hidden />
+              <div className="min-w-0">
+                <div className="text-[12.5px] font-medium text-slate-900">{d.name}</div>
+                <div className="text-[11.5px] text-slate-500">{d.note}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Preventive actions">
+        <ul className="space-y-1.5">
+          {r.preventiveActions.map((a) => (
+            <li key={a.label} className="flex items-start gap-2 text-[12.5px] leading-snug text-slate-600">
+              <span
+                className={cn("mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full", a.done ? "bg-emerald-500" : "bg-sky-400")}
+                aria-hidden
+              />
+              <span>
+                {a.label}
+                {!a.done && <span className="text-slate-400"> · standing by</span>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Customer action">
+        <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3.5 py-3">
+          <div className="text-[13px] font-semibold text-emerald-700">{r.customerAction}</div>
+          <p className="mt-1 text-[12px] leading-relaxed text-slate-600">
+            We will contact you directly if this emerging condition begins to affect your service.
+          </p>
+        </div>
+      </Section>
+    </>
+  );
+}
+
 export function CustomerImpactDrawer({
   context, onClose,
 }: { context: CustomerImpactContext | null; onClose: () => void }) {
@@ -548,14 +663,15 @@ export function CustomerImpactDrawer({
           {current.dependency && <DependencySections d={current.dependency} onDrill={drill} />}
           {current.event && <EventSections e={current.event} />}
           {current.region && <RegionSections r={current.region} onDrill={drill} />}
+          {current.risk && <RiskSections r={current.risk} />}
 
-          {!current.deployment && !current.dependency && !current.event && !current.region && !current.region && (
+          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.region && (
           <Section title="What is happening?">
             <p className="text-[13px] leading-relaxed text-slate-600">{current.whatIsHappening}</p>
           </Section>
           )}
 
-          {!current.deployment && !current.dependency && !current.event && !current.region && !current.region && (
+          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.region && (
           <Section title="Does this affect me?">
             <div className={cn("rounded-lg border px-3.5 py-3", impactStyles[current.impact])}>
               <div className="text-[16px] font-semibold tracking-tight">{current.impact}</div>
@@ -567,7 +683,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.dependency && !current.event && !current.region && (
+          {!current.dependency && !current.event && !current.region && !current.risk && (
           <Section title="What of mine is affected?">
             <ul className="space-y-2">
               {current.affected.map((a) => (
@@ -629,7 +745,7 @@ export function CustomerImpactDrawer({
             </Section>
           ))}
 
-          {!current.dependency && !current.event && !current.region && (
+          {!current.dependency && !current.event && !current.region && !current.risk && (
           <Section title="What are we seeing?">
             <ul className="space-y-2">
               {current.signals.map((s) => (
@@ -645,7 +761,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.dependency && !current.event && !current.region && (
+          {!current.dependency && !current.event && !current.region && !current.risk && (
           <Section title="What is being done?">
             <ul className="space-y-1.5">
               {current.whatIsBeingDone.map((w) => (
@@ -658,7 +774,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.deployment && !current.dependency && !current.event && !current.region && !current.region && (
+          {!current.deployment && !current.dependency && !current.event && !current.region && !current.risk && !current.region && (
           <Section title="Do I need to do anything?">
             <div
               className={cn(
@@ -676,7 +792,7 @@ export function CustomerImpactDrawer({
           </Section>
           )}
 
-          {!current.event && !current.region && (
+          {!current.event && !current.region && !current.risk && (
           <Section title="Timeline">
             <ol className="space-y-0">
               {current.timeline.map((t, i) => (

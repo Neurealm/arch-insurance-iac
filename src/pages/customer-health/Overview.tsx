@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import DependencyHealthPanel from "./DependencyHealthPanel";
 import { RegionList, RegionMap } from "./RegionHealthPanel";
+import { RiskTiles } from "./RiskEarlyWarningPanel";
 import { EventCard } from "./EventCards";
 import { useEventFeed } from "./useEventFeed";
 import { cn } from "@/lib/utils";
@@ -153,22 +154,12 @@ export default function CustomerHealthOverview() {
 
       {/* Risk / SLO / changes */}
       <div className="grid gap-4 xl:grid-cols-3">
-        <Panel title="Risk & Early Warning" subtitle="Proactive risk signals for your environment">
-          <div className="grid grid-cols-2 gap-3">
-            {risks.map((r) => (
-              <Interactive
-                key={r.id}
-                tooltip="A prediction of how likely this area is to affect your users in the near future — not a statement that it already has."
-                onClick={() => open(r.contextId)}
-                className="rounded-lg border border-slate-200 px-3 py-2.5"
-              >
-                <div className="text-[11px] text-slate-500">{r.label}</div>
-                <div className={cn("text-[14px] font-semibold", statusStyles[r.status].text)}>{r.level}</div>
-                <Sparkline points={r.spark} status={r.status} className="mt-1" />
-              </Interactive>
-            ))}
-          </div>
-          <p className="mt-2.5 text-[10.5px] text-slate-500">Risk is calculated using predictive analysis and historical patterns.</p>
+        <Panel title="Risk & Early Warning" subtitle="Forward-looking risk — separate from current health">
+          <RiskTiles onOpen={open} />
+          <p className="mt-2.5 text-[10.5px] leading-snug text-slate-500">
+            Risk describes an elevated probability of future impact based on observed trends. A service can be
+            healthy today and still carry elevated risk. Nothing here predicts an outage with certainty.
+          </p>
         </Panel>
 
         <Panel title="SLO Status" subtitle="Your service level objectives">

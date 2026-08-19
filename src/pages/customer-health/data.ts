@@ -5,6 +5,7 @@ import { kpiContexts, kpiOverlays } from "./kpiDetail";
 import { deploymentDetails } from "./deploymentDetail";
 import { dependencyDetails } from "./dependencyDetail";
 import { regionDetails } from "./regionDetail";
+import { riskDetails, riskSignals } from "./riskDetail";
 import { eventDetails } from "./eventDetail";
 import type {
   AlertRule, ChangeRecord, CustomerImpactContext, DependencyRow, DeploymentCard,
@@ -249,12 +250,7 @@ export const slos: SloRow[] = [
   { id: "slo-durability", name: "Durability SLO", target: "99.999%", current: "100%", attainment: 100, errorBudget: 100, status: "healthy", contextId: "slo-durability" },
 ];
 
-export const risks: RiskSignal[] = [
-  { id: "risk-overall", label: "Overall Risk", level: "Low", status: "healthy", spark: [30, 28, 32, 29, 27, 31, 28, 26, 29, 27, 25, 28], contextId: "risk-overall" },
-  { id: "risk-storage", label: "Storage Risk", level: "Elevated", status: "degraded", spark: [34, 40, 52, 47, 61, 58, 70, 64, 72, 68, 74, 71], contextId: "risk-storage" },
-  { id: "risk-compute", label: "Compute Risk", level: "Low", status: "healthy", spark: [26, 29, 27, 30, 28, 26, 29, 27, 30, 28, 26, 27], contextId: "risk-compute" },
-  { id: "risk-network", label: "Network Risk", level: "Low", status: "healthy", spark: [24, 27, 25, 28, 26, 24, 27, 25, 28, 26, 25, 26], contextId: "risk-network" },
-];
+export const risks: RiskSignal[] = riskSignals;
 
 export const changes: ChangeRecord[] = [
   { id: "chg-az", title: "Azure Maintenance – West US 2", window: "Jun 6, 02:00 – 06:00 AM PT", potentialImpact: "Low", kind: "Provider maintenance", contextId: "chg-azure-westus2" },
@@ -880,6 +876,18 @@ export const impactContexts: Record<string, CustomerImpactContext> = {
     timeline: [{ stage: "Latest observation", at: "8m ago", note: "Risk low." }],
     technical: [{ label: "Score", value: "15 / 100" }],
   },
+  "risk-regional": {
+    id: "risk-regional", title: "Regional Risk", subtitle: "Moderate — concentrated in one region",
+    infrastructureStatus: "advisory", infrastructureNote: "One of six regions carries an open provider advisory.",
+    impact: "NO CURRENT IMPACT",
+    whatIsHappening: "One region you deploy into has an open provider advisory. Your service there is still healthy, but the risk model rates regional exposure as moderate while the advisory remains open.",
+    affected: [{ label: "Production – West US 2", detail: "In the region carrying the advisory", status: "advisory" }],
+    signals: [{ label: "Regions with an open advisory", value: "1 of 6", status: "advisory", interpretation: "Exposure is concentrated rather than widespread." }],
+    whatIsBeingDone: ["Cross-region comparison running", "Regional traffic rebalancing armed"],
+    customerAction: noAction, noActionRequired: true,
+    timeline: [{ stage: "Latest observation", at: "6m ago", note: "Advisory scope unchanged." }],
+    technical: [{ label: "Score", value: "49 / 100 (moderate band 40–59)" }],
+  },
   "chg-azure-westus2": {
     id: "chg-azure-westus2", title: "Azure Maintenance – West US 2", subtitle: "Jun 6, 02:00 – 06:00 AM PT",
     infrastructureStatus: "info", infrastructureNote: "Provider maintenance on host infrastructure.",
@@ -1033,6 +1041,8 @@ export function getImpactContext(id: string): CustomerImpactContext {
   if (dependency) return { ...merged, dependency, title: dependency.headline, subtitle: dependency.conditionLabel };
   const region = regionDetails[base.id];
   if (region) return { ...merged, region, title: region.headline };
+  const risk = riskDetails[base.id];
+  if (risk) return { ...merged, risk, title: `${risk.headline} – ${risk.level}`, subtitle: "Forward-looking risk signal — separate from current health" };
   const event = eventDetails[base.id];
   if (event) return { ...merged, event, title: event.headline, subtitle: `${event.classification} · Next update ${event.nextUpdate}` };
   return merged;
