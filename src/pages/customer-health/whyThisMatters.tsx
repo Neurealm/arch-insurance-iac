@@ -122,7 +122,12 @@ export function buildWhy(objectKey: string): WhyExplanation | null {
         ? `this layer is behaving normally`
         : `the ${d.status === "at-risk" ? "watch condition" : "condition"} observed in ${source}`;
     currentStatus = d.status;
-    currentResult = d.customerRelevance ?? "Behaving within expectations.";
+    currentResult =
+      d.status === "healthy"
+        ? "This layer is operating normally and your service is unaffected."
+        : d.status === "at-risk"
+          ? "The condition is being tracked; your service continues to run normally."
+          : "The condition is absorbed by the layers above it — your service remains available.";
     customerImpact = d.status === "healthy" ? "None." : "None reaching your users at this time.";
     if (deps.length === 0) {
       deps = deployments.filter((x) => relatedKeys(`deployment:${x.id}`).has(objectKey));
