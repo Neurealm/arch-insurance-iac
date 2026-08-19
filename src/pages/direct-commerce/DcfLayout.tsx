@@ -1,7 +1,7 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
 import {
   Home, LayoutDashboard, ShoppingCart, KeyRound, Repeat, Cloud, Scale,
-  GitBranch, BookOpen, Plug, ShieldCheck,
+  GitBranch, BookOpen, Plug, ShieldCheck, Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
