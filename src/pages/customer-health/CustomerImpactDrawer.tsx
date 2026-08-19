@@ -8,10 +8,9 @@ import { ArrowLeft, ChevronDown, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CustomerImpactContext, DependencyDetail, DeploymentDetail, EventDetail, RegionDetail, RiskDetail } from "./types";
 import { getImpactContext } from "./data";
-import { impactStyles, statusStyles, StatusChip } from "./primitives";
+import { impactStyles, Sparkline, statusStyles, StatusChip } from "./primitives";
 import { classificationStyles } from "./eventDetail";
 import { riskLevelStyles, trendStyles } from "./RiskEarlyWarningPanel";
-import { Sparkline } from "./primitives";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
