@@ -155,7 +155,7 @@ export default function ExperienceFeedback() {
             </div>
           ) : (
             <div
-              className="w-full text-center motion-safe:animate-scale-in"
+              className="w-full text-center motion-safe:animate-fade-in"
               role="status"
               aria-live="polite"
             >
