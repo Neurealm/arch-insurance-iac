@@ -26,15 +26,16 @@ export default defineConfig(({ mode }) => ({
       cache: false,
       output: {
         // Route-level React.lazy in src/App.tsx does the application splitting.
-        // Only heavy third-party libraries are pinned to their own chunks so
-        // they are not duplicated across route chunks.
+        // Only the heaviest third-party libraries are pinned. Let Rollup place
+        // everything else beside its lazy route instead of creating one very
+        // large catch-all vendor chunk that can exhaust preview build memory.
         manualChunks(id: string) {
           if (!id.includes("node_modules")) return undefined;
           if (/maplibre-gl/.test(id)) return "vendor-maplibre";
           if (/three|@react-three/.test(id)) return "vendor-three";
           if (/recharts|d3-/.test(id)) return "vendor-charts";
           if (/react-dom|react-router|@tanstack/.test(id)) return "vendor-react";
-          return "vendor";
+          return undefined;
         },
       },
     },
