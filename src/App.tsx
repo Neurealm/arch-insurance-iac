@@ -476,6 +476,7 @@ const AutonomousRecoveryMonitor = lazy(() => import("./pages/agentic-sre-noc/Aut
 const GlhtProductionArchitecture = lazy(() => import("./pages/agentic-sre-noc/ProductionArchitecture.tsx"));
 const PredictiveOpticalLinkIntelligence = lazy(() => import("./pages/agentic-sre-noc/PredictiveOpticalLinkIntelligence.tsx"));
 const IacLayout = lazy(() => import("./pages/agentic-iac/IacLayout.tsx"));
+const AzureConnections = lazy(() => import("./pages/agentic-iac/AzureConnections.tsx"));
 const AssetDigitalTwin = lazy(() => import("./pages/agentic-iac/AssetDigitalTwin.tsx"));
 const RemediationIntelligence = lazy(() => import("./pages/agentic-iac/RemediationIntelligence.tsx"));
 const ChangeEngineering = lazy(() => import("./pages/agentic-iac/ChangeEngineering.tsx"));
@@ -902,7 +903,9 @@ const App = () => (
             <Route path="executive-value" element={<NocPage slug="executive-value" />} />
           </Route>
           <Route path="/agentic-iac-engineering" element={<IacLayout />}>
-            <Route index element={<AssetDigitalTwin />} />
+            <Route index element={<AzureConnections />} />
+            <Route path="connections" element={<AzureConnections />} />
+            <Route path="resources" element={<AssetDigitalTwin />} />
             <Route path="remediation-intelligence" element={<RemediationIntelligence />} />
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
             <Route path="change-engineering" element={<ChangeEngineering />} />
@@ -979,7 +982,9 @@ const App = () => (
 
 
           <Route path="/intelligent-iac" element={<IacLayout />}>
-            <Route index element={<AssetDigitalTwin />} />
+            <Route index element={<AzureConnections />} />
+            <Route path="connections" element={<AzureConnections />} />
+            <Route path="resources" element={<AssetDigitalTwin />} />
             <Route path="remediation-intelligence" element={<RemediationIntelligence />} />
             <Route path="remediation-intelligence/:assetId" element={<RemediationIntelligence />} />
             <Route path="change-engineering" element={<ChangeEngineering />} />

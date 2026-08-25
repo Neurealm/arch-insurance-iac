@@ -6,9 +6,11 @@ import {
   Network, Plug, KeyRound, Scale, SlidersHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 const NAV = [
-  { label: "Asset Digital Twin", to: "/agentic-iac-engineering", icon: Boxes, enabled: true },
+  { label: "Connections", to: "/agentic-iac-engineering/connections", icon: Plug, enabled: true },
+  { label: "Azure Resources", to: "/agentic-iac-engineering/resources", icon: Boxes, enabled: true },
   { label: "Remediation Intelligence", to: "/agentic-iac-engineering/remediation-intelligence/sql-prod-07", icon: Activity, enabled: true },
   { label: "Change Engineering", to: "/agentic-iac-engineering/change-engineering/sql-prod-07", icon: GitPullRequest, enabled: true },
   { label: "Change Review & Approval", to: "/intelligent-iac/change-review/CP-2026-01842", icon: ClipboardCheck, enabled: true },
@@ -30,8 +32,11 @@ const PLATFORM_NAV = [
 /** Module shell for Intelligent Infrastructure as Code (Agentic IaC Engineering). */
 export default function IacLayout() {
   const { pathname } = useLocation();
+  const { user, isAdmin } = useAuth();
   const [environment, setEnvironment] = useState("Production");
   const [query, setQuery] = useState("");
+  const displayName = user?.email ?? "Not signed in";
+  const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : "--";
 
   return (
     <div className="flex min-h-screen bg-[#F6F8FA] text-slate-900">
@@ -177,10 +182,10 @@ export default function IacLayout() {
             </button>
 
             <div className="flex items-center gap-2 border-l border-[#E2E8F0] pl-3">
-              <div className="grid h-7 w-7 place-items-center rounded-full bg-[#1B4F91] text-[11px] font-semibold text-white">JS</div>
+              <div className="grid h-7 w-7 place-items-center rounded-full bg-[#1B4F91] text-[11px] font-semibold text-white">{initials}</div>
               <div className="leading-tight">
-                <div className="text-[12px] font-medium text-slate-800">Jane Smith</div>
-                <div className="text-[10.5px] text-slate-500">Infrastructure Engineer</div>
+                <div className="max-w-[180px] truncate text-[12px] font-medium text-slate-800" title={displayName}>{displayName}</div>
+                <div className="text-[10.5px] text-slate-500">{isAdmin ? "Platform administrator" : "Platform user"}</div>
               </div>
             </div>
           </div>

@@ -35,14 +35,17 @@ function matches(node: RelatedNode, filter: Filter) {
 interface Props {
   selectedId: string | null;
   onSelect: (node: RelatedNode | null) => void;
+  assetName?: string;
+  assetType?: string;
+  nodes?: RelatedNode[];
 }
 
 /** Interactive infrastructure relationship graph centered on the asset. */
-export function RelationshipMap({ selectedId, onSelect }: Props) {
+export function RelationshipMap({ selectedId, onSelect, assetName = "PROD-WEB-023", assetType = "Azure Virtual Machine", nodes = relatedNodes }: Props) {
   const [filter, setFilter] = useState<Filter>("1 Hop");
   const [hovered, setHovered] = useState<RelatedNode | null>(null);
-  const visible = relatedNodes.filter((n) => matches(n, filter));
-  const selected = relatedNodes.find((n) => n.id === selectedId) ?? null;
+  const visible = nodes.filter((n) => matches(n, filter));
+  const selected = nodes.find((n) => n.id === selectedId) ?? null;
 
   return (
     <section className="flex h-full flex-col rounded-md border border-[#E2E8F0] bg-white">
@@ -86,8 +89,8 @@ export function RelationshipMap({ selectedId, onSelect }: Props) {
           {/* Center asset */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <div className="rounded-md border border-[#1B4F91] bg-white px-3 py-2 text-center shadow-sm">
-              <div className="text-[12px] font-semibold text-[#1B4F91]">PROD-WEB-023</div>
-              <div className="text-[10px] text-slate-500">Azure Virtual Machine</div>
+              <div className="max-w-[180px] truncate text-[12px] font-semibold text-[#1B4F91]">{assetName}</div>
+              <div className="text-[10px] text-slate-500">{assetType}</div>
             </div>
           </div>
 
