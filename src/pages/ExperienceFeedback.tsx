@@ -123,15 +123,14 @@ export default function ExperienceFeedback() {
                       "motion-safe:hover:-translate-y-1 motion-safe:hover:scale-[1.03]",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                       s.ring,
-                      "hover:" + "shadow-lg",
+                      "hover:shadow-lg",
                       s.value === 5 ? "sm:col-span-1 col-span-2" : "",
                     )}
                   >
                     <span
                       className={cn(
-                        "text-4xl font-semibold tabular-nums text-foreground transition-colors duration-300 group-hover:" +
-                          s.text.replace("text-", "text-"),
-                        "group-hover:" + s.text,
+                        "text-4xl font-semibold tabular-nums transition-transform duration-300 motion-safe:group-hover:scale-110",
+                        s.text,
                       )}
                     >
                       {s.value}
