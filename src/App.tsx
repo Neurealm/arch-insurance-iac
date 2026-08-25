@@ -155,6 +155,7 @@ const CoworkersApplicationSupport = lazy(() => import("./pages/CoworkersApplicat
 const HadoopHealthPrecheckAgent = lazy(() => import("./pages/coworkers/appsupport/HadoopHealthPrecheckAgent.tsx"));
 const IntegrationMonitoringAgent = lazy(() => import("./pages/coworkers/appsupport/IntegrationMonitoringAgent.tsx"));
 const EtlPipelineTraceCoworker = lazy(() => import("./pages/coworkers/appsupport/EtlPipelineTraceCoworker.tsx"));
+const ExperienceFeedback = lazy(() => import("./pages/ExperienceFeedback.tsx"));
 
 const VmwareCapacityContention = lazy(() => import("./pages/coworkers/infra/VmwareCapacityContention.tsx"));
 const ServerProvisioningDeprovisioning = lazy(() => import("./pages/coworkers/infra/ServerProvisioningDeprovisioning.tsx"));
@@ -504,6 +505,27 @@ const IamAdminPlaceholder = lazy(() => import("./pages/iam-admin/Placeholder.tsx
 const FinOpsAdminLayout = lazy(() => import("./pages/finops-admin/FinOpsAdminLayout.tsx"));
 const FinOpsAdminOverview = lazy(() => import("./pages/finops-admin/Overview.tsx"));
 const FinOpsAdminPlaceholder = lazy(() => import("./pages/finops-admin/Placeholder.tsx"));
+const CustomerHealthLayout = lazy(() => import("./pages/customer-health/CustomerHealthLayout.tsx"));
+const CustomerHealthOverview = lazy(() => import("./pages/customer-health/Overview.tsx"));
+const CustomerHealthDeployments = lazy(() => import("./pages/customer-health/Deployments.tsx"));
+const CustomerHealthEvents = lazy(() => import("./pages/customer-health/Events.tsx"));
+const CustomerHealthRegions = lazy(() => import("./pages/customer-health/Regions.tsx"));
+const CustomerHealthDependencies = lazy(() => import("./pages/customer-health/Dependencies.tsx"));
+const CustomerHealthSlos = lazy(() => import("./pages/customer-health/Slos.tsx"));
+const CustomerHealthReports = lazy(() => import("./pages/customer-health/Reports.tsx"));
+const CustomerHealthAlerts = lazy(() => import("./pages/customer-health/Alerts.tsx"));
+const CustomerHealthSettings = lazy(() => import("./pages/customer-health/Settings.tsx"));
+const DcfLayout = lazy(() => import("./pages/direct-commerce/DcfLayout.tsx"));
+const DcfOverview = lazy(() => import("./pages/direct-commerce/Overview.tsx"));
+const DcfOrders = lazy(() => import("./pages/direct-commerce/Orders.tsx"));
+const DcfEntitlements = lazy(() => import("./pages/direct-commerce/Entitlements.tsx"));
+const DcfLifterFulfillment = lazy(() => import("./pages/direct-commerce/LifterFulfillment.tsx"));
+const DcfProvisioning = lazy(() => import("./pages/direct-commerce/Provisioning.tsx"));
+const DcfReconciliation = lazy(() => import("./pages/direct-commerce/Reconciliation.tsx"));
+const DcfCustomerTimeline = lazy(() => import("./pages/direct-commerce/CustomerTimeline.tsx"));
+const DcfCatalog = lazy(() => import("./pages/direct-commerce/Catalog.tsx"));
+const DcfIntegrations = lazy(() => import("./pages/direct-commerce/Integrations.tsx"));
+const DcfWorkflowOverview = lazy(() => import("./pages/direct-commerce/WorkflowOverview.tsx"));
 
 
 
@@ -677,6 +699,7 @@ const App = () => (
           
 
           <Route path="/coworkers" element={<Coworkers />} />
+          <Route path="/experience-feedback" element={<ExperienceFeedback />} />
           <Route path="/coworkers/network-connectivity-engineering" element={<CoworkersNetwork />} />
           <Route path="/coworkers/site-reliability-engineering" element={<CoworkersSRE />} />
           <Route path="/coworkers/identity-access-management" element={<CoworkersIAM />} />
@@ -1006,7 +1029,34 @@ const App = () => (
 
 
 
+          <Route path="/customer-health" element={<CustomerHealthLayout />}>
+            <Route index element={<CustomerHealthOverview />} />
+            <Route path="deployments" element={<CustomerHealthDeployments />} />
+            <Route path="events" element={<CustomerHealthEvents />} />
+            <Route path="regions" element={<CustomerHealthRegions />} />
+            <Route path="dependencies" element={<CustomerHealthDependencies />} />
+            <Route path="slos" element={<CustomerHealthSlos />} />
+            <Route path="reports" element={<CustomerHealthReports />} />
+            <Route path="alerts" element={<CustomerHealthAlerts />} />
+            <Route path="settings" element={<CustomerHealthSettings />} />
+          </Route>
+
+          <Route path="/direct-commerce" element={<DcfLayout />}>
+            <Route index element={<DcfOverview />} />
+            <Route path="orders" element={<DcfOrders />} />
+            <Route path="entitlements" element={<DcfEntitlements />} />
+            <Route path="lifter-fulfillment" element={<DcfLifterFulfillment />} />
+            <Route path="provisioning" element={<DcfProvisioning />} />
+            <Route path="reconciliation" element={<DcfReconciliation />} />
+            <Route path="timeline" element={<DcfCustomerTimeline />} />
+            <Route path="catalog" element={<DcfCatalog />} />
+            <Route path="integrations" element={<DcfIntegrations />} />
+          </Route>
+          <Route path="/direct-commerce/workflow-overview" element={<DcfWorkflowOverview />} />
+
+
           <Route element={<SreLayout />}>
+
             <Route path="/prod-resilience-twin" element={<ProdResilienceTwin />} />
             <Route path="/product-line-map" element={<ProductLineMap />} />
             <Route path="/golden-workflow-map" element={<GoldenWorkflowMap />} />
