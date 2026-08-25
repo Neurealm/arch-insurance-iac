@@ -227,6 +227,13 @@ const tree: Node[] = [
     pill: "NEW",
   },
   {
+    key: "experience-feedback",
+    label: "Experience Feedback",
+    icon: Smile,
+    to: "/experience-feedback",
+    exact: true,
+  },
+  {
     key: "platform",
     label: "Platform",
     icon: ShieldCheck,

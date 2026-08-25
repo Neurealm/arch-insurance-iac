@@ -141,6 +141,7 @@ import TechnologyProfilePage from "./pages/admin/technology-taxonomy/TechnologyP
 import DomainsPage from "./pages/admin/technology-taxonomy/domains/DomainsPage.tsx";
 import DomainProfilePage from "./pages/admin/technology-taxonomy/domains/DomainProfilePage.tsx";
 import Coworkers from "./pages/Coworkers.tsx";
+const ExperienceFeedback = lazy(() => import("./pages/ExperienceFeedback.tsx"));
 import CoworkersNetwork from "./pages/CoworkersNetwork.tsx";
 import CoworkersSRE from "./pages/CoworkersSRE.tsx";
 import CoworkersIAM from "./pages/CoworkersIAM.tsx";
@@ -698,6 +699,7 @@ const App = () => (
           
 
           <Route path="/coworkers" element={<Coworkers />} />
+          <Route path="/experience-feedback" element={<ExperienceFeedback />} />
           <Route path="/coworkers/network-connectivity-engineering" element={<CoworkersNetwork />} />
           <Route path="/coworkers/site-reliability-engineering" element={<CoworkersSRE />} />
           <Route path="/coworkers/identity-access-management" element={<CoworkersIAM />} />
