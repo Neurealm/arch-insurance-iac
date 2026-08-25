@@ -699,6 +699,7 @@ const App = () => (
           
 
           <Route path="/coworkers" element={<Coworkers />} />
+          <Route path="/experience-feedback" element={<ExperienceFeedback />} />
           <Route path="/coworkers/network-connectivity-engineering" element={<CoworkersNetwork />} />
           <Route path="/coworkers/site-reliability-engineering" element={<CoworkersSRE />} />
           <Route path="/coworkers/identity-access-management" element={<CoworkersIAM />} />
