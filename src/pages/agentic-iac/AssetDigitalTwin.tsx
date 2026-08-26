@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlertCircle, CheckCircle2, ChevronDown, ChevronRight, Code2, RefreshCw, Server, Tags, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RelationshipMap } from "./RelationshipMap";
@@ -79,6 +79,8 @@ function nodesFromVm(vm: AzureVirtualMachine): RelatedNode[] {
 }
 
 export default function AssetDigitalTwin() {
+  const { vmName } = useParams<{ vmName: string }>();
+  const navigate = useNavigate();
   const [openSections, setOpenSections] = useState<string[]>(configSections.map((section) => section.key));
   const [category, setCategory] = useState<ActionCategory>("Compute");
   const [selectedAction, setSelectedAction] = useState<AssetAction | null>(null);
@@ -92,7 +94,10 @@ export default function AssetDigitalTwin() {
   const [lastDiscovered, setLastDiscovered] = useState(asset.lastDiscovered);
   const [rawStateOpen, setRawStateOpen] = useState(false);
 
-  const selectedVm = virtualMachines.find((vm) => vm.id === selectedVmId) ?? virtualMachines[0] ?? null;
+  const selectedVm = virtualMachines.find((vm) => vm.name === vmName)
+    ?? virtualMachines.find((vm) => vm.id === selectedVmId)
+    ?? virtualMachines[0]
+    ?? null;
   const liveAzure = !!selectedVm;
   const assetView = selectedVm ? assetFromVm(selectedVm) : asset;
   const configuration = selectedVm ? configurationFromVm(selectedVm) : configSections;
@@ -110,7 +115,10 @@ export default function AssetDigitalTwin() {
     try {
       const resources = await listAzureVirtualMachines();
       setVirtualMachines(resources);
-      setSelectedVmId((current) => resources.some((vm) => vm.id === current) ? current : resources[0]?.id ?? null);
+      setSelectedVmId((current) => {
+        const routeVm = vmName ? resources.find((vm) => vm.name === vmName) : undefined;
+        return routeVm?.id ?? (resources.some((vm) => vm.id === current) ? current : resources[0]?.id ?? null);
+      });
       setLastDiscovered(`Live Azure refresh · ${now()}`);
       if (!resources.length) setConnectionError("Azure returned no virtual machines in the pilot scope.");
     } catch (error) {
@@ -118,7 +126,7 @@ export default function AssetDigitalTwin() {
     } finally {
       setLoadingAzure(false);
     }
-  }, []);
+  }, [vmName]);
 
   useEffect(() => { void refreshAzure(); }, [refreshAzure]);
   useEffect(() => { setOpenSections((current) => [...new Set([...current, ...configuration.map((section) => section.key)])]); }, [configuration]);
@@ -147,7 +155,7 @@ export default function AssetDigitalTwin() {
             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-slate-500"><span>{assetView.assetType}</span><span>·</span><span>{assetView.os}</span><span>·</span><span>{assetView.workload}</span></div>
           </div>
           <div className="ml-auto flex flex-wrap items-center gap-2">
-            {virtualMachines.length > 1 && <select value={selectedVm?.id ?? ""} onChange={(event) => setSelectedVmId(event.target.value)} className="h-8 max-w-[220px] rounded-md border border-[#E2E8F0] bg-white px-2 text-[12px] text-slate-700">{virtualMachines.map((vm) => <option key={vm.id} value={vm.id}>{vm.name}</option>)}</select>}
+            {virtualMachines.length > 1 && <select value={selectedVm?.id ?? ""} onChange={(event) => { const vm = virtualMachines.find((item) => item.id === event.target.value); if (vm) navigate(`/agentic-iac-engineering/resources/virtual-machines/${encodeURIComponent(vm.name)}`); }} className="h-8 max-w-[220px] rounded-md border border-[#E2E8F0] bg-white px-2 text-[12px] text-slate-700">{virtualMachines.map((vm) => <option key={vm.id} value={vm.id}>{vm.name}</option>)}</select>}
             <button type="button" onClick={() => void refreshAzure()} disabled={loadingAzure} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] px-2.5 text-[12px] text-slate-700 hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60"><RefreshCw className={cn("h-3.5 w-3.5", loadingAzure && "animate-spin")} />Refresh Twin</button>
             <button type="button" onClick={() => setRawStateOpen(true)} disabled={!selectedVm} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] px-2.5 text-[12px] text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"><Code2 className="h-3.5 w-3.5" />View Raw State</button>
             <button type="button" disabled className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] px-2.5 text-[12px] text-slate-400"><Tags className="h-3.5 w-3.5" />Edit Tags</button>

@@ -23,6 +23,18 @@ export type AzureVirtualMachine = {
   raw: Record<string, unknown>;
 };
 
+export type AzureResource = {
+  id: string;
+  name: string;
+  type: string;
+  kind: string | null;
+  location: string;
+  subscriptionId: string;
+  subscriptionName: string;
+  resourceGroup: string;
+  tags: Record<string, string>;
+};
+
 export class AzureControlPlaneError extends Error {
   constructor(message: string, readonly status?: number) {
     super(message);
@@ -106,6 +118,24 @@ async function authenticatedGet(path: string): Promise<unknown> {
 
 export async function listAzureVirtualMachines(): Promise<AzureVirtualMachine[]> {
   return responseItems(await authenticatedGet("/api/v1/virtual-machines")).map(normalizeVm);
+}
+
+export async function listAzureResources(): Promise<AzureResource[]> {
+  return responseItems(await authenticatedGet("/api/v1/resources")).flatMap((value) => {
+    const raw = record(value);
+    if (typeof raw.id !== "string" || typeof raw.name !== "string" || typeof raw.type !== "string") return [];
+    return [{
+      id: raw.id,
+      name: raw.name,
+      type: raw.type,
+      kind: typeof raw.kind === "string" ? raw.kind : null,
+      location: text(raw.location),
+      subscriptionId: text(raw.subscriptionId),
+      subscriptionName: text(raw.subscriptionName),
+      resourceGroup: text(raw.resourceGroup),
+      tags: normalizeTags(raw.tags),
+    }];
+  });
 }
 
 export async function getAzureScopes(): Promise<Record<string, unknown>> {
