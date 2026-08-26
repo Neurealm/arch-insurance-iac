@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { LazyRouteBoundary } from "@/components/routing/LazyRouteBoundary";
+import { RequireAuth } from "@/components/routing/RequireAuth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
