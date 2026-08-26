@@ -94,10 +94,11 @@ export default function AssetDigitalTwin() {
   const [lastDiscovered, setLastDiscovered] = useState(asset.lastDiscovered);
   const [rawStateOpen, setRawStateOpen] = useState(false);
 
-  const selectedVm = virtualMachines.find((vm) => vm.name === vmName)
-    ?? virtualMachines.find((vm) => vm.id === selectedVmId)
-    ?? virtualMachines[0]
-    ?? null;
+  const matchedVm = vmName ? virtualMachines.find((vm) => vm.name === vmName) ?? null : null;
+  const selectedVm = vmName
+    ? matchedVm
+    : virtualMachines.find((vm) => vm.id === selectedVmId) ?? virtualMachines[0] ?? null;
+  const vmNotFound = !!vmName && !loadingAzure && !connectionError && virtualMachines.length > 0 && !matchedVm;
   const liveAzure = !!selectedVm;
   const assetView = selectedVm ? assetFromVm(selectedVm) : asset;
   const configuration = selectedVm ? configurationFromVm(selectedVm) : configSections;
@@ -138,7 +139,7 @@ export default function AssetDigitalTwin() {
   return (
     <div className="px-4 py-3">
       <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1 text-[11.5px] text-slate-500">
-        <Link to="/agentic-iac-engineering/resources" className="hover:text-slate-800">Azure Resources</Link><span>/</span><span>Virtual Machines</span><span>/</span><span className="font-medium text-slate-800">{assetView.name}</span>
+        <Link to="/agentic-iac-engineering/resources" className="hover:text-slate-800">Azure Resources</Link><span>/</span><span>Virtual Machines</span><span>/</span><span className="font-medium text-slate-800">{vmName ?? assetView.name}</span>
       </nav>
 
       <section className="rounded-md border border-[#E2E8F0] bg-white">
@@ -166,6 +167,8 @@ export default function AssetDigitalTwin() {
       </section>
 
       {connectionError && <section className="mt-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" /><div><span className="font-semibold">Azure connection unavailable.</span> {connectionError} Sample data remains visible until a signed-in user can reach the Azure control plane.</div></section>}
+
+      {vmNotFound && <section className="mt-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" /><div><span className="font-semibold">Virtual machine "{vmName}" was not found.</span> It may have been renamed, deleted, or fall outside the discovered pilot scope. Sample data is shown below — <Link to="/agentic-iac-engineering/resources" className="font-medium underline">return to Azure Resources</Link> to pick a valid machine.</div></section>}
 
       <section className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1.5 rounded-md border border-[#E2E8F0] bg-white px-4 py-2">
         {liveAzure ? <><Metric label="Connection" value="Azure control plane" good /><Metric label="Discovery Freshness" value="Just now" /><Metric label="Source" value="Managed Identity" /></> : <><Metric label="Connection" value={loadingAzure ? "Connecting" : "Unavailable"} /><Metric label="Discovery" value="Sample data" /></>}
