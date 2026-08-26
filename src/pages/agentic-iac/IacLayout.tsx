@@ -130,13 +130,13 @@ export default function IacLayout() {
             <Settings className="h-4 w-4 shrink-0 text-slate-300" />
             <span>Settings</span>
           </div>
-          <Link
-            to="/app"
+          <a
+            href="https://neugain.io"
             className="mx-2 my-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[12px] text-slate-500 hover:bg-slate-50 hover:text-slate-800"
           >
             <Home className="h-4 w-4 shrink-0" />
-            <span>NeuGAIN Command Center</span>
-          </Link>
+            <span>Back to NeuGAIN Command Center</span>
+          </a>
         </div>
       </aside>
 
