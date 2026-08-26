@@ -46,13 +46,13 @@ export default function IacLayout() {
   return (
     <div className="flex min-h-screen bg-[#F6F8FA] text-slate-900">
       <aside className="sticky top-0 flex h-screen w-[232px] shrink-0 flex-col border-r border-[#E2E8F0] bg-white">
-        <Link
-          to="/app"
+        <a
+          href="https://neugain.io"
           className="flex items-center gap-2 border-b border-[#E2E8F0] px-4 py-2.5 text-[12px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900"
         >
           <Home className="h-4 w-4 shrink-0" />
-          <span>NeuGAIN Command Center</span>
-        </Link>
+          <span>Back to NeuGAIN Command Center</span>
+        </a>
 
         <div className="border-b border-[#E2E8F0] px-4 py-3.5">
           <div className="text-[11px] font-semibold uppercase leading-tight tracking-[0.12em] text-slate-500">
