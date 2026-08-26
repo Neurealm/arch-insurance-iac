@@ -28,5 +28,5 @@ export function detailPathFor(kind: ResourceKind, resourceName: string): string 
 
 /** Link target for a breadcrumb crumb that returns to the resource list, pre-filtered to this kind. */
 export function resourceListFilterLink(kind: ResourceKind): { pathname: string; search: string } {
-  return { pathname: "/agentic-iac-engineering/resources", search: `?q=${encodeURIComponent(kind.label)}` };
+  return { pathname: "/agentic-iac-engineering/resources", search: `?type=${encodeURIComponent(kind.azureType)}` };
 }
