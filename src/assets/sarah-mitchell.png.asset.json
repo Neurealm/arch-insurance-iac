@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "26a1ab24-6bb1-40d9-b85c-330161b1ffb7",
-  "project_id": "cf41b1c7-eed7-4ec8-8c7a-bb33fbe7ed6b",
-  "url": "/__l5e/assets-v1/26a1ab24-6bb1-40d9-b85c-330161b1ffb7/sarah-mitchell.png",
-  "r2_key": "a/v1/cf41b1c7-eed7-4ec8-8c7a-bb33fbe7ed6b/26a1ab24-6bb1-40d9-b85c-330161b1ffb7/sarah-mitchell.png",
-  "original_filename": "sarah-mitchell.png",
-  "size": 98706,
   "content_type": "image/png",
-  "created_at": "2026-06-14T22:34:39Z"
+  "created_at": "2026-06-14T22:34:39Z",
+  "original_filename": "sarah-mitchell.png",
+  "project_id": "f5f4b495-b12d-41eb-89db-c28cdf1bbe08",
+  "r2_key": "a/v1/f5f4b495-b12d-41eb-89db-c28cdf1bbe08/26a1ab24-6bb1-40d9-b85c-330161b1ffb7/sarah-mitchell.png",
+  "size": 98706,
+  "url": "/__l5e/assets-v1/26a1ab24-6bb1-40d9-b85c-330161b1ffb7/sarah-mitchell.png",
+  "version": 1
 }
