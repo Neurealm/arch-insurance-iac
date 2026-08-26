@@ -99,7 +99,7 @@ export default function ChangeReviewApproval() {
       <nav className="flex flex-wrap items-center gap-1 text-[11.5px] text-slate-500">
         <span>Assets</span><ChevronRight className="h-3 w-3" />
         <span>SQL Servers</span><ChevronRight className="h-3 w-3" />
-        <Link className="text-[#1B4F91] hover:underline" to="/agentic-iac-engineering">SQL-PROD-07</Link><ChevronRight className="h-3 w-3" />
+        <span>SQL-PROD-07</span><ChevronRight className="h-3 w-3" />
         <Link className="text-[#1B4F91] hover:underline" to="/agentic-iac-engineering/remediation-intelligence/sql-prod-07">Remediation Intelligence</Link><ChevronRight className="h-3 w-3" />
         <Link className="text-[#1B4F91] hover:underline" to="/agentic-iac-engineering/change-engineering/sql-prod-07">Change Engineering</Link><ChevronRight className="h-3 w-3" />
         <span className="font-medium text-slate-700">Change Review &amp; Approval</span>

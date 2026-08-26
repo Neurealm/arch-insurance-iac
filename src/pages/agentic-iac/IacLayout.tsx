@@ -29,6 +29,11 @@ const PLATFORM_NAV = [
 ];
 
 
+/** True while on `to` or a route drilled into from it, e.g. a resource's detail page. */
+function isSectionActive(pathname: string, to: string) {
+  return pathname === to || pathname.startsWith(`${to}/`);
+}
+
 /** Module shell for Intelligent Infrastructure as Code (Agentic IaC Engineering). */
 export default function IacLayout() {
   const { pathname } = useLocation();
@@ -62,7 +67,7 @@ export default function IacLayout() {
         <nav className="flex-1 overflow-y-auto py-2">
           {NAV.map((item) => {
             const Icon = item.icon;
-            const active = item.enabled && pathname === item.to;
+            const active = item.enabled && isSectionActive(pathname, item.to);
             if (!item.enabled) {
               return (
                 <div
@@ -99,7 +104,7 @@ export default function IacLayout() {
           </div>
           {PLATFORM_NAV.map((item) => {
             const Icon = item.icon;
-            const active = pathname === item.to;
+            const active = isSectionActive(pathname, item.to);
             return (
               <NavLink
                 key={item.label}

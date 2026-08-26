@@ -13,6 +13,12 @@ import {
   AzureControlPlaneError, listAzureVirtualMachines, vmDiskName, vmNicName,
   type AzureVirtualMachine,
 } from "./azureControlPlane";
+import { detailPathFor, resourceKindFor, resourceListFilterLink } from "./resourceKinds";
+
+// This page is the Digital Twin for one resource kind: Virtual Machines. A future
+// twin page for another kind (storage accounts, disks, ...) should look itself up
+// the same way rather than hardcoding its own label/route here.
+const VM_KIND = resourceKindFor("Microsoft.Compute/virtualMachines")!;
 
 function now() {
   return new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(new Date());
@@ -139,7 +145,7 @@ export default function AssetDigitalTwin() {
   return (
     <div className="px-4 py-3">
       <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1 text-[11.5px] text-slate-500">
-        <Link to="/agentic-iac-engineering/resources" className="hover:text-slate-800">Azure Resources</Link><span>/</span><span>Virtual Machines</span><span>/</span><span className="font-medium text-slate-800">{vmName ?? assetView.name}</span>
+        <Link to="/agentic-iac-engineering/resources" className="hover:text-slate-800">Azure Resources</Link><span>/</span><Link to={resourceListFilterLink(VM_KIND)} className="hover:text-slate-800">{VM_KIND.label}</Link><span>/</span><span className="font-medium text-slate-800">{vmName ?? assetView.name}</span>
       </nav>
 
       <section className="rounded-md border border-[#E2E8F0] bg-white">
@@ -156,7 +162,7 @@ export default function AssetDigitalTwin() {
             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-slate-500"><span>{assetView.assetType}</span><span>·</span><span>{assetView.os}</span><span>·</span><span>{assetView.workload}</span></div>
           </div>
           <div className="ml-auto flex flex-wrap items-center gap-2">
-            {virtualMachines.length > 1 && <select value={selectedVm?.id ?? ""} onChange={(event) => { const vm = virtualMachines.find((item) => item.id === event.target.value); if (vm) navigate(`/agentic-iac-engineering/resources/virtual-machines/${encodeURIComponent(vm.name)}`); }} className="h-8 max-w-[220px] rounded-md border border-[#E2E8F0] bg-white px-2 text-[12px] text-slate-700">{virtualMachines.map((vm) => <option key={vm.id} value={vm.id}>{vm.name}</option>)}</select>}
+            {virtualMachines.length > 1 && <select value={selectedVm?.id ?? ""} onChange={(event) => { const vm = virtualMachines.find((item) => item.id === event.target.value); if (vm) navigate(detailPathFor(VM_KIND, vm.name)); }} className="h-8 max-w-[220px] rounded-md border border-[#E2E8F0] bg-white px-2 text-[12px] text-slate-700">{virtualMachines.map((vm) => <option key={vm.id} value={vm.id}>{vm.name}</option>)}</select>}
             <button type="button" onClick={() => void refreshAzure()} disabled={loadingAzure} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] px-2.5 text-[12px] text-slate-700 hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60"><RefreshCw className={cn("h-3.5 w-3.5", loadingAzure && "animate-spin")} />Refresh Twin</button>
             <button type="button" onClick={() => setRawStateOpen(true)} disabled={!selectedVm} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] px-2.5 text-[12px] text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"><Code2 className="h-3.5 w-3.5" />View Raw State</button>
             <button type="button" disabled className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] px-2.5 text-[12px] text-slate-400"><Tags className="h-3.5 w-3.5" />Edit Tags</button>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle, ChevronDown, ChevronRight, CheckCircle2, RefreshCw, MoreVertical,
   ShieldCheck, Ban, Info, ArrowRight, Cpu,
@@ -128,9 +128,9 @@ export default function RemediationIntelligence() {
         <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[12px] text-slate-500">
           <span>Assets</span>
           <span>/</span>
-          <Link to="/agentic-iac-engineering" className="text-[#1B4F91] hover:underline">SQL Servers</Link>
+          <span>SQL Servers</span>
           <span>/</span>
-          <Link to="/agentic-iac-engineering" className="text-[#1B4F91] hover:underline">SQL-PROD-07</Link>
+          <span>SQL-PROD-07</span>
           <span>/</span>
           <span className="font-medium text-slate-800">Remediation Intelligence</span>
         </nav>

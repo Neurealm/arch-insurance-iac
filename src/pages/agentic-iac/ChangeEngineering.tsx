@@ -80,7 +80,7 @@ export default function ChangeEngineering() {
     <div className="p-4">
       {/* breadcrumb */}
       <nav className="mb-2 flex flex-wrap items-center gap-1.5 text-[11.5px] text-slate-500">
-        <Link to="/agentic-iac-engineering" className="hover:text-slate-700">Assets</Link>
+        <span>Assets</span>
         <span>/</span><span>SQL Servers</span>
         <span>/</span><span className="text-slate-700">{c.server}</span>
         <span>/</span>

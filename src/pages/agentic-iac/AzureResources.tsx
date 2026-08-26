@@ -1,17 +1,23 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { AlertCircle, ChevronDown, ChevronRight, Cloud, Folder, FolderTree, RefreshCw, Search, Server } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AzureControlPlaneError, getAzureScopes, listAzureResources, listAzureVirtualMachines, type AzureResource, type AzureVirtualMachine } from "./azureControlPlane";
+import { detailPathFor, resourceKindFor } from "./resourceKinds";
 
 type AzureScopeGroup = { name: string; location: string };
 type AzureScopeSubscription = { id: string; displayName: string; resourceGroups: AzureScopeGroup[] };
 type ResourceGroupNode = AzureScopeGroup & { resources: AzureResource[] };
 type SubscriptionNode = { id: string; displayName: string; resourceGroups: ResourceGroupNode[] };
 
+// Kept outside React state so it survives this page unmounting when the user drills
+// into a VM's Digital Twin, then restores on Back/breadcrumb return instead of the
+// tree re-collapsing and re-scrolling to the top on every visit.
+type ResourcesViewState = { query: string; expandedNodes: string[]; scrollY: number };
+let viewStateCache: ResourcesViewState | null = null;
+
 function nodeId(...parts: string[]) { return parts.join("/"); }
 function isRunning(vm: AzureVirtualMachine) { return /running/i.test(vm.powerState); }
-function detailPath(vm: AzureVirtualMachine) { return `/agentic-iac-engineering/resources/virtual-machines/${encodeURIComponent(vm.name)}`; }
 
 function scopeSubscriptions(payload: Record<string, unknown>): AzureScopeSubscription[] {
   const subscriptions = Array.isArray(payload.subscriptions) ? payload.subscriptions : [];
@@ -29,7 +35,11 @@ function scopeSubscriptions(payload: Record<string, unknown>): AzureScopeSubscri
   });
 }
 
-function resourceTypeLabel(type: string) { return type.split("/").at(-1)?.replace(/([a-z])([A-Z])/g, "$1 $2") ?? type; }
+function resourceTypeLabel(type: string) {
+  const raw = type.split("/").at(-1) ?? type;
+  const spaced = raw.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
 function resourcesByType(resources: AzureResource[]) {
   const grouped = new Map<string, AzureResource[]>();
   resources.forEach((resource) => grouped.set(resource.type, [...(grouped.get(resource.type) ?? []), resource]));
@@ -59,31 +69,55 @@ function buildHierarchy(scopes: AzureScopeSubscription[], resources: AzureResour
 }
 
 export default function AzureResources() {
+  const [searchParams] = useSearchParams();
+  const focusQuery = searchParams.get("q");
+  // Snapshot once at mount: this is what a Back/breadcrumb return should restore,
+  // independent of whatever this same instance later writes to the module cache.
+  const restoredViewRef = useRef(viewStateCache);
+
   const [virtualMachines, setVirtualMachines] = useState<AzureVirtualMachine[]>([]);
   const [resources, setResources] = useState<AzureResource[]>([]);
   const [subscriptions, setSubscriptions] = useState<AzureScopeSubscription[]>([]);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => focusQuery ?? restoredViewRef.current?.query ?? "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
+  const [expandedNodes, setExpandedNodes] = useState<string[]>(() => restoredViewRef.current?.expandedNodes ?? []);
   const [refreshedAt, setRefreshedAt] = useState<string | null>(null);
+  const [resourcesError, setResourcesError] = useState<string | null>(null);
+  const scrollRestoredRef = useRef(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setResourcesError(null);
     try {
-      const [discoveredResources, discoveredVms, scopes] = await Promise.all([listAzureResources(), listAzureVirtualMachines(), getAzureScopes()]);
-      setResources(discoveredResources);
+      const [discoveredVms, scopes] = await Promise.all([listAzureVirtualMachines(), getAzureScopes()]);
       setVirtualMachines(discoveredVms);
       const discoveredScopes = scopeSubscriptions(scopes);
       setSubscriptions(discoveredScopes);
-      setExpandedNodes([
-        ...discoveredScopes.flatMap((subscription) => [
-          nodeId("subscription", subscription.id),
-          ...subscription.resourceGroups.map((group) => nodeId("group", subscription.id, group.name)),
-        ]),
-        ...[...new Set(discoveredResources.map((resource) => nodeId("type", resource.subscriptionId, resource.resourceGroup, resource.type)))],
-      ]);
+
+      let discoveredResources: AzureResource[] = [];
+      try {
+        discoveredResources = await listAzureResources();
+      } catch (resourceReason) {
+        // Resource discovery is a separate, still-maturing endpoint. Its failure
+        // shouldn't take down the VM list and subscription tree, which work today.
+        setResourcesError(resourceReason instanceof AzureControlPlaneError ? resourceReason.message : "Unable to load the full resource inventory.");
+      }
+      setResources(discoveredResources);
+
+      // A returning visit (Back button, breadcrumb) already restored the tree's
+      // expand/collapse state above; a refresh shouldn't blow that away by forcing
+      // everything open again. Only auto-expand on a genuinely first-time load.
+      if (!restoredViewRef.current) {
+        setExpandedNodes([
+          ...discoveredScopes.flatMap((subscription) => [
+            nodeId("subscription", subscription.id),
+            ...subscription.resourceGroups.map((group) => nodeId("group", subscription.id, group.name)),
+          ]),
+          ...[...new Set(discoveredResources.map((resource) => nodeId("type", resource.subscriptionId, resource.resourceGroup, resource.type)))],
+        ]);
+      }
       setRefreshedAt(new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(new Date()));
     } catch (reason) {
       setError(reason instanceof AzureControlPlaneError ? reason.message : "Unable to load Azure resources.");
@@ -97,6 +131,26 @@ export default function AzureResources() {
 
   useEffect(() => { void refresh(); }, [refresh]);
 
+  // Keep the latest query/expandedNodes readable from the unmount cleanup below
+  // without re-running that effect (and re-registering scroll capture) on every keystroke.
+  const latestViewRef = useRef({ query, expandedNodes });
+  useEffect(() => { latestViewRef.current = { query, expandedNodes }; }, [query, expandedNodes]);
+
+  useEffect(() => {
+    return () => {
+      viewStateCache = { ...latestViewRef.current, scrollY: window.scrollY };
+    };
+  }, []);
+
+  // Restore scroll position once the tree has real height to scroll into, so a
+  // Back/breadcrumb return lands where the user left off instead of at the top.
+  useEffect(() => {
+    if (loading || scrollRestoredRef.current) return;
+    scrollRestoredRef.current = true;
+    const targetY = restoredViewRef.current?.scrollY;
+    if (targetY) window.requestAnimationFrame(() => window.scrollTo(0, targetY));
+  }, [loading]);
+
   const hierarchy = useMemo(() => buildHierarchy(subscriptions, resources), [subscriptions, resources]);
   const filteredHierarchy = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -105,7 +159,7 @@ export default function AzureResources() {
       ...subscription,
       resourceGroups: subscription.resourceGroups.flatMap((group) => {
         const groupMatches = `${subscription.id} ${subscription.displayName} ${group.name} ${group.location}`.toLowerCase().includes(term);
-        const visibleResources = groupMatches ? group.resources : group.resources.filter((resource) => `${resource.name} ${resource.type} ${resource.location}`.toLowerCase().includes(term));
+        const visibleResources = groupMatches ? group.resources : group.resources.filter((resource) => `${resource.name} ${resource.type} ${resourceTypeLabel(resource.type)} ${resource.location}`.toLowerCase().includes(term));
         return visibleResources.length ? [{ ...group, resources: visibleResources }] : [];
       }),
     })).filter((subscription) => subscription.resourceGroups.length);
@@ -134,6 +188,8 @@ export default function AzureResources() {
 
       {error && <section className="mt-3 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-[12px] text-amber-900"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><div><span className="font-semibold">Azure discovery is unavailable.</span> {error}</div></section>}
 
+      {!error && resourcesError && <section className="mt-3 flex items-start gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-[12px] text-slate-600"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" /><div><span className="font-semibold text-slate-700">Full resource inventory unavailable.</span> {resourcesError} Virtual machines and subscriptions below are still live.</div></section>}
+
       <section className="mt-3 overflow-hidden rounded-md border border-[#E2E8F0] bg-white">
         <header className="flex flex-wrap items-center gap-3 border-b border-[#E2E8F0] px-4 py-3">
           <div><h2 className="text-[13px] font-semibold text-slate-900">Azure hierarchy</h2><p className="mt-0.5 text-[11.5px] text-slate-500">Expand a folder to see what it contains. The Digital Twin opens only when you choose a VM.</p></div>
@@ -155,7 +211,18 @@ export default function AzureResources() {
                   {isExpanded(groupNode) && <div className="ml-5 border-l border-[#D9E4EF] pl-2">{resourceTypes.length === 0 && <div className="px-2 py-2 text-[11.5px] text-slate-500">No resources discovered</div>}{resourceTypes.map(([type, typedResources]) => {
                     const typeNode = nodeId("type", subscription.id, group.name, type);
                     return <div key={typeNode}><TreeButton open={isExpanded(typeNode)} onClick={() => toggle(typeNode)} icon={<Server className="h-3.5 w-3.5 text-[#1B4F91]" />} title={resourceTypeLabel(type)} detail={`${typedResources.length} discovered`} />
-                      {isExpanded(typeNode) && <div className="ml-5 border-l border-[#D9E4EF] pl-2 pb-1">{typedResources.map((resource) => { const vm = virtualMachines.find((item) => item.id === resource.id); return <div key={resource.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded px-2 py-2 text-[12px] hover:bg-[#F4F8FC]"><div className="flex min-w-[220px] items-center gap-2"><Server className="h-3.5 w-3.5 text-[#1B4F91]" /><span className="font-medium text-slate-800">{resource.name}</span></div><span className="text-[11px] text-slate-500">{resource.location}{resource.kind ? ` · ${resource.kind}` : ""}</span>{vm ? <><span className={cn("rounded-full px-1.5 py-0.5 text-[10.5px] font-medium", isRunning(vm) ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700")}>{vm.powerState}</span><Link to={detailPath(vm)} className="ml-auto text-[11.5px] font-medium text-[#1B4F91] hover:underline">Open Digital Twin</Link></> : <span className="ml-auto text-[11px] text-slate-400">Azure resource</span>}</div>; })}</div>}
+                      {isExpanded(typeNode) && <div className="ml-5 border-l border-[#D9E4EF] pl-2 pb-1">{typedResources.map((resource) => {
+                        const vm = virtualMachines.find((item) => item.id === resource.id);
+                        const kind = resourceKindFor(resource.type);
+                        return <div key={resource.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded px-2 py-2 text-[12px] hover:bg-[#F4F8FC]">
+                          <div className="flex min-w-[220px] items-center gap-2"><Server className="h-3.5 w-3.5 text-[#1B4F91]" /><span className="font-medium text-slate-800">{resource.name}</span></div>
+                          <span className="text-[11px] text-slate-500">{resource.location}{resource.kind ? ` · ${resource.kind}` : ""}</span>
+                          {vm && <span className={cn("rounded-full px-1.5 py-0.5 text-[10.5px] font-medium", isRunning(vm) ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700")}>{vm.powerState}</span>}
+                          {kind
+                            ? <Link to={detailPathFor(kind, resource.name)} className="ml-auto text-[11.5px] font-medium text-[#1B4F91] hover:underline">Open Digital Twin</Link>
+                            : <span className="ml-auto text-[11px] text-slate-400">Azure resource</span>}
+                        </div>;
+                      })}</div>}
                     </div>;
                   })}</div>}
                 </div>;
