@@ -68,28 +68,31 @@ const App = () => (
               <Route path="/set-initial-password" element={<SetInitialPassword />} />
               <Route path="/complete-profile" element={<CompleteProfile />} />
 
-              {/* Infrastructure as Code application */}
-              <Route element={<IacLayout />}>
-                <Route path="/connections" element={<AzureConnections />} />
-                <Route path="/resources" element={<AzureResources />} />
-                <Route path="/resources/virtual-machines/:vmName" element={<AssetDigitalTwin />} />
-                <Route path="/remediation" element={<RemediationIntelligence />} />
-                <Route path="/remediation/:assetId" element={<RemediationIntelligence />} />
-                <Route path="/changes" element={<ChangeEngineering />} />
-                <Route path="/changes/:assetId" element={<ChangeEngineering />} />
-                <Route path="/approvals" element={<ChangeReviewApproval />} />
-                <Route path="/approvals/:packageId" element={<ChangeReviewApproval />} />
-                <Route path="/execution" element={<ExecutionCenter />} />
-                <Route path="/execution/:packageId" element={<ExecutionCenter />} />
-                <Route path="/validation" element={<ValidationEvidence />} />
-                <Route path="/validation/:packageId" element={<ValidationEvidence />} />
-                <Route path="/platform/deployment-architecture" element={<DeploymentArchitecture />} />
-                <Route path="/platform/integrations" element={<IntegrationsConnectivity />} />
-                <Route path="/platform/access-security" element={<AccessGovernance />} />
-                <Route path="/platform/policies-governance" element={<PoliciesGovernance />} />
-                <Route path="/platform/audit-compliance" element={<PlatformAdminPlaceholder />} />
-                <Route path="/platform/system-settings" element={<SystemSettingsPage />} />
+              {/* Infrastructure as Code application (authentication required) */}
+              <Route element={<RequireAuth />}>
+                <Route element={<IacLayout />}>
+                  <Route path="/connections" element={<AzureConnections />} />
+                  <Route path="/resources" element={<AzureResources />} />
+                  <Route path="/resources/virtual-machines/:vmName" element={<AssetDigitalTwin />} />
+                  <Route path="/remediation" element={<RemediationIntelligence />} />
+                  <Route path="/remediation/:assetId" element={<RemediationIntelligence />} />
+                  <Route path="/changes" element={<ChangeEngineering />} />
+                  <Route path="/changes/:assetId" element={<ChangeEngineering />} />
+                  <Route path="/approvals" element={<ChangeReviewApproval />} />
+                  <Route path="/approvals/:packageId" element={<ChangeReviewApproval />} />
+                  <Route path="/execution" element={<ExecutionCenter />} />
+                  <Route path="/execution/:packageId" element={<ExecutionCenter />} />
+                  <Route path="/validation" element={<ValidationEvidence />} />
+                  <Route path="/validation/:packageId" element={<ValidationEvidence />} />
+                  <Route path="/platform/deployment-architecture" element={<DeploymentArchitecture />} />
+                  <Route path="/platform/integrations" element={<IntegrationsConnectivity />} />
+                  <Route path="/platform/access-security" element={<AccessGovernance />} />
+                  <Route path="/platform/policies-governance" element={<PoliciesGovernance />} />
+                  <Route path="/platform/audit-compliance" element={<PlatformAdminPlaceholder />} />
+                  <Route path="/platform/system-settings" element={<SystemSettingsPage />} />
+                </Route>
               </Route>
+
 
               {/* Legacy prefixes */}
               <Route path="/agentic-iac-engineering/*" element={<LegacyIacRedirect />} />
