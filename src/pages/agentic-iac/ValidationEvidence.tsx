@@ -186,7 +186,7 @@ export default function ValidationEvidence() {
             <FileText className="h-3.5 w-3.5" /> View Evidence Package
           </button>
           {phase === "closed" ? (
-            <Link to="/intelligent-iac" className="inline-flex h-8 items-center gap-1.5 rounded-md bg-[#1B4F91] px-3 text-[12px] font-semibold text-white hover:bg-[#173f75]">
+            <Link to="/resources" className="inline-flex h-8 items-center gap-1.5 rounded-md bg-[#1B4F91] px-3 text-[12px] font-semibold text-white hover:bg-[#173f75]">
               <Database className="h-3.5 w-3.5" /> View Updated Digital Twin
             </Link>
           ) : verified ? (
@@ -380,7 +380,7 @@ export default function ValidationEvidence() {
 
           {/* Digital twin reconciliation */}
           <Panel title="Digital Twin Reconciliation" actions={
-            <Link to="/intelligent-iac" className="rounded-md border border-[#E2E8F0] px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50">
+            <Link to="/resources" className="rounded-md border border-[#E2E8F0] px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50">
               View Updated Digital Twin
             </Link>
           }>
@@ -601,13 +601,13 @@ export default function ValidationEvidence() {
                 <KeyValue label="Digital Twin" value="Updated" />
                 <KeyValue label="Evidence" value="Immutable" />
                 <div className="flex flex-col gap-2 pt-1">
-                  <Link to="/intelligent-iac" className="inline-flex h-8 items-center justify-center rounded-md bg-[#1B4F91] px-3 text-[12px] font-semibold text-white hover:bg-[#173f75]">
+                  <Link to="/resources" className="inline-flex h-8 items-center justify-center rounded-md bg-[#1B4F91] px-3 text-[12px] font-semibold text-white hover:bg-[#173f75]">
                     View Updated Digital Twin
                   </Link>
                   <button onClick={() => { setEvTab("Summary"); setEvidenceOpen(true); }} className="h-8 rounded-md border border-[#E2E8F0] bg-white text-[12px] font-medium text-slate-700 hover:bg-slate-50">
                     View Evidence Package
                   </button>
-                  <Link to={`/intelligent-iac/change-review/${pkgId}`} className="inline-flex h-8 items-center justify-center rounded-md border border-[#E2E8F0] bg-white px-3 text-[12px] font-medium text-slate-700 hover:bg-slate-50">
+                  <Link to={`/approvals/${pkgId}`} className="inline-flex h-8 items-center justify-center rounded-md border border-[#E2E8F0] bg-white px-3 text-[12px] font-medium text-slate-700 hover:bg-slate-50">
                     View Change History
                   </Link>
                 </div>

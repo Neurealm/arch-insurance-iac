@@ -145,7 +145,7 @@ export default function AssetDigitalTwin() {
   return (
     <div className="px-4 py-3">
       <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1 text-[11.5px] text-slate-500">
-        <Link to="/agentic-iac-engineering/resources" className="hover:text-slate-800">Azure Resources</Link><span>/</span><Link to={resourceListFilterLink(VM_KIND)} className="hover:text-slate-800">{VM_KIND.label}</Link><span>/</span><span className="font-medium text-slate-800">{vmName ?? assetView.name}</span>
+        <Link to="/resources" className="hover:text-slate-800">Azure Resources</Link><span>/</span><Link to={resourceListFilterLink(VM_KIND)} className="hover:text-slate-800">{VM_KIND.label}</Link><span>/</span><span className="font-medium text-slate-800">{vmName ?? assetView.name}</span>
       </nav>
 
       <section className="rounded-md border border-[#E2E8F0] bg-white">
@@ -174,7 +174,7 @@ export default function AssetDigitalTwin() {
 
       {connectionError && <section className="mt-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" /><div><span className="font-semibold">Azure connection unavailable.</span> {connectionError} Sample data remains visible until a signed-in user can reach the Azure control plane.</div></section>}
 
-      {vmNotFound && <section className="mt-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" /><div><span className="font-semibold">Virtual machine "{vmName}" was not found.</span> It may have been renamed, deleted, or fall outside the discovered pilot scope. Sample data is shown below — <Link to="/agentic-iac-engineering/resources" className="font-medium underline">return to Azure Resources</Link> to pick a valid machine.</div></section>}
+      {vmNotFound && <section className="mt-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" /><div><span className="font-semibold">Virtual machine "{vmName}" was not found.</span> It may have been renamed, deleted, or fall outside the discovered pilot scope. Sample data is shown below — <Link to="/resources" className="font-medium underline">return to Azure Resources</Link> to pick a valid machine.</div></section>}
 
       <section className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1.5 rounded-md border border-[#E2E8F0] bg-white px-4 py-2">
         {liveAzure ? <><Metric label="Connection" value="Azure control plane" good /><Metric label="Discovery Freshness" value="Just now" /><Metric label="Source" value="Managed Identity" /></> : <><Metric label="Connection" value={loadingAzure ? "Connecting" : "Unavailable"} /><Metric label="Discovery" value="Sample data" /></>}

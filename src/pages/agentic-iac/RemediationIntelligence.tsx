@@ -404,7 +404,7 @@ export default function RemediationIntelligence() {
                 </dl>
                 <button
                   type="button"
-                  onClick={() => navigate("/agentic-iac-engineering/change-engineering/sql-prod-07")}
+                  onClick={() => navigate("/changes/sql-prod-07")}
                   className="mt-2 w-full rounded-md border border-[#1B4F91] bg-white py-1.5 text-[11.5px] font-semibold text-[#1B4F91] hover:bg-[#EFF4FB]"
                 >
                   Continue to Change Engineering
