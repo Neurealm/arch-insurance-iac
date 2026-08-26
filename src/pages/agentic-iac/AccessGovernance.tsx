@@ -1070,9 +1070,9 @@ export default function AccessGovernance() {
 
           <Panel title="Related">
             <div className="space-y-1 text-[11.5px]">
-              <a href="/intelligent-iac/platform/integrations" className="block text-[#1B4F91] hover:underline">Integrations &amp; Connectivity</a>
-              <a href="/intelligent-iac/platform/policies-governance" className="block text-[#1B4F91] hover:underline">Policies &amp; Governance</a>
-              <a href="/intelligent-iac/platform/deployment-architecture" className="block text-[#1B4F91] hover:underline">Customer Deployment Architecture</a>
+              <a href="/platform/integrations" className="block text-[#1B4F91] hover:underline">Integrations &amp; Connectivity</a>
+              <a href="/platform/policies-governance" className="block text-[#1B4F91] hover:underline">Policies &amp; Governance</a>
+              <a href="/platform/deployment-architecture" className="block text-[#1B4F91] hover:underline">Customer Deployment Architecture</a>
             </div>
           </Panel>
         </aside>

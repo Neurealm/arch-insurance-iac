@@ -9,23 +9,23 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
 const NAV = [
-  { label: "Connections", to: "/agentic-iac-engineering/connections", icon: Plug, enabled: true },
-  { label: "Azure Resources", to: "/agentic-iac-engineering/resources", icon: Boxes, enabled: true },
-  { label: "Remediation Intelligence", to: "/agentic-iac-engineering/remediation-intelligence/sql-prod-07", icon: Activity, enabled: true },
-  { label: "Change Engineering", to: "/agentic-iac-engineering/change-engineering/sql-prod-07", icon: GitPullRequest, enabled: true },
-  { label: "Change Review & Approval", to: "/intelligent-iac/change-review/CP-2026-01842", icon: ClipboardCheck, enabled: true },
-  { label: "Execution Center", to: "/intelligent-iac/execution/CP-2026-01842", icon: PlayCircle, enabled: true },
-  { label: "Validation & Evidence", to: "/intelligent-iac/validation/CP-2026-01842", icon: ClipboardCheck, enabled: true },
-  { label: "Customer-hosted Intelligent IaC", to: "/intelligent-iac/platform/deployment-architecture", icon: Network, enabled: true },
+  { label: "Connections", to: "/connections", icon: Plug, enabled: true },
+  { label: "Azure Resources", to: "/resources", icon: Boxes, enabled: true },
+  { label: "Remediation Intelligence", to: "/remediation/sql-prod-07", icon: Activity, enabled: true },
+  { label: "Change Engineering", to: "/changes/sql-prod-07", icon: GitPullRequest, enabled: true },
+  { label: "Change Review & Approval", to: "/approvals/CP-2026-01842", icon: ClipboardCheck, enabled: true },
+  { label: "Execution Center", to: "/execution/CP-2026-01842", icon: PlayCircle, enabled: true },
+  { label: "Validation & Evidence", to: "/validation/CP-2026-01842", icon: ClipboardCheck, enabled: true },
+  { label: "Customer-hosted Intelligent IaC", to: "/platform/deployment-architecture", icon: Network, enabled: true },
 ];
 
 const PLATFORM_NAV = [
-  { label: "Deployment Architecture", to: "/intelligent-iac/platform/deployment-architecture", icon: Network, enabled: true },
-  { label: "Integrations & Connectivity", to: "/intelligent-iac/platform/integrations", icon: Plug, enabled: true },
-  { label: "Access & Governance", to: "/intelligent-iac/platform/access-security", icon: KeyRound, enabled: true },
-  { label: "Policies & Governance", to: "/intelligent-iac/platform/policies-governance", icon: Scale, enabled: true },
+  { label: "Deployment Architecture", to: "/platform/deployment-architecture", icon: Network, enabled: true },
+  { label: "Integrations & Connectivity", to: "/platform/integrations", icon: Plug, enabled: true },
+  { label: "Access & Governance", to: "/platform/access-security", icon: KeyRound, enabled: true },
+  { label: "Policies & Governance", to: "/platform/policies-governance", icon: Scale, enabled: true },
   
-  { label: "System Settings", to: "/intelligent-iac/platform/system-settings", icon: SlidersHorizontal, enabled: true },
+  { label: "System Settings", to: "/platform/system-settings", icon: SlidersHorizontal, enabled: true },
 ];
 
 
@@ -46,13 +46,13 @@ export default function IacLayout() {
   return (
     <div className="flex min-h-screen bg-[#F6F8FA] text-slate-900">
       <aside className="sticky top-0 flex h-screen w-[232px] shrink-0 flex-col border-r border-[#E2E8F0] bg-white">
-        <Link
-          to="/app"
+        <a
+          href="https://neugain.io"
           className="flex items-center gap-2 border-b border-[#E2E8F0] px-4 py-2.5 text-[12px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900"
         >
           <Home className="h-4 w-4 shrink-0" />
-          <span>NeuGAIN Command Center</span>
-        </Link>
+          <span>Back to NeuGAIN Command Center</span>
+        </a>
 
         <div className="border-b border-[#E2E8F0] px-4 py-3.5">
           <div className="text-[11px] font-semibold uppercase leading-tight tracking-[0.12em] text-slate-500">
@@ -130,13 +130,13 @@ export default function IacLayout() {
             <Settings className="h-4 w-4 shrink-0 text-slate-300" />
             <span>Settings</span>
           </div>
-          <Link
-            to="/app"
+          <a
+            href="https://neugain.io"
             className="mx-2 my-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[12px] text-slate-500 hover:bg-slate-50 hover:text-slate-800"
           >
             <Home className="h-4 w-4 shrink-0" />
-            <span>NeuGAIN Command Center</span>
-          </Link>
+            <span>Back to NeuGAIN Command Center</span>
+          </a>
         </div>
       </aside>
 

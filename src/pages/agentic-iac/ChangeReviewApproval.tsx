@@ -100,8 +100,8 @@ export default function ChangeReviewApproval() {
         <span>Assets</span><ChevronRight className="h-3 w-3" />
         <span>SQL Servers</span><ChevronRight className="h-3 w-3" />
         <span>SQL-PROD-07</span><ChevronRight className="h-3 w-3" />
-        <Link className="text-[#1B4F91] hover:underline" to="/agentic-iac-engineering/remediation-intelligence/sql-prod-07">Remediation Intelligence</Link><ChevronRight className="h-3 w-3" />
-        <Link className="text-[#1B4F91] hover:underline" to="/agentic-iac-engineering/change-engineering/sql-prod-07">Change Engineering</Link><ChevronRight className="h-3 w-3" />
+        <Link className="text-[#1B4F91] hover:underline" to="/remediation/sql-prod-07">Remediation Intelligence</Link><ChevronRight className="h-3 w-3" />
+        <Link className="text-[#1B4F91] hover:underline" to="/changes/sql-prod-07">Change Engineering</Link><ChevronRight className="h-3 w-3" />
         <span className="font-medium text-slate-700">Change Review &amp; Approval</span>
       </nav>
 
@@ -139,7 +139,7 @@ export default function ChangeReviewApproval() {
           </button>
           {approved ? (
             <button
-              onClick={() => navigate(`/intelligent-iac/execution/${pkgId}`)}
+              onClick={() => navigate(`/execution/${pkgId}`)}
               className="inline-flex h-8 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-[12px] font-semibold text-white hover:bg-emerald-700"
             >
               <ArrowRight className="h-3.5 w-3.5" /> Proceed to Execution Center
@@ -162,7 +162,7 @@ export default function ChangeReviewApproval() {
       {state === "changes" && decision && (
         <Banner tone="warn" title="Package returned to engineering">
           {decision.reason} — {decision.comment || "No detail provided."} Package contents are preserved.
-          <Link className="ml-2 underline" to="/agentic-iac-engineering/change-engineering/sql-prod-07">Return to Change Engineering</Link>
+          <Link className="ml-2 underline" to="/changes/sql-prod-07">Return to Change Engineering</Link>
         </Banner>
       )}
       {state === "rejected" && decision && (
@@ -649,7 +649,7 @@ export default function ChangeReviewApproval() {
             <div className="space-y-2">
               {approved ? (
                 <button
-                  onClick={() => navigate(`/intelligent-iac/execution/${pkgId}`)}
+                  onClick={() => navigate(`/execution/${pkgId}`)}
                   className="flex h-9 w-full items-center justify-center gap-1.5 rounded-md bg-emerald-600 text-[12.5px] font-semibold text-white hover:bg-emerald-700"
                 >
                   <ArrowRight className="h-4 w-4" /> Proceed to Execution Center
@@ -681,7 +681,7 @@ export default function ChangeReviewApproval() {
                 Reject Change
               </button>
               <Link
-                to="/agentic-iac-engineering/change-engineering/sql-prod-07"
+                to="/changes/sql-prod-07"
                 className="flex h-9 w-full items-center justify-center rounded-md border border-[#E2E8F0] bg-white text-[12.5px] font-medium text-slate-700 hover:bg-slate-50"
               >
                 Return to Change Engineering

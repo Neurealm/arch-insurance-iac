@@ -288,7 +288,7 @@ export default function ExecutionCenter() {
               View Authorization
             </button>
             <Link
-              to={`/intelligent-iac/change-review/${pkgId}`}
+              to={`/approvals/${pkgId}`}
               className="inline-flex h-9 items-center rounded-md border border-[#E2E8F0] bg-white px-3 text-[12.5px] font-medium text-slate-700 hover:bg-slate-50"
             >
               Return to Approval
@@ -408,7 +408,7 @@ export default function ExecutionCenter() {
           </div>
           <p className="mt-2 text-[12px] text-emerald-900">Execution completed successfully. Final outcome verification is required.</p>
           <button
-            onClick={() => navigate(`/intelligent-iac/validation/${pkgId}`)}
+            onClick={() => navigate(`/validation/${pkgId}`)}
             className="mt-2 inline-flex h-8 items-center rounded-md bg-emerald-700 px-3 text-[12px] font-semibold text-white hover:bg-emerald-800"
           >
             Proceed to Validation &amp; Evidence

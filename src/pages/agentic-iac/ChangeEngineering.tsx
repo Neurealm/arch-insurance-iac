@@ -84,7 +84,7 @@ export default function ChangeEngineering() {
         <span>/</span><span>SQL Servers</span>
         <span>/</span><span className="text-slate-700">{c.server}</span>
         <span>/</span>
-        <Link to="/agentic-iac-engineering/remediation-intelligence/sql-prod-07" className="hover:text-slate-700 hover:underline">Remediation Intelligence</Link>
+        <Link to="/remediation/sql-prod-07" className="hover:text-slate-700 hover:underline">Remediation Intelligence</Link>
         <span>/</span><span className="font-medium text-slate-800">Change Engineering</span>
       </nav>
 

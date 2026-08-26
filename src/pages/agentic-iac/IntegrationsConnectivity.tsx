@@ -807,8 +807,8 @@ export default function IntegrationsConnectivity() {
 
           <Panel title="Related">
             <div className="space-y-1 text-[11.5px]">
-              <a href="/intelligent-iac/platform/deployment-architecture" className="flex items-center gap-1.5 text-[#1B4F91] hover:underline"><BookOpen className="h-3.5 w-3.5" />Customer Deployment Architecture</a>
-              <a href="/intelligent-iac/platform/access-security" className="flex items-center gap-1.5 text-[#1B4F91] hover:underline"><KeyRound className="h-3.5 w-3.5" />Access &amp; Security</a>
+              <a href="/platform/deployment-architecture" className="flex items-center gap-1.5 text-[#1B4F91] hover:underline"><BookOpen className="h-3.5 w-3.5" />Customer Deployment Architecture</a>
+              <a href="/platform/access-security" className="flex items-center gap-1.5 text-[#1B4F91] hover:underline"><KeyRound className="h-3.5 w-3.5" />Access &amp; Security</a>
             </div>
           </Panel>
         </aside>

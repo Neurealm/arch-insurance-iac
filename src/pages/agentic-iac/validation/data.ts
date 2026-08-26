@@ -210,15 +210,15 @@ export const INTEGRITY_ROWS: [string, string][] = [
 ];
 
 export const TRACE = [
-  { k: "Original Condition", v: "SQL transaction-log capacity risk", to: "/intelligent-iac/remediation-intelligence/SQL-PROD-07" },
-  { k: "Diagnosis", v: "LOG_BACKUP blocking log reuse", to: "/intelligent-iac/remediation-intelligence/SQL-PROD-07" },
-  { k: "Remediation Decision", v: "Stabilize SQL + Protect Capacity", to: "/intelligent-iac/remediation-intelligence/SQL-PROD-07" },
-  { k: "Change Package", v: "CP-2026-01842", to: "/intelligent-iac/change-engineering/SQL-PROD-07" },
-  { k: "Approval", v: "EXEC-AUTH-01842", to: "/intelligent-iac/change-review/CP-2026-01842" },
-  { k: "Execution", v: "8 / 8 stages completed", to: "/intelligent-iac/execution/CP-2026-01842" },
+  { k: "Original Condition", v: "SQL transaction-log capacity risk", to: "/remediation/SQL-PROD-07" },
+  { k: "Diagnosis", v: "LOG_BACKUP blocking log reuse", to: "/remediation/SQL-PROD-07" },
+  { k: "Remediation Decision", v: "Stabilize SQL + Protect Capacity", to: "/remediation/SQL-PROD-07" },
+  { k: "Change Package", v: "CP-2026-01842", to: "/changes/SQL-PROD-07" },
+  { k: "Approval", v: "EXEC-AUTH-01842", to: "/approvals/CP-2026-01842" },
+  { k: "Execution", v: "8 / 8 stages completed", to: "/execution/CP-2026-01842" },
   { k: "Validation", v: "21 / 21 passed", to: null },
   { k: "Observed Outcome", v: "Capacity risk mitigated", to: null },
-  { k: "Digital Twin", v: "Reconciled", to: "/intelligent-iac" },
+  { k: "Digital Twin", v: "Reconciled", to: "/resources" },
   { k: "Evidence Record", v: "EV-2026-01842", to: null },
 ];
 

@@ -10,7 +10,7 @@ export interface ResourceKind {
   azureType: string;
   /** Friendly plural label, used in breadcrumbs and as the resource-tree search term. */
   label: string;
-  /** Route segment for this kind's detail page: /agentic-iac-engineering/resources/<segment>/:name */
+  /** Route segment for this kind's detail page: /resources/<segment>/:name */
   routeSegment: string;
 }
 
@@ -23,10 +23,10 @@ export function resourceKindFor(azureType: string): ResourceKind | undefined {
 }
 
 export function detailPathFor(kind: ResourceKind, resourceName: string): string {
-  return `/agentic-iac-engineering/resources/${kind.routeSegment}/${encodeURIComponent(resourceName)}`;
+  return `/resources/${kind.routeSegment}/${encodeURIComponent(resourceName)}`;
 }
 
 /** Link target for a breadcrumb crumb that returns to the resource list, pre-filtered to this kind. */
 export function resourceListFilterLink(kind: ResourceKind): { pathname: string; search: string } {
-  return { pathname: "/agentic-iac-engineering/resources", search: `?type=${encodeURIComponent(kind.azureType)}` };
+  return { pathname: "/resources", search: `?type=${encodeURIComponent(kind.azureType)}` };
 }
