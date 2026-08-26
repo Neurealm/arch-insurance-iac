@@ -114,7 +114,7 @@ export default function ResetPassword() {
     if (typeof window !== "undefined") {
       history.replaceState(null, "", window.location.pathname);
     }
-    navigate("/app", { replace: true });
+    navigate("/connections", { replace: true });
   };
 
   return (

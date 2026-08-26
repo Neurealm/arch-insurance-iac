@@ -51,7 +51,7 @@ export default function Signup() {
     const { error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
-      options: { emailRedirectTo: window.location.origin + "/app" },
+      options: { emailRedirectTo: window.location.origin + "/connections" },
     });
     setLoading(false);
     if (error) return toast.error(friendlyAuthError(error.message));
@@ -60,7 +60,7 @@ export default function Signup() {
   };
 
   const onGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app" });
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/connections" });
     if (result.error) toast.error("Google sign-in failed");
   };
 

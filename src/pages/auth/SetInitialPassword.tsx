@@ -75,7 +75,7 @@ export default function SetInitialPassword() {
     if (prof && !(prof as any).profile_completed_at) {
       navigate("/complete-profile", { replace: true });
     } else {
-      navigate("/app", { replace: true });
+      navigate("/connections", { replace: true });
     }
   };
 

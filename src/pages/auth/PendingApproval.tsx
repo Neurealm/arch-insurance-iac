@@ -11,7 +11,7 @@ export default function PendingApproval() {
     return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
   }
   if (!user) return <Navigate to="/login" replace />;
-  if (isAdmin || approvalStatus === "approved") return <Navigate to="/app" replace />;
+  if (isAdmin || approvalStatus === "approved") return <Navigate to="/connections" replace />;
 
   const rejected = approvalStatus === "rejected";
 

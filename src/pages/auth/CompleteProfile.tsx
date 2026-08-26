@@ -74,10 +74,10 @@ export default function CompleteProfile() {
     if (!error && full_name) await supabase.auth.updateUser({ data: { full_name } });
     setSaving(false);
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
-    else { toast({ title: "Profile saved" }); navigate("/app", { replace: true }); }
+    else { toast({ title: "Profile saved" }); navigate("/connections", { replace: true }); }
   };
 
-  const skip = () => navigate("/app", { replace: true });
+  const skip = () => navigate("/connections", { replace: true });
 
   return (
     <AuthLayout
