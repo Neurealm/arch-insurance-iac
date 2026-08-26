@@ -20,7 +20,7 @@ export default function Login() {
   const dest =
     (location.state as any)?.from ||
     (nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null) ||
-    "/app";
+    "/connections";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,7 +46,7 @@ export default function Login() {
   };
 
   const onGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app" });
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/connections" });
     if (result.error) toast.error("Google sign-in failed");
   };
 

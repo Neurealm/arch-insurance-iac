@@ -76,7 +76,7 @@ export default function ForgotPassword() {
     setLoading(false);
     if (error) return toast.error(friendlyAuthError(error.message));
     toast.success("Password updated.");
-    navigate("/app", { replace: true });
+    navigate("/connections", { replace: true });
   };
 
   const subtitle =
