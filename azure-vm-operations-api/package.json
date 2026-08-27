@@ -1,0 +1,17 @@
+{
+  "name": "arch-iac-vm-operations-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/functions/*.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "func start",
+    "check": "node --check src/functions/vm-operations.js"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.7.2"
+  }
+}

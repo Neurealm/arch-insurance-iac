@@ -4,14 +4,15 @@ import { AlertCircle, ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Code2,
 import { cn } from "@/lib/utils";
 import { RelationshipMap } from "./RelationshipMap";
 import { ActionPreviewDrawer } from "./ActionPreviewDrawer";
+import { VmOperationsOverview } from "./VmOperationsOverview";
 import {
   ACTION_CATEGORIES, actions, asset, assetIntelligence, changeHistory, configSections,
   discoverySources, provenance, provenanceStats, type ActionCategory, type AssetAction,
   type AssetIdentity, type ChangeRecord, type ConfigSection, type RelatedNode,
 } from "./data";
 import {
-  AzureControlPlaneError, listAzureVirtualMachines, vmDiskName, vmNicName,
-  type AzureVirtualMachine,
+  AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, vmDiskName, vmNicName,
+  type AzureVirtualMachine, type AzureVmOperations,
 } from "./azureControlPlane";
 import { detailPathFor, resourceKindFor } from "./resourceKinds";
 
@@ -99,6 +100,9 @@ export default function AssetDigitalTwin() {
   const [loadingAzure, setLoadingAzure] = useState(true);
   const [lastDiscovered, setLastDiscovered] = useState(asset.lastDiscovered);
   const [rawStateOpen, setRawStateOpen] = useState(false);
+  const [operations, setOperations] = useState<AzureVmOperations | null>(null);
+  const [operationsError, setOperationsError] = useState<string | null>(null);
+  const [loadingOperations, setLoadingOperations] = useState(false);
 
   const matchedVm = vmName ? virtualMachines.find((vm) => vm.name === vmName) ?? null : null;
   const selectedVm = vmName
@@ -143,6 +147,30 @@ export default function AssetDigitalTwin() {
   }, [vmName]);
 
   useEffect(() => { void refreshAzure(); }, [refreshAzure]);
+  useEffect(() => {
+    let active = true;
+    if (!selectedVm) {
+      setOperations(null);
+      setOperationsError(null);
+      setLoadingOperations(false);
+      return () => { active = false; };
+    }
+
+    setLoadingOperations(true);
+    setOperations(null);
+    setOperationsError(null);
+    void getAzureVmOperations(selectedVm)
+      .then((result) => { if (active) setOperations(result); })
+      .catch((error) => {
+        if (!active) return;
+        setOperationsError(error instanceof AzureControlPlaneError
+          ? "The Azure operations data source is not enabled for this VM."
+          : "Unable to load Azure operations data.");
+      })
+      .finally(() => { if (active) setLoadingOperations(false); });
+
+    return () => { active = false; };
+  }, [selectedVm]);
   useEffect(() => {
     const configurationKeys = configuration.map((section) => section.key);
     setOpenSections((current) => {
@@ -190,6 +218,8 @@ export default function AssetDigitalTwin() {
       <section className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1.5 rounded-md border border-[#E2E8F0] bg-white px-4 py-2">
         {liveAzure ? <><Metric label="Connection" value="Azure control plane" good /><Metric label="Discovery Freshness" value="Just now" /><Metric label="Source" value="Managed Identity" /></> : <><Metric label="Connection" value={loadingAzure ? "Connecting" : "Unavailable"} /><Metric label="Discovery" value="Sample data" /></>}
       </section>
+
+      {liveAzure && <VmOperationsOverview data={operations} loading={loadingOperations} error={operationsError} />}
 
       <div className="mt-2 grid gap-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)_minmax(0,1fr)]">
         <section className="rounded-md border border-[#E2E8F0] bg-white"><header className="border-b border-[#E2E8F0] px-3 py-2"><h2 className="text-[12.5px] font-semibold uppercase tracking-wide text-slate-700">Current Configuration</h2></header><div className="max-h-[640px] overflow-y-auto">{configuration.map((section) => { const open = openSections.includes(section.key); return <div key={section.key} className="border-b border-[#EEF2F6] last:border-b-0"><button type="button" onClick={() => toggleSection(section.key)} className="flex w-full items-center gap-1.5 bg-[#F8FAFC] px-3 py-1.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-600 hover:bg-slate-100">{open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}{section.title}</button>{open && <dl className="divide-y divide-[#F1F5F9]">{section.properties.map((property) => <div key={`${section.key}-${property.label}`} className="flex items-center justify-between gap-3 px-3 py-1.5 text-[12px]"><dt className="text-slate-500">{property.label}</dt><dd className={cn("max-w-[65%] truncate text-right font-medium", property.tone === "good" ? "text-emerald-700" : property.tone === "warn" ? "text-amber-700" : "text-slate-800")} title={property.value}>{property.value}</dd></div>)}</dl>}</div>; })}</div></section>

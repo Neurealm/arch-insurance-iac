@@ -9,6 +9,16 @@ export const azureControlPlaneUrl = (
   "https://arch-iac-pilot-api-dev-01-fvdscfc5gmgkgfev.eastus-01.azurewebsites.net"
 ).replace(/\/$/, "");
 
+/**
+ * VM operations run in a separate, read-only Function App. Keeping it
+ * separate lets the existing control plane keep serving its current API while
+ * this higher-volume Azure monitoring endpoint evolves independently.
+ */
+export const azureVmOperationsUrl = (
+  import.meta.env.VITE_AZURE_VM_OPERATIONS_URL ??
+  "https://arch-iac-vm-operations-dev-01.azurewebsites.net"
+).replace(/\/$/, "");
+
 export type AzureVirtualMachine = {
   id: string;
   name: string;
@@ -33,6 +43,45 @@ export type AzureResource = {
   subscriptionName: string;
   resourceGroup: string;
   tags: Record<string, string>;
+};
+
+/**
+ * Read-only VM operations data assembled by the protected Azure control plane.
+ * The Function App is responsible for querying Azure Monitor, Backup, Update
+ * Manager, and Resource Graph with its Managed Identity; the browser never
+ * receives Azure credentials or calls Azure management APIs directly.
+ */
+export type AzureVmOperations = {
+  observedAt: string | null;
+  monitoring: {
+    state: "available" | "not_configured" | "unavailable";
+    cpuPercent: number | null;
+    memoryPercent: number | null;
+    diskUsedPercent: number | null;
+  };
+  bootDiagnostics: {
+    state: "enabled" | "disabled" | "unavailable";
+    screenshotAvailable: boolean;
+    consoleLogAvailable: boolean;
+  };
+  backup: {
+    state: "protected" | "not_protected" | "unavailable";
+    vaultName: string | null;
+    lastSuccessfulBackup: string | null;
+  };
+  patching: {
+    state: "compliant" | "updates_available" | "not_configured" | "unavailable";
+    assessment: string | null;
+    updatesAvailable: number | null;
+  };
+  network: {
+    networkInterface: string | null;
+    privateIps: string[];
+    publicIps: string[];
+    subnet: string | null;
+    networkSecurityGroups: string[];
+    loadBalancers: string[];
+  };
 };
 
 export class AzureControlPlaneError extends Error {
@@ -92,6 +141,64 @@ function normalizeVm(value: unknown): AzureVirtualMachine {
   };
 }
 
+function nullableText(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function nullableNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function textList(value: unknown): string[] {
+  return Array.isArray(value) ? value.flatMap((item) => typeof item === "string" && item.trim() ? [item] : []) : [];
+}
+
+function state<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+  return typeof value === "string" && (allowed as readonly string[]).includes(value) ? value as T : fallback;
+}
+
+function normalizeVmOperations(value: unknown, vm: AzureVirtualMachine): AzureVmOperations {
+  const raw = record(value);
+  const monitoring = record(raw.monitoring);
+  const bootDiagnostics = record(raw.bootDiagnostics ?? raw.boot_diagnostics);
+  const backup = record(raw.backup);
+  const patching = record(raw.patching ?? raw.patch);
+  const network = record(raw.network);
+
+  return {
+    observedAt: nullableText(raw.observedAt ?? raw.observed_at),
+    monitoring: {
+      state: state(monitoring.state, ["available", "not_configured", "unavailable"], "unavailable"),
+      cpuPercent: nullableNumber(monitoring.cpuPercent ?? monitoring.cpu_percent),
+      memoryPercent: nullableNumber(monitoring.memoryPercent ?? monitoring.memory_percent),
+      diskUsedPercent: nullableNumber(monitoring.diskUsedPercent ?? monitoring.disk_used_percent),
+    },
+    bootDiagnostics: {
+      state: state(bootDiagnostics.state, ["enabled", "disabled", "unavailable"], "unavailable"),
+      screenshotAvailable: bootDiagnostics.screenshotAvailable === true || bootDiagnostics.screenshot_available === true,
+      consoleLogAvailable: bootDiagnostics.consoleLogAvailable === true || bootDiagnostics.console_log_available === true,
+    },
+    backup: {
+      state: state(backup.state, ["protected", "not_protected", "unavailable"], "unavailable"),
+      vaultName: nullableText(backup.vaultName ?? backup.vault_name),
+      lastSuccessfulBackup: nullableText(backup.lastSuccessfulBackup ?? backup.last_successful_backup),
+    },
+    patching: {
+      state: state(patching.state, ["compliant", "updates_available", "not_configured", "unavailable"], "unavailable"),
+      assessment: nullableText(patching.assessment),
+      updatesAvailable: nullableNumber(patching.updatesAvailable ?? patching.updates_available),
+    },
+    network: {
+      networkInterface: nullableText(network.networkInterface ?? network.network_interface) ?? vmNicName(vm),
+      privateIps: textList(network.privateIps ?? network.private_ips),
+      publicIps: textList(network.publicIps ?? network.public_ips),
+      subnet: nullableText(network.subnet),
+      networkSecurityGroups: textList(network.networkSecurityGroups ?? network.network_security_groups),
+      loadBalancers: textList(network.loadBalancers ?? network.load_balancers),
+    },
+  };
+}
+
 function responseItems(payload: unknown): unknown[] {
   if (Array.isArray(payload)) return payload;
   const body = record(payload);
@@ -101,11 +208,11 @@ function responseItems(payload: unknown): unknown[] {
   return [];
 }
 
-async function authenticatedGet(path: string): Promise<unknown> {
+async function authenticatedGet(path: string, baseUrl = azureControlPlaneUrl): Promise<unknown> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) throw new AzureControlPlaneError("Sign in to load Azure resources.", 401);
 
-  const response = await fetch(`${azureControlPlaneUrl}${path}`, {
+  const response = await fetch(`${baseUrl}${path}`, {
     headers: { Authorization: `Bearer ${session.access_token}` },
   });
   const payload = await response.json().catch(() => ({}));
@@ -140,6 +247,21 @@ export async function listAzureResources(): Promise<AzureResource[]> {
 
 export async function getAzureScopes(): Promise<Record<string, unknown>> {
   return record(await authenticatedGet("/api/azure/scopes"));
+}
+
+/**
+ * The endpoint is read-only and uses a managed identity in Azure. The browser
+ * provides only the signed-in user's Supabase session token.
+ */
+export async function getAzureVmOperations(vm: AzureVirtualMachine): Promise<AzureVmOperations> {
+  const subscription = encodeURIComponent(vm.subscriptionId);
+  const resourceGroup = encodeURIComponent(vm.resourceGroup);
+  const name = encodeURIComponent(vm.name);
+  const payload = await authenticatedGet(
+    `/api/v1/virtual-machines/${subscription}/${resourceGroup}/${name}/operations`,
+    azureVmOperationsUrl,
+  );
+  return normalizeVmOperations(payload, vm);
 }
 
 export function vmDiskName(vm: AzureVirtualMachine): string | null {
