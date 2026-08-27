@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Activity, AlertTriangle, CheckCircle2, Code2, HardDrive, Info, Network, RefreshCw, ShieldCheck, Wrench } from "lucide-react";
+import { Activity, AlertTriangle, BellRing, CheckCircle2, Clock3, Code2, HardDrive, Info, Network, RefreshCw, Scale, ShieldCheck, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines,
@@ -23,6 +23,8 @@ function statusLabel(value: string) {
 }
 
 function metric(value: number | null, suffix = "%") { return value === null ? "Not available" : `${value}${suffix}`; }
+
+function dateTime(value: string | null) { return value ? new Date(value).toLocaleString() : "Not reported"; }
 
 export default function RemediationIntelligence() {
   const { vmName } = useParams<{ vmName: string }>();
@@ -66,6 +68,25 @@ export default function RemediationIntelligence() {
     return result;
   }, [operations, selectedVm]);
 
+  const intelligence = useMemo(() => {
+    if (!selectedVm || !operations) return null;
+    const policies: Array<{ label: string; result: string; weight: number; satisfied: boolean }> = [
+      { label: "VM running state", result: selectedVm.powerState, weight: 20, satisfied: /running/i.test(selectedVm.powerState) },
+      { label: "Performance telemetry", result: statusLabel(operations.monitoring.state), weight: 15, satisfied: operations.monitoring.state === "available" },
+      { label: "Backup protection", result: statusLabel(operations.backup.state), weight: 20, satisfied: operations.backup.state === "protected" },
+      { label: "Patch assessment", result: statusLabel(operations.patching.state), weight: 15, satisfied: operations.patching.state === "compliant" },
+      { label: "Boot diagnostics", result: statusLabel(operations.bootDiagnostics.state), weight: 0, satisfied: operations.bootDiagnostics.state === "enabled" },
+    ];
+    const score = policies.reduce((total, policy) => total + (policy.satisfied ? 0 : policy.weight), 0);
+    const level = score >= 50 ? "High" : score >= 25 ? "Medium" : "Low";
+    const recommendations: Array<{ title: string; detail: string; approval: string }> = [];
+    if (!/running/i.test(selectedVm.powerState)) recommendations.push({ title: "Confirm VM power state", detail: "Confirm the deallocated state is intentional before requesting a start action.", approval: "VM owner approval required" });
+    if (operations.monitoring.state !== "available") recommendations.push({ title: "Enable Azure Monitor / VM Insights", detail: "Collect CPU, memory, and disk evidence before making a performance-related decision.", approval: "Monitoring owner approval required" });
+    if (operations.backup.state !== "protected") recommendations.push({ title: "Confirm or configure Azure Backup", detail: "Validate the backup requirement and recovery objective for this VM.", approval: "Backup owner approval required" });
+    if (operations.patching.state !== "compliant") recommendations.push({ title: "Run a patch assessment", detail: "Obtain a current Azure Update Manager assessment before planning maintenance.", approval: "Operations approval required" });
+    return { policies, score, level, recommendations };
+  }, [operations, selectedVm]);
+
   if (loading && !selectedVm) return <div className="p-4 text-[13px] text-slate-600">Loading Azure VM assessment…</div>;
   if (!selectedVm) return <div className="p-4"><Panel title="VM Remediation Intelligence"><p className="text-[13px] text-slate-600">No Azure virtual machines are available in the connected pilot scope.</p>{error && <p className="mt-2 text-[12px] text-red-700">{error}</p>}<Link to="/resources" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Back to Azure Resources</Link></Panel></div>;
 
@@ -105,6 +126,25 @@ export default function RemediationIntelligence() {
 
       <div className="flex flex-col gap-3"><Panel title="Storage & protection"><div className="flex items-center gap-2 text-[12px] font-semibold text-slate-800"><HardDrive className="h-4 w-4 text-[#1B4F91]" />OS disk</div><Row label="Name" value={config?.osDisk.name ?? "Not reported"} /><Row label="Size" value={config?.osDisk.sizeGB === null || config?.osDisk.sizeGB === undefined ? "Not reported" : `${config.osDisk.sizeGB} GB`} /><Row label="SKU" value={config?.osDisk.storageSku ?? "Not reported"} /><Row label="Caching" value={config?.osDisk.caching ?? "Not reported"} /><div className="mt-2 border-t border-[#E2E8F0] pt-2"><Row label="Data disks" value={config?.dataDisks.length ? config.dataDisks.map((disk) => disk.name).join(", ") : "None"} /><Row label="Azure Backup" value={operations ? statusLabel(operations.backup.state) : "Loading"} tone={operations?.backup.state === "protected" ? "ok" : "warn"} /><Row label="Last backup" value={operations?.backup.lastSuccessfulBackup ?? "Not reported"} /><Row label="Patch assessment" value={operations ? statusLabel(operations.patching.state) : "Loading"} tone={operations?.patching.state === "compliant" ? "ok" : "warn"} /></div></Panel>
       <Panel title="Network & Azure scope"><div className="flex items-center gap-2 text-[12px] font-semibold text-slate-800"><Network className="h-4 w-4 text-[#1B4F91]" />Connected infrastructure</div><Row label="Resource group" value={selectedVm.resourceGroup} /><Row label="Subscription" value={selectedVm.subscriptionId} /><Row label="Network interface" value={operations?.network.networkInterface ?? "Not reported"} /><Row label="Private IPs" value={operations?.network.privateIps.length ? operations.network.privateIps.join(", ") : "Not reported"} /><Row label="Network security groups" value={operations?.network.networkSecurityGroups.length ? operations.network.networkSecurityGroups.join(", ") : "Not reported"} /><Row label="Load balancers" value={operations?.network.loadBalancers.length ? operations.network.loadBalancers.join(", ") : "None reported"} /></Panel></div>
+    </div>
+
+    <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)_minmax(0,1fr)]">
+      <Panel title="Pilot policy & risk score" right={<span className={cn("rounded border px-1.5 py-0.5 text-[10.5px] font-semibold", intelligence?.level === "High" ? "border-red-200 bg-red-50 text-red-700" : intelligence?.level === "Medium" ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700")}>{intelligence ? `${intelligence.level} · ${intelligence.score}/100` : "Loading"}</span>}>
+        <p className="mb-2 text-[11.5px] leading-relaxed text-slate-600">A transparent pilot guardrail score from the live Azure evidence below. It is not an automated compliance decision.</p>
+        <div className="space-y-1.5">{intelligence?.policies.map((policy) => <div key={policy.label} className="flex items-center justify-between gap-2 rounded border border-[#E2E8F0] px-2 py-1.5 text-[11.5px]"><span className="flex items-center gap-1.5 text-slate-700">{policy.satisfied ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />}{policy.label}</span><span className={cn("font-medium", policy.satisfied ? "text-emerald-700" : "text-amber-700")}>{policy.result}{policy.weight > 0 && !policy.satisfied ? ` · +${policy.weight}` : ""}</span></div>) ?? <p className="text-[12px] text-slate-500">Loading policy evidence…</p>}</div>
+      </Panel>
+
+      <Panel title="Historical state comparison" right={<span className="text-[11px] text-slate-500">Azure Change Analysis</span>}>
+        {operations?.history.state === "available" ? operations.history.changes.length ? <div className="space-y-2">{operations.history.changes.slice(0, 3).map((change) => <div key={`${change.timestamp}-${change.changeType}`} className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-2"><div className="flex items-center gap-1.5 text-[11.5px] font-semibold text-slate-800"><Clock3 className="h-3.5 w-3.5 text-[#1B4F91]" />{change.changeType} <span className="ml-auto font-normal text-slate-500">{dateTime(change.timestamp)}</span></div>{change.fields.length ? <ul className="mt-1 space-y-0.5 text-[11px] text-slate-600">{change.fields.slice(0, 3).map((field) => <li key={field.field}><span className="font-medium text-slate-700">{field.field}:</span> {field.before ?? "not set"} → {field.after ?? "not set"}</li>)}</ul> : <p className="mt-1 text-[11px] text-slate-500">Azure recorded a resource update without individual property details.</p>}</div>)}</div> : <p className="text-[12px] text-slate-600">No Azure resource changes were recorded for this VM in the Change Analysis retention window.</p> : <p className="text-[12px] text-slate-600">Change Analysis is not available to the connected Azure identity.</p>}
+      </Panel>
+
+      <div className="flex flex-col gap-3"><Panel title="Azure Monitor alert correlation" right={<BellRing className="h-3.5 w-3.5 text-[#1B4F91]" />}>
+        {operations?.alerts.state === "available" ? operations.alerts.alerts.length ? <div className="space-y-1.5">{operations.alerts.alerts.map((alert) => <div key={`${alert.name}-${alert.startedAt}`} className="rounded border border-amber-200 bg-amber-50 p-2 text-[11.5px]"><div className="font-semibold text-slate-800">{alert.name}</div><div className="mt-0.5 text-slate-600">{alert.severity} · {alert.state}{alert.monitorService ? ` · ${alert.monitorService}` : ""}</div></div>)}</div> : <p className="text-[12px] text-slate-600">No fired Azure Monitor alerts are correlated to this VM for the last seven days.</p> : <p className="text-[12px] text-slate-600">Alert correlation is unavailable because Azure Monitor alerts access is not configured for the connected identity.</p>}
+      </Panel>
+      <Panel title="Approved action recommendations" right={<Scale className="h-3.5 w-3.5 text-[#1B4F91]" />}>
+        <p className="mb-2 text-[11.5px] text-slate-600">Recommendations only—no action is enabled or executed here.</p>
+        <div className="space-y-1.5">{intelligence?.recommendations.map((recommendation) => <div key={recommendation.title} className="rounded border border-[#E2E8F0] p-2"><div className="text-[11.5px] font-semibold text-slate-800">{recommendation.title}</div><p className="mt-0.5 text-[11px] leading-relaxed text-slate-600">{recommendation.detail}</p><div className="mt-1 text-[10.5px] font-medium text-[#1B4F91]">{recommendation.approval}</div></div>) ?? <p className="text-[12px] text-slate-500">Loading recommendations…</p>}</div>
+      </Panel></div>
     </div>
 
     <Panel className="mt-3" title="Assessment data coverage" right={<button type="button" onClick={() => setRawOpen((open) => !open)} className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#1B4F91]"><Code2 className="h-3.5 w-3.5" />{rawOpen ? "Hide" : "View"} raw Azure observation</button>}>

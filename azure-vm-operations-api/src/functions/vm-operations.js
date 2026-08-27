@@ -303,6 +303,66 @@ async function patching(vmId) {
   }
 }
 
+function printable(value) {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
+  return null;
+}
+
+function propertyLabel(path) {
+  return path
+    .replace(/^properties\./, "")
+    .replace(/\.([A-Z])/g, " $1")
+    .replace(/\./g, " · ");
+}
+
+async function history(vmId) {
+  try {
+    const result = record(await arm(`${vmId}/providers/Microsoft.Resources/changes?api-version=2022-05-01&$top=20`));
+    const changes = asArray(result.value).flatMap((entry) => {
+      const properties = record(record(entry).properties);
+      const attributes = record(properties.ChangeAttributes);
+      const changedProperties = record(properties.Changes);
+      const fields = Object.entries(changedProperties).flatMap(([path, values]) => {
+        const change = record(values);
+        const before = printable(change.PreviousValue);
+        const after = printable(change.NewValue);
+        return before || after ? [{ field: propertyLabel(path), before, after }] : [];
+      });
+      const timestamp = typeof attributes.Timestamp === "string" ? attributes.Timestamp : null;
+      const changeType = typeof properties.ChangeType === "string" ? properties.ChangeType : "Update";
+      return timestamp ? [{ timestamp, changeType, fields }] : [];
+    }).sort((left, right) => right.timestamp.localeCompare(left.timestamp));
+    return { state: "available", changes };
+  } catch {
+    return { state: "unavailable", changes: [] };
+  }
+}
+
+async function alerts(subscriptionId, vmId) {
+  try {
+    const result = record(await arm(
+      `/subscriptions/${subscriptionId}/providers/Microsoft.AlertsManagement/alerts?api-version=2019-03-01&targetResource=${encodeURIComponent(vmId)}&monitorCondition=Fired&timeRange=7d&pageCount=25`,
+    ));
+    const items = asArray(result.value).flatMap((entry) => {
+      const essentials = record(record(record(entry).properties).essentials);
+      const name = typeof essentials.alertRule === "string"
+        ? essentials.alertRule
+        : typeof essentials.alertRuleName === "string" ? essentials.alertRuleName : null;
+      if (!name) return [];
+      return [{
+        name,
+        severity: typeof essentials.severity === "string" ? essentials.severity : "Unknown",
+        state: typeof essentials.alertState === "string" ? essentials.alertState : "Unknown",
+        startedAt: typeof essentials.startDateTime === "string" ? essentials.startDateTime : null,
+        monitorService: typeof essentials.monitorService === "string" ? essentials.monitorService : null,
+      }];
+    });
+    return { state: "available", alerts: items };
+  } catch {
+    return { state: "unavailable", alerts: [] };
+  }
+}
+
 function addUnique(target, value) {
   if (typeof value === "string" && value.trim() && !target.includes(value)) target.push(value);
 }
@@ -389,11 +449,13 @@ async function vmOperations(request) {
     ]);
     const vmRecord = record(vm);
     const location = vmRecord.location;
-    const [monitoringResult, backupResult, patchingResult, networkResult] = await Promise.all([
+    const [monitoringResult, backupResult, patchingResult, networkResult, historyResult, alertsResult] = await Promise.all([
       monitoring(vmRecord.id),
       backup(subscriptionId, location, vmRecord),
       patching(vmRecord.id),
       network(vmRecord).catch(() => ({ networkInterface: null, networkInterfaces: [], privateIps: [], publicIps: [], subnet: null, networkSecurityGroups: [], loadBalancers: [] })),
+      history(vmRecord.id),
+      alerts(subscriptionId, vmRecord.id),
     ]);
 
     return response({
@@ -404,6 +466,8 @@ async function vmOperations(request) {
       backup: backupResult,
       patching: patchingResult,
       network: networkResult,
+      history: historyResult,
+      alerts: alertsResult,
     }, 200, request);
   } catch (error) {
     const status = errorStatus(error);

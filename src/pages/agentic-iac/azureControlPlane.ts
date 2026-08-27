@@ -109,6 +109,24 @@ export type AzureVmOperations = {
     networkSecurityGroups: string[];
     loadBalancers: string[];
   };
+  history: {
+    state: "available" | "unavailable";
+    changes: Array<{
+      timestamp: string;
+      changeType: string;
+      fields: Array<{ field: string; before: string | null; after: string | null }>;
+    }>;
+  };
+  alerts: {
+    state: "available" | "unavailable";
+    alerts: Array<{
+      name: string;
+      severity: string;
+      state: string;
+      startedAt: string | null;
+      monitorService: string | null;
+    }>;
+  };
 };
 
 export class AzureControlPlaneError extends Error {
@@ -195,6 +213,8 @@ function normalizeVmOperations(value: unknown, vm: AzureVirtualMachine): AzureVm
   const backup = record(raw.backup);
   const patching = record(raw.patching ?? raw.patch);
   const network = record(raw.network);
+  const history = record(raw.history);
+  const alerts = record(raw.alerts);
   const configuration = record(raw.configuration);
   const osDisk = record(configuration.osDisk ?? configuration.os_disk);
   const dataDisks = Array.isArray(configuration.dataDisks ?? configuration.data_disks)
@@ -262,6 +282,34 @@ function normalizeVmOperations(value: unknown, vm: AzureVirtualMachine): AzureVm
       subnet: nullableText(network.subnet),
       networkSecurityGroups: textList(network.networkSecurityGroups ?? network.network_security_groups),
       loadBalancers: textList(network.loadBalancers ?? network.load_balancers),
+    },
+    history: {
+      state: state(history.state, ["available", "unavailable"], "unavailable"),
+      changes: Array.isArray(history.changes) ? history.changes.flatMap((value) => {
+        const change = record(value);
+        const timestamp = nullableText(change.timestamp);
+        if (!timestamp) return [];
+        const fields = Array.isArray(change.fields) ? change.fields.flatMap((fieldValue) => {
+          const field = record(fieldValue);
+          const name = nullableText(field.field);
+          return name ? [{ field: name, before: nullableText(field.before), after: nullableText(field.after) }] : [];
+        }) : [];
+        return [{ timestamp, changeType: text(change.changeType, "Update"), fields }];
+      }) : [],
+    },
+    alerts: {
+      state: state(alerts.state, ["available", "unavailable"], "unavailable"),
+      alerts: Array.isArray(alerts.alerts) ? alerts.alerts.flatMap((value) => {
+        const alert = record(value);
+        const name = nullableText(alert.name);
+        return name ? [{
+          name,
+          severity: text(alert.severity, "Unknown"),
+          state: text(alert.state, "Unknown"),
+          startedAt: nullableText(alert.startedAt ?? alert.started_at),
+          monitorService: nullableText(alert.monitorService ?? alert.monitor_service),
+        }] : [];
+      }) : [],
     },
   };
 }
