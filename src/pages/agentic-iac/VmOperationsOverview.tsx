@@ -56,7 +56,7 @@ export function VmOperationsOverview({ data, loading, error }: Props) {
     <section className="mt-2 rounded-md border border-[#E2E8F0] bg-white p-3">
       <div className="flex items-center gap-2"><AlertCircle className="h-4 w-4 text-amber-600" /><h2 className="text-[12.5px] font-semibold uppercase tracking-wide text-slate-700">VM Operations</h2></div>
       <p className="mt-1.5 text-[12px] text-slate-600">{error ?? "Azure Monitor, Backup, Update Manager, and network topology data are not available for this VM."}</p>
-      <p className="mt-1 text-[11px] text-slate-500">Enable the read-only operations endpoint in the Azure control plane to populate this view.</p>
+      <p className="mt-1 text-[11px] text-slate-500">This view is read-only and reports only Azure data available for the selected VM.</p>
     </section>
   );
 

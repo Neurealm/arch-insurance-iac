@@ -163,9 +163,15 @@ export default function AssetDigitalTwin() {
       .then((result) => { if (active) setOperations(result); })
       .catch((error) => {
         if (!active) return;
-        setOperationsError(error instanceof AzureControlPlaneError
-          ? "The Azure operations data source is not enabled for this VM."
-          : "Unable to load Azure operations data.");
+        if (error instanceof AzureControlPlaneError) {
+          setOperationsError(
+            error.status === 401
+              ? "Sign in again to load Azure VM operations data."
+              : error.message,
+          );
+          return;
+        }
+        setOperationsError("The VM Operations API could not be reached. Refresh the page and try again.");
       })
       .finally(() => { if (active) setLoadingOperations(false); });
 
