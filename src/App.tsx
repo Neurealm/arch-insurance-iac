@@ -79,6 +79,7 @@ const App = () => (
                   <Route path="/remediation/virtual-machines/:vmName" element={<RemediationIntelligence />} />
                   <Route path="/remediation/:assetId" element={<Navigate to="/remediation" replace />} />
                   <Route path="/changes" element={<ChangeEngineering />} />
+                  <Route path="/changes/virtual-machines/:vmName" element={<ChangeEngineering />} />
                   <Route path="/changes/:assetId" element={<ChangeEngineering />} />
                   <Route path="/approvals" element={<ChangeReviewApproval />} />
                   <Route path="/approvals/:packageId" element={<ChangeReviewApproval />} />

@@ -1,313 +1,152 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { CheckCircle2, Download, Save, ShieldCheck, Bot } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { AlertTriangle, CheckCircle2, ClipboardCheck, RefreshCw, Save, ShieldCheck, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  ARTIFACT_COUNT, CHANGE_CONTEXT, CONTRIBUTORS, LIFECYCLE, STEPS, VALIDATIONS,
-  type StageKey,
-} from "./change/data";
-import { STEP_TABS, StepWorkspaceBody, type StepTab } from "./change/StepWorkspace";
-import { PackageContentsDrawer } from "./change/PackageContentsDrawer";
+import { useAuth } from "@/context/AuthContext";
+import { AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, type AzureVirtualMachine, type AzureVmOperations } from "./azureControlPlane";
+import { listVmChangePackages, saveVmChangePackage, type VmChangePackage } from "./changePackages";
 
-const STATUS_TONE: Record<string, string> = {
-  Ready: "text-emerald-700",
-  "In Focus": "text-[#1B4F91]",
-  Pending: "text-slate-500",
-};
+type ActionId = "start_vm" | "restart_vm" | "resize_vm" | "increase_os_disk" | "configure_backup" | "enable_monitoring" | "assess_patches";
+type ActionDefinition = { id: ActionId; label: string; description: string; category: string; requiresValue?: "vmSize" | "diskSize" };
 
-function Panel({ title, right, children, className }: {
-  title: string; right?: React.ReactNode; children: React.ReactNode; className?: string;
-}) {
-  return (
-    <section className={cn("flex flex-col rounded-md border border-[#E2E8F0] bg-white", className)}>
-      <header className="flex items-center gap-2 border-b border-[#E2E8F0] px-3 py-2">
-        <h2 className="text-[12px] font-semibold uppercase tracking-wide text-slate-700">{title}</h2>
-        {right && <div className="ml-auto flex items-center gap-2">{right}</div>}
-      </header>
-      <div className="flex-1 p-3">{children}</div>
-    </section>
-  );
+const ACTIONS: ActionDefinition[] = [
+  { id: "start_vm", label: "Start virtual machine", description: "Request a start for a deallocated VM after confirming it is intended to run.", category: "Power" },
+  { id: "restart_vm", label: "Restart virtual machine", description: "Request a controlled restart with pre- and post-change validation.", category: "Power" },
+  { id: "resize_vm", label: "Change VM size", description: "Request a new Azure VM SKU. Capacity and regional availability must be validated before approval.", category: "Compute", requiresValue: "vmSize" },
+  { id: "increase_os_disk", label: "Increase OS disk capacity", description: "Request a larger managed OS disk. Azure disk capacity cannot be reduced after expansion.", category: "Storage", requiresValue: "diskSize" },
+  { id: "configure_backup", label: "Configure Azure Backup", description: "Request a recovery-services backup policy after confirming the required recovery objective.", category: "Protection" },
+  { id: "enable_monitoring", label: "Enable Azure Monitor / VM Insights", description: "Request performance telemetry collection for CPU, memory, and disk capacity evidence.", category: "Monitoring" },
+  { id: "assess_patches", label: "Run patch assessment", description: "Request a current Azure Update Manager assessment before planning maintenance.", category: "Maintenance" },
+];
+
+function Panel({ title, right, children, className }: { title: string; right?: React.ReactNode; children: React.ReactNode; className?: string }) {
+  return <section className={cn("rounded-md border border-[#E2E8F0] bg-white", className)}><header className="flex items-center gap-2 border-b border-[#E2E8F0] px-3 py-2"><h2 className="text-[12px] font-semibold uppercase tracking-wide text-slate-700">{title}</h2>{right && <div className="ml-auto">{right}</div>}</header><div className="p-3">{children}</div></section>;
 }
 
-function Row({ label, value, tone }: { label: string; value: React.ReactNode; tone?: "ok" | "warn" }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 py-[3px] text-[11.5px]">
-      <span className="text-slate-500">{label}</span>
-      <span className={cn("text-right font-medium text-slate-800", tone === "ok" && "text-emerald-700", tone === "warn" && "text-amber-700")}>{value}</span>
-    </div>
-  );
-}
-
-function Badge({ children, tone = "slate" }: { children: React.ReactNode; tone?: "slate" | "amber" | "blue" }) {
-  return (
-    <span className={cn(
-      "rounded border px-1.5 py-0.5 text-[10.5px] font-medium",
-      tone === "slate" && "border-[#E2E8F0] bg-slate-50 text-slate-700",
-      tone === "amber" && "border-amber-200 bg-amber-50 text-amber-700",
-      tone === "blue" && "border-[#CFE0F3] bg-[#EFF4FB] text-[#1B4F91]",
-    )}>
-      {children}
-    </span>
-  );
-}
+function Row({ label, value }: { label: string; value: React.ReactNode }) { return <div className="flex items-start justify-between gap-4 py-1 text-[12px]"><span className="text-slate-500">{label}</span><span className="text-right font-medium text-slate-800">{value}</span></div>; }
+function title(value: string) { return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()); }
+function newPackageNumber() { return `VM-CHG-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`; }
 
 export default function ChangeEngineering() {
-  const [stage, setStage] = useState<StageKey>(4);
-  const [stepId, setStepId] = useState(4);
-  const [tab, setTab] = useState<StepTab>("Overview");
-  const [pkgOpen, setPkgOpen] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { vmName } = useParams<{ vmName: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [vms, setVms] = useState<AzureVirtualMachine[]>([]);
+  const [operations, setOperations] = useState<AzureVmOperations | null>(null);
+  const [packages, setPackages] = useState<VmChangePackage[]>([]);
+  const [actionId, setActionId] = useState<ActionId | "">("");
+  const [vmSize, setVmSize] = useState("");
+  const [diskSize, setDiskSize] = useState("");
+  const [rationale, setRationale] = useState("");
+  const [activePackage, setActivePackage] = useState<VmChangePackage | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const step = useMemo(() => STEPS.find((s) => s.id === stepId) ?? STEPS[3], [stepId]);
-  const c = CHANGE_CONTEXT;
+  const selectedVm = useMemo(() => vmName ? vms.find((vm) => vm.name.toLowerCase() === vmName.toLowerCase()) ?? null : vms[0] ?? null, [vmName, vms]);
+  const selectedAction = ACTIONS.find((action) => action.id === actionId) ?? null;
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try {
+      const [machines, existingPackages] = await Promise.all([listAzureVirtualMachines(), user ? listVmChangePackages() : Promise.resolve([])]);
+      setVms(machines); setPackages(existingPackages);
+    } catch (cause) { setError(cause instanceof AzureControlPlaneError ? cause.message : "Unable to load the VM inventory or your saved packages."); }
+    finally { setLoading(false); }
+  }, [user]);
+  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    if (!selectedVm) { setOperations(null); return; }
+    let cancelled = false;
+    getAzureVmOperations(selectedVm).then((result) => { if (!cancelled) setOperations(result); }).catch((cause) => { if (!cancelled) setError(cause instanceof AzureControlPlaneError ? cause.message : "Unable to load the current Azure VM state."); });
+    return () => { cancelled = true; };
+  }, [selectedVm]);
 
-  const selectStage = (s: StageKey) => {
-    setStage(s);
-    const first = LIFECYCLE.find((l) => l.id === s)?.steps[0] ?? 1;
-    setStepId(first);
-    setTab("Overview");
+  const isActionAvailable = (action: ActionDefinition) => {
+    if (!operations) return { enabled: false, note: "Loading Azure state" };
+    if (action.id === "start_vm" && /running/i.test(selectedVm?.powerState ?? "")) return { enabled: false, note: "VM is already running" };
+    if (action.id === "restart_vm" && !/running/i.test(selectedVm?.powerState ?? "")) return { enabled: false, note: "VM must be running" };
+    if (action.id === "increase_os_disk" && !operations.configuration.osDisk.sizeGB) return { enabled: false, note: "OS disk capacity unavailable" };
+    return { enabled: true, note: "Eligible for package creation" };
   };
 
-  const selectStep = (id: number) => {
-    setStepId(id);
-    const st = STEPS.find((s) => s.id === id);
-    if (st) setStage(st.stage);
-    setTab("Overview");
+  const policy = useMemo(() => {
+    if (!selectedVm || !operations || !selectedAction) return null;
+    const checks = [
+      { label: "Azure VM discovery", pass: true, detail: "Current target resolved from Azure control plane" },
+      { label: "Action eligibility", pass: isActionAvailable(selectedAction).enabled, detail: isActionAvailable(selectedAction).note },
+      { label: "Backup evidence", pass: operations.backup.state === "protected", detail: title(operations.backup.state) },
+      { label: "Monitoring evidence", pass: operations.monitoring.state === "available", detail: title(operations.monitoring.state) },
+    ];
+    let score = selectedAction.id === "start_vm" ? 20 : selectedAction.id === "assess_patches" ? 15 : selectedAction.id === "enable_monitoring" || selectedAction.id === "configure_backup" ? 35 : 45;
+    if (operations.backup.state !== "protected") score += 10;
+    if (operations.monitoring.state !== "available") score += 5;
+    if ((selectedVm.tags.environment ?? selectedVm.tags.Environment ?? "").toLowerCase() === "production") score += 15;
+    score = Math.min(score, 100);
+    return { checks, score, level: score >= 60 ? "High" as const : score >= 35 ? "Medium" as const : "Low" as const };
+  }, [operations, selectedAction, selectedVm]);
+
+  const parameterError = selectedAction?.requiresValue === "vmSize" && !vmSize.trim()
+    ? "Enter the requested Azure VM size."
+    : selectedAction?.requiresValue === "diskSize" && (!/^\d+$/.test(diskSize) || Number(diskSize) <= (operations?.configuration.osDisk.sizeGB ?? 0))
+      ? `Enter a disk size in GB greater than the current ${operations?.configuration.osDisk.sizeGB ?? "reported"} GB.` : null;
+  const ready = !!selectedVm && !!operations && !!selectedAction && !!policy && rationale.trim().length >= 10 && !parameterError && isActionAvailable(selectedAction).enabled;
+
+  const packageInput = (status: "draft" | "submitted") => {
+    if (!selectedVm || !operations || !selectedAction || !policy) throw new Error("A target, action, and current Azure state are required.");
+    const params = selectedAction.requiresValue === "vmSize" ? { requestedVmSize: vmSize.trim(), currentVmSize: operations.configuration.vmSize ?? selectedVm.vmSize }
+      : selectedAction.requiresValue === "diskSize" ? { currentOsDiskSizeGB: operations.configuration.osDisk.sizeGB, requestedOsDiskSizeGB: Number(diskSize) }
+        : {};
+    const validationPlan = [
+      "Re-read Azure VM power and provisioning state.",
+      selectedAction.id === "increase_os_disk" ? "Confirm managed disk capacity equals the approved target." : "Confirm the requested Azure operation reached a terminal success state.",
+      selectedAction.id === "enable_monitoring" ? "Confirm Azure Monitor starts returning VM telemetry." : "Capture post-change Azure control-plane observation.",
+    ];
+    return {
+      packageNumber: activePackage?.packageNumber ?? newPackageNumber(), status, targetResourceId: selectedVm.id, targetName: selectedVm.name,
+      subscriptionId: selectedVm.subscriptionId, resourceGroup: selectedVm.resourceGroup, region: selectedVm.location,
+      actionType: selectedAction.id, actionLabel: selectedAction.label, parameters: params, rationale: rationale.trim(),
+      currentState: { vm: selectedVm.raw, operations }, policyEvidence: policy.checks, validationPlan, riskScore: policy.score,
+      riskLevel: policy.level, approvalRequired: true,
+    };
   };
 
-  return (
-    <div className="p-4">
-      {/* breadcrumb */}
-      <nav className="mb-2 flex flex-wrap items-center gap-1.5 text-[11.5px] text-slate-500">
-        <span>Assets</span>
-        <span>/</span><span>SQL Servers</span>
-        <span>/</span><span className="text-slate-700">{c.server}</span>
-        <span>/</span>
-        <Link to="/remediation/sql-prod-07" className="hover:text-slate-700 hover:underline">Remediation Intelligence</Link>
-        <span>/</span><span className="font-medium text-slate-800">Change Engineering</span>
-      </nav>
+  const persist = async (status: "draft" | "submitted") => {
+    if (!ready) { setError(parameterError ?? "Choose an eligible action and provide a reason of at least 10 characters."); return; }
+    setSaving(true); setError(null); setMessage(null);
+    try {
+      const saved = await saveVmChangePackage(packageInput(status), activePackage?.id);
+      setActivePackage(saved); setPackages((items) => [saved, ...items.filter((item) => item.id !== saved.id)]);
+      setMessage(status === "submitted" ? `${saved.packageNumber} submitted for governed approval. No Azure action has been executed.` : `${saved.packageNumber} saved as a durable draft.`);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to save the change package."); }
+    finally { setSaving(false); }
+  };
 
-      {/* header */}
-      <header className="mb-3 flex flex-wrap items-start gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-[20px] font-semibold leading-tight text-slate-900">Change Engineering Workspace</h1>
-            <span className="rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-              {submitted ? "Submitted for Approval" : "Ready for Review"}
-            </span>
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-slate-700">
-            <span className="font-medium">{c.server} / {c.database}</span>
-            <Badge tone="amber">{c.environment}</Badge>
-            <Badge>{c.criticality}</Badge>
-            <Badge tone="blue">AWS</Badge>
-            <Badge>SQL Server</Badge>
-          </div>
-          <p className="mt-1 text-[12px] text-slate-600">
-            <span className="font-medium text-slate-700">Objective:</span> Stabilize SQL transaction log and increase infrastructure capacity headroom.
-          </p>
-        </div>
+  if (loading && !selectedVm) return <div className="p-4 text-[13px] text-slate-600">Loading Azure VM change builder…</div>;
+  if (!selectedVm) return <div className="p-4"><Panel title="VM change engineering"><p className="text-[13px] text-slate-600">No Azure virtual machine is available in the connected scope.</p><Link to="/resources" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Back to Azure Resources</Link></Panel></div>;
 
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <button type="button" onClick={() => setPkgOpen(true)} className="flex items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50">
-            <Download className="h-3.5 w-3.5" /> Export Package
-          </button>
-          <button type="button" onClick={() => setSaved(true)} className="flex items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50">
-            <Save className="h-3.5 w-3.5" /> {saved ? "Draft Saved" : "Save Draft"}
-          </button>
-          <button type="button" onClick={() => setSubmitted(true)} className="flex items-center gap-1.5 rounded-md bg-[#1B4F91] px-3 py-1.5 text-[12px] font-medium text-white hover:bg-[#16406f]">
-            <ShieldCheck className="h-3.5 w-3.5" /> {submitted ? "Awaiting Approval" : "Submit for Approval"}
-          </button>
-        </div>
-      </header>
+  return <div className="min-w-0 p-4">
+    <div className="mb-3 flex flex-wrap items-center gap-2"><nav className="text-[12px] text-slate-500"><Link to="/resources" className="hover:text-[#1B4F91]">Azure Resources</Link><span className="mx-1.5">/</span><Link to={`/resources/virtual-machines/${encodeURIComponent(selectedVm.name)}`} className="hover:text-[#1B4F91]">{selectedVm.name}</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">Change Engineering</span></nav><button type="button" onClick={() => void load()} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50"><RefreshCw className="h-3.5 w-3.5" />Refresh Azure state</button></div>
+    <header className="mb-3 flex flex-wrap items-start gap-3"><div><h1 className="text-[20px] font-semibold text-slate-900">VM Change Package Builder</h1><p className="mt-1 text-[12px] text-slate-600">Choose a real Azure VM and the change you want to request. Saving creates a durable package; it does not modify Azure.</p></div><div className="ml-auto rounded-md border border-[#CFE0F3] bg-[#EFF4FB] px-3 py-2 text-[11.5px] text-[#1B4F91]"><ShieldCheck className="mr-1 inline h-3.5 w-3.5" />Human approval required for every VM change</div></header>
+    {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}{message && <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{message}</div>}
 
-      {submitted && (
-        <p className="mb-3 rounded-md border border-[#CFE0F3] bg-[#EFF4FB] px-3 py-2 text-[11.5px] text-[#1B4F91]">
-          Change package {c.changeId} routed for human approval. No infrastructure operation has been executed.
-        </p>
-      )}
+    <div className="grid gap-3 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+      <div className="space-y-3"><Panel title="1. Select the Azure VM"><label className="text-[12px] font-medium text-slate-700">Target virtual machine</label><select value={selectedVm.name} onChange={(event) => { setActivePackage(null); setActionId(""); navigate(`/changes/virtual-machines/${encodeURIComponent(event.target.value)}`); }} className="mt-1 block h-9 w-full rounded-md border border-[#CBD5E1] bg-white px-2.5 text-[12px] text-slate-800">{vms.map((vm) => <option key={vm.id} value={vm.name}>{vm.name} · {vm.resourceGroup} · {vm.location}</option>)}</select><div className="mt-3 grid gap-2 sm:grid-cols-3"><Fact label="Power state" value={selectedVm.powerState} /><Fact label="VM size" value={operations?.configuration.vmSize ?? selectedVm.vmSize} /><Fact label="OS disk" value={operations?.configuration.osDisk.sizeGB ? `${operations.configuration.osDisk.sizeGB} GB` : "Not reported"} /></div></Panel>
 
-      {/* summary strip */}
-      <div className="mb-3 flex flex-wrap items-center gap-x-6 gap-y-1.5 rounded-md border border-[#E2E8F0] bg-white px-3 py-2 text-[11.5px]">
-        {[
-          ["Change Package", c.changeId], ["Status", c.status], ["Engineering Confidence", `${c.confidence}%`],
-          ["Expected Downtime", c.downtime], ["Risk", c.risk], ["Approval Required", c.approvalRequired],
-          ["Systems", c.systems], ["Artifacts", String(ARTIFACT_COUNT)], ["Validation Tests", String(VALIDATIONS.length)],
-          ["Infrastructure Mutations", String(c.mutations)],
-        ].map(([k, v]) => (
-          <div key={k} className="flex items-baseline gap-1.5">
-            <span className="text-slate-500">{k}:</span>
-            <span className="font-medium text-slate-800">{v}</span>
-          </div>
-        ))}
-      </div>
+      <Panel title="2. Select what you want to change" right={<span className="text-[11px] text-slate-500">Azure VM actions</span>}><div className="grid gap-2 sm:grid-cols-2">{ACTIONS.map((action) => { const availability = isActionAvailable(action); const selected = action.id === actionId; return <button key={action.id} type="button" disabled={!availability.enabled} onClick={() => { setActionId(action.id); setActivePackage(null); }} className={cn("rounded-md border p-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50", selected ? "border-[#1B4F91] bg-[#EFF4FB] ring-1 ring-[#CFE0F3]" : "border-[#E2E8F0] hover:bg-slate-50")}><div className="flex gap-2"><Wrench className="mt-0.5 h-4 w-4 shrink-0 text-[#1B4F91]" /><div><div className="text-[12px] font-semibold text-slate-800">{action.label}</div><p className="mt-0.5 text-[11px] leading-relaxed text-slate-600">{action.description}</p><div className={cn("mt-1 text-[10.5px] font-medium", availability.enabled ? "text-emerald-700" : "text-slate-500")}>{availability.note}</div></div></div></button>; })}</div>
+        {selectedAction?.requiresValue === "vmSize" && <label className="mt-3 block text-[12px] font-medium text-slate-700">Requested Azure VM size<input value={vmSize} onChange={(event) => setVmSize(event.target.value)} placeholder="For example: Standard_D2s_v5" className="mt-1 h-9 w-full rounded-md border border-[#CBD5E1] px-2.5 text-[12px]" /></label>}
+        {selectedAction?.requiresValue === "diskSize" && <label className="mt-3 block text-[12px] font-medium text-slate-700">Requested OS disk size (GB)<input inputMode="numeric" value={diskSize} onChange={(event) => setDiskSize(event.target.value)} placeholder={`More than ${operations?.configuration.osDisk.sizeGB ?? "current size"}`} className="mt-1 h-9 w-full rounded-md border border-[#CBD5E1] px-2.5 text-[12px]" /></label>}
+        {parameterError && <p className="mt-1 text-[11.5px] text-red-700">{parameterError}</p>}</Panel>
 
-      {/* lifecycle */}
-      <div className="mb-3 overflow-x-auto rounded-md border border-[#E2E8F0] bg-white p-3">
-        <div className="flex min-w-[900px] items-stretch gap-2">
-          {LIFECYCLE.map((l, i) => {
-            const active = stage === l.id;
-            return (
-              <div key={l.id} className="flex flex-1 items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => selectStage(l.id)}
-                  className={cn(
-                    "flex flex-1 items-start gap-2 rounded-md border px-2.5 py-2 text-left transition-colors",
-                    active ? "border-[#CFE0F3] bg-[#EFF4FB]" : "border-transparent hover:bg-slate-50",
-                  )}
-                >
-                  <span className={cn(
-                    "mt-[1px] grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10.5px] font-semibold",
-                    active ? "bg-[#1B4F91] text-white" : l.state === "done" ? "bg-emerald-600 text-white" : "border border-slate-300 text-slate-500",
-                  )}>{l.id}</span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-[11.5px] font-semibold uppercase tracking-wide text-slate-700">{l.title}</span>
-                    <span className="block truncate text-[11px] text-slate-500">{l.sub}</span>
-                    {l.state === "done" && <CheckCircle2 className="mt-1 h-3.5 w-3.5 text-emerald-600" />}
-                  </span>
-                </button>
-                {i < LIFECYCLE.length - 1 && <span className="text-slate-300">→</span>}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <Panel title="3. Explain why this change is needed"><textarea value={rationale} onChange={(event) => setRationale(event.target.value)} placeholder="Describe the operational reason, expected outcome, and any timing or business constraint." rows={4} className="w-full rounded-md border border-[#CBD5E1] p-2.5 text-[12px] outline-none focus:border-[#1B4F91]" /><p className="mt-1 text-[11px] text-slate-500">At least 10 characters. This rationale is stored with the package.</p></Panel></div>
 
-      {/* three-column workspace */}
-      <div className="grid gap-3 xl:grid-cols-[320px_minmax(0,1fr)_300px]">
-        {/* left: plan */}
-        <Panel title="Engineered Change Plan" className="self-start">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-[11.5px]">
-              <thead className="text-[10.5px] uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="pb-1 font-medium">Step</th>
-                  <th className="pb-1 font-medium">Technology</th>
-                  <th className="pb-1 text-right font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {STEPS.map((s) => (
-                  <tr
-                    key={s.id}
-                    onClick={() => selectStep(s.id)}
-                    className={cn("cursor-pointer border-t border-[#E2E8F0] align-top", s.id === stepId ? "bg-[#EFF4FB]" : "hover:bg-slate-50")}
-                  >
-                    <td className="py-1.5 pr-2">
-                      <div className="flex gap-2">
-                        <span className="mt-[1px] grid h-4 w-4 shrink-0 place-items-center rounded-full border border-slate-300 text-[10px] text-slate-600">{s.id}</span>
-                        <div className="min-w-0">
-                          <div className="font-medium text-slate-800">{s.title}</div>
-                          <div className="text-[11px] text-slate-500">{s.description}</div>
-                          <div className="mt-0.5 font-mono text-[10.5px] text-slate-500">{s.artifacts.join(", ")}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-1.5 pr-2 text-[11px] text-slate-600">{s.technology.join(", ")}</td>
-                    <td className={cn("py-1.5 text-right text-[11px] font-medium", STATUS_TONE[s.status])}>{s.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Panel>
-
-        {/* center: step workspace */}
-        <section className="flex min-w-0 flex-col rounded-md border border-[#E2E8F0] bg-white">
-          <header className="border-b border-[#E2E8F0] px-3 py-2">
-            <h2 className="text-[13px] font-semibold text-slate-900">Step {step.id}, {step.title}</h2>
-            <p className="text-[11.5px] text-slate-500">{step.description}</p>
-          </header>
-          <div className="flex flex-wrap gap-1 border-b border-[#E2E8F0] px-2 py-1.5">
-            {STEP_TABS.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setTab(t)}
-                className={cn(
-                  "rounded-md px-2.5 py-1 text-[11.5px] transition-colors",
-                  tab === t ? "bg-[#EFF4FB] font-medium text-[#1B4F91] ring-1 ring-inset ring-[#CFE0F3]" : "text-slate-600 hover:bg-slate-50",
-                )}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-          <div className="min-w-0 flex-1 p-3">
-            <StepWorkspaceBody step={step} tab={tab} />
-          </div>
-        </section>
-
-        {/* right rail */}
-        <div className="flex flex-col gap-3">
-          <Panel
-            title="Change Package"
-            right={
-              <button type="button" onClick={() => setPkgOpen(true)} className="text-[11px] font-medium text-[#1B4F91] hover:underline">
-                View Package Contents
-              </button>
-            }
-          >
-            <div className="mb-1 flex items-center gap-2">
-              <span className="font-mono text-[12.5px] font-semibold text-slate-900">{c.changeId}</span>
-              <Badge>{c.status}</Badge>
-            </div>
-            <Row label="Target" value={`${c.server} / ${c.database}`} />
-            <Row label="Environment" value={c.environment} />
-            <Row label="Business Service" value="Order Processing" />
-            <Row label="Systems" value="SQL Server, Windows, AWS" />
-            <Row label="Artifacts" value={ARTIFACT_COUNT} />
-            <Row label="Infrastructure Mutations" value={c.mutations} />
-            <Row label="Validation Tests" value={VALIDATIONS.length} />
-            <Row label="Expected Downtime" value={c.downtime} />
-            <Row label="Risk" value={c.risk} tone="warn" />
-            <Row label="Approval Required" value={c.approvalRequired} tone="warn" />
-            <Row label="Engineering Confidence" value={`${c.confidence}%`} tone="ok" />
-            <div className="mt-1 h-1.5 overflow-hidden rounded bg-slate-100">
-              <div className="h-full rounded bg-emerald-500" style={{ width: `${c.confidence}%` }} />
-            </div>
-            <Row label="Created" value={c.created} />
-          </Panel>
-
-          <Panel title="Agentic Engineering Contributors">
-            <ul className="space-y-2.5">
-              {CONTRIBUTORS.map((a) => (
-                <li key={a.name} className="flex gap-2">
-                  <Bot className="mt-[2px] h-4 w-4 shrink-0 text-[#1B4F91]" />
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11.5px] font-medium text-slate-800">{a.name}</span>
-                      <span className="ml-auto flex items-center gap-1 text-[10.5px] text-emerald-700">
-                        <CheckCircle2 className="h-3 w-3" />{a.status}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-600">{a.contribution}</p>
-                    <p className="mt-0.5 text-[10.5px] text-slate-500">Artifacts: {a.artifacts} · Confidence: {a.confidence}%</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Panel>
-
-          <Panel title="Scenario Context">
-            <Row label="Condition" value={c.condition} />
-            <Row label="Root Cause" value={c.rootCause} />
-            <Row label="Log Utilization" value={c.logUtilization} tone="warn" />
-            <Row label="Last Log Backup" value={c.lastLogBackup} />
-            <Row label="Windows Volume" value={c.windowsVolume} />
-            <Row label="EBS Volume" value={c.ebsVolume} />
-            <Row label="Capacity" value={`${c.currentCapacity} → ${c.targetCapacity}`} />
-            <Row label="Strategy" value={c.strategy} />
-            <Row label="Region" value={c.region} />
-            <Row label="Operating System" value={c.os} />
-            <Row label="Engine" value={c.engine} />
-          </Panel>
-        </div>
-      </div>
-
-      <PackageContentsDrawer open={pkgOpen} onClose={() => setPkgOpen(false)} />
+      <div className="space-y-3"><Panel title="Current Azure evidence"><Row label="Resource group" value={selectedVm.resourceGroup} /><Row label="Subscription" value={selectedVm.subscriptionId} /><Row label="Provisioning" value={selectedVm.provisioningState} /><Row label="Backup" value={operations ? title(operations.backup.state) : "Loading"} /><Row label="Monitoring" value={operations ? title(operations.monitoring.state) : "Loading"} /><Row label="Patch assessment" value={operations ? title(operations.patching.state) : "Loading"} /></Panel>
+      <Panel title="Policy & approval preview" right={policy && <span className={cn("rounded border px-1.5 py-0.5 text-[10.5px] font-semibold", policy.level === "High" ? "border-red-200 bg-red-50 text-red-700" : policy.level === "Medium" ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700")}>{policy.level} · {policy.score}/100</span>}>{policy ? <><p className="mb-2 text-[11.5px] text-slate-600">Score is calculated from the selected action and current Azure evidence. Approval is always required.</p>{policy.checks.map((check) => <div key={check.label} className="flex items-center justify-between gap-2 border-t border-[#EEF2F6] py-1.5 text-[11.5px]"><span className="flex items-center gap-1.5 text-slate-700">{check.pass ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />}{check.label}</span><span className="text-right text-slate-500">{check.detail}</span></div>)}</> : <p className="text-[12px] text-slate-600">Select an action to calculate its policy and approval preview.</p>}</Panel>
+      <Panel title="Package controls"><div className="space-y-2"><button type="button" disabled={!ready || saving || activePackage?.status === "submitted"} onClick={() => void persist("draft")} className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-md border border-[#1B4F91] bg-white px-3 text-[12px] font-medium text-[#1B4F91] hover:bg-[#EFF4FB] disabled:opacity-50"><Save className="h-3.5 w-3.5" />{saving ? "Saving…" : activePackage ? "Update draft" : "Save draft package"}</button><button type="button" disabled={!ready || saving || activePackage?.status === "submitted"} onClick={() => void persist("submitted")} className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-md bg-[#1B4F91] px-3 text-[12px] font-medium text-white hover:bg-[#16406f] disabled:opacity-50"><ClipboardCheck className="h-3.5 w-3.5" />Submit for approval</button></div>{activePackage && <div className="mt-3 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-2.5 text-[11.5px]"><div className="font-mono font-semibold text-slate-800">{activePackage.packageNumber}</div><div className="mt-1 text-slate-600">{activePackage.status === "submitted" ? "Submitted and immutable" : "Draft saved"} · {activePackage.actionLabel}</div></div>}<p className="mt-2 text-[10.5px] text-slate-500">Execution is deliberately unavailable until an Azure action runner and approval workflow are configured.</p></Panel></div>
     </div>
-  );
+
+    <Panel className="mt-3" title="Your recent VM change packages" right={<span className="text-[11px] text-slate-500">Stored in Supabase</span>}>{packages.length ? <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-[11.5px]"><thead className="border-b border-[#E2E8F0] text-[10.5px] uppercase tracking-wide text-slate-500"><tr><th className="pb-2 font-medium">Package</th><th className="pb-2 font-medium">Target</th><th className="pb-2 font-medium">Requested action</th><th className="pb-2 font-medium">Risk</th><th className="pb-2 font-medium">Status</th><th className="pb-2 font-medium">Updated</th></tr></thead><tbody>{packages.map((pkg) => <tr key={pkg.id} className="border-b border-[#EEF2F6]"><td className="py-2 font-mono text-slate-800">{pkg.packageNumber}</td><td className="py-2">{pkg.targetName}</td><td className="py-2">{pkg.actionLabel}</td><td className="py-2">{pkg.riskLevel} ({pkg.riskScore}/100)</td><td className="py-2"><span className={cn("rounded border px-1.5 py-0.5", pkg.status === "submitted" ? "border-[#CFE0F3] bg-[#EFF4FB] text-[#1B4F91]" : "border-slate-200 bg-slate-50 text-slate-700")}>{title(pkg.status)}</span></td><td className="py-2 text-slate-500">{new Date(pkg.updatedAt).toLocaleString()}</td></tr>)}</tbody></table></div> : <p className="text-[12px] text-slate-600">No VM change package has been saved by your account yet.</p>}</Panel>
+  </div>;
 }
+
+function Fact({ label, value }: { label: string; value: string }) { return <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2"><div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div><div className="mt-0.5 truncate text-[12px] font-medium text-slate-800" title={value}>{value}</div></div>; }

@@ -12,7 +12,7 @@ const NAV = [
   { label: "Connections", to: "/connections", icon: Plug, enabled: true },
   { label: "Azure Resources", to: "/resources", icon: Boxes, enabled: true },
   { label: "Remediation Intelligence", to: "/remediation", icon: Activity, enabled: true },
-  { label: "Change Engineering", to: "/changes/sql-prod-07", icon: GitPullRequest, enabled: true },
+  { label: "Change Engineering", to: "/changes", icon: GitPullRequest, enabled: true },
   { label: "Change Review & Approval", to: "/approvals/CP-2026-01842", icon: ClipboardCheck, enabled: true },
   { label: "Execution Center", to: "/execution/CP-2026-01842", icon: PlayCircle, enabled: true },
   { label: "Validation & Evidence", to: "/validation/CP-2026-01842", icon: ClipboardCheck, enabled: true },
