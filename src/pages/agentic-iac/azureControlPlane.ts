@@ -323,11 +323,12 @@ function responseItems(payload: unknown): unknown[] {
   return [];
 }
 
-async function authenticatedGet(path: string, baseUrl = azureControlPlaneUrl): Promise<unknown> {
+async function authenticatedGet(path: string, baseUrl = azureControlPlaneUrl, method = "GET"): Promise<unknown> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) throw new AzureControlPlaneError("Sign in to load Azure resources.", 401);
 
   const response = await fetch(`${baseUrl}${path}`, {
+    method,
     headers: { Authorization: `Bearer ${session.access_token}` },
   });
   const payload = await response.json().catch(() => ({}));
@@ -377,6 +378,15 @@ export async function getAzureVmOperations(vm: AzureVirtualMachine): Promise<Azu
     azureVmOperationsUrl,
   );
   return normalizeVmOperations(payload, vm);
+}
+
+export async function executeApprovedVmChangePackage(packageId: string): Promise<{ executionStatus: string; azurePowerState: string; message: string }> {
+  const payload = record(await authenticatedGet(`/api/v1/change-packages/${encodeURIComponent(packageId)}/execute`, azureVmOperationsUrl, "POST"));
+  return {
+    executionStatus: text(payload.executionStatus, "unknown"),
+    azurePowerState: text(payload.azurePowerState, "unknown"),
+    message: text(payload.message, "Azure execution request completed."),
+  };
 }
 
 export function vmDiskName(vm: AzureVirtualMachine): string | null {

@@ -2,6 +2,8 @@ import { app } from "@azure/functions";
 
 const managementResource = "https://management.azure.com/";
 const controlPlaneAuthUrl = process.env.CONTROL_PLANE_AUTH_URL;
+const supabaseUrl = (process.env.SUPABASE_URL ?? "").replace(/\/$/, "");
+const supabasePublishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
 const allowedOrigins = new Set(
   (process.env.ALLOWED_ORIGINS ?? "")
     .split(",")
@@ -40,7 +42,7 @@ function preflight(request) {
     status: 200,
     headers: {
       "access-control-allow-origin": origin,
-      "access-control-allow-methods": "GET, OPTIONS",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
       "access-control-allow-headers": "authorization, content-type",
       "access-control-max-age": "600",
       vary: "Origin",
@@ -124,6 +126,42 @@ async function requireAuthorizedUser(request) {
 
   const authResponse = await fetch(controlPlaneAuthUrl, { headers: { authorization } });
   return authResponse.ok;
+}
+
+async function supabaseRpc(functionName, authorization, body) {
+  if (!supabaseUrl || !supabasePublishableKey) throw new Error("Supabase execution validation is not configured.");
+  const rpcResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/${functionName}`, {
+    method: "POST",
+    headers: {
+      apikey: supabasePublishableKey,
+      authorization,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const payload = await rpcResponse.json().catch(() => ({}));
+  if (!rpcResponse.ok) {
+    const message = record(payload).message ?? record(payload).error ?? `Package validation returned ${rpcResponse.status}.`;
+    throw new AzureRequestError(rpcResponse.status === 401 || rpcResponse.status === 403 ? 403 : 409, String(message));
+  }
+  return Array.isArray(payload) ? payload[0] ?? {} : payload;
+}
+
+function powerState(instanceView) {
+  const status = asArray(record(instanceView).statuses).find((item) => String(record(item).code ?? "").startsWith("PowerState/"));
+  return typeof record(status).code === "string" ? record(status).code : null;
+}
+
+function delay(milliseconds) { return new Promise((resolve) => setTimeout(resolve, milliseconds)); }
+
+async function waitForRunning(vmPath) {
+  for (let attempt = 0; attempt < 18; attempt += 1) {
+    const instanceView = await arm(`${vmPath}/instanceView?api-version=2024-07-01`);
+    const state = powerState(instanceView);
+    if (state === "PowerState/running") return { running: true, state };
+    await delay(5_000);
+  }
+  return { running: false, state: "PowerState/starting" };
 }
 
 function lastMetricAverage(metrics) {
@@ -477,9 +515,63 @@ async function vmOperations(request) {
   }
 }
 
+async function executeApprovedVmPackage(request) {
+  if (request.method === "OPTIONS") return preflight(request);
+  const origin = request.headers.get("origin");
+  if (origin && !allowedOrigins.has(origin)) return response({ message: "This application origin is not allowed to call the Azure execution API." }, 403, request);
+
+  let packageStarted = false;
+  let packageId = null;
+  let authorization = null;
+  try {
+    authorization = request.headers.get("authorization");
+    if (!await requireAuthorizedUser(request)) return response({ message: "A valid user session is required." }, 401, request);
+    packageId = request.params.packageId;
+    if (!isValidSegment(packageId, /^[0-9a-fA-F-]{36}$/)) return response({ message: "Invalid change package identifier." }, 400, request);
+
+    const packageRecord = record(await supabaseRpc("begin_iac_vm_execution", authorization, { p_package_id: packageId }));
+    packageStarted = true;
+    const subscriptionId = packageRecord.subscription_id;
+    const resourceGroup = packageRecord.resource_group;
+    const vmName = packageRecord.target_name;
+    if (packageRecord.action_type !== "start_vm" || !isValidSegment(subscriptionId, /^[0-9a-fA-F-]{36}$/) || !isValidSegment(resourceGroup, /^[\w.()_-]{1,90}$/) || !isValidSegment(vmName, /^[\w.()_-]{1,80}$/)) {
+      throw new AzureRequestError(409, "The approved package is not a valid start-VM request.");
+    }
+
+    const vmPath = `/subscriptions/${subscriptionId}/resourceGroups/${encodeURIComponent(resourceGroup)}/providers/Microsoft.Compute/virtualMachines/${encodeURIComponent(vmName)}`;
+    await arm(`${vmPath}/start?api-version=2024-07-01`, { method: "POST" });
+    const observed = await waitForRunning(vmPath);
+    const message = observed.running ? "Azure reports the VM is running." : "Azure accepted the start request; the VM is still transitioning.";
+    await supabaseRpc("complete_iac_vm_execution", authorization, { p_package_id: packageId, p_success: true, p_message: message });
+    return response({ packageId, executionStatus: "executed", azurePowerState: observed.state, message }, 200, request);
+  } catch (error) {
+    if (packageStarted && packageId && authorization) {
+      try {
+        await supabaseRpc("complete_iac_vm_execution", authorization, {
+          p_package_id: packageId,
+          p_success: false,
+          p_message: error instanceof Error ? error.message : "Azure execution failed.",
+        });
+      } catch (completionError) {
+        console.error("Unable to record VM execution failure", { message: completionError instanceof Error ? completionError.message : "Unknown error" });
+      }
+    }
+    const status = errorStatus(error) ?? 503;
+    console.error("VM package execution failed", { status, message: error instanceof Error ? error.message : "Unknown error" });
+    return response({ message: error instanceof Error ? error.message : "Azure VM execution failed." }, status, request);
+  }
+}
+
 app.http("get-vm-operations", {
   methods: ["GET", "OPTIONS"],
   authLevel: "anonymous",
   route: "v1/virtual-machines/{subscriptionId}/{resourceGroup}/{vmName}/operations",
   handler: vmOperations,
+});
+
+app.http("execute-approved-vm-package", {
+  methods: ["POST", "OPTIONS"],
+  authLevel: "anonymous",
+  route: "v1/change-packages/{packageId}/execute",
+  handler: executeApprovedVmPackage,
 });

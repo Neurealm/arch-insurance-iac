@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type ChangePackageStatus = "draft" | "submitted" | "approved" | "changes_requested" | "rejected";
+export type ChangePackageStatus = "draft" | "submitted" | "approved" | "changes_requested" | "rejected" | "executing" | "executed" | "execution_failed";
 export type ChangeReviewDecision = "approved" | "changes_requested" | "rejected";
 
 export type VmChangePackageReview = {
@@ -32,12 +32,16 @@ export type VmChangePackage = {
   riskScore: number;
   riskLevel: "Low" | "Medium" | "High";
   approvalRequired: boolean;
+  executionStartedAt: string | null;
+  executionCompletedAt: string | null;
+  executionMessage: string | null;
+  executedBy: string | null;
   submittedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
 
-type PackageInput = Omit<VmChangePackage, "id" | "createdBy" | "createdAt" | "updatedAt" | "submittedAt">;
+type PackageInput = Omit<VmChangePackage, "id" | "createdBy" | "createdAt" | "updatedAt" | "submittedAt" | "executionStartedAt" | "executionCompletedAt" | "executionMessage" | "executedBy">;
 
 const table = () => supabase as unknown as { from: (name: string) => any };
 
@@ -62,6 +66,10 @@ function map(row: Record<string, any>): VmChangePackage {
     riskScore: row.risk_score,
     riskLevel: row.risk_level,
     approvalRequired: row.approval_required,
+    executionStartedAt: row.execution_started_at ?? null,
+    executionCompletedAt: row.execution_completed_at ?? null,
+    executionMessage: row.execution_message ?? null,
+    executedBy: row.executed_by ?? null,
     submittedAt: row.submitted_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
