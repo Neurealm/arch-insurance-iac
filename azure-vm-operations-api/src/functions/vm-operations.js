@@ -171,7 +171,7 @@ function firstStatus(statuses) {
     : typeof status.code === "string" ? status.code : null;
 }
 
-function diskConfiguration(disk) {
+function diskAttachmentConfiguration(disk) {
   const values = record(disk);
   const managedDisk = record(values.managedDisk);
   return {
@@ -183,6 +183,26 @@ function diskConfiguration(disk) {
   };
 }
 
+async function diskConfiguration(disk) {
+  const attachment = diskAttachmentConfiguration(disk);
+  const managedDiskId = record(record(disk).managedDisk).id;
+  if (typeof managedDiskId !== "string") return attachment;
+
+  try {
+    const managedDisk = record(await arm(`${managedDiskId}?api-version=2024-03-02`));
+    const properties = record(managedDisk.properties);
+    const sku = record(managedDisk.sku);
+    return {
+      ...attachment,
+      sizeGB: typeof properties.diskSizeGB === "number" ? properties.diskSizeGB : attachment.sizeGB,
+      storageSku: typeof sku.name === "string" ? sku.name : attachment.storageSku,
+    };
+  } catch {
+    // Disk metadata is optional enrichment; retain the VM attachment details.
+    return attachment;
+  }
+}
+
 function imageReference(storageProfile) {
   const image = record(record(storageProfile).imageReference);
   const parts = [image.publisher, image.offer, image.sku, image.version]
@@ -190,7 +210,7 @@ function imageReference(storageProfile) {
   return parts.length ? parts.join(" / ") : null;
 }
 
-function vmConfiguration(vm, instanceView, topology) {
+async function vmConfiguration(vm, instanceView, topology) {
   const properties = record(record(vm).properties);
   const hardware = record(properties.hardwareProfile);
   const storage = record(properties.storageProfile);
@@ -203,6 +223,10 @@ function vmConfiguration(vm, instanceView, topology) {
     const status = firstStatus(details.statuses);
     return [status ? `${name} (${status})` : name];
   });
+
+  const osDisk = await diskConfiguration(storage.osDisk);
+  const dataDisks = (await Promise.all(asArray(storage.dataDisks).map(diskConfiguration)))
+    .flatMap((disk) => disk.name ? [disk] : []);
 
   return {
     vmSize: typeof hardware.vmSize === "string" ? hardware.vmSize : null,
@@ -217,8 +241,8 @@ function vmConfiguration(vm, instanceView, topology) {
     vmAgentVersion: typeof agent.vmAgentVersion === "string" ? agent.vmAgentVersion : null,
     vmAgentStatus: firstStatus(agent.statuses),
     extensions,
-    osDisk: diskConfiguration(storage.osDisk),
-    dataDisks: asArray(storage.dataDisks).map(diskConfiguration).flatMap((disk) => disk.name ? [disk] : []),
+    osDisk,
+    dataDisks,
     networkInterfaces: topology.networkInterfaces,
   };
 }
@@ -374,7 +398,7 @@ async function vmOperations(request) {
 
     return response({
       observedAt: isoNow(),
-      configuration: vmConfiguration(vmRecord, instanceView, networkResult),
+      configuration: await vmConfiguration(vmRecord, instanceView, networkResult),
       monitoring: monitoringResult,
       bootDiagnostics: bootDiagnostics(vmRecord, instanceView),
       backup: backupResult,
