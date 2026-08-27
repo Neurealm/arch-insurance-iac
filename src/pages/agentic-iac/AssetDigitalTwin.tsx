@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AlertCircle, CheckCircle2, ChevronDown, ChevronRight, Code2, RefreshCw, Server, Tags, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2, ChevronDown, ChevronRight, Code2, RefreshCw, Server, Tags, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RelationshipMap } from "./RelationshipMap";
 import { ActionPreviewDrawer } from "./ActionPreviewDrawer";
@@ -13,7 +13,7 @@ import {
   AzureControlPlaneError, listAzureVirtualMachines, vmDiskName, vmNicName,
   type AzureVirtualMachine,
 } from "./azureControlPlane";
-import { detailPathFor, resourceKindFor, resourceListFilterLink } from "./resourceKinds";
+import { detailPathFor, resourceKindFor } from "./resourceKinds";
 
 // This page is the Digital Twin for one resource kind: Virtual Machines. A future
 // twin page for another kind (storage accounts, disks, ...) should look itself up
@@ -157,9 +157,7 @@ export default function AssetDigitalTwin() {
 
   return (
     <div className="px-4 py-3">
-      <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1 text-[11.5px] text-slate-500">
-        <Link to="/resources" className="hover:text-slate-800">Azure Resources</Link><span>/</span><Link to={resourceListFilterLink(VM_KIND)} className="hover:text-slate-800">{VM_KIND.label}</Link><span>/</span><span className="font-medium text-slate-800">{vmName ?? assetView.name}</span>
-      </nav>
+      <button type="button" onClick={() => navigate(-1)} className="mb-2 inline-flex items-center gap-1 text-[12px] font-medium text-slate-500 hover:text-slate-800"><ArrowLeft className="h-3.5 w-3.5" />Back</button>
 
       <section className="rounded-md border border-[#E2E8F0] bg-white">
         <div className="flex flex-wrap items-start gap-3 px-4 py-3">
