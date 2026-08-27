@@ -107,7 +107,14 @@ export default function AssetDigitalTwin() {
   const vmNotFound = !!vmName && !loadingAzure && !connectionError && virtualMachines.length > 0 && !matchedVm;
   const liveAzure = !!selectedVm;
   const assetView = selectedVm ? assetFromVm(selectedVm) : asset;
-  const configuration = selectedVm ? configurationFromVm(selectedVm) : configSections;
+  // `configurationFromVm` creates an array. Memoize it so the effect below only
+  // runs when the selected resource actually changes, not after every render.
+  // Without this, opening a live Azure twin continually replaces
+  // `openSections`, starving the UI and preventing client-side navigation.
+  const configuration = useMemo(
+    () => selectedVm ? configurationFromVm(selectedVm) : configSections,
+    [selectedVm],
+  );
   const nodes = selectedVm ? nodesFromVm(selectedVm) : undefined;
   const categoryActions = actions.filter((action) => action.category === category);
   const intelligence = useMemo(() => selectedVm ? [
@@ -136,7 +143,13 @@ export default function AssetDigitalTwin() {
   }, [vmName]);
 
   useEffect(() => { void refreshAzure(); }, [refreshAzure]);
-  useEffect(() => { setOpenSections((current) => [...new Set([...current, ...configuration.map((section) => section.key)])]); }, [configuration]);
+  useEffect(() => {
+    const configurationKeys = configuration.map((section) => section.key);
+    setOpenSections((current) => {
+      const next = [...new Set([...current, ...configurationKeys])];
+      return next.length === current.length ? current : next;
+    });
+  }, [configuration]);
 
   function toggleSection(key: string) {
     setOpenSections((current) => current.includes(key) ? current.filter((value) => value !== key) : [...current, key]);
