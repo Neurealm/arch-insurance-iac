@@ -164,6 +164,65 @@ function bootDiagnostics(vm, instanceView) {
   };
 }
 
+function firstStatus(statuses) {
+  const status = record(asArray(statuses)[0]);
+  return typeof status.displayStatus === "string"
+    ? status.displayStatus
+    : typeof status.code === "string" ? status.code : null;
+}
+
+function diskConfiguration(disk) {
+  const values = record(disk);
+  const managedDisk = record(values.managedDisk);
+  return {
+    name: typeof values.name === "string" ? values.name : null,
+    sizeGB: typeof values.diskSizeGB === "number" ? values.diskSizeGB : null,
+    storageSku: typeof managedDisk.storageAccountType === "string" ? managedDisk.storageAccountType : null,
+    caching: typeof values.caching === "string" ? values.caching : null,
+    lun: typeof values.lun === "number" ? values.lun : null,
+  };
+}
+
+function imageReference(storageProfile) {
+  const image = record(record(storageProfile).imageReference);
+  const parts = [image.publisher, image.offer, image.sku, image.version]
+    .filter((value) => typeof value === "string" && value.trim());
+  return parts.length ? parts.join(" / ") : null;
+}
+
+function vmConfiguration(vm, instanceView, topology) {
+  const properties = record(record(vm).properties);
+  const hardware = record(properties.hardwareProfile);
+  const storage = record(properties.storageProfile);
+  const security = record(properties.securityProfile);
+  const agent = record(record(instanceView).vmAgent);
+  const extensions = asArray(record(instanceView).extensions).flatMap((extension) => {
+    const details = record(extension);
+    const name = typeof details.name === "string" ? details.name : null;
+    if (!name) return [];
+    const status = firstStatus(details.statuses);
+    return [status ? `${name} (${status})` : name];
+  });
+
+  return {
+    vmSize: typeof hardware.vmSize === "string" ? hardware.vmSize : null,
+    osType: typeof record(storage.osDisk).osType === "string" ? record(storage.osDisk).osType : null,
+    zones: asArray(vm.zones).filter((zone) => typeof zone === "string"),
+    availabilitySet: nameFromId(record(properties.availabilitySet).id),
+    priority: typeof properties.priority === "string" ? properties.priority : null,
+    securityType: typeof security.securityType === "string" ? security.securityType : null,
+    encryptionAtHost: typeof security.encryptionAtHost === "boolean" ? security.encryptionAtHost : null,
+    imageReference: imageReference(storage),
+    identityType: typeof record(vm.identity).type === "string" ? record(vm.identity).type : null,
+    vmAgentVersion: typeof agent.vmAgentVersion === "string" ? agent.vmAgentVersion : null,
+    vmAgentStatus: firstStatus(agent.statuses),
+    extensions,
+    osDisk: diskConfiguration(storage.osDisk),
+    dataDisks: asArray(storage.dataDisks).map(diskConfiguration).flatMap((disk) => disk.name ? [disk] : []),
+    networkInterfaces: topology.networkInterfaces,
+  };
+}
+
 async function backup(subscriptionId, location, vm) {
   const vmId = vm.id;
   const vmName = vm.name;
@@ -236,6 +295,7 @@ async function network(vm) {
   const publicIps = [];
   const networkSecurityGroups = [];
   const loadBalancers = [];
+  const networkInterfaces = [];
   let subnet = null;
   let networkInterface = null;
 
@@ -244,6 +304,7 @@ async function network(vm) {
     if (typeof interfaceId !== "string") continue;
     const nic = record(await arm(`${interfaceId}?api-version=2024-05-01`));
     networkInterface ??= nic.name ?? nameFromId(interfaceId);
+    addUnique(networkInterfaces, nic.name ?? nameFromId(interfaceId));
     const nicProperties = record(nic.properties);
     addUnique(networkSecurityGroups, nameFromId(record(nicProperties.networkSecurityGroup).id));
 
@@ -277,7 +338,7 @@ async function network(vm) {
     }
   }
 
-  return { networkInterface, privateIps, publicIps, subnet, networkSecurityGroups, loadBalancers };
+  return { networkInterface, networkInterfaces, privateIps, publicIps, subnet, networkSecurityGroups, loadBalancers };
 }
 
 async function vmOperations(request) {
@@ -308,11 +369,12 @@ async function vmOperations(request) {
       monitoring(vmRecord.id),
       backup(subscriptionId, location, vmRecord),
       patching(vmRecord.id),
-      network(vmRecord).catch(() => ({ networkInterface: null, privateIps: [], publicIps: [], subnet: null, networkSecurityGroups: [], loadBalancers: [] })),
+      network(vmRecord).catch(() => ({ networkInterface: null, networkInterfaces: [], privateIps: [], publicIps: [], subnet: null, networkSecurityGroups: [], loadBalancers: [] })),
     ]);
 
     return response({
       observedAt: isoNow(),
+      configuration: vmConfiguration(vmRecord, instanceView, networkResult),
       monitoring: monitoringResult,
       bootDiagnostics: bootDiagnostics(vmRecord, instanceView),
       backup: backupResult,

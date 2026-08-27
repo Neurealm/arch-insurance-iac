@@ -29,14 +29,14 @@ function isHealthy(vm: AzureVirtualMachine) {
   return /running/i.test(vm.powerState) && /succeeded/i.test(vm.provisioningState);
 }
 
-function assetFromVm(vm: AzureVirtualMachine): AssetIdentity {
+function assetFromVm(vm: AzureVirtualMachine, operations: AzureVmOperations | null): AssetIdentity {
   const tags = vm.tags;
   return {
     id: vm.id,
     name: vm.name,
     provider: "azure",
     assetType: "Azure Virtual Machine",
-    os: vm.osType,
+    os: operations?.configuration.osType ?? vm.osType,
     workload: "Azure pilot workload",
     health: isHealthy(vm) ? "healthy" : "warning",
     environment: tags.environment ?? tags.Environment ?? "Development",
@@ -49,14 +49,45 @@ function assetFromVm(vm: AzureVirtualMachine): AssetIdentity {
   };
 }
 
-function configurationFromVm(vm: AzureVirtualMachine): ConfigSection[] {
+function reported(value: string | null | undefined, fallback = "Not reported by Azure") {
+  return value?.trim() ? value : fallback;
+}
+
+function configurationFromVm(vm: AzureVirtualMachine, operations: AzureVmOperations | null): ConfigSection[] {
+  const detail = operations?.configuration;
+  const osDisk = detail?.osDisk;
+  const diskDescription = osDisk?.name
+    ? [osDisk.name, osDisk.sizeGB === null ? null : `${osDisk.sizeGB} GiB`, osDisk.storageSku, osDisk.caching].filter(Boolean).join(" · ")
+    : vmDiskName(vm) ?? "Not reported by Azure";
+  const dataDisks = detail?.dataDisks.map((disk) => [disk.name, disk.sizeGB === null ? null : `${disk.sizeGB} GiB`, disk.storageSku, disk.lun === null ? null : `LUN ${disk.lun}`].filter(Boolean).join(" · ")) ?? [];
+  const networkInterfaces = detail?.networkInterfaces.length ? detail.networkInterfaces : [vmNicName(vm)].filter((name): name is string => !!name);
+
   return [
     {
       key: "compute", title: "Compute", properties: [
-        { label: "VM Size", value: vm.vmSize },
+        { label: "VM Size", value: reported(detail?.vmSize, vm.vmSize) },
         { label: "Power State", value: vm.powerState, tone: /running/i.test(vm.powerState) ? "good" : "warn" },
         { label: "Provisioning", value: vm.provisioningState, tone: /succeeded/i.test(vm.provisioningState) ? "good" : "warn" },
-        { label: "Operating System", value: vm.osType },
+        { label: "Operating System", value: reported(detail?.osType, vm.osType) },
+        { label: "Availability Zones", value: detail?.zones.length ? detail.zones.join(", ") : "Not zonal" },
+        { label: "Priority", value: reported(detail?.priority, "Regular") },
+      ],
+    },
+    {
+      key: "storage", title: "Storage & Image", properties: [
+        { label: "OS Disk", value: diskDescription },
+        { label: "Data Disks", value: dataDisks.length ? dataDisks.join(" | ") : "None" },
+        { label: "Image Reference", value: reported(detail?.imageReference) },
+      ],
+    },
+    {
+      key: "platform", title: "Platform & Management", properties: [
+        { label: "Availability Set", value: reported(detail?.availabilitySet, "None") },
+        { label: "Security Type", value: reported(detail?.securityType, "Standard") },
+        { label: "Encryption at Host", value: detail?.encryptionAtHost === null || detail?.encryptionAtHost === undefined ? "Not reported" : detail.encryptionAtHost ? "Enabled" : "Disabled" },
+        { label: "Managed Identity", value: reported(detail?.identityType, "Not assigned") },
+        { label: "VM Agent", value: [detail?.vmAgentVersion, detail?.vmAgentStatus].filter(Boolean).join(" · ") || "Not reported" },
+        { label: "Extensions", value: detail?.extensions.length ? detail.extensions.join(" | ") : "None reported" },
       ],
     },
     {
@@ -69,16 +100,18 @@ function configurationFromVm(vm: AzureVirtualMachine): ConfigSection[] {
     },
     {
       key: "relationships", title: "Discovered Relationships", properties: [
-        { label: "OS Disk", value: vmDiskName(vm) ?? "Not reported by control plane" },
-        { label: "Network Interface", value: vmNicName(vm) ?? "Not reported by control plane" },
+        { label: "Network Interfaces", value: networkInterfaces.length ? networkInterfaces.join(", ") : "Not reported by Azure" },
+        { label: "Private IPs", value: operations?.network.privateIps.length ? operations.network.privateIps.join(", ") : "Not reported by Azure" },
+        { label: "Network Security Groups", value: operations?.network.networkSecurityGroups.length ? operations.network.networkSecurityGroups.join(", ") : "Not reported by Azure" },
+        { label: "Load Balancers", value: operations?.network.loadBalancers.length ? operations.network.loadBalancers.join(", ") : "None reported" },
       ],
     },
   ];
 }
 
-function nodesFromVm(vm: AzureVirtualMachine): RelatedNode[] {
-  const disk = vmDiskName(vm);
-  const nic = vmNicName(vm);
+function nodesFromVm(vm: AzureVirtualMachine, operations: AzureVmOperations | null): RelatedNode[] {
+  const disk = operations?.configuration.osDisk.name ?? vmDiskName(vm);
+  const nic = operations?.configuration.networkInterfaces[0] ?? vmNicName(vm);
   const nodes: RelatedNode[] = [];
   if (disk) nodes.push({ id: `${vm.id}/disk`, name: disk, type: "Azure Managed Disk", health: "unknown", relationship: "CONNECTED TO", layer: "infrastructure", hops: 1, lastDiscovered: "Live Azure refresh", x: 23, y: 30, detail: ["Discovered from VM storage profile"] });
   if (nic) nodes.push({ id: `${vm.id}/nic`, name: nic, type: "Azure Network Interface", health: "unknown", relationship: "CONNECTED TO", layer: "infrastructure", hops: 1, lastDiscovered: "Live Azure refresh", x: 78, y: 68, detail: ["Discovered from VM network profile"] });
@@ -110,16 +143,16 @@ export default function AssetDigitalTwin() {
     : virtualMachines.find((vm) => vm.id === selectedVmId) ?? virtualMachines[0] ?? null;
   const vmNotFound = !!vmName && !loadingAzure && !connectionError && virtualMachines.length > 0 && !matchedVm;
   const liveAzure = !!selectedVm;
-  const assetView = selectedVm ? assetFromVm(selectedVm) : asset;
+  const assetView = selectedVm ? assetFromVm(selectedVm, operations) : asset;
   // `configurationFromVm` creates an array. Memoize it so the effect below only
   // runs when the selected resource actually changes, not after every render.
   // Without this, opening a live Azure twin continually replaces
   // `openSections`, starving the UI and preventing client-side navigation.
   const configuration = useMemo(
-    () => selectedVm ? configurationFromVm(selectedVm) : configSections,
-    [selectedVm],
+    () => selectedVm ? configurationFromVm(selectedVm, operations) : configSections,
+    [selectedVm, operations],
   );
-  const nodes = selectedVm ? nodesFromVm(selectedVm) : undefined;
+  const nodes = selectedVm ? nodesFromVm(selectedVm, operations) : undefined;
   const categoryActions = actions.filter((action) => action.category === category);
   const intelligence = useMemo(() => selectedVm ? [
     { label: "Azure connection", value: "Connected", tone: "good" as const },
@@ -193,6 +226,20 @@ export default function AssetDigitalTwin() {
     <div className="px-4 py-3">
       <button type="button" onClick={() => navigate(-1)} className="mb-2 inline-flex items-center gap-1 text-[12px] font-medium text-slate-500 hover:text-slate-800"><ArrowLeft className="h-3.5 w-3.5" />Back</button>
 
+      {!selectedVm ? (
+        <section className="rounded-md border border-[#E2E8F0] bg-white px-4 py-8 text-center">
+          <Server className={cn("mx-auto h-7 w-7 text-[#1B4F91]", loadingAzure && "animate-pulse")} />
+          <h1 className="mt-3 text-[16px] font-semibold text-slate-900">{loadingAzure ? "Loading Azure virtual machine…" : "Azure virtual machine unavailable"}</h1>
+          <p className="mx-auto mt-1 max-w-xl text-[12px] text-slate-600">
+            {loadingAzure
+              ? "Retrieving the selected VM from the Azure control plane."
+              : connectionError ?? (vmNotFound
+                ? `Virtual machine “${vmName}” was not found in the connected Azure scope.`
+                : "No virtual machine was returned by the Azure control plane.")}
+          </p>
+          {!loadingAzure && <Link to="/resources" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] hover:underline">Return to Azure Resources</Link>}
+        </section>
+      ) : <>
       <section className="rounded-md border border-[#E2E8F0] bg-white">
         <div className="flex flex-wrap items-start gap-3 px-4 py-3">
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md border border-[#CFE0F3] bg-[#EFF4FB] text-[#1B4F91]"><Server className="h-5 w-5" /></div>
@@ -243,6 +290,7 @@ export default function AssetDigitalTwin() {
       <ActionPreviewDrawer action={selectedAction} onClose={() => setSelectedAction(null)} />
       {rawStateOpen && selectedVm && <Drawer title="Raw VM State" subtitle="Azure control plane response" onClose={() => setRawStateOpen(false)}><pre className="overflow-x-auto rounded-md bg-slate-950 p-3 text-[11px] leading-5 text-slate-100">{JSON.stringify(selectedVm.raw, null, 2)}</pre></Drawer>}
       {selectedChange && <Drawer title={selectedChange.action} subtitle={`${selectedChange.changeId} · ${selectedChange.method}`} onClose={() => setSelectedChange(null)}><div className="space-y-3 text-[12px]"><p className="text-slate-700">{selectedChange.intent}</p><div className="grid grid-cols-2 gap-2"><Meta label="Method" value={selectedChange.method} /><Meta label="Validation" value={selectedChange.validation} /><Meta label="Status" value={selectedChange.status} /><Meta label="Timestamp" value={selectedChange.timestamp} /></div></div></Drawer>}
+      </>}
     </div>
   );
 }

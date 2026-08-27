@@ -53,6 +53,33 @@ export type AzureResource = {
  */
 export type AzureVmOperations = {
   observedAt: string | null;
+  configuration: {
+    vmSize: string | null;
+    osType: string | null;
+    zones: string[];
+    availabilitySet: string | null;
+    priority: string | null;
+    securityType: string | null;
+    encryptionAtHost: boolean | null;
+    imageReference: string | null;
+    identityType: string | null;
+    vmAgentVersion: string | null;
+    vmAgentStatus: string | null;
+    extensions: string[];
+    osDisk: {
+      name: string | null;
+      sizeGB: number | null;
+      storageSku: string | null;
+      caching: string | null;
+    };
+    dataDisks: Array<{
+      name: string;
+      sizeGB: number | null;
+      storageSku: string | null;
+      lun: number | null;
+    }>;
+    networkInterfaces: string[];
+  };
   monitoring: {
     state: "available" | "not_configured" | "unavailable";
     cpuPercent: number | null;
@@ -149,6 +176,10 @@ function nullableNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function nullableBoolean(value: unknown): boolean | null {
+  return typeof value === "boolean" ? value : null;
+}
+
 function textList(value: unknown): string[] {
   return Array.isArray(value) ? value.flatMap((item) => typeof item === "string" && item.trim() ? [item] : []) : [];
 }
@@ -164,9 +195,45 @@ function normalizeVmOperations(value: unknown, vm: AzureVirtualMachine): AzureVm
   const backup = record(raw.backup);
   const patching = record(raw.patching ?? raw.patch);
   const network = record(raw.network);
+  const configuration = record(raw.configuration);
+  const osDisk = record(configuration.osDisk ?? configuration.os_disk);
+  const dataDisks = Array.isArray(configuration.dataDisks ?? configuration.data_disks)
+    ? (configuration.dataDisks ?? configuration.data_disks) as unknown[]
+    : [];
 
   return {
     observedAt: nullableText(raw.observedAt ?? raw.observed_at),
+    configuration: {
+      vmSize: nullableText(configuration.vmSize ?? configuration.vm_size),
+      osType: nullableText(configuration.osType ?? configuration.os_type),
+      zones: textList(configuration.zones),
+      availabilitySet: nullableText(configuration.availabilitySet ?? configuration.availability_set),
+      priority: nullableText(configuration.priority),
+      securityType: nullableText(configuration.securityType ?? configuration.security_type),
+      encryptionAtHost: nullableBoolean(configuration.encryptionAtHost ?? configuration.encryption_at_host),
+      imageReference: nullableText(configuration.imageReference ?? configuration.image_reference),
+      identityType: nullableText(configuration.identityType ?? configuration.identity_type),
+      vmAgentVersion: nullableText(configuration.vmAgentVersion ?? configuration.vm_agent_version),
+      vmAgentStatus: nullableText(configuration.vmAgentStatus ?? configuration.vm_agent_status),
+      extensions: textList(configuration.extensions),
+      osDisk: {
+        name: nullableText(osDisk.name),
+        sizeGB: nullableNumber(osDisk.sizeGB ?? osDisk.size_gb),
+        storageSku: nullableText(osDisk.storageSku ?? osDisk.storage_sku),
+        caching: nullableText(osDisk.caching),
+      },
+      dataDisks: dataDisks.flatMap((value) => {
+        const disk = record(value);
+        const name = nullableText(disk.name);
+        return name ? [{
+          name,
+          sizeGB: nullableNumber(disk.sizeGB ?? disk.size_gb),
+          storageSku: nullableText(disk.storageSku ?? disk.storage_sku),
+          lun: nullableNumber(disk.lun),
+        }] : [];
+      }),
+      networkInterfaces: textList(configuration.networkInterfaces ?? configuration.network_interfaces),
+    },
     monitoring: {
       state: state(monitoring.state, ["available", "not_configured", "unavailable"], "unavailable"),
       cpuPercent: nullableNumber(monitoring.cpuPercent ?? monitoring.cpu_percent),
