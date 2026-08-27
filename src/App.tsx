@@ -76,7 +76,8 @@ const App = () => (
                   <Route path="/resources" element={<AzureResources />} />
                   <Route path="/resources/virtual-machines/:vmName" element={<AssetDigitalTwin />} />
                   <Route path="/remediation" element={<RemediationIntelligence />} />
-                  <Route path="/remediation/:assetId" element={<RemediationIntelligence />} />
+                  <Route path="/remediation/virtual-machines/:vmName" element={<RemediationIntelligence />} />
+                  <Route path="/remediation/:assetId" element={<Navigate to="/remediation" replace />} />
                   <Route path="/changes" element={<ChangeEngineering />} />
                   <Route path="/changes/:assetId" element={<ChangeEngineering />} />
                   <Route path="/approvals" element={<ChangeReviewApproval />} />
