@@ -1,9 +1,20 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type ChangePackageStatus = "draft" | "submitted";
+export type ChangePackageStatus = "draft" | "submitted" | "approved" | "changes_requested" | "rejected";
+export type ChangeReviewDecision = "approved" | "changes_requested" | "rejected";
+
+export type VmChangePackageReview = {
+  id: string;
+  packageId: string;
+  decision: ChangeReviewDecision;
+  comment: string | null;
+  reviewedBy: string;
+  reviewedAt: string;
+};
 
 export type VmChangePackage = {
   id: string;
+  createdBy: string;
   packageNumber: string;
   status: ChangePackageStatus;
   targetResourceId: string;
@@ -26,13 +37,14 @@ export type VmChangePackage = {
   updatedAt: string;
 };
 
-type PackageInput = Omit<VmChangePackage, "id" | "createdAt" | "updatedAt" | "submittedAt">;
+type PackageInput = Omit<VmChangePackage, "id" | "createdBy" | "createdAt" | "updatedAt" | "submittedAt">;
 
 const table = () => supabase as unknown as { from: (name: string) => any };
 
 function map(row: Record<string, any>): VmChangePackage {
   return {
     id: row.id,
+    createdBy: row.created_by,
     packageNumber: row.package_number,
     status: row.status,
     targetResourceId: row.target_resource_id,
@@ -53,6 +65,17 @@ function map(row: Record<string, any>): VmChangePackage {
     submittedAt: row.submitted_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+function mapReview(row: Record<string, any>): VmChangePackageReview {
+  return {
+    id: row.id,
+    packageId: row.package_id,
+    decision: row.decision,
+    comment: row.comment ?? null,
+    reviewedBy: row.reviewed_by,
+    reviewedAt: row.reviewed_at,
   };
 }
 
@@ -82,6 +105,29 @@ export async function listVmChangePackages() {
   const { data, error } = await table().from("iac_change_packages").select("*").order("updated_at", { ascending: false });
   if (error) throw error;
   return (data ?? []).map(map);
+}
+
+export async function getVmChangePackage(id: string) {
+  const { data, error } = await table().from("iac_change_packages").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data ? map(data) : null;
+}
+
+export async function listVmChangePackageReviews(packageId: string) {
+  const { data, error } = await table().from("iac_change_package_reviews").select("*").eq("package_id", packageId).order("reviewed_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(mapReview);
+}
+
+export async function reviewVmChangePackage(packageId: string, decision: ChangeReviewDecision, comment?: string) {
+  const rpc = supabase as unknown as { rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: Record<string, any>; error: Error | null }> };
+  const { data, error } = await rpc.rpc("review_iac_change_package", {
+    p_package_id: packageId,
+    p_decision: decision,
+    p_comment: comment?.trim() || null,
+  });
+  if (error) throw error;
+  return mapReview(data);
 }
 
 export async function saveVmChangePackage(input: PackageInput, existingId?: string) {
