@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { Activity, AlertTriangle, BellRing, CheckCircle2, Clock3, Code2, HardDrive, Info, Network, RefreshCw, Scale, ShieldCheck, Wrench } from "lucide-react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Activity, AlertTriangle, ArrowRight, BellRing, CheckCircle2, Clock3, Code2, HardDrive, Info, Network, RefreshCw, Scale, Search, ShieldCheck, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines,
@@ -28,7 +28,60 @@ function dateTime(value: string | null) { return value ? new Date(value).toLocal
 
 export default function RemediationIntelligence() {
   const { vmName } = useParams<{ vmName: string }>();
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  return vmName
+    ? <VmRemediationAssessment vmName={vmName} vmResourceId={searchParams.get("resourceId")} />
+    : <VmRemediationTargetSelection />;
+}
+
+/** The global Remediation entry must not silently assess an arbitrary VM. */
+function VmRemediationTargetSelection() {
+  const [vms, setVms] = useState<AzureVirtualMachine[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [region, setRegion] = useState("all");
+  const [resourceGroup, setResourceGroup] = useState("all");
+  const [powerState, setPowerState] = useState("all");
+  const [environment, setEnvironment] = useState("all");
+
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try { setVms(await listAzureVirtualMachines()); }
+    catch (cause) { setError(cause instanceof AzureControlPlaneError ? cause.message : "Unable to load the Azure VM inventory."); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { void load(); }, [load]);
+
+  const regions = useMemo(() => [...new Set(vms.map((vm) => vm.location).filter(Boolean))].sort(), [vms]);
+  const resourceGroups = useMemo(() => [...new Set(vms.map((vm) => vm.resourceGroup).filter(Boolean))].sort(), [vms]);
+  const powerStates = useMemo(() => [...new Set(vms.map((vm) => vm.powerState).filter(Boolean))].sort(), [vms]);
+  const environments = useMemo(() => [...new Set(vms.map((vm) => vm.tags.environment ?? vm.tags.Environment ?? "Not tagged"))].sort(), [vms]);
+  const filteredVms = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return vms.filter((vm) => {
+      const vmEnvironment = vm.tags.environment ?? vm.tags.Environment ?? "Not tagged";
+      const matchesSearch = !needle || [vm.name, vm.resourceGroup, vm.location, vm.powerState, vmEnvironment].some((value) => value.toLowerCase().includes(needle));
+      return matchesSearch && (region === "all" || vm.location === region) && (resourceGroup === "all" || vm.resourceGroup === resourceGroup) && (powerState === "all" || vm.powerState === powerState) && (environment === "all" || vmEnvironment === environment);
+    });
+  }, [environment, powerState, query, region, resourceGroup, vms]);
+
+  return <div className="min-w-0 p-4">
+    <div className="mb-3 flex flex-wrap items-center gap-2"><nav className="text-[12px] text-slate-500"><Link to="/resources" className="hover:text-[#1B4F91]">Azure Resources</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">Remediation Intelligence</span></nav><button type="button" onClick={() => void load()} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50"><RefreshCw className="h-3.5 w-3.5" />Refresh VM inventory</button></div>
+    <header className="mb-4 flex flex-wrap items-start gap-3"><div><h1 className="text-[20px] font-semibold text-slate-900">Select a VM to assess</h1><p className="mt-1 max-w-3xl text-[12px] text-slate-600">Choose an Azure virtual machine to view its live, read-only operational assessment. This screen never changes the selected VM.</p></div><div className="ml-auto rounded-md border border-[#CFE0F3] bg-[#EFF4FB] px-3 py-2 text-[11.5px] text-[#1B4F91]"><ShieldCheck className="mr-1 inline h-3.5 w-3.5" />Read-only Azure assessment</div></header>
+    {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}
+    <Panel title="Live Azure VM inventory" right={<span className="text-[11px] text-slate-500">{loading ? "Loading…" : `${filteredVms.length} of ${vms.length} VMs`}</span>}>
+      <div className="grid gap-2 xl:grid-cols-[minmax(0,1fr)_150px_180px_170px_150px]"><label className="relative block"><Search className="pointer-events-none absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search VM, resource group, region, state…" className="h-9 w-full rounded-md border border-[#CBD5E1] pl-8 pr-2.5 text-[12px]" /></label><RemediationFilterSelect value={region} onChange={setRegion} label="All regions" values={regions} /><RemediationFilterSelect value={resourceGroup} onChange={setResourceGroup} label="All resource groups" values={resourceGroups} /><RemediationFilterSelect value={powerState} onChange={setPowerState} label="All power states" values={powerStates} /><RemediationFilterSelect value={environment} onChange={setEnvironment} label="All environments" values={environments} /></div>
+      {loading ? <p className="py-8 text-center text-[12px] text-slate-500">Loading the connected Azure VM inventory…</p> : filteredVms.length ? <div className="mt-3 overflow-x-auto"><table className="w-full min-w-[780px] text-left text-[12px]"><thead className="border-b border-[#E2E8F0] text-[10.5px] uppercase tracking-wide text-slate-500"><tr><th className="pb-2 font-medium">Virtual machine</th><th className="pb-2 font-medium">Resource group</th><th className="pb-2 font-medium">Region</th><th className="pb-2 font-medium">Power state</th><th className="pb-2 font-medium">Environment</th><th className="pb-2" /></tr></thead><tbody>{filteredVms.map((vm) => <tr key={vm.id} className="border-b border-[#EEF2F6]"><td className="py-3 font-semibold text-slate-800">{vm.name}<div className="mt-0.5 text-[10.5px] font-normal text-slate-500">{vm.osType || "OS not reported"} · {vm.vmSize || "Size not reported"}</div></td><td className="py-3 text-slate-700">{vm.resourceGroup}</td><td className="py-3 text-slate-700">{vm.location}</td><td className="py-3 text-slate-700">{vm.powerState || "Not reported"}</td><td className="py-3 text-slate-700">{vm.tags.environment ?? vm.tags.Environment ?? "Not tagged"}</td><td className="py-3 text-right"><Link to={`/remediation/virtual-machines/${encodeURIComponent(vm.name)}?resourceId=${encodeURIComponent(vm.id)}`} className="inline-flex h-8 items-center gap-1 rounded-md bg-[#1B4F91] px-2.5 text-[11.5px] font-medium text-white hover:bg-[#16406f]">Assess VM<ArrowRight className="h-3.5 w-3.5" /></Link></td></tr>)}</tbody></table></div> : <div className="py-8 text-center"><p className="text-[12px] text-slate-600">{vms.length ? "No virtual machines match these filters." : "No Azure virtual machine is available in the connected scope."}</p>{vms.length > 0 && <button type="button" onClick={() => { setQuery(""); setRegion("all"); setResourceGroup("all"); setPowerState("all"); setEnvironment("all"); }} className="mt-2 text-[12px] font-medium text-[#1B4F91] underline">Clear filters</button>}</div>}
+    </Panel>
+  </div>;
+}
+
+function RemediationFilterSelect({ value, onChange, label, values }: { value: string; onChange: (value: string) => void; label: string; values: string[] }) {
+  return <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} className="h-9 w-full rounded-md border border-[#CBD5E1] bg-white px-2.5 text-[12px] text-slate-700"><option value="all">{label}</option>{values.map((item) => <option key={item} value={item}>{item}</option>)}</select>;
+}
+
+function VmRemediationAssessment({ vmName, vmResourceId }: { vmName: string; vmResourceId: string | null }) {
   const [vms, setVms] = useState<AzureVirtualMachine[]>([]);
   const [operations, setOperations] = useState<AzureVmOperations | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +89,9 @@ export default function RemediationIntelligence() {
   const [error, setError] = useState<string | null>(null);
   const [rawOpen, setRawOpen] = useState(false);
 
-  const selectedVm = useMemo(() => vmName ? vms.find((vm) => vm.name.toLowerCase() === vmName.toLowerCase()) ?? null : vms[0] ?? null, [vmName, vms]);
+  const selectedVm = useMemo(() => vmResourceId
+    ? vms.find((vm) => vm.id.toLowerCase() === vmResourceId.toLowerCase()) ?? null
+    : vms.find((vm) => vm.name.toLowerCase() === vmName.toLowerCase()) ?? null, [vmName, vmResourceId, vms]);
   const load = useCallback(async () => {
     setLoading(true); setError(null);
     try { setVms(await listAzureVirtualMachines()); }
@@ -88,7 +143,7 @@ export default function RemediationIntelligence() {
   }, [operations, selectedVm]);
 
   if (loading && !selectedVm) return <div className="p-4 text-[13px] text-slate-600">Loading Azure VM assessment…</div>;
-  if (!selectedVm) return <div className="p-4"><Panel title="VM Remediation Intelligence"><p className="text-[13px] text-slate-600">No Azure virtual machines are available in the connected pilot scope.</p>{error && <p className="mt-2 text-[12px] text-red-700">{error}</p>}<Link to="/resources" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Back to Azure Resources</Link></Panel></div>;
+  if (!selectedVm) return <div className="p-4"><Panel title="VM Remediation Intelligence"><p className="text-[13px] text-slate-600">This virtual machine is not available in the current connected Azure scope.</p>{error && <p className="mt-2 text-[12px] text-red-700">{error}</p>}<Link to="/remediation" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Select another Azure VM</Link></Panel></div>;
 
   const config = operations?.configuration;
   const metricsReady = operations?.monitoring.state === "available";
@@ -99,7 +154,7 @@ export default function RemediationIntelligence() {
     <div className="mb-3 flex flex-wrap items-center gap-2">
       <nav className="text-[12px] text-slate-500"><Link to="/resources" className="hover:text-[#1B4F91]">Azure Resources</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">VM Remediation Intelligence</span></nav>
       <div className="ml-auto flex items-center gap-2">
-        {vms.length > 1 && <select value={selectedVm.name} onChange={(event) => navigate(`/remediation/virtual-machines/${encodeURIComponent(event.target.value)}`)} className="h-8 max-w-[250px] rounded-md border border-[#E2E8F0] bg-white px-2 text-[12px] text-slate-700">{vms.map((vm) => <option key={vm.id} value={vm.name}>{vm.name}</option>)}</select>}
+        <Link to="/remediation" className="inline-flex h-8 items-center rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-[#1B4F91] hover:bg-slate-50">Choose a different VM</Link>
         <button type="button" onClick={() => void refresh()} disabled={refreshing} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"><RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />Refresh assessment</button>
       </div>
     </div>
