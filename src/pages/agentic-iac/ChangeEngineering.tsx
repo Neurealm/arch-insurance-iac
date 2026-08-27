@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { AlertTriangle, CheckCircle2, ClipboardCheck, RefreshCw, Save, ShieldCheck, Wrench } from "lucide-react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, RefreshCw, Save, Search, ShieldCheck, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, type AzureVirtualMachine, type AzureVmOperations } from "./azureControlPlane";
@@ -29,7 +29,66 @@ function newPackageNumber() { return `VM-CHG-${new Date().toISOString().slice(0,
 
 export default function ChangeEngineering() {
   const { vmName } = useParams<{ vmName: string }>();
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  return vmName
+    ? <VmChangePackageBuilder vmName={vmName} vmResourceId={searchParams.get("resourceId")} />
+    : <VmChangeTargetSelection />;
+}
+
+/** The sidebar entry deliberately starts here; it never assumes a VM target. */
+function VmChangeTargetSelection() {
+  const [vms, setVms] = useState<AzureVirtualMachine[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [region, setRegion] = useState("all");
+  const [resourceGroup, setResourceGroup] = useState("all");
+  const [powerState, setPowerState] = useState("all");
+  const [environment, setEnvironment] = useState("all");
+
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try { setVms(await listAzureVirtualMachines()); }
+    catch (cause) { setError(cause instanceof AzureControlPlaneError ? cause.message : "Unable to load the Azure VM inventory."); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { void load(); }, [load]);
+
+  const regions = useMemo(() => [...new Set(vms.map((vm) => vm.location).filter(Boolean))].sort(), [vms]);
+  const resourceGroups = useMemo(() => [...new Set(vms.map((vm) => vm.resourceGroup).filter(Boolean))].sort(), [vms]);
+  const powerStates = useMemo(() => [...new Set(vms.map((vm) => vm.powerState).filter(Boolean))].sort(), [vms]);
+  const environments = useMemo(() => [...new Set(vms.map((vm) => vm.tags.environment ?? vm.tags.Environment ?? "Not tagged"))].sort(), [vms]);
+  const filteredVms = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return vms.filter((vm) => {
+      const environment = vm.tags.environment ?? vm.tags.Environment ?? "";
+      const matchesSearch = !needle || [vm.name, vm.resourceGroup, vm.location, vm.powerState, environment].some((value) => value.toLowerCase().includes(needle));
+      return matchesSearch && (region === "all" || vm.location === region) && (resourceGroup === "all" || vm.resourceGroup === resourceGroup) && (powerState === "all" || vm.powerState === powerState) && (environment === "all" || environment === (vm.tags.environment ?? vm.tags.Environment ?? "Not tagged"));
+    });
+  }, [environment, powerState, query, region, resourceGroup, vms]);
+
+  return <div className="min-w-0 p-4">
+    <div className="mb-3 flex flex-wrap items-center gap-2"><nav className="text-[12px] text-slate-500"><Link to="/resources" className="hover:text-[#1B4F91]">Azure Resources</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">Change Engineering</span></nav><button type="button" onClick={() => void load()} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50"><RefreshCw className="h-3.5 w-3.5" />Refresh VM inventory</button></div>
+    <header className="mb-4 flex flex-wrap items-start gap-3"><div><h1 className="text-[20px] font-semibold text-slate-900">Select a VM to change</h1><p className="mt-1 max-w-3xl text-[12px] text-slate-600">Choose the Azure virtual machine first. You will then select a change and create an approval-controlled package; no Azure action is performed from this screen.</p></div><div className="ml-auto rounded-md border border-[#CFE0F3] bg-[#EFF4FB] px-3 py-2 text-[11.5px] text-[#1B4F91]"><ShieldCheck className="mr-1 inline h-3.5 w-3.5" />Human approval required for every VM change</div></header>
+    {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}
+    <Panel title="Live Azure VM inventory" right={<span className="text-[11px] text-slate-500">{loading ? "Loading…" : `${filteredVms.length} of ${vms.length} VMs`}</span>}>
+      <div className="grid gap-2 xl:grid-cols-[minmax(0,1fr)_150px_180px_170px_150px]">
+        <label className="relative block"><Search className="pointer-events-none absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search VM, resource group, region, state…" className="h-9 w-full rounded-md border border-[#CBD5E1] pl-8 pr-2.5 text-[12px]" /></label>
+        <FilterSelect value={region} onChange={setRegion} label="All regions" values={regions} />
+        <FilterSelect value={resourceGroup} onChange={setResourceGroup} label="All resource groups" values={resourceGroups} />
+        <FilterSelect value={powerState} onChange={setPowerState} label="All power states" values={powerStates} />
+        <FilterSelect value={environment} onChange={setEnvironment} label="All environments" values={environments} />
+      </div>
+      {loading ? <p className="py-8 text-center text-[12px] text-slate-500">Loading the connected Azure VM inventory…</p> : filteredVms.length ? <div className="mt-3 overflow-x-auto"><table className="w-full min-w-[780px] text-left text-[12px]"><thead className="border-b border-[#E2E8F0] text-[10.5px] uppercase tracking-wide text-slate-500"><tr><th className="pb-2 font-medium">Virtual machine</th><th className="pb-2 font-medium">Resource group</th><th className="pb-2 font-medium">Region</th><th className="pb-2 font-medium">Power state</th><th className="pb-2 font-medium">Environment</th><th className="pb-2" /></tr></thead><tbody>{filteredVms.map((vm) => <tr key={vm.id} className="border-b border-[#EEF2F6]"><td className="py-3 font-semibold text-slate-800">{vm.name}<div className="mt-0.5 text-[10.5px] font-normal text-slate-500">{vm.osType || "OS not reported"} · {vm.vmSize || "Size not reported"}</div></td><td className="py-3 text-slate-700">{vm.resourceGroup}</td><td className="py-3 text-slate-700">{vm.location}</td><td className="py-3 text-slate-700">{vm.powerState || "Not reported"}</td><td className="py-3 text-slate-700">{vm.tags.environment ?? vm.tags.Environment ?? "Not tagged"}</td><td className="py-3 text-right"><Link to={`/changes/virtual-machines/${encodeURIComponent(vm.name)}?resourceId=${encodeURIComponent(vm.id)}`} className="inline-flex h-8 items-center gap-1 rounded-md bg-[#1B4F91] px-2.5 text-[11.5px] font-medium text-white hover:bg-[#16406f]">Select VM<ArrowRight className="h-3.5 w-3.5" /></Link></td></tr>)}</tbody></table></div> : <div className="py-8 text-center"><p className="text-[12px] text-slate-600">{vms.length ? "No virtual machines match these filters." : "No Azure virtual machine is available in the connected scope."}</p>{vms.length > 0 && <button type="button" onClick={() => { setQuery(""); setRegion("all"); setResourceGroup("all"); setPowerState("all"); setEnvironment("all"); }} className="mt-2 text-[12px] font-medium text-[#1B4F91] underline">Clear filters</button>}</div>}
+    </Panel>
+  </div>;
+}
+
+function FilterSelect({ value, onChange, label, values }: { value: string; onChange: (value: string) => void; label: string; values: string[] }) {
+  return <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} className="h-9 w-full rounded-md border border-[#CBD5E1] bg-white px-2.5 text-[12px] text-slate-700"><option value="all">{label}</option>{values.map((item) => <option key={item} value={item}>{item}</option>)}</select>;
+}
+
+function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmResourceId: string | null }) {
   const { user } = useAuth();
   const [vms, setVms] = useState<AzureVirtualMachine[]>([]);
   const [operations, setOperations] = useState<AzureVmOperations | null>(null);
@@ -44,7 +103,9 @@ export default function ChangeEngineering() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedVm = useMemo(() => vmName ? vms.find((vm) => vm.name.toLowerCase() === vmName.toLowerCase()) ?? null : vms[0] ?? null, [vmName, vms]);
+  const selectedVm = useMemo(() => vmResourceId
+    ? vms.find((vm) => vm.id.toLowerCase() === vmResourceId.toLowerCase()) ?? null
+    : vms.find((vm) => vm.name.toLowerCase() === vmName.toLowerCase()) ?? null, [vmName, vmResourceId, vms]);
   const selectedAction = ACTIONS.find((action) => action.id === actionId) ?? null;
   const load = useCallback(async () => {
     setLoading(true); setError(null);
@@ -123,7 +184,7 @@ export default function ChangeEngineering() {
   };
 
   if (loading && !selectedVm) return <div className="p-4 text-[13px] text-slate-600">Loading Azure VM change builder…</div>;
-  if (!selectedVm) return <div className="p-4"><Panel title="VM change engineering"><p className="text-[13px] text-slate-600">No Azure virtual machine is available in the connected scope.</p><Link to="/resources" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Back to Azure Resources</Link></Panel></div>;
+  if (!selectedVm) return <div className="p-4"><Panel title="VM change engineering"><p className="text-[13px] text-slate-600">This virtual machine is not available in the current connected Azure scope.</p><Link to="/changes" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Select another Azure VM</Link></Panel></div>;
 
   return <div className="min-w-0 p-4">
     <div className="mb-3 flex flex-wrap items-center gap-2"><nav className="text-[12px] text-slate-500"><Link to="/resources" className="hover:text-[#1B4F91]">Azure Resources</Link><span className="mx-1.5">/</span><Link to={`/resources/virtual-machines/${encodeURIComponent(selectedVm.name)}`} className="hover:text-[#1B4F91]">{selectedVm.name}</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">Change Engineering</span></nav><button type="button" onClick={() => void load()} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50"><RefreshCw className="h-3.5 w-3.5" />Refresh Azure state</button></div>
@@ -131,7 +192,7 @@ export default function ChangeEngineering() {
     {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}{message && <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{message}</div>}
 
     <div className="grid gap-3 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-      <div className="space-y-3"><Panel title="1. Select the Azure VM"><label className="text-[12px] font-medium text-slate-700">Target virtual machine</label><select value={selectedVm.name} onChange={(event) => { setActivePackage(null); setActionId(""); navigate(`/changes/virtual-machines/${encodeURIComponent(event.target.value)}`); }} className="mt-1 block h-9 w-full rounded-md border border-[#CBD5E1] bg-white px-2.5 text-[12px] text-slate-800">{vms.map((vm) => <option key={vm.id} value={vm.name}>{vm.name} · {vm.resourceGroup} · {vm.location}</option>)}</select><div className="mt-3 grid gap-2 sm:grid-cols-3"><Fact label="Power state" value={selectedVm.powerState} /><Fact label="VM size" value={operations?.configuration.vmSize ?? selectedVm.vmSize} /><Fact label="OS disk" value={operations?.configuration.osDisk.sizeGB ? `${operations.configuration.osDisk.sizeGB} GB` : "Not reported"} /></div></Panel>
+      <div className="space-y-3"><Panel title="1. Selected Azure VM" right={<Link to="/changes" className="text-[11px] font-medium text-[#1B4F91] hover:underline">Choose a different VM</Link>}><div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-2"><div className="text-[12px] font-semibold text-slate-800">{selectedVm.name}</div><div className="mt-0.5 text-[11px] text-slate-500">{selectedVm.resourceGroup} · {selectedVm.location} · {selectedVm.id}</div></div><div className="mt-3 grid gap-2 sm:grid-cols-3"><Fact label="Power state" value={selectedVm.powerState} /><Fact label="VM size" value={operations?.configuration.vmSize ?? selectedVm.vmSize} /><Fact label="OS disk" value={operations?.configuration.osDisk.sizeGB ? `${operations.configuration.osDisk.sizeGB} GB` : "Not reported"} /></div></Panel>
 
       <Panel title="2. Select what you want to change" right={<span className="text-[11px] text-slate-500">Azure VM actions</span>}><div className="grid gap-2 sm:grid-cols-2">{ACTIONS.map((action) => { const availability = isActionAvailable(action); const selected = action.id === actionId; return <button key={action.id} type="button" disabled={!availability.enabled} onClick={() => { setActionId(action.id); setActivePackage(null); }} className={cn("rounded-md border p-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50", selected ? "border-[#1B4F91] bg-[#EFF4FB] ring-1 ring-[#CFE0F3]" : "border-[#E2E8F0] hover:bg-slate-50")}><div className="flex gap-2"><Wrench className="mt-0.5 h-4 w-4 shrink-0 text-[#1B4F91]" /><div><div className="text-[12px] font-semibold text-slate-800">{action.label}</div><p className="mt-0.5 text-[11px] leading-relaxed text-slate-600">{action.description}</p><div className={cn("mt-1 text-[10.5px] font-medium", availability.enabled ? "text-emerald-700" : "text-slate-500")}>{availability.note}</div></div></div></button>; })}</div>
         {selectedAction?.requiresValue === "vmSize" && <label className="mt-3 block text-[12px] font-medium text-slate-700">Requested Azure VM size<input value={vmSize} onChange={(event) => setVmSize(event.target.value)} placeholder="For example: Standard_D2s_v5" className="mt-1 h-9 w-full rounded-md border border-[#CBD5E1] px-2.5 text-[12px]" /></label>}
