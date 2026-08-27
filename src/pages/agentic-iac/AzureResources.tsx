@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { AlertCircle, ArrowDown, ArrowUp, ArrowUpDown, Cloud, Folder, RefreshCw, Search, Server, X } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { AlertCircle, ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Cloud, Folder, RefreshCw, Search, Server, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AzureControlPlaneError, getAzureScopes, listAzureResources, listAzureVirtualMachines, type AzureResource, type AzureVirtualMachine } from "./azureControlPlane";
 import { detailPathFor, resourceKindFor } from "./resourceKinds";
@@ -55,6 +55,7 @@ function sortValue(resource: AzureResource, key: SortKey): string {
 }
 
 export default function AzureResources() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const focusType = searchParams.get("type");
   // Snapshot once at mount: this is what a Back/breadcrumb return should restore,
@@ -188,7 +189,7 @@ export default function AzureResources() {
     <div className="mx-auto max-w-[1480px] px-4 py-4">
       <div className="flex flex-wrap items-start gap-3">
         <div>
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-[11px] text-slate-500"><span>Azure Resources</span><span>/</span><span className="font-medium text-slate-700">Resource Explorer</span></nav>
+          <button type="button" onClick={() => navigate(-1)} className="inline-flex items-center gap-1 text-[12px] font-medium text-slate-500 hover:text-slate-800"><ArrowLeft className="h-3.5 w-3.5" />Back</button>
           <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-slate-900">Azure Resource Explorer</h1>
           <p className="mt-1 text-[13px] text-slate-600">Every discovered resource in one filterable list — narrow by subscription, resource group, or type, then sort any column.</p>
         </div>
