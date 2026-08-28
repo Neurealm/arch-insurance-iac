@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import {
+  Activity,
   AlertTriangle,
   CheckCircle2,
   ChevronRight,
   CloudCog,
-  FileWarning,
+  HardDrive,
+  Network,
   RefreshCw,
   ShieldCheck,
   Timer,
@@ -81,6 +83,18 @@ function executionReadiness(pkg: VmChangePackage, vm?: AzureVirtualMachine): Rea
 function ReadinessBadge({ readiness }: { readiness: Readiness }) {
   const style = readiness.state === "ready" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : readiness.state === "blocked" ? "border-red-200 bg-red-50 text-red-700" : "border-amber-200 bg-amber-50 text-amber-700";
   return <span title={readiness.detail} className={cn("inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold", style)}>{readiness.title}</span>;
+}
+
+function humanize(value?: string | null) {
+  return value ? value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()) : "Not reported";
+}
+
+type PreflightStepState = "complete" | "attention" | "blocked" | "waiting";
+
+function PreflightStep({ number, title, detail, state }: { number: number; title: string; detail: string; state: PreflightStepState }) {
+  const style = state === "complete" ? "border-emerald-200 bg-emerald-50" : state === "blocked" ? "border-red-200 bg-red-50" : state === "attention" ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-slate-50";
+  const icon = state === "complete" ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <AlertTriangle className={cn("h-4 w-4", state === "blocked" ? "text-red-600" : state === "attention" ? "text-amber-600" : "text-slate-500")} />;
+  return <div className={cn("rounded-lg border p-3", style)}><div className="flex gap-2.5"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-bold text-slate-700">{number}</span><div className="min-w-0"><div className="flex items-center gap-1.5"><span>{icon}</span><p className="text-sm font-semibold text-slate-900">{title}</p></div><p className="mt-1 text-xs leading-relaxed text-slate-600">{detail}</p></div></div></div>;
 }
 
 export default function ExecutionCenter() {
@@ -164,6 +178,34 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
 
   const readiness = pkg ? executionReadiness(pkg, vm) : undefined;
   const canExecute = Boolean(pkg && pkg.status === "approved" && readiness?.state === "ready");
+  const preflightSteps = [
+    {
+      title: "Confirm the target VM",
+      detail: vm ? `${vm.name} was found in the latest Azure discovery for ${vm.resourceGroup}.` : "The target VM was not returned by the latest Azure discovery.",
+      state: vm ? "complete" : "blocked",
+    },
+    {
+      title: "Validate the approved package",
+      detail: pkg.status === "approved" || pkg.status === "executing" || pkg.status === "executed" ? `Package is ${pkg.status.replace(/_/g, " ")}; approval evidence is retained with this package.` : `Package is ${pkg.status.replace(/_/g, " ")} and cannot be executed.`,
+      state: pkg.status === "approved" || pkg.status === "executing" || pkg.status === "executed" ? "complete" : "blocked",
+    },
+    {
+      title: "Validate the Azure action",
+      detail: pkg.actionType === "start_vm" ? "This package uses the supported, package-bound Azure VM start workflow." : "No controlled Azure execution workflow is configured for this action.",
+      state: pkg.actionType === "start_vm" ? "complete" : "blocked",
+    },
+    {
+      title: "Check current VM state",
+      detail: readiness?.detail ?? "Current state is unavailable.",
+      state: readiness?.state === "ready" ? "complete" : readiness?.state === "blocked" ? "blocked" : "attention",
+    },
+    {
+      title: "Collect operational evidence",
+      detail: operations?.observedAt ? `Azure observation captured ${formatDate(operations.observedAt)}.` : "Azure operations evidence is not currently available; this is visible as a coverage gap.",
+      state: operations?.observedAt ? "complete" : "attention",
+    },
+  ] as Array<{ title: string; detail: string; state: PreflightStepState }>;
+  const completedPreflightSteps = preflightSteps.filter((step) => step.state === "complete").length;
   const execute = async () => {
     if (!pkg || !canExecute) return;
     setExecuting(true); setError(null);
@@ -187,6 +229,10 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
   return <main className="mx-auto max-w-[1500px] space-y-4 px-3 py-5 md:px-5">
     <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs text-slate-500"><Link className="hover:underline" to="/execution">Execution Center</Link> <ChevronRight className="inline h-3 w-3" /> {pkg.packageNumber}</p><h1 className="mt-1 text-2xl font-semibold text-slate-900">{pkg.actionLabel}</h1><p className="mt-1 text-sm text-slate-600">{pkg.targetName} · {pkg.resourceGroup} · {pkg.region}</p></div><div className="flex items-center gap-2"><Status value={pkg.status} /><button onClick={() => void load()} className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700"><RefreshCw className="h-4 w-4" />Refresh</button></div></div>
     {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>}
+    <Panel title="VM execution plan" action={<span className="text-xs text-slate-500">{completedPreflightSteps} of {preflightSteps.length} checks complete</span>}>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">{preflightSteps.map((step, index) => <PreflightStep key={step.title} number={index + 1} title={step.title} detail={step.detail} state={step.state} />)}</div>
+      <p className="mt-3 text-xs text-slate-500">These checks use the package record and the current Azure control-plane observation. They are re-evaluated before a VM action is sent.</p>
+    </Panel>
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
       <div className="space-y-4">
         <Panel title="Execution preflight"><div className={cn("rounded-lg border p-4", readiness?.state === "ready" ? "border-emerald-200 bg-emerald-50" : readiness?.state === "blocked" ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50")}><div className="flex gap-3"><AlertTriangle className={cn("mt-0.5 h-5 w-5 shrink-0", readiness?.state === "ready" ? "text-emerald-600" : readiness?.state === "blocked" ? "text-red-600" : "text-amber-600")} /><div><p className="font-semibold text-slate-900">{readiness?.title}</p><p className="mt-1 text-sm text-slate-700">{readiness?.detail}</p></div></div></div><div className="mt-4 grid gap-x-8 md:grid-cols-2"><Row label="Package status" value={<Status value={pkg.status} />} /><Row label="Live Azure power state" value={vm?.powerState || "VM not found"} /><Row label="Action" value={pkg.actionLabel} /><Row label="Provisioning" value={vm?.provisioningState || "Not reported"} /></div><p className="mt-3 text-xs text-slate-500">Execution is limited to the approved package action. This page cannot modify a VM directly or execute an unapproved package.</p></Panel>
@@ -196,7 +242,17 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
       <div className="space-y-4">
         <Panel title="Change package"><Row label="Reference" value={pkg.packageNumber} /><Row label="Requestor" value={pkg.createdBy} /><Row label="Target resource" value={<span className="break-all text-xs">{shortId(pkg.targetResourceId)}</span>} /><Row label="Reason" value={pkg.rationale} /></Panel>
         <Panel title="Approval record">{reviews.length === 0 ? <p className="text-sm text-slate-500">No review decision is recorded.</p> : <div className="space-y-3">{reviews.map((review) => <div key={review.id} className="rounded-lg border border-slate-200 p-3"><div className="flex justify-between gap-2"><Status value={review.decision} /><span className="text-xs text-slate-500">{formatDate(review.reviewedAt)}</span></div><p className="mt-2 text-sm font-medium text-slate-800">{review.reviewedBy || "Reviewer"}</p><p className="mt-1 text-sm text-slate-600">{review.comment || "No comment recorded."}</p></div>)}</div>}</Panel>
-        <Panel title="Post-execution Azure evidence"><Row label="VM size" value={operations?.configuration.vmSize || vm?.vmSize} /><Row label="Operating system" value={operations?.configuration.osType || vm?.osType} /><Row label="Boot diagnostics" value={operations?.bootDiagnostics.state === "enabled" ? "Enabled" : operations?.bootDiagnostics.state} /><Row label="Azure Monitor" value={operations?.monitoring.state === "available" ? "Configured" : operations?.monitoring.state?.replace(/_/g, " ")} /><Row label="Azure Backup" value={operations?.backup.state?.replace(/_/g, " ")} /><Row label="Patch assessment" value={operations?.patching.state?.replace(/_/g, " ")} /><Row label="Network interface" value={operations?.network.networkInterface} /><Row label="Private IP" value={operations?.network.privateIps?.join(", ")} /><div className="mt-3 flex gap-3 border-t border-slate-100 pt-3"><Link className="text-sm font-medium text-blue-700 underline" to={`/resources/virtual-machines/${encodeURIComponent(pkg.targetName)}`}>Open Digital Twin</Link><Link className="text-sm font-medium text-blue-700 underline" to={`/remediation/virtual-machines/${encodeURIComponent(pkg.targetName)}`}>Open assessment</Link></div></Panel>
+        <Panel title="Live VM operational metrics" action={<span className="text-xs text-slate-500">{operations?.observedAt ? formatDate(operations.observedAt) : "Awaiting Azure observation"}</span>}>
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><Activity className="h-3.5 w-3.5" />Performance coverage</div>
+          <Row label="CPU utilization" value={operations?.monitoring.state === "available" && operations.monitoring.cpuPercent !== null ? `${operations.monitoring.cpuPercent}%` : humanize(operations?.monitoring.state)} />
+          <Row label="Memory utilization" value={operations?.monitoring.state === "available" && operations.monitoring.memoryPercent !== null ? `${operations.monitoring.memoryPercent}%` : humanize(operations?.monitoring.state)} />
+          <Row label="Disk used" value={operations?.monitoring.state === "available" && operations.monitoring.diskUsedPercent !== null ? `${operations.monitoring.diskUsedPercent}%` : humanize(operations?.monitoring.state)} />
+          <div className="mt-3 border-t border-slate-100 pt-3"><div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><HardDrive className="h-3.5 w-3.5" />Compute & storage</div>
+          <Row label="VM size" value={operations?.configuration.vmSize || vm?.vmSize} /><Row label="Operating system" value={operations?.configuration.osType || vm?.osType} /><Row label="OS disk" value={operations?.configuration.osDisk.name ? `${operations.configuration.osDisk.name} · ${operations.configuration.osDisk.sizeGB ?? "?"} GB · ${operations.configuration.osDisk.storageSku ?? "SKU not reported"}` : "Not reported"} /><Row label="Data disks" value={operations?.configuration.dataDisks.length ? operations.configuration.dataDisks.map((disk) => `${disk.name} (${disk.sizeGB ?? "?"} GB)`).join(", ") : "None reported"} /><Row label="Boot diagnostics" value={humanize(operations?.bootDiagnostics.state)} /></div>
+          <div className="mt-3 border-t border-slate-100 pt-3"><div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><Network className="h-3.5 w-3.5" />Network & protection</div>
+          <Row label="Network interface" value={operations?.network.networkInterface} /><Row label="Private IP" value={operations?.network.privateIps.join(", ")} /><Row label="Network security groups" value={operations?.network.networkSecurityGroups.join(", ")} /><Row label="Azure Backup" value={humanize(operations?.backup.state)} /><Row label="Last successful backup" value={operations?.backup.lastSuccessfulBackup ? formatDate(operations.backup.lastSuccessfulBackup) : "Not reported"} /><Row label="Patch assessment" value={humanize(operations?.patching.state)} /><Row label="Updates available" value={operations?.patching.updatesAvailable === null || operations?.patching.updatesAvailable === undefined ? "Not reported" : String(operations.patching.updatesAvailable)} /></div>
+          <div className="mt-3 flex gap-3 border-t border-slate-100 pt-3"><Link className="text-sm font-medium text-blue-700 underline" to={`/resources/virtual-machines/${encodeURIComponent(pkg.targetName)}`}>Open Digital Twin</Link><Link className="text-sm font-medium text-blue-700 underline" to={`/remediation/virtual-machines/${encodeURIComponent(pkg.targetName)}`}>Open assessment</Link></div>
+        </Panel>
       </div>
     </div>
   </main>;
