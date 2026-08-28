@@ -13,7 +13,7 @@ const NAV = [
   { label: "Azure Resources", to: "/resources", icon: Boxes, enabled: true },
   { label: "Remediation Intelligence", to: "/remediation", icon: Activity, enabled: true },
   { label: "Change Engineering", to: "/changes", icon: GitPullRequest, enabled: true },
-  { label: "Change Review & Approval", to: "/approvals/CP-2026-01842", icon: ClipboardCheck, enabled: true },
+  { label: "Change Review & Approval", to: "/approvals", icon: ClipboardCheck, enabled: true },
   { label: "Execution Center", to: "/execution/CP-2026-01842", icon: PlayCircle, enabled: true },
   { label: "Validation & Evidence", to: "/validation/CP-2026-01842", icon: ClipboardCheck, enabled: true },
   { label: "Customer-hosted Intelligent IaC", to: "/platform/deployment-architecture", icon: Network, enabled: true },

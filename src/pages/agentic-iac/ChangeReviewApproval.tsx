@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, CheckCircle2, ChevronRight, ClipboardCheck, FileWarning, RefreshCw, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -53,10 +53,12 @@ function Status({ status }: { status: ChangePackageStatus }) { return <span clas
 
 export default function ChangeReviewApproval() {
   const { packageId } = useParams<{ packageId: string }>();
+  if (packageId && /^CP-\d{4}-\d+$/i.test(packageId)) return <Navigate to="/approvals?reference=legacy-sample" replace />;
   return packageId ? <VmPackageReview packageId={packageId} /> : <VmApprovalQueue />;
 }
 
 function VmApprovalQueue() {
+  const { search } = useLocation();
   const [packages, setPackages] = useState<VmChangePackage[]>([]);
   const [vms, setVms] = useState<AzureVirtualMachine[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,11 +67,13 @@ function VmApprovalQueue() {
   useEffect(() => { void load(); }, [load]);
   const submitted = packages.filter((pkg) => pkg.status === "submitted");
   const vmById = useMemo(() => new Map(vms.map((vm) => [vm.id.toLowerCase(), vm])), [vms]);
+  const openedLegacySample = new URLSearchParams(search).get("reference") === "legacy-sample";
 
   return <div className="min-w-0 p-4">
     <div className="mb-3 flex flex-wrap items-center gap-2"><nav className="text-[12px] text-slate-500"><Link to="/resources" className="hover:text-[#1B4F91]">Azure Resources</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">Change Review &amp; Approval</span></nav><button type="button" onClick={() => void load()} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50"><RefreshCw className="h-3.5 w-3.5" />Refresh queue</button></div>
     <header className="mb-4 flex flex-wrap items-start gap-3"><div><h1 className="text-[20px] font-semibold text-slate-900">VM Change Review &amp; Approval</h1><p className="mt-1 max-w-3xl text-[12px] text-slate-600">Review only durable Azure VM change packages. Approval is a human governance decision; it does not execute an Azure action.</p></div><div className="ml-auto rounded-md border border-[#CFE0F3] bg-[#EFF4FB] px-3 py-2 text-[11.5px] text-[#1B4F91]"><ShieldCheck className="mr-1 inline h-3.5 w-3.5" />Self-approval is prohibited</div></header>
     {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}
+    {openedLegacySample && <div className="mb-3 rounded-md border border-[#CFE0F3] bg-[#EFF4FB] px-3 py-2 text-[12px] text-[#16406f]"><strong>Live VM approval queue opened.</strong> The previous SQL/AWS sample package is not part of the Azure pilot. Select a real saved VM package below.</div>}
     <Panel title="Approval queue" right={<span className="text-[11px] text-slate-500">{loading ? "Loading…" : `${submitted.length} awaiting review`}</span>}>
       <p className="mb-3 text-[11.5px] text-slate-600">Each request is compared with the current Azure VM inventory before a reviewer opens it. A package is never treated as evidence of the VM’s current state.</p>
       {loading ? <p className="py-8 text-center text-[12px] text-slate-500">Loading saved VM change packages…</p> : packages.length ? <div className="overflow-x-auto"><table className="w-full min-w-[1050px] text-left text-[12px]"><thead className="border-b border-[#E2E8F0] text-[10.5px] uppercase tracking-wide text-slate-500"><tr><th className="pb-2 font-medium">Package</th><th className="pb-2 font-medium">Target VM</th><th className="pb-2 font-medium">Requested action</th><th className="pb-2 font-medium">Current Azure state</th><th className="pb-2 font-medium">Review readiness</th><th className="pb-2 font-medium">Risk</th><th className="pb-2 font-medium">Status</th><th className="pb-2" /></tr></thead><tbody>{packages.map((pkg) => { const vm = vmById.get(pkg.targetResourceId.toLowerCase()) ?? null; const readiness = reviewReadiness(pkg, vm); return <tr key={pkg.id} className="border-b border-[#EEF2F6]"><td className="py-3 font-mono text-[11px] font-semibold text-slate-800">{pkg.packageNumber}<div className="mt-0.5 font-sans text-[10.5px] font-normal text-slate-500">Submitted {dateTime(pkg.submittedAt)}</div></td><td className="py-3"><div className="font-medium text-slate-800">{pkg.targetName}</div><div className="mt-0.5 text-[10.5px] text-slate-500">{pkg.resourceGroup} · {pkg.region}</div></td><td className="py-3 text-slate-700">{pkg.actionLabel}</td><td className="py-3"><div className="font-medium text-slate-800">{vm?.powerState ?? "Not discovered"}</div><div className="mt-0.5 text-[10.5px] text-slate-500">{vm?.provisioningState ?? "No live VM observation"}</div></td><td className="py-3"><Readiness value={readiness} /></td><td className="py-3"><span className={cn("font-medium", pkg.riskLevel === "High" ? "text-red-700" : pkg.riskLevel === "Medium" ? "text-amber-700" : "text-emerald-700")}>{pkg.riskLevel} · {pkg.riskScore}/100</span></td><td className="py-3"><Status status={pkg.status} /></td><td className="py-3 text-right"><Link to={`/approvals/${pkg.id}`} className="text-[11.5px] font-medium text-[#1B4F91] hover:underline">Review package</Link></td></tr>; })}</tbody></table></div> : <div className="py-8 text-center"><p className="text-[12px] text-slate-600">No VM change packages are visible to your account.</p><Link to="/changes" className="mt-2 inline-block text-[12px] font-medium text-[#1B4F91] underline">Create a VM change package</Link></div>}
@@ -115,7 +119,7 @@ function VmPackageReview({ packageId }: { packageId: string }) {
   const execute = async () => { if (!pkg || pkg.status !== "approved" || pkg.actionType !== "start_vm") return; setExecuting(true); setError(null); try { await executeApprovedVmChangePackage(pkg.id); await load(); } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to execute the approved Azure VM action."); await load(); } finally { setExecuting(false); } };
 
   if (loading && !pkg) return <div className="p-4 text-[13px] text-slate-600">Loading VM change package…</div>;
-  if (!pkg) return <div className="p-4"><Panel title="Change package"><p className="text-[12px] text-slate-600">This package is not available to your account.</p><Link to="/approvals" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Back to approval queue</Link></Panel></div>;
+  if (!pkg) return <div className="p-4"><Panel title="Change package"><p className="text-[12px] text-slate-600">This is not a live VM package available in your current Azure pilot scope. Select a package from the approval queue to review its current Azure evidence.</p><Link to="/approvals" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Open approval queue</Link></Panel></div>;
 
   return <div className="min-w-0 p-4">
     <div className="mb-3 flex flex-wrap items-center gap-2"><nav className="text-[12px] text-slate-500"><Link to="/approvals" className="hover:text-[#1B4F91]">Change Review &amp; Approval</Link><ChevronRight className="h-3 w-3" /><span className="font-mono font-medium text-slate-800">{pkg.packageNumber}</span></nav><button type="button" onClick={() => void load()} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50"><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />Refresh evidence</button></div>

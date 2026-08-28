@@ -116,7 +116,8 @@ export async function listVmChangePackages() {
 }
 
 export async function getVmChangePackage(id: string) {
-  const { data, error } = await table().from("iac_change_packages").select("*").eq("id", id).maybeSingle();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+  const { data, error } = await table().from("iac_change_packages").select("*").eq(isUuid ? "id" : "package_number", id).maybeSingle();
   if (error) throw error;
   return data ? map(data) : null;
 }
