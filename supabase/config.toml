@@ -1,1 +1,6 @@
 project_id = "esfpbiishpkvhlejnxzq"
+
+# ServiceNow calls this endpoint from outside Supabase. The function performs
+# its own shared-secret verification before accepting the webhook payload.
+[functions.servicenow-intake]
+verify_jwt = false

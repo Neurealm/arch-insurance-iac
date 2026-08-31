@@ -42,6 +42,37 @@ ServiceNow ticket
 
 Start with the `Restart Azure VM` request type because the current pilot already supports Azure VM discovery, approval, controlled execution, and post-execution validation. Expand later to VM creation, resize, storage expansion, monitoring, backup, and network workflows.
 
+## Webhook implementation
+
+The production integration is server-side and webhook-first:
+
+```text
+ServiceNow outbound REST/webhook
+  -> Supabase Edge Function: servicenow-intake
+  -> Gemini 2.5 Flash through the Lovable AI gateway
+  -> Azure control-plane inventory enrichment
+  -> deterministic readiness and conflict checks
+  -> ServiceNow customer-visible `comments` update
+  -> ready-for-engineering intake or clarification
+```
+
+The Edge Function persists the ticket revision, normalized fields, LLM response,
+Azure observation, decision, clarification note, and audit events in
+`servicenow_intake_requests` and `servicenow_intake_events`. Duplicate webhook
+retries are idempotent by ticket number and payload hash.
+
+Required server-side secrets are `SERVICENOW_WEBHOOK_SECRET`,
+`SERVICENOW_BASE_URL`, `SERVICENOW_CLIENT_ID`, `SERVICENOW_CLIENT_SECRET`,
+`LOVABLE_API_KEY`, and (for live Azure enrichment)
+`AZURE_CONTROL_PLANE_URL` plus `AZURE_CONTROL_PLANE_TOKEN`. Optional
+`IAC_AUTOMATION_USER_ID` enables creation of a draft VM package for a complete,
+supported request; it never approves or executes the change.
+
+The function posts to ServiceNow's customer-visible `comments` field. It does
+not use `work_notes`, approve a request, or execute Azure actions. The ticket
+content is treated as untrusted data in the Gemini prompt, and the model output
+is validated before any status update or package handoff.
+
 ## Related implementation
 
 The current VM workflow is implemented under `src/pages/agentic-iac/`. The future tab should feed complete requests into Change Engineering and should use the existing approval, execution, and Validation & Evidence flows.
