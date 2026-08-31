@@ -55,7 +55,25 @@ function timestamp(value: string) {
 function first(source: RecordValue, keys: string[]) { for (const key of keys) { const value = text(source[key]); if (value) return value; } return ""; }
 function array(value: unknown) { return Array.isArray(value) ? value : []; }
 function unique(values: string[]) { return [...new Set(values.filter(Boolean))]; }
-function json(body: unknown, status = 200) { return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } }); }
+function corsHeaders(request?: Request) {
+  const configuredOrigin = Deno.env.get("APP_ORIGIN")?.trim();
+  const requestOrigin = request?.headers.get("origin")?.trim();
+  const allowOrigin = configuredOrigin || requestOrigin || "*";
+  return {
+    "access-control-allow-origin": allowOrigin,
+    "access-control-allow-headers": "authorization, x-client-info, apikey, content-type, x-servicenow-webhook-secret",
+    "access-control-allow-methods": "POST, OPTIONS",
+    "access-control-max-age": "86400",
+    "vary": "Origin",
+  };
+}
+
+function json(body: unknown, status = 200, request?: Request) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders(request), "content-type": "application/json", "cache-control": "no-store" },
+  });
+}
 
 function normalizeTicket(body: RecordValue): NormalizedTicket {
   const source = record(body.ticket ?? body.change_request ?? body.request);
@@ -271,37 +289,38 @@ async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket:
 }
 
 Deno.serve(async (request) => {
-  if (request.method !== "POST") return json({ error: "method not allowed" }, 405);
+  if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(request) });
+  if (request.method !== "POST") return json({ error: "method not allowed" }, 405, request);
 
   let body: RecordValue;
-  try { body = record(await request.json()); } catch { return json({ error: "invalid json" }, 400); }
+  try { body = record(await request.json()); } catch { return json({ error: "invalid json" }, 400, request); }
   const demoMode = text(body.mode).toLowerCase() === "demo";
   const callerId = demoMode ? await authenticatedCaller(request) : null;
   if (demoMode) {
-    if (!callerId) return json({ error: "authenticated demo submission required" }, 401);
+    if (!callerId) return json({ error: "authenticated demo submission required" }, 401, request);
   } else {
     const expectedSecret = Deno.env.get("SERVICENOW_WEBHOOK_SECRET");
     const receivedSecret = request.headers.get("x-servicenow-webhook-secret");
-    if (!expectedSecret) return json({ error: "webhook is not configured" }, 503);
-    if (!receivedSecret || receivedSecret !== expectedSecret) return json({ error: "unauthorized" }, 401);
+    if (!expectedSecret) return json({ error: "webhook is not configured" }, 503, request);
+    if (!receivedSecret || receivedSecret !== expectedSecret) return json({ error: "unauthorized" }, 401, request);
   }
   const ticket = normalizeTicket(body);
-  if (!ticket.ticketNumber) return json({ error: "ticket number is required" }, 400);
+  if (!ticket.ticketNumber) return json({ error: "ticket number is required" }, 400, request);
   const admin = supabaseAdmin();
   const payloadHash = await sha256(body);
   const existing = await admin.from("servicenow_intake_requests").select("id, status, change_package_id").eq("ticket_number", ticket.ticketNumber).eq("payload_hash", payloadHash).maybeSingle();
-  if (existing.data?.status === "comment_posted") return json({ duplicate: true, requestId: existing.data.id, status: existing.data.status, changePackageId: existing.data.change_package_id });
+  if (existing.data?.status === "comment_posted") return json({ duplicate: true, requestId: existing.data.id, status: existing.data.status, changePackageId: existing.data.change_package_id }, 200, request);
 
   let requestId = existing.data?.id as string | undefined;
   if (requestId) {
     const { error: resetError } = await admin.from("servicenow_intake_requests").update({ status: "analyzing", error_message: null }).eq("id", requestId);
-    if (resetError) return json({ error: resetError.message }, 500);
+    if (resetError) return json({ error: resetError.message }, 500, request);
   } else {
     const { data: intake, error: insertError } = await admin.from("servicenow_intake_requests").insert({ ticket_number: ticket.ticketNumber, service_now_sys_id: ticket.sysId, ticket_updated_at: ticket.sourceUpdatedAt, payload_hash: payloadHash, status: "analyzing", requested_by_user_id: callerId, ticket_payload: body, normalized_request: ticket }).select("id").single();
-    if (insertError || !intake) return json({ error: insertError?.message ?? "unable to persist intake request" }, 500);
+    if (insertError || !intake) return json({ error: insertError?.message ?? "unable to persist intake request" }, 500, request);
     requestId = intake.id as string;
   }
-  if (!requestId) return json({ error: "unable to resolve intake request id" }, 500);
+  if (!requestId) return json({ error: "unable to resolve intake request id" }, 500, request);
   await addEvent(admin, requestId, "ticket_received", { ticketNumber: ticket.ticketNumber });
 
   try {
@@ -319,16 +338,16 @@ Deno.serve(async (request) => {
     if (demoMode) {
       await admin.from("servicenow_intake_requests").update({ status: "demo_comment_generated", clarification_note: finalNote }).eq("id", requestId);
       await addEvent(admin, requestId, "demo_customer_comment_generated", { field: "comments", simulated: true });
-      return json({ requestId, status: "demo_comment_generated", action: analysis.action, confidence: analysis.confidence, readyForEngineering: validation.ready, changePackageNumber: draft?.package_number ?? null, comment: finalNote });
+      return json({ requestId, status: "demo_comment_generated", action: analysis.action, confidence: analysis.confidence, readyForEngineering: validation.ready, changePackageNumber: draft?.package_number ?? null, comment: finalNote }, 200, request);
     }
     await postCustomerComment(ticket, finalNote);
     await admin.from("servicenow_intake_requests").update({ status: "comment_posted", clarification_note: finalNote }).eq("id", requestId);
     await addEvent(admin, requestId, "servicenow_customer_comment_posted", { field: "comments" });
-    return json({ requestId, status: "comment_posted", action: analysis.action, confidence: analysis.confidence, readyForEngineering: validation.ready, changePackageNumber: draft?.package_number ?? null });
+    return json({ requestId, status: "comment_posted", action: analysis.action, confidence: analysis.confidence, readyForEngineering: validation.ready, changePackageNumber: draft?.package_number ?? null }, 200, request);
   } catch (error) {
     const message = error instanceof Error ? error.message : "ServiceNow intake processing failed.";
     await admin.from("servicenow_intake_requests").update({ status: "comment_failed", error_message: message }).eq("id", requestId);
     await addEvent(admin, requestId, "processing_failed", { message });
-    return json({ requestId, error: message }, 502);
+    return json({ requestId, error: message }, 502, request);
   }
 });
