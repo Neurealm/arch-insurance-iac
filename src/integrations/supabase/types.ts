@@ -9087,6 +9087,109 @@ export type Database = {
           },
         ]
       }
+      servicenow_intake_events: {
+        Row: {
+          created_at: string
+          detail: Json
+          event_type: string
+          id: string
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          event_type: string
+          id?: string
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          event_type?: string
+          id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_events_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicenow_intake_requests: {
+        Row: {
+          analyzed_at: string | null
+          azure_observation: Json
+          change_package_id: string | null
+          clarification_note: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          llm_analysis: Json
+          normalized_request: Json
+          payload_hash: string
+          received_at: string
+          requested_by_user_id: string | null
+          service_now_sys_id: string | null
+          status: string
+          ticket_number: string
+          ticket_payload: Json
+          ticket_updated_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          analyzed_at?: string | null
+          azure_observation?: Json
+          change_package_id?: string | null
+          clarification_note?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          llm_analysis?: Json
+          normalized_request?: Json
+          payload_hash: string
+          received_at?: string
+          requested_by_user_id?: string | null
+          service_now_sys_id?: string | null
+          status?: string
+          ticket_number: string
+          ticket_payload?: Json
+          ticket_updated_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          analyzed_at?: string | null
+          azure_observation?: Json
+          change_package_id?: string | null
+          clarification_note?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          llm_analysis?: Json
+          normalized_request?: Json
+          payload_hash?: string
+          received_at?: string
+          requested_by_user_id?: string | null
+          service_now_sys_id?: string | null
+          status?: string
+          ticket_number?: string
+          ticket_payload?: Json
+          ticket_updated_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_requests_change_package_id_fkey"
+            columns: ["change_package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_change_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stakeholder_registers: {
         Row: {
           company: string | null
