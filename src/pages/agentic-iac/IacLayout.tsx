@@ -15,7 +15,7 @@ const NAV = [
   { label: "Change Engineering", to: "/changes", icon: GitPullRequest, enabled: true },
   { label: "Change Review & Approval", to: "/approvals", icon: ClipboardCheck, enabled: true },
   { label: "Execution Center", to: "/execution", icon: PlayCircle, enabled: true },
-  { label: "Validation & Evidence", to: "/validation/CP-2026-01842", icon: ClipboardCheck, enabled: true },
+  { label: "Validation & Evidence", to: "/validation", icon: ClipboardCheck, enabled: true },
   { label: "Customer-hosted Intelligent IaC", to: "/platform/deployment-architecture", icon: Network, enabled: true },
 ];
 
