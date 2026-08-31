@@ -20,6 +20,7 @@ import { AuthProvider } from "./context/AuthContext.tsx";
 const IacLayout = lazy(() => import("./pages/agentic-iac/IacLayout.tsx"));
 const AzureConnections = lazy(() => import("./pages/agentic-iac/AzureConnections.tsx"));
 const AzureResources = lazy(() => import("./pages/agentic-iac/AzureResources.tsx"));
+const ServiceNowIntake = lazy(() => import("./pages/agentic-iac/ServiceNowIntake.tsx"));
 const AssetDigitalTwin = lazy(() => import("./pages/agentic-iac/AssetDigitalTwin.tsx"));
 const RemediationIntelligence = lazy(() => import("./pages/agentic-iac/RemediationIntelligence.tsx"));
 const ChangeEngineering = lazy(() => import("./pages/agentic-iac/ChangeEngineering.tsx"));
@@ -74,6 +75,7 @@ const App = () => (
                 <Route element={<IacLayout />}>
                   <Route path="/connections" element={<AzureConnections />} />
                   <Route path="/resources" element={<AzureResources />} />
+                  <Route path="/servicenow-intake" element={<ServiceNowIntake />} />
                   <Route path="/resources/virtual-machines/:vmName" element={<AssetDigitalTwin />} />
                   <Route path="/remediation" element={<RemediationIntelligence />} />
                   <Route path="/remediation/virtual-machines/:vmName" element={<RemediationIntelligence />} />
