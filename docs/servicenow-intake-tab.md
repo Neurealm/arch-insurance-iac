@@ -21,13 +21,15 @@ ServiceNow ticket
 
 ## UI sections
 
-- ServiceNow ticket number, requester, application, environment, action, and description
-- Detected request type and agent confidence
-- Extracted intent, missing information, and conflicting information
-- Readiness checks for target VM, maintenance window, business impact, application owner, and rollback plan
-- Audit timeline for ticket receipt, analysis, and clarification
-- Action to post a clarification note back to ServiceNow
-- Change-package creation enabled only after required information is complete
+- **Demo Change Request** — a dedicated ServiceNow-shaped submission form for
+  client demonstrations when the customer's ServiceNow instance is not
+  connected.
+- **ServiceNow Intake / Agent** — a separate queue of submitted tickets. Each
+  ticket can be opened to review detected request type, confidence, extracted
+  intent, Azure enrichment, missing/conflicting information, generated
+  customer-visible comment, and the governed next step.
+- Change-package creation is enabled only after the agent and deterministic
+  readiness layer agree that a supported request is complete.
 
 ## Guardrails
 

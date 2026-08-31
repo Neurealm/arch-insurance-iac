@@ -3,7 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Boxes, GitPullRequest, PlayCircle, ClipboardCheck,
   Settings, Search, Bell, HelpCircle, ChevronDown, Home, Cloud, CircleDot, Activity,
-  Network, Plug, KeyRound, Scale, SlidersHorizontal, FileInput,
+  Network, Plug, KeyRound, Scale, SlidersHorizontal, FileInput, FilePlus2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -11,7 +11,8 @@ import { useAuth } from "@/context/AuthContext";
 const NAV = [
   { label: "Connections", to: "/connections", icon: Plug, enabled: true },
   { label: "Azure Resources", to: "/resources", icon: Boxes, enabled: true },
-  { label: "ServiceNow Intake", to: "/servicenow-intake", icon: FileInput, enabled: true },
+  { label: "Demo Change Request", to: "/demo-change-request", icon: FilePlus2, enabled: true },
+  { label: "ServiceNow Intake / Agent", to: "/servicenow-intake", icon: FileInput, enabled: true },
   { label: "Remediation Intelligence", to: "/remediation", icon: Activity, enabled: true },
   { label: "Change Engineering", to: "/changes", icon: GitPullRequest, enabled: true },
   { label: "Change Review & Approval", to: "/approvals", icon: ClipboardCheck, enabled: true },
