@@ -92,6 +92,22 @@ function supabaseAdmin() {
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 }
 
+async function authenticatedCaller(request: Request) {
+  const authorization = request.headers.get("authorization") ?? "";
+  if (!authorization.startsWith("Bearer ")) return null;
+  const url = Deno.env.get("SUPABASE_URL");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? (() => {
+    try { return JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}").default; } catch { return undefined; }
+  })();
+  if (!url || !anonKey) throw new Error("Supabase public credentials are not configured.");
+  const userClient = createClient(url, anonKey, { global: { headers: { authorization } } });
+  const token = authorization.slice("Bearer ".length);
+  const { data, error } = await userClient.auth.getClaims(token);
+  const userId = data?.claims?.sub as string | undefined;
+  if (error || !userId) return null;
+  return userId;
+}
+
 async function addEvent(admin: ReturnType<typeof supabaseAdmin>, requestId: string, eventType: string, detail: RecordValue = {}) {
   await admin.from("servicenow_intake_events").insert({ request_id: requestId, event_type: eventType, detail });
 }
@@ -113,11 +129,12 @@ function normalizeVm(value: unknown): AzureVm | null {
   };
 }
 
-async function loadAzureInventory() {
+async function loadAzureInventory(userAuthorization?: string) {
   const baseUrl = (Deno.env.get("AZURE_CONTROL_PLANE_URL") ?? "").replace(/\/$/, "");
   const token = Deno.env.get("AZURE_CONTROL_PLANE_TOKEN");
-  if (!baseUrl || !token) return { state: "not_configured", vms: [] as AzureVm[] };
-  const response = await fetch(`${baseUrl}/api/v1/virtual-machines`, { headers: { authorization: `Bearer ${token}`, accept: "application/json" } });
+  const authorization = token ? `Bearer ${token}` : userAuthorization;
+  if (!baseUrl || !authorization) return { state: "not_configured", vms: [] as AzureVm[] };
+  const response = await fetch(`${baseUrl}/api/v1/virtual-machines`, { headers: { authorization, accept: "application/json" } });
   if (!response.ok) throw new Error(`Azure inventory returned ${response.status}.`);
   const payload = record(await response.json());
   const values = Array.isArray(payload) ? payload : array(payload.items ?? payload.value ?? payload.virtualMachines);
@@ -237,8 +254,8 @@ async function postCustomerComment(ticket: NormalizedTicket, note: string) {
   if (!update.ok) throw new Error(`ServiceNow comment update returned ${update.status}.`);
 }
 
-async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket: NormalizedTicket, analysis: Analysis, target: AzureVm | null) {
-  const creator = Deno.env.get("IAC_AUTOMATION_USER_ID");
+async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket: NormalizedTicket, analysis: Analysis, target: AzureVm | null, creatorOverride?: string | null) {
+  const creator = creatorOverride || Deno.env.get("IAC_AUTOMATION_USER_ID");
   if (!creator || !target || !SUPPORTED_ACTIONS.has(analysis.action) || analysis.action === "create_vm") return null;
   const packageNumber = `VM-CHG-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
   const { data, error } = await admin.from("iac_change_packages").insert({
@@ -255,13 +272,19 @@ async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket:
 
 Deno.serve(async (request) => {
   if (request.method !== "POST") return json({ error: "method not allowed" }, 405);
-  const expectedSecret = Deno.env.get("SERVICENOW_WEBHOOK_SECRET");
-  const receivedSecret = request.headers.get("x-servicenow-webhook-secret");
-  if (!expectedSecret) return json({ error: "webhook is not configured" }, 503);
-  if (!receivedSecret || receivedSecret !== expectedSecret) return json({ error: "unauthorized" }, 401);
 
   let body: RecordValue;
   try { body = record(await request.json()); } catch { return json({ error: "invalid json" }, 400); }
+  const demoMode = text(body.mode).toLowerCase() === "demo";
+  const callerId = demoMode ? await authenticatedCaller(request) : null;
+  if (demoMode) {
+    if (!callerId) return json({ error: "authenticated demo submission required" }, 401);
+  } else {
+    const expectedSecret = Deno.env.get("SERVICENOW_WEBHOOK_SECRET");
+    const receivedSecret = request.headers.get("x-servicenow-webhook-secret");
+    if (!expectedSecret) return json({ error: "webhook is not configured" }, 503);
+    if (!receivedSecret || receivedSecret !== expectedSecret) return json({ error: "unauthorized" }, 401);
+  }
   const ticket = normalizeTicket(body);
   if (!ticket.ticketNumber) return json({ error: "ticket number is required" }, 400);
   const admin = supabaseAdmin();
@@ -274,7 +297,7 @@ Deno.serve(async (request) => {
     const { error: resetError } = await admin.from("servicenow_intake_requests").update({ status: "analyzing", error_message: null }).eq("id", requestId);
     if (resetError) return json({ error: resetError.message }, 500);
   } else {
-    const { data: intake, error: insertError } = await admin.from("servicenow_intake_requests").insert({ ticket_number: ticket.ticketNumber, service_now_sys_id: ticket.sysId, ticket_updated_at: ticket.sourceUpdatedAt, payload_hash: payloadHash, status: "analyzing", ticket_payload: body, normalized_request: ticket }).select("id").single();
+    const { data: intake, error: insertError } = await admin.from("servicenow_intake_requests").insert({ ticket_number: ticket.ticketNumber, service_now_sys_id: ticket.sysId, ticket_updated_at: ticket.sourceUpdatedAt, payload_hash: payloadHash, status: "analyzing", requested_by_user_id: callerId, ticket_payload: body, normalized_request: ticket }).select("id").single();
     if (insertError || !intake) return json({ error: insertError?.message ?? "unable to persist intake request" }, 500);
     requestId = intake.id as string;
   }
@@ -282,18 +305,24 @@ Deno.serve(async (request) => {
   await addEvent(admin, requestId, "ticket_received", { ticketNumber: ticket.ticketNumber });
 
   try {
-    const azure = await loadAzureInventory();
+    const azure = await loadAzureInventory(request.headers.get("authorization") ?? undefined);
     await admin.from("servicenow_intake_requests").update({ azure_observation: azure }).eq("id", requestId);
     await addEvent(admin, requestId, "azure_enrichment_completed", { state: azure.state, vmCount: azure.vms.length });
     const analysis = await analyzeWithGemini(ticket, azure);
     const validation = validate(ticket, analysis, azure);
     const note = clarificationNote(ticket, analysis, validation);
-    const draft = validation.ready ? await maybeCreateDraft(admin, ticket, analysis, validation.target) : null;
+    const draft = validation.ready ? await maybeCreateDraft(admin, ticket, analysis, validation.target, demoMode ? callerId : null) : null;
     const status = validation.ready ? "ready_for_engineering" : "needs_clarification";
     await admin.from("servicenow_intake_requests").update({ status, llm_analysis: { ...analysis, validation }, clarification_note: note, change_package_id: draft?.id ?? null, analyzed_at: new Date().toISOString(), error_message: null }).eq("id", requestId);
     await addEvent(admin, requestId, "llm_analysis_completed", { action: analysis.action, confidence: analysis.confidence, ready: validation.ready, missingCount: validation.missing.length, conflictCount: validation.conflicts.length });
-    await postCustomerComment(ticket, draft ? `${note}\n\nGoverned draft package created: ${draft.package_number}. Approval is still required.` : note);
-    await admin.from("servicenow_intake_requests").update({ status: "comment_posted" }).eq("id", requestId);
+    const finalNote = draft ? `${note}\n\nGoverned draft package created: ${draft.package_number}. Approval is still required.` : note;
+    if (demoMode) {
+      await admin.from("servicenow_intake_requests").update({ status: "demo_comment_generated", clarification_note: finalNote }).eq("id", requestId);
+      await addEvent(admin, requestId, "demo_customer_comment_generated", { field: "comments", simulated: true });
+      return json({ requestId, status: "demo_comment_generated", action: analysis.action, confidence: analysis.confidence, readyForEngineering: validation.ready, changePackageNumber: draft?.package_number ?? null, comment: finalNote });
+    }
+    await postCustomerComment(ticket, finalNote);
+    await admin.from("servicenow_intake_requests").update({ status: "comment_posted", clarification_note: finalNote }).eq("id", requestId);
     await addEvent(admin, requestId, "servicenow_customer_comment_posted", { field: "comments" });
     return json({ requestId, status: "comment_posted", action: analysis.action, confidence: analysis.confidence, readyForEngineering: validation.ready, changePackageNumber: draft?.package_number ?? null });
   } catch (error) {

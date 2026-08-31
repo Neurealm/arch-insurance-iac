@@ -73,6 +73,17 @@ not use `work_notes`, approve a request, or execute Azure actions. The ticket
 content is treated as untrusted data in the Gemini prompt, and the model output
 is validated before any status update or package handoff.
 
+## Client demonstration mode
+
+When a customer ServiceNow instance is not available, an authenticated user can
+submit a ServiceNow-shaped demo ticket from the Intake tab. The demo submission
+invokes the same Edge Function with `mode: "demo"`, uses the signed-in user's
+Azure control-plane authorization for live enrichment, calls Gemini, persists
+the request, and displays the generated `comments` text in the intake queue.
+Only the ServiceNow transport and external comment write-back are simulated;
+the ticket schema, LLM analysis, Azure facts, policy checks, audit trail, and
+optional draft package are the same as the webhook path.
+
 ## Related implementation
 
 The current VM workflow is implemented under `src/pages/agentic-iac/`. The future tab should feed complete requests into Change Engineering and should use the existing approval, execution, and Validation & Evidence flows.
