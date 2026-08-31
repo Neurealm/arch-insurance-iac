@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.17"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -4307,6 +4307,281 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_change_package_reviews: {
+        Row: {
+          comment: string | null
+          decision: string
+          id: string
+          package_id: string
+          reviewed_at: string
+          reviewed_by: string
+        }
+        Insert: {
+          comment?: string | null
+          decision: string
+          id?: string
+          package_id: string
+          reviewed_at?: string
+          reviewed_by: string
+        }
+        Update: {
+          comment?: string | null
+          decision?: string
+          id?: string
+          package_id?: string
+          reviewed_at?: string
+          reviewed_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_change_package_reviews_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: true
+            referencedRelation: "iac_change_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_change_packages: {
+        Row: {
+          action_label: string
+          action_type: string
+          approval_required: boolean
+          created_at: string
+          created_by: string
+          current_state: Json
+          executed_by: string | null
+          execution_completed_at: string | null
+          execution_message: string | null
+          execution_started_at: string | null
+          id: string
+          package_number: string
+          parameters: Json
+          policy_evidence: Json
+          rationale: string
+          region: string
+          resource_group: string
+          risk_level: string
+          risk_score: number
+          status: string
+          submitted_at: string | null
+          subscription_id: string
+          target_name: string
+          target_resource_id: string
+          updated_at: string
+          validation_plan: Json
+        }
+        Insert: {
+          action_label: string
+          action_type: string
+          approval_required?: boolean
+          created_at?: string
+          created_by?: string
+          current_state?: Json
+          executed_by?: string | null
+          execution_completed_at?: string | null
+          execution_message?: string | null
+          execution_started_at?: string | null
+          id?: string
+          package_number: string
+          parameters?: Json
+          policy_evidence?: Json
+          rationale: string
+          region: string
+          resource_group: string
+          risk_level: string
+          risk_score: number
+          status?: string
+          submitted_at?: string | null
+          subscription_id: string
+          target_name: string
+          target_resource_id: string
+          updated_at?: string
+          validation_plan?: Json
+        }
+        Update: {
+          action_label?: string
+          action_type?: string
+          approval_required?: boolean
+          created_at?: string
+          created_by?: string
+          current_state?: Json
+          executed_by?: string | null
+          execution_completed_at?: string | null
+          execution_message?: string | null
+          execution_started_at?: string | null
+          id?: string
+          package_number?: string
+          parameters?: Json
+          policy_evidence?: Json
+          rationale?: string
+          region?: string
+          resource_group?: string
+          risk_level?: string
+          risk_score?: number
+          status?: string
+          submitted_at?: string | null
+          subscription_id?: string
+          target_name?: string
+          target_resource_id?: string
+          updated_at?: string
+          validation_plan?: Json
+        }
+        Relationships: []
+      }
+      iac_evidence_items: {
+        Row: {
+          captured_at: string
+          content: Json
+          content_hash: string | null
+          id: string
+          kind: string
+          name: string
+          run_id: string
+          source: string
+        }
+        Insert: {
+          captured_at?: string
+          content?: Json
+          content_hash?: string | null
+          id?: string
+          kind: string
+          name: string
+          run_id: string
+          source: string
+        }
+        Update: {
+          captured_at?: string
+          content?: Json
+          content_hash?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          run_id?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_evidence_items_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "iac_validation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_validation_results: {
+        Row: {
+          check_code: string
+          checked_at: string
+          domain: string
+          expected: string
+          id: string
+          measure: string
+          observed: string
+          raw: Json
+          result: string
+          run_id: string
+          source: string
+        }
+        Insert: {
+          check_code: string
+          checked_at?: string
+          domain: string
+          expected: string
+          id?: string
+          measure: string
+          observed: string
+          raw?: Json
+          result: string
+          run_id: string
+          source: string
+        }
+        Update: {
+          check_code?: string
+          checked_at?: string
+          domain?: string
+          expected?: string
+          id?: string
+          measure?: string
+          observed?: string
+          raw?: Json
+          result?: string
+          run_id?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_validation_results_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "iac_validation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_validation_runs: {
+        Row: {
+          after_state: Json
+          before_state: Json
+          closed_at: string | null
+          completed_at: string | null
+          confidence: number | null
+          created_at: string
+          created_by: string
+          evidence_hash: string | null
+          id: string
+          package_id: string
+          started_at: string | null
+          status: string
+          summary: string | null
+          updated_at: string
+          validated_by: string | null
+        }
+        Insert: {
+          after_state?: Json
+          before_state?: Json
+          closed_at?: string | null
+          completed_at?: string | null
+          confidence?: number | null
+          created_at?: string
+          created_by?: string
+          evidence_hash?: string | null
+          id?: string
+          package_id: string
+          started_at?: string | null
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          validated_by?: string | null
+        }
+        Update: {
+          after_state?: Json
+          before_state?: Json
+          closed_at?: string | null
+          completed_at?: string | null
+          confidence?: number | null
+          created_at?: string
+          created_by?: string
+          evidence_hash?: string | null
+          id?: string
+          package_id?: string
+          started_at?: string | null
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_validation_runs_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: true
+            referencedRelation: "iac_change_packages"
             referencedColumns: ["id"]
           },
         ]
@@ -9956,6 +10231,43 @@ export type Database = {
         Args: { _action: string; _comment?: string; _version_id: string }
         Returns: Json
       }
+      begin_iac_vm_execution: {
+        Args: { p_package_id: string }
+        Returns: {
+          action_label: string
+          action_type: string
+          approval_required: boolean
+          created_at: string
+          created_by: string
+          current_state: Json
+          executed_by: string | null
+          execution_completed_at: string | null
+          execution_message: string | null
+          execution_started_at: string | null
+          id: string
+          package_number: string
+          parameters: Json
+          policy_evidence: Json
+          rationale: string
+          region: string
+          resource_group: string
+          risk_level: string
+          risk_score: number
+          status: string
+          submitted_at: string | null
+          subscription_id: string
+          target_name: string
+          target_resource_id: string
+          updated_at: string
+          validation_plan: Json
+        }
+        SetofOptions: {
+          from: "*"
+          to: "iac_change_packages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       bootstrap_commercial_workspace: { Args: never; Returns: Json }
       bootstrap_tenant_default_roles: {
         Args: { _actor: string; _tenant_id: string }
@@ -10361,6 +10673,43 @@ export type Database = {
         Args: { _scenario_id: string }
         Returns: Json
       }
+      complete_iac_vm_execution: {
+        Args: { p_message: string; p_package_id: string; p_success: boolean }
+        Returns: {
+          action_label: string
+          action_type: string
+          approval_required: boolean
+          created_at: string
+          created_by: string
+          current_state: Json
+          executed_by: string | null
+          execution_completed_at: string | null
+          execution_message: string | null
+          execution_started_at: string | null
+          id: string
+          package_number: string
+          parameters: Json
+          policy_evidence: Json
+          rationale: string
+          region: string
+          resource_group: string
+          risk_level: string
+          risk_score: number
+          status: string
+          submitted_at: string | null
+          subscription_id: string
+          target_name: string
+          target_resource_id: string
+          updated_at: string
+          validation_plan: Json
+        }
+        SetofOptions: {
+          from: "*"
+          to: "iac_change_packages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       count_active_tenant_admins: {
         Args: { _exclude_membership?: string; _tenant_id: string }
         Returns: number
@@ -10759,6 +11108,23 @@ export type Database = {
       resend_invitation: {
         Args: { _expires_in_days?: number; _invitation_id: string }
         Returns: Json
+      }
+      review_iac_change_package: {
+        Args: { p_comment?: string; p_decision: string; p_package_id: string }
+        Returns: {
+          comment: string | null
+          decision: string
+          id: string
+          package_id: string
+          reviewed_at: string
+          reviewed_by: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "iac_change_package_reviews"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       runops_advance_scenario: {
         Args: { _actor: string; _scenario_id: string }
