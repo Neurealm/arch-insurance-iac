@@ -1,0 +1,6 @@
+# Non-secret example only. The runner supplies the real values at runtime.
+resource_group_name  = "replace-with-state-resource-group"
+storage_account_name = "replacewithstateaccount"
+container_name       = "terraform-state"
+key                  = "pilot/vm-operations.tfstate"
+use_azuread_auth     = true

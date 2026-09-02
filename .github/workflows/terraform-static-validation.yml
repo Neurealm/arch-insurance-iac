@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "terraform/**"
+      - "runner/**"
       - "supabase/functions/terraform-orchestrator/**"
       - "supabase/migrations/*terraform*"
       - ".github/workflows/terraform-static-validation.yml"
@@ -23,6 +24,11 @@ jobs:
           terraform_version: "1.16.1"
       - name: Formatting
         run: terraform fmt -check -recursive terraform
+      - name: Validate pilot backend configuration
+        working-directory: terraform/environments/pilot
+        run: terraform init -backend=false && terraform validate
+      - name: Validate runner job contract
+        run: jq empty runner/contracts/terraform-job.schema.json
       - name: Validate VM action module
         working-directory: terraform/modules/vm-action
         run: terraform init -backend=false && terraform validate
