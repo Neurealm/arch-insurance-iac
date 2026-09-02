@@ -2,6 +2,7 @@ import type { AzureVirtualMachine } from "./azureControlPlane";
 
 export type IntakeAction =
   | "start_vm"
+  | "stop_vm"
   | "restart_vm"
   | "resize_vm"
   | "increase_os_disk"
@@ -43,6 +44,7 @@ export type TriageResult = {
 
 const ACTION_LABELS: Record<IntakeAction, string> = {
   start_vm: "Start Azure VM",
+  stop_vm: "Stop Azure VM",
   restart_vm: "Restart Azure VM",
   resize_vm: "Change VM size",
   increase_os_disk: "Increase OS disk capacity",
@@ -56,6 +58,7 @@ const ACTION_LABELS: Record<IntakeAction, string> = {
 const ACTION_RULES: Array<{ action: IntakeAction; terms: string[] }> = [
   { action: "restart_vm", terms: ["restart", "reboot", "re-boot", "cycle the vm", "cycle vm"] },
   { action: "start_vm", terms: ["start the vm", "start vm", "power on", "turn on", "boot the vm"] },
+  { action: "stop_vm", terms: ["stop the vm", "stop vm", "power off", "turn off", "deallocate"] },
   { action: "resize_vm", terms: ["resize", "vm size", "sku", "scale up", "scale down", "change capacity"] },
   { action: "increase_os_disk", terms: ["os disk", "disk size", "disk capacity", "storage expansion", "expand disk", "increase disk"] },
   { action: "configure_backup", terms: ["backup", "recovery vault", "backup protection"] },
@@ -140,6 +143,7 @@ export function analyzeServiceNowRequest(input: TriageInput): TriageResult {
   if (classification.action === "create_vm" && !/\b(subscription|resource group|region|eastus|westus|size|sku|image|subnet|network)\b/i.test(text)) missing.push("Subscription, resource group, region, size, image, and network requirements");
 
   if (target && classification.action === "start_vm" && /running/i.test(target.powerState)) conflicts.push("The selected VM is already running; confirm that a start operation is still required.");
+  if (target && classification.action === "stop_vm" && !/running/i.test(target.powerState)) conflicts.push("The selected VM is not running; confirm that a stop operation is required.");
   if (target && classification.action === "restart_vm" && !/running/i.test(target.powerState)) conflicts.push("Restart normally requires a running VM; confirm the requested state or use Start Azure VM.");
   if (classification.action === "create_vm") conflicts.push("VM creation is triage-only in this pilot; an approved provisioning workflow is not configured yet.");
 

@@ -12,6 +12,20 @@ dist
 dist-ssr
 *.local
 
+# Environment and credentials
+.env
+.env.*
+!.env.example
+
+# Terraform local state and plans
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+.terraform.lock.hcl
+crash.log
+crash.*.log
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,0 +1,31 @@
+name: Terraform static validation
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+      - "supabase/functions/terraform-orchestrator/**"
+      - "supabase/migrations/*terraform*"
+      - ".github/workflows/terraform-static-validation.yml"
+  push:
+    branches: [main]
+    paths: ["terraform/**"]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.16.1"
+      - name: Formatting
+        run: terraform fmt -check -recursive terraform
+      - name: Validate VM action module
+        working-directory: terraform/modules/vm-action
+        run: terraform init -backend=false && terraform validate
+      - name: Validate VM resize module
+        working-directory: terraform/modules/vm-resize
+        run: terraform init -backend=false && terraform validate
