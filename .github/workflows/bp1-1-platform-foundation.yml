@@ -8,6 +8,7 @@ on:
       - "terraform/**"
       - "docs/bp1-1-*.md"
       - "docs/bp1.1-*.md"
+      - "scripts/validate-bp1-1.sh"
       - ".github/workflows/bp1-1-platform-foundation.yml"
       - "package.json"
       - "bun.lockb"
@@ -53,6 +54,7 @@ jobs:
           --health-cmd="pg_isready -U postgres"
           --health-interval=10s --health-timeout=5s --health-retries=10
     env:
+      # Local Supabase Postgres — never a shared or production DB.
       PGPASSWORD: postgres
       DB_URL: postgres://postgres:postgres@localhost:5432/postgres
     steps:
