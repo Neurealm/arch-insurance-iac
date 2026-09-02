@@ -43,18 +43,26 @@ jobs:
   database:
     name: BP1.1 SQL regression (disposable DB)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:15.6.1.115
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s --health-timeout=5s --health-retries=10
     env:
-      # Supabase CLI's isolated local database — never a shared or production DB.
+      # Local Supabase Postgres — never a shared or production DB.
       PGPASSWORD: postgres
-      DB_URL: postgres://postgres:postgres@127.0.0.1:54322/postgres
+      DB_URL: postgres://postgres:postgres@localhost:5432/postgres
     steps:
       - uses: actions/checkout@v4
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
-      - name: Start disposable Supabase database
-        run: supabase db start
       - name: Apply migrations to disposable DB
         run: |
           set -euo pipefail
@@ -72,8 +80,30 @@ jobs:
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/bp1_1_invitations.sql
       - name: Last-administrator
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/bp1_1_last_admin.sql
-      - name: Terraform governance
+
+  terraform-governance:
+    name: Terraform governance SQL
+    runs-on: ubuntu-latest
+    env:
+      PGPASSWORD: postgres
+      DB_URL: postgres://postgres:postgres@127.0.0.1:54322/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start clean Supabase database
+        run: |
+          mv supabase/migrations supabase/project-migrations
+          mkdir supabase/migrations
+          supabase db start
+      - name: Apply governance contract and migration
+        run: |
+          psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/tests/fixtures/iac_terraform_governance_baseline.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260902190000_add_terraform_automation_governance.sql
+      - name: Verify Terraform governance
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/iac_terraform_governance.sql
-      - name: Stop disposable Supabase database
+      - name: Stop clean Supabase database
         if: always()
         run: supabase stop --no-backup
