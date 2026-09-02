@@ -114,16 +114,19 @@ async function authenticatedCaller(request: Request) {
   const authorization = request.headers.get("authorization") ?? "";
   if (!authorization.startsWith("Bearer ")) return null;
   const url = Deno.env.get("SUPABASE_URL");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? (() => {
-    try { return JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}").default; } catch { return undefined; }
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => {
+    try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default; } catch { return undefined; }
   })();
-  if (!url || !anonKey) throw new Error("Supabase public credentials are not configured.");
-  const userClient = createClient(url, anonKey, { global: { headers: { authorization } } });
+  if (!url || !serviceRoleKey) throw new Error("Supabase server credentials are not configured.");
+
+  // Validate the caller with the service-role client. This avoids relying on
+  // the anon-key/JWKS path, which can reject otherwise valid brokered preview
+  // sessions while still preserving normal Supabase token validation.
+  const admin = createClient(url, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } });
   const token = authorization.slice("Bearer ".length);
-  const { data, error } = await userClient.auth.getClaims(token);
-  const userId = data?.claims?.sub as string | undefined;
-  if (error || !userId) return null;
-  return userId;
+  const { data, error } = await admin.auth.getUser(token);
+  if (error || !data.user) return null;
+  return data.user.id;
 }
 
 async function addEvent(admin: ReturnType<typeof supabaseAdmin>, requestId: string, eventType: string, detail: RecordValue = {}) {
