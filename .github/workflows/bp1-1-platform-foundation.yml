@@ -63,6 +63,15 @@ jobs:
         uses: supabase/setup-cli@v1
         with:
           version: latest
+      - name: Align disposable Storage schema
+        run: |
+          # The pinned Postgres test image predates storage.buckets.public,
+          # which is present in deployed Supabase projects and used by an
+          # existing avatar migration.
+          psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          alter table storage.buckets
+            add column if not exists public boolean not null default false;
+          SQL
       - name: Apply migrations to disposable DB
         run: |
           set -euo pipefail
