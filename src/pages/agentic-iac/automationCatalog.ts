@@ -1,3 +1,5 @@
+/* The generated database types do not include this pending migration yet. */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { supabase } from "@/integrations/supabase/client";
 
 export type AutomationCapability = {
