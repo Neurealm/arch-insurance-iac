@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neurealm.example/contracts/terraform-job.schema.json",
+  "title": "Governed Terraform runner job",
+  "type": "object",
+  "required": [
+    "operation",
+    "runId",
+    "correlationId",
+    "packageId",
+    "moduleSource",
+    "moduleVersion",
+    "inputs",
+    "environment",
+    "callbackUrl",
+    "callbackSecret"
+  ],
+  "properties": {
+    "operation": {
+      "enum": [
+        "plan",
+        "apply"
+      ]
+    },
+    "runId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "packageId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "planRunId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "moduleSource": {
+      "type": "string",
+      "pattern": "^terraform/modules/[a-z0-9_-]+$"
+    },
+    "moduleVersion": {
+      "type": "string",
+      "pattern": "^v[0-9]+\\\\.[0-9]+\\\\.[0-9]+$"
+    },
+    "inputs": {
+      "type": "object",
+      "required": [
+        "target_resource_id",
+        "change_request_id"
+      ],
+      "properties": {
+        "target_resource_id": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\\\.Compute/virtualMachines/[^/]+$"
+        },
+        "change_request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "action": {
+          "enum": [
+            "start",
+            "powerOff",
+            "deallocate",
+            "restart"
+          ]
+        },
+        "requested_vm_size": {
+          "type": "string",
+          "pattern": "^Standard_[A-Za-z0-9_]+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "environment": {
+      "enum": [
+        "development",
+        "pre-production",
+        "production"
+      ]
+    },
+    "artifactUri": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "planSha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "callbackUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "callbackSecret": {
+      "type": "string",
+      "minLength": 32
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "apply"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "planRunId",
+          "artifactUri",
+          "planSha256"
+        ]
+      }
+    }
+  ],
+  "additionalProperties": false
+}

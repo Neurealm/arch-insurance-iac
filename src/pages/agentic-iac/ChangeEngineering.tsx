@@ -5,12 +5,14 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, type AzureVirtualMachine, type AzureVmOperations } from "./azureControlPlane";
 import { listVmChangePackages, saveVmChangePackage, type VmChangePackage } from "./changePackages";
+import { createTerraformPlan } from "./automationCatalog";
 
-type ActionId = "start_vm" | "restart_vm" | "resize_vm" | "increase_os_disk" | "configure_backup" | "enable_monitoring" | "assess_patches";
+type ActionId = "start_vm" | "stop_vm" | "restart_vm" | "resize_vm" | "increase_os_disk" | "configure_backup" | "enable_monitoring" | "assess_patches";
 type ActionDefinition = { id: ActionId; label: string; description: string; category: string; requiresValue?: "vmSize" | "diskSize" };
 
 const ACTIONS: ActionDefinition[] = [
   { id: "start_vm", label: "Start virtual machine", description: "Request a start for a deallocated VM after confirming it is intended to run.", category: "Power" },
+  { id: "stop_vm", label: "Stop virtual machine", description: "Request a controlled power-off with pre- and post-change validation.", category: "Power" },
   { id: "restart_vm", label: "Restart virtual machine", description: "Request a controlled restart with pre- and post-change validation.", category: "Power" },
   { id: "resize_vm", label: "Change VM size", description: "Request a new Azure VM SKU. Capacity and regional availability must be validated before approval.", category: "Compute", requiresValue: "vmSize" },
   { id: "increase_os_disk", label: "Increase OS disk capacity", description: "Request a larger managed OS disk. Azure disk capacity cannot be reduced after expansion.", category: "Storage", requiresValue: "diskSize" },
@@ -126,6 +128,7 @@ function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmRe
   const isActionAvailable = (action: ActionDefinition) => {
     if (!operations) return { enabled: false, note: "Loading Azure state" };
     if (action.id === "start_vm" && /running/i.test(selectedVm?.powerState ?? "")) return { enabled: false, note: "VM is already running" };
+    if (action.id === "stop_vm" && !/running/i.test(selectedVm?.powerState ?? "")) return { enabled: false, note: "VM must be running" };
     if (action.id === "restart_vm" && !/running/i.test(selectedVm?.powerState ?? "")) return { enabled: false, note: "VM must be running" };
     if (action.id === "increase_os_disk" && !operations.configuration.osDisk.sizeGB) return { enabled: false, note: "OS disk capacity unavailable" };
     return { enabled: true, note: "Eligible for package creation" };
@@ -178,7 +181,17 @@ function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmRe
     try {
       const saved = await saveVmChangePackage(packageInput(status), activePackage?.id);
       setActivePackage(saved); setPackages((items) => [saved, ...items.filter((item) => item.id !== saved.id)]);
-      setMessage(status === "submitted" ? `${saved.packageNumber} submitted for governed approval. No Azure action has been executed.` : `${saved.packageNumber} saved as a durable draft.`);
+      if (status === "submitted") {
+        try {
+          await createTerraformPlan(saved.id);
+          setMessage(`${saved.packageNumber} submitted and its governed Terraform plan was queued. No Azure action has been executed.`);
+        } catch (planCause) {
+          setMessage(`${saved.packageNumber} was submitted, but it cannot be approved until Terraform planning succeeds.`);
+          setError(planCause instanceof Error ? `Terraform plan was not queued: ${planCause.message}` : "Terraform plan was not queued.");
+        }
+      } else {
+        setMessage(`${saved.packageNumber} saved as a durable draft.`);
+      }
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to save the change package."); }
     finally { setSaving(false); }
   };

@@ -4,3 +4,9 @@ project_id = "esfpbiishpkvhlejnxzq"
 # its own shared-secret verification before accepting the webhook payload.
 [functions.servicenow-intake]
 verify_jwt = false
+
+# User calls are validated inside the function and runner callbacks use a
+# dedicated secret. Gateway JWT verification would reject legitimate runner
+# callbacks before the function can validate them.
+[functions.terraform-orchestrator]
+verify_jwt = false
