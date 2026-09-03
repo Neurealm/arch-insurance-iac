@@ -8,6 +8,7 @@ on:
       - "supabase/functions/terraform-orchestrator/**"
       - "supabase/migrations/*terraform*"
       - ".github/workflows/terraform-static-validation.yml"
+      - ".github/workflows/hcp-terraform-authentication-test.yml"
   push:
     branches: [main]
     paths: ["terraform/**"]
@@ -26,6 +27,9 @@ jobs:
         run: terraform fmt -check -recursive terraform
       - name: Validate pilot backend configuration
         working-directory: terraform/environments/pilot
+        run: terraform init -backend=false && terraform validate
+      - name: Validate HCP authentication check
+        working-directory: terraform/hcp/authentication-check
         run: terraform init -backend=false && terraform validate
       - name: Validate runner job contract
         run: jq empty runner/contracts/terraform-job.schema.json
