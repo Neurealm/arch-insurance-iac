@@ -22,8 +22,3 @@ output "target_resource_id" {
   description = "The VM Azure Resource Manager ID resolved by the OIDC-authenticated plan."
   value       = data.azurerm_virtual_machine.target.id
 }
-
-output "vm_size" {
-  description = "Current size, read only for authentication verification."
-  value       = data.azurerm_virtual_machine.target.size
-}
