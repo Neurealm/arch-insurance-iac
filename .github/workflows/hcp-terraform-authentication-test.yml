@@ -3,8 +3,8 @@ name: HCP Terraform Azure OIDC authentication test
 on:
   workflow_dispatch:
     inputs:
-      workspace_id:
-        description: HCP Terraform development workspace ID (starts with ws-)
+      workspace_name:
+        description: HCP Terraform development workspace name
         required: true
         type: string
       resource_group_name:
@@ -26,7 +26,8 @@ jobs:
     timeout-minutes: 15
     env:
       HCP_TERRAFORM_TOKEN: ${{ secrets.HCP_TERRAFORM_PLAN_TOKEN }}
-      HCP_TERRAFORM_WORKSPACE_ID: ${{ inputs.workspace_id }}
+      HCP_TERRAFORM_ORGANIZATION: Arch-Neugain
+      HCP_TERRAFORM_WORKSPACE_NAME: ${{ inputs.workspace_name }}
       RESOURCE_GROUP_NAME: ${{ inputs.resource_group_name }}
       VM_NAME: ${{ inputs.vm_name }}
       HCP_TERRAFORM_HOSTNAME: app.terraform.io
@@ -40,8 +41,8 @@ jobs:
             echo "Repository secret HCP_TERRAFORM_PLAN_TOKEN is required."
             exit 1
           fi
-          if [[ ! "$HCP_TERRAFORM_WORKSPACE_ID" =~ ^ws- ]]; then
-            echo "workspace_id must be an HCP Terraform workspace ID starting with ws-."
+          if [[ ! "$HCP_TERRAFORM_WORKSPACE_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]]; then
+            echo "workspace_name must contain only letters, numbers, hyphens, or underscores."
             exit 1
           fi
 
@@ -61,9 +62,17 @@ jobs:
           api="https://$HCP_TERRAFORM_HOSTNAME/api/v2"
           headers=(-H "Authorization: Bearer $HCP_TERRAFORM_TOKEN" -H "Content-Type: application/vnd.api+json")
 
+          workspace=$(curl --fail-with-body --silent --show-error "${headers[@]}" \
+            "$api/organizations/$HCP_TERRAFORM_ORGANIZATION/workspaces/$HCP_TERRAFORM_WORKSPACE_NAME")
+          workspace_id=$(jq -r '.data.id' <<<"$workspace")
+          if [[ ! "$workspace_id" =~ ^ws- ]]; then
+            echo "HCP Terraform workspace lookup did not return a workspace ID."
+            exit 1
+          fi
+
           configuration=$(curl --fail-with-body --silent --show-error --request POST "${headers[@]}" \
             --data '{"data":{"type":"configuration-versions","attributes":{"auto-queue-runs":false}}}' \
-            "$api/workspaces/$HCP_TERRAFORM_WORKSPACE_ID/configuration-versions")
+            "$api/workspaces/$workspace_id/configuration-versions")
           upload_url=$(jq -r '.data.attributes["upload-url"]' <<<"$configuration")
           configuration_id=$(jq -r '.data.id' <<<"$configuration")
           test -n "$upload_url" && test "$upload_url" != "null"
@@ -84,7 +93,7 @@ jobs:
           test "$status" = "uploaded"
 
           variables=$(jq -cn --arg rg "$RESOURCE_GROUP_NAME" --arg vm "$VM_NAME" '[            {key:"resource_group_name",value:("\"" + $rg + "\"")},            {key:"vm_name",value:("\"" + $vm + "\"")}          ]')
-          payload=$(jq -cn --arg workspace "$HCP_TERRAFORM_WORKSPACE_ID" --arg configuration "$configuration_id" --argjson variables "$variables" '{data:{type:"runs",attributes:{"plan-only":true,"auto-apply":false,message:"Read-only Azure OIDC authentication test",variables:$variables},relationships:{workspace:{data:{type:"workspaces",id:$workspace}}, "configuration-version":{data:{type:"configuration-versions",id:$configuration}}}}}')
+          payload=$(jq -cn --arg workspace "$workspace_id" --arg configuration "$configuration_id" --argjson variables "$variables" '{data:{type:"runs",attributes:{"plan-only":true,"auto-apply":false,message:"Read-only Azure OIDC authentication test",variables:$variables},relationships:{workspace:{data:{type:"workspaces",id:$workspace}}, "configuration-version":{data:{type:"configuration-versions",id:$configuration}}}}}')
           run=$(curl --fail-with-body --silent --show-error --request POST "${headers[@]}" --data "$payload" "$api/runs")
           run_id=$(jq -r '.data.id' <<<"$run")
           test -n "$run_id" && test "$run_id" != "null"
