@@ -11,6 +11,11 @@ terraform {
 
 provider "azurerm" {
   features {}
+
+  # The pilot identity is intentionally scoped to a resource group. Provider
+  # registration requires subscription-level permissions and is not needed for
+  # this read-only VM lookup.
+  resource_provider_registrations = "none"
 }
 
 data "azurerm_virtual_machine" "target" {
