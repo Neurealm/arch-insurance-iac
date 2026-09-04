@@ -1,0 +1,128 @@
+name: HCP Terraform Azure OIDC authentication test
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_name:
+        description: HCP Terraform development workspace name
+        required: true
+        type: string
+      resource_group_name:
+        description: Resource group containing the existing pilot VM
+        required: true
+        type: string
+      vm_name:
+        description: Existing pilot VM name to read
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  plan-only-authentication-test:
+    name: Plan-only Azure authentication test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HCP_TERRAFORM_TOKEN: ${{ secrets.HCP_TERRAFORM_PLAN_TOKEN }}
+      HCP_TERRAFORM_ORGANIZATION: Arch-Neugain
+      HCP_TERRAFORM_WORKSPACE_NAME: ${{ inputs.workspace_name }}
+      RESOURCE_GROUP_NAME: ${{ inputs.resource_group_name }}
+      VM_NAME: ${{ inputs.vm_name }}
+      HCP_TERRAFORM_HOSTNAME: app.terraform.io
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm required secret
+        shell: bash
+        run: |
+          if [ -z "$HCP_TERRAFORM_TOKEN" ]; then
+            echo "Repository secret HCP_TERRAFORM_PLAN_TOKEN is required."
+            exit 1
+          fi
+          if [[ ! "$HCP_TERRAFORM_WORKSPACE_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]]; then
+            echo "workspace_name must contain only letters, numbers, hyphens, or underscores."
+            exit 1
+          fi
+
+      - name: Build read-only Terraform configuration archive
+        shell: bash
+        run: |
+          mkdir -p .hcp-auth-test
+          cp terraform/hcp/authentication-check/*.tf .hcp-auth-test/
+          tar --sort=name --owner=0 --group=0 --numeric-owner -czf hcp-authentication-check.tar.gz -C .hcp-auth-test .
+          sha256sum hcp-authentication-check.tar.gz
+
+      - name: Upload configuration and queue plan-only run
+        id: queue
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://$HCP_TERRAFORM_HOSTNAME/api/v2"
+          headers=(-H "Authorization: Bearer $HCP_TERRAFORM_TOKEN" -H "Content-Type: application/vnd.api+json")
+
+          workspace=$(curl --fail-with-body --silent --show-error "${headers[@]}" \
+            "$api/organizations/$HCP_TERRAFORM_ORGANIZATION/workspaces/$HCP_TERRAFORM_WORKSPACE_NAME")
+          workspace_id=$(jq -r '.data.id' <<<"$workspace")
+          if [[ ! "$workspace_id" =~ ^ws- ]]; then
+            echo "HCP Terraform workspace lookup did not return a workspace ID."
+            exit 1
+          fi
+
+          configuration=$(curl --fail-with-body --silent --show-error --request POST "${headers[@]}" \
+            --data '{"data":{"type":"configuration-versions","attributes":{"auto-queue-runs":false}}}' \
+            "$api/workspaces/$workspace_id/configuration-versions")
+          upload_url=$(jq -r '.data.attributes["upload-url"]' <<<"$configuration")
+          configuration_id=$(jq -r '.data.id' <<<"$configuration")
+          test -n "$upload_url" && test "$upload_url" != "null"
+          curl --fail-with-body --silent --show-error --request PUT \
+            --header "Content-Type: application/octet-stream" \
+            --upload-file hcp-authentication-check.tar.gz "$upload_url"
+
+          for attempt in {1..30}; do
+            configuration=$(curl --fail-with-body --silent --show-error "${headers[@]}" "$api/configuration-versions/$configuration_id")
+            status=$(jq -r '.data.attributes.status' <<<"$configuration")
+            if [ "$status" = "uploaded" ]; then break; fi
+            if [ "$status" = "errored" ]; then
+              jq -r '.data.attributes["error-message"] // "HCP configuration upload failed."' <<<"$configuration"
+              exit 1
+            fi
+            sleep 2
+          done
+          test "$status" = "uploaded"
+
+          variables=$(jq -cn --arg rg "$RESOURCE_GROUP_NAME" --arg vm "$VM_NAME" '[            {key:"resource_group_name",value:("\"" + $rg + "\"")},            {key:"vm_name",value:("\"" + $vm + "\"")}          ]')
+          payload=$(jq -cn --arg workspace "$workspace_id" --arg configuration "$configuration_id" --argjson variables "$variables" '{data:{type:"runs",attributes:{"plan-only":true,"auto-apply":false,message:"Read-only Azure OIDC authentication test",variables:$variables},relationships:{workspace:{data:{type:"workspaces",id:$workspace}}, "configuration-version":{data:{type:"configuration-versions",id:$configuration}}}}}')
+          run=$(curl --fail-with-body --silent --show-error --request POST "${headers[@]}" --data "$payload" "$api/runs")
+          run_id=$(jq -r '.data.id' <<<"$run")
+          test -n "$run_id" && test "$run_id" != "null"
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for plan-only result
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://$HCP_TERRAFORM_HOSTNAME/api/v2"
+          run_id="${{ steps.queue.outputs.run_id }}"
+          for attempt in {1..120}; do
+            run=$(curl --fail-with-body --silent --show-error \
+              -H "Authorization: Bearer $HCP_TERRAFORM_TOKEN" \
+              -H "Content-Type: application/vnd.api+json" \
+              "$api/runs/$run_id")
+            status=$(jq -r '.data.attributes.status' <<<"$run")
+            echo "HCP Terraform run status: $status"
+            case "$status" in
+              planned_and_finished)
+                echo "Read-only HCP Terraform Azure authentication test passed."
+                exit 0
+                ;;
+              errored|canceled|force_canceled|discarded|policy_soft_failed)
+                jq -c '.data.attributes' <<<"$run"
+                exit 1
+                ;;
+            esac
+            sleep 5
+          done
+          echo "Timed out waiting for HCP Terraform run $run_id."
+          exit 1
