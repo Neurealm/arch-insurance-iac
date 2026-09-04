@@ -1,7 +1,20 @@
 
-insert into storage.buckets (id, name, public)
-values ('avatars', 'avatars', true)
-on conflict (id) do nothing;
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'storage' and table_name = 'buckets' and column_name = 'public'
+  ) then
+    insert into storage.buckets (id, name, public)
+    values ('avatars', 'avatars', true)
+    on conflict (id) do nothing;
+  else
+    insert into storage.buckets (id, name)
+    values ('avatars', 'avatars')
+    on conflict (id) do nothing;
+  end if;
+end;
+$$;
 
 create policy "Avatars are publicly readable"
 on storage.objects for select
