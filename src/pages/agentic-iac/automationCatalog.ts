@@ -15,6 +15,9 @@ export type TerraformRun = {
   moduleSource: string; moduleVersion: string; planSha256: string | null;
   planSummary: Record<string, unknown>; reconciliation: Record<string, unknown>;
   hasDestroy: boolean; hasReplace: boolean; errorMessage: string | null; createdAt: string;
+  executionEngine: "legacy_runner" | "hcp_terraform";
+  hcpOrganization: string | null; hcpWorkspaceName: string | null; hcpRunId: string | null;
+  hcpPlanId: string | null; hcpRunStatus: string | null; sourceRevision: string | null;
 };
 
 const db = () => supabase as unknown as { from: (name: string) => any };
@@ -30,6 +33,9 @@ const mapRun = (row: Record<string, any>): TerraformRun => ({
   moduleSource: row.module_source, moduleVersion: row.module_version, planSha256: row.plan_sha256 ?? null,
   planSummary: row.plan_summary ?? {}, reconciliation: row.reconciliation ?? {}, hasDestroy: row.has_destroy,
   hasReplace: row.has_replace, errorMessage: row.error_message ?? null, createdAt: row.created_at,
+  executionEngine: row.execution_engine ?? "legacy_runner", hcpOrganization: row.hcp_organization ?? null,
+  hcpWorkspaceName: row.hcp_workspace_name ?? null, hcpRunId: row.hcp_run_id ?? null,
+  hcpPlanId: row.hcp_plan_id ?? null, hcpRunStatus: row.hcp_run_status ?? null, sourceRevision: row.source_revision ?? null,
 });
 
 export async function listApprovedVmCapabilities() {
@@ -46,7 +52,7 @@ export async function listTerraformRuns(packageId: string) {
   return (data ?? []).map(mapRun);
 }
 
-async function invoke(operation: "resolve" | "plan" | "apply", packageId: string) {
+async function invoke(operation: "resolve" | "plan" | "apply" | "sync", packageId: string) {
   const { data, error } = await supabase.functions.invoke("terraform-orchestrator", { body: { operation, packageId } });
   if (error) throw error;
   return data as Record<string, unknown>;
@@ -55,3 +61,4 @@ async function invoke(operation: "resolve" | "plan" | "apply", packageId: string
 export const resolveTerraformCapability = (packageId: string) => invoke("resolve", packageId);
 export const createTerraformPlan = (packageId: string) => invoke("plan", packageId);
 export const applyApprovedTerraformPlan = (packageId: string) => invoke("apply", packageId);
+export const syncTerraformRuns = (packageId: string) => invoke("sync", packageId);

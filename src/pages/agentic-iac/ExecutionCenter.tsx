@@ -15,7 +15,6 @@ import {
 import { cn } from "@/lib/utils";
 import {
   AzureControlPlaneError,
-  executeApprovedVmChangePackage,
   getAzureVmOperations,
   listAzureVirtualMachines,
   type AzureVirtualMachine,
@@ -29,6 +28,7 @@ import {
   type VmChangePackage,
   type VmChangePackageReview,
 } from "./changePackages";
+import { applyApprovedTerraformPlan, listTerraformRuns, syncTerraformRuns, type TerraformRun } from "./automationCatalog";
 
 const STATUS_STYLE: Record<ChangePackageStatus, string> = {
   draft: "border-slate-200 bg-slate-50 text-slate-700",
@@ -148,6 +148,7 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
   const [reviews, setReviews] = useState<VmChangePackageReview[]>([]);
   const [vms, setVms] = useState<AzureVirtualMachine[]>([]);
   const [operations, setOperations] = useState<AzureVmOperations | null>(null);
+  const [terraformRuns, setTerraformRuns] = useState<TerraformRun[]>([]);
   const [loading, setLoading] = useState(true);
   const [executing, setExecuting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -155,8 +156,10 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
   const load = useCallback(async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
     try {
-      const [nextPackage, azureVms] = await Promise.all([getVmChangePackage(packageReference), listAzureVirtualMachines()]);
+      await syncTerraformRuns(packageReference).catch(() => undefined);
+      const [nextPackage, azureVms, runs] = await Promise.all([getVmChangePackage(packageReference), listAzureVirtualMachines(), listTerraformRuns(packageReference)]);
       setPkg(nextPackage); setVms(azureVms);
+      setTerraformRuns(runs);
       setReviews(nextPackage ? await listVmChangePackageReviews(nextPackage.id) : []);
       setError(null);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to load this change package."); }
@@ -177,7 +180,8 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
   }, [load, pkg?.status]);
 
   const readiness = pkg ? executionReadiness(pkg, vm) : undefined;
-  const canExecute = Boolean(pkg && pkg.status === "approved" && readiness?.state === "ready");
+  const savedPlan = useMemo(() => terraformRuns.find((run) => run.runType === "plan" && run.executionEngine === "hcp_terraform" && run.status === "succeeded") ?? null, [terraformRuns]);
+  const canExecute = Boolean(pkg && pkg.status === "approved" && savedPlan);
   const preflightSteps = [
     {
       title: "Confirm the target VM",
@@ -190,9 +194,9 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
       state: pkg.status === "approved" || pkg.status === "executing" || pkg.status === "executed" ? "complete" : "blocked",
     },
     {
-      title: "Validate the Azure action",
-      detail: pkg.actionType === "start_vm" ? "This package uses the supported, package-bound Azure VM start workflow." : "No controlled Azure execution workflow is configured for this action.",
-      state: pkg.actionType === "start_vm" ? "complete" : "blocked",
+      title: "Validate the HCP saved plan",
+      detail: savedPlan ? `HCP plan ${savedPlan.hcpRunId} passed the exact-target boundary check.` : "A successful HCP Terraform saved plan is required before execution.",
+      state: savedPlan ? "complete" : "blocked",
     },
     {
       title: "Check current VM state",
@@ -209,8 +213,8 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
   const execute = async () => {
     if (!pkg || !canExecute) return;
     setExecuting(true); setError(null);
-    try { await executeApprovedVmChangePackage(pkg.id); await load(false); }
-    catch (cause) { setError(cause instanceof AzureControlPlaneError ? cause.message : cause instanceof Error ? cause.message : "Execution could not be started."); await load(false); }
+    try { await applyApprovedTerraformPlan(pkg.id); await load(false); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "HCP Terraform execution could not be started."); await load(false); }
     finally { setExecuting(false); }
   };
   const events = useMemo(() => {
@@ -218,8 +222,8 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
     return [
       { label: "Package submitted", time: pkg.submittedAt, detail: `Submitted by ${pkg.createdBy || "the requestor"}.`, tone: "info" as const },
       ...reviews.map((review) => ({ label: `Review ${review.decision.replace(/_/g, " ")}`, time: review.reviewedAt, detail: `${review.reviewedBy || "Reviewer"}: ${review.comment || "No comment recorded."}`, tone: review.decision === "approved" ? "ok" as const : "bad" as const })),
-      ...(pkg.executionStartedAt ? [{ label: "Azure execution started", time: pkg.executionStartedAt, detail: "The approved, package-bound Azure VM action was requested.", tone: "info" as const }] : []),
-      ...(pkg.executionCompletedAt ? [{ label: pkg.status === "executed" ? "Azure execution completed" : "Azure execution failed", time: pkg.executionCompletedAt, detail: pkg.executionMessage || "No completion message was recorded.", tone: pkg.status === "executed" ? "ok" as const : "bad" as const }] : []),
+      ...(pkg.executionStartedAt ? [{ label: "HCP Terraform apply requested", time: pkg.executionStartedAt, detail: "The exact approved saved plan was submitted to HCP Terraform.", tone: "info" as const }] : []),
+      ...(pkg.executionCompletedAt ? [{ label: pkg.status === "executed" ? "HCP Terraform apply completed" : "HCP Terraform apply failed", time: pkg.executionCompletedAt, detail: pkg.executionMessage || "No completion message was recorded.", tone: pkg.status === "executed" ? "ok" as const : "bad" as const }] : []),
     ];
   }, [pkg, reviews]);
 
@@ -235,8 +239,8 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
     </Panel>
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
       <div className="space-y-4">
-        <Panel title="Execution preflight"><div className={cn("rounded-lg border p-4", readiness?.state === "ready" ? "border-emerald-200 bg-emerald-50" : readiness?.state === "blocked" ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50")}><div className="flex gap-3"><AlertTriangle className={cn("mt-0.5 h-5 w-5 shrink-0", readiness?.state === "ready" ? "text-emerald-600" : readiness?.state === "blocked" ? "text-red-600" : "text-amber-600")} /><div><p className="font-semibold text-slate-900">{readiness?.title}</p><p className="mt-1 text-sm text-slate-700">{readiness?.detail}</p></div></div></div><div className="mt-4 grid gap-x-8 md:grid-cols-2"><Row label="Package status" value={<Status value={pkg.status} />} /><Row label="Live Azure power state" value={vm?.powerState || "VM not found"} /><Row label="Action" value={pkg.actionLabel} /><Row label="Provisioning" value={vm?.provisioningState || "Not reported"} /></div><p className="mt-3 text-xs text-slate-500">Execution is limited to the approved package action. This page cannot modify a VM directly or execute an unapproved package.</p></Panel>
-        <Panel title="Controlled execution"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="font-medium text-slate-900">{pkg.actionLabel}</p><p className="mt-1 max-w-2xl text-sm text-slate-600">{pkg.rationale}</p></div><button onClick={() => void execute()} disabled={!canExecute || executing} className="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"><CloudCog className="h-4 w-4" />{executing ? "Requesting Azure action…" : "Execute approved VM change"}</button></div>{!canExecute && pkg.status === "approved" && <p className="mt-3 text-xs text-amber-700">Azure execution is blocked until the preflight is ready.</p>}{pkg.status === "executing" && <p className="mt-3 text-sm text-blue-700">Execution is in progress. This page refreshes the durable package status every 10 seconds.</p>}<p className="mt-3 text-xs text-slate-500">No pause, cancel, or rollback action is offered: Azure VM start requests are asynchronous and must be observed to completion.</p></Panel>
+        <Panel title="Execution preflight"><div className={cn("rounded-lg border p-4", savedPlan ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50")}><div className="flex gap-3"><AlertTriangle className={cn("mt-0.5 h-5 w-5 shrink-0", savedPlan ? "text-emerald-600" : "text-red-600")} /><div><p className="font-semibold text-slate-900">{savedPlan ? "HCP saved plan is ready" : "HCP saved plan is required"}</p><p className="mt-1 text-sm text-slate-700">{savedPlan ? `Plan ${savedPlan.hcpRunId} is bound to this package and target VM.` : "Execution remains blocked until HCP Terraform completes a clean saved plan."}</p></div></div></div><div className="mt-4 grid gap-x-8 md:grid-cols-2"><Row label="Package status" value={<Status value={pkg.status} />} /><Row label="HCP workspace" value={savedPlan?.hcpWorkspaceName || "Not planned"} /><Row label="Plan digest" value={savedPlan?.planSha256 ? shortId(savedPlan.planSha256) : "Not reported"} /><Row label="Live Azure power state" value={vm?.powerState || "VM not found"} /></div><p className="mt-3 text-xs text-slate-500">Execution applies HCP’s exact approved saved plan. This page cannot call Azure directly.</p></Panel>
+        <Panel title="Controlled execution"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="font-medium text-slate-900">{pkg.actionLabel}</p><p className="mt-1 max-w-2xl text-sm text-slate-600">{pkg.rationale}</p></div><button onClick={() => void execute()} disabled={!canExecute || executing} className="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"><CloudCog className="h-4 w-4" />{executing ? "Requesting HCP apply…" : "Apply approved HCP plan"}</button></div>{!canExecute && pkg.status === "approved" && <p className="mt-3 text-xs text-amber-700">Execution is blocked until the HCP saved plan is successful.</p>}{pkg.status === "executing" && <p className="mt-3 text-sm text-blue-700">Execution is in progress. This page refreshes the durable package status every 10 seconds.</p>}<p className="mt-3 text-xs text-slate-500">No pause, cancel, or rollback action is offered. HCP Terraform applies the exact saved plan once.</p></Panel>
         <Panel title="Execution timeline"><div className="space-y-4">{events.map((event, index) => <div key={`${event.label}-${index}`} className="flex gap-3"><span className={cn("mt-1 h-3 w-3 shrink-0 rounded-full", event.tone === "ok" ? "bg-emerald-500" : event.tone === "bad" ? "bg-red-500" : "bg-blue-500")} /><div><div className="flex flex-wrap gap-x-3"><p className="font-medium capitalize text-slate-900">{event.label}</p><p className="text-xs text-slate-500">{formatDate(event.time)}</p></div><p className="mt-0.5 text-sm text-slate-600">{event.detail}</p></div></div>)}</div></Panel>
       </div>
       <div className="space-y-4">

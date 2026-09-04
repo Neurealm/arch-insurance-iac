@@ -55,6 +55,13 @@ BEGIN
   IF NOT has_function_privilege('authenticated', 'public.review_iac_change_package(uuid,text,text)', 'EXECUTE') THEN
     RAISE EXCEPTION 'authenticated reviewers cannot execute the review function';
   END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'hcp_plan_run_identity_required'
+  ) THEN
+    RAISE EXCEPTION 'HCP saved-plan identity constraint is missing';
+  END IF;
 END;
 $$;
 

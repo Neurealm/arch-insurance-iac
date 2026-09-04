@@ -1,4 +1,10 @@
-variable "target_resource_id" { type = string }
+variable "target_resource_id" {
+  type = string
+  validation {
+    condition     = can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Compute/virtualMachines/[^/]+$", var.target_resource_id))
+    error_message = "target_resource_id must be one Azure virtual machine ARM ID."
+  }
+}
 variable "requested_vm_size" {
   type = string
   validation {

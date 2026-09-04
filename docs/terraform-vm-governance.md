@@ -11,8 +11,8 @@
    module, but the request pauses until tests and human approval finish.
 7. Generate a plan with server-resolved inputs only.
 8. Block destroy, replacement, extra targets, target mismatch, or version drift.
-9. A different platform administrator approves the exact plan digest.
-10. Apply once, validate Azure and telemetry, preserve evidence, and update
+9. A different platform administrator approves the exact HCP Terraform saved-plan digest.
+10. HCP applies that same saved plan once, validate Azure and telemetry, preserve evidence, and update
     ServiceNow.
 
 ## Initial rollout
@@ -22,5 +22,6 @@
   from production.
 - OS disk expansion stays in `testing` until disk ownership and import/adoption
   are proven safely.
-- Keep the current direct Start-VM executor during runner rollout. Retire it only
-  after the self-hosted runner passes end-to-end tests.
+- HCP Terraform replaces the unimplemented self-hosted runner. The legacy direct
+  Start-VM executor is not an approved Terraform execution path and must not be
+  used for packages governed by the Terraform capability catalogue.

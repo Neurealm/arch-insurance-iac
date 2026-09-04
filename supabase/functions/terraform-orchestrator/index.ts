@@ -2,229 +2,176 @@ import { createClient } from "npm:@supabase/supabase-js@2.112.4";
 
 type Json = Record<string, unknown>;
 const VM_TYPE = "Microsoft.Compute/virtualMachines";
+const HCP_API = "https://app.terraform.io/api/v2";
+const HCP_ORGANIZATION = "Arch-Neugain";
+const REPOSITORY = "Neurealm/arch-insurance-iac";
 const ACTIONS: Record<string, string> = { start_vm: "start", stop_vm: "powerOff", restart_vm: "restart" };
+const PLAN_SUCCESS = new Set(["planned", "planned_and_finished"]);
+const FAILURE = new Set(["errored", "canceled", "force_canceled", "discarded", "policy_soft_failed", "policy_override"]);
 
-const record = (value: unknown): Json => value && typeof value === "object" && !Array.isArray(value) ? value as Json : {};
-const text = (value: unknown) => typeof value === "string" ? value.trim() : "";
-const list = (value: unknown) => Array.isArray(value) ? value : [];
+const obj = (value: unknown): Json => value && typeof value === "object" && !Array.isArray(value) ? value as Json : {};
+const str = (value: unknown) => typeof value === "string" ? value.trim() : "";
+const arr = (value: unknown) => Array.isArray(value) ? value : [];
+const iso = () => new Date().toISOString();
 
-function adminClient() {
+function admin() {
   const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => {
-    try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default; } catch { return undefined; }
-  })();
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => { try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default; } catch { return undefined; } })();
   if (!url || !key) throw new Error("Supabase server credentials are not configured.");
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 }
-
 function cors(request: Request) {
   const origin = request.headers.get("origin");
-  const allowed = (Deno.env.get("APP_ORIGINS") ?? Deno.env.get("APP_ORIGIN") ?? "").split(",").map((x) => x.trim()).filter(Boolean);
-  const accepted = origin && allowed.includes(origin) ? origin : allowed[0] ?? "null";
-  return { "access-control-allow-origin": accepted, "access-control-allow-headers": "authorization, apikey, content-type, x-runner-callback-secret", "access-control-allow-methods": "POST, OPTIONS", vary: "Origin" };
+  const origins = (Deno.env.get("APP_ORIGINS") ?? Deno.env.get("APP_ORIGIN") ?? "").split(",").map((item) => item.trim()).filter(Boolean);
+  return { "access-control-allow-origin": origin && origins.includes(origin) ? origin : origins[0] ?? "null", "access-control-allow-headers": "authorization, apikey, content-type", "access-control-allow-methods": "POST, OPTIONS", vary: "Origin" };
 }
-
-function json(request: Request, body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { ...cors(request), "content-type": "application/json", "cache-control": "no-store" } });
+function reply(request: Request, body: unknown, status = 200) { return new Response(JSON.stringify(body), { status, headers: { ...cors(request), "content-type": "application/json", "cache-control": "no-store" } }); }
+async function user(request: Request, db: ReturnType<typeof admin>) {
+  const auth = request.headers.get("authorization") ?? "";
+  if (!auth.startsWith("Bearer ")) return null;
+  const { data, error } = await db.auth.getUser(auth.slice(7));
+  return error ? null : data.user;
 }
+async function isAdmin(db: ReturnType<typeof admin>, id: string) { return !!(await db.from("user_roles").select("user_id").eq("user_id", id).eq("role", "platform_admin").maybeSingle()).data; }
+async function addEvent(db: ReturnType<typeof admin>, id: string, type: string, detail: Json = {}) { await db.from("iac_terraform_run_events").insert({ run_id: id, event_type: type, detail }); }
 
-async function caller(request: Request, admin: ReturnType<typeof adminClient>) {
-  const authorization = request.headers.get("authorization") ?? "";
-  if (!authorization.startsWith("Bearer ")) return null;
-  const { data, error } = await admin.auth.getUser(authorization.slice(7));
-  return error ? null : data.user ?? null;
+function environment(pkg: Json) {
+  const parameters = obj(pkg.parameters); const vm = obj(obj(pkg.current_state).vm); const tags = obj(vm.tags);
+  return (str(parameters.environment) || str(tags.environment) || str(tags.Environment) || "development").toLowerCase();
 }
-
-async function platformAdmin(admin: ReturnType<typeof adminClient>, userId: string) {
-  const { data } = await admin.from("user_roles").select("user_id").eq("user_id", userId).eq("role", "platform_admin").maybeSingle();
-  return !!data;
+function workspace(env: string) {
+  const key = env === "development" ? "DEVELOPMENT" : ["pre-production", "preproduction"].includes(env) ? "PREPRODUCTION" : "";
+  const id = key ? str(Deno.env.get(`HCP_TERRAFORM_${key}_WORKSPACE_ID`)) : "";
+  const name = key ? str(Deno.env.get(`HCP_TERRAFORM_${key}_WORKSPACE_NAME`)) : "";
+  if (!id || !name) throw new Error(`No configured HCP Terraform workspace is approved for ${env}.`);
+  return { id, name };
 }
-
-function environmentOf(pkg: Json) {
-  const parameters = record(pkg.parameters);
-  const state = record(pkg.current_state);
-  const vm = record(state.vm);
-  const tags = record(vm.tags);
-  return (text(parameters.environment) || text(tags.environment) || text(tags.Environment) || "development").toLowerCase();
-}
-
-function resolvedInputs(pkg: Json, capability: Json) {
-  const actionType = text(pkg.action_type);
-  const parameters = record(pkg.parameters);
-  const inputs: Json = {
-    target_resource_id: text(pkg.target_resource_id),
-    change_request_id: text(parameters.serviceNowTicket) || text(pkg.package_number),
-  };
-  if (ACTIONS[actionType]) inputs.action = ACTIONS[actionType];
-  if (actionType === "resize_vm") {
-    const requested = text(parameters.requestedVmSize);
-    if (!/^Standard_[A-Za-z0-9_]+$/.test(requested)) throw new Error("A valid requested VM size is required.");
-    inputs.requested_vm_size = requested;
-  }
-  const required = list(record(capability.input_schema).required).map(text);
-  const missing = required.filter((key) => inputs[key] === undefined || inputs[key] === "");
+function inputsFor(pkg: Json, capability: Json) {
+  const parameters = obj(pkg.parameters); const action = str(pkg.action_type);
+  const inputs: Json = { target_resource_id: str(pkg.target_resource_id), change_request_id: str(parameters.serviceNowTicket) || str(pkg.package_number) };
+  if (ACTIONS[action]) inputs.action = ACTIONS[action];
+  if (action === "resize_vm") { const size = str(parameters.requestedVmSize); if (!/^Standard_[A-Za-z0-9_]+$/.test(size)) throw new Error("A valid requested VM size is required."); inputs.requested_vm_size = size; }
+  const missing = arr(obj(capability.input_schema).required).map(str).filter((key) => !inputs[key]);
   if (missing.length) throw new Error(`Required Terraform inputs are missing: ${missing.join(", ")}.`);
   return inputs;
 }
-
-async function packageAndCapability(admin: ReturnType<typeof adminClient>, packageId: string) {
-  const { data: pkg, error } = await admin.from("iac_change_packages").select("*").eq("id", packageId).maybeSingle();
+async function packageCapability(db: ReturnType<typeof admin>, packageId: string) {
+  const { data: pkg, error } = await db.from("iac_change_packages").select("*").eq("id", packageId).maybeSingle();
   if (error || !pkg) throw new Error("Change package was not found.");
-  const { data: capability } = await admin.from("iac_automation_capabilities").select("*")
-    .eq("provider", "azure").eq("resource_type", VM_TYPE).eq("action_type", pkg.action_type)
-    .eq("lifecycle_status", "approved").maybeSingle();
+  const { data: capability } = await db.from("iac_automation_capabilities").select("*").eq("provider", "azure").eq("resource_type", VM_TYPE).eq("action_type", pkg.action_type).eq("lifecycle_status", "approved").maybeSingle();
   if (!capability) throw new Error(`No approved Terraform capability exists for ${pkg.action_type}.`);
-  const environment = environmentOf(pkg);
-  if (!(capability.allowed_environments ?? []).map((x: string) => x.toLowerCase()).includes(environment)) {
-    throw new Error(`${capability.display_name} ${capability.module_version} is not approved for ${environment}.`);
-  }
-  return { pkg: pkg as Json, capability: capability as Json, inputs: resolvedInputs(pkg, capability), environment };
+  const env = environment(pkg as Json);
+  if (!(capability.allowed_environments ?? []).map((value: string) => value.toLowerCase()).includes(env)) throw new Error(`${capability.display_name} is not approved for ${env}.`);
+  return { pkg: pkg as Json, capability: capability as Json, inputs: inputsFor(pkg as Json, capability as Json), env };
+}
+async function bind(db: ReturnType<typeof admin>, actor: string, pkg: Json, capability: Json, inputs: Json) {
+  const { data: old } = await db.from("iac_package_automation_bindings").select("*").eq("package_id", pkg.id).maybeSingle();
+  if (old) { if (old.capability_id !== capability.id || JSON.stringify(old.resolved_inputs) !== JSON.stringify(inputs)) throw new Error("The package is already bound to different Terraform inputs."); return old; }
+  const { data, error } = await db.from("iac_package_automation_bindings").insert({ package_id: pkg.id, capability_id: capability.id, module_source: capability.module_source, module_version: capability.module_version, resolved_inputs: inputs, resolved_by: actor }).select("*").single();
+  if (error) throw error; return data;
 }
 
-async function bind(admin: ReturnType<typeof adminClient>, actor: string, pkg: Json, capability: Json, inputs: Json) {
-  const packageId = text(pkg.id);
-  const { data: existing } = await admin.from("iac_package_automation_bindings").select("*").eq("package_id", packageId).maybeSingle();
-  if (existing) {
-    if (existing.capability_id !== capability.id || JSON.stringify(existing.resolved_inputs) !== JSON.stringify(inputs)) {
-      throw new Error("The submitted package is already bound to different Terraform inputs.");
-    }
-    return existing;
+function token(kind: "plan" | "apply") { const value = str(Deno.env.get(kind === "apply" ? "HCP_TERRAFORM_APPLY_TOKEN" : "HCP_TERRAFORM_PLAN_TOKEN")); if (!value) throw new Error(`HCP_TERRAFORM_${kind.toUpperCase()}_TOKEN is not configured.`); return value; }
+async function hcp(path: string, tokenValue: string, init: RequestInit = {}) {
+  const response = await fetch(`${HCP_API}${path}`, { ...init, headers: { accept: "application/vnd.api+json", authorization: `Bearer ${tokenValue}`, ...(init.headers ?? {}) } });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) { const error = obj(arr(obj(body).errors)[0]); throw new Error((str(error.detail) || str(error.title) || `HCP Terraform returned ${response.status}.`).slice(0, 500)); }
+  return body;
+}
+async function digest(value: ArrayBuffer | Uint8Array | string) { const bytes = typeof value === "string" ? new TextEncoder().encode(value) : value; return [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))].map((byte) => byte.toString(16).padStart(2, "0")).join(""); }
+async function git(path: string, secret: string) {
+  const response = await fetch(`https://api.github.com${path}`, { headers: { accept: "application/vnd.github+json", authorization: `Bearer ${secret}`, "x-github-api-version": "2022-11-28" } });
+  if (!response.ok) throw new Error(`Unable to read approved Terraform source from GitHub (${response.status}).`); return response.json();
+}
+function from64(value: string) { const raw = atob(value.replace(/\s/g, "")); return Uint8Array.from(raw, (item) => item.charCodeAt(0)); }
+function put(target: Uint8Array, offset: number, length: number, value: string) { target.set(new TextEncoder().encode(value).slice(0, length), offset); }
+function octal(target: Uint8Array, offset: number, length: number, value: number) { put(target, offset, length, value.toString(8).padStart(length - 1, "0").slice(-(length - 1)) + "\0"); }
+function tarPart(path: string, content: Uint8Array) {
+  if (!/^[A-Za-z0-9._/-]{1,100}$/.test(path) || path.includes("..")) throw new Error("Unsafe Terraform bundle path.");
+  const head = new Uint8Array(512); put(head, 0, 100, path); octal(head, 100, 8, 0o644); octal(head, 108, 8, 0); octal(head, 116, 8, 0); octal(head, 124, 12, content.byteLength); octal(head, 136, 12, 0); head.fill(32, 148, 156); head[156] = 48; put(head, 257, 6, "ustar\0"); put(head, 263, 2, "00"); put(head, 148, 8, head.reduce((sum, byte) => sum + byte, 0).toString(8).padStart(6, "0") + "\0 ");
+  return [head, content, new Uint8Array((512 - content.byteLength % 512) % 512)];
+}
+async function archive(files: Array<{ path: string; content: Uint8Array }>) {
+  const parts = [...files.sort((a, b) => a.path.localeCompare(b.path)).flatMap((file) => tarPart(file.path, file.content)), new Uint8Array(1024)];
+  const result = new Uint8Array(parts.reduce((sum, part) => sum + part.byteLength, 0)); let offset = 0; for (const part of parts) { result.set(part, offset); offset += part.byteLength; }
+  return new Uint8Array(await new Response(new Blob([result]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer());
+}
+function sourcePaths(action: string) { if (["start_vm", "stop_vm", "restart_vm"].includes(action)) return ["terraform/environments/pilot/vm-action", "terraform/modules/vm-action"]; if (action === "resize_vm") return ["terraform/environments/pilot/vm-resize", "terraform/modules/vm-resize"]; throw new Error(`No HCP Terraform root module exists for ${action}.`); }
+async function sourceBundle(action: string) {
+  const secret = str(Deno.env.get("GITHUB_TERRAFORM_SOURCE_TOKEN")); if (!secret) throw new Error("GITHUB_TERRAFORM_SOURCE_TOKEN is not configured.");
+  const ref = str(Deno.env.get("HCP_TERRAFORM_SOURCE_REF")) || "main"; if (!/^[A-Za-z0-9._/-]{1,160}$/.test(ref) || ref.includes("..")) throw new Error("HCP_TERRAFORM_SOURCE_REF is invalid.");
+  const revision = str(obj(await git(`/repos/${REPOSITORY}/commits/${encodeURIComponent(ref)}`, secret)).sha); if (!/^[0-9a-f]{40}$/i.test(revision)) throw new Error("GitHub did not return an immutable Terraform source revision.");
+  const [root, module] = sourcePaths(action); const tree = arr(obj(await git(`/repos/${REPOSITORY}/git/trees/${revision}?recursive=1`, secret)).tree).map(obj);
+  const rootFiles = tree.filter((item) => str(item.type) === "blob" && str(item.path).startsWith(`${root}/`) && str(item.path).endsWith(".tf"));
+  const moduleFiles = tree.filter((item) => str(item.type) === "blob" && str(item.path).startsWith(`${module}/`) && str(item.path).endsWith(".tf"));
+  if (!rootFiles.length || !moduleFiles.length) throw new Error("Approved Terraform source is incomplete at the resolved revision.");
+  const files: Array<{ path: string; content: Uint8Array }> = [];
+  for (const item of rootFiles) { const path = str(item.path); const content = str(obj(await git(`/repos/${REPOSITORY}/contents/${path}?ref=${revision}`, secret)).content); const rewritten = new TextDecoder().decode(from64(content)).replace(/source\s*=\s*"\.\.\/\.\.\/\.\.\/modules\/[-a-z0-9_]+"/, 'source = "./module"'); files.push({ path: path.slice(root.length + 1), content: new TextEncoder().encode(rewritten) }); }
+  for (const item of moduleFiles) { const path = str(item.path); const content = str(obj(await git(`/repos/${REPOSITORY}/contents/${path}?ref=${revision}`, secret)).content); files.push({ path: `module/${path.slice(module.length + 1)}`, content: from64(content) }); }
+  const bytes = await archive(files); return { bytes, revision, sha256: await digest(bytes) };
+}
+
+async function savedPlan(ws: { id: string; name: string }, action: string, inputs: Json, packageNumber: string) {
+  const planToken = token("plan"); const source = await sourceBundle(action);
+  const cv = obj((await hcp(`/workspaces/${ws.id}/configuration-versions`, planToken, { method: "POST", headers: { "content-type": "application/vnd.api+json" }, body: JSON.stringify({ data: { type: "configuration-versions", attributes: { "auto-queue-runs": false, provisional: true } } }) })).data);
+  const cvId = str(cv.id); const upload = str(obj(cv.attributes)["upload-url"]); if (!cvId || !upload) throw new Error("HCP Terraform did not return an uploadable configuration version.");
+  const sent = await fetch(upload, { method: "PUT", headers: { "content-type": "application/octet-stream" }, body: source.bytes }); if (!sent.ok) throw new Error(`HCP Terraform configuration upload failed (${sent.status}).`);
+  let uploaded = false;
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const current = obj((await hcp(`/configuration-versions/${cvId}`, planToken)).data);
+    const status = str(obj(current.attributes).status);
+    if (status === "uploaded") { uploaded = true; break; }
+    if (status === "errored") throw new Error("HCP Terraform rejected the generated configuration archive.");
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  const { data, error } = await admin.from("iac_package_automation_bindings").insert({
-    package_id: packageId, capability_id: capability.id, module_source: capability.module_source,
-    module_version: capability.module_version, resolved_inputs: inputs, resolved_by: actor,
-  }).select("*").single();
+  if (!uploaded) throw new Error("HCP Terraform did not finish receiving the configuration archive.");
+  const run = obj((await hcp("/runs", planToken, { method: "POST", headers: { "content-type": "application/vnd.api+json" }, body: JSON.stringify({ data: { type: "runs", attributes: { "auto-apply": false, "is-destroy": false, refresh: true, "save-plan": true, message: `Governed VM package ${packageNumber}; source ${source.revision}`, variables: Object.entries(inputs).map(([key, value]) => ({ key, value: JSON.stringify(value), category: "terraform", hcl: false })) }, relationships: { workspace: { data: { type: "workspaces", id: ws.id } }, "configuration-version": { data: { type: "configuration-versions", id: cvId } } } } }) })).data);
+  if (!str(run.id)) throw new Error("HCP Terraform did not return a saved-plan run ID."); return { configurationVersionId: cvId, runId: str(run.id), source };
+}
+function relation(run: Json, name: string) { return str(obj(obj(obj(run.relationships)[name]).data).id); }
+function resourceIds(value: unknown, found = new Set<string>()): Set<string> {
+  if (Array.isArray(value)) value.forEach((item) => resourceIds(item, found));
+  else if (value && typeof value === "object") for (const [key, item] of Object.entries(value as Json)) {
+    if (key === "resource_id" && typeof item === "string" && item.startsWith("/subscriptions/")) found.add(item.toLowerCase());
+    else resourceIds(item, found);
+  }
+  return found;
+}
+function safeguards(plan: Json, target: string) { const changes = arr(plan.resource_changes).map(obj); const destroy = changes.some((item) => arr(obj(item.change).actions).map(str).includes("delete")); const replace = changes.some((item) => { const actions = arr(obj(item.change).actions).map(str); return actions.includes("delete") && actions.includes("create"); }); const affected = [...resourceIds(obj(plan.planned_values))]; const actions = changes.reduce((result, item) => { for (const action of arr(obj(item.change).actions).map(str)) result[action] = Number(result[action] ?? 0) + 1; return result; }, {} as Json); return { destroy, replace, affected, actions, matched: affected.length === 1 && affected[0] === target.toLowerCase() && !destroy && !replace }; }
+function runUrl(ws: string, run: string) { return `https://app.terraform.io/app/${encodeURIComponent(HCP_ORGANIZATION)}/workspaces/${encodeURIComponent(ws)}/runs/${encodeURIComponent(run)}`; }
+async function sync(db: ReturnType<typeof admin>, run: Json) {
+  const remote = obj((await hcp(`/runs/${encodeURIComponent(str(run.hcp_run_id))}`, token("plan"))).data); const hcpStatus = str(obj(remote.attributes).status); const planId = relation(remote, "plan") || str(run.hcp_plan_id);
+  const update: Json = { hcp_run_status: hcpStatus, hcp_plan_id: planId || null, hcp_synced_at: iso() };
+  if (run.run_type === "plan" && PLAN_SUCCESS.has(hcpStatus) && planId) { const plan = obj(await hcp(`/plans/${encodeURIComponent(planId)}/json-output`, token("plan"))); const guard = safeguards(plan, str(obj(run.resolved_inputs).target_resource_id)); Object.assign(update, { status: guard.matched ? "succeeded" : "blocked", completed_at: iso(), artifact_uri: runUrl(str(run.hcp_workspace_name), str(run.hcp_run_id)), plan_sha256: await digest(JSON.stringify(plan)), plan_summary: { actions: guard.actions, hcpStatus, sourceRevision: run.source_revision }, reconciliation: { matched: guard.matched, expectedTarget: str(obj(run.resolved_inputs).target_resource_id).toLowerCase(), affectedResourceIds: guard.affected }, has_destroy: guard.destroy, has_replace: guard.replace, hcp_plan_json: { formatVersion: str(plan.format_version), terraformVersion: str(plan.terraform_version), resourceChanges: arr(plan.resource_changes).length, guardrails: guard }, error_message: guard.matched ? null : "HCP Terraform plan did not match the approved VM boundary." }); }
+  else if (run.run_type === "apply" && hcpStatus === "applied") Object.assign(update, { status: "succeeded", completed_at: iso(), artifact_uri: runUrl(str(run.hcp_workspace_name), str(run.hcp_run_id)), error_message: null });
+  else if (FAILURE.has(hcpStatus)) Object.assign(update, { status: hcpStatus === "policy_soft_failed" ? "blocked" : "failed", completed_at: iso(), error_message: `HCP Terraform run ended with ${hcpStatus}.` });
+  const { data, error } = await db.from("iac_terraform_runs").update(update).eq("id", run.id).select("*").single(); if (error) throw error;
+  if (data.status !== run.status || data.hcp_run_status !== run.hcp_run_status) await addEvent(db, str(run.id), "hcp_run_synchronized", { status: data.status, hcpStatus });
+  if (run.run_type === "apply" && ["succeeded", "failed", "blocked"].includes(data.status)) await db.from("iac_change_packages").update({ status: data.status === "succeeded" ? "executed" : "execution_failed", execution_completed_at: iso(), execution_message: data.status === "succeeded" ? "The exact approved HCP Terraform saved plan was applied." : data.error_message }).eq("id", run.package_id).eq("status", "executing");
+  return data as Json;
+}
+async function plan(request: Request, db: ReturnType<typeof admin>, actor: string, packageId: string) {
+  const resolved = await packageCapability(db, packageId); if (resolved.pkg.status !== "submitted") throw new Error("Only a submitted package can be planned."); const binding = await bind(db, actor, resolved.pkg, resolved.capability, resolved.inputs); const ws = workspace(resolved.env); const hcpRun = await savedPlan(ws, str(resolved.pkg.action_type), resolved.inputs, str(resolved.pkg.package_number));
+  const { data, error } = await db.from("iac_terraform_runs").insert({ package_id: packageId, capability_id: resolved.capability.id, run_type: "plan", status: "running", requested_by: actor, module_source: binding.module_source, module_version: binding.module_version, resolved_inputs: resolved.inputs, runner_correlation_id: `hcp-plan:${hcpRun.runId}`, execution_engine: "hcp_terraform", hcp_organization: HCP_ORGANIZATION, hcp_workspace_id: ws.id, hcp_workspace_name: ws.name, hcp_configuration_version_id: hcpRun.configurationVersionId, hcp_run_id: hcpRun.runId, hcp_run_status: "pending", source_revision: hcpRun.source.revision, started_at: iso() }).select("*").single();
+  if (error) throw error; await addEvent(db, data.id, "hcp_saved_plan_queued", { hcpRunId: hcpRun.runId, configurationVersionId: hcpRun.configurationVersionId, sourceRevision: hcpRun.source.revision, configurationSha256: hcpRun.source.sha256 }); return reply(request, { runId: data.id, hcpRunId: hcpRun.runId, status: data.status }, 202);
+}
+async function apply(request: Request, db: ReturnType<typeof admin>, actor: string, packageId: string) {
+  const resolved = await packageCapability(db, packageId); if (resolved.pkg.status !== "approved") throw new Error("Only an approved package can be applied."); if (resolved.pkg.created_by !== actor && !await isAdmin(db, actor)) throw new Error("The caller is not authorized to execute this package.");
+  const { data: saved } = await db.from("iac_terraform_runs").select("*").eq("package_id", packageId).eq("run_type", "plan").eq("execution_engine", "hcp_terraform").eq("status", "succeeded").order("created_at", { ascending: false }).limit(1).maybeSingle();
+  if (!saved || saved.capability_id !== resolved.capability.id || saved.has_destroy || saved.has_replace || saved.reconciliation?.matched !== true || !saved.hcp_run_id || !saved.hcp_plan_id || JSON.stringify(saved.resolved_inputs) !== JSON.stringify(resolved.inputs)) throw new Error("A clean, request-matched HCP Terraform saved plan is required.");
+  const { data: claimed } = await db.from("iac_change_packages").update({ status: "executing", execution_started_at: iso(), executed_by: actor }).eq("id", packageId).eq("status", "approved").select("id").maybeSingle(); if (!claimed) throw new Error("The package was already claimed for execution.");
+  const { data, error } = await db.from("iac_terraform_runs").insert({ package_id: packageId, capability_id: saved.capability_id, run_type: "apply", status: "running", requested_by: actor, plan_run_id: saved.id, module_source: saved.module_source, module_version: saved.module_version, resolved_inputs: resolved.inputs, runner_correlation_id: `hcp-apply:${saved.hcp_run_id}`, execution_engine: "hcp_terraform", hcp_organization: saved.hcp_organization, hcp_workspace_id: saved.hcp_workspace_id, hcp_workspace_name: saved.hcp_workspace_name, hcp_run_id: saved.hcp_run_id, hcp_plan_id: saved.hcp_plan_id, hcp_run_status: saved.hcp_run_status, source_revision: saved.source_revision, artifact_uri: saved.artifact_uri, plan_sha256: saved.plan_sha256, started_at: iso() }).select("*").single();
   if (error) throw error;
-  return data;
+  try { await hcp(`/runs/${encodeURIComponent(saved.hcp_run_id)}/actions/apply`, token("apply"), { method: "POST", headers: { "content-type": "application/vnd.api+json" }, body: JSON.stringify({ data: { type: "apply-actions" } }) }); await addEvent(db, data.id, "hcp_saved_plan_apply_requested", { hcpRunId: saved.hcp_run_id, hcpPlanId: saved.hcp_plan_id }); }
+  catch (cause) { const message = cause instanceof Error ? cause.message : "HCP Terraform apply request failed."; await db.from("iac_terraform_runs").update({ status: "failed", completed_at: iso(), error_message: message }).eq("id", data.id); await db.from("iac_change_packages").update({ status: "execution_failed", execution_completed_at: iso(), execution_message: message }).eq("id", packageId).eq("status", "executing"); throw cause; }
+  return reply(request, { runId: data.id, hcpRunId: saved.hcp_run_id, status: data.status }, 202);
 }
-
-async function event(admin: ReturnType<typeof adminClient>, runId: string, eventType: string, detail: Json = {}) {
-  await admin.from("iac_terraform_run_events").insert({ run_id: runId, event_type: eventType, detail });
-}
-
-async function enqueue(admin: ReturnType<typeof adminClient>, run: Json, payload: Json) {
-  const runnerUrl = (Deno.env.get("TERRAFORM_RUNNER_URL") ?? "").replace(/\/$/, "");
-  const token = Deno.env.get("TERRAFORM_RUNNER_TOKEN");
-  const callbackSecret = Deno.env.get("TERRAFORM_RUNNER_CALLBACK_SECRET");
-  const callbackUrl = Deno.env.get("TERRAFORM_CALLBACK_URL");
-  if (!runnerUrl || !token || !callbackSecret || !callbackUrl) throw new Error("The Azure Terraform runner is not configured.");
-  const response = await fetch(`${runnerUrl}/v1/jobs`, {
-    method: "POST",
-    headers: { authorization: `Bearer ${token}`, "content-type": "application/json", "idempotency-key": text(run.runner_correlation_id) },
-    body: JSON.stringify({ ...payload, runId: run.id, correlationId: run.runner_correlation_id, callbackUrl, callbackSecret }),
-  });
-  if (!response.ok) throw new Error(`Terraform runner rejected the job with status ${response.status}.`);
-  await admin.from("iac_terraform_runs").update({ status: "running", started_at: new Date().toISOString() }).eq("id", run.id).eq("status", "queued");
-  await event(admin, text(run.id), "runner_job_accepted", { status: response.status });
-}
-
-async function createPlan(request: Request, admin: ReturnType<typeof adminClient>, actor: string, packageId: string) {
-  const { pkg, capability, inputs, environment } = await packageAndCapability(admin, packageId);
-  if (pkg.status !== "submitted") throw new Error("Only a submitted package can be planned.");
-  const binding = await bind(admin, actor, pkg, capability, inputs);
-  const correlation = `tf-plan:${packageId}:${crypto.randomUUID()}`;
-  const { data: run, error } = await admin.from("iac_terraform_runs").insert({
-    package_id: packageId, capability_id: capability.id, run_type: "plan", status: "queued", requested_by: actor,
-    module_source: binding.module_source, module_version: binding.module_version, resolved_inputs: inputs, runner_correlation_id: correlation,
-  }).select("*").single();
-  if (error) throw error;
-  try {
-    await enqueue(admin, run, { operation: "plan", packageId, moduleSource: binding.module_source, moduleVersion: binding.module_version, inputs, environment });
-  } catch (cause) {
-    await admin.from("iac_terraform_runs").update({ status: "failed", completed_at: new Date().toISOString(), error_message: cause instanceof Error ? cause.message : "Runner enqueue failed." }).eq("id", run.id);
-    throw cause;
-  }
-  return json(request, { runId: run.id, status: "running" }, 202);
-}
-
-async function createApply(request: Request, admin: ReturnType<typeof adminClient>, actor: string, packageId: string) {
-  const { pkg, capability, inputs, environment } = await packageAndCapability(admin, packageId);
-  if (pkg.status !== "approved") throw new Error("Only an approved package can be applied.");
-  if (pkg.created_by !== actor && !await platformAdmin(admin, actor)) throw new Error("The caller is not authorized to execute this package.");
-  const { data: plan } = await admin.from("iac_terraform_runs").select("*").eq("package_id", packageId)
-    .eq("run_type", "plan").eq("status", "succeeded").order("created_at", { ascending: false }).limit(1).maybeSingle();
-  if (!plan || plan.capability_id !== capability.id || plan.has_destroy || plan.has_replace || plan.reconciliation?.matched !== true) {
-    throw new Error("A clean, request-matched Terraform plan is required.");
-  }
-  const correlation = `tf-apply:${packageId}:${plan.id}`;
-  const { data: run, error } = await admin.from("iac_terraform_runs").insert({
-    package_id: packageId, capability_id: capability.id, run_type: "apply", status: "queued", requested_by: actor,
-    plan_run_id: plan.id, module_source: plan.module_source, module_version: plan.module_version,
-    resolved_inputs: inputs, runner_correlation_id: correlation, artifact_uri: plan.artifact_uri, plan_sha256: plan.plan_sha256,
-  }).select("*").single();
-  if (error) throw error;
-  const { data: claimed } = await admin.from("iac_change_packages").update({ status: "executing", execution_started_at: new Date().toISOString(), executed_by: actor })
-    .eq("id", packageId).eq("status", "approved").select("id").maybeSingle();
-  if (!claimed) throw new Error("The package was already claimed for execution.");
-  try {
-    await enqueue(admin, run, { operation: "apply", packageId, planRunId: plan.id, artifactUri: plan.artifact_uri, planSha256: plan.plan_sha256, moduleSource: plan.module_source, moduleVersion: plan.module_version, inputs, environment });
-  } catch (cause) {
-    const message = cause instanceof Error ? cause.message : "Runner enqueue failed.";
-    await admin.from("iac_terraform_runs").update({ status: "failed", completed_at: new Date().toISOString(), error_message: message }).eq("id", run.id);
-    await admin.from("iac_change_packages").update({ status: "execution_failed", execution_completed_at: new Date().toISOString(), execution_message: message }).eq("id", packageId).eq("status", "executing");
-    throw cause;
-  }
-  return json(request, { runId: run.id, status: "running" }, 202);
-}
-
-async function callback(request: Request, admin: ReturnType<typeof adminClient>, body: Json) {
-  const expected = Deno.env.get("TERRAFORM_RUNNER_CALLBACK_SECRET");
-  if (!expected || request.headers.get("x-runner-callback-secret") !== expected) return json(request, { error: "unauthorized" }, 401);
-  const runId = text(body.runId);
-  const { data: run } = await admin.from("iac_terraform_runs").select("*").eq("id", runId).eq("status", "running").maybeSingle();
-  if (!run) return json(request, { error: "active run not found" }, 404);
-  const success = body.success === true;
-  const changes = list(body.changes).map(record);
-  const hasDestroy = changes.some((change) => list(change.actions).map(text).includes("delete"));
-  const hasReplace = changes.some((change) => {
-    const actions = list(change.actions).map(text); return actions.includes("delete") && actions.includes("create");
-  });
-  const target = text(run.resolved_inputs?.target_resource_id).toLowerCase();
-  const affected = [...new Set(list(body.affectedResourceIds).map(text).filter(Boolean).map((x) => x.toLowerCase()))];
-  const matched = affected.length === 1 && affected[0] === target && !hasDestroy && !hasReplace;
-  const digest = text(body.planSha256).toLowerCase();
-  const artifact = text(body.artifactUri);
-  const validPlanArtifact = run.run_type !== "plan" || (/^[0-9a-f]{64}$/.test(digest) && artifact.startsWith("https://"));
-  const status = success && matched && validPlanArtifact ? "succeeded" : success ? "blocked" : "failed";
-  const errorMessage = status === "blocked" ? "Terraform output did not match the approved request boundary." : success ? null : text(body.error) || "Terraform runner failed.";
-  await admin.from("iac_terraform_runs").update({
-    status, completed_at: new Date().toISOString(), artifact_uri: artifact || run.artifact_uri,
-    plan_sha256: digest || run.plan_sha256, plan_summary: record(body.summary),
-    reconciliation: { matched, expectedTarget: target, affectedResourceIds: affected }, has_destroy: hasDestroy,
-    has_replace: hasReplace, error_message: errorMessage,
-  }).eq("id", runId).eq("status", "running");
-  await event(admin, runId, "runner_completed", { status, matched, hasDestroy, hasReplace });
-  if (run.run_type === "apply") {
-    await admin.from("iac_change_packages").update({
-      status: status === "succeeded" ? "executed" : "execution_failed",
-      execution_completed_at: new Date().toISOString(),
-      execution_message: status === "succeeded" ? "The exact approved Terraform plan was applied." : errorMessage,
-    }).eq("id", run.package_id).eq("status", "executing");
-  }
-  return json(request, { accepted: true });
-}
+async function refresh(request: Request, db: ReturnType<typeof admin>, actor: string, packageId: string) { const { data: pkg } = await db.from("iac_change_packages").select("created_by").eq("id", packageId).maybeSingle(); if (!pkg || (pkg.created_by !== actor && !await isAdmin(db, actor))) throw new Error("The caller is not authorized to inspect this package."); const { data, error } = await db.from("iac_terraform_runs").select("*").eq("package_id", packageId).eq("execution_engine", "hcp_terraform").in("status", ["queued", "running"]).order("created_at", { ascending: false }); if (error) throw error; return reply(request, { runs: await Promise.all((data ?? []).map((run) => sync(db, run as Json))) }); }
 
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS") return new Response("ok", { headers: cors(request) });
-  if (request.method !== "POST") return json(request, { error: "method not allowed" }, 405);
-  let body: Json;
-  try { body = record(await request.json()); } catch { return json(request, { error: "invalid json" }, 400); }
-  const admin = adminClient();
-  if (text(body.operation) === "callback") return callback(request, admin, body);
-  const user = await caller(request, admin);
-  if (!user) return json(request, { error: "authentication required" }, 401);
-  const packageId = text(body.packageId);
-  if (!/^[0-9a-f-]{36}$/i.test(packageId)) return json(request, { error: "valid packageId required" }, 400);
-  try {
-    if (body.operation === "resolve") {
-      const resolved = await packageAndCapability(admin, packageId);
-      const binding = await bind(admin, user.id, resolved.pkg, resolved.capability, resolved.inputs);
-      return json(request, { capability: resolved.capability, binding, environment: resolved.environment });
-    }
-    if (body.operation === "plan") return await createPlan(request, admin, user.id, packageId);
-    if (body.operation === "apply") return await createApply(request, admin, user.id, packageId);
-    return json(request, { error: "unsupported operation" }, 400);
-  } catch (cause) {
-    return json(request, { error: cause instanceof Error ? cause.message : "Terraform orchestration failed." }, 409);
-  }
+  if (request.method === "OPTIONS") return new Response("ok", { headers: cors(request) }); if (request.method !== "POST") return reply(request, { error: "method not allowed" }, 405);
+  const db = admin(); let body: Json; try { body = obj(await request.json()); } catch { return reply(request, { error: "invalid json" }, 400); } const actor = await user(request, db); if (!actor) return reply(request, { error: "authentication required" }, 401);
+  const packageId = str(body.packageId); if (!/^[0-9a-f-]{36}$/i.test(packageId)) return reply(request, { error: "valid packageId required" }, 400);
+  try { if (body.operation === "resolve") { const result = await packageCapability(db, packageId); return reply(request, { capability: result.capability, binding: await bind(db, actor.id, result.pkg, result.capability, result.inputs), environment: result.env }); } if (body.operation === "plan") return await plan(request, db, actor.id, packageId); if (body.operation === "apply") return await apply(request, db, actor.id, packageId); if (body.operation === "sync") return await refresh(request, db, actor.id, packageId); return reply(request, { error: "unsupported operation" }, 400); }
+  catch (cause) { return reply(request, { error: cause instanceof Error ? cause.message : "Terraform orchestration failed." }, 409); }
 });
