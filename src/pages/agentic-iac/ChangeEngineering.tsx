@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, type AzureVirtualMachine, type AzureVmOperations } from "./azureControlPlane";
 import { listVmChangePackages, saveVmChangePackage, type VmChangePackage } from "./changePackages";
-import { createTerraformPlan } from "./automationCatalog";
+import { createTerraformPlan, diagnoseTerraformSource, type TerraformSourceDiagnostics } from "./automationCatalog";
 
 type ActionId = "start_vm" | "stop_vm" | "restart_vm" | "resize_vm" | "increase_os_disk" | "configure_backup" | "enable_monitoring" | "assess_patches";
 type ActionDefinition = { id: ActionId; label: string; description: string; category: string; requiresValue?: "vmSize" | "diskSize" };
@@ -253,6 +253,16 @@ function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmRe
     finally { setSaving(false); }
   };
 
+  const [diagnostics, setDiagnostics] = useState<TerraformSourceDiagnostics | null>(null);
+  const [diagnosing, setDiagnosing] = useState(false);
+  const [diagnosticsError, setDiagnosticsError] = useState<string | null>(null);
+  const runDiagnostics = async () => {
+    setDiagnosing(true); setDiagnosticsError(null);
+    try { setDiagnostics(await diagnoseTerraformSource()); }
+    catch (cause) { setDiagnosticsError(cause instanceof Error ? cause.message : "Unable to check the Terraform source settings."); }
+    finally { setDiagnosing(false); }
+  };
+
   if (loading && !selectedVm) return <div className="p-4 text-[13px] text-slate-600">Loading Azure VM change builder…</div>;
   if (!selectedVm) return <div className="p-4"><Panel title="VM change engineering"><p className="text-[13px] text-slate-600">This virtual machine is not available in the current connected Azure scope.</p><Link to="/changes" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Select another Azure VM</Link></Panel></div>;
 
@@ -277,6 +287,19 @@ function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmRe
     </div>
 
     <Panel className="mt-3" title="Your recent VM change packages" right={<span className="text-[11px] text-slate-500">Stored in Supabase</span>}>{packages.length ? <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-[11.5px]"><thead className="border-b border-[#E2E8F0] text-[10.5px] uppercase tracking-wide text-slate-500"><tr><th className="pb-2 font-medium">Package</th><th className="pb-2 font-medium">Target</th><th className="pb-2 font-medium">Requested action</th><th className="pb-2 font-medium">Risk</th><th className="pb-2 font-medium">Status</th><th className="pb-2 font-medium">Updated</th></tr></thead><tbody>{packages.map((pkg) => <tr key={pkg.id} className="border-b border-[#EEF2F6]"><td className="py-2 font-mono text-slate-800">{pkg.packageNumber}</td><td className="py-2">{pkg.targetName}</td><td className="py-2">{pkg.actionLabel}</td><td className="py-2">{pkg.riskLevel} ({pkg.riskScore}/100)</td><td className="py-2"><span className={cn("rounded border px-1.5 py-0.5", pkg.status === "submitted" ? "border-[#CFE0F3] bg-[#EFF4FB] text-[#1B4F91]" : "border-slate-200 bg-slate-50 text-slate-700")}>{title(pkg.status)}</span></td><td className="py-2 text-slate-500">{new Date(pkg.updatedAt).toLocaleString()}</td></tr>)}</tbody></table></div> : <p className="text-[12px] text-slate-600">No VM change package has been saved by your account yet.</p>}</Panel>
+
+    <Panel className="mt-3" title="Terraform source connection check" right={<button type="button" onClick={() => void runDiagnostics()} disabled={diagnosing} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#1B4F91] bg-white px-2.5 text-[11.5px] font-medium text-[#1B4F91] hover:bg-[#EFF4FB] disabled:opacity-50"><RefreshCw className={cn("h-3.5 w-3.5", diagnosing && "animate-spin")} />{diagnosing ? "Checking…" : "Run check"}</button>}>
+      <p className="text-[11.5px] text-slate-600">Confirms the stored repository access and source reference used to build governed Terraform plans. Platform administrators only. No stored values are displayed.</p>
+      {diagnosticsError && <p className="mt-2 text-[11.5px] text-red-700">{diagnosticsError}</p>}
+      {diagnostics && <div className="mt-2 space-y-1 text-[11.5px]">
+        <Row label="Repository" value={diagnostics.repository} />
+        <Row label="Source reference" value={diagnostics.ref} />
+        <Row label="Repository access" value={diagnostics.repositoryAccess === 200 ? "Working" : diagnostics.repositoryAccess ? `Refused (${diagnostics.repositoryAccess})` : "Not checked"} />
+        <Row label="Reference resolves" value={diagnostics.refResolution === 200 ? `Yes · ${(diagnostics.revision ?? "").slice(0, 12)}` : diagnostics.refResolution ? `No (${diagnostics.refResolution})` : "Not checked"} />
+        {diagnostics.terraformSource && <Row label="Approved Terraform files" value={Object.values(diagnostics.terraformSource).every(Boolean) ? "All present" : "Incomplete"} />}
+        <div className={cn("mt-2 rounded-md border px-2.5 py-2", diagnostics.problem ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-800")}>{diagnostics.problem ?? "The Terraform source settings are correct."}</div>
+      </div>}
+    </Panel>
   </div>;
 }
 

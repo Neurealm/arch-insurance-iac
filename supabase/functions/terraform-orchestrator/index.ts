@@ -176,9 +176,36 @@ async function apply(request: Request, db: ReturnType<typeof admin>, actor: stri
 }
 async function refresh(request: Request, db: ReturnType<typeof admin>, actor: string, packageId: string) { const { data: pkg } = await db.from("iac_change_packages").select("created_by").eq("id", packageId).maybeSingle(); if (!pkg || (pkg.created_by !== actor && !await isAdmin(db, actor))) throw new Error("The caller is not authorized to inspect this package."); const { data, error } = await db.from("iac_terraform_runs").select("*").eq("package_id", packageId).eq("execution_engine", "hcp_terraform").in("status", ["queued", "running"]).order("created_at", { ascending: false }); if (error) throw error; return reply(request, { runs: await Promise.all((data ?? []).map((run) => sync(db, run as Json))) }); }
 
+async function diagnose(request: Request, db: ReturnType<typeof admin>, actor: string) {
+  if (!await isAdmin(db, actor)) return reply(request, { error: "platform administrator required" }, 403);
+  const report: Json = { repository: REPOSITORY, tokenConfigured: Boolean(str(Deno.env.get("GITHUB_TERRAFORM_SOURCE_TOKEN"))), ref: str(Deno.env.get("HCP_TERRAFORM_SOURCE_REF")) || "main (default)" };
+  const secret = str(Deno.env.get("GITHUB_TERRAFORM_SOURCE_TOKEN"));
+  if (!secret) { report.problem = "GITHUB_TERRAFORM_SOURCE_TOKEN is not configured."; return reply(request, report); }
+  const ref = str(Deno.env.get("HCP_TERRAFORM_SOURCE_REF")) || "main";
+  if (!/^[A-Za-z0-9._/-]{1,160}$/.test(ref) || ref.includes("..")) { report.problem = "HCP_TERRAFORM_SOURCE_REF contains characters that are not allowed."; return reply(request, report); }
+  const head = async (path: string) => { const response = await fetch(`https://api.github.com${path}`, { headers: { accept: "application/vnd.github+json", authorization: `Bearer ${secret}`, "x-github-api-version": "2022-11-28" } }); return { status: response.status, body: await response.json().catch(() => ({})) }; };
+  const repo = await head(`/repos/${REPOSITORY}`);
+  report.repositoryAccess = repo.status;
+  if (repo.status !== 200) { report.problem = repo.status === 401 ? "The GitHub token is invalid or expired." : repo.status === 404 ? "The GitHub token cannot see this repository (wrong account, missing repository access, or SSO not authorized)." : `GitHub returned ${repo.status} for the repository.`; return reply(request, report); }
+  const commit = await head(`/repos/${REPOSITORY}/commits/${encodeURIComponent(ref)}`);
+  report.refResolution = commit.status;
+  if (commit.status !== 200) { report.problem = `The source ref "${ref}" does not exist in ${REPOSITORY} (GitHub returned ${commit.status}).`; return reply(request, report); }
+  const revision = str(obj(commit.body).sha); report.revision = revision;
+  const tree = await head(`/repos/${REPOSITORY}/git/trees/${revision}?recursive=1`);
+  const paths = arr(obj(tree.body).tree).map(obj).map((item) => str(item.path));
+  const present = (prefix: string) => paths.some((path) => path.startsWith(`${prefix}/`) && path.endsWith(".tf"));
+  report.terraformSource = { vmActionRoot: present("terraform/environments/pilot/vm-action"), vmActionModule: present("terraform/modules/vm-action"), vmResizeRoot: present("terraform/environments/pilot/vm-resize"), vmResizeModule: present("terraform/modules/vm-resize") };
+  const missing = Object.entries(report.terraformSource as Record<string, boolean>).filter(([, ok]) => !ok).map(([name]) => name);
+  report.problem = missing.length ? `The approved Terraform source is missing at this revision: ${missing.join(", ")}. The ref probably points at a branch or tag that predates it.` : null;
+  return reply(request, report);
+}
+
+
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: cors(request) }); if (request.method !== "POST") return reply(request, { error: "method not allowed" }, 405);
   const db = admin(); let body: Json; try { body = obj(await request.json()); } catch { return reply(request, { error: "invalid json" }, 400); } const actor = await user(request, db); if (!actor) return reply(request, { error: "authentication required" }, 401);
+  if (body.operation === "diagnose") { try { return await diagnose(request, db, actor.id); } catch (cause) { return reply(request, { error: cause instanceof Error ? cause.message : "Diagnostics failed." }, 409); } }
   const packageId = str(body.packageId); if (!/^[0-9a-f-]{36}$/i.test(packageId)) return reply(request, { error: "valid packageId required" }, 400);
   try { if (body.operation === "resolve") { const result = await packageCapability(db, packageId); return reply(request, { capability: result.capability, binding: await bind(db, actor.id, result.pkg, result.capability, result.inputs), environment: result.env }); } if (body.operation === "plan") return await plan(request, db, actor.id, packageId); if (body.operation === "apply") return await apply(request, db, actor.id, packageId); if (body.operation === "sync") return await refresh(request, db, actor.id, packageId); return reply(request, { error: "unsupported operation" }, 400); }
   catch (cause) { return reply(request, { error: cause instanceof Error ? cause.message : "Terraform orchestration failed." }, 409); }
