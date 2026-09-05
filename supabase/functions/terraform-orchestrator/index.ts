@@ -6,7 +6,7 @@ const HCP_API = "https://app.terraform.io/api/v2";
 const HCP_ORGANIZATION = "Arch-Neugain";
 const REPOSITORY = "Neurealm/arch-insurance-iac";
 const ACTIONS: Record<string, string> = { start_vm: "start", stop_vm: "powerOff", restart_vm: "restart" };
-const PLAN_SUCCESS = new Set(["planned", "planned_and_finished"]);
+const PLAN_SUCCESS = new Set(["planned", "planned_and_finished", "planned_and_saved"]);
 const FAILURE = new Set(["errored", "canceled", "force_canceled", "discarded", "policy_soft_failed", "policy_override"]);
 
 const obj = (value: unknown): Json => value && typeof value === "object" && !Array.isArray(value) ? value as Json : {};
