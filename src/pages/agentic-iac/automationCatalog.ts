@@ -58,6 +58,19 @@ async function invoke(operation: "resolve" | "plan" | "apply" | "sync", packageI
   return data as Record<string, unknown>;
 }
 
+export type TerraformSourceDiagnostics = {
+  repository: string; tokenConfigured: boolean; ref: string;
+  repositoryAccess?: number; refResolution?: number; revision?: string;
+  terraformSource?: Record<string, boolean>; problem?: string | null;
+};
+
+export async function diagnoseTerraformSource() {
+  const { data, error } = await supabase.functions.invoke("terraform-orchestrator", { body: { operation: "diagnose" } });
+  if (error) throw error;
+  return data as TerraformSourceDiagnostics;
+}
+
+
 export const resolveTerraformCapability = (packageId: string) => invoke("resolve", packageId);
 export const createTerraformPlan = (packageId: string) => invoke("plan", packageId);
 export const applyApprovedTerraformPlan = (packageId: string) => invoke("apply", packageId);
