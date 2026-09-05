@@ -176,7 +176,7 @@ ${JSON.stringify(azure, null, 2)}
 Return ONLY JSON with this exact shape:
 {
   "action": "supported action or unknown",
-  "confidence": 0,
+  "confidence": 87,
   "summary": "short explanation",
   "targetVmName": "exact inventory VM name or null",
   "extractedFields": {},
@@ -185,13 +185,16 @@ Return ONLY JSON with this exact shape:
   "clarificationQuestions": ["specific questions for the requester"]
 }
 
-Use low confidence for ambiguous or unsupported requests. Never invent Azure values. A missing target, maintenance window, business impact, owner, rollback plan, or action-specific value must be reported.`;
+"confidence" must be an integer percentage from 0 to 100 (for example 87 means 87% confident) — never a 0-1 fraction. Use a low confidence value (below 60) for ambiguous or unsupported requests, and a high value (60 or above) when the action, target, and required fields are all clear and unambiguous. Never invent Azure values. A missing target, maintenance window, business impact, owner, rollback plan, or action-specific value must be reported.`;
 }
 
 function sanitizeAnalysis(value: unknown): Analysis {
   const raw = record(value);
   const action = text(raw.action) || "unknown";
-  const confidence = typeof raw.confidence === "number" && Number.isFinite(raw.confidence) ? Math.max(0, Math.min(100, Math.round(raw.confidence))) : 0;
+  const rawConfidence = typeof raw.confidence === "number" && Number.isFinite(raw.confidence) ? raw.confidence : 0;
+  // Some model responses express confidence as a 0-1 fraction despite the
+  // prompt requesting a 0-100 percentage; rescale so a stray 0.91 reads as 91.
+  const confidence = Math.max(0, Math.min(100, Math.round(rawConfidence > 0 && rawConfidence <= 1 ? rawConfidence * 100 : rawConfidence)));
   return {
     action: SUPPORTED_ACTIONS.has(action) ? action : "unknown",
     confidence,
