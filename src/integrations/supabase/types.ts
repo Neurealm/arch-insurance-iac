@@ -4311,6 +4311,57 @@ export type Database = {
           },
         ]
       }
+      iac_automation_capabilities: {
+        Row: {
+          action_type: string
+          allowed_environments: string[]
+          created_at: string
+          display_name: string
+          execution_mode: string
+          id: string
+          input_schema: Json
+          lifecycle_status: string
+          module_source: string
+          module_version: string
+          provider: string
+          requires_managed_resource: boolean
+          resource_type: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          allowed_environments?: string[]
+          created_at?: string
+          display_name: string
+          execution_mode: string
+          id?: string
+          input_schema?: Json
+          lifecycle_status?: string
+          module_source: string
+          module_version: string
+          provider?: string
+          requires_managed_resource?: boolean
+          resource_type: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          allowed_environments?: string[]
+          created_at?: string
+          display_name?: string
+          execution_mode?: string
+          id?: string
+          input_schema?: Json
+          lifecycle_status?: string
+          module_source?: string
+          module_version?: string
+          provider?: string
+          requires_managed_resource?: boolean
+          resource_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       iac_change_package_reviews: {
         Row: {
           comment: string | null
@@ -4470,6 +4521,210 @@ export type Database = {
             columns: ["run_id"]
             isOneToOne: false
             referencedRelation: "iac_validation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_package_automation_bindings: {
+        Row: {
+          capability_id: string
+          module_source: string
+          module_version: string
+          package_id: string
+          resolved_at: string
+          resolved_by: string
+          resolved_inputs: Json
+        }
+        Insert: {
+          capability_id: string
+          module_source: string
+          module_version: string
+          package_id: string
+          resolved_at?: string
+          resolved_by: string
+          resolved_inputs: Json
+        }
+        Update: {
+          capability_id?: string
+          module_source?: string
+          module_version?: string
+          package_id?: string
+          resolved_at?: string
+          resolved_by?: string
+          resolved_inputs?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_package_automation_bindings_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "iac_automation_capabilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_package_automation_bindings_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: true
+            referencedRelation: "iac_change_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_terraform_run_events: {
+        Row: {
+          created_at: string
+          detail: Json
+          event_type: string
+          id: string
+          run_id: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          event_type: string
+          id?: string
+          run_id: string
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          event_type?: string
+          id?: string
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_terraform_run_events_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "iac_terraform_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_terraform_runs: {
+        Row: {
+          artifact_uri: string | null
+          capability_id: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          execution_engine: string
+          has_destroy: boolean
+          has_replace: boolean
+          hcp_configuration_version_id: string | null
+          hcp_organization: string | null
+          hcp_plan_id: string | null
+          hcp_plan_json: Json | null
+          hcp_run_id: string | null
+          hcp_run_status: string | null
+          hcp_synced_at: string | null
+          hcp_workspace_id: string | null
+          hcp_workspace_name: string | null
+          id: string
+          module_source: string
+          module_version: string
+          package_id: string
+          plan_run_id: string | null
+          plan_sha256: string | null
+          plan_summary: Json
+          reconciliation: Json
+          requested_by: string
+          resolved_inputs: Json
+          run_type: string
+          runner_correlation_id: string
+          source_revision: string | null
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          artifact_uri?: string | null
+          capability_id: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          execution_engine?: string
+          has_destroy?: boolean
+          has_replace?: boolean
+          hcp_configuration_version_id?: string | null
+          hcp_organization?: string | null
+          hcp_plan_id?: string | null
+          hcp_plan_json?: Json | null
+          hcp_run_id?: string | null
+          hcp_run_status?: string | null
+          hcp_synced_at?: string | null
+          hcp_workspace_id?: string | null
+          hcp_workspace_name?: string | null
+          id?: string
+          module_source: string
+          module_version: string
+          package_id: string
+          plan_run_id?: string | null
+          plan_sha256?: string | null
+          plan_summary?: Json
+          reconciliation?: Json
+          requested_by: string
+          resolved_inputs: Json
+          run_type: string
+          runner_correlation_id: string
+          source_revision?: string | null
+          started_at?: string | null
+          status: string
+        }
+        Update: {
+          artifact_uri?: string | null
+          capability_id?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          execution_engine?: string
+          has_destroy?: boolean
+          has_replace?: boolean
+          hcp_configuration_version_id?: string | null
+          hcp_organization?: string | null
+          hcp_plan_id?: string | null
+          hcp_plan_json?: Json | null
+          hcp_run_id?: string | null
+          hcp_run_status?: string | null
+          hcp_synced_at?: string | null
+          hcp_workspace_id?: string | null
+          hcp_workspace_name?: string | null
+          id?: string
+          module_source?: string
+          module_version?: string
+          package_id?: string
+          plan_run_id?: string | null
+          plan_sha256?: string | null
+          plan_summary?: Json
+          reconciliation?: Json
+          requested_by?: string
+          resolved_inputs?: Json
+          run_type?: string
+          runner_correlation_id?: string
+          source_revision?: string | null
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_terraform_runs_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "iac_automation_capabilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_terraform_runs_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_change_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_terraform_runs_plan_run_id_fkey"
+            columns: ["plan_run_id"]
+            isOneToOne: false
+            referencedRelation: "iac_terraform_runs"
             referencedColumns: ["id"]
           },
         ]
