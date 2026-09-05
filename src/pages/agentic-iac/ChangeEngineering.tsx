@@ -253,6 +253,16 @@ function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmRe
     finally { setSaving(false); }
   };
 
+  const [diagnostics, setDiagnostics] = useState<TerraformSourceDiagnostics | null>(null);
+  const [diagnosing, setDiagnosing] = useState(false);
+  const [diagnosticsError, setDiagnosticsError] = useState<string | null>(null);
+  const runDiagnostics = async () => {
+    setDiagnosing(true); setDiagnosticsError(null);
+    try { setDiagnostics(await diagnoseTerraformSource()); }
+    catch (cause) { setDiagnosticsError(cause instanceof Error ? cause.message : "Unable to check the Terraform source settings."); }
+    finally { setDiagnosing(false); }
+  };
+
   if (loading && !selectedVm) return <div className="p-4 text-[13px] text-slate-600">Loading Azure VM change builder…</div>;
   if (!selectedVm) return <div className="p-4"><Panel title="VM change engineering"><p className="text-[13px] text-slate-600">This virtual machine is not available in the current connected Azure scope.</p><Link to="/changes" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Select another Azure VM</Link></Panel></div>;
 
