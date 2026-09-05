@@ -190,8 +190,8 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
     },
     {
       title: "Validate the approved package",
-      detail: pkg.status === "approved" || pkg.status === "executing" || pkg.status === "executed" ? `Package is ${pkg.status.replace(/_/g, " ")}; approval evidence is retained with this package.` : `Package is ${pkg.status.replace(/_/g, " ")} and cannot be executed.`,
-      state: pkg.status === "approved" || pkg.status === "executing" || pkg.status === "executed" ? "complete" : "blocked",
+      detail: !pkg ? "The change package has not finished loading." : pkg.status === "approved" || pkg.status === "executing" || pkg.status === "executed" ? `Package is ${pkg.status.replace(/_/g, " ")}; approval evidence is retained with this package.` : `Package is ${pkg.status.replace(/_/g, " ")} and cannot be executed.`,
+      state: pkg?.status === "approved" || pkg?.status === "executing" || pkg?.status === "executed" ? "complete" : "blocked",
     },
     {
       title: "Validate the HCP saved plan",
