@@ -13,6 +13,14 @@ const obj = (value: unknown): Json => value && typeof value === "object" && !Arr
 const str = (value: unknown) => typeof value === "string" ? value.trim() : "";
 const arr = (value: unknown) => Array.isArray(value) ? value : [];
 const iso = () => new Date().toISOString();
+// Postgres jsonb does not preserve object key insertion order, so a value
+// round-tripped through the database rarely JSON.stringify-matches a freshly
+// built object with the same fields; sort keys before comparing.
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  if (value && typeof value === "object") return `{${Object.keys(value as Json).sort().map((key) => `${JSON.stringify(key)}:${stableStringify((value as Json)[key])}`).join(",")}}`;
+  return JSON.stringify(value);
+}
 
 function admin() {
   const url = Deno.env.get("SUPABASE_URL");
@@ -66,7 +74,7 @@ async function packageCapability(db: ReturnType<typeof admin>, packageId: string
 }
 async function bind(db: ReturnType<typeof admin>, actor: string, pkg: Json, capability: Json, inputs: Json) {
   const { data: old } = await db.from("iac_package_automation_bindings").select("*").eq("package_id", pkg.id).maybeSingle();
-  if (old) { if (old.capability_id !== capability.id || JSON.stringify(old.resolved_inputs) !== JSON.stringify(inputs)) throw new Error("The package is already bound to different Terraform inputs."); return old; }
+  if (old) { if (old.capability_id !== capability.id || stableStringify(old.resolved_inputs) !== stableStringify(inputs)) throw new Error("The package is already bound to different Terraform inputs."); return old; }
   const { data, error } = await db.from("iac_package_automation_bindings").insert({ package_id: pkg.id, capability_id: capability.id, module_source: capability.module_source, module_version: capability.module_version, resolved_inputs: inputs, resolved_by: actor }).select("*").single();
   if (error) throw error; return data;
 }
@@ -158,7 +166,7 @@ async function plan(request: Request, db: ReturnType<typeof admin>, actor: strin
 async function apply(request: Request, db: ReturnType<typeof admin>, actor: string, packageId: string) {
   const resolved = await packageCapability(db, packageId); if (resolved.pkg.status !== "approved") throw new Error("Only an approved package can be applied."); if (resolved.pkg.created_by !== actor && !await isAdmin(db, actor)) throw new Error("The caller is not authorized to execute this package.");
   const { data: saved } = await db.from("iac_terraform_runs").select("*").eq("package_id", packageId).eq("run_type", "plan").eq("execution_engine", "hcp_terraform").eq("status", "succeeded").order("created_at", { ascending: false }).limit(1).maybeSingle();
-  if (!saved || saved.capability_id !== resolved.capability.id || saved.has_destroy || saved.has_replace || saved.reconciliation?.matched !== true || !saved.hcp_run_id || !saved.hcp_plan_id || JSON.stringify(saved.resolved_inputs) !== JSON.stringify(resolved.inputs)) throw new Error("A clean, request-matched HCP Terraform saved plan is required.");
+  if (!saved || saved.capability_id !== resolved.capability.id || saved.has_destroy || saved.has_replace || saved.reconciliation?.matched !== true || !saved.hcp_run_id || !saved.hcp_plan_id || stableStringify(saved.resolved_inputs) !== stableStringify(resolved.inputs)) throw new Error("A clean, request-matched HCP Terraform saved plan is required.");
   const { data: claimed } = await db.from("iac_change_packages").update({ status: "executing", execution_started_at: iso(), executed_by: actor }).eq("id", packageId).eq("status", "approved").select("id").maybeSingle(); if (!claimed) throw new Error("The package was already claimed for execution.");
   const { data, error } = await db.from("iac_terraform_runs").insert({ package_id: packageId, capability_id: saved.capability_id, run_type: "apply", status: "running", requested_by: actor, plan_run_id: saved.id, module_source: saved.module_source, module_version: saved.module_version, resolved_inputs: resolved.inputs, runner_correlation_id: `hcp-apply:${saved.hcp_run_id}`, execution_engine: "hcp_terraform", hcp_organization: saved.hcp_organization, hcp_workspace_id: saved.hcp_workspace_id, hcp_workspace_name: saved.hcp_workspace_name, hcp_run_id: saved.hcp_run_id, hcp_plan_id: saved.hcp_plan_id, hcp_run_status: saved.hcp_run_status, source_revision: saved.source_revision, artifact_uri: saved.artifact_uri, plan_sha256: saved.plan_sha256, started_at: iso() }).select("*").single();
   if (error) throw error;
