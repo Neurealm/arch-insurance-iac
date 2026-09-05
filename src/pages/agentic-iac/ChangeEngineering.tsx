@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, type AzureVirtualMachine, type AzureVmOperations } from "./azureControlPlane";
 import { listVmChangePackages, saveVmChangePackage, type VmChangePackage } from "./changePackages";
-import { createTerraformPlan } from "./automationCatalog";
+import { createTerraformPlan, diagnoseTerraformSource, type TerraformSourceDiagnostics } from "./automationCatalog";
 
 type ActionId = "start_vm" | "stop_vm" | "restart_vm" | "resize_vm" | "increase_os_disk" | "configure_backup" | "enable_monitoring" | "assess_patches";
 type ActionDefinition = { id: ActionId; label: string; description: string; category: string; requiresValue?: "vmSize" | "diskSize" };
