@@ -4,7 +4,28 @@
 CREATE TABLE public.iac_change_packages (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   created_by uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
-  status text NOT NULL DEFAULT 'submitted'
+  status text NOT NULL DEFAULT 'submitted',
+  -- Single-target columns the N-target migration backfills from. Defaulted
+  -- here (the real schema has them NOT NULL without defaults) purely so this
+  -- isolated fixture stays a one-line insert for tests that don't care.
+  target_resource_id text NOT NULL DEFAULT '',
+  target_name text NOT NULL DEFAULT '',
+  subscription_id text NOT NULL DEFAULT '',
+  resource_group text NOT NULL DEFAULT '',
+  region text NOT NULL DEFAULT '',
+  current_state jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+
+-- Minimal stand-in for the intake table an engineering gap links back to.
+-- The status CHECK is reproduced under its real constraint name because the
+-- engineering-gap migration drops and re-adds it to widen the allowed set.
+CREATE TABLE public.servicenow_intake_requests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  status text NOT NULL DEFAULT 'received',
+  CONSTRAINT servicenow_intake_requests_status_check CHECK (status = ANY (ARRAY[
+    'received', 'analyzing', 'needs_clarification', 'ready_for_engineering',
+    'comment_posted', 'comment_failed', 'demo_comment_generated', 'failed'
+  ]))
 );
 
 CREATE TABLE public.iac_change_package_reviews (

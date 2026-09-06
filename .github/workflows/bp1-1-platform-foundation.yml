@@ -142,6 +142,11 @@ jobs:
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/tests/fixtures/iac_terraform_governance_baseline.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260902190000_add_terraform_automation_governance.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260904110000_add_hcp_terraform_saved_plan_governance.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260906050000_add_typed_input_schema.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260906060000_add_change_package_targets.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260906070000_add_engineering_gaps.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260906080000_add_gap_pr_tracking.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260906090000_add_azapi_resource_execution_mode.sql
       - name: Verify Terraform governance
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/iac_terraform_governance.sql
       - name: Stop clean Supabase database
