@@ -10,7 +10,7 @@ resource "azapi_resource" "network_interface" {
     properties = {
       ipConfigurations = [
         {
-          name       = "ipconfig1"
+          name = "ipconfig1"
           properties = {
             subnet = {
               id = var.subnet_id
@@ -53,17 +53,17 @@ resource "azapi_resource" "virtual_machine" {
         }
         osDisk = {
           createOption = "FromImage"
-          managedDisk  = {
+          managedDisk = {
             storageAccountType = "Standard_LRS"
           }
         }
       }
       osProfile = {
-        computerName       = each.key
-        adminUsername      = var.admin_username
+        computerName  = each.key
+        adminUsername = var.admin_username
         linuxConfiguration = {
           disablePasswordAuthentication = true
-          ssh                           = {
+          ssh = {
             publicKeys = [
               {
                 path    = "/home/${var.admin_username}/.ssh/authorized_keys"
