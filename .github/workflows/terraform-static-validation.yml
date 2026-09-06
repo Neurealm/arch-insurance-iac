@@ -17,12 +17,30 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.16.1"
+      # AI-drafted PRs (terraform-drafting-agent) commit their own best-effort
+      # formatting; run the real terraform fmt here and push a fixup so a
+      # purely cosmetic diff never blocks CI on those branches. Never applies
+      # to human-authored branches -- the Formatting step below still gates
+      # every other PR exactly as before.
+      - name: Auto-format AI-drafted Terraform
+        if: startsWith(github.head_ref, 'ai-draft/')
+        run: |
+          set -e
+          terraform fmt -recursive terraform
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -am "chore: terraform fmt (AI-draft auto-format)"
+            git push origin "HEAD:${{ github.head_ref }}"
+          fi
       - name: Formatting
         run: terraform fmt -check -recursive terraform
       - name: Validate pilot backend configuration
