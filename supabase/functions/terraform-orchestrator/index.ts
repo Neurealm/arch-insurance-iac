@@ -86,6 +86,14 @@ function inputsFor(pkg: Json, capability: Json, targetResourceId: string) {
   }
   return inputs;
 }
+/** Every target resource this package declares, from the immutable-once-submitted child table. */
+async function packageTargets(db: ReturnType<typeof admin>, packageId: string) {
+  const { data, error } = await db.from("iac_change_package_targets").select("target_resource_id").eq("package_id", packageId);
+  if (error) throw error;
+  const targets = (data ?? []).map((row) => str(row.target_resource_id)).filter(Boolean);
+  if (!targets.length) throw new Error("The change package has no declared target resources.");
+  return targets;
+}
 async function packageCapability(db: ReturnType<typeof admin>, packageId: string) {
   const { data: pkg, error } = await db.from("iac_change_packages").select("*").eq("id", packageId).maybeSingle();
   if (error || !pkg) throw new Error("Change package was not found.");
@@ -93,7 +101,10 @@ async function packageCapability(db: ReturnType<typeof admin>, packageId: string
   if (!capability) throw new Error(`No approved Terraform capability exists for ${pkg.action_type}.`);
   const env = environment(pkg as Json);
   if (!(capability.allowed_environments ?? []).map((value: string) => value.toLowerCase()).includes(env)) throw new Error(`${capability.display_name} is not approved for ${env}.`);
-  return { pkg: pkg as Json, capability: capability as Json, inputs: inputsFor(pkg as Json, capability as Json, str(pkg.target_resource_id)), env };
+  const targets = await packageTargets(db, packageId);
+  const maxTargets = Number(capability.max_targets_per_run ?? 1);
+  if (targets.length > maxTargets) throw new Error(`${capability.display_name} allows at most ${maxTargets} target resource(s) per run; this package declares ${targets.length}.`);
+  return { pkg: pkg as Json, capability: capability as Json, inputs: inputsFor(pkg as Json, capability as Json, str(pkg.target_resource_id)), env, targets };
 }
 async function bind(db: ReturnType<typeof admin>, actor: string, pkg: Json, capability: Json, inputs: Json) {
   const { data: old } = await db.from("iac_package_automation_bindings").select("*").eq("package_id", pkg.id).maybeSingle();
@@ -188,12 +199,32 @@ function resourceIds(value: unknown, found = new Set<string>()): Set<string> {
   }
   return found;
 }
-function safeguards(plan: Json, target: string) { const changes = arr(plan.resource_changes).map(obj); const destroy = changes.some((item) => arr(obj(item.change).actions).map(str).includes("delete")); const replace = changes.some((item) => { const actions = arr(obj(item.change).actions).map(str); return actions.includes("delete") && actions.includes("create"); }); const affected = [...resourceIds(obj(plan.planned_values))]; const actions = changes.reduce((result, item) => { for (const action of arr(obj(item.change).actions).map(str)) result[action] = Number(result[action] ?? 0) + 1; return result; }, {} as Json); return { destroy, replace, affected, actions, matched: affected.length === 1 && affected[0] === target.toLowerCase() && !destroy && !replace }; }
+/**
+ * Blocks a plan unless it touches EXACTLY the package's declared targets:
+ * no resource outside that set (`unexpected`, blocks a plan that reaches
+ * beyond the approved boundary) and none of the declared targets missing
+ * from the plan (`missingFromPlan`, blocks a silently-partial batch from
+ * reading as complete). Destroy/replace still unconditionally block
+ * regardless of how many targets are declared. For the N=1 case this is
+ * exactly the prior single-target exact-match check.
+ */
+function safeguards(plan: Json, targets: string[]) {
+  const changes = arr(plan.resource_changes).map(obj);
+  const destroy = changes.some((item) => arr(obj(item.change).actions).map(str).includes("delete"));
+  const replace = changes.some((item) => { const actions = arr(obj(item.change).actions).map(str); return actions.includes("delete") && actions.includes("create"); });
+  const affected = [...resourceIds(obj(plan.planned_values))];
+  const actions = changes.reduce((result, item) => { for (const action of arr(obj(item.change).actions).map(str)) result[action] = Number(result[action] ?? 0) + 1; return result; }, {} as Json);
+  const expected = new Set(targets.map((target) => target.toLowerCase()));
+  const affectedSet = new Set(affected);
+  const unexpected = affected.filter((item) => !expected.has(item));
+  const missingFromPlan = [...expected].filter((item) => !affectedSet.has(item));
+  return { destroy, replace, affected, actions, unexpected, missingFromPlan, matched: unexpected.length === 0 && missingFromPlan.length === 0 && !destroy && !replace };
+}
 function runUrl(ws: string, run: string) { return `https://app.terraform.io/app/${encodeURIComponent(HCP_ORGANIZATION)}/workspaces/${encodeURIComponent(ws)}/runs/${encodeURIComponent(run)}`; }
 async function sync(db: ReturnType<typeof admin>, run: Json) {
   const remote = obj((await hcp(`/runs/${encodeURIComponent(str(run.hcp_run_id))}`, token("plan"))).data); const hcpStatus = str(obj(remote.attributes).status); const planId = relation(remote, "plan") || str(run.hcp_plan_id);
   const update: Json = { hcp_run_status: hcpStatus, hcp_plan_id: planId || null, hcp_synced_at: iso() };
-  if (run.run_type === "plan" && PLAN_SUCCESS.has(hcpStatus) && planId) { const plan = obj(await hcp(`/plans/${encodeURIComponent(planId)}/json-output`, token("plan"))); const guard = safeguards(plan, str(obj(run.resolved_inputs).target_resource_id)); Object.assign(update, { status: guard.matched ? "succeeded" : "blocked", completed_at: iso(), artifact_uri: runUrl(str(run.hcp_workspace_name), str(run.hcp_run_id)), plan_sha256: await digest(JSON.stringify(plan)), plan_summary: { actions: guard.actions, hcpStatus, sourceRevision: run.source_revision }, reconciliation: { matched: guard.matched, expectedTarget: str(obj(run.resolved_inputs).target_resource_id).toLowerCase(), affectedResourceIds: guard.affected }, has_destroy: guard.destroy, has_replace: guard.replace, hcp_plan_json: { formatVersion: str(plan.format_version), terraformVersion: str(plan.terraform_version), resourceChanges: arr(plan.resource_changes).length, guardrails: guard }, error_message: guard.matched ? null : "HCP Terraform plan did not match the approved VM boundary." }); }
+  if (run.run_type === "plan" && PLAN_SUCCESS.has(hcpStatus) && planId) { const plan = obj(await hcp(`/plans/${encodeURIComponent(planId)}/json-output`, token("plan"))); const targets = await packageTargets(db, str(run.package_id)); const guard = safeguards(plan, targets); Object.assign(update, { status: guard.matched ? "succeeded" : "blocked", completed_at: iso(), artifact_uri: runUrl(str(run.hcp_workspace_name), str(run.hcp_run_id)), plan_sha256: await digest(JSON.stringify(plan)), plan_summary: { actions: guard.actions, hcpStatus, sourceRevision: run.source_revision }, reconciliation: { matched: guard.matched, expectedTargets: targets.map((target) => target.toLowerCase()), affectedResourceIds: guard.affected, unexpected: guard.unexpected, missingFromPlan: guard.missingFromPlan }, has_destroy: guard.destroy, has_replace: guard.replace, hcp_plan_json: { formatVersion: str(plan.format_version), terraformVersion: str(plan.terraform_version), resourceChanges: arr(plan.resource_changes).length, guardrails: guard }, error_message: guard.matched ? null : "HCP Terraform plan did not match the approved VM boundary." }); }
   else if (run.run_type === "apply" && hcpStatus === "applied") Object.assign(update, { status: "succeeded", completed_at: iso(), artifact_uri: runUrl(str(run.hcp_workspace_name), str(run.hcp_run_id)), error_message: null });
   else if (FAILURE.has(hcpStatus)) Object.assign(update, { status: hcpStatus === "policy_soft_failed" ? "blocked" : "failed", completed_at: iso(), error_message: `HCP Terraform run ended with ${hcpStatus}.` });
   const { data, error } = await db.from("iac_terraform_runs").update(update).eq("id", run.id).select("*").single(); if (error) throw error;

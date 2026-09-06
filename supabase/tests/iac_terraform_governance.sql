@@ -62,6 +62,26 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'HCP saved-plan identity constraint is missing';
   END IF;
+
+  -- Phase 2: N-target change packages (iac_change_package_targets).
+  IF EXISTS (
+    SELECT 1 FROM public.iac_change_packages p
+    WHERE NOT EXISTS (SELECT 1 FROM public.iac_change_package_targets t WHERE t.package_id = p.id)
+  ) THEN RAISE EXCEPTION 'a change package exists with zero declared targets'; END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.iac_change_packages p
+    WHERE p.target_count <> (SELECT count(*) FROM public.iac_change_package_targets t WHERE t.package_id = p.id)
+  ) THEN RAISE EXCEPTION 'target_count is out of sync with iac_change_package_targets for at least one package'; END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.iac_automation_capabilities
+    WHERE lifecycle_status = 'approved' AND (max_targets_per_run < 1 OR max_targets_per_run > 50)
+  ) THEN RAISE EXCEPTION 'an approved capability has max_targets_per_run outside [1, 50]'; END IF;
+
+  IF NOT (
+    SELECT relrowsecurity FROM pg_class WHERE oid = 'public.iac_change_package_targets'::regclass
+  ) THEN RAISE EXCEPTION 'RLS is not enabled on iac_change_package_targets'; END IF;
 END;
 $$;
 
