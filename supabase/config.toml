@@ -5,8 +5,8 @@ project_id = "esfpbiishpkvhlejnxzq"
 [functions.servicenow-intake]
 verify_jwt = false
 
-# User calls are validated inside the function and runner callbacks use a
-# dedicated secret. Gateway JWT verification would reject legitimate runner
-# callbacks before the function can validate them.
+# User JWTs are verified inside the function with Auth.getUser(). Every
+# package operation also checks ownership/administrator access before privileged
+# workflow operations. This endpoint does not accept legacy runner callbacks.
 [functions.terraform-orchestrator]
 verify_jwt = false

@@ -10,6 +10,11 @@ export type VmChangePackageReview = {
   comment: string | null;
   reviewedBy: string;
   reviewedAt: string;
+  approvedPlanRunId: string | null;
+  approvedPlanSha256: string | null;
+  approvedSourceRevision: string | null;
+  approvedHcpRunId: string | null;
+  approvedHcpPlanId: string | null;
 };
 
 export type VmChangePackage = {
@@ -84,6 +89,11 @@ function mapReview(row: Record<string, any>): VmChangePackageReview {
     comment: row.comment ?? null,
     reviewedBy: row.reviewed_by,
     reviewedAt: row.reviewed_at,
+    approvedPlanRunId: row.approved_plan_run_id ?? null,
+    approvedPlanSha256: row.approved_plan_sha256 ?? null,
+    approvedSourceRevision: row.approved_source_revision ?? null,
+    approvedHcpRunId: row.approved_hcp_run_id ?? null,
+    approvedHcpPlanId: row.approved_hcp_plan_id ?? null,
   };
 }
 
@@ -128,12 +138,15 @@ export async function listVmChangePackageReviews(packageId: string) {
   return (data ?? []).map(mapReview);
 }
 
-export async function reviewVmChangePackage(packageId: string, decision: ChangeReviewDecision, comment?: string) {
+export async function reviewVmChangePackage(packageId: string, decision: ChangeReviewDecision, comment?: string, displayedPlan?: { id: string; planSha256: string | null } | null) {
+  if (decision === "approved" && !displayedPlan?.planSha256) throw new Error("Refresh and review an exact saved Terraform plan before approval.");
   const rpc = supabase as unknown as { rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: Record<string, any>; error: Error | null }> };
-  const { data, error } = await rpc.rpc("review_iac_change_package", {
+  const { data, error } = await rpc.rpc("review_iac_terraform_plan", {
     p_package_id: packageId,
     p_decision: decision,
     p_comment: comment?.trim() || null,
+    p_plan_run_id: decision === "approved" ? displayedPlan?.id : null,
+    p_plan_sha256: decision === "approved" ? displayedPlan?.planSha256 : null,
   });
   if (error) throw error;
   return mapReview(data);

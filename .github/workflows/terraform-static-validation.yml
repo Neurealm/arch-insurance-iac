@@ -6,12 +6,21 @@ on:
       - "terraform/**"
       - "runner/**"
       - "supabase/functions/terraform-orchestrator/**"
+      - "supabase/functions/terraform-drafting-agent/**"
+      - "supabase/functions/_shared/terraform-draft-policy*"
+      - "scripts/validate-terraform-drafts.ts"
       - "supabase/migrations/*terraform*"
       - ".github/workflows/terraform-static-validation.yml"
       - ".github/workflows/hcp-terraform-authentication-test.yml"
   push:
     branches: [main]
-    paths: ["terraform/**"]
+    paths:
+      - "terraform/**"
+      - "supabase/functions/terraform-drafting-agent/**"
+      - "supabase/functions/_shared/terraform-draft-policy*"
+      - "scripts/validate-terraform-drafts.ts"
+      - ".github/workflows/terraform-static-validation.yml"
+  workflow_dispatch:
 
 jobs:
   validate:
@@ -20,6 +29,19 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: "2.9.6"
+      # Parse untrusted drafts before terraform init could install a provider.
+      # No HCP/Azure/GitHub secrets are exposed to the validator or Terraform.
+      - name: Test draft HCL security policy
+        # GopherJS's Go runtime enumerates process.env during initialization.
+        # No cloud credentials are supplied; no network/run/read is granted.
+        run: deno test --allow-env --no-config --no-lock --node-modules-dir=none supabase/functions/_shared/terraform-draft-policy.test.ts
+      - name: Validate generated draft archives
+        run: deno run --allow-env --no-config --no-lock --node-modules-dir=none --allow-read=terraform scripts/validate-terraform-drafts.ts
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.16.1"

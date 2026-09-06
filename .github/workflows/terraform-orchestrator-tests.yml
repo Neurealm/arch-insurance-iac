@@ -1,0 +1,34 @@
+name: Terraform orchestrator security tests
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/terraform-orchestrator/**"
+      - "supabase/functions/_shared/github.ts"
+      - ".github/workflows/terraform-orchestrator-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/terraform-orchestrator/**"
+      - "supabase/functions/_shared/github.ts"
+      - ".github/workflows/terraform-orchestrator-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authorization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      # Node's built-in runner/type stripping: no npm install, credentials,
+      # database, Terraform CLI, or cloud operations are needed for this gate.
+      - name: Verify the production request authorization boundary
+        run: node --test supabase/functions/terraform-orchestrator/request-handler.test.ts supabase/functions/terraform-orchestrator/plan-digest.test.ts

@@ -1,5 +1,12 @@
 # Controlled Terraform runner
 
+**Legacy design reference, not the active implementation.** The VM pilot now
+uses HCP Terraform as its execution/state authority. See
+[`terraform/README.md`](../terraform/README.md) and the
+[current handoff](../docs/implementation-status-2026-09-06.md). The contract and
+original requirements below are retained for history; do not build a second
+runner or introduce Blob state for the HCP configuration.
+
 This directory defines the trusted execution boundary between the application orchestrator and Azure. It intentionally contains no deployable runner implementation yet because the Azure hosting service, private networking, and managed identity must be agreed before code is selected.
 
 The runner must:

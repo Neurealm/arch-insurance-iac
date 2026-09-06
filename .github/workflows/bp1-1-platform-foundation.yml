@@ -11,6 +11,7 @@ on:
       - "scripts/validate-bp1-1.sh"
       - ".github/workflows/bp1-1-platform-foundation.yml"
       - "package.json"
+      - "package-lock.json"
       - "bun.lockb"
   push:
     branches: [main]
@@ -24,7 +25,6 @@ jobs:
   changes:
     name: Select affected validation suites
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     permissions:
       contents: read
       pull-requests: read
@@ -33,26 +33,38 @@ jobs:
       database: ${{ steps.filter.outputs.database }}
       terraform: ${{ steps.filter.outputs.terraform }}
     steps:
+      # The job itself must run for push/dispatch. Skipping it causes every
+      # dependent suite to be skipped even when its own condition is true.
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: dorny/paths-filter@v3
+        if: github.event_name == 'pull_request'
         id: filter
         with:
           filters: |
             app:
               - 'src/**'
               - 'package.json'
+              - 'package-lock.json'
               - 'bun.lockb'
               - 'vite.config.*'
               - 'tsconfig*.json'
+              - '.github/workflows/bp1-1-platform-foundation.yml'
             database:
               - 'supabase/**'
               - 'docs/bp1-1-*.md'
               - 'docs/bp1.1-*.md'
               - 'scripts/validate-bp1-1.sh'
+              - '.github/workflows/bp1-1-platform-foundation.yml'
             terraform:
               - 'terraform/**'
               - 'supabase/functions/terraform-orchestrator/**'
-              - 'supabase/migrations/*terraform*'
+              - 'supabase/migrations/**'
+              - 'supabase/tests/iac_terraform*'
+              - 'supabase/tests/fixtures/iac_terraform_governance_baseline.sql'
               - '.github/workflows/terraform-static-validation.yml'
+              - '.github/workflows/bp1-1-platform-foundation.yml'
 
   app:
     name: App validation (typecheck, lint, tests, build)
@@ -142,6 +154,7 @@ jobs:
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/tests/fixtures/iac_terraform_governance_baseline.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260902190000_add_terraform_automation_governance.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260904110000_add_hcp_terraform_saved_plan_governance.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260905040000_fix_hcp_run_id_unique_scope.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260906050000_add_typed_input_schema.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260906060000_add_change_package_targets.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260906070000_add_engineering_gaps.sql
@@ -149,6 +162,11 @@ jobs:
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260906090000_add_azapi_resource_execution_mode.sql
       - name: Verify Terraform governance
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/iac_terraform_governance.sql
+      - name: Apply hardened approval and capability migrations
+        run: |
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/project-migrations/20260906130519_add_capability_ci_promotion.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/project-migrations/20260906130620_enforce_exact_terraform_approval.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/project-migrations/20260906130851_authoritative_vm_validation.sql
       - name: Stop clean Supabase database
         if: always()
         run: supabase stop --no-backup

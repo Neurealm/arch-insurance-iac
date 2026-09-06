@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.112.4";
+import { CREATE_VM_INPUT_SCHEMA, CREATE_VM_VARIABLES, validateDraft, validateGeneratedDraftFiles, type DraftResult, type DraftVariable } from "../_shared/terraform-draft-policy.ts";
 
 // This agent is the one place in the whole platform that is allowed to
 // WRITE to GitHub (open a branch, commit files, open a PR) -- it uses its
@@ -9,11 +10,6 @@ import { createClient } from "npm:@supabase/supabase-js@2.112.4";
 type Json = Record<string, unknown>;
 const REPOSITORY = "Neurealm/arch-insurance-iac";
 const MODEL = "google/gemini-2.5-flash";
-// Every resource type an AI-drafted module is allowed to declare. Anything
-// else in the LLM's output is rejected outright, before it ever reaches a
-// commit -- this is the one hard technical backstop behind "AI may draft a
-// module" in the governance doc; everything else is human review + CI.
-const ALLOWED_RESOURCE_TYPES = ["Microsoft.Compute/virtualMachines", "Microsoft.Network/networkInterfaces"];
 
 const obj = (value: unknown): Json => value && typeof value === "object" && !Array.isArray(value) ? value as Json : {};
 const str = (value: unknown) => typeof value === "string" ? value.trim() : "";
@@ -77,17 +73,6 @@ async function openPullRequest(token: string, branch: string, baseBranch: string
 }
 
 // --- Drafting ---------------------------------------------------------------
-type DraftVariable = { name: string; type: string; description: string };
-type DraftResult = {
-  moduleName: string;
-  displayName: string;
-  rationale: string;
-  variables: DraftVariable[];
-  moduleMainTf: string;
-  moduleVariablesTf: string;
-  moduleOutputsTf: string;
-  inputSchema: Json;
-};
 
 function buildPrompt(gap: Json, exemplar: string) {
   const context = obj(gap.context);
@@ -103,9 +88,12 @@ ${exemplar}
 
 Requirements for your new module:
 - Use ONLY these two Azure resource types, both via the "azapi_resource" resource type (NOT azapi_resource_action -- that is only for actions on already-existing resources): "Microsoft.Compute/virtualMachines@2024-07-01" and "Microsoft.Network/networkInterfaces@2023-11-01". Do not declare any other resource type.
-- The module must create MULTIPLE VMs from a single apply: use "for_each = toset(var.vm_names)" (or equivalent) across both resources, one NIC per VM, each VM referencing its own NIC's resource_id.
-- Declare (at minimum) these variables, matching the existing module's validation style: target_resource_group_id (string, ARM ID of the destination resource group), subnet_id (string, ARM ID of the subnet each NIC attaches to), vm_names (list(string), 1 to 50 entries), vm_size (string, must match "^Standard_[A-Za-z0-9_]+$"), admin_username (string), ssh_public_key (string), os_publisher (string), os_offer (string), os_sku (string), os_version (string), change_request_id (string, length >= 6, immutable correlation id -- same lifecycle precondition pattern as the exemplar), tags (map(string), optional, default {}).
-- variables.tf must include a "validation" block for every variable that has an obvious constraint (vm_size pattern, change_request_id length, vm_names count between 1 and 50).
+- The destination resource group, virtual network and subnet ALREADY EXIST and are managed outside this module. Never declare a Microsoft.Resources/resourceGroups resource (or any network resource other than the NIC) -- take the resource group and subnet as ARM ID inputs and reference them. A draft that declares any resource type outside the two allowed above is rejected outright and never reaches review.
+- Declare exactly one azapi_resource VM and one azapi_resource NIC, both with "for_each = toset(var.vm_names)", "parent_id = var.target_resource_group_id", "location = var.location" and names derived from each.key. Each VM references its own NIC's resource_id.
+- Declare EXACTLY these variable names/types (no additional variables): ${JSON.stringify(CREATE_VM_VARIABLES)}. Only tags may have a default, which must be {}. Do not put interpolation or directives in descriptions.
+- variables.tf must validate vm_size using "^Standard_[A-Za-z0-9_]+$", change_request_id length >= 6, and vm_names count between 1 and 20. Both resources require lifecycle/precondition with the exact condition length(trimspace(var.change_request_id)) >= 6.
+- Do not use data sources, modules, providers, backend, provisioners, dynamic blocks, file/template/environment functions, local file access, heredocs, block comments, customData, userData, adminPassword, or provider-defined functions. Use SSH public key authentication. No execution hooks or ignore_changes.
+- The inputSchema MUST be exactly this canonical server-owned shape: ${JSON.stringify(CREATE_VM_INPUT_SCHEMA)}.
 - outputs.tf must export a map from vm name to the created VM's resource_id.
 - Do not reference any provider block, backend block, or the tfc_azure_dynamic_credentials variable in the module itself (that belongs to the root config, not the module) -- only resource/variable/output blocks.
 - HCL string escaping: inside a double-quoted HCL string, a literal backslash must be written as "\\\\" (two characters). A regex like Microsoft\.Compute inside an HCL string literal MUST be written as "Microsoft\\\\.Compute" (matching the exemplar's target_resource_id validation exactly) -- "Microsoft\\.Compute" (one backslash) is invalid HCL and will fail terraform validate. Re-check every regex() call in your output against this rule before returning.
@@ -219,34 +207,10 @@ function alignEquals(content: string): string {
   return out.join("\n");
 }
 
-/** Every hard rejection reason is returned, not thrown, so the caller can log all of them at once. */
-function validateDraft(draft: DraftResult): string[] {
-  const problems: string[] = [];
-  if (!/^[a-z][a-z0-9-]{2,39}$/.test(draft.moduleName)) problems.push("moduleName is not valid lowercase kebab-case (3-40 chars).");
-  if (["vm-action", "vm-resize"].includes(draft.moduleName)) problems.push("moduleName collides with an existing module.");
-  for (const [label, content] of [["moduleMainTf", draft.moduleMainTf], ["moduleVariablesTf", draft.moduleVariablesTf], ["moduleOutputsTf", draft.moduleOutputsTf]] as const) {
-    if (!content || content.length < 20) problems.push(`${label} is empty or too short.`);
-    if (content.length > 20000) problems.push(`${label} is implausibly large.`);
-  }
-  if (/azapi_resource_action/.test(draft.moduleMainTf)) problems.push("moduleMainTf uses azapi_resource_action, which is only for actions on existing resources.");
-  const typeMatches = [...draft.moduleMainTf.matchAll(/type\s*=\s*"([^"@]+)@/g)].map((match) => match[1]);
-  if (!typeMatches.length) problems.push("moduleMainTf declares no recognizable azapi_resource type.");
-  for (const type of typeMatches) if (!ALLOWED_RESOURCE_TYPES.includes(type)) problems.push(`moduleMainTf declares a disallowed resource type: ${type}`);
-  const schema = obj(draft.inputSchema);
-  const fields = arr(schema.fields).map(obj);
-  if (!fields.length) problems.push("inputSchema declares no fields.");
-  for (const field of fields) {
-    const source = str(field.source);
-    if (source !== "target" && source !== "package_number_or_ticket" && !source.startsWith("parameters.")) problems.push(`inputSchema field "${str(field.key)}" has an invalid source: ${source}`);
-    if (!str(field.key)) problems.push("inputSchema has a field with no key.");
-  }
-  return problems;
-}
-
 function templateRootFiles(moduleName: string, variables: DraftVariable[]) {
   const moduleSnake = moduleName.replace(/-/g, "_");
   const wiring = variables.map((variable) => `  ${variable.name} = var.${variable.name}`).join("\n");
-  const varDecls = variables.map((variable) => `variable "${variable.name}" {\n  type        = ${variable.type}\n  description = ${JSON.stringify(variable.description || variable.name)}\n}`).join("\n\n");
+  const varDecls = variables.map((variable) => `variable "${variable.name}" {\n  type        = ${variable.type}\n  description = ${JSON.stringify(variable.description || variable.name)}\n${variable.name === "tags" ? "  default     = {}\n" : ""}}`).join("\n\n");
   const main = `provider "azapi" {
   # HCP Terraform supplies these short-lived files through its Azure dynamic
   # credentials integration. Do not replace this with a client secret.
@@ -339,6 +303,9 @@ variable "change_request_id" {
 }`;
 
 async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
+  if (str(gap.provider).toLowerCase() !== "azure" || str(gap.action_type) !== "create_vm" || str(gap.resource_type).toLowerCase() !== "microsoft.compute/virtualmachines") {
+    return { outcome: "unsupported", message: "Draft generation supports Azure create_vm gaps only." };
+  }
   const draft = await draftWithGemini(gap, EXEMPLAR);
   draft.moduleMainTf = sanitizeHcl(draft.moduleMainTf);
   draft.moduleVariablesTf = sanitizeHcl(draft.moduleVariablesTf);
@@ -349,16 +316,11 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
     return { outcome: "validation_failed", problems };
   }
 
-  const { data: capability, error: capabilityError } = await db.from("iac_automation_capabilities").insert({
-    provider: str(gap.provider), resource_type: str(gap.resource_type), action_type: str(gap.action_type),
-    display_name: draft.displayName, module_source: `terraform/modules/${draft.moduleName}`, module_version: "v1.0.0",
-    execution_mode: "azapi_resource", lifecycle_status: "draft", input_schema: draft.inputSchema,
-    allowed_environments: ["development"], requires_managed_resource: false, max_targets_per_run: 20,
-  }).select("id").single();
-  if (capabilityError) { await addEvent(db, str(gap.id), "draft_capability_insert_failed", { message: capabilityError.message }); return { outcome: "capability_insert_failed", message: capabilityError.message }; }
-
   const token = draftToken();
-  const root = templateRootFiles(draft.moduleName, draft.variables);
+  // Root HCL is built only from the server-owned interface, never LLM types,
+  // names or descriptions (even after validation). The agent owns no OIDC or
+  // provider configuration and cannot add variables to this trusted template.
+  const root = templateRootFiles(draft.moduleName, CREATE_VM_VARIABLES);
   const files = [
     { path: `terraform/modules/${draft.moduleName}/main.tf`, content: draft.moduleMainTf },
     { path: `terraform/modules/${draft.moduleName}/variables.tf`, content: draft.moduleVariablesTf },
@@ -368,13 +330,25 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
     { path: `terraform/environments/pilot/${draft.moduleName}/variables.tf`, content: root.variablesTf },
     { path: `terraform/environments/pilot/${draft.moduleName}/versions.tf`, content: root.versions },
   ].map((file) => ({ ...file, content: alignEquals(file.content) }));
+  const fileProblems = validateGeneratedDraftFiles(draft, files);
+  if (fileProblems.length) {
+    await addEvent(db, str(gap.id), "draft_validation_failed", { problems: fileProblems });
+    return { outcome: "validation_failed", problems: fileProblems };
+  }
+  const { data: capability, error: capabilityError } = await db.from("iac_automation_capabilities").insert({
+    provider: str(gap.provider), resource_type: str(gap.resource_type), action_type: str(gap.action_type),
+    display_name: draft.displayName, module_source: `terraform/modules/${draft.moduleName}`, module_version: "v1.0.0",
+    execution_mode: "azapi_resource", lifecycle_status: "draft", input_schema: CREATE_VM_INPUT_SCHEMA,
+    allowed_environments: ["development"], requires_managed_resource: false, max_targets_per_run: 20,
+  }).select("id").single();
+  if (capabilityError) { await addEvent(db, str(gap.id), "draft_capability_insert_failed", { message: capabilityError.message }); return { outcome: "capability_insert_failed", message: capabilityError.message }; }
   const branch = `ai-draft/${draft.moduleName}-${str(gap.id).slice(0, 8)}`;
   const prBody = [
     `AI-drafted Terraform module for **${str(gap.action_type)}** (${str(gap.resource_type)}), generated from engineering gap \`${gap.id}\`.`,
     "",
     draft.rationale,
     "",
-    "**This module is not yet approved.** CI on this PR validates syntax only (`terraform fmt` + `terraform validate`, no cloud credentials, no plan/apply). A platform administrator must review the code, test it, and approve the linked draft capability before it can be used by any governed change package.",
+    "**This module is not yet approved.** A restrictive parsed-HCL policy checks all generated files before this PR is created. CI enforces that policy, `terraform fmt` and `terraform validate` without cloud credentials or plan/apply. A platform administrator must review the code, test it, and approve the linked draft capability before any governed change package may use it.",
     "",
     `Draft capability id: \`${capability.id}\``,
   ].join("\n");

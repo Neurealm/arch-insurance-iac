@@ -2,6 +2,12 @@
 
 Last verified: 2026-09-04
 
+**Historical snapshot:** the implementation advanced after this date. Read
+[the September 6 inspection and continuation](implementation-status-2026-09-06.md)
+first for current code status, remaining gaps and test evidence. The deployment
+blockers and single-target limitations below describe September 4, not a fresh
+inspection of the running platform.
+
 This is the authoritative implementation history and continuation guide for the
 governed Azure VM Terraform pilot. It is deliberately factual: a feature is
 either **validated**, **implemented but not deployed**, or **not enabled**.
