@@ -6,7 +6,6 @@ const VM_TYPE = "Microsoft.Compute/virtualMachines";
 const HCP_API = "https://app.terraform.io/api/v2";
 const HCP_ORGANIZATION = "Arch-Neugain";
 const REPOSITORY = "Neurealm/arch-insurance-iac";
-const ACTIONS: Record<string, string> = { start_vm: "start", stop_vm: "powerOff", restart_vm: "restart" };
 const PLAN_SUCCESS = new Set(["planned", "planned_and_finished", "planned_and_saved"]);
 const FAILURE = new Set(["errored", "canceled", "force_canceled", "discarded", "policy_soft_failed", "policy_override"]);
 
@@ -55,13 +54,36 @@ function workspace(env: string) {
   if (!id || !name) throw new Error(`No configured HCP Terraform workspace is approved for ${env}.`);
   return { id, name };
 }
-function inputsFor(pkg: Json, capability: Json) {
-  const parameters = obj(pkg.parameters); const action = str(pkg.action_type);
-  const inputs: Json = { target_resource_id: str(pkg.target_resource_id), change_request_id: str(parameters.serviceNowTicket) || str(pkg.package_number) };
-  if (ACTIONS[action]) inputs.action = ACTIONS[action];
-  if (action === "resize_vm") { const size = str(parameters.requestedVmSize); if (!/^Standard_[A-Za-z0-9_]+$/.test(size)) throw new Error("A valid requested VM size is required."); inputs.requested_vm_size = size; }
-  const missing = arr(obj(capability.input_schema).required).map(str).filter((key) => !inputs[key]);
-  if (missing.length) throw new Error(`Required Terraform inputs are missing: ${missing.join(", ")}.`);
+function dotpath(source: Json, path: string): unknown {
+  return path.split(".").reduce<unknown>((value, key) => obj(value)[key], source);
+}
+/**
+ * Computes Terraform inputs entirely from the capability's own
+ * input_schema.fields (see the typed shape documented in migration
+ * 20260906050000): each field declares where its value comes from
+ * ("target", "package_number_or_ticket", or "parameters.<dotpath>") and how
+ * to validate it. Adding a new approved capability with the right schema
+ * makes it usable without any code change here.
+ */
+function inputsFor(pkg: Json, capability: Json, targetResourceId: string) {
+  const schema = obj(capability.input_schema);
+  const inputs: Json = {};
+  if (typeof schema.action === "string") inputs.action = schema.action;
+  for (const rawField of arr(schema.fields)) {
+    const field = obj(rawField);
+    const key = str(field.key);
+    if (!key) continue;
+    let value: unknown;
+    if (field.source === "target") value = targetResourceId;
+    else if (field.source === "package_number_or_ticket") value = str(obj(pkg.parameters).serviceNowTicket) || str(pkg.package_number);
+    else if (typeof field.source === "string" && field.source.startsWith("parameters.")) value = dotpath(obj(pkg.parameters), field.source.slice("parameters.".length));
+    if (field.required && (value === undefined || value === null || value === "")) throw new Error(`Required Terraform input "${key}" could not be resolved.`);
+    if (typeof value === "string") {
+      if (typeof field.pattern === "string" && !new RegExp(field.pattern).test(value)) throw new Error(`Terraform input "${key}" failed validation.`);
+      if (typeof field.minLength === "number" && value.length < field.minLength) throw new Error(`Terraform input "${key}" is too short.`);
+    }
+    if (value !== undefined) inputs[key] = value;
+  }
   return inputs;
 }
 async function packageCapability(db: ReturnType<typeof admin>, packageId: string) {
@@ -71,7 +93,7 @@ async function packageCapability(db: ReturnType<typeof admin>, packageId: string
   if (!capability) throw new Error(`No approved Terraform capability exists for ${pkg.action_type}.`);
   const env = environment(pkg as Json);
   if (!(capability.allowed_environments ?? []).map((value: string) => value.toLowerCase()).includes(env)) throw new Error(`${capability.display_name} is not approved for ${env}.`);
-  return { pkg: pkg as Json, capability: capability as Json, inputs: inputsFor(pkg as Json, capability as Json), env };
+  return { pkg: pkg as Json, capability: capability as Json, inputs: inputsFor(pkg as Json, capability as Json, str(pkg.target_resource_id)), env };
 }
 async function bind(db: ReturnType<typeof admin>, actor: string, pkg: Json, capability: Json, inputs: Json) {
   const { data: old } = await db.from("iac_package_automation_bindings").select("*").eq("package_id", pkg.id).maybeSingle();
@@ -100,13 +122,37 @@ async function archive(files: Array<{ path: string; content: Uint8Array }>) {
   const result = new Uint8Array(parts.reduce((sum, part) => sum + part.byteLength, 0)); let offset = 0; for (const part of parts) { result.set(part, offset); offset += part.byteLength; }
   return new Uint8Array(await new Response(new Blob([result]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer());
 }
-function sourcePaths(action: string) { if (["start_vm", "stop_vm", "restart_vm"].includes(action)) return ["terraform/environments/pilot/vm-action", "terraform/modules/vm-action"]; if (action === "resize_vm") return ["terraform/environments/pilot/vm-resize", "terraform/modules/vm-resize"]; throw new Error(`No HCP Terraform root module exists for ${action}.`); }
-async function sourceBundle(action: string) {
+/** Root + module GitHub paths for a capability, derived from its own module_source column instead of a hardcoded action switch. */
+function sourcePaths(capability: Json) {
+  const moduleSource = str(capability.module_source);
+  if (!/^terraform\/modules\/[a-z0-9_-]+$/.test(moduleSource)) throw new Error(`Capability "${str(capability.display_name)}" has an invalid module_source.`);
+  const name = moduleSource.split("/").pop();
+  return [`terraform/environments/pilot/${name}`, moduleSource];
+}
+/**
+ * Resolves the git revision to build a capability's Terraform bundle from.
+ * Prefers an immutable per-module tag (terraform-modules/<name>/<version>) so
+ * approving a new version of one capability can never silently change what
+ * source another capability resolves to; falls back to the existing global
+ * HCP_TERRAFORM_SOURCE_REF when no such tag exists yet (true for every
+ * capability today, so behavior is unchanged until modules start being tagged).
+ */
+async function moduleRevision(moduleName: string, moduleVersion: string, secret: string, errorPrefix: string) {
+  const globalRef = str(Deno.env.get("HCP_TERRAFORM_SOURCE_REF")) || "main";
+  if (!/^[A-Za-z0-9._/-]{1,160}$/.test(globalRef) || globalRef.includes("..")) throw new Error("HCP_TERRAFORM_SOURCE_REF is invalid.");
+  const pinnedRef = `terraform-modules/${moduleName}/${moduleVersion}`;
+  if (/^[A-Za-z0-9._/-]{1,160}$/.test(pinnedRef) && !pinnedRef.includes("..")) {
+    try { return await resolveRevision(REPOSITORY, pinnedRef, secret, errorPrefix); } catch { /* fall through to the global ref */ }
+  }
+  return await resolveRevision(REPOSITORY, globalRef, secret, errorPrefix);
+}
+async function sourceBundle(capability: Json) {
   const secret = str(Deno.env.get("GITHUB_TERRAFORM_SOURCE_TOKEN")); if (!secret) throw new Error("GITHUB_TERRAFORM_SOURCE_TOKEN is not configured.");
-  const ref = str(Deno.env.get("HCP_TERRAFORM_SOURCE_REF")) || "main"; if (!/^[A-Za-z0-9._/-]{1,160}$/.test(ref) || ref.includes("..")) throw new Error("HCP_TERRAFORM_SOURCE_REF is invalid.");
   const errorPrefix = "Unable to read approved Terraform source from GitHub";
-  const revision = await resolveRevision(REPOSITORY, ref, secret, errorPrefix);
-  const [root, module] = sourcePaths(action); const tree = await fetchTree(REPOSITORY, revision, secret, errorPrefix);
+  const [root, module] = sourcePaths(capability);
+  const moduleName = str(module.split("/").pop()); const moduleVersion = str(capability.module_version) || "v1.0.0";
+  const revision = await moduleRevision(moduleName, moduleVersion, secret, errorPrefix);
+  const tree = await fetchTree(REPOSITORY, revision, secret, errorPrefix);
   const rootFiles = filesUnder(tree, root, ".tf");
   const moduleFiles = filesUnder(tree, module, ".tf");
   if (!rootFiles.length || !moduleFiles.length) throw new Error("Approved Terraform source is incomplete at the resolved revision.");
@@ -116,8 +162,8 @@ async function sourceBundle(action: string) {
   const bytes = await archive(files); return { bytes, revision, sha256: await digest(bytes) };
 }
 
-async function savedPlan(ws: { id: string; name: string }, action: string, inputs: Json, packageNumber: string) {
-  const planToken = token("plan"); const source = await sourceBundle(action);
+async function savedPlan(ws: { id: string; name: string }, capability: Json, inputs: Json, packageNumber: string) {
+  const planToken = token("plan"); const source = await sourceBundle(capability);
   const cv = obj((await hcp(`/workspaces/${ws.id}/configuration-versions`, planToken, { method: "POST", headers: { "content-type": "application/vnd.api+json" }, body: JSON.stringify({ data: { type: "configuration-versions", attributes: { "auto-queue-runs": false, provisional: true } } }) })).data);
   const cvId = str(cv.id); const upload = str(obj(cv.attributes)["upload-url"]); if (!cvId || !upload) throw new Error("HCP Terraform did not return an uploadable configuration version.");
   const sent = await fetch(upload, { method: "PUT", headers: { "content-type": "application/octet-stream" }, body: source.bytes }); if (!sent.ok) throw new Error(`HCP Terraform configuration upload failed (${sent.status}).`);
@@ -156,7 +202,7 @@ async function sync(db: ReturnType<typeof admin>, run: Json) {
   return data as Json;
 }
 async function plan(request: Request, db: ReturnType<typeof admin>, actor: string, packageId: string) {
-  const resolved = await packageCapability(db, packageId); if (resolved.pkg.status !== "submitted") throw new Error("Only a submitted package can be planned."); const binding = await bind(db, actor, resolved.pkg, resolved.capability, resolved.inputs); const ws = workspace(resolved.env); const hcpRun = await savedPlan(ws, str(resolved.pkg.action_type), resolved.inputs, str(resolved.pkg.package_number));
+  const resolved = await packageCapability(db, packageId); if (resolved.pkg.status !== "submitted") throw new Error("Only a submitted package can be planned."); const binding = await bind(db, actor, resolved.pkg, resolved.capability, resolved.inputs); const ws = workspace(resolved.env); const hcpRun = await savedPlan(ws, resolved.capability, resolved.inputs, str(resolved.pkg.package_number));
   const { data, error } = await db.from("iac_terraform_runs").insert({ package_id: packageId, capability_id: resolved.capability.id, run_type: "plan", status: "running", requested_by: actor, module_source: binding.module_source, module_version: binding.module_version, resolved_inputs: resolved.inputs, runner_correlation_id: `hcp-plan:${hcpRun.runId}`, execution_engine: "hcp_terraform", hcp_organization: HCP_ORGANIZATION, hcp_workspace_id: ws.id, hcp_workspace_name: ws.name, hcp_configuration_version_id: hcpRun.configurationVersionId, hcp_run_id: hcpRun.runId, hcp_run_status: "pending", source_revision: hcpRun.source.revision, started_at: iso() }).select("*").single();
   if (error) throw error; await addEvent(db, data.id, "hcp_saved_plan_queued", { hcpRunId: hcpRun.runId, configurationVersionId: hcpRun.configurationVersionId, sourceRevision: hcpRun.source.revision, configurationSha256: hcpRun.source.sha256 }); return reply(request, { runId: data.id, hcpRunId: hcpRun.runId, status: data.status }, 202);
 }
@@ -191,8 +237,16 @@ async function diagnose(request: Request, db: ReturnType<typeof admin>, actor: s
   const tree = await head(`/repos/${REPOSITORY}/git/trees/${revision}?recursive=1`);
   const paths = arr(obj(tree.body).tree).map(obj).map((item) => str(item.path));
   const present = (prefix: string) => paths.some((path) => path.startsWith(`${prefix}/`) && path.endsWith(".tf"));
-  report.terraformSource = { vmActionRoot: present("terraform/environments/pilot/vm-action"), vmActionModule: present("terraform/modules/vm-action"), vmResizeRoot: present("terraform/environments/pilot/vm-resize"), vmResizeModule: present("terraform/modules/vm-resize") };
-  const missing = Object.entries(report.terraformSource as Record<string, boolean>).filter(([, ok]) => !ok).map(([name]) => name);
+  const { data: capabilities } = await db.from("iac_automation_capabilities").select("action_type, module_source").eq("lifecycle_status", "approved");
+  const terraformSource: Record<string, boolean> = {};
+  for (const capability of capabilities ?? []) {
+    const moduleSource = str(capability.module_source); const name = moduleSource.split("/").pop();
+    if (!name) continue;
+    terraformSource[`${capability.action_type}Root`] = present(`terraform/environments/pilot/${name}`);
+    terraformSource[`${capability.action_type}Module`] = present(moduleSource);
+  }
+  report.terraformSource = terraformSource;
+  const missing = Object.entries(terraformSource).filter(([, ok]) => !ok).map(([name]) => name);
   report.problem = missing.length ? `The approved Terraform source is missing at this revision: ${missing.join(", ")}. The ref probably points at a branch or tag that predates it.` : null;
   return reply(request, report);
 }
