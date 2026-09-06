@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.112.4";
+import { fetchFileBytes, fetchTree, filesUnder, resolveRevision } from "../_shared/github.ts";
 
 type Json = Record<string, unknown>;
 const VM_TYPE = "Microsoft.Compute/virtualMachines";
@@ -87,11 +88,6 @@ async function hcp(path: string, tokenValue: string, init: RequestInit = {}) {
   return body;
 }
 async function digest(value: ArrayBuffer | Uint8Array | string) { const bytes = typeof value === "string" ? new TextEncoder().encode(value) : value; return [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))].map((byte) => byte.toString(16).padStart(2, "0")).join(""); }
-async function git(path: string, secret: string) {
-  const response = await fetch(`https://api.github.com${path}`, { headers: { accept: "application/vnd.github+json", authorization: `Bearer ${secret}`, "x-github-api-version": "2022-11-28" } });
-  if (!response.ok) throw new Error(`Unable to read approved Terraform source from GitHub (${response.status}).`); return response.json();
-}
-function from64(value: string) { const raw = atob(value.replace(/\s/g, "")); return Uint8Array.from(raw, (item) => item.charCodeAt(0)); }
 function put(target: Uint8Array, offset: number, length: number, value: string) { target.set(new TextEncoder().encode(value).slice(0, length), offset); }
 function octal(target: Uint8Array, offset: number, length: number, value: number) { put(target, offset, length, value.toString(8).padStart(length - 1, "0").slice(-(length - 1)) + "\0"); }
 function tarPart(path: string, content: Uint8Array) {
@@ -108,14 +104,15 @@ function sourcePaths(action: string) { if (["start_vm", "stop_vm", "restart_vm"]
 async function sourceBundle(action: string) {
   const secret = str(Deno.env.get("GITHUB_TERRAFORM_SOURCE_TOKEN")); if (!secret) throw new Error("GITHUB_TERRAFORM_SOURCE_TOKEN is not configured.");
   const ref = str(Deno.env.get("HCP_TERRAFORM_SOURCE_REF")) || "main"; if (!/^[A-Za-z0-9._/-]{1,160}$/.test(ref) || ref.includes("..")) throw new Error("HCP_TERRAFORM_SOURCE_REF is invalid.");
-  const revision = str(obj(await git(`/repos/${REPOSITORY}/commits/${encodeURIComponent(ref)}`, secret)).sha); if (!/^[0-9a-f]{40}$/i.test(revision)) throw new Error("GitHub did not return an immutable Terraform source revision.");
-  const [root, module] = sourcePaths(action); const tree = arr(obj(await git(`/repos/${REPOSITORY}/git/trees/${revision}?recursive=1`, secret)).tree).map(obj);
-  const rootFiles = tree.filter((item) => str(item.type) === "blob" && str(item.path).startsWith(`${root}/`) && str(item.path).endsWith(".tf"));
-  const moduleFiles = tree.filter((item) => str(item.type) === "blob" && str(item.path).startsWith(`${module}/`) && str(item.path).endsWith(".tf"));
+  const errorPrefix = "Unable to read approved Terraform source from GitHub";
+  const revision = await resolveRevision(REPOSITORY, ref, secret, errorPrefix);
+  const [root, module] = sourcePaths(action); const tree = await fetchTree(REPOSITORY, revision, secret, errorPrefix);
+  const rootFiles = filesUnder(tree, root, ".tf");
+  const moduleFiles = filesUnder(tree, module, ".tf");
   if (!rootFiles.length || !moduleFiles.length) throw new Error("Approved Terraform source is incomplete at the resolved revision.");
   const files: Array<{ path: string; content: Uint8Array }> = [];
-  for (const item of rootFiles) { const path = str(item.path); const content = str(obj(await git(`/repos/${REPOSITORY}/contents/${path}?ref=${revision}`, secret)).content); const rewritten = new TextDecoder().decode(from64(content)).replace(/source\s*=\s*"\.\.\/\.\.\/\.\.\/modules\/[-a-z0-9_]+"/, 'source = "./module"'); files.push({ path: path.slice(root.length + 1), content: new TextEncoder().encode(rewritten) }); }
-  for (const item of moduleFiles) { const path = str(item.path); const content = str(obj(await git(`/repos/${REPOSITORY}/contents/${path}?ref=${revision}`, secret)).content); files.push({ path: `module/${path.slice(module.length + 1)}`, content: from64(content) }); }
+  for (const path of rootFiles) { const bytes = await fetchFileBytes(REPOSITORY, path, revision, secret, errorPrefix); const rewritten = new TextDecoder().decode(bytes).replace(/source\s*=\s*"\.\.\/\.\.\/\.\.\/modules\/[-a-z0-9_]+"/, 'source = "./module"'); files.push({ path: path.slice(root.length + 1), content: new TextEncoder().encode(rewritten) }); }
+  for (const path of moduleFiles) { const bytes = await fetchFileBytes(REPOSITORY, path, revision, secret, errorPrefix); files.push({ path: `module/${path.slice(module.length + 1)}`, content: bytes }); }
   const bytes = await archive(files); return { bytes, revision, sha256: await digest(bytes) };
 }
 

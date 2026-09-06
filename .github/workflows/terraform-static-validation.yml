@@ -33,15 +33,11 @@ jobs:
         run: terraform init -backend=false && terraform validate
       - name: Validate runner job contract
         run: jq empty runner/contracts/terraform-job.schema.json
-      - name: Validate VM action module
-        working-directory: terraform/modules/vm-action
-        run: terraform init -backend=false && terraform validate
-      - name: Validate VM resize module
-        working-directory: terraform/modules/vm-resize
-        run: terraform init -backend=false && terraform validate
-      - name: Validate HCP VM action root
-        working-directory: terraform/environments/pilot/vm-action
-        run: terraform init -backend=false && terraform validate
-      - name: Validate HCP VM resize root
-        working-directory: terraform/environments/pilot/vm-resize
-        run: terraform init -backend=false && terraform validate
+      - name: Validate every Terraform module and pilot root
+        run: |
+          set -e
+          for dir in terraform/modules/*/ terraform/environments/pilot/*/; do
+            echo "::group::Validate $dir"
+            (cd "$dir" && terraform init -backend=false && terraform validate)
+            echo "::endgroup::"
+          done
