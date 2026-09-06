@@ -3,7 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Boxes, GitPullRequest, PlayCircle, ClipboardCheck,
   Settings, Search, Bell, HelpCircle, ChevronDown, Home, Cloud, CircleDot, Activity,
-  Network, Plug, KeyRound, Scale, SlidersHorizontal, FileInput, FilePlus2,
+  Network, Plug, KeyRound, Scale, SlidersHorizontal, FileInput, FilePlus2, ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -26,7 +26,7 @@ const PLATFORM_NAV = [
   { label: "Integrations & Connectivity", to: "/platform/integrations", icon: Plug, enabled: true },
   { label: "Access & Governance", to: "/platform/access-security", icon: KeyRound, enabled: true },
   { label: "Policies & Governance", to: "/platform/policies-governance", icon: Scale, enabled: true },
-  
+  { label: "Capability Promotion", to: "/platform/capabilities", icon: ShieldCheck, enabled: true },
   { label: "System Settings", to: "/platform/system-settings", icon: SlidersHorizontal, enabled: true },
 ];
 

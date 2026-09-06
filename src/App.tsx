@@ -30,6 +30,7 @@ const ExecutionCenter = lazy(() => import("./pages/agentic-iac/ExecutionCenter.t
 const ValidationEvidence = lazy(() => import("./pages/agentic-iac/ValidationEvidence.tsx"));
 const DeploymentArchitecture = lazy(() => import("./pages/agentic-iac/DeploymentArchitecture.tsx"));
 const PlatformAdminPlaceholder = lazy(() => import("./pages/agentic-iac/PlatformAdminPlaceholder.tsx"));
+const CapabilityApproval = lazy(() => import("./pages/agentic-iac/CapabilityApproval.tsx"));
 const IntegrationsConnectivity = lazy(() => import("./pages/agentic-iac/IntegrationsConnectivity.tsx"));
 const AccessGovernance = lazy(() => import("./pages/agentic-iac/AccessGovernance.tsx"));
 const PoliciesGovernance = lazy(() => import("./pages/agentic-iac/PoliciesGovernance.tsx"));
@@ -95,6 +96,8 @@ const App = () => (
                   <Route path="/platform/integrations" element={<IntegrationsConnectivity />} />
                   <Route path="/platform/access-security" element={<AccessGovernance />} />
                   <Route path="/platform/policies-governance" element={<PoliciesGovernance />} />
+                  <Route path="/platform/capabilities" element={<CapabilityApproval />} />
+                  <Route path="/platform/capabilities/:gapId" element={<CapabilityApproval />} />
                   <Route path="/platform/audit-compliance" element={<PlatformAdminPlaceholder />} />
                   <Route path="/platform/system-settings" element={<SystemSettingsPage />} />
                 </Route>
