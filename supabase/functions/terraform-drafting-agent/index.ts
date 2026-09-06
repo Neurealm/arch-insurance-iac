@@ -158,16 +158,27 @@ async function draftWithGemini(gap: Json, exemplar: string): Promise<DraftResult
 }
 
 /**
- * Gemini reliably emits a single backslash before a literal "." inside a
- * double-quoted HCL string (almost always inside a regex() call, e.g.
- * "Microsoft\.Network"), which is not a valid HCL escape sequence and fails
- * terraform validate with "Invalid escape sequence" -- observed twice in a
- * row even after an explicit prompt instruction against it. Deterministic,
- * narrow post-processing catches what the prompt alone couldn't: double an
- * un-doubled backslash-dot, leaving an already-correct "\\." untouched.
+ * Gemini reliably emits regex escapes as a single backslash inside a
+ * double-quoted HCL string (e.g. "Microsoft\.Network", "[^\/]+"), which is
+ * not a valid HCL escape sequence and fails terraform validate with
+ * "Invalid escape sequence" -- observed repeatedly even after an explicit
+ * prompt instruction against it. HCL only accepts \n \r \t \" \\ \uXXXX and
+ * \UXXXXXXXX, so any backslash followed by anything else is doubled here.
+ * Idempotent: an already-correct "\\." is left exactly as it is.
  */
 function sanitizeHcl(content: string): string {
-  return content.replace(/\\\./g, (match, offset: number, full: string) => (full[offset - 1] === "\\" ? match : "\\\\."));
+  const valid = "nrt\"uU";
+  let out = "";
+  for (let i = 0; i < content.length; i += 1) {
+    const char = content[i];
+    if (char !== "\\") { out += char; continue; }
+    const next = content[i + 1] ?? "";
+    if (next === "\\") { out += "\\\\"; i += 1; continue; }
+    if (valid.includes(next)) { out += char + next; i += 1; continue; }
+    out += `\\\\${next}`;
+    i += 1;
+  }
+  return out;
 }
 
 /**

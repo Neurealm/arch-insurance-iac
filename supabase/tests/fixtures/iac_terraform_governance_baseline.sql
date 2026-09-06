@@ -37,6 +37,14 @@ CREATE TABLE public.iac_change_package_reviews (
   reviewed_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Production grants anon nothing on any of these tables; a bare CREATE TABLE
+-- here inherits the schema's default anon grants instead, which made the
+-- governance suite's anon sweep fail against the fixture rather than against
+-- a real problem. Match production's posture explicitly.
+REVOKE ALL ON public.iac_change_packages FROM anon;
+REVOKE ALL ON public.iac_change_package_reviews FROM anon;
+REVOKE ALL ON public.servicenow_intake_requests FROM anon;
+
 CREATE OR REPLACE FUNCTION public.is_platform_admin(_user_id uuid)
 RETURNS boolean
 LANGUAGE sql
