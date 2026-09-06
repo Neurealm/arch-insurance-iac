@@ -10,3 +10,17 @@ verify_jwt = false
 # workflow operations. This endpoint does not accept legacy runner callbacks.
 [functions.terraform-orchestrator]
 verify_jwt = false
+
+# Verifies its own caller: a service-role bearer is compared against the real
+# service key, and a human session is resolved with Auth.getUser() plus a
+# platform_admin role check. Promotion additionally refuses service callers.
+# Gateway verification is off so browser callers receive CORS-headed 401/403
+# responses instead of an opaque gateway rejection.
+[functions.terraform-ci-status-sync]
+verify_jwt = false
+
+# Resolves the caller with Auth.getUser() and checks package ownership or
+# administrator access before reading HCP/Azure evidence. Evidence is persisted
+# only through the service-only record_iac_vm_validation RPC.
+[functions.vm-change-validation]
+verify_jwt = false
