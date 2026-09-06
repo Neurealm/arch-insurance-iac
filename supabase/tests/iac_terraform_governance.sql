@@ -82,6 +82,43 @@ BEGIN
   IF NOT (
     SELECT relrowsecurity FROM pg_class WHERE oid = 'public.iac_change_package_targets'::regclass
   ) THEN RAISE EXCEPTION 'RLS is not enabled on iac_change_package_targets'; END IF;
+
+  -- Phase 3: engineering gaps (iac_engineering_gaps / iac_engineering_gap_events).
+  FOREACH table_name IN ARRAY ARRAY['iac_engineering_gaps', 'iac_engineering_gap_events']
+  LOOP
+    IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid = format('public.%I', table_name)::regclass) THEN
+      RAISE EXCEPTION 'RLS is not enabled on %', table_name;
+    END IF;
+    IF has_table_privilege('authenticated', format('public.%I', table_name), 'INSERT')
+      OR has_table_privilege('authenticated', format('public.%I', table_name), 'UPDATE')
+      OR has_table_privilege('authenticated', format('public.%I', table_name), 'DELETE')
+    THEN RAISE EXCEPTION 'authenticated clients can mutate %', table_name; END IF;
+  END LOOP;
+
+  IF EXISTS (
+    SELECT 1 FROM public.iac_engineering_gaps
+    WHERE action_type = 'create_vm'
+    GROUP BY provider, resource_type, action_type
+    HAVING count(*) FILTER (WHERE status NOT IN ('capability_approved', 'abandoned')) > 1
+  ) THEN RAISE EXCEPTION 'more than one open engineering gap exists for the same action'; END IF;
+
+  -- No governed table this project owns should be reachable by the anon
+  -- role at all -- a raw table grant is enforced independently of RLS, so a
+  -- new table that forgets to REVOKE the schema's default anon grant is a
+  -- real hole even with correct RLS policies (caught live once already:
+  -- iac_change_package_targets and iac_engineering_gaps both shipped with
+  -- this gap before their grants were locked down).
+  FOR table_name IN
+    SELECT c.relname FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relkind = 'r' AND c.relname LIKE 'iac\_%'
+  LOOP
+    IF has_table_privilege('anon', format('public.%I', table_name), 'SELECT')
+      OR has_table_privilege('anon', format('public.%I', table_name), 'INSERT')
+      OR has_table_privilege('anon', format('public.%I', table_name), 'UPDATE')
+      OR has_table_privilege('anon', format('public.%I', table_name), 'DELETE')
+    THEN RAISE EXCEPTION 'anon can access %', table_name; END IF;
+  END LOOP;
 END;
 $$;
 

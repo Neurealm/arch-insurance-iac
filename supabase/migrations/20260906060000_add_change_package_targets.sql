@@ -101,6 +101,11 @@ USING (
   )
 );
 
+-- The table inherits the schema's default ALL-privileges grant to anon; its
+-- parent table iac_change_packages grants anon nothing at all -- RLS alone
+-- is not sufficient defense-in-depth without also removing this raw grant.
+REVOKE ALL ON public.iac_change_package_targets FROM anon;
+
 CREATE POLICY iac_change_package_targets_mutate_own_draft
 ON public.iac_change_package_targets FOR ALL
 USING (

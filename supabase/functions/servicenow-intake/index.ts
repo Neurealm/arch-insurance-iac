@@ -253,14 +253,19 @@ function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: 
   if (analysis.action === "resize_vm" && !(/standard_[a-z0-9_]+/i.test(textBlob) || /\b\d+\s*(v?cpu|core|cores)\b/i.test(textBlob))) missing.push("Requested VM size or SKU");
   if (analysis.action === "increase_os_disk" && !/\b\d+\s*(gb|tb)\b/i.test(textBlob)) missing.push("Requested disk capacity");
   if (analysis.action === "configure_backup" && !/\b(rpo|rto|hour|daily|weekly|retention|policy)\b/i.test(textBlob)) missing.push("Recovery objective or backup policy");
-  if (analysis.action === "create_vm") { conflicts.push("VM creation is not enabled in the current governed execution workflow."); missing.push("Subscription, resource group, region, size, image, and network requirements"); }
+  if (analysis.action === "create_vm" && !/\b\d+\s*(vm|vms|virtual machine|machines|instance|instances)\b/i.test(textBlob) && !/\bstandard_[a-z0-9_]+\b/i.test(textBlob)) missing.push("Requested VM count and size/SKU");
 
   const questions = unique([...analysis.clarificationQuestions, ...unique(missing).map((field) => `Please provide ${field.toLowerCase()}.`), ...unique(conflicts).map((conflict) => `Please resolve: ${conflict}`)]);
-  return { target, missing: unique(missing), conflicts: unique(conflicts), questions, ready: analysis.action !== "unknown" && analysis.action !== "create_vm" && analysis.confidence >= 60 && !missing.length && !conflicts.length };
+  // create_vm is never "ready for engineering" the normal way (no existing
+  // capability to bind to) -- once its own required fields are present it's
+  // "ready to open an engineering gap" instead; maybeCreateGap() below is
+  // gated on this same missing/conflicts emptiness.
+  return { target, missing: unique(missing), conflicts: unique(conflicts), questions, ready: analysis.action !== "unknown" && analysis.action !== "create_vm" && analysis.confidence >= 60 && !missing.length && !conflicts.length, readyForGap: analysis.action === "create_vm" && analysis.confidence >= 60 && !missing.length && !conflicts.length };
 }
 
-function clarificationNote(ticket: NormalizedTicket, analysis: Analysis, result: ReturnType<typeof validate>) {
+function clarificationNote(ticket: NormalizedTicket, analysis: Analysis, result: ReturnType<typeof validate>, gap?: { id: string; reused: boolean } | null) {
   if (result.ready) return `${SERVICE_NOW_MARKER}\n\nThe request has passed initial intake checks for ${actionLabel(analysis.action)} (${analysis.confidence}% confidence). The platform will route it to Change Engineering for human approval. No Azure action was performed by this analysis.`;
+  if (gap) return `${SERVICE_NOW_MARKER}\n\nNo approved Terraform capability exists yet for ${actionLabel(analysis.action)} (${analysis.confidence}% confidence). ${gap.reused ? `This request has been linked to the existing engineering gap GAP-${gap.id.slice(0, 8).toUpperCase()}.` : `An engineering gap (GAP-${gap.id.slice(0, 8).toUpperCase()}) has been opened.`} AI may draft a module, but the request pauses until tests and human approval finish. No Azure action was performed by this analysis.`;
   return [`${SERVICE_NOW_MARKER} Clarification required`, "", "The infrastructure team cannot process this change yet. Please update the ticket with:", ...result.questions.map((question) => `- ${question}`), "", `Detected request type: ${actionLabel(analysis.action)} (${analysis.confidence}% confidence).`, "No Azure action was performed by this analysis."].join("\n");
 }
 
@@ -293,6 +298,32 @@ async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket:
   }).select("id, package_number").single();
   if (error) throw new Error(`Unable to create governed draft: ${error.message}`);
   return data as { id: string; package_number: string };
+}
+
+const VM_RESOURCE_TYPE = "Microsoft.Compute/virtualMachines";
+
+/**
+ * Implements the governance doc's promise for an unsupported action
+ * (docs/terraform-vm-governance.md: "If no approved capability exists,
+ * create an engineering gap ..."). Links to the existing open gap for this
+ * action_type if one exists (one drafting effort per action, not one per
+ * ticket) rather than opening a duplicate.
+ */
+async function maybeCreateGap(admin: ReturnType<typeof supabaseAdmin>, ticket: NormalizedTicket, analysis: Analysis, requestId: string, requestedBy: string | null) {
+  if (analysis.action !== "create_vm") return null;
+  const { data: open } = await admin.from("iac_engineering_gaps").select("id, status").eq("provider", "azure").eq("resource_type", VM_RESOURCE_TYPE).eq("action_type", "create_vm").not("status", "in", "(capability_approved,abandoned)").maybeSingle();
+  if (open) {
+    await admin.from("iac_engineering_gap_events").insert({ gap_id: open.id, event_type: "ticket_linked", detail: { ticketNumber: ticket.ticketNumber, serviceNowSysId: ticket.sysId } });
+    return { id: open.id as string, reused: true };
+  }
+  const { data: created, error } = await admin.from("iac_engineering_gaps").insert({
+    provider: "azure", resource_type: VM_RESOURCE_TYPE, action_type: "create_vm", status: "open",
+    requested_by: requestedBy, source_intake_request_id: requestId,
+    context: { ticketNumber: ticket.ticketNumber, serviceNowSysId: ticket.sysId, requester: ticket.requester, description: ticket.description, extractedFields: analysis.extractedFields, confidence: analysis.confidence },
+  }).select("id").single();
+  if (error) throw new Error(`Unable to open an engineering gap: ${error.message}`);
+  await admin.from("iac_engineering_gap_events").insert({ gap_id: created.id, event_type: "gap_opened", detail: { ticketNumber: ticket.ticketNumber } });
+  return { id: created.id as string, reused: false };
 }
 
 Deno.serve(async (request) => {
@@ -336,11 +367,12 @@ Deno.serve(async (request) => {
     await addEvent(admin, requestId, "azure_enrichment_completed", { state: azure.state, vmCount: azure.vms.length });
     const analysis = await analyzeWithGemini(ticket, azure);
     const validation = validate(ticket, analysis, azure);
-    const note = clarificationNote(ticket, analysis, validation);
     const draft = validation.ready ? await maybeCreateDraft(admin, ticket, analysis, validation.target, demoMode ? callerId : null) : null;
-    const status = validation.ready ? "ready_for_engineering" : "needs_clarification";
+    const gap = validation.readyForGap ? await maybeCreateGap(admin, ticket, analysis, requestId, demoMode ? callerId : null) : null;
+    const note = clarificationNote(ticket, analysis, validation, gap);
+    const status = validation.ready ? "ready_for_engineering" : gap ? "engineering_gap_opened" : "needs_clarification";
     await admin.from("servicenow_intake_requests").update({ status, llm_analysis: { ...analysis, validation }, clarification_note: note, change_package_id: draft?.id ?? null, analyzed_at: new Date().toISOString(), error_message: null }).eq("id", requestId);
-    await addEvent(admin, requestId, "llm_analysis_completed", { action: analysis.action, confidence: analysis.confidence, ready: validation.ready, missingCount: validation.missing.length, conflictCount: validation.conflicts.length });
+    await addEvent(admin, requestId, "llm_analysis_completed", { action: analysis.action, confidence: analysis.confidence, ready: validation.ready, gapId: gap?.id ?? null, missingCount: validation.missing.length, conflictCount: validation.conflicts.length });
     const finalNote = draft ? `${note}\n\nGoverned draft package created: ${draft.package_number}. Approval is still required.` : note;
     if (demoMode) {
       await admin.from("servicenow_intake_requests").update({ status: "demo_comment_generated", clarification_note: finalNote }).eq("id", requestId);
