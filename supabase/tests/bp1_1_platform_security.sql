@@ -43,7 +43,7 @@ BEGIN
         WHERE c LIKE 'search_path=%'
      );
   IF v_bad_count > 0 THEN
-    RAISE EXCEPTION '%% SECURITY DEFINER function(s) missing search_path', v_prefix, v_bad_count;
+    RAISE EXCEPTION '% % SECURITY DEFINER function(s) missing search_path', v_prefix, v_bad_count;
   END IF;
 
   -- 3. anon must NOT have SELECT on canonical BP1.1 tables.

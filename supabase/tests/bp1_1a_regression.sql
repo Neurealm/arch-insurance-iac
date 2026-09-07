@@ -88,9 +88,13 @@ BEGIN
   -----------------------------------------------------------------
   -- 3. Permission seed matches approved codes exactly
   -----------------------------------------------------------------
-  SELECT array_agg(code ORDER BY code) INTO v_actual FROM public.permissions;
+  -- The ten platform-foundation codes must all be present. Later modules
+  -- (audio, commercial) add their own codes to the same table, so this is a
+  -- containment check, not an equality check.
+  SELECT array_agg(code ORDER BY code) INTO v_actual
+    FROM public.permissions WHERE code = ANY(v_expected_permissions);
   IF v_actual IS DISTINCT FROM v_expected_permissions THEN
-    RAISE EXCEPTION '%permission seed drift: expected % got %',
+    RAISE EXCEPTION '%platform permission seed drift: expected % got %',
       v_fail_prefix, v_expected_permissions, v_actual;
   END IF;
 
@@ -108,12 +112,15 @@ BEGIN
     VALUES (v_tenant_a, 'regress_role_a', 'Regress Role A')
     RETURNING id INTO v_role_a;
 
+  -- memberships.user_id references auth.users; seed the identities first.
+  INSERT INTO auth.users(id) VALUES (v_user_a), (v_user_b) ON CONFLICT (id) DO NOTHING;
   INSERT INTO public.memberships(tenant_id, user_id, status)
     VALUES (v_tenant_a, v_user_a, 'active')
     RETURNING id INTO v_mem_a;
 
-  INSERT INTO public.tenant_invitations(tenant_id, email, token_hash, invited_by)
-    VALUES (v_tenant_a, 'Regress@Example.com', 'hash-' || gen_random_uuid()::text, NULL)
+  INSERT INTO public.tenant_invitations(tenant_id, email, token_hash, invited_by, expires_at)
+    VALUES (v_tenant_a, 'Regress@Example.com', sha256(gen_random_uuid()::text::bytea), NULL,
+            now() + interval '7 days')
     RETURNING id INTO v_inv_a;
 
   -----------------------------------------------------------------
@@ -276,11 +283,8 @@ BEGIN
   END IF;
 
   RAISE NOTICE 'BP1_1A_REGRESSION_OK: all assertions passed';
-
-  -- Always roll back — this test suite must never leave data behind.
-  RAISE EXCEPTION 'BP1_1A_REGRESSION_ROLLBACK: intentional rollback after successful assertions';
 END
 $regression$;
 
--- Unreachable: the DO block always raises.
+-- Nothing this suite created is kept.
 ROLLBACK;

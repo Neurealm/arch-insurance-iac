@@ -115,12 +115,7 @@ jobs:
       - name: Reconcile storage schema baseline (CI image drift)
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/storage_baseline.sql
       - name: Apply migrations to disposable DB
-        run: |
-          set -euo pipefail
-          for f in supabase/migrations/*.sql; do
-            echo "Applying $f"
-            psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$f" > /dev/null
-          done
+        run: supabase/tests/apply-migrations.sh
       - name: BP1.1A regression
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/bp1_1a_regression.sql
       - name: Platform security

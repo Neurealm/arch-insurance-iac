@@ -12,7 +12,9 @@ DECLARE
   v_tenant uuid := gen_random_uuid();
   v_role uuid;
   v_user uuid := gen_random_uuid();
+  v_user2 uuid := gen_random_uuid();
   v_mem uuid;
+  v_mem2 uuid;
   v_count int;
 BEGIN
   INSERT INTO public.tenants(id,name,slug,status,default_currency_code,default_timezone)
@@ -28,7 +30,7 @@ BEGIN
   -- Pending invitation MUST NOT count as admin.
   INSERT INTO public.tenant_invitations(id, tenant_id, email, normalized_email, status, token_hash, expires_at)
     VALUES (gen_random_uuid(), v_tenant, 'p@example.com','p@example.com','pending',
-            encode(digest(gen_random_uuid()::text,'sha256'),'hex'), now()+interval '7 days');
+            sha256(gen_random_uuid()::text::bytea), now()+interval '7 days');
 
   SELECT public.count_active_tenant_admins(v_tenant) INTO v_count;
   IF v_count <> 0 THEN
@@ -36,6 +38,8 @@ BEGIN
   END IF;
 
   -- Add active membership with the admin role.
+  -- memberships.user_id references auth.users; seed the identity first.
+  INSERT INTO auth.users(id) VALUES (v_user) ON CONFLICT (id) DO NOTHING;
   INSERT INTO public.memberships(id, tenant_id, user_id, status)
     VALUES (gen_random_uuid(), v_tenant, v_user, 'active') RETURNING id INTO v_mem;
   INSERT INTO public.membership_roles(membership_id, role_id, tenant_id)
@@ -46,10 +50,28 @@ BEGIN
     RAISE EXCEPTION '%active admin membership not counted (got %)', v_prefix, v_count;
   END IF;
 
-  -- Suspend the membership -> count returns to 0.
+  -- Suspending the only administrator must be refused by the safeguard.
+  BEGIN
+    UPDATE public.memberships SET status='suspended' WHERE id = v_mem;
+    RAISE EXCEPTION '%last administrator was allowed to be suspended', v_prefix;
+  EXCEPTION WHEN others THEN
+    IF SQLERRM LIKE (v_prefix || '%') THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%last_tenant_administrator_protected%' THEN
+      RAISE EXCEPTION '%unexpected error suspending last admin: %', v_prefix, SQLERRM;
+    END IF;
+  END;
+
+  -- With a second administrator present, suspending the first is allowed and
+  -- the count falls back to one.
+  INSERT INTO auth.users(id) VALUES (v_user2) ON CONFLICT (id) DO NOTHING;
+  INSERT INTO public.memberships(id, tenant_id, user_id, status)
+    VALUES (gen_random_uuid(), v_tenant, v_user2, 'active') RETURNING id INTO v_mem2;
+  INSERT INTO public.membership_roles(membership_id, role_id, tenant_id)
+    VALUES (v_mem2, v_role, v_tenant);
+
   UPDATE public.memberships SET status='suspended' WHERE id = v_mem;
   SELECT public.count_active_tenant_admins(v_tenant) INTO v_count;
-  IF v_count <> 0 THEN
+  IF v_count <> 1 THEN
     RAISE EXCEPTION '%suspended membership still counted (got %)', v_prefix, v_count;
   END IF;
 
