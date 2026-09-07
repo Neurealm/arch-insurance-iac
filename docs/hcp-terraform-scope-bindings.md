@@ -122,3 +122,63 @@ configuration is invalid."*
 `sourceRevision` here deliberately. Once a capability is promoted through
 `/platform/capabilities`, its own `approved_source_revision` takes precedence
 and the binding's `sourceRevision` must agree with it or planning fails.
+
+---
+
+## Adding `vm-batch-create` (provisioning)
+
+`create_vm` is now an approved capability pinned to
+`a305ac8de3712593e7c8f49201b53074507d3bd0`, and the code gate in
+`assessPlan()` has been removed by owner decision. It still cannot plan until a
+binding exists, because `resolveExecutionScope` requires
+`provisioningEnabled: true` for any `azapi_resource` capability.
+
+Provisioning bindings differ from the action bindings above in three ways:
+
+1. **`targetResourceIds` are VMs that do not exist yet.** A package declares the
+   ARM IDs it intends to create, and the binding must list that exact same set.
+   Only the ID *format* is validated, not existence. This means a binding is
+   effectively per-batch — a different set of ten VM names needs a different
+   binding entry.
+2. **`sourceRevision` must equal the capability's pinned commit.** It is now
+   `a305ac8d…`; if the two disagree, planning fails closed.
+3. **`allowedSubnetIds` is not enforced anywhere.** It is declared here for
+   documentation only — `assessPlan()` does not check the created NIC's subnet
+   against it. Treat it as a note to reviewers, not a control.
+
+```json
+{
+  "moduleSource": "terraform/modules/vm-batch-create",
+  "environment": "production",
+  "stateAttested": true,
+  "workspaceId": "ws-REPLACE",
+  "workspaceName": "arch-vm-ops-production",
+  "sourceRevision": "a305ac8de3712593e7c8f49201b53074507d3bd0",
+  "resourceGroupId": "/subscriptions/<sub>/resourceGroups/<rg>",
+  "targetResourceIds": [
+    "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.Compute/virtualMachines/<vm-01>"
+  ],
+  "managedResourceIds": [],
+  "allowedRegions": ["<region>"],
+  "allowedVmSizes": [],
+  "allowedSubnetIds": ["/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.Network/virtualNetworks/<vnet>/subnets/<subnet>"],
+  "applyEnabled": true,
+  "provisioningEnabled": true
+}
+```
+
+`managedResourceIds` stays empty: `create_vm` has
+`requires_managed_resource = false`, and the VMs are not adopted resources.
+
+### The package must supply every input
+
+The capability's `input_schema` now has 13 fields, all sourced from the change
+package's `parameters` except `change_request_id`. A package missing any of
+these fails before HCP is contacted:
+
+`resourceGroupArmId`, `subnetArmId`, `location`, `vmNames`, `vmSize`,
+`adminUsername`, `sshPublicKey`, `osPublisher`, `osOffer`, `osSku`,
+`osVersion`, and optionally `tags`.
+
+`location` is the field the drafted module originally lacked; without it every
+VM was created in East US regardless of the requested region.
