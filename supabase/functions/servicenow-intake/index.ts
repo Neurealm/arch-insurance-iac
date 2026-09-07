@@ -41,6 +41,9 @@ type Analysis = {
   missingFields: string[];
   conflicts: string[];
   clarificationQuestions: string[];
+  /** Validated provisioning inputs. A field the ticket did not supply, or
+   *  supplied in an unusable shape, is absent here and reported as missing. */
+  provisioning: RecordValue;
 };
 
 function record(value: unknown): RecordValue {
@@ -182,10 +185,95 @@ Return ONLY JSON with this exact shape:
   "extractedFields": {},
   "missingFields": ["fields the ticket does not provide"],
   "conflicts": ["ticket/Azure contradictions"],
-  "clarificationQuestions": ["specific questions for the requester"]
+  "clarificationQuestions": ["specific questions for the requester"],
+  "provisioning": {}
 }
 
+When and only when the action is create_vm, fill "provisioning" with whatever the ticket genuinely states, omitting any key it does not:
+{
+  "resourceGroupArmId": "/subscriptions/<guid>/resourceGroups/<name>",
+  "subnetArmId": "/subscriptions/<guid>/resourceGroups/<name>/providers/Microsoft.Network/virtualNetworks/<vnet>/subnets/<subnet>",
+  "location": "azure region short name such as eastus",
+  "vmNames": ["one name per requested machine"],
+  "vmSize": "Standard_...",
+  "adminUsername": "linux administrator username",
+  "sshPublicKey": "ssh-ed25519 AAAA... or ssh-rsa AAAA...",
+  "osPublisher": "e.g. Canonical", "osOffer": "e.g. 0001-com-ubuntu-server-jammy",
+  "osSku": "e.g. 22_04-lts-gen2", "osVersion": "e.g. latest",
+  "tags": {}
+}
+
+Rules for "provisioning": omit any key the ticket does not state outright. Never guess or invent a subscription ID, resource group, subnet, SSH key or image; a wrong Azure identifier is worse than an absent one, because an absent one is asked for and a wrong one is refused later without explanation. If the ticket asks for N machines but names fewer than N, omit "vmNames" entirely rather than inventing the remainder.
+
 "confidence" must be an integer percentage from 0 to 100 (for example 87 means 87% confident) — never a 0-1 fraction. Use a low confidence value (below 60) for ambiguous or unsupported requests, and a high value (60 or above) when the action, target, and required fields are all clear and unambiguous. Never invent Azure values. A missing target, maintenance window, business impact, owner, rollback plan, or action-specific value must be reported.`;
+}
+
+/**
+ * The twelve inputs a create_vm package must carry, with the human-readable
+ * label used when asking the requester for a missing one. Keys and order match
+ * the canonical create-VM interface in _shared/terraform-draft-policy.ts.
+ */
+const PROVISIONING_FIELDS: Array<{ key: string; label: string }> = [
+  { key: "resourceGroupArmId", label: "Destination resource group ARM ID" },
+  { key: "subnetArmId", label: "Subnet ARM ID the machines attach to" },
+  { key: "location", label: "Azure region, for example eastus" },
+  { key: "vmNames", label: "Name for each virtual machine" },
+  { key: "vmSize", label: "VM size or SKU, for example Standard_B2s" },
+  { key: "adminUsername", label: "Administrator username" },
+  { key: "sshPublicKey", label: "SSH public key for the administrator" },
+  { key: "osPublisher", label: "OS image publisher, for example Canonical" },
+  { key: "osOffer", label: "OS image offer" },
+  { key: "osSku", label: "OS image SKU" },
+  { key: "osVersion", label: "OS image version, for example latest" },
+];
+
+const ARM_GROUP = /^\/subscriptions\/[0-9a-fA-F-]{36}\/resourceGroups\/[A-Za-z0-9_.()-]+$/;
+const ARM_SUBNET = /^\/subscriptions\/[0-9a-fA-F-]{36}\/resourceGroups\/[A-Za-z0-9_.()-]+\/providers\/Microsoft\.Network\/virtualNetworks\/[A-Za-z0-9_.-]+\/subnets\/[A-Za-z0-9_.-]+$/;
+const VM_NAME = /^[A-Za-z0-9][A-Za-z0-9-]{0,62}$/;
+const IMAGE_PART = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+
+/**
+ * The trust boundary for ticket-supplied infrastructure values.
+ *
+ * Everything here reaches Terraform as an HCP run variable, so a value is
+ * either provably well-shaped or it is dropped. Dropping rather than passing
+ * through is deliberate: an absent field becomes a specific question back to
+ * the requester, whereas a malformed one that slipped through would surface as
+ * an opaque failure during planning.
+ *
+ * Shape is all this can establish. Whether the requester is *allowed* to use a
+ * given subnet, SKU or resource group is decided server-side against
+ * HCP_TERRAFORM_SCOPE_BINDINGS, which no ticket can reach.
+ */
+function sanitizeProvisioning(value: unknown): RecordValue {
+  const raw = record(value);
+  const out: RecordValue = {};
+  const group = text(raw.resourceGroupArmId);
+  if (ARM_GROUP.test(group)) out.resourceGroupArmId = group;
+  const subnet = text(raw.subnetArmId);
+  if (ARM_SUBNET.test(subnet)) out.subnetArmId = subnet;
+  const location = text(raw.location).toLowerCase().replace(/\s+/g, "");
+  if (/^[a-z][a-z0-9]{2,30}$/.test(location)) out.location = location;
+  const names = array(raw.vmNames).filter((item): item is string => typeof item === "string").map((item) => item.trim());
+  const distinct = unique(names.map((name) => name.toLowerCase()));
+  if (names.length >= 1 && names.length <= 20 && names.every((name) => VM_NAME.test(name)) && distinct.length === names.length) out.vmNames = names;
+  const size = text(raw.vmSize);
+  if (/^Standard_[A-Za-z0-9_]+$/.test(size)) out.vmSize = size;
+  const admin = text(raw.adminUsername);
+  if (/^[a-z_][a-z0-9_-]{0,31}$/.test(admin) && !["root", "admin", "administrator"].includes(admin)) out.adminUsername = admin;
+  const key = text(raw.sshPublicKey);
+  if (/^(ssh-rsa|ssh-ed25519|ecdsa-sha2-nistp(256|384|521)) [A-Za-z0-9+/=]+/.test(key)) out.sshPublicKey = key;
+  for (const field of ["osPublisher", "osOffer", "osSku", "osVersion"]) {
+    const part = text(raw[field]);
+    if (IMAGE_PART.test(part)) out[field] = part;
+  }
+  const tags = record(raw.tags);
+  const flat: RecordValue = {};
+  for (const [name, item] of Object.entries(tags)) {
+    if (/^[A-Za-z0-9_.-]{1,128}$/.test(name) && typeof item === "string" && item.length <= 256) flat[name] = item;
+  }
+  out.tags = flat;
+  return out;
 }
 
 function sanitizeAnalysis(value: unknown): Analysis {
@@ -204,6 +292,7 @@ function sanitizeAnalysis(value: unknown): Analysis {
     missingFields: unique(array(raw.missingFields).filter((value): value is string => typeof value === "string").slice(0, 30)),
     conflicts: unique(array(raw.conflicts).filter((value): value is string => typeof value === "string").slice(0, 30)),
     clarificationQuestions: unique(array(raw.clarificationQuestions).filter((value): value is string => typeof value === "string").slice(0, 30)),
+    provisioning: sanitizeProvisioning(raw.provisioning),
   };
 }
 
@@ -228,7 +317,7 @@ function actionLabel(action: string) {
   return ({ start_vm: "Start Azure VM", stop_vm: "Stop Azure VM", restart_vm: "Restart Azure VM", resize_vm: "Change VM size", increase_os_disk: "Increase OS disk capacity", configure_backup: "Configure Azure Backup", enable_monitoring: "Enable Azure Monitor / VM Insights", assess_patches: "Run patch assessment", create_vm: "Create Azure VM", unknown: "Unable to classify request" } as Record<string, string>)[action] ?? action;
 }
 
-function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: string; vms: AzureVm[] }) {
+function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: string; vms: AzureVm[] }, hasApprovedCapability = false) {
   const missing = [...analysis.missingFields];
   const conflicts = [...analysis.conflicts];
   if (!ticket.ticketNumber) missing.push("ServiceNow ticket number");
@@ -253,14 +342,44 @@ function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: 
   if (analysis.action === "resize_vm" && !(/standard_[a-z0-9_]+/i.test(textBlob) || /\b\d+\s*(v?cpu|core|cores)\b/i.test(textBlob))) missing.push("Requested VM size or SKU");
   if (analysis.action === "increase_os_disk" && !/\b\d+\s*(gb|tb)\b/i.test(textBlob)) missing.push("Requested disk capacity");
   if (analysis.action === "configure_backup" && !/\b(rpo|rto|hour|daily|weekly|retention|policy)\b/i.test(textBlob)) missing.push("Recovery objective or backup policy");
-  if (analysis.action === "create_vm" && !/\b\d+\s*(vm|vms|virtual machine|machines|instance|instances)\b/i.test(textBlob) && !/\bstandard_[a-z0-9_]+\b/i.test(textBlob)) missing.push("Requested VM count and size/SKU");
+  // Creation needs twelve specific inputs, so say which one is absent rather
+  // than asking for "VM count and size/SKU" and leaving the requester to guess.
+  // sanitizeProvisioning has already dropped anything malformed, so an absent
+  // key here means either "not supplied" or "supplied unusably" -- both of
+  // which the requester answers the same way.
+  if (analysis.action === "create_vm") {
+    for (const field of PROVISIONING_FIELDS) {
+      const value = analysis.provisioning[field.key];
+      const present = Array.isArray(value) ? value.length > 0 : text(value).length > 0;
+      if (!present) missing.push(field.label);
+    }
+    const names = array(analysis.provisioning.vmNames).filter((item): item is string => typeof item === "string");
+    // Catching a name collision here means the requester is told in the ticket,
+    // rather than the batch failing part-way through apply against Azure.
+    if (names.length && azure.state === "available") {
+      const taken = names.filter((name) => azure.vms.some((vm) => vm.name.toLowerCase() === name.toLowerCase()));
+      if (taken.length) conflicts.push(`These machine names already exist in Azure: ${taken.join(", ")}.`);
+    }
+    const group = text(analysis.provisioning.resourceGroupArmId).toLowerCase();
+    const subnet = text(analysis.provisioning.subnetArmId).toLowerCase();
+    if (group && subnet && subnet.split("/providers/")[0].split("/resourcegroups/")[0] !== group.split("/resourcegroups/")[0]) {
+      conflicts.push("The subnet is in a different subscription from the destination resource group.");
+    }
+  }
 
   const questions = unique([...analysis.clarificationQuestions, ...unique(missing).map((field) => `Please provide ${field.toLowerCase()}.`), ...unique(conflicts).map((conflict) => `Please resolve: ${conflict}`)]);
-  // create_vm is never "ready for engineering" the normal way (no existing
-  // capability to bind to) -- once its own required fields are present it's
-  // "ready to open an engineering gap" instead; maybeCreateGap() below is
-  // gated on this same missing/conflicts emptiness.
-  return { target, missing: unique(missing), conflicts: unique(conflicts), questions, ready: analysis.action !== "unknown" && analysis.action !== "create_vm" && analysis.confidence >= 60 && !missing.length && !conflicts.length, readyForGap: analysis.action === "create_vm" && analysis.confidence >= 60 && !missing.length && !conflicts.length };
+  // Whether a request can proceed depends on whether an approved capability
+  // exists for its action -- not on the action's name. create_vm used to be
+  // hardcoded as permanently gap-only, so a ticket would have kept opening
+  // engineering gaps even after the capability was approved and the loop would
+  // never close. Keying on the catalog also means the next unsupported action
+  // gets the gap treatment for free, with no code change.
+  const complete = analysis.action !== "unknown" && analysis.confidence >= 60 && !missing.length && !conflicts.length;
+  return {
+    target, missing: unique(missing), conflicts: unique(conflicts), questions,
+    ready: complete && hasApprovedCapability,
+    readyForGap: complete && !hasApprovedCapability,
+  };
 }
 
 function clarificationNote(ticket: NormalizedTicket, analysis: Analysis, result: ReturnType<typeof validate>, gap?: { id: string; reused: boolean } | null) {
@@ -286,8 +405,55 @@ async function postCustomerComment(ticket: NormalizedTicket, note: string) {
 
 async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket: NormalizedTicket, analysis: Analysis, target: AzureVm | null, creatorOverride?: string | null) {
   const creator = creatorOverride || Deno.env.get("IAC_AUTOMATION_USER_ID");
-  if (!creator || !target || !SUPPORTED_ACTIONS.has(analysis.action) || analysis.action === "create_vm") return null;
+  if (!creator || !SUPPORTED_ACTIONS.has(analysis.action)) return null;
   const packageNumber = `VM-CHG-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
+
+  // A creation request has no existing VM to point at. Its targets are the
+  // machines it intends to create, synthesised in SQL so the console and this
+  // function cannot drift, and declared up front so the guardrail can later
+  // require the plan to touch exactly them and nothing else.
+  if (analysis.action === "create_vm") {
+    const provisioning = analysis.provisioning;
+    const group = text(provisioning.resourceGroupArmId);
+    const names = array(provisioning.vmNames).filter((item): item is string => typeof item === "string");
+    if (!group || !names.length) return null;
+    const { data: ids, error: idsError } = await admin.rpc("iac_vm_target_ids", { p_resource_group_arm_id: group, p_vm_names: names });
+    if (idsError) throw new Error(`Unable to derive VM targets: ${idsError.message}`);
+    const targetIds = array(ids).filter((item): item is string => typeof item === "string");
+    if (!targetIds.length) return null;
+    const subscription = group.split("/")[2] ?? "";
+    const resourceGroup = group.split("/")[4] ?? "";
+    const location = text(provisioning.location);
+    const { data: created, error: createError } = await admin.rpc("save_iac_change_package", {
+      p_package: {
+        package_number: packageNumber, target_resource_id: targetIds[0], target_name: names[0],
+        subscription_id: subscription, resource_group: resourceGroup, region: location,
+        action_type: "create_vm", action_label: actionLabel("create_vm"),
+        // environment is compared against the server-authorized scope binding;
+        // packages created here have never carried it before.
+        parameters: { ...provisioning, environment: ticket.environment.toLowerCase(), source: "servicenow_webhook", serviceNowTicket: ticket.ticketNumber, serviceNowSysId: ticket.sysId, confidence: analysis.confidence },
+        rationale: `ServiceNow ${ticket.ticketNumber} requested by ${ticket.requester}: ${ticket.description}`,
+        current_state: {},
+        policy_evidence: [
+          { check: "LLM classification", result: `create_vm · ${analysis.confidence}% confidence` },
+          { check: "Provisioning inputs", result: `All ${PROVISIONING_FIELDS.length} required inputs validated from the ticket` },
+          { check: "Name collision", result: `${targetIds.length} requested name(s) not present in live Azure inventory` },
+        ],
+        validation_plan: ["Confirm every requested machine exists in Azure after apply", "Confirm each machine has the approved size and image", "Confirm each NIC attached to the authorized subnet"],
+        risk_score: 60, risk_level: "Medium", approval_required: true,
+      },
+      p_targets: targetIds.map((id, index) => ({
+        target_resource_id: id, target_name: names[index], subscription_id: subscription,
+        resource_group: resourceGroup, region: location, current_state: {},
+      })),
+      p_submit: false, p_package_id: null, p_created_by: creator,
+    });
+    if (createError) throw new Error(`Unable to create governed draft: ${createError.message}`);
+    const saved = record(created);
+    return { id: text(saved.id), package_number: text(saved.package_number) };
+  }
+
+  if (!target) return null;
   // save_iac_change_package is the only supported write path: a direct INSERT
   // here produced a package with no rows in iac_change_package_targets, which
   // the orchestrator then refused to plan. The service role supplies
@@ -383,7 +549,12 @@ Deno.serve(async (request) => {
     await admin.from("servicenow_intake_requests").update({ azure_observation: azure }).eq("id", requestId);
     await addEvent(admin, requestId, "azure_enrichment_completed", { state: azure.state, vmCount: azure.vms.length });
     const analysis = await analyzeWithGemini(ticket, azure);
-    const validation = validate(ticket, analysis, azure);
+    // Does the platform already know how to do what this ticket asks? That is
+    // a catalog question, not a question about the action's name.
+    const { data: approvedCapability } = await admin.from("iac_automation_capabilities")
+      .select("id").eq("provider", "azure").eq("resource_type", VM_RESOURCE_TYPE)
+      .eq("action_type", analysis.action).eq("lifecycle_status", "approved").maybeSingle();
+    const validation = validate(ticket, analysis, azure, !!approvedCapability);
     const draft = validation.ready ? await maybeCreateDraft(admin, ticket, analysis, validation.target, demoMode ? callerId : null) : null;
     const gap = validation.readyForGap ? await maybeCreateGap(admin, ticket, analysis, requestId, demoMode ? callerId : null) : null;
     const note = clarificationNote(ticket, analysis, validation, gap);

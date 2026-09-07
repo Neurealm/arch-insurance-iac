@@ -140,12 +140,11 @@ export function analyzeServiceNowRequest(input: TriageInput): TriageResult {
     missing.push(classification.action === "resize_vm" ? "Requested VM size in the ticket" : "Requested disk capacity in the ticket");
   }
   if (classification.action === "configure_backup" && !/\b(rpo|rto|hour|daily|weekly|retention|backup policy)\b/i.test(text)) missing.push("Recovery objective or backup policy");
-  if (classification.action === "create_vm" && !/\b(subscription|resource group|region|eastus|westus|size|sku|image|subnet|network)\b/i.test(text)) missing.push("Subscription, resource group, region, size, image, and network requirements");
+  if (classification.action === "create_vm" && !/\b(subscription|resource group|region|eastus|westus|size|sku|image|subnet|network)\b/i.test(text)) missing.push("Resource group ARM ID, subnet ARM ID, region, VM names, size, admin username, SSH public key and OS image publisher/offer/SKU/version");
 
   if (target && classification.action === "start_vm" && /running/i.test(target.powerState)) conflicts.push("The selected VM is already running; confirm that a start operation is still required.");
   if (target && classification.action === "stop_vm" && !/running/i.test(target.powerState)) conflicts.push("The selected VM is not running; confirm that a stop operation is required.");
   if (target && classification.action === "restart_vm" && !/running/i.test(target.powerState)) conflicts.push("Restart normally requires a running VM; confirm the requested state or use Start Azure VM.");
-  if (classification.action === "create_vm") conflicts.push("VM creation is triage-only in this pilot; an approved provisioning workflow is not configured yet.");
 
   const clarificationQuestions = unique([
     ...missing.map((field) => `Please provide ${field.toLowerCase()}.`),
@@ -163,7 +162,11 @@ export function analyzeServiceNowRequest(input: TriageInput): TriageResult {
     missing: unique(missing),
     conflicts: unique(conflicts),
     clarificationQuestions,
-    readyForEngineering: classification.action !== "unknown" && classification.action !== "create_vm" && missing.length === 0 && conflicts.length === 0,
+    // create_vm is no longer permanently excluded: it is an approved
+    // capability now, and the authoritative decision is made server-side in
+    // servicenow-intake against the capability catalog. This browser-side
+    // preview must agree with it or the console contradicts the ticket.
+    readyForEngineering: classification.action !== "unknown" && missing.length === 0 && conflicts.length === 0,
   };
 }
 
