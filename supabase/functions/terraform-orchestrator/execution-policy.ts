@@ -90,7 +90,11 @@ export function typedInputs(pkg: Json, capability: Json, target: string): Json {
 /** Analyze actual resource changes, not arbitrary nested resource_id values. */
 export function assessPlan(plan: Json, targets: string[], inputs: Json, capability: Json) {
   const expected = new Set(targets.map(value => armIdentity(value).id));
-  const seen = new Set<string>(), violations: string[] = [], actions: Json = {};
+  const seen = new Set<string>(), createdNics = new Set<string>(), violations: string[] = [], actions: Json = {};
+  // Resource groups the declared targets live in. resolveExecutionScope has
+  // already proven every target sits in the single authorized group, so this is
+  // the boundary a derived NIC is allowed to be created inside.
+  const targetGroups = new Set([...expected].map(id => armIdentity(id).resourceGroupId));
   let destroy = false, replace = false;
   const changes = arr(plan.resource_changes).map(obj);
   if (!changes.length) violations.push("Plan contains no managed-resource evidence.");
@@ -122,15 +126,40 @@ export function assessPlan(plan: Json, targets: string[], inputs: Json, capabili
         if (!["Microsoft.Compute/virtualMachines", "Microsoft.Network/networkInterfaces"].includes(type)) throw new Error("Unexpected created resource type.");
         id = armIdentity(`${str(after.parent_id)}/providers/${type}/${str(after.name)}`).id;
         if (!operations.includes("create") || change.before !== null || hasUnknown(unknown.body) || hasUnknown(unknown.sensitive_body) || !emptyObject(after.sensitive_body)) throw new Error("Only fully specified new VM/NIC creation is allowed.");
-        // Until the full creation-body policy and end-to-end validation have
-        // been qualified, promotion does not automatically authorize creation.
-        throw new Error("VM provisioning execution is not yet qualified for production. Keep this capability in engineering review.");
+        // A VM create also creates its NIC, which no requester declares as a
+        // target. Record it separately so the boundary check below can allow it
+        // inside the authorized resource group instead of calling it unexpected.
+        if (type.toLowerCase() === NIC) createdNics.add(id);
+        // WARNING -- DELIBERATELY UNGUARDED, AUTHORIZED 2026-09-07.
+        // Creation execution was enabled by explicit owner decision before the
+        // creation-body policy existed. What is checked above: resource type is
+        // VM or NIC, identity is known at plan time, the operation is a pure
+        // create, and no unknown or sensitive body. What is NOT checked, and
+        // what an AI-drafted module could therefore specify freely:
+        //   * image reference, OS/data disk sizes, VM SKU
+        //   * subnet placement -- scope.allowedSubnetIds is NOT enforced here
+        //   * public IP attachment
+        //   * custom script or any other VM extension
+        //   * admin credentials carried in the plain body
+        //   * subscription quota, SKU availability or region capacity
+        // Compare azapi_update above, which pins the body to exactly
+        // properties.hardwareProfile.vmSize. Creation has no equivalent.
+        // Restore the gate by re-throwing here; close the gaps by validating
+        // `after.body` against a per-capability creation policy.
       } else throw new Error("Unapproved resource implementation.");
       if (seen.has(id)) throw new Error("Multiple Terraform resources target the same Azure resource.");
       seen.add(id);
     } catch (cause) { violations.push(cause instanceof Error ? cause.message : "Invalid resource evidence."); }
   }
-  const affected = [...seen], unexpected = affected.filter(id => !expected.has(id)), missingFromPlan = [...expected].filter(id => !seen.has(id));
+  // A resource is unexpected unless it is a declared target, or a NIC this plan
+  // creates inside the same resource group as the declared targets. The second
+  // clause is the narrowest relaxation that lets VM creation plan at all; it
+  // still blocks a NIC created anywhere outside the authorized group, and every
+  // non-NIC resource is judged exactly as before.
+  const affected = [...seen];
+  const unexpected = affected.filter(id => !expected.has(id)
+    && !(createdNics.has(id) && targetGroups.has(armIdentity(id).resourceGroupId)));
+  const missingFromPlan = [...expected].filter(id => !seen.has(id));
   if (plan.errored === true || plan.complete === false || arr(plan.deferred_changes).length) violations.push("Plan is incomplete, deferred or errored.");
   return { destroy, replace, affected, actions, unexpected, missingFromPlan, violations, matched: !destroy && !replace && !unexpected.length && !missingFromPlan.length && !violations.length };
 }
