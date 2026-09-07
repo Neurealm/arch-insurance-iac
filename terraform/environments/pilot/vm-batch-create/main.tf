@@ -10,6 +10,7 @@ provider "azapi" {
 module "vm_batch_create" {
   source = "../../../modules/vm-batch-create"
 
+  location                 = var.location
   target_resource_group_id = var.target_resource_group_id
   subnet_id                = var.subnet_id
   vm_names                 = var.vm_names

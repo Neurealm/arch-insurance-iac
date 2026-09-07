@@ -4,7 +4,7 @@ resource "azapi_resource" "network_interface" {
   type      = "Microsoft.Network/networkInterfaces@2023-11-01"
   name      = "${each.key}-nic"
   parent_id = var.target_resource_group_id
-  location  = trim(split("providers", var.target_resource_group_id)[0], "/") == "subscriptions" ? data.azurerm_resource_group.rg_info[trim(split("providers", var.target_resource_group_id)[0], "/")].location : "East US" # This assumes a common location, but in a real module, location would be an explicit input.
+  location  = var.location
 
   body = jsonencode({
     properties = {
@@ -38,7 +38,7 @@ resource "azapi_resource" "virtual_machine" {
   type      = "Microsoft.Compute/virtualMachines@2024-07-01"
   name      = each.key
   parent_id = var.target_resource_group_id
-  location  = trim(split("providers", var.target_resource_group_id)[0], "/") == "subscriptions" ? data.azurerm_resource_group.rg_info[trim(split("providers", var.target_resource_group_id)[0], "/")].location : "East US" # This assumes a common location, but in a real module, location would be an explicit input.
+  location  = var.location
 
   body = jsonencode({
     properties = {
@@ -97,19 +97,4 @@ resource "azapi_resource" "virtual_machine" {
       error_message = "The action is not bound to an approved change request."
     }
   }
-}
-
-# Data source to fetch resource group properties, primarily location.
-# This is a workaround as azapi_resource does not expose direct resource group location lookup.
-# In a production environment, it's often preferred to pass location explicitly.
-data "azurerm_resource_group" "rg_info" {
-  for_each = toset([var.target_resource_group_id])
-  name     = split("/", each.key)[4]
-  provider = azurerm.azapi_workaround
-}
-
-# Provider alias for azurerm data source, as azapi module usually runs in a context where azurerm provider might not be the default.
-# This assumes the azurerm provider is configured in the root module.
-provider "azurerm" {
-  alias = "azapi_workaround"
 }

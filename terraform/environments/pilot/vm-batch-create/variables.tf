@@ -71,3 +71,12 @@ variable "tfc_azure_dynamic_credentials" {
     }))
   })
 }
+
+variable "location" {
+  description = "Azure region the VMs and NICs are created in. Passed explicitly by the orchestrator from the change package region; never inferred."
+  type        = string
+  validation {
+    condition     = can(regex("^[a-z0-9]{3,40}$", var.location))
+    error_message = "location must be an Azure region short name, for example eastus."
+  }
+}
