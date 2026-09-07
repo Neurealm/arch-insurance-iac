@@ -4,9 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type AutomationCapability = {
   id: string; actionType: string; displayName: string; moduleSource: string; moduleVersion: string;
-  executionMode: "azapi_action" | "azapi_update" | "azurerm_resource";
+  // azapi_resource is provisioning -- a plain CRUD create, as opposed to the
+  // RPC-style action and PATCH-style update modes the other capabilities use.
+  executionMode: "azapi_action" | "azapi_update" | "azurerm_resource" | "azapi_resource";
   lifecycleStatus: "draft" | "testing" | "approved" | "retired";
   allowedEnvironments: string[]; requiresManagedResource: boolean;
+  /** Blast-radius cap per run, set per capability. 1 for the mutate actions. */
+  maxTargetsPerRun: number;
 };
 
 export type TerraformRun = {
@@ -26,6 +30,7 @@ const mapCapability = (row: Record<string, any>): AutomationCapability => ({
   id: row.id, actionType: row.action_type, displayName: row.display_name, moduleSource: row.module_source,
   moduleVersion: row.module_version, executionMode: row.execution_mode, lifecycleStatus: row.lifecycle_status,
   allowedEnvironments: row.allowed_environments ?? [], requiresManagedResource: row.requires_managed_resource,
+  maxTargetsPerRun: Number(row.max_targets_per_run ?? 1),
 });
 
 const mapRun = (row: Record<string, any>): TerraformRun => ({

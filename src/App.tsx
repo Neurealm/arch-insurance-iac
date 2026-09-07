@@ -25,6 +25,7 @@ const ServiceNowIntake = lazy(() => import("./pages/agentic-iac/ServiceNowIntake
 const AssetDigitalTwin = lazy(() => import("./pages/agentic-iac/AssetDigitalTwin.tsx"));
 const RemediationIntelligence = lazy(() => import("./pages/agentic-iac/RemediationIntelligence.tsx"));
 const ChangeEngineering = lazy(() => import("./pages/agentic-iac/ChangeEngineering.tsx"));
+const ProvisionVms = lazy(() => import("./pages/agentic-iac/change/ProvisionVms.tsx"));
 const ChangeReviewApproval = lazy(() => import("./pages/agentic-iac/ChangeReviewApproval.tsx"));
 const ExecutionCenter = lazy(() => import("./pages/agentic-iac/ExecutionCenter.tsx"));
 const ValidationEvidence = lazy(() => import("./pages/agentic-iac/ValidationEvidence.tsx"));
@@ -84,6 +85,7 @@ const App = () => (
                   <Route path="/remediation/virtual-machines/:vmName" element={<RemediationIntelligence />} />
                   <Route path="/remediation/:assetId" element={<Navigate to="/remediation" replace />} />
                   <Route path="/changes" element={<ChangeEngineering />} />
+                  <Route path="/changes/provision-vms" element={<ProvisionVms />} />
                   <Route path="/changes/virtual-machines/:vmName" element={<ChangeEngineering />} />
                   <Route path="/changes/:assetId" element={<Navigate to="/changes" replace />} />
                   <Route path="/approvals" element={<ChangeReviewApproval />} />

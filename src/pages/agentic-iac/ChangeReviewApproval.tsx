@@ -4,7 +4,7 @@ import { AlertTriangle, CheckCircle2, ChevronRight, ClipboardCheck, FileWarning,
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, type AzureVirtualMachine, type AzureVmOperations } from "./azureControlPlane";
-import { getVmChangePackage, listVmChangePackageReviews, listVmChangePackages, reviewVmChangePackage, type ChangePackageStatus, type ChangeReviewDecision, type VmChangePackage, type VmChangePackageReview } from "./changePackages";
+import { authorizeProvisioningTargets, getProvisioningAuthorization, getVmChangePackage, listChangePackageTargets, listVmChangePackageReviews, listVmChangePackages, reviewVmChangePackage, type ChangePackageStatus, type ChangePackageTarget, type ChangeReviewDecision, type ProvisioningAuthorization, type VmChangePackage, type VmChangePackageReview } from "./changePackages";
 import { listTerraformRuns, syncTerraformRuns, type TerraformRun } from "./automationCatalog";
 
 function Panel({ title, right, children, className }: { title: string; right?: ReactNode; children: ReactNode; className?: string }) {
@@ -82,6 +82,69 @@ function VmApprovalQueue() {
   </div>;
 }
 
+/**
+ * Naming the exact machines a batch may create.
+ *
+ * Provisioning cannot be authorized by the scope binding the way the four
+ * mutate actions are, because the machines do not exist when that binding is
+ * written. A platform administrator declares the exact set here instead, and
+ * the orchestrator refuses to plan until the package's declared targets equal
+ * it. The administrator confirms the full list rather than clicking a single
+ * button, so this is a deliberate act rather than a rubber stamp on whatever
+ * the ticket happened to contain.
+ */
+function ProvisioningAuthorizationPanel({ pkg, canAuthorize, onChange }: { pkg: VmChangePackage; canAuthorize: boolean; onChange: () => void }) {
+  const [targets, setTargets] = useState<ChangePackageTarget[]>([]);
+  const [authorization, setAuthorization] = useState<ProvisioningAuthorization | null>(null);
+  const [comment, setComment] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { const [rows, existing] = await Promise.all([listChangePackageTargets(pkg.id), getProvisioningAuthorization(pkg.id)]); setTargets(rows); setAuthorization(existing); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to load the declared machines."); }
+    finally { setLoading(false); }
+  }, [pkg.id]);
+  useEffect(() => { void load(); }, [load]);
+
+  const authorize = async () => {
+    setBusy(true); setError(null);
+    try { await authorizeProvisioningTargets(pkg.id, targets.map((target) => target.targetResourceId), comment); setComment(""); await load(); onChange(); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Authorization was refused."); }
+    finally { setBusy(false); }
+  };
+
+  return <Panel title="Authorized machines" right={<span className="text-[10.5px] text-slate-500">{loading ? "Loading…" : `${targets.length} declared`}</span>}>
+    {error && <div className="mb-2 rounded-md border border-red-200 bg-red-50 px-2.5 py-2 text-[11.5px] text-red-800">{error}</div>}
+    <div className="max-h-48 overflow-y-auto rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-2">
+      {targets.map((target) => <div key={target.targetResourceId} className="flex items-center gap-2 py-0.5 text-[11px]">
+        <span className="font-medium text-slate-800">{target.targetName}</span>
+        <span className="ml-auto truncate font-mono text-[10px] text-slate-500" title={target.targetResourceId}>{target.resourceGroup} · {target.region}</span>
+      </div>)}
+      {!loading && !targets.length && <p className="text-[11.5px] text-slate-500">This package declares no machines.</p>}
+    </div>
+    {authorization
+      ? <div className="mt-2 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[11.5px] text-emerald-800">
+          <ShieldCheck className="mr-1 inline h-3.5 w-3.5" /><b>{authorization.targetResourceIds.length} machine(s) authorized</b> by <span className="font-mono">{shortId(authorization.authorizedBy)}</span> on {dateTime(authorization.authorizedAt)}.
+          <p className="mt-1 leading-relaxed">{authorization.comment}</p>
+        </div>
+      : canAuthorize
+        ? <>
+            <p className="mt-2 text-[11.5px] leading-relaxed text-slate-600">Confirm that exactly these machines may be created. This cannot be changed afterwards — a different set requires a new package.</p>
+            <textarea value={comment} onChange={(event) => setComment(event.target.value)} rows={2} placeholder="Why these machines, in this resource group (10+ characters)." className="mt-1 w-full rounded-md border border-[#CBD5E1] p-2 text-[11.5px] outline-none focus:border-[#1B4F91]" />
+            <button type="button" disabled={busy || comment.trim().length < 10 || !targets.length} onClick={() => void authorize()}
+              className="mt-2 inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-md bg-[#1B4F91] px-3 text-[11.5px] font-semibold text-white hover:bg-[#16406f] disabled:cursor-not-allowed disabled:bg-slate-300">
+              <ShieldCheck className="h-3.5 w-3.5" />{busy ? "Authorizing…" : `Authorize these ${targets.length} machine(s)`}
+            </button>
+          </>
+        : <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-[11.5px] text-amber-800">
+            <AlertTriangle className="mr-1 inline h-3.5 w-3.5" />Not yet authorized. A platform administrator other than the requester must name these machines before this package can be planned.
+          </div>}
+  </Panel>;
+}
+
 function VmPackageReview({ packageId }: { packageId: string }) {
   const navigate = useNavigate();
   const { user, hasPlatformAdminRole } = useAuth();
@@ -142,6 +205,7 @@ function VmPackageReview({ packageId }: { packageId: string }) {
         {readiness?.tone === "attention" && <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-900">Review may continue, but the reviewer must confirm the current Azure state before approving.</div>}
       </Panel>
       <Panel title="Approval record" right={<span className="text-[10.5px] text-slate-500">Durable audit trail</span>}>{reviews.length ? <div className="space-y-2">{reviews.map((review) => <div key={review.id} className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-2.5"><div className="flex items-center gap-2"><Status status={review.decision} /><span className="ml-auto text-[10.5px] text-slate-500">{dateTime(review.reviewedAt)}</span></div><div className="mt-1 text-[11px] text-slate-600">Reviewer ID: <span className="font-mono">{shortId(review.reviewedBy)}</span></div>{review.comment && <p className="mt-1 text-[11.5px] leading-relaxed text-slate-700">{review.comment}</p>}</div>)}</div> : <p className="text-[12px] text-slate-600">No decision has been recorded. The package is awaiting an authorized reviewer.</p>}</Panel>
+      {pkg.actionType === "create_vm" && <ProvisioningAuthorizationPanel pkg={pkg} canAuthorize={hasPlatformAdminRole && pkg.createdBy !== user?.id} onChange={() => void load()} />}
       <Panel title="Reviewer decision"><p className="mb-2 text-[11.5px] leading-relaxed text-slate-600">An authorized platform administrator may decide only after a clean HCP Terraform saved plan is recorded. The request owner cannot approve their own package.</p>{eligibleToReview ? <><textarea value={comment} onChange={(event) => setComment(event.target.value)} rows={3} placeholder="Required: explain the approval, requested change, or rejection using the live VM evidence (10+ characters)." className="w-full rounded-md border border-[#CBD5E1] p-2 text-[11.5px] outline-none focus:border-[#1B4F91]" /><div className="mt-2 grid gap-2 sm:grid-cols-3"><button type="button" disabled={saving} onClick={() => void decide("approved")} className="inline-flex h-8 items-center justify-center gap-1 rounded-md bg-emerald-700 px-2 text-[11px] font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"><CheckCircle2 className="h-3.5 w-3.5" />Approve</button><button type="button" disabled={saving} onClick={() => void decide("changes_requested")} className="inline-flex h-8 items-center justify-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2 text-[11px] font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-50"><AlertTriangle className="h-3.5 w-3.5" />Request changes</button><button type="button" disabled={saving} onClick={() => void decide("rejected")} className="inline-flex h-8 items-center justify-center gap-1 rounded-md border border-red-300 bg-red-50 px-2 text-[11px] font-semibold text-red-800 hover:bg-red-100 disabled:opacity-50"><XCircle className="h-3.5 w-3.5" />Reject</button></div></> : <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-2.5 text-[11.5px] text-slate-600">{reviewBlockedReason}</div>}<div className="mt-3 border-t border-[#E2E8F0] pt-3">{pkg.status === "approved" ? <Link to={`/execution/${pkg.id}`} className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-md bg-[#1B4F91] px-3 text-[11.5px] font-semibold text-white hover:bg-[#16406f]">Open HCP Terraform execution</Link> : <p className="text-[10.5px] text-slate-500">Approval never calls Azure directly. The Execution Center applies the reviewed HCP saved plan.</p>}</div></Panel></div>
     </div>
     <div className="mt-3 flex flex-wrap gap-2"><Link to="/approvals" className="inline-flex h-8 items-center rounded-md border border-[#E2E8F0] bg-white px-3 text-[11.5px] font-medium text-slate-700 hover:bg-slate-50">Back to approval queue</Link><Link to={`/resources/virtual-machines/${encodeURIComponent(pkg.targetName)}`} className="inline-flex h-8 items-center rounded-md border border-[#E2E8F0] bg-white px-3 text-[11.5px] font-medium text-[#1B4F91] hover:bg-slate-50">Open VM Digital Twin</Link>{pkg.status === "changes_requested" && <button type="button" onClick={() => navigate("/changes")} className="inline-flex h-8 items-center rounded-md bg-[#1B4F91] px-3 text-[11.5px] font-medium text-white hover:bg-[#16406f]">Create revised package</button>}</div>

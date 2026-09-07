@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, Cpu, Filter, MapPin, Power, RefreshCw, Save, Search, ServerCog, ShieldCheck, Wrench, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, Cpu, Filter, MapPin, Power, RefreshCw, Save, Search, ServerCog, ShieldCheck, Wrench, X , ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, type AzureVirtualMachine, type AzureVmOperations } from "./azureControlPlane";
@@ -115,6 +115,14 @@ function VmChangeTargetSelection() {
       <span>{loading ? "Loading…" : `${filteredVms.length} of ${vms.length} VMs`}</span>
     </div>
 
+    {/* Every card below acts on a VM that already exists. Requesting new ones
+        starts without a target, so it gets its own entry rather than a
+        disabled-looking slot in an inventory grid. */}
+    <Link to="/changes/provision-vms" className="mb-3 flex items-center gap-3 rounded-lg border border-dashed border-[#CFE0F3] bg-[#F7FAFE] px-3.5 py-3 transition-colors hover:bg-[#EFF4FB]">
+      <ServerCog className="h-4 w-4 shrink-0 text-[#1B4F91]" />
+      <div className="min-w-0"><div className="text-[13px] font-semibold text-[#1B4F91]">Provision new virtual machines</div><div className="mt-0.5 text-[11px] text-slate-600">Request machines that do not exist yet. Governed by the same plan, authorization and two-person approval as every action below.</div></div>
+      <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-[#1B4F91]" />
+    </Link>
     {loading ? (
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{[0, 1, 2].map((key) => <div key={key} className="h-[132px] animate-pulse rounded-lg border border-[#E2E8F0] bg-slate-50" />)}</div>
     ) : filteredVms.length ? (

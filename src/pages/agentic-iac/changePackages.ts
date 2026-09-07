@@ -152,6 +152,62 @@ export async function listVmChangePackageReviews(packageId: string) {
   return (data ?? []).map(mapReview);
 }
 
+const rpcClient = () => supabase as unknown as { rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: any; error: Error | null }> };
+
+/**
+ * The exact ARM IDs a create_vm package will declare, derived server-side.
+ *
+ * Synthesis lives in SQL so this screen and servicenow-intake cannot drift, and
+ * so a name Azure would reject — or one that would break the orchestrator's ARM
+ * ID parser — is refused here, while the requester can still fix it.
+ */
+export async function deriveVmTargetIds(resourceGroupArmId: string, vmNames: string[]): Promise<string[]> {
+  const { data, error } = await rpcClient().rpc("iac_vm_target_ids", {
+    p_resource_group_arm_id: resourceGroupArmId, p_vm_names: vmNames,
+  });
+  if (error) throw error;
+  return Array.isArray(data) ? data.filter((item: unknown): item is string => typeof item === "string") : [];
+}
+
+/** Every resource a package declares. One row for a mutate action, N for a batch create. */
+export async function listChangePackageTargets(packageId: string): Promise<ChangePackageTarget[]> {
+  const { data, error } = await table().from("iac_change_package_targets").select("*").eq("package_id", packageId).order("target_resource_id");
+  if (error) throw error;
+  return (data ?? []).map((row: Record<string, any>) => ({
+    targetResourceId: row.target_resource_id, targetName: row.target_name,
+    subscriptionId: row.subscription_id, resourceGroup: row.resource_group,
+    region: row.region, currentState: row.current_state ?? {},
+  }));
+}
+
+export type ProvisioningAuthorization = {
+  packageId: string; targetResourceIds: string[]; authorizedBy: string; authorizedAt: string; comment: string;
+};
+
+export async function getProvisioningAuthorization(packageId: string): Promise<ProvisioningAuthorization | null> {
+  const { data, error } = await table().from("iac_provisioning_authorizations").select("*").eq("package_id", packageId).maybeSingle();
+  if (error) throw error;
+  return data ? {
+    packageId: data.package_id, targetResourceIds: data.target_resource_ids ?? [],
+    authorizedBy: data.authorized_by, authorizedAt: data.authorized_at, comment: data.comment,
+  } : null;
+}
+
+/**
+ * A platform administrator names the exact machines a batch may create.
+ *
+ * The caller passes the full set rather than a confirmation flag: the server
+ * requires it to equal the package's declared targets, so authorising is an
+ * explicit act rather than a rubber stamp on whatever the ticket contained.
+ */
+export async function authorizeProvisioningTargets(packageId: string, targetResourceIds: string[], comment: string) {
+  const { data, error } = await rpcClient().rpc("authorize_iac_provisioning_targets", {
+    p_package_id: packageId, p_target_resource_ids: targetResourceIds, p_comment: comment.trim(),
+  });
+  if (error) throw error;
+  return data as Record<string, unknown>;
+}
+
 export async function reviewVmChangePackage(packageId: string, decision: ChangeReviewDecision, comment?: string, displayedPlan?: { id: string; planSha256: string | null } | null) {
   if (decision === "approved" && !displayedPlan?.planSha256) throw new Error("Refresh and review an exact saved Terraform plan before approval.");
   const rpc = supabase as unknown as { rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: Record<string, any>; error: Error | null }> };
