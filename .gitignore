@@ -36,3 +36,6 @@ crash.*.log
 *.njsproj
 *.sln
 *.sw?
+
+# Supabase CLI local state (project ref, linked-project, tool versions).
+supabase/.temp/
