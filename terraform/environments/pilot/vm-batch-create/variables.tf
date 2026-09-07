@@ -15,7 +15,7 @@ variable "vm_names" {
 
 variable "vm_size" {
   type        = string
-  description = "The Azure VM size to use for all virtual machines (e.g., 'Standard_B2s')."
+  description = "The Azure VM size to use for all virtual machines, for example 'Standard_B2s'."
 }
 
 variable "admin_username" {
@@ -30,22 +30,22 @@ variable "ssh_public_key" {
 
 variable "os_publisher" {
   type        = string
-  description = "The publisher of the OS image (e.g., 'Canonical')."
+  description = "The publisher of the OS image, for example 'Canonical'."
 }
 
 variable "os_offer" {
   type        = string
-  description = "The offer of the OS image (e.g., '0001-com-ubuntu-server-jammy')."
+  description = "The offer of the OS image, for example '0001-com-ubuntu-server-jammy'."
 }
 
 variable "os_sku" {
   type        = string
-  description = "The SKU of the OS image (e.g., '22_04-lts-gen2')."
+  description = "The SKU of the OS image, for example '22_04-lts-gen2'."
 }
 
 variable "os_version" {
   type        = string
-  description = "The OS image version (e.g., 'latest' or a specific version like '22.04.202310030')."
+  description = "The OS image version, for example 'latest' or a specific version like '22.04.202310030'."
 }
 
 variable "change_request_id" {
@@ -54,6 +54,7 @@ variable "change_request_id" {
 }
 
 variable "tags" {
+  default     = {}
   type        = map(string)
   description = "A map of tags to assign to all created resources."
 }
@@ -75,8 +76,4 @@ variable "tfc_azure_dynamic_credentials" {
 variable "location" {
   description = "Azure region the VMs and NICs are created in. Passed explicitly by the orchestrator from the change package region; never inferred."
   type        = string
-  validation {
-    condition     = can(regex("^[a-z0-9]{3,40}$", var.location))
-    error_message = "location must be an Azure region short name, for example eastus."
-  }
 }

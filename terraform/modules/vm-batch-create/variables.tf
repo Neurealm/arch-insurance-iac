@@ -30,11 +30,11 @@ variable "vm_names" {
 }
 
 variable "vm_size" {
-  description = "The Azure VM size to use for all virtual machines (e.g., 'Standard_B2s')."
+  description = "The Azure VM size to use for all virtual machines, for example 'Standard_B2s'."
   type        = string
   validation {
     condition     = can(regex("^Standard_[A-Za-z0-9_]+$", var.vm_size))
-    error_message = "vm_size must follow the Azure naming convention (e.g., 'Standard_B2s')."
+    error_message = "vm_size must follow the Azure naming convention, for example 'Standard_B2s'."
   }
 }
 
@@ -56,27 +56,27 @@ variable "ssh_public_key" {
   }
   validation {
     condition     = can(regex("^(ssh-rsa|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521|ssh-ed25519) [A-Za-z0-9+/=]+(?: .*)?$", trimspace(var.ssh_public_key)))
-    error_message = "SSH public key must be in a valid OpenSSH format (e.g., starting with 'ssh-rsa', 'ecdsa-sha2-nistp', or 'ssh-ed25519')."
+    error_message = "SSH public key must be in a valid OpenSSH format, for example starting with 'ssh-rsa', 'ecdsa-sha2-nistp', or 'ssh-ed25519'."
   }
 }
 
 variable "os_publisher" {
-  description = "The publisher of the OS image (e.g., 'Canonical')."
+  description = "The publisher of the OS image, for example 'Canonical'."
   type        = string
 }
 
 variable "os_offer" {
-  description = "The offer of the OS image (e.g., '0001-com-ubuntu-server-jammy')."
+  description = "The offer of the OS image, for example '0001-com-ubuntu-server-jammy'."
   type        = string
 }
 
 variable "os_sku" {
-  description = "The SKU of the OS image (e.g., '22_04-lts-gen2')."
+  description = "The SKU of the OS image, for example '22_04-lts-gen2'."
   type        = string
 }
 
 variable "os_version" {
-  description = "The OS image version (e.g., 'latest' or a specific version like '22.04.202310030')."
+  description = "The OS image version, for example 'latest' or a specific version like '22.04.202310030'."
   type        = string
 }
 
