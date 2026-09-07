@@ -12121,6 +12121,50 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      save_iac_change_package: {
+        Args: {
+          p_created_by?: string
+          p_package: Json
+          p_package_id?: string
+          p_submit?: boolean
+          p_targets: Json
+        }
+        Returns: {
+          action_label: string
+          action_type: string
+          approval_required: boolean
+          created_at: string
+          created_by: string
+          current_state: Json
+          executed_by: string | null
+          execution_completed_at: string | null
+          execution_message: string | null
+          execution_started_at: string | null
+          id: string
+          package_number: string
+          parameters: Json
+          policy_evidence: Json
+          rationale: string
+          region: string
+          resource_group: string
+          risk_level: string
+          risk_score: number
+          status: string
+          submitted_at: string | null
+          subscription_id: string
+          target_count: number
+          target_name: string
+          target_resource_id: string
+          updated_at: string
+          validation_plan: Json
+        }
+        SetofOptions: {
+          from: "*"
+          to: "iac_change_packages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       seed_project_momentous_foundation: { Args: never; Returns: Json }
       seed_project_momentous_scenarios: { Args: never; Returns: Json }
       seed_user_defaults: {
