@@ -41,9 +41,19 @@ tolerated=0
 strict=0
 
 HOOK_DIR="${HOOK_DIR:-supabase/tests/fixtures/replay-hooks}"
+SKIP_FILE="${SKIP_FILE:-supabase/tests/fixtures/replay-skip.txt}"
 
 for f in "$MIG_DIR"/*.sql; do
   name="$(basename "$f")"
+
+  # Skip list: data-repair migrations that patch specific production rows by
+  # UUID. They assert on rows that only exist in the live database, so they can
+  # never succeed on an empty one. They change no schema, so skipping them does
+  # not weaken any structural assertion.
+  if [[ -f "$SKIP_FILE" ]] && grep -qxF "$name" "$SKIP_FILE"; then
+    echo "skip: $name (data-only production patch)"
+    continue
+  fi
 
   # Replay hook: reproduces out-of-band schema changes that were made directly
   # against the live database (never captured as a migration) and that the next
