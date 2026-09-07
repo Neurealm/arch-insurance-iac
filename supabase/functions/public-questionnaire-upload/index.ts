@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
     if (!resp) return json({ error: "Response not found" }, 404);
     if (resp.status === "submitted") return json({ error: "Already submitted" }, 409);
 
-    const safeName = file.name.replace(/[^\w.\-]+/g, "_").slice(0, 180);
+    const safeName = file.name.replace(/[^\w.-]+/g, "_").slice(0, 180);
     const path = `questionnaire-public/${resp.id}/${crypto.randomUUID()}-${safeName}`;
     const bytes = new Uint8Array(await file.arrayBuffer());
 

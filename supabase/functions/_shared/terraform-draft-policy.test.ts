@@ -100,7 +100,7 @@ const attacks: Array<[string, (draft: DraftResult) => void]> = [
   ["multiline function call", (d) => { d.moduleOutputsTf = 'output "secret" { value = file\n("/tmp/token") }'; }],
   ["comment-obfuscated function", (d) => { d.moduleOutputsTf = 'output "secret" { value = file /* hide */ ("/tmp/token") }'; }],
   ["heredoc interpolation", (d) => { d.moduleOutputsTf = 'output "secret" {\nvalue = <<EOT\n${file("/tmp/token")}\nEOT\n}'; }],
-  ["escaped string interpolation", (d) => { d.moduleOutputsTf = 'output "secret" { value = "${file(\"/tmp/token\")}" }'; }],
+  ["escaped string interpolation", (d) => { d.moduleOutputsTf = 'output "secret" { value = "${file("/tmp/token")}" }'; }],
   ["credential traversal", (d) => { d.moduleOutputsTf = 'output "secret" { value = var.tfc_azure_dynamic_credentials }'; }],
   ["metadata name injection", (d) => { d.variables[0].name = 'x" {}\nprovider "evil'; }],
   ["metadata type injection", (d) => { d.variables[0].type = 'string\n}\nprovider "evil" {'; }],

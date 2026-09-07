@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const already =
           typeof sessionStorage !== "undefined" && sessionStorage.getItem(dedupeKey);
         if (!already) {
-          try { sessionStorage?.setItem(dedupeKey, "1"); } catch {}
+          try { sessionStorage?.setItem(dedupeKey, "1"); } catch { /* sessionStorage unavailable */ }
           setTimeout(() => {
             supabase.functions
               .invoke("record-login", {
