@@ -20,17 +20,21 @@ CREATE TABLE IF NOT EXISTS public.stakeholder_registers (
 ALTER TABLE public.stakeholder_registers ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Anyone can view stakeholder registers" ON public.stakeholder_registers;
+DROP POLICY IF EXISTS "Anyone can view stakeholder registers" ON public.stakeholder_registers;
 CREATE POLICY "Anyone can view stakeholder registers" ON public.stakeholder_registers FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Anyone can insert stakeholder registers" ON public.stakeholder_registers;
 DROP POLICY IF EXISTS "Anyone can insert stakeholder registers" ON public.stakeholder_registers;
 CREATE POLICY "Anyone can insert stakeholder registers" ON public.stakeholder_registers FOR INSERT
   WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Anyone can update stakeholder registers" ON public.stakeholder_registers;
+DROP POLICY IF EXISTS "Anyone can update stakeholder registers" ON public.stakeholder_registers;
 CREATE POLICY "Anyone can update stakeholder registers" ON public.stakeholder_registers FOR UPDATE
   USING (true);
 
+DROP POLICY IF EXISTS "Anyone can delete stakeholder registers" ON public.stakeholder_registers;
 DROP POLICY IF EXISTS "Anyone can delete stakeholder registers" ON public.stakeholder_registers;
 CREATE POLICY "Anyone can delete stakeholder registers" ON public.stakeholder_registers FOR DELETE
   USING (true);
@@ -43,6 +47,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SET search_path = public;
 
+DROP TRIGGER IF EXISTS update_stakeholder_registers_updated_at ON public.stakeholder_registers;
 DROP TRIGGER IF EXISTS update_stakeholder_registers_updated_at ON public.stakeholder_registers;
 CREATE TRIGGER update_stakeholder_registers_updated_at BEFORE UPDATE ON public.stakeholder_registers
 FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -299,14 +304,18 @@ AS $$
 $$;
 
 DROP TRIGGER IF EXISTS trg_profiles_updated ON public.profiles;
+DROP TRIGGER IF EXISTS trg_profiles_updated ON public.profiles;
 CREATE TRIGGER trg_profiles_updated BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_tenants_updated ON public.tenants;
 DROP TRIGGER IF EXISTS trg_tenants_updated ON public.tenants;
 CREATE TRIGGER trg_tenants_updated BEFORE UPDATE ON public.tenants
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 DROP TRIGGER IF EXISTS trg_tools_catalog_updated ON public.tools_catalog;
+DROP TRIGGER IF EXISTS trg_tools_catalog_updated ON public.tools_catalog;
 CREATE TRIGGER trg_tools_catalog_updated BEFORE UPDATE ON public.tools_catalog
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_agents_catalog_updated ON public.agents_catalog;
 DROP TRIGGER IF EXISTS trg_agents_catalog_updated ON public.agents_catalog;
 CREATE TRIGGER trg_agents_catalog_updated BEFORE UPDATE ON public.agents_catalog
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -323,18 +332,23 @@ ALTER TABLE public.user_tool_assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_agent_assignments ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Profiles readable by authenticated" ON public.profiles;
+DROP POLICY IF EXISTS "Profiles readable by authenticated" ON public.profiles;
 CREATE POLICY "Profiles readable by authenticated" ON public.profiles
   FOR SELECT TO authenticated USING (true);
 DROP POLICY IF EXISTS "Users insert own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users insert own profile" ON public.profiles;
 CREATE POLICY "Users insert own profile" ON public.profiles
   FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users update own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Users update own profile" ON public.profiles;
 CREATE POLICY "Users update own profile" ON public.profiles
   FOR UPDATE TO authenticated USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users read own roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Users read own roles" ON public.user_roles;
 CREATE POLICY "Users read own roles" ON public.user_roles
   FOR SELECT TO authenticated USING (auth.uid() = user_id OR public.is_platform_admin(auth.uid()));
+DROP POLICY IF EXISTS "Platform admins manage roles" ON public.user_roles;
 DROP POLICY IF EXISTS "Platform admins manage roles" ON public.user_roles;
 CREATE POLICY "Platform admins manage roles" ON public.user_roles
   FOR ALL TO authenticated
@@ -342,24 +356,30 @@ CREATE POLICY "Platform admins manage roles" ON public.user_roles
   WITH CHECK (public.is_platform_admin(auth.uid()));
 
 DROP POLICY IF EXISTS "Members or admins read tenant" ON public.tenants;
+DROP POLICY IF EXISTS "Members or admins read tenant" ON public.tenants;
 CREATE POLICY "Members or admins read tenant" ON public.tenants
   FOR SELECT TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.is_tenant_member(auth.uid(), id));
 DROP POLICY IF EXISTS "Platform admins insert tenants" ON public.tenants;
+DROP POLICY IF EXISTS "Platform admins insert tenants" ON public.tenants;
 CREATE POLICY "Platform admins insert tenants" ON public.tenants
   FOR INSERT TO authenticated WITH CHECK (public.is_platform_admin(auth.uid()));
+DROP POLICY IF EXISTS "Tenant admins update tenant" ON public.tenants;
 DROP POLICY IF EXISTS "Tenant admins update tenant" ON public.tenants;
 CREATE POLICY "Tenant admins update tenant" ON public.tenants
   FOR UPDATE TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), id, 'tenant_admin'));
 DROP POLICY IF EXISTS "Platform admins delete tenants" ON public.tenants;
+DROP POLICY IF EXISTS "Platform admins delete tenants" ON public.tenants;
 CREATE POLICY "Platform admins delete tenants" ON public.tenants
   FOR DELETE TO authenticated USING (public.is_platform_admin(auth.uid()));
 
 DROP POLICY IF EXISTS "Members read same-tenant memberships" ON public.tenant_memberships;
+DROP POLICY IF EXISTS "Members read same-tenant memberships" ON public.tenant_memberships;
 CREATE POLICY "Members read same-tenant memberships" ON public.tenant_memberships
   FOR SELECT TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.is_tenant_member(auth.uid(), tenant_id));
+DROP POLICY IF EXISTS "Tenant admins manage memberships" ON public.tenant_memberships;
 DROP POLICY IF EXISTS "Tenant admins manage memberships" ON public.tenant_memberships;
 CREATE POLICY "Tenant admins manage memberships" ON public.tenant_memberships
   FOR ALL TO authenticated
@@ -367,8 +387,10 @@ CREATE POLICY "Tenant admins manage memberships" ON public.tenant_memberships
   WITH CHECK (public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
 
 DROP POLICY IF EXISTS "Authenticated read tools_catalog" ON public.tools_catalog;
+DROP POLICY IF EXISTS "Authenticated read tools_catalog" ON public.tools_catalog;
 CREATE POLICY "Authenticated read tools_catalog" ON public.tools_catalog
   FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Platform admins manage tools_catalog" ON public.tools_catalog;
 DROP POLICY IF EXISTS "Platform admins manage tools_catalog" ON public.tools_catalog;
 CREATE POLICY "Platform admins manage tools_catalog" ON public.tools_catalog
   FOR ALL TO authenticated
@@ -376,8 +398,10 @@ CREATE POLICY "Platform admins manage tools_catalog" ON public.tools_catalog
   WITH CHECK (public.is_platform_admin(auth.uid()));
 
 DROP POLICY IF EXISTS "Authenticated read agents_catalog" ON public.agents_catalog;
+DROP POLICY IF EXISTS "Authenticated read agents_catalog" ON public.agents_catalog;
 CREATE POLICY "Authenticated read agents_catalog" ON public.agents_catalog
   FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Platform admins manage agents_catalog" ON public.agents_catalog;
 DROP POLICY IF EXISTS "Platform admins manage agents_catalog" ON public.agents_catalog;
 CREATE POLICY "Platform admins manage agents_catalog" ON public.agents_catalog
   FOR ALL TO authenticated
@@ -385,9 +409,11 @@ CREATE POLICY "Platform admins manage agents_catalog" ON public.agents_catalog
   WITH CHECK (public.is_platform_admin(auth.uid()));
 
 DROP POLICY IF EXISTS "Members read tenant_tool_assignments" ON public.tenant_tool_assignments;
+DROP POLICY IF EXISTS "Members read tenant_tool_assignments" ON public.tenant_tool_assignments;
 CREATE POLICY "Members read tenant_tool_assignments" ON public.tenant_tool_assignments
   FOR SELECT TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.is_tenant_member(auth.uid(), tenant_id));
+DROP POLICY IF EXISTS "Platform admins manage tenant_tool_assignments" ON public.tenant_tool_assignments;
 DROP POLICY IF EXISTS "Platform admins manage tenant_tool_assignments" ON public.tenant_tool_assignments;
 CREATE POLICY "Platform admins manage tenant_tool_assignments" ON public.tenant_tool_assignments
   FOR ALL TO authenticated
@@ -395,9 +421,11 @@ CREATE POLICY "Platform admins manage tenant_tool_assignments" ON public.tenant_
   WITH CHECK (public.is_platform_admin(auth.uid()));
 
 DROP POLICY IF EXISTS "Members read tenant_agent_assignments" ON public.tenant_agent_assignments;
+DROP POLICY IF EXISTS "Members read tenant_agent_assignments" ON public.tenant_agent_assignments;
 CREATE POLICY "Members read tenant_agent_assignments" ON public.tenant_agent_assignments
   FOR SELECT TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.is_tenant_member(auth.uid(), tenant_id));
+DROP POLICY IF EXISTS "Platform admins manage tenant_agent_assignments" ON public.tenant_agent_assignments;
 DROP POLICY IF EXISTS "Platform admins manage tenant_agent_assignments" ON public.tenant_agent_assignments;
 CREATE POLICY "Platform admins manage tenant_agent_assignments" ON public.tenant_agent_assignments
   FOR ALL TO authenticated
@@ -405,9 +433,11 @@ CREATE POLICY "Platform admins manage tenant_agent_assignments" ON public.tenant
   WITH CHECK (public.is_platform_admin(auth.uid()));
 
 DROP POLICY IF EXISTS "Self or tenant admin read user_tool_assignments" ON public.user_tool_assignments;
+DROP POLICY IF EXISTS "Self or tenant admin read user_tool_assignments" ON public.user_tool_assignments;
 CREATE POLICY "Self or tenant admin read user_tool_assignments" ON public.user_tool_assignments
   FOR SELECT TO authenticated
   USING (auth.uid() = user_id OR public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
+DROP POLICY IF EXISTS "Tenant admins manage user_tool_assignments" ON public.user_tool_assignments;
 DROP POLICY IF EXISTS "Tenant admins manage user_tool_assignments" ON public.user_tool_assignments;
 CREATE POLICY "Tenant admins manage user_tool_assignments" ON public.user_tool_assignments
   FOR ALL TO authenticated
@@ -415,9 +445,11 @@ CREATE POLICY "Tenant admins manage user_tool_assignments" ON public.user_tool_a
   WITH CHECK (public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
 
 DROP POLICY IF EXISTS "Self or tenant admin read user_agent_assignments" ON public.user_agent_assignments;
+DROP POLICY IF EXISTS "Self or tenant admin read user_agent_assignments" ON public.user_agent_assignments;
 CREATE POLICY "Self or tenant admin read user_agent_assignments" ON public.user_agent_assignments
   FOR SELECT TO authenticated
   USING (auth.uid() = user_id OR public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
+DROP POLICY IF EXISTS "Tenant admins manage user_agent_assignments" ON public.user_agent_assignments;
 DROP POLICY IF EXISTS "Tenant admins manage user_agent_assignments" ON public.user_agent_assignments;
 CREATE POLICY "Tenant admins manage user_agent_assignments" ON public.user_agent_assignments
   FOR ALL TO authenticated
@@ -642,17 +674,21 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS preferred_language text;
 
 DROP POLICY IF EXISTS "Avatars are publicly readable" ON storage.objects;
+DROP POLICY IF EXISTS "Avatars are publicly readable" ON storage.objects;
 CREATE POLICY "Avatars are publicly readable" ON storage.objects for select
 using (bucket_id = 'avatars');
 
+DROP POLICY IF EXISTS "Users can upload their own avatar" ON storage.objects;
 DROP POLICY IF EXISTS "Users can upload their own avatar" ON storage.objects;
 CREATE POLICY "Users can upload their own avatar" ON storage.objects for insert
 with check (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
 
 DROP POLICY IF EXISTS "Users can update their own avatar" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own avatar" ON storage.objects;
 CREATE POLICY "Users can update their own avatar" ON storage.objects for update
 using (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
 
+DROP POLICY IF EXISTS "Users can delete their own avatar" ON storage.objects;
 DROP POLICY IF EXISTS "Users can delete their own avatar" ON storage.objects;
 CREATE POLICY "Users can delete their own avatar" ON storage.objects for delete
 using (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
@@ -794,11 +830,14 @@ CREATE TABLE IF NOT EXISTS public.integrations_catalog (
 
 ALTER TABLE public.integrations_catalog ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Authenticated read integrations_catalog" ON public.integrations_catalog;
+DROP POLICY IF EXISTS "Authenticated read integrations_catalog" ON public.integrations_catalog;
 CREATE POLICY "Authenticated read integrations_catalog" ON public.integrations_catalog FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Platform admins manage integrations_catalog" ON public.integrations_catalog;
 DROP POLICY IF EXISTS "Platform admins manage integrations_catalog" ON public.integrations_catalog;
 CREATE POLICY "Platform admins manage integrations_catalog" ON public.integrations_catalog FOR ALL TO authenticated
   USING (is_platform_admin(auth.uid()))
   WITH CHECK (is_platform_admin(auth.uid()));
+DROP TRIGGER IF EXISTS trg_integrations_catalog_updated ON public.integrations_catalog;
 DROP TRIGGER IF EXISTS trg_integrations_catalog_updated ON public.integrations_catalog;
 CREATE TRIGGER trg_integrations_catalog_updated BEFORE UPDATE ON public.integrations_catalog
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -818,12 +857,15 @@ CREATE TABLE IF NOT EXISTS public.tenant_integrations (
 
 ALTER TABLE public.tenant_integrations ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Members read tenant_integrations" ON public.tenant_integrations;
+DROP POLICY IF EXISTS "Members read tenant_integrations" ON public.tenant_integrations;
 CREATE POLICY "Members read tenant_integrations" ON public.tenant_integrations FOR SELECT TO authenticated
   USING (is_platform_admin(auth.uid()) OR is_tenant_member(auth.uid(), tenant_id));
+DROP POLICY IF EXISTS "Platform admins manage tenant_integrations" ON public.tenant_integrations;
 DROP POLICY IF EXISTS "Platform admins manage tenant_integrations" ON public.tenant_integrations;
 CREATE POLICY "Platform admins manage tenant_integrations" ON public.tenant_integrations FOR ALL TO authenticated
   USING (is_platform_admin(auth.uid()))
   WITH CHECK (is_platform_admin(auth.uid()));
+DROP TRIGGER IF EXISTS trg_tenant_integrations_updated ON public.tenant_integrations;
 DROP TRIGGER IF EXISTS trg_tenant_integrations_updated ON public.tenant_integrations;
 CREATE TRIGGER trg_tenant_integrations_updated BEFORE UPDATE ON public.tenant_integrations
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -838,6 +880,7 @@ INSERT INTO public.integrations_catalog (key, name, description, category, icon,
   ('azure', 'Azure', 'Cloud resources and identity', 'Cloud', 'cloud', 'oauth'),
   ('aws', 'AWS', 'Cloud resources and services', 'Cloud', 'cloud', 'iam_role');
 
+DROP POLICY IF EXISTS "Users self-join tenant on signup" ON public.tenant_memberships;
 DROP POLICY IF EXISTS "Users self-join tenant on signup" ON public.tenant_memberships;
 CREATE POLICY "Users self-join tenant on signup" ON public.tenant_memberships FOR INSERT TO authenticated
   WITH CHECK (
@@ -1030,11 +1073,13 @@ $function$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users
 FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Tenants public anon read of safe columns only
 GRANT SELECT (id, name, slug, logo_url, status) ON public.tenants TO anon;
+DROP POLICY IF EXISTS "Public read tenant basics" ON public.tenants;
 DROP POLICY IF EXISTS "Public read tenant basics" ON public.tenants;
 CREATE POLICY "Public read tenant basics" ON public.tenants FOR SELECT
   TO anon
@@ -1045,10 +1090,12 @@ REVOKE UPDATE (approval_status, approved_by, approved_at) ON public.profiles FRO
 
 DROP POLICY IF EXISTS "Users update own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Users update own profile basic fields" ON public.profiles;
+DROP POLICY IF EXISTS "Users update own profile basic fields" ON public.profiles;
 CREATE POLICY "Users update own profile basic fields" ON public.profiles FOR UPDATE
 TO authenticated
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Platform admins update any profile" ON public.profiles;
 DROP POLICY IF EXISTS "Platform admins update any profile" ON public.profiles;
 CREATE POLICY "Platform admins update any profile" ON public.profiles FOR UPDATE
 TO authenticated
