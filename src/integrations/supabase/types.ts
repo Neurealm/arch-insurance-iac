@@ -4315,12 +4315,19 @@ export type Database = {
         Row: {
           action_type: string
           allowed_environments: string[]
+          approval_gap_id: string | null
+          approved_at: string | null
+          approved_by: string | null
+          approved_source_merge_revision: string | null
+          approved_source_repository: string | null
+          approved_source_revision: string | null
           created_at: string
           display_name: string
           execution_mode: string
           id: string
           input_schema: Json
           lifecycle_status: string
+          max_targets_per_run: number
           module_source: string
           module_version: string
           provider: string
@@ -4331,12 +4338,19 @@ export type Database = {
         Insert: {
           action_type: string
           allowed_environments?: string[]
+          approval_gap_id?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_source_merge_revision?: string | null
+          approved_source_repository?: string | null
+          approved_source_revision?: string | null
           created_at?: string
           display_name: string
           execution_mode: string
           id?: string
           input_schema?: Json
           lifecycle_status?: string
+          max_targets_per_run?: number
           module_source: string
           module_version: string
           provider?: string
@@ -4347,12 +4361,19 @@ export type Database = {
         Update: {
           action_type?: string
           allowed_environments?: string[]
+          approval_gap_id?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_source_merge_revision?: string | null
+          approved_source_repository?: string | null
+          approved_source_revision?: string | null
           created_at?: string
           display_name?: string
           execution_mode?: string
           id?: string
           input_schema?: Json
           lifecycle_status?: string
+          max_targets_per_run?: number
           module_source?: string
           module_version?: string
           provider?: string
@@ -4360,10 +4381,23 @@ export type Database = {
           resource_type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "iac_automation_capabilities_approval_gap_id_fkey"
+            columns: ["approval_gap_id"]
+            isOneToOne: false
+            referencedRelation: "iac_engineering_gaps"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       iac_change_package_reviews: {
         Row: {
+          approved_hcp_plan_id: string | null
+          approved_hcp_run_id: string | null
+          approved_plan_run_id: string | null
+          approved_plan_sha256: string | null
+          approved_source_revision: string | null
           comment: string | null
           decision: string
           id: string
@@ -4372,6 +4406,11 @@ export type Database = {
           reviewed_by: string
         }
         Insert: {
+          approved_hcp_plan_id?: string | null
+          approved_hcp_run_id?: string | null
+          approved_plan_run_id?: string | null
+          approved_plan_sha256?: string | null
+          approved_source_revision?: string | null
           comment?: string | null
           decision: string
           id?: string
@@ -4380,6 +4419,11 @@ export type Database = {
           reviewed_by: string
         }
         Update: {
+          approved_hcp_plan_id?: string | null
+          approved_hcp_run_id?: string | null
+          approved_plan_run_id?: string | null
+          approved_plan_sha256?: string | null
+          approved_source_revision?: string | null
           comment?: string | null
           decision?: string
           id?: string
@@ -4389,9 +4433,60 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "iac_change_package_reviews_approved_plan_run_id_fkey"
+            columns: ["approved_plan_run_id"]
+            isOneToOne: false
+            referencedRelation: "iac_terraform_runs"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "iac_change_package_reviews_package_id_fkey"
             columns: ["package_id"]
             isOneToOne: true
+            referencedRelation: "iac_change_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_change_package_targets: {
+        Row: {
+          created_at: string
+          current_state: Json
+          id: string
+          package_id: string
+          region: string
+          resource_group: string
+          subscription_id: string
+          target_name: string
+          target_resource_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_state?: Json
+          id?: string
+          package_id: string
+          region: string
+          resource_group: string
+          subscription_id: string
+          target_name: string
+          target_resource_id: string
+        }
+        Update: {
+          created_at?: string
+          current_state?: Json
+          id?: string
+          package_id?: string
+          region?: string
+          resource_group?: string
+          subscription_id?: string
+          target_name?: string
+          target_resource_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_change_package_targets_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
             referencedRelation: "iac_change_packages"
             referencedColumns: ["id"]
           },
@@ -4421,6 +4516,7 @@ export type Database = {
           status: string
           submitted_at: string | null
           subscription_id: string
+          target_count: number
           target_name: string
           target_resource_id: string
           updated_at: string
@@ -4449,6 +4545,7 @@ export type Database = {
           status?: string
           submitted_at?: string | null
           subscription_id: string
+          target_count?: number
           target_name: string
           target_resource_id: string
           updated_at?: string
@@ -4477,12 +4574,135 @@ export type Database = {
           status?: string
           submitted_at?: string | null
           subscription_id?: string
+          target_count?: number
           target_name?: string
           target_resource_id?: string
           updated_at?: string
           validation_plan?: Json
         }
         Relationships: []
+      }
+      iac_engineering_gap_events: {
+        Row: {
+          created_at: string
+          detail: Json
+          event_type: string
+          gap_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          event_type: string
+          gap_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          event_type?: string
+          gap_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_engineering_gap_events_gap_id_fkey"
+            columns: ["gap_id"]
+            isOneToOne: false
+            referencedRelation: "iac_engineering_gaps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_engineering_gaps: {
+        Row: {
+          action_type: string
+          ci_capability_snapshot: Json
+          ci_evidence: Json
+          ci_head_sha: string | null
+          ci_observed_at: string | null
+          ci_status: string
+          ci_version: number
+          context: Json
+          created_at: string
+          discovered_module_source: string | null
+          draft_branch: string | null
+          draft_pr_number: number | null
+          draft_pr_url: string | null
+          id: string
+          linked_capability_id: string | null
+          notes: string | null
+          provider: string
+          requested_by: string | null
+          resource_type: string
+          source_intake_request_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          ci_capability_snapshot?: Json
+          ci_evidence?: Json
+          ci_head_sha?: string | null
+          ci_observed_at?: string | null
+          ci_status?: string
+          ci_version?: number
+          context?: Json
+          created_at?: string
+          discovered_module_source?: string | null
+          draft_branch?: string | null
+          draft_pr_number?: number | null
+          draft_pr_url?: string | null
+          id?: string
+          linked_capability_id?: string | null
+          notes?: string | null
+          provider?: string
+          requested_by?: string | null
+          resource_type: string
+          source_intake_request_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          ci_capability_snapshot?: Json
+          ci_evidence?: Json
+          ci_head_sha?: string | null
+          ci_observed_at?: string | null
+          ci_status?: string
+          ci_version?: number
+          context?: Json
+          created_at?: string
+          discovered_module_source?: string | null
+          draft_branch?: string | null
+          draft_pr_number?: number | null
+          draft_pr_url?: string | null
+          id?: string
+          linked_capability_id?: string | null
+          notes?: string | null
+          provider?: string
+          requested_by?: string | null
+          resource_type?: string
+          source_intake_request_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_engineering_gaps_linked_capability_id_fkey"
+            columns: ["linked_capability_id"]
+            isOneToOne: false
+            referencedRelation: "iac_automation_capabilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_engineering_gaps_source_intake_request_id_fkey"
+            columns: ["source_intake_request_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       iac_evidence_items: {
         Row: {
@@ -4570,6 +4790,54 @@ export type Database = {
           },
         ]
       }
+      iac_terraform_plan_claims: {
+        Row: {
+          created_at: string
+          id: string
+          package_id: string
+          requested_by: string
+          scope_evidence: Json
+          source_revision: string
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          package_id: string
+          requested_by: string
+          scope_evidence: Json
+          source_revision: string
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          package_id?: string
+          requested_by?: string
+          scope_evidence?: Json
+          source_revision?: string
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_terraform_plan_claims_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_change_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_terraform_plan_claims_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "iac_terraform_workspace_claims"
+            referencedColumns: ["workspace_id"]
+          },
+        ]
+      }
       iac_terraform_run_events: {
         Row: {
           created_at: string
@@ -4625,6 +4893,7 @@ export type Database = {
           module_source: string
           module_version: string
           package_id: string
+          plan_claim_id: string | null
           plan_run_id: string | null
           plan_sha256: string | null
           plan_summary: Json
@@ -4659,6 +4928,7 @@ export type Database = {
           module_source: string
           module_version: string
           package_id: string
+          plan_claim_id?: string | null
           plan_run_id?: string | null
           plan_sha256?: string | null
           plan_summary?: Json
@@ -4693,6 +4963,7 @@ export type Database = {
           module_source?: string
           module_version?: string
           package_id?: string
+          plan_claim_id?: string | null
           plan_run_id?: string | null
           plan_sha256?: string | null
           plan_summary?: Json
@@ -4721,6 +4992,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "iac_terraform_runs_plan_claim_id_fkey"
+            columns: ["plan_claim_id"]
+            isOneToOne: false
+            referencedRelation: "iac_terraform_plan_claims"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "iac_terraform_runs_plan_run_id_fkey"
             columns: ["plan_run_id"]
             isOneToOne: false
@@ -4728,6 +5006,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      iac_terraform_workspace_claims: {
+        Row: {
+          active_claim_id: string | null
+          configuration_key: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          active_claim_id?: string | null
+          configuration_key: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          active_claim_id?: string | null
+          configuration_key?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
       }
       iac_validation_results: {
         Row: {
@@ -4782,6 +5081,7 @@ export type Database = {
       iac_validation_runs: {
         Row: {
           after_state: Json
+          apply_run_id: string | null
           before_state: Json
           closed_at: string | null
           completed_at: string | null
@@ -4796,9 +5096,11 @@ export type Database = {
           summary: string | null
           updated_at: string
           validated_by: string | null
+          validation_authority: string | null
         }
         Insert: {
           after_state?: Json
+          apply_run_id?: string | null
           before_state?: Json
           closed_at?: string | null
           completed_at?: string | null
@@ -4813,9 +5115,11 @@ export type Database = {
           summary?: string | null
           updated_at?: string
           validated_by?: string | null
+          validation_authority?: string | null
         }
         Update: {
           after_state?: Json
+          apply_run_id?: string | null
           before_state?: Json
           closed_at?: string | null
           completed_at?: string | null
@@ -4830,8 +5134,16 @@ export type Database = {
           summary?: string | null
           updated_at?: string
           validated_by?: string | null
+          validation_authority?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "iac_validation_runs_apply_run_id_fkey"
+            columns: ["apply_run_id"]
+            isOneToOne: false
+            referencedRelation: "iac_terraform_runs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "iac_validation_runs_package_id_fkey"
             columns: ["package_id"]
@@ -10448,6 +10760,44 @@ export type Database = {
           user_agent: string
         }[]
       }
+      approve_iac_capability: {
+        Args: {
+          p_actor_id: string
+          p_comment: string
+          p_expected_version: number
+          p_gap_id: string
+          p_head_sha: string
+        }
+        Returns: {
+          action_type: string
+          allowed_environments: string[]
+          approval_gap_id: string | null
+          approved_at: string | null
+          approved_by: string | null
+          approved_source_merge_revision: string | null
+          approved_source_repository: string | null
+          approved_source_revision: string | null
+          created_at: string
+          display_name: string
+          execution_mode: string
+          id: string
+          input_schema: Json
+          lifecycle_status: string
+          max_targets_per_run: number
+          module_source: string
+          module_version: string
+          provider: string
+          requires_managed_resource: boolean
+          resource_type: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "iac_automation_capabilities"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       archive_tenant_role: { Args: { _role_id: string }; Returns: undefined }
       assign_membership_role: {
         Args: { _membership_id: string; _role_id: string }
@@ -10614,6 +10964,7 @@ export type Database = {
           status: string
           submitted_at: string | null
           subscription_id: string
+          target_count: number
           target_name: string
           target_resource_id: string
           updated_at: string
@@ -10634,6 +10985,55 @@ export type Database = {
       cancel_invitation: {
         Args: { _invitation_id: string }
         Returns: undefined
+      }
+      claim_iac_terraform_apply: {
+        Args: {
+          p_actor: string
+          p_package_id: string
+          p_plan_sha256: string
+          p_run_id: string
+        }
+        Returns: {
+          artifact_uri: string | null
+          capability_id: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          execution_engine: string
+          has_destroy: boolean
+          has_replace: boolean
+          hcp_configuration_version_id: string | null
+          hcp_organization: string | null
+          hcp_plan_id: string | null
+          hcp_plan_json: Json | null
+          hcp_run_id: string | null
+          hcp_run_status: string | null
+          hcp_synced_at: string | null
+          hcp_workspace_id: string | null
+          hcp_workspace_name: string | null
+          id: string
+          module_source: string
+          module_version: string
+          package_id: string
+          plan_claim_id: string | null
+          plan_run_id: string | null
+          plan_sha256: string | null
+          plan_summary: Json
+          reconciliation: Json
+          requested_by: string
+          resolved_inputs: Json
+          run_type: string
+          runner_correlation_id: string
+          source_revision: string | null
+          started_at: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "iac_terraform_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       commercial_assumption_impact: {
         Args: { _code: string }
@@ -11056,6 +11456,7 @@ export type Database = {
           status: string
           submitted_at: string | null
           subscription_id: string
+          target_count: number
           target_name: string
           target_resource_id: string
           updated_at: string
@@ -11327,6 +11728,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      iac_capability_review_snapshot: {
+        Args: {
+          p_cap: Database["public"]["Tables"]["iac_automation_capabilities"]["Row"]
+        }
+        Returns: Json
+      }
       invite_member: {
         Args: {
           _email: string
@@ -11442,6 +11849,50 @@ export type Database = {
         }
         Returns: Json
       }
+      record_iac_capability_ci: {
+        Args: { p_evidence: Json; p_expected_version: number; p_gap_id: string }
+        Returns: {
+          action_type: string
+          ci_capability_snapshot: Json
+          ci_evidence: Json
+          ci_head_sha: string | null
+          ci_observed_at: string | null
+          ci_status: string
+          ci_version: number
+          context: Json
+          created_at: string
+          discovered_module_source: string | null
+          draft_branch: string | null
+          draft_pr_number: number | null
+          draft_pr_url: string | null
+          id: string
+          linked_capability_id: string | null
+          notes: string | null
+          provider: string
+          requested_by: string | null
+          resource_type: string
+          source_intake_request_id: string | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "iac_engineering_gaps"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      record_iac_vm_validation: {
+        Args: {
+          p_actor_id: string
+          p_apply_run_id: string
+          p_checks: Json
+          p_close?: boolean
+          p_observations: Json
+          p_package_id: string
+        }
+        Returns: Json
+      }
       record_user_login_event: {
         Args: {
           _action?: string
@@ -11455,6 +11906,10 @@ export type Database = {
         }
         Returns: string
       }
+      release_iac_terraform_claim: {
+        Args: { p_claim_id: string }
+        Returns: undefined
+      }
       remove_membership_role: {
         Args: { _membership_id: string; _role_id: string }
         Returns: undefined
@@ -11467,9 +11922,53 @@ export type Database = {
         Args: { _expires_in_days?: number; _invitation_id: string }
         Returns: Json
       }
+      reserve_iac_terraform_plan: {
+        Args: {
+          p_actor: string
+          p_configuration_key: string
+          p_package_id: string
+          p_scope_evidence: Json
+          p_source_revision: string
+          p_workspace_id: string
+        }
+        Returns: string
+      }
       review_iac_change_package: {
         Args: { p_comment?: string; p_decision: string; p_package_id: string }
         Returns: {
+          approved_hcp_plan_id: string | null
+          approved_hcp_run_id: string | null
+          approved_plan_run_id: string | null
+          approved_plan_sha256: string | null
+          approved_source_revision: string | null
+          comment: string | null
+          decision: string
+          id: string
+          package_id: string
+          reviewed_at: string
+          reviewed_by: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "iac_change_package_reviews"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      review_iac_terraform_plan: {
+        Args: {
+          p_comment: string
+          p_decision: string
+          p_package_id: string
+          p_plan_run_id: string
+          p_plan_sha256: string
+        }
+        Returns: {
+          approved_hcp_plan_id: string | null
+          approved_hcp_run_id: string | null
+          approved_plan_run_id: string | null
+          approved_plan_sha256: string | null
+          approved_source_revision: string | null
           comment: string | null
           decision: string
           id: string
@@ -11635,6 +12134,50 @@ export type Database = {
           _status: Database["public"]["Enums"]["membership_status"]
         }
         Returns: Json
+      }
+      synchronize_iac_terraform_run: {
+        Args: { p_observation: Json; p_run_id: string }
+        Returns: {
+          artifact_uri: string | null
+          capability_id: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          execution_engine: string
+          has_destroy: boolean
+          has_replace: boolean
+          hcp_configuration_version_id: string | null
+          hcp_organization: string | null
+          hcp_plan_id: string | null
+          hcp_plan_json: Json | null
+          hcp_run_id: string | null
+          hcp_run_status: string | null
+          hcp_synced_at: string | null
+          hcp_workspace_id: string | null
+          hcp_workspace_name: string | null
+          id: string
+          module_source: string
+          module_version: string
+          package_id: string
+          plan_claim_id: string | null
+          plan_run_id: string | null
+          plan_sha256: string | null
+          plan_summary: Json
+          reconciliation: Json
+          requested_by: string
+          resolved_inputs: Json
+          run_type: string
+          runner_correlation_id: string
+          source_revision: string | null
+          started_at: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "iac_terraform_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_tenant: {
         Args: {

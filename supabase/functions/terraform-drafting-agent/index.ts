@@ -96,7 +96,7 @@ Requirements for your new module:
 - The inputSchema MUST be exactly this canonical server-owned shape: ${JSON.stringify(CREATE_VM_INPUT_SCHEMA)}.
 - outputs.tf must export a map from vm name to the created VM's resource_id.
 - Do not reference any provider block, backend block, or the tfc_azure_dynamic_credentials variable in the module itself (that belongs to the root config, not the module) -- only resource/variable/output blocks.
-- HCL string escaping: inside a double-quoted HCL string, a literal backslash must be written as "\\\\" (two characters). A regex like Microsoft\.Compute inside an HCL string literal MUST be written as "Microsoft\\\\.Compute" (matching the exemplar's target_resource_id validation exactly) -- "Microsoft\\.Compute" (one backslash) is invalid HCL and will fail terraform validate. Re-check every regex() call in your output against this rule before returning.
+- HCL string escaping: inside a double-quoted HCL string, a literal backslash must be written as "\\\\" (two characters). A regex like Microsoft\\.Compute inside an HCL string literal MUST be written as "Microsoft\\\\.Compute" (matching the exemplar's target_resource_id validation exactly) -- "Microsoft\\.Compute" (one backslash) is invalid HCL and will fail terraform validate. Re-check every regex() call in your output against this rule before returning.
 
 Return ONLY JSON with this exact shape:
 {

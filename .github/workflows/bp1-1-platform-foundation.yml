@@ -112,6 +112,8 @@ jobs:
         uses: supabase/setup-cli@v1
         with:
           version: latest
+      - name: Reconcile storage schema baseline (CI image drift)
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/storage_baseline.sql
       - name: Apply migrations to disposable DB
         run: |
           set -euo pipefail
