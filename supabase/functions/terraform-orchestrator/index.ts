@@ -64,7 +64,18 @@ async function packageCapability(db: ReturnType<typeof admin>, packageId: string
   const { data: capability } = await db.from("iac_automation_capabilities").select("*").eq("provider", "azure").eq("resource_type", VM_TYPE).eq("action_type", pkg.action_type).eq("lifecycle_status", "approved").maybeSingle();
   if (!capability) throw new Error(`No approved Terraform capability exists for ${pkg.action_type}.`);
   const targets = await packageTargets(db, packageId);
-  const scope = resolveExecutionScope(Deno.env.get("HCP_TERRAFORM_SCOPE_BINDINGS"), pkg, capability, targets);
+  // A provisioning package creates machines that do not exist yet, so no server
+  // secret can name them in advance. The exact set is authorized per batch by a
+  // platform administrator instead; resolveExecutionScope requires it to equal
+  // the declared targets. Nothing else reads this.
+  let authorizedTargets: string[] | null = null;
+  if (capability.execution_mode === "azapi_resource") {
+    const { data: authorization, error: authorizationError } = await db
+      .from("iac_provisioning_authorizations").select("target_resource_ids").eq("package_id", packageId).maybeSingle();
+    if (authorizationError) throw authorizationError;
+    authorizedTargets = (authorization?.target_resource_ids ?? []).map((value: unknown) => str(value)).filter(Boolean);
+  }
+  const scope = resolveExecutionScope(Deno.env.get("HCP_TERRAFORM_SCOPE_BINDINGS"), pkg, capability, targets, authorizedTargets);
   return { pkg: pkg as Json, capability: capability as Json, inputs: typedInputs(pkg, capability, str(pkg.target_resource_id)), env: scope.environment, targets, scope };
 }
 async function bind(db: ReturnType<typeof admin>, actor: string, pkg: Json, capability: Json, inputs: Json) {

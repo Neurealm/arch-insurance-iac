@@ -28,14 +28,33 @@ export type ExecutionScope = {
   allowedSubnetIds: string[]; applyEnabled: boolean; provisioningEnabled: boolean;
 };
 
-/** Server-only configuration; never fall back to caller tags or a global shared workspace. */
-export function resolveExecutionScope(raw: string | undefined, pkg: Json, capability: Json, targets: string[]): ExecutionScope {
+/**
+ * Server-only configuration; never fall back to caller tags or a global shared workspace.
+ *
+ * `authorizedTargets` is the exact machine set a platform administrator named
+ * for a provisioning package (iac_provisioning_authorizations). It is required
+ * only for `azapi_resource` capabilities and is ignored for every other one.
+ */
+export function resolveExecutionScope(raw: string | undefined, pkg: Json, capability: Json, targets: string[], authorizedTargets?: string[] | null): ExecutionScope {
   let values: unknown;
   try { values = JSON.parse(raw ?? "[]"); } catch { throw new Error("Trusted Terraform scope configuration is invalid."); }
   const exactTargets = targets.map(id => armIdentity(id).id);
   if (!exactTargets.length || new Set(exactTargets).size !== exactTargets.length) throw new Error("Target set is empty or duplicated.");
-  const candidates = arr(values).map(obj).filter(scope => scope.moduleSource === capability.module_source && sameSet(arr(scope.targetResourceIds).map(id => armIdentity(id).id), exactTargets));
+  const provisioning = capability.execution_mode === "azapi_resource";
+  // Mutate-an-existing-VM capabilities are matched exactly as before: the
+  // binding itself names the resources. A provisioning binding cannot, because
+  // the machines do not exist yet, so it declares no targetResourceIds and the
+  // exact set comes from the administrator's authorization below. A binding
+  // that declares both is ambiguous and matches nothing.
+  const candidates = arr(values).map(obj).filter(scope => scope.moduleSource === capability.module_source && (provisioning
+    ? scope.provisioningEnabled === true && !arr(scope.targetResourceIds).length
+    : sameSet(arr(scope.targetResourceIds).map(id => armIdentity(id).id), exactTargets)));
   if (candidates.length !== 1) throw new Error("Exactly one reviewed workspace/target scope binding is required. Configure HCP_TERRAFORM_SCOPE_BINDINGS on the server.");
+  if (provisioning) {
+    const authorized = (authorizedTargets ?? []).map(id => armIdentity(id).id);
+    if (!authorized.length) throw new Error("A platform administrator must authorize the exact machines this package will create before it can be planned.");
+    if (!sameSet(authorized, exactTargets)) throw new Error("The package's declared targets no longer match the authorized machines. Re-authorize before planning.");
+  }
   const scope = candidates[0];
   const environment = str(scope.environment).toLowerCase();
   if (!["development", "preproduction", "pre-production", "production"].includes(environment) || scope.stateAttested !== true) throw new Error("Workspace state ownership must be reviewed and attested before planning.");
@@ -55,10 +74,23 @@ export function resolveExecutionScope(raw: string | undefined, pkg: Json, capabi
   if (!allowedRegions.length || !allowedRegions.includes(str(pkg.region).toLowerCase())) throw new Error("Requested region is outside the authorized scope.");
   const sizes = arr(scope.allowedVmSizes).map(str);
   if (pkg.action_type === "resize_vm" && !sizes.includes(str(obj(pkg.parameters).requestedVmSize))) throw new Error("Requested VM SKU has not been authorized for this scope.");
-  if (capability.execution_mode === "azapi_resource" && (!capability.approved_source_revision || !capability.approval_gap_id || scope.provisioningEnabled !== true)) throw new Error("Provisioning requires a promoted capability and an explicitly verified creation scope.");
+  const subnets = arr(scope.allowedSubnetIds).map(value => str(value).toLowerCase());
+  if (provisioning) {
+    if (!capability.approved_source_revision || !capability.approval_gap_id || scope.provisioningEnabled !== true) throw new Error("Provisioning requires a promoted capability and an explicitly verified creation scope.");
+    // The SKU is the cost control. Without this a ticket chooses the size of
+    // every machine in the batch; resize_vm has been checked since day one and
+    // creation is the larger exposure.
+    if (!sizes.length || !sizes.includes(str(obj(pkg.parameters).vmSize))) throw new Error("Requested VM SKU has not been authorized for this scope.");
+    // allowedSubnetIds has existed on the scope since it was introduced and was
+    // never read. The subnet now arrives from a ticket, so it is checked here --
+    // before HCP is contacted and before any credential is used -- against a
+    // server secret the requester cannot reach.
+    const requestedSubnet = str(obj(pkg.parameters).subnetArmId).toLowerCase();
+    if (!subnets.length || !subnets.includes(requestedSubnet)) throw new Error("The requested subnet has not been authorized for this scope.");
+  }
   return { environment, workspaceId: str(scope.workspaceId), workspaceName: str(scope.workspaceName), moduleSource: str(scope.moduleSource), sourceRevision,
     targetResourceIds: exactTargets, managedResourceIds: managed, resourceGroupId: group, allowedRegions, allowedVmSizes: sizes,
-    allowedSubnetIds: arr(scope.allowedSubnetIds).map(value => str(value).toLowerCase()), applyEnabled: scope.applyEnabled === true, provisioningEnabled: scope.provisioningEnabled === true };
+    allowedSubnetIds: subnets, applyEnabled: scope.applyEnabled === true, provisioningEnabled: scope.provisioningEnabled === true };
 }
 
 export function typedInputs(pkg: Json, capability: Json, target: string): Json {
