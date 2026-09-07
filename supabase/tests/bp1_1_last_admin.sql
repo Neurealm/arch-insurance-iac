@@ -48,7 +48,19 @@ BEGIN
     RAISE EXCEPTION '%active admin membership not counted (got %)', v_prefix, v_count;
   END IF;
 
-  -- Suspend the membership -> count returns to 0.
+  -- Suspending the only administrator must be refused by the safeguard.
+  BEGIN
+    UPDATE public.memberships SET status='suspended' WHERE id = v_mem;
+    RAISE EXCEPTION '%last administrator was allowed to be suspended', v_prefix;
+  EXCEPTION WHEN others THEN
+    IF SQLERRM LIKE (v_prefix || '%') THEN RAISE; END IF;
+    IF SQLERRM NOT LIKE '%last_tenant_administrator_protected%' THEN
+      RAISE EXCEPTION '%unexpected error suspending last admin: %', v_prefix, SQLERRM;
+    END IF;
+  END;
+
+  -- With the admin role removed, suspension is allowed and the count is 0.
+  DELETE FROM public.membership_roles WHERE membership_id = v_mem AND role_id = v_role;
   UPDATE public.memberships SET status='suspended' WHERE id = v_mem;
   SELECT public.count_active_tenant_admins(v_tenant) INTO v_count;
   IF v_count <> 0 THEN

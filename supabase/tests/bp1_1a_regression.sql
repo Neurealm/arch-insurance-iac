@@ -118,8 +118,9 @@ BEGIN
     VALUES (v_tenant_a, v_user_a, 'active')
     RETURNING id INTO v_mem_a;
 
-  INSERT INTO public.tenant_invitations(tenant_id, email, token_hash, invited_by)
-    VALUES (v_tenant_a, 'Regress@Example.com', sha256(gen_random_uuid()::text::bytea), NULL)
+  INSERT INTO public.tenant_invitations(tenant_id, email, token_hash, invited_by, expires_at)
+    VALUES (v_tenant_a, 'Regress@Example.com', sha256(gen_random_uuid()::text::bytea), NULL,
+            now() + interval '7 days')
     RETURNING id INTO v_inv_a;
 
   -----------------------------------------------------------------
