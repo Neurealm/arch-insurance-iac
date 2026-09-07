@@ -54,12 +54,12 @@ for f in "$MIG_DIR"/*.sql; do
     psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f "$HOOK_DIR/$name" >/dev/null || exit 1
   fi
 
-  # Skip list: data-repair migrations that patch specific production rows by
-  # UUID. They assert on rows that only exist in the live database, so they can
-  # never succeed on an empty one. Any schema statement such a file also carries
-  # is replayed by its hook above, so skipping weakens no structural assertion.
-  if [[ -f "$SKIP_FILE" ]] && grep -qxF "$name" "$SKIP_FILE"; then
-    echo "skip: $name (data-only production patch)"
+  # Skip list: migrations that cannot run on a disposable database — data
+  # repairs keyed to production row UUIDs, and files needing extensions the CI
+  # image cannot load. Any schema statement such a file also carries is
+  # replayed by its hook above, so skipping weakens no structural assertion.
+  if [[ -f "$SKIP_FILE" ]] && grep -v '^#' "$SKIP_FILE" | grep -qxF "$name"; then
+    echo "skip: $name (listed in $SKIP_FILE)"
     continue
   fi
 

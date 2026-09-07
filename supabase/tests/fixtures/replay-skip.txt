@@ -1,3 +1,17 @@
+# Migrations that cannot be replayed against a disposable database.
+# Each entry is either a data repair keyed to production row UUIDs, or a file
+# that requires extensions a plain CI Postgres cannot load. None of them are
+# needed for the BP1.1 assertions; where one also carries a schema statement,
+# that statement is replayed by a file of the same name in replay-hooks/.
+
+# Requires pg_net, pg_cron, supabase_vault and pgmq (not loadable in CI).
+20260601191608_email_infra.sql
+
+# BP3.4.2 commercial run supersession repair — asserts on live run UUIDs.
 20260725172731_cbe89ec7-fdf0-4a1a-901c-8fb60bafa0d0.sql
+
+# Grants one named user a commercial role in a live tenant.
 20260727140812_da2936f9-a6ed-4283-bb0d-6afd3147f5c8.sql
+
+# Seeds audio narratives for a live tenant/owner pair (schema part hooked).
 20260727181133_26f9ebcd-de05-4773-90c9-59af8a13c975.sql
