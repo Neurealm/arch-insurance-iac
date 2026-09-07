@@ -40,8 +40,18 @@ BENIGN='already exists|duplicate key value violates unique constraint'
 tolerated=0
 strict=0
 
+HOOK_DIR="${HOOK_DIR:-supabase/tests/fixtures/replay-hooks}"
+
 for f in "$MIG_DIR"/*.sql; do
   name="$(basename "$f")"
+
+  # Replay hook: reproduces out-of-band schema changes that were made directly
+  # against the live database (never captured as a migration) and that the next
+  # migration depends on.
+  if [[ -f "$HOOK_DIR/$name" ]]; then
+    echo "hook: applying $HOOK_DIR/$name"
+    psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f "$HOOK_DIR/$name" >/dev/null || exit 1
+  fi
 
   if psql "$DB_URL" --single-transaction -v ON_ERROR_STOP=1 -q -f "$f" >/dev/null 2>/tmp/mig_err.txt; then
     strict=$((strict + 1))
