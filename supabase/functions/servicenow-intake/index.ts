@@ -318,7 +318,14 @@ function actionLabel(action: string) {
 }
 
 function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: string; vms: AzureVm[] }, hasApprovedCapability = false) {
-  const missing = [...analysis.missingFields];
+  // For creation the required inputs are a known, finite list computed below,
+  // so the model's own missingFields are dropped rather than merged. Merging
+  // them produced a comment asking for the same thing twice -- once as a raw
+  // key ("Please provide ospublisher.") and once as a real label -- and it
+  // asked for targetVmName, which a creation request does not have. The
+  // model's clarificationQuestions are kept: they are well phrased and add
+  // context the canonical labels cannot.
+  const missing = analysis.action === "create_vm" ? [] : [...analysis.missingFields];
   const conflicts = [...analysis.conflicts];
   if (!ticket.ticketNumber) missing.push("ServiceNow ticket number");
   if (!ticket.requester) missing.push("Requester");
@@ -330,6 +337,19 @@ function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: 
   if (!ticket.applicationOwner) missing.push("Application owner");
   if (ticket.rollbackPlan.length < 10) missing.push("Rollback plan");
   if (analysis.action === "unknown" || analysis.confidence < 60) missing.push("A supported, unambiguous Azure VM action");
+
+  // The ticket carries an environment in a structured field AND in prose, and
+  // they can disagree -- a request whose dropdown says Production while the
+  // description says development is the obvious case. Neither is safe to
+  // silently prefer: parameters.environment is compared against the
+  // server-authorized scope binding, so picking wrong either refuses a valid
+  // request or points a real one at the wrong environment. Make the requester
+  // resolve it.
+  const statedEnvironment = ticket.environment.trim().toLowerCase().replace("pre-production", "preproduction");
+  const inferredEnvironment = text(analysis.extractedFields.environment).toLowerCase().replace("pre-production", "preproduction");
+  if (statedEnvironment && inferredEnvironment && statedEnvironment !== inferredEnvironment) {
+    conflicts.push(`The ticket's environment field says ${ticket.environment} but the description asks for ${text(analysis.extractedFields.environment)}. Confirm which environment these machines belong in.`);
+  }
 
   const target = azure.vms.find((vm) => vm.name.toLowerCase() === (analysis.targetVmName ?? "").toLowerCase() || vm.id.toLowerCase() === (analysis.targetVmName ?? "").toLowerCase()) ?? null;
   if (analysis.action !== "create_vm") {
@@ -367,7 +387,10 @@ function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: 
     }
   }
 
-  const questions = unique([...analysis.clarificationQuestions, ...unique(missing).map((field) => `Please provide ${field.toLowerCase()}.`), ...unique(conflicts).map((conflict) => `Please resolve: ${conflict}`)]);
+  // Lowercase only the first character so acronyms survive: "ARM ID" stayed
+  // readable, whereas toLowerCase() on the whole label produced "arm id".
+  const asRequest = (field: string) => `Please provide the ${field.charAt(0).toLowerCase()}${field.slice(1)}.`;
+  const questions = unique([...analysis.clarificationQuestions, ...unique(missing).map(asRequest), ...unique(conflicts).map((conflict) => `Please resolve: ${conflict}`)]);
   // Whether a request can proceed depends on whether an approved capability
   // exists for its action -- not on the action's name. create_vm used to be
   // hardcoded as permanently gap-only, so a ticket would have kept opening
