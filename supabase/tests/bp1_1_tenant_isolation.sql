@@ -49,7 +49,7 @@ BEGIN
 
   INSERT INTO public.tenant_invitations(id, tenant_id, email, normalized_email, status, token_hash, expires_at)
     VALUES (gen_random_uuid(), v_tenant_b, 'x@example.com','x@example.com','pending',
-            encode(sha256(gen_random_uuid()::text::bytea),'hex'), now()+interval '7 days')
+            sha256(gen_random_uuid()::text::bytea), now()+interval '7 days')
     RETURNING id INTO v_inv_b;
 
   -- 3. Cross-tenant membership_role must be rejected by trigger.

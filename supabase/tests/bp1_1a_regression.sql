@@ -112,12 +112,14 @@ BEGIN
     VALUES (v_tenant_a, 'regress_role_a', 'Regress Role A')
     RETURNING id INTO v_role_a;
 
+  -- memberships.user_id references auth.users; seed the identities first.
+  INSERT INTO auth.users(id) VALUES (v_user_a), (v_user_b) ON CONFLICT (id) DO NOTHING;
   INSERT INTO public.memberships(tenant_id, user_id, status)
     VALUES (v_tenant_a, v_user_a, 'active')
     RETURNING id INTO v_mem_a;
 
   INSERT INTO public.tenant_invitations(tenant_id, email, token_hash, invited_by)
-    VALUES (v_tenant_a, 'Regress@Example.com', 'hash-' || gen_random_uuid()::text, NULL)
+    VALUES (v_tenant_a, 'Regress@Example.com', sha256(gen_random_uuid()::text::bytea), NULL)
     RETURNING id INTO v_inv_a;
 
   -----------------------------------------------------------------

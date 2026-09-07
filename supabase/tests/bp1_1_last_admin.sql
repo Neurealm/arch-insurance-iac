@@ -28,7 +28,7 @@ BEGIN
   -- Pending invitation MUST NOT count as admin.
   INSERT INTO public.tenant_invitations(id, tenant_id, email, normalized_email, status, token_hash, expires_at)
     VALUES (gen_random_uuid(), v_tenant, 'p@example.com','p@example.com','pending',
-            encode(sha256(gen_random_uuid()::text::bytea),'hex'), now()+interval '7 days');
+            sha256(gen_random_uuid()::text::bytea), now()+interval '7 days');
 
   SELECT public.count_active_tenant_admins(v_tenant) INTO v_count;
   IF v_count <> 0 THEN
