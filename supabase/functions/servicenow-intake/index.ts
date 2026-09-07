@@ -493,20 +493,115 @@ const VM_RESOURCE_TYPE = "Microsoft.Compute/virtualMachines";
  * ticket) rather than opening a duplicate.
  */
 async function maybeCreateGap(admin: ReturnType<typeof supabaseAdmin>, ticket: NormalizedTicket, analysis: Analysis, requestId: string, requestedBy: string | null) {
-  if (analysis.action !== "create_vm") return null;
-  const { data: open } = await admin.from("iac_engineering_gaps").select("id, status").eq("provider", "azure").eq("resource_type", VM_RESOURCE_TYPE).eq("action_type", "create_vm").not("status", "in", "(capability_approved,abandoned)").maybeSingle();
+  const { data: open } = await admin.from("iac_engineering_gaps").select("id, status").eq("provider", "azure").eq("resource_type", VM_RESOURCE_TYPE).eq("action_type", analysis.action).not("status", "in", "(capability_approved,abandoned)").maybeSingle();
+  // Every waiting ticket is linked, not just the one that opened the gap.
+  // source_intake_request_id records only the first, so on a reused gap the
+  // later tickets used to become an event carrying a ticket number and no
+  // intake ID -- unrecoverable, and therefore unresumable.
+  const link = async (gapId: string) => {
+    const { error } = await admin.from("iac_engineering_gap_intake_requests").upsert({ gap_id: gapId, intake_request_id: requestId }, { onConflict: "gap_id,intake_request_id" });
+    if (error) throw new Error(`Unable to link the ticket to its engineering gap: ${error.message}`);
+  };
   if (open) {
-    await admin.from("iac_engineering_gap_events").insert({ gap_id: open.id, event_type: "ticket_linked", detail: { ticketNumber: ticket.ticketNumber, serviceNowSysId: ticket.sysId } });
+    await link(open.id as string);
+    await admin.from("iac_engineering_gap_events").insert({ gap_id: open.id, event_type: "ticket_linked", detail: { ticketNumber: ticket.ticketNumber, serviceNowSysId: ticket.sysId, intakeRequestId: requestId } });
     return { id: open.id as string, reused: true };
   }
   const { data: created, error } = await admin.from("iac_engineering_gaps").insert({
-    provider: "azure", resource_type: VM_RESOURCE_TYPE, action_type: "create_vm", status: "open",
+    provider: "azure", resource_type: VM_RESOURCE_TYPE, action_type: analysis.action, status: "open",
     requested_by: requestedBy, source_intake_request_id: requestId,
     context: { ticketNumber: ticket.ticketNumber, serviceNowSysId: ticket.sysId, requester: ticket.requester, description: ticket.description, extractedFields: analysis.extractedFields, confidence: analysis.confidence },
   }).select("id").single();
   if (error) throw new Error(`Unable to open an engineering gap: ${error.message}`);
-  await admin.from("iac_engineering_gap_events").insert({ gap_id: created.id, event_type: "gap_opened", detail: { ticketNumber: ticket.ticketNumber } });
+  await link(created.id as string);
+  await admin.from("iac_engineering_gap_events").insert({ gap_id: created.id, event_type: "gap_opened", detail: { ticketNumber: ticket.ticketNumber, intakeRequestId: requestId } });
   return { id: created.id as string, reused: false };
+}
+
+function serviceRoleKey() {
+  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => {
+    try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default as string | undefined; } catch { return undefined; }
+  })();
+}
+
+async function isPlatformAdmin(admin: ReturnType<typeof supabaseAdmin>, userId: string) {
+  const { data } = await admin.from("user_roles").select("user_id").eq("user_id", userId).eq("role", "platform_admin").maybeSingle();
+  return !!data;
+}
+
+/**
+ * Re-analyse tickets whose capability has since been approved.
+ *
+ * This is the half of the promise the customer comment has always made -- "the
+ * request pauses until tests and human approval finish" -- and which nothing
+ * previously kept.
+ *
+ * Note what it does NOT do: it re-runs classification against the live model
+ * and live Azure rather than replaying the earlier verdict, because the ticket
+ * has been sitting for however long the drafting and review took, and the
+ * resource group or the request itself may have moved. If the model now reads
+ * the ticket as a different action, that is treated as a failure needing a
+ * human, not as licence to build something the requester did not ask for.
+ */
+async function resumeQueued(admin: ReturnType<typeof supabaseAdmin>, request: Request, onlyIntakeRequestId: string | null) {
+  let queue: Array<RecordValue>;
+  if (onlyIntakeRequestId) {
+    const { data, error } = await admin.from("iac_intake_resumptions").select("*").eq("intake_request_id", onlyIntakeRequestId).in("status", ["queued", "running"]).limit(1);
+    if (error) return json({ error: error.message }, 500, request);
+    // A manual Resume on a ticket with nothing queued still re-analyses it --
+    // that is the point of the button when automatic enqueueing missed it.
+    queue = (data ?? []).length ? (data as RecordValue[]) : [{ id: null, intake_request_id: onlyIntakeRequestId }];
+  } else {
+    const { data, error } = await admin.rpc("claim_iac_intake_resumptions", { p_limit: 5 });
+    if (error) return json({ error: error.message }, 500, request);
+    queue = array(data) as RecordValue[];
+  }
+
+  const results: RecordValue[] = [];
+  for (const item of queue) {
+    const resumptionId = text(item.id) || null;
+    const intakeRequestId = text(item.intake_request_id);
+    const finish = async (status: string, error?: string) => {
+      if (resumptionId) await admin.rpc("finish_iac_intake_resumption", { p_id: resumptionId, p_status: status, p_error: error ?? null });
+    };
+    try {
+      const { data: intake } = await admin.from("servicenow_intake_requests").select("id, ticket_payload, clarification_note, change_package_id, requested_by_user_id").eq("id", intakeRequestId).maybeSingle();
+      if (!intake) { await finish("skipped", "intake request no longer exists"); results.push({ intakeRequestId, outcome: "skipped" }); continue; }
+      if (intake.change_package_id) { await finish("skipped", "a change package already exists"); results.push({ intakeRequestId, outcome: "already_resumed" }); continue; }
+
+      const ticket = normalizeTicket(record(intake.ticket_payload));
+      const azure = await loadAzureInventory();
+      const analysis = await analyzeWithGemini(ticket, azure);
+      const { data: approvedCapability } = await admin.from("iac_automation_capabilities")
+        .select("id").eq("provider", "azure").eq("resource_type", VM_RESOURCE_TYPE)
+        .eq("action_type", analysis.action).eq("lifecycle_status", "approved").maybeSingle();
+      const validation = validate(ticket, analysis, azure, !!approvedCapability);
+      const draft = validation.ready ? await maybeCreateDraft(admin, ticket, analysis, validation.target, text(intake.requested_by_user_id) || null) : null;
+      const note = clarificationNote(ticket, analysis, validation, null);
+      const finalNote = draft ? `${note}\n\nGoverned draft package created: ${draft.package_number}. Approval is still required.` : note;
+      const status = validation.ready ? "ready_for_engineering" : "needs_clarification";
+      await admin.from("servicenow_intake_requests").update({
+        status, llm_analysis: { ...analysis, validation }, clarification_note: finalNote,
+        change_package_id: draft?.id ?? null, analyzed_at: new Date().toISOString(), error_message: null,
+      }).eq("id", intakeRequestId);
+      await addEvent(admin, intakeRequestId, "intake_resumed", { action: analysis.action, ready: validation.ready, changePackageId: draft?.id ?? null });
+
+      // Only speak up if the answer changed. A resume that reaches the same
+      // conclusion must not post the requester an identical comment again.
+      if (finalNote !== text(intake.clarification_note)) {
+        try { await postCustomerComment(ticket, finalNote); await addEvent(admin, intakeRequestId, "servicenow_customer_comment_posted", { field: "comments", resumed: true }); }
+        catch { /* the analysis stands even when ServiceNow is unreachable */ }
+      }
+      await finish(draft ? "succeeded" : "failed", draft ? undefined : "resumed but still not ready for engineering");
+      results.push({ intakeRequestId, outcome: draft ? "package_created" : "still_blocked", changePackageNumber: draft?.package_number ?? null, action: analysis.action });
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : "resume failed";
+      await finish("failed", message);
+      await admin.from("servicenow_intake_requests").update({ error_message: message }).eq("id", intakeRequestId);
+      results.push({ intakeRequestId, outcome: "failed", error: message });
+    }
+  }
+  return json({ processed: results.length, results }, 200, request);
 }
 
 Deno.serve(async (request) => {
@@ -515,7 +610,26 @@ Deno.serve(async (request) => {
 
   let body: RecordValue;
   try { body = record(await request.json()); } catch { return json({ error: "invalid json" }, 400, request); }
-  const demoMode = text(body.mode).toLowerCase() === "demo";
+  const mode = text(body.mode).toLowerCase();
+
+  // Resuming tickets whose capability has since been approved. Either the
+  // scheduler calls this with the service key, or an administrator presses
+  // Resume in the console; both drain the same queue, so no scheduler is
+  // required for the loop to close.
+  if (mode === "resume") {
+    const admin = supabaseAdmin();
+    const authorization = request.headers.get("authorization") ?? "";
+    const bearer = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+    let permitted = bearer !== "" && bearer === serviceRoleKey();
+    if (!permitted) {
+      const actor = await authenticatedCaller(request);
+      permitted = !!actor && await isPlatformAdmin(admin, actor);
+    }
+    if (!permitted) return json({ error: "a platform administrator or the platform service may resume tickets" }, 403, request);
+    return await resumeQueued(admin, request, text(body.intakeRequestId) || null);
+  }
+
+  const demoMode = mode === "demo";
   const callerId = demoMode ? await authenticatedCaller(request) : null;
   if (demoMode) {
     if (!callerId) return json({ error: "authenticated demo submission required" }, 401, request);

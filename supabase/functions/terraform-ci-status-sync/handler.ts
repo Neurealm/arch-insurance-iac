@@ -54,7 +54,7 @@ export function createCiHandler(deps: Dependencies) {
         if (operation === "approve" && principal.kind === "human") {
           if (typeof evidence.headSha !== "string" || evidence.headSha !== body.expectedHeadSha || evidence.status !== "passed" || !evidence.promotionReady) return reply({ error: "Fresh GitHub evidence does not authorize this promotion.", evidence, ciVersion: stored.ci_version }, 409);
           const capability = await deps.approve(gap, stored.ci_version, evidence.headSha, principal.id, String(body.comment).trim());
-          return reply({ capability, evidence, message: "Exact reviewed source promoted. No ticket was resumed and no Terraform or Azure operation was performed." });
+          return reply({ capability, evidence, message: "Exact reviewed source promoted. Any ticket waiting on this capability is queued for re-analysis; no Terraform or Azure operation was performed." });
         }
         results.push({ gapId: gap.id, ciVersion: stored.ci_version, evidence });
       }

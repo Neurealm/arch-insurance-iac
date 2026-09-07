@@ -42,6 +42,32 @@ export async function listServiceNowIntakeRequests() {
   return (data ?? []).map(map);
 }
 
+export type IntakeResumeResult = { intakeRequestId: string; outcome: string; changePackageNumber?: string | null; action?: string; error?: string };
+
+/**
+ * Re-analyse tickets whose capability has since been approved.
+ *
+ * Called with no argument this drains the queue the approval trigger fills, so
+ * the loop closes without a scheduler. Called with a ticket it re-analyses that
+ * one, which is what the per-ticket Resume control is for when a request was
+ * incomplete at the moment the capability landed.
+ */
+export async function resumeServiceNowIntake(intakeRequestId?: string): Promise<IntakeResumeResult[]> {
+  const { data, error } = await supabase.functions.invoke("servicenow-intake", {
+    body: intakeRequestId ? { mode: "resume", intakeRequestId } : { mode: "resume" },
+  });
+  if (error) {
+    const response = (error as { context?: Response }).context;
+    if (response && typeof response.json === "function") {
+      const parsed = await response.json().catch(() => ({}));
+      if (parsed && typeof parsed.error === "string" && parsed.error) throw new Error(parsed.error);
+    }
+    throw error;
+  }
+  const results = (data as { results?: unknown })?.results;
+  return Array.isArray(results) ? results as IntakeResumeResult[] : [];
+}
+
 export async function submitDemoServiceNowTicket(ticket: Record<string, unknown>) {
   const { data, error } = await supabase.functions.invoke("servicenow-intake", { body: { mode: "demo", ticket } });
   if (error) throw error;

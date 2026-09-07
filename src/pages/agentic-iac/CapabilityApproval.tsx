@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, CheckCircle2, ExternalLink, GitPullRequest, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { resumeServiceNowIntake } from "./servicenowIntakeRequests";
 import {
   approveCapability, getCapabilityGap, listCapabilityGaps, listGapEvents, syncCapabilityCi,
   type CapabilityGap, type CiStatus, type GapEvent, type GapStatus,
@@ -124,7 +125,7 @@ function GapDetail({ gapId }: { gapId: string }) {
   const [gap, setGap] = useState<CapabilityGap | null>(null);
   const [events, setEvents] = useState<GapEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<"sync" | "approve" | null>(null);
+  const [busy, setBusy] = useState<"sync" | "approve" | "resume" | null>(null);
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -141,6 +142,19 @@ function GapDetail({ gapId }: { gapId: string }) {
     setBusy("sync"); setError(null); setNotice(null);
     try { await syncCapabilityCi(gapId); setNotice("GitHub was re-observed and the evidence was recorded. No capability was promoted."); await load(); }
     catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to synchronize CI evidence."); }
+    finally { setBusy(null); }
+  };
+
+  const resumeTickets = async () => {
+    setBusy("resume"); setError(null); setNotice(null);
+    try {
+      const results = await resumeServiceNowIntake();
+      const created = results.filter((item) => item.outcome === "package_created").length;
+      setNotice(results.length
+        ? `Re-analyzed ${results.length} waiting ticket(s); ${created} produced a change package. Nothing was applied in Azure.`
+        : "No ticket is waiting on a newly approved capability.");
+      await load();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to resume waiting tickets."); }
     finally { setBusy(null); }
   };
 
@@ -169,6 +183,7 @@ function GapDetail({ gapId }: { gapId: string }) {
     <div className="mb-3 flex flex-wrap items-center gap-2">
       <nav className="text-[12px] text-slate-500"><Link to="/platform/capabilities" className="hover:text-[#1B4F91]">Capability Promotion</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">{title(gap.actionType)}</span></nav>
       <button type="button" onClick={() => void sync()} disabled={busy !== null} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"><RefreshCw className={cn("h-3.5 w-3.5", busy === "sync" && "animate-spin")} />{busy === "sync" ? "Observing GitHub…" : "Synchronize CI"}</button>
+      <button type="button" onClick={() => void resumeTickets()} disabled={busy !== null} title="Re-analyze tickets that were waiting on this capability" className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"><RefreshCw className={cn("h-3.5 w-3.5", busy === "resume" && "animate-spin")} />Resume linked tickets</button>
     </div>
     {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}
     {notice && <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{notice}</div>}
@@ -215,7 +230,7 @@ function GapDetail({ gapId }: { gapId: string }) {
         <button type="button" onClick={() => void promote()} disabled={!canPromote} className="mt-2 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-md bg-[#1B4F91] px-3 text-[12px] font-semibold text-white hover:bg-[#16406f] disabled:cursor-not-allowed disabled:bg-slate-300">
           <ShieldCheck className="h-3.5 w-3.5" />{busy === "approve" ? "Promoting…" : "Promote the reviewed commit"}
         </button>
-        <p className="mt-2 text-[11px] text-slate-500">Promotion pins this exact commit as the capability's approved source. It does not resume the originating ticket and never starts a Terraform plan or apply. Rejecting a draft is done by closing its pull request in GitHub; there is no server-side reject action yet.</p>
+        <p className="mt-2 text-[11px] text-slate-500">Promotion pins this exact commit as the capability's approved source. Any ticket waiting on this capability is queued for re-analysis; promotion itself never starts a Terraform plan or apply. Rejecting a draft is done by closing its pull request in GitHub; there is no server-side reject action yet.</p>
       </Panel>
     </div>
 
