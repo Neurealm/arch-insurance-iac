@@ -88,9 +88,13 @@ BEGIN
   -----------------------------------------------------------------
   -- 3. Permission seed matches approved codes exactly
   -----------------------------------------------------------------
-  SELECT array_agg(code ORDER BY code) INTO v_actual FROM public.permissions;
+  -- The ten platform-foundation codes must all be present. Later modules
+  -- (audio, commercial) add their own codes to the same table, so this is a
+  -- containment check, not an equality check.
+  SELECT array_agg(code ORDER BY code) INTO v_actual
+    FROM public.permissions WHERE code = ANY(v_expected_permissions);
   IF v_actual IS DISTINCT FROM v_expected_permissions THEN
-    RAISE EXCEPTION '%permission seed drift: expected % got %',
+    RAISE EXCEPTION '%platform permission seed drift: expected % got %',
       v_fail_prefix, v_expected_permissions, v_actual;
   END IF;
 

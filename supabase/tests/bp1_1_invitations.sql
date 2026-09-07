@@ -9,7 +9,7 @@ DO $inv$
 DECLARE
   v_prefix constant text := 'BP1_1_INVITATIONS_FAIL: ';
   v_tenant uuid := gen_random_uuid();
-  v_tok text := encode(digest(gen_random_uuid()::text,'sha256'),'hex');
+  v_tok text := encode(sha256(gen_random_uuid()::text::bytea),'hex');
   v_id uuid;
 BEGIN
   INSERT INTO public.tenants(id,name,slug,status,default_currency_code,default_timezone)
