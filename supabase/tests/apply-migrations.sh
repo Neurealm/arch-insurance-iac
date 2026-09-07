@@ -46,22 +46,23 @@ SKIP_FILE="${SKIP_FILE:-supabase/tests/fixtures/replay-skip.txt}"
 for f in "$MIG_DIR"/*.sql; do
   name="$(basename "$f")"
 
+  # Replay hook: reproduces schema state the next migration depends on but that
+  # never reached migration history — either an out-of-band change made directly
+  # against the live database, or the schema-only part of a skipped data patch.
+  if [[ -f "$HOOK_DIR/$name" ]]; then
+    echo "hook: applying $HOOK_DIR/$name"
+    psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f "$HOOK_DIR/$name" >/dev/null || exit 1
+  fi
+
   # Skip list: data-repair migrations that patch specific production rows by
   # UUID. They assert on rows that only exist in the live database, so they can
-  # never succeed on an empty one. They change no schema, so skipping them does
-  # not weaken any structural assertion.
+  # never succeed on an empty one. Any schema statement such a file also carries
+  # is replayed by its hook above, so skipping weakens no structural assertion.
   if [[ -f "$SKIP_FILE" ]] && grep -qxF "$name" "$SKIP_FILE"; then
     echo "skip: $name (data-only production patch)"
     continue
   fi
 
-  # Replay hook: reproduces out-of-band schema changes that were made directly
-  # against the live database (never captured as a migration) and that the next
-  # migration depends on.
-  if [[ -f "$HOOK_DIR/$name" ]]; then
-    echo "hook: applying $HOOK_DIR/$name"
-    psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f "$HOOK_DIR/$name" >/dev/null || exit 1
-  fi
 
   if psql "$DB_URL" --single-transaction -v ON_ERROR_STOP=1 -q -f "$f" >/dev/null 2>/tmp/mig_err.txt; then
     strict=$((strict + 1))
