@@ -1,5 +1,5 @@
 
-CREATE TABLE IF NOT EXISTS public.stakeholder_registers (
+CREATE TABLE public.stakeholder_registers (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   register_id TEXT NOT NULL,
   stakeholder_name TEXT NOT NULL,
@@ -19,20 +19,20 @@ CREATE TABLE IF NOT EXISTS public.stakeholder_registers (
 
 ALTER TABLE public.stakeholder_registers ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Anyone can view stakeholder registers" ON public.stakeholder_registers;
-CREATE POLICY "Anyone can view stakeholder registers" ON public.stakeholder_registers FOR SELECT
+CREATE POLICY "Anyone can view stakeholder registers"
+  ON public.stakeholder_registers FOR SELECT
   USING (true);
 
-DROP POLICY IF EXISTS "Anyone can insert stakeholder registers" ON public.stakeholder_registers;
-CREATE POLICY "Anyone can insert stakeholder registers" ON public.stakeholder_registers FOR INSERT
+CREATE POLICY "Anyone can insert stakeholder registers"
+  ON public.stakeholder_registers FOR INSERT
   WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Anyone can update stakeholder registers" ON public.stakeholder_registers;
-CREATE POLICY "Anyone can update stakeholder registers" ON public.stakeholder_registers FOR UPDATE
+CREATE POLICY "Anyone can update stakeholder registers"
+  ON public.stakeholder_registers FOR UPDATE
   USING (true);
 
-DROP POLICY IF EXISTS "Anyone can delete stakeholder registers" ON public.stakeholder_registers;
-CREATE POLICY "Anyone can delete stakeholder registers" ON public.stakeholder_registers FOR DELETE
+CREATE POLICY "Anyone can delete stakeholder registers"
+  ON public.stakeholder_registers FOR DELETE
   USING (true);
 
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
@@ -43,12 +43,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SET search_path = public;
 
-DROP TRIGGER IF EXISTS update_stakeholder_registers_updated_at ON public.stakeholder_registers;
-CREATE TRIGGER update_stakeholder_registers_updated_at BEFORE UPDATE ON public.stakeholder_registers
+CREATE TRIGGER update_stakeholder_registers_updated_at
+BEFORE UPDATE ON public.stakeholder_registers
 FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Companies
-CREATE TABLE IF NOT EXISTS public.crm_companies (
+CREATE TABLE public.crm_companies (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   industry text DEFAULT '',
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS public.crm_companies (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.crm_departments (
+CREATE TABLE public.crm_departments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id uuid NOT NULL REFERENCES public.crm_companies(id) ON DELETE CASCADE,
   name text NOT NULL,
@@ -75,9 +75,9 @@ CREATE TABLE IF NOT EXISTS public.crm_departments (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_crm_departments_company ON public.crm_departments(company_id);
+CREATE INDEX idx_crm_departments_company ON public.crm_departments(company_id);
 
-CREATE TABLE IF NOT EXISTS public.crm_teams (
+CREATE TABLE public.crm_teams (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id uuid NOT NULL REFERENCES public.crm_companies(id) ON DELETE CASCADE,
   department_id uuid REFERENCES public.crm_departments(id) ON DELETE SET NULL,
@@ -87,10 +87,10 @@ CREATE TABLE IF NOT EXISTS public.crm_teams (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_crm_teams_company ON public.crm_teams(company_id);
-CREATE INDEX IF NOT EXISTS idx_crm_teams_department ON public.crm_teams(department_id);
+CREATE INDEX idx_crm_teams_company ON public.crm_teams(company_id);
+CREATE INDEX idx_crm_teams_department ON public.crm_teams(department_id);
 
-CREATE TABLE IF NOT EXISTS public.crm_stakeholders (
+CREATE TABLE public.crm_stakeholders (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id uuid NOT NULL REFERENCES public.crm_companies(id) ON DELETE CASCADE,
   department_id uuid REFERENCES public.crm_departments(id) ON DELETE SET NULL,
@@ -110,11 +110,11 @@ CREATE TABLE IF NOT EXISTS public.crm_stakeholders (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_crm_stakeholders_company ON public.crm_stakeholders(company_id);
-CREATE INDEX IF NOT EXISTS idx_crm_stakeholders_department ON public.crm_stakeholders(department_id);
-CREATE INDEX IF NOT EXISTS idx_crm_stakeholders_team ON public.crm_stakeholders(team_id);
+CREATE INDEX idx_crm_stakeholders_company ON public.crm_stakeholders(company_id);
+CREATE INDEX idx_crm_stakeholders_department ON public.crm_stakeholders(department_id);
+CREATE INDEX idx_crm_stakeholders_team ON public.crm_stakeholders(team_id);
 
-CREATE TABLE IF NOT EXISTS public.crm_activities (
+CREATE TABLE public.crm_activities (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id uuid NOT NULL REFERENCES public.crm_companies(id) ON DELETE CASCADE,
   stakeholder_id uuid REFERENCES public.crm_stakeholders(id) ON DELETE SET NULL,
@@ -125,9 +125,9 @@ CREATE TABLE IF NOT EXISTS public.crm_activities (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_crm_activities_company ON public.crm_activities(company_id);
+CREATE INDEX idx_crm_activities_company ON public.crm_activities(company_id);
 
-CREATE TABLE IF NOT EXISTS public.crm_notes (
+CREATE TABLE public.crm_notes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   company_id uuid NOT NULL REFERENCES public.crm_companies(id) ON DELETE CASCADE,
   stakeholder_id uuid REFERENCES public.crm_stakeholders(id) ON DELETE SET NULL,
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS public.crm_notes (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_crm_notes_company ON public.crm_notes(company_id);
+CREATE INDEX idx_crm_notes_company ON public.crm_notes(company_id);
 
 ALTER TABLE public.crm_companies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.crm_departments ENABLE ROW LEVEL SECURITY;
@@ -158,14 +158,10 @@ BEGIN
   END LOOP;
 END $$;
 
-DO $idem$ BEGIN
 CREATE TYPE public.app_role AS ENUM ('platform_admin', 'platform_support');
-EXCEPTION WHEN duplicate_object THEN NULL; END $idem$;
-DO $idem$ BEGIN
 CREATE TYPE public.tenant_role AS ENUM ('tenant_admin', 'tenant_manager', 'tenant_member');
-EXCEPTION WHEN duplicate_object THEN NULL; END $idem$;
 
-CREATE TABLE IF NOT EXISTS public.profiles (
+CREATE TABLE public.profiles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL UNIQUE,
   display_name text DEFAULT '',
@@ -174,7 +170,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.user_roles (
+CREATE TABLE public.user_roles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   role public.app_role NOT NULL,
@@ -182,7 +178,7 @@ CREATE TABLE IF NOT EXISTS public.user_roles (
   UNIQUE (user_id, role)
 );
 
-CREATE TABLE IF NOT EXISTS public.tenants (
+CREATE TABLE public.tenants (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   slug text NOT NULL UNIQUE,
@@ -192,7 +188,7 @@ CREATE TABLE IF NOT EXISTS public.tenants (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.tenant_memberships (
+CREATE TABLE public.tenant_memberships (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
   user_id uuid NOT NULL,
@@ -200,10 +196,10 @@ CREATE TABLE IF NOT EXISTS public.tenant_memberships (
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (tenant_id, user_id)
 );
-CREATE INDEX IF NOT EXISTS idx_tenant_memberships_user ON public.tenant_memberships(user_id);
-CREATE INDEX IF NOT EXISTS idx_tenant_memberships_tenant ON public.tenant_memberships(tenant_id);
+CREATE INDEX idx_tenant_memberships_user ON public.tenant_memberships(user_id);
+CREATE INDEX idx_tenant_memberships_tenant ON public.tenant_memberships(tenant_id);
 
-CREATE TABLE IF NOT EXISTS public.tools_catalog (
+CREATE TABLE public.tools_catalog (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   key text NOT NULL UNIQUE,
   name text NOT NULL,
@@ -216,7 +212,7 @@ CREATE TABLE IF NOT EXISTS public.tools_catalog (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.agents_catalog (
+CREATE TABLE public.agents_catalog (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   key text NOT NULL UNIQUE,
   name text NOT NULL,
@@ -228,7 +224,7 @@ CREATE TABLE IF NOT EXISTS public.agents_catalog (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.tenant_tool_assignments (
+CREATE TABLE public.tenant_tool_assignments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
   tool_id uuid NOT NULL REFERENCES public.tools_catalog(id) ON DELETE CASCADE,
@@ -236,9 +232,9 @@ CREATE TABLE IF NOT EXISTS public.tenant_tool_assignments (
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (tenant_id, tool_id)
 );
-CREATE INDEX IF NOT EXISTS idx_tta_tenant ON public.tenant_tool_assignments(tenant_id);
+CREATE INDEX idx_tta_tenant ON public.tenant_tool_assignments(tenant_id);
 
-CREATE TABLE IF NOT EXISTS public.tenant_agent_assignments (
+CREATE TABLE public.tenant_agent_assignments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
   agent_id uuid NOT NULL REFERENCES public.agents_catalog(id) ON DELETE CASCADE,
@@ -246,9 +242,9 @@ CREATE TABLE IF NOT EXISTS public.tenant_agent_assignments (
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (tenant_id, agent_id)
 );
-CREATE INDEX IF NOT EXISTS idx_taa_tenant ON public.tenant_agent_assignments(tenant_id);
+CREATE INDEX idx_taa_tenant ON public.tenant_agent_assignments(tenant_id);
 
-CREATE TABLE IF NOT EXISTS public.user_tool_assignments (
+CREATE TABLE public.user_tool_assignments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
   user_id uuid NOT NULL,
@@ -256,10 +252,10 @@ CREATE TABLE IF NOT EXISTS public.user_tool_assignments (
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (tenant_id, user_id, tool_id)
 );
-CREATE INDEX IF NOT EXISTS idx_uta_user ON public.user_tool_assignments(user_id);
-CREATE INDEX IF NOT EXISTS idx_uta_tenant ON public.user_tool_assignments(tenant_id);
+CREATE INDEX idx_uta_user ON public.user_tool_assignments(user_id);
+CREATE INDEX idx_uta_tenant ON public.user_tool_assignments(tenant_id);
 
-CREATE TABLE IF NOT EXISTS public.user_agent_assignments (
+CREATE TABLE public.user_agent_assignments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
   user_id uuid NOT NULL,
@@ -267,8 +263,8 @@ CREATE TABLE IF NOT EXISTS public.user_agent_assignments (
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (tenant_id, user_id, agent_id)
 );
-CREATE INDEX IF NOT EXISTS idx_uaa_user ON public.user_agent_assignments(user_id);
-CREATE INDEX IF NOT EXISTS idx_uaa_tenant ON public.user_agent_assignments(tenant_id);
+CREATE INDEX idx_uaa_user ON public.user_agent_assignments(user_id);
+CREATE INDEX idx_uaa_tenant ON public.user_agent_assignments(tenant_id);
 
 CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role public.app_role)
 RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
@@ -294,16 +290,12 @@ AS $$
   SELECT EXISTS (SELECT 1 FROM public.tenant_memberships WHERE user_id = _user_id AND tenant_id = _tenant_id AND role = _role);
 $$;
 
-DROP TRIGGER IF EXISTS trg_profiles_updated ON public.profiles;
 CREATE TRIGGER trg_profiles_updated BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
-DROP TRIGGER IF EXISTS trg_tenants_updated ON public.tenants;
 CREATE TRIGGER trg_tenants_updated BEFORE UPDATE ON public.tenants
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
-DROP TRIGGER IF EXISTS trg_tools_catalog_updated ON public.tools_catalog;
 CREATE TRIGGER trg_tools_catalog_updated BEFORE UPDATE ON public.tools_catalog
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
-DROP TRIGGER IF EXISTS trg_agents_catalog_updated ON public.agents_catalog;
 CREATE TRIGGER trg_agents_catalog_updated BEFORE UPDATE ON public.agents_catalog
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
@@ -318,109 +310,86 @@ ALTER TABLE public.tenant_agent_assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_tool_assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_agent_assignments ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Profiles readable by authenticated" ON public.profiles;
 CREATE POLICY "Profiles readable by authenticated" ON public.profiles
   FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "Users insert own profile" ON public.profiles;
 CREATE POLICY "Users insert own profile" ON public.profiles
   FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Users update own profile" ON public.profiles;
 CREATE POLICY "Users update own profile" ON public.profiles
   FOR UPDATE TO authenticated USING (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "Users read own roles" ON public.user_roles;
 CREATE POLICY "Users read own roles" ON public.user_roles
   FOR SELECT TO authenticated USING (auth.uid() = user_id OR public.is_platform_admin(auth.uid()));
-DROP POLICY IF EXISTS "Platform admins manage roles" ON public.user_roles;
 CREATE POLICY "Platform admins manage roles" ON public.user_roles
   FOR ALL TO authenticated
   USING (public.is_platform_admin(auth.uid()))
   WITH CHECK (public.is_platform_admin(auth.uid()));
 
-DROP POLICY IF EXISTS "Members or admins read tenant" ON public.tenants;
 CREATE POLICY "Members or admins read tenant" ON public.tenants
   FOR SELECT TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.is_tenant_member(auth.uid(), id));
-DROP POLICY IF EXISTS "Platform admins insert tenants" ON public.tenants;
 CREATE POLICY "Platform admins insert tenants" ON public.tenants
   FOR INSERT TO authenticated WITH CHECK (public.is_platform_admin(auth.uid()));
-DROP POLICY IF EXISTS "Tenant admins update tenant" ON public.tenants;
 CREATE POLICY "Tenant admins update tenant" ON public.tenants
   FOR UPDATE TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), id, 'tenant_admin'));
-DROP POLICY IF EXISTS "Platform admins delete tenants" ON public.tenants;
 CREATE POLICY "Platform admins delete tenants" ON public.tenants
   FOR DELETE TO authenticated USING (public.is_platform_admin(auth.uid()));
 
-DROP POLICY IF EXISTS "Members read same-tenant memberships" ON public.tenant_memberships;
 CREATE POLICY "Members read same-tenant memberships" ON public.tenant_memberships
   FOR SELECT TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.is_tenant_member(auth.uid(), tenant_id));
-DROP POLICY IF EXISTS "Tenant admins manage memberships" ON public.tenant_memberships;
 CREATE POLICY "Tenant admins manage memberships" ON public.tenant_memberships
   FOR ALL TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'))
   WITH CHECK (public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
 
-DROP POLICY IF EXISTS "Authenticated read tools_catalog" ON public.tools_catalog;
 CREATE POLICY "Authenticated read tools_catalog" ON public.tools_catalog
   FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "Platform admins manage tools_catalog" ON public.tools_catalog;
 CREATE POLICY "Platform admins manage tools_catalog" ON public.tools_catalog
   FOR ALL TO authenticated
   USING (public.is_platform_admin(auth.uid()))
   WITH CHECK (public.is_platform_admin(auth.uid()));
 
-DROP POLICY IF EXISTS "Authenticated read agents_catalog" ON public.agents_catalog;
 CREATE POLICY "Authenticated read agents_catalog" ON public.agents_catalog
   FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "Platform admins manage agents_catalog" ON public.agents_catalog;
 CREATE POLICY "Platform admins manage agents_catalog" ON public.agents_catalog
   FOR ALL TO authenticated
   USING (public.is_platform_admin(auth.uid()))
   WITH CHECK (public.is_platform_admin(auth.uid()));
 
-DROP POLICY IF EXISTS "Members read tenant_tool_assignments" ON public.tenant_tool_assignments;
 CREATE POLICY "Members read tenant_tool_assignments" ON public.tenant_tool_assignments
   FOR SELECT TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.is_tenant_member(auth.uid(), tenant_id));
-DROP POLICY IF EXISTS "Platform admins manage tenant_tool_assignments" ON public.tenant_tool_assignments;
 CREATE POLICY "Platform admins manage tenant_tool_assignments" ON public.tenant_tool_assignments
   FOR ALL TO authenticated
   USING (public.is_platform_admin(auth.uid()))
   WITH CHECK (public.is_platform_admin(auth.uid()));
 
-DROP POLICY IF EXISTS "Members read tenant_agent_assignments" ON public.tenant_agent_assignments;
 CREATE POLICY "Members read tenant_agent_assignments" ON public.tenant_agent_assignments
   FOR SELECT TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.is_tenant_member(auth.uid(), tenant_id));
-DROP POLICY IF EXISTS "Platform admins manage tenant_agent_assignments" ON public.tenant_agent_assignments;
 CREATE POLICY "Platform admins manage tenant_agent_assignments" ON public.tenant_agent_assignments
   FOR ALL TO authenticated
   USING (public.is_platform_admin(auth.uid()))
   WITH CHECK (public.is_platform_admin(auth.uid()));
 
-DROP POLICY IF EXISTS "Self or tenant admin read user_tool_assignments" ON public.user_tool_assignments;
 CREATE POLICY "Self or tenant admin read user_tool_assignments" ON public.user_tool_assignments
   FOR SELECT TO authenticated
   USING (auth.uid() = user_id OR public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
-DROP POLICY IF EXISTS "Tenant admins manage user_tool_assignments" ON public.user_tool_assignments;
 CREATE POLICY "Tenant admins manage user_tool_assignments" ON public.user_tool_assignments
   FOR ALL TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'))
   WITH CHECK (public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
 
-DROP POLICY IF EXISTS "Self or tenant admin read user_agent_assignments" ON public.user_agent_assignments;
 CREATE POLICY "Self or tenant admin read user_agent_assignments" ON public.user_agent_assignments
   FOR SELECT TO authenticated
   USING (auth.uid() = user_id OR public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
-DROP POLICY IF EXISTS "Tenant admins manage user_agent_assignments" ON public.user_agent_assignments;
 CREATE POLICY "Tenant admins manage user_agent_assignments" ON public.user_agent_assignments
   FOR ALL TO authenticated
   USING (public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'))
   WITH CHECK (public.is_platform_admin(auth.uid()) OR public.has_tenant_role(auth.uid(), tenant_id, 'tenant_admin'));
 
-CREATE TABLE IF NOT EXISTS public.org_business_units (
+CREATE TABLE public.org_business_units (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   short_name text DEFAULT '',
@@ -441,7 +410,7 @@ CREATE TABLE IF NOT EXISTS public.org_business_units (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.org_practices (
+CREATE TABLE public.org_practices (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   business_unit_id uuid REFERENCES public.org_business_units(id) ON DELETE RESTRICT,
   name text NOT NULL,
@@ -463,7 +432,7 @@ CREATE TABLE IF NOT EXISTS public.org_practices (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.org_capability_areas (
+CREATE TABLE public.org_capability_areas (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   practice_id uuid NOT NULL REFERENCES public.org_practices(id) ON DELETE RESTRICT,
   name text NOT NULL,
@@ -484,9 +453,9 @@ CREATE TABLE IF NOT EXISTS public.org_capability_areas (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_org_capability_areas_parent ON public.org_capability_areas(practice_id);
+CREATE INDEX idx_org_capability_areas_parent ON public.org_capability_areas(practice_id);
 
-CREATE TABLE IF NOT EXISTS public.org_service_functions (
+CREATE TABLE public.org_service_functions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   capability_area_id uuid NOT NULL REFERENCES public.org_capability_areas(id) ON DELETE RESTRICT,
   name text NOT NULL,
@@ -507,9 +476,9 @@ CREATE TABLE IF NOT EXISTS public.org_service_functions (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_org_service_functions_parent ON public.org_service_functions(capability_area_id);
+CREATE INDEX idx_org_service_functions_parent ON public.org_service_functions(capability_area_id);
 
-CREATE TABLE IF NOT EXISTS public.org_workflows (
+CREATE TABLE public.org_workflows (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   service_function_id uuid NOT NULL REFERENCES public.org_service_functions(id) ON DELETE RESTRICT,
   name text NOT NULL,
@@ -530,9 +499,9 @@ CREATE TABLE IF NOT EXISTS public.org_workflows (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_org_workflows_parent ON public.org_workflows(service_function_id);
+CREATE INDEX idx_org_workflows_parent ON public.org_workflows(service_function_id);
 
-CREATE TABLE IF NOT EXISTS public.org_activities (
+CREATE TABLE public.org_activities (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   workflow_id uuid NOT NULL REFERENCES public.org_workflows(id) ON DELETE RESTRICT,
   name text NOT NULL,
@@ -553,9 +522,9 @@ CREATE TABLE IF NOT EXISTS public.org_activities (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_org_activities_parent ON public.org_activities(workflow_id);
+CREATE INDEX idx_org_activities_parent ON public.org_activities(workflow_id);
 
-CREATE TABLE IF NOT EXISTS public.org_tasks (
+CREATE TABLE public.org_tasks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   activity_id uuid NOT NULL REFERENCES public.org_activities(id) ON DELETE RESTRICT,
   name text NOT NULL,
@@ -576,7 +545,7 @@ CREATE TABLE IF NOT EXISTS public.org_tasks (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_org_tasks_parent ON public.org_tasks(activity_id);
+CREATE INDEX idx_org_tasks_parent ON public.org_tasks(activity_id);
 
 DO $$
 DECLARE t text;
@@ -637,20 +606,20 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS time_zone text,
   ADD COLUMN IF NOT EXISTS preferred_language text;
 
-DROP POLICY IF EXISTS "Avatars are publicly readable" ON storage.objects;
-CREATE POLICY "Avatars are publicly readable" ON storage.objects for select
+create policy "Avatars are publicly readable"
+on storage.objects for select
 using (bucket_id = 'avatars');
 
-DROP POLICY IF EXISTS "Users can upload their own avatar" ON storage.objects;
-CREATE POLICY "Users can upload their own avatar" ON storage.objects for insert
+create policy "Users can upload their own avatar"
+on storage.objects for insert
 with check (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
 
-DROP POLICY IF EXISTS "Users can update their own avatar" ON storage.objects;
-CREATE POLICY "Users can update their own avatar" ON storage.objects for update
+create policy "Users can update their own avatar"
+on storage.objects for update
 using (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
 
-DROP POLICY IF EXISTS "Users can delete their own avatar" ON storage.objects;
-CREATE POLICY "Users can delete their own avatar" ON storage.objects for delete
+create policy "Users can delete their own avatar"
+on storage.objects for delete
 using (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
 
 REVOKE EXECUTE ON FUNCTION public.is_platform_admin(uuid) FROM anon;
@@ -775,7 +744,7 @@ ALTER TABLE public.tenants
   ADD COLUMN IF NOT EXISTS primary_admin_email text;
 CREATE INDEX IF NOT EXISTS idx_tenants_source_company_id ON public.tenants(source_company_id);
 
-CREATE TABLE IF NOT EXISTS public.integrations_catalog (
+CREATE TABLE public.integrations_catalog (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   key text NOT NULL UNIQUE,
   name text NOT NULL,
@@ -789,17 +758,17 @@ CREATE TABLE IF NOT EXISTS public.integrations_catalog (
 );
 
 ALTER TABLE public.integrations_catalog ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Authenticated read integrations_catalog" ON public.integrations_catalog;
-CREATE POLICY "Authenticated read integrations_catalog" ON public.integrations_catalog FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "Platform admins manage integrations_catalog" ON public.integrations_catalog;
-CREATE POLICY "Platform admins manage integrations_catalog" ON public.integrations_catalog FOR ALL TO authenticated
+CREATE POLICY "Authenticated read integrations_catalog"
+  ON public.integrations_catalog FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Platform admins manage integrations_catalog"
+  ON public.integrations_catalog FOR ALL TO authenticated
   USING (is_platform_admin(auth.uid()))
   WITH CHECK (is_platform_admin(auth.uid()));
-DROP TRIGGER IF EXISTS trg_integrations_catalog_updated ON public.integrations_catalog;
-CREATE TRIGGER trg_integrations_catalog_updated BEFORE UPDATE ON public.integrations_catalog
+CREATE TRIGGER trg_integrations_catalog_updated
+  BEFORE UPDATE ON public.integrations_catalog
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
-CREATE TABLE IF NOT EXISTS public.tenant_integrations (
+CREATE TABLE public.tenant_integrations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id uuid NOT NULL,
   integration_id uuid NOT NULL,
@@ -813,15 +782,15 @@ CREATE TABLE IF NOT EXISTS public.tenant_integrations (
 );
 
 ALTER TABLE public.tenant_integrations ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Members read tenant_integrations" ON public.tenant_integrations;
-CREATE POLICY "Members read tenant_integrations" ON public.tenant_integrations FOR SELECT TO authenticated
+CREATE POLICY "Members read tenant_integrations"
+  ON public.tenant_integrations FOR SELECT TO authenticated
   USING (is_platform_admin(auth.uid()) OR is_tenant_member(auth.uid(), tenant_id));
-DROP POLICY IF EXISTS "Platform admins manage tenant_integrations" ON public.tenant_integrations;
-CREATE POLICY "Platform admins manage tenant_integrations" ON public.tenant_integrations FOR ALL TO authenticated
+CREATE POLICY "Platform admins manage tenant_integrations"
+  ON public.tenant_integrations FOR ALL TO authenticated
   USING (is_platform_admin(auth.uid()))
   WITH CHECK (is_platform_admin(auth.uid()));
-DROP TRIGGER IF EXISTS trg_tenant_integrations_updated ON public.tenant_integrations;
-CREATE TRIGGER trg_tenant_integrations_updated BEFORE UPDATE ON public.tenant_integrations
+CREATE TRIGGER trg_tenant_integrations_updated
+  BEFORE UPDATE ON public.tenant_integrations
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 INSERT INTO public.integrations_catalog (key, name, description, category, icon, auth_type) VALUES
@@ -834,8 +803,8 @@ INSERT INTO public.integrations_catalog (key, name, description, category, icon,
   ('azure', 'Azure', 'Cloud resources and identity', 'Cloud', 'cloud', 'oauth'),
   ('aws', 'AWS', 'Cloud resources and services', 'Cloud', 'cloud', 'iam_role');
 
-DROP POLICY IF EXISTS "Users self-join tenant on signup" ON public.tenant_memberships;
-CREATE POLICY "Users self-join tenant on signup" ON public.tenant_memberships FOR INSERT TO authenticated
+CREATE POLICY "Users self-join tenant on signup"
+  ON public.tenant_memberships FOR INSERT TO authenticated
   WITH CHECK (
     auth.uid() = user_id
     AND role = 'tenant_member'::tenant_role
@@ -1018,14 +987,14 @@ END;
 $function$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
 FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Tenants public anon read of safe columns only
 GRANT SELECT (id, name, slug, logo_url, status) ON public.tenants TO anon;
-DROP POLICY IF EXISTS "Public read tenant basics" ON public.tenants;
-CREATE POLICY "Public read tenant basics" ON public.tenants FOR SELECT
+CREATE POLICY "Public read tenant basics"
+  ON public.tenants FOR SELECT
   TO anon
   USING (true);
 
@@ -1033,13 +1002,13 @@ CREATE POLICY "Public read tenant basics" ON public.tenants FOR SELECT
 REVOKE UPDATE (approval_status, approved_by, approved_at) ON public.profiles FROM authenticated;
 
 DROP POLICY IF EXISTS "Users update own profile" ON public.profiles;
-DROP POLICY IF EXISTS "Users update own profile basic fields" ON public.profiles;
-CREATE POLICY "Users update own profile basic fields" ON public.profiles FOR UPDATE
+CREATE POLICY "Users update own profile basic fields"
+ON public.profiles FOR UPDATE
 TO authenticated
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Platform admins update any profile" ON public.profiles;
-CREATE POLICY "Platform admins update any profile" ON public.profiles FOR UPDATE
+CREATE POLICY "Platform admins update any profile"
+ON public.profiles FOR UPDATE
 TO authenticated
 USING (public.is_platform_admin(auth.uid()))
 WITH CHECK (public.is_platform_admin(auth.uid()));
