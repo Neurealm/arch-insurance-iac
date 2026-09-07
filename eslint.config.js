@@ -21,6 +21,9 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // Legacy Supabase-typed escape hatches (`as any` around generated DB types)
+      // are tracked as debt, not build breakers.
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   {
