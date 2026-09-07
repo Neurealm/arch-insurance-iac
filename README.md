@@ -6,6 +6,9 @@ This project was built with [Lovable](https://lovable.dev).
 
 ## Engineering handoff
 
+For current deployment versions and the remaining frontend publication blocker,
+read the [deployment reconciliation record](docs/deployment-reconciliation-2026-09-06.md).
+
 For the governed Azure VM Terraform pilot, start with the
 [current implementation status and next milestones](docs/implementation-status-2026-09-06.md).
 It distinguishes completed code, unfinished governance work and unverified

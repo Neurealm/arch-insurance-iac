@@ -10,10 +10,12 @@ function resource(name: string, type: string) {
     location = var.location
     for_each = toset(var.vm_names)
     body = { properties = { subnet_id = var.subnet_id } }
-    lifecycle { precondition {
+    lifecycle {
+      precondition {
       condition = length(trimspace(var.change_request_id)) >= 6
       error_message = "Change request required."
-    } }
+      }
+    }
   }`;
 }
 export function validDraft(): DraftResult {

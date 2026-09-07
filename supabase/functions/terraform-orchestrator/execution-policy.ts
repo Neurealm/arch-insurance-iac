@@ -12,7 +12,7 @@ const emptyObject = (value: unknown): boolean => value == null || (typeof value 
 export function hclLiteral(value: unknown): string {
   const encoded = JSON.stringify(value);
   if (encoded === undefined) throw new Error("Undefined Terraform input.");
-  return encoded.replace(/\$\{/g, "$${").replace(/%\{/g, "%%{");
+  return encoded.replace(/\$\{/g, () => "$${").replace(/%\{/g, () => "%%{");
 }
 export function armIdentity(value: unknown) {
   const match = str(value).match(/^\/subscriptions\/([0-9a-f-]{36})\/resourceGroups\/([A-Za-z0-9_.()-]+)\/providers\/(Microsoft\.(?:Compute|Network)\/(?:virtualMachines|networkInterfaces))\/([A-Za-z0-9_-]+)$/i);

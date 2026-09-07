@@ -31,4 +31,4 @@ jobs:
       # Node's built-in runner/type stripping: no npm install, credentials,
       # database, Terraform CLI, or cloud operations are needed for this gate.
       - name: Verify the production request authorization boundary
-        run: node --test supabase/functions/terraform-orchestrator/request-handler.test.ts supabase/functions/terraform-orchestrator/plan-digest.test.ts
+        run: node --test supabase/functions/terraform-orchestrator/request-handler.test.ts supabase/functions/terraform-orchestrator/plan-digest.test.ts supabase/functions/terraform-orchestrator/execution-policy.test.ts
