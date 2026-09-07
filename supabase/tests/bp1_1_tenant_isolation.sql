@@ -14,6 +14,7 @@ DECLARE
   v_tenant_a uuid := gen_random_uuid();
   v_tenant_b uuid := gen_random_uuid();
   v_role_a uuid;
+  v_user_b uuid := gen_random_uuid();
   v_mem_b uuid;
   v_inv_b uuid;
   v_tbl text;
@@ -40,8 +41,10 @@ BEGIN
     VALUES (gen_random_uuid(), v_tenant_a, 'admin', 'Admin', 'active')
     RETURNING id INTO v_role_a;
 
+  -- memberships.user_id references auth.users; seed the identity first.
+  INSERT INTO auth.users(id) VALUES (v_user_b) ON CONFLICT (id) DO NOTHING;
   INSERT INTO public.memberships(id, tenant_id, user_id, status)
-    VALUES (gen_random_uuid(), v_tenant_b, gen_random_uuid(), 'active')
+    VALUES (gen_random_uuid(), v_tenant_b, v_user_b, 'active')
     RETURNING id INTO v_mem_b;
 
   INSERT INTO public.tenant_invitations(id, tenant_id, email, normalized_email, status, token_hash, expires_at)

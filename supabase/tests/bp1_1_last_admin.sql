@@ -36,6 +36,8 @@ BEGIN
   END IF;
 
   -- Add active membership with the admin role.
+  -- memberships.user_id references auth.users; seed the identity first.
+  INSERT INTO auth.users(id) VALUES (v_user) ON CONFLICT (id) DO NOTHING;
   INSERT INTO public.memberships(id, tenant_id, user_id, status)
     VALUES (gen_random_uuid(), v_tenant, v_user, 'active') RETURNING id INTO v_mem;
   INSERT INTO public.membership_roles(membership_id, role_id, tenant_id)
