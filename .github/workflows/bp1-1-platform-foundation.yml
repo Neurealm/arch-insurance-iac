@@ -152,6 +152,7 @@ jobs:
       - name: Apply governance contract and migration
         run: |
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/tests/fixtures/iac_terraform_governance_baseline.sql
+          psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260831200000_add_iac_vm_validation_evidence.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260902190000_add_terraform_automation_governance.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260904110000_add_hcp_terraform_saved_plan_governance.sql
           psql "$DB_URL" -v ON_ERROR_STOP=1             -f supabase/project-migrations/20260905040000_fix_hcp_run_id_unique_scope.sql

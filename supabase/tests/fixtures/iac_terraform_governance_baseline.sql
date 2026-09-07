@@ -53,3 +53,26 @@ SET search_path = public
 AS $$
   SELECT false;
 $$;
+
+-- The legacy direct-execution RPCs from 20260827231500. They are stubbed here
+-- only so the hardening migration's REVOKE has a real grant to remove: that
+-- REVOKE is the control that stops a browser forging execution success, and a
+-- fixture without these functions would make the migration fail to replay
+-- rather than prove the control. Signatures and the authenticated grant match
+-- the real migration; the bodies are irrelevant because nothing may call them.
+CREATE OR REPLACE FUNCTION public.begin_iac_vm_execution(p_package_id uuid)
+RETURNS public.iac_change_packages
+LANGUAGE sql
+AS $$
+  SELECT * FROM public.iac_change_packages WHERE id = p_package_id;
+$$;
+
+CREATE OR REPLACE FUNCTION public.complete_iac_vm_execution(p_package_id uuid, p_success boolean, p_message text)
+RETURNS public.iac_change_packages
+LANGUAGE sql
+AS $$
+  SELECT * FROM public.iac_change_packages WHERE id = p_package_id;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.begin_iac_vm_execution(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.complete_iac_vm_execution(uuid, boolean, text) TO authenticated;
