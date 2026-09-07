@@ -288,16 +288,33 @@ async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket:
   const creator = creatorOverride || Deno.env.get("IAC_AUTOMATION_USER_ID");
   if (!creator || !target || !SUPPORTED_ACTIONS.has(analysis.action) || analysis.action === "create_vm") return null;
   const packageNumber = `VM-CHG-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
-  const { data, error } = await admin.from("iac_change_packages").insert({
-    package_number: packageNumber, created_by: creator, status: "draft", target_resource_id: target.id, target_name: target.name,
-    subscription_id: target.subscriptionId, resource_group: target.resourceGroup, region: target.location, action_type: analysis.action,
-    action_label: actionLabel(analysis.action), parameters: { source: "servicenow_webhook", serviceNowTicket: ticket.ticketNumber, serviceNowSysId: ticket.sysId, confidence: analysis.confidence, extractedFields: analysis.extractedFields },
-    rationale: `ServiceNow ${ticket.ticketNumber} requested by ${ticket.requester}: ${ticket.description}`, current_state: target,
-    policy_evidence: [{ check: "LLM classification", result: `${analysis.action} · ${analysis.confidence}% confidence` }, { check: "Azure target", result: `${target.name} matched live inventory` }],
-    validation_plan: ["Reconcile target VM with Azure before approval", "Validate action-specific post-change state", "Review current Azure operations evidence"], risk_score: analysis.action === "restart_vm" ? 35 : 25, risk_level: "Low", approval_required: true,
-  }).select("id, package_number").single();
+  // save_iac_change_package is the only supported write path: a direct INSERT
+  // here produced a package with no rows in iac_change_package_targets, which
+  // the orchestrator then refused to plan. The service role supplies
+  // p_created_by so the package is attributed to the ticket's requester.
+  const { data, error } = await admin.rpc("save_iac_change_package", {
+    p_package: {
+      package_number: packageNumber, target_resource_id: target.id, target_name: target.name,
+      subscription_id: target.subscriptionId, resource_group: target.resourceGroup, region: target.location,
+      action_type: analysis.action, action_label: actionLabel(analysis.action),
+      parameters: { source: "servicenow_webhook", serviceNowTicket: ticket.ticketNumber, serviceNowSysId: ticket.sysId, confidence: analysis.confidence, extractedFields: analysis.extractedFields },
+      rationale: `ServiceNow ${ticket.ticketNumber} requested by ${ticket.requester}: ${ticket.description}`,
+      current_state: target,
+      policy_evidence: [{ check: "LLM classification", result: `${analysis.action} · ${analysis.confidence}% confidence` }, { check: "Azure target", result: `${target.name} matched live inventory` }],
+      validation_plan: ["Reconcile target VM with Azure before approval", "Validate action-specific post-change state", "Review current Azure operations evidence"],
+      risk_score: analysis.action === "restart_vm" ? 35 : 25, risk_level: "Low", approval_required: true,
+    },
+    p_targets: [{
+      target_resource_id: target.id, target_name: target.name, subscription_id: target.subscriptionId,
+      resource_group: target.resourceGroup, region: target.location, current_state: target,
+    }],
+    p_submit: false,
+    p_package_id: null,
+    p_created_by: creator,
+  });
   if (error) throw new Error(`Unable to create governed draft: ${error.message}`);
-  return data as { id: string; package_number: string };
+  const saved = record(data);
+  return { id: text(saved.id), package_number: text(saved.package_number) };
 }
 
 const VM_RESOURCE_TYPE = "Microsoft.Compute/virtualMachines";

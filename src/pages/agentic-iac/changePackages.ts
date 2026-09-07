@@ -48,6 +48,20 @@ export type VmChangePackage = {
 
 type PackageInput = Omit<VmChangePackage, "id" | "createdBy" | "createdAt" | "updatedAt" | "submittedAt" | "executionStartedAt" | "executionCompletedAt" | "executionMessage" | "executedBy">;
 
+/**
+ * One Azure resource a package acts on. A package always declares at least one;
+ * the four mutate-an-existing-VM actions declare exactly one, and create_vm
+ * declares one per requested machine.
+ */
+export type ChangePackageTarget = {
+  targetResourceId: string;
+  targetName: string;
+  subscriptionId: string;
+  resourceGroup: string;
+  region: string;
+  currentState?: Record<string, unknown>;
+};
+
 const table = () => supabase as unknown as { from: (name: string) => any };
 
 function map(row: Record<string, any>): VmChangePackage {
@@ -152,11 +166,35 @@ export async function reviewVmChangePackage(packageId: string, decision: ChangeR
   return mapReview(data);
 }
 
-export async function saveVmChangePackage(input: PackageInput, existingId?: string) {
-  const query = existingId
-    ? table().from("iac_change_packages").update(payload(input)).eq("id", existingId).select("*").single()
-    : table().from("iac_change_packages").insert(payload(input)).select("*").single();
-  const { data, error } = await query;
+/**
+ * Writes a package and its declared targets in one transaction.
+ *
+ * Direct INSERT on iac_change_packages is revoked; save_iac_change_package is
+ * the only supported write path. That is deliberate — it used to be possible to
+ * create a package with no target rows, which the orchestrator then refused to
+ * plan with "The change package has no declared target resources."
+ *
+ * `status: "submitted"` is passed as p_submit rather than written directly: the
+ * RPC always creates the row as a draft, writes the targets, and submits last,
+ * because the targets guard rejects child writes once the parent leaves draft.
+ */
+export async function saveVmChangePackage(input: PackageInput, targets: ChangePackageTarget[], existingId?: string) {
+  if (!targets.length) throw new Error("A change package must declare at least one target resource.");
+  const { status, ...rest } = payload(input);
+  const rpc = supabase as unknown as { rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: Record<string, any>; error: Error | null }> };
+  const { data, error } = await rpc.rpc("save_iac_change_package", {
+    p_package: rest,
+    p_targets: targets.map((target) => ({
+      target_resource_id: target.targetResourceId,
+      target_name: target.targetName,
+      subscription_id: target.subscriptionId,
+      resource_group: target.resourceGroup,
+      region: target.region,
+      current_state: target.currentState ?? {},
+    })),
+    p_submit: status === "submitted",
+    p_package_id: existingId ?? null,
+  });
   if (error) throw error;
   return map(data);
 }

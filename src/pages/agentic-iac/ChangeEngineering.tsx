@@ -236,7 +236,14 @@ function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmRe
     if (!ready) { setError(parameterError ?? "Choose an eligible action and provide a reason of at least 10 characters."); return; }
     setSaving(true); setError(null); setMessage(null);
     try {
-      const saved = await saveVmChangePackage(packageInput(status), activePackage?.id);
+      // A mutate-an-existing-VM action declares exactly one target: the VM the
+      // user selected from live Azure discovery.
+      const targets = [{
+        targetResourceId: selectedVm!.id, targetName: selectedVm!.name,
+        subscriptionId: selectedVm!.subscriptionId, resourceGroup: selectedVm!.resourceGroup,
+        region: selectedVm!.location, currentState: { vm: selectedVm!.raw, operations },
+      }];
+      const saved = await saveVmChangePackage(packageInput(status), targets, activePackage?.id);
       setActivePackage(saved); setPackages((items) => [saved, ...items.filter((item) => item.id !== saved.id)]);
       if (status === "submitted") {
         try {
