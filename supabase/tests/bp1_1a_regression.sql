@@ -283,11 +283,8 @@ BEGIN
   END IF;
 
   RAISE NOTICE 'BP1_1A_REGRESSION_OK: all assertions passed';
-
-  -- Always roll back — this test suite must never leave data behind.
-  RAISE EXCEPTION 'BP1_1A_REGRESSION_ROLLBACK: intentional rollback after successful assertions';
 END
 $regression$;
 
--- Unreachable: the DO block always raises.
+-- Nothing this suite created is kept.
 ROLLBACK;

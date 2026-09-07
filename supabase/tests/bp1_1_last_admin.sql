@@ -12,7 +12,9 @@ DECLARE
   v_tenant uuid := gen_random_uuid();
   v_role uuid;
   v_user uuid := gen_random_uuid();
+  v_user2 uuid := gen_random_uuid();
   v_mem uuid;
+  v_mem2 uuid;
   v_count int;
 BEGIN
   INSERT INTO public.tenants(id,name,slug,status,default_currency_code,default_timezone)
@@ -59,11 +61,17 @@ BEGIN
     END IF;
   END;
 
-  -- With the admin role removed, suspension is allowed and the count is 0.
-  DELETE FROM public.membership_roles WHERE membership_id = v_mem AND role_id = v_role;
+  -- With a second administrator present, suspending the first is allowed and
+  -- the count falls back to one.
+  INSERT INTO auth.users(id) VALUES (v_user2) ON CONFLICT (id) DO NOTHING;
+  INSERT INTO public.memberships(id, tenant_id, user_id, status)
+    VALUES (gen_random_uuid(), v_tenant, v_user2, 'active') RETURNING id INTO v_mem2;
+  INSERT INTO public.membership_roles(membership_id, role_id, tenant_id)
+    VALUES (v_mem2, v_role, v_tenant);
+
   UPDATE public.memberships SET status='suspended' WHERE id = v_mem;
   SELECT public.count_active_tenant_admins(v_tenant) INTO v_count;
-  IF v_count <> 0 THEN
+  IF v_count <> 1 THEN
     RAISE EXCEPTION '%suspended membership still counted (got %)', v_prefix, v_count;
   END IF;
 
