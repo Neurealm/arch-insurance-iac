@@ -139,7 +139,12 @@ function ProvisioningAuthorizationPanel({ pkg, canAuthorize, onChange }: { pkg: 
       ? <div className="mt-2 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[11.5px] text-emerald-800">
           <ShieldCheck className="mr-1 inline h-3.5 w-3.5" /><b>{authorization.targetResourceIds.length} machine(s) authorized</b> by <span className="font-mono">{shortId(authorization.authorizedBy)}</span> on {dateTime(authorization.authorizedAt)}.
           <p className="mt-1 leading-relaxed">{authorization.comment}</p>
+          <button type="button" disabled={busy} onClick={() => void retryPlan()}
+            className="mt-2 inline-flex h-7 items-center justify-center rounded-md border border-emerald-300 bg-white px-2 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-50">
+            {busy ? "Starting Terraform plan…" : "Start Terraform plan"}
+          </button>
         </div>
+
       : canAuthorize
         ? <>
             <p className="mt-2 text-[11.5px] leading-relaxed text-slate-600">Confirm that exactly these machines may be created. This cannot be changed afterwards — a different set requires a new package.</p>
