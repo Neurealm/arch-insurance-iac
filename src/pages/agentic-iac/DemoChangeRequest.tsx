@@ -35,6 +35,7 @@ export default function DemoChangeRequest() {
   const [error, setError] = useState<string | null>(null);
   const [outstanding, setOutstanding] = useState<string[]>([]);
   const [revisingTicket, setRevisingTicket] = useState<string | null>(null);
+  const [additionalNotes, setAdditionalNotes] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
