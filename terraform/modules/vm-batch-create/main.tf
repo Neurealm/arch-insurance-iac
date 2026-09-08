@@ -6,15 +6,15 @@ resource "azapi_resource" "network_interface" {
   parent_id = var.target_resource_group_id
   location  = var.location
 
-  body = jsonencode({
+  body = {
     properties = {
       ipConfigurations = [
         {
           name       = "ipconfig1"
           properties = {
             primary                   = true
-            privateIpAllocationMethod = "Dynamic"
-            subnet                    = {
+            privateIPAllocationMethod = "Dynamic"
+            subnet = {
               id = var.subnet_id
             }
           }
@@ -22,7 +22,7 @@ resource "azapi_resource" "network_interface" {
       ]
     }
     tags = var.tags
-  })
+  }
 
   lifecycle {
     precondition {
@@ -40,7 +40,7 @@ resource "azapi_resource" "virtual_machine" {
   parent_id = var.target_resource_group_id
   location  = var.location
 
-  body = jsonencode({
+  body = {
     properties = {
       hardwareProfile = {
         vmSize = var.vm_size
@@ -89,7 +89,7 @@ resource "azapi_resource" "virtual_machine" {
       }
     }
     tags = var.tags
-  })
+  }
 
   lifecycle {
     precondition {
