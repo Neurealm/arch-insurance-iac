@@ -4614,6 +4614,39 @@ export type Database = {
           },
         ]
       }
+      iac_engineering_gap_intake_requests: {
+        Row: {
+          gap_id: string
+          intake_request_id: string
+          linked_at: string
+        }
+        Insert: {
+          gap_id: string
+          intake_request_id: string
+          linked_at?: string
+        }
+        Update: {
+          gap_id?: string
+          intake_request_id?: string
+          linked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_engineering_gap_intake_requests_gap_id_fkey"
+            columns: ["gap_id"]
+            isOneToOne: false
+            referencedRelation: "iac_engineering_gaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_engineering_gap_intake_requests_intake_request_id_fkey"
+            columns: ["intake_request_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       iac_engineering_gaps: {
         Row: {
           action_type: string
@@ -4745,6 +4778,64 @@ export type Database = {
           },
         ]
       }
+      iac_intake_resumptions: {
+        Row: {
+          attempts: number
+          capability_id: string | null
+          created_at: string
+          gap_id: string | null
+          id: string
+          intake_request_id: string
+          last_error: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          capability_id?: string | null
+          created_at?: string
+          gap_id?: string | null
+          id?: string
+          intake_request_id: string
+          last_error?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          capability_id?: string | null
+          created_at?: string
+          gap_id?: string | null
+          id?: string
+          intake_request_id?: string
+          last_error?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_intake_resumptions_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "iac_automation_capabilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_intake_resumptions_gap_id_fkey"
+            columns: ["gap_id"]
+            isOneToOne: false
+            referencedRelation: "iac_engineering_gaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_intake_resumptions_intake_request_id_fkey"
+            columns: ["intake_request_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       iac_package_automation_bindings: {
         Row: {
           capability_id: string
@@ -4783,6 +4874,38 @@ export type Database = {
           },
           {
             foreignKeyName: "iac_package_automation_bindings_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: true
+            referencedRelation: "iac_change_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_provisioning_authorizations: {
+        Row: {
+          authorized_at: string
+          authorized_by: string
+          comment: string
+          package_id: string
+          target_resource_ids: string[]
+        }
+        Insert: {
+          authorized_at?: string
+          authorized_by: string
+          comment: string
+          package_id: string
+          target_resource_ids: string[]
+        }
+        Update: {
+          authorized_at?: string
+          authorized_by?: string
+          comment?: string
+          package_id?: string
+          target_resource_ids?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_provisioning_authorizations_package_id_fkey"
             columns: ["package_id"]
             isOneToOne: true
             referencedRelation: "iac_change_packages"
@@ -10939,6 +11062,26 @@ export type Database = {
         Args: { _action: string; _comment?: string; _version_id: string }
         Returns: Json
       }
+      authorize_iac_provisioning_targets: {
+        Args: {
+          p_comment: string
+          p_package_id: string
+          p_target_resource_ids: string[]
+        }
+        Returns: {
+          authorized_at: string
+          authorized_by: string
+          comment: string
+          package_id: string
+          target_resource_ids: string[]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "iac_provisioning_authorizations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       begin_iac_vm_execution: {
         Args: { p_package_id: string }
         Returns: {
@@ -10985,6 +11128,26 @@ export type Database = {
       cancel_invitation: {
         Args: { _invitation_id: string }
         Returns: undefined
+      }
+      claim_iac_intake_resumptions: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          capability_id: string | null
+          created_at: string
+          gap_id: string | null
+          id: string
+          intake_request_id: string
+          last_error: string | null
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "iac_intake_resumptions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       claim_iac_terraform_apply: {
         Args: {
@@ -11709,6 +11872,10 @@ export type Database = {
         Args: { _ordered_ids: string[]; _technology_id: string }
         Returns: undefined
       }
+      finish_iac_intake_resumption: {
+        Args: { p_error?: string; p_id: string; p_status: string }
+        Returns: undefined
+      }
       get_current_access_context: {
         Args: { _tenant_id?: string }
         Returns: Json
@@ -11733,6 +11900,10 @@ export type Database = {
           p_cap: Database["public"]["Tables"]["iac_automation_capabilities"]["Row"]
         }
         Returns: Json
+      }
+      iac_vm_target_ids: {
+        Args: { p_resource_group_arm_id: string; p_vm_names: string[] }
+        Returns: string[]
       }
       invite_member: {
         Args: {
