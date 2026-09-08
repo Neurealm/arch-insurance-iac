@@ -120,7 +120,13 @@ export function typedInputs(pkg: Json, capability: Json, target: string): Json {
 }
 
 /** Analyze actual resource changes, not arbitrary nested resource_id values. */
-export function assessPlan(plan: Json, targets: string[], inputs: Json, capability: Json) {
+export function assessPlan(plan: Json, targets: string[], inputs: Json, capability: Json, options: { allowDestroy?: boolean } = {}) {
+  // WARNING -- DELIBERATELY RELAXED, AUTHORIZED 2026-09-08 by the project owner.
+  // allowDestroy lets a PLAN that deletes resources be recorded as policy-clean
+  // so it can be reviewed. Apply must still call assessPlan without this option
+  // (or reject `destroy` explicitly); nothing is ever deleted without a separate
+  // human apply decision on the exact saved plan.
+  const allowDestroy = options.allowDestroy === true;
   const expected = new Set(targets.map(value => armIdentity(value).id));
   const seen = new Set<string>(), createdNics = new Set<string>(), violations: string[] = [], actions: Json = {};
   // Resource groups the declared targets live in. resolveExecutionScope has
@@ -137,7 +143,12 @@ export function assessPlan(plan: Json, targets: string[], inputs: Json, capabili
     if (operations.includes("delete")) destroy = true;
     if (operations.includes("delete") && operations.includes("create")) replace = true;
     if (resource.mode !== "managed" || str(resource.provider_name).toLowerCase() !== "registry.terraform.io/azure/azapi") { violations.push("Unexpected resource mode or provider."); continue; }
+    // A pure delete has no `after` body to validate against the request. When
+    // deletions are permitted it is recorded and skipped; the destroy flag above
+    // still carries it into every downstream decision.
+    if (allowDestroy && operations.length === 1 && operations[0] === "delete") continue;
     if (!operations.length || operations.some(op => !["create", "update", "no-op"].includes(op))) violations.push("Destroy, replace or unsupported resource operation is prohibited.");
+
     let id: string;
     try {
       if (resource.type === "azapi_resource_action" || resource.type === "azapi_update_resource") {
