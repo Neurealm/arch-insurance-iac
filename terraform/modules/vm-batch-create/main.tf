@@ -40,7 +40,7 @@ resource "azapi_resource" "virtual_machine" {
   parent_id = var.target_resource_group_id
   location  = var.location
 
-  body = jsonencode({
+  body = {
     properties = {
       hardwareProfile = {
         vmSize = var.vm_size
