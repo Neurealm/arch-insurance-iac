@@ -79,6 +79,50 @@ export default function ProvisionVms() {
   }, []);
   useEffect(() => { void load(); }, [load]);
 
+  // Seeded once per ticket. Refreshing Azure state later must never overwrite
+  // what the person has since typed, so this deliberately does not depend on
+  // load() and bails as soon as a prefill for this ticket is in place.
+  useEffect(() => {
+    if (!fromTicket || prefill?.intakeRequestId === fromTicket) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const ticket = await loadTicketPrefill(fromTicket);
+        if (!ticket || cancelled) return;
+        const p = ticket.provisioning;
+        const seeded = new Set<string>();
+        const set = (key: string, value: string, apply: (value: string) => void) => { if (!value) return; apply(value); seeded.add(key); };
+        const vmNames = Array.isArray(p.vmNames) ? p.vmNames.filter((item): item is string => typeof item === "string") : [];
+        set("names", vmNames.join("\n"), setNames);
+        set("resourceGroupArmId", asText(p.resourceGroupArmId), setResourceGroupArmId);
+        set("subnetArmId", asText(p.subnetArmId), setSubnetArmId);
+        set("location", asText(p.location), setLocation);
+        set("vmSize", asText(p.vmSize), setVmSize);
+        set("adminUsername", asText(p.adminUsername), setAdminUsername);
+        set("sshPublicKey", asText(p.sshPublicKey), setSshPublicKey);
+        set("osPublisher", asText(p.osPublisher), setOsPublisher);
+        set("osOffer", asText(p.osOffer), setOsOffer);
+        set("osSku", asText(p.osSku), setOsSku);
+        set("osVersion", asText(p.osVersion), setOsVersion);
+        if (["development", "pre-production", "production"].includes(ticket.environment)) set("environment", ticket.environment, setEnvironment);
+        set("rationale", prefillRationale(ticket), setRationale);
+        setPrefill(ticket);
+        setFromTicketFields(seeded);
+      } catch { /* a failed prefill still leaves a usable blank form */ }
+    })();
+    return () => { cancelled = true; };
+  }, [fromTicket, prefill?.intakeRequestId]);
+
+  const clearPrefill = () => {
+    setPrefill(null); setFromTicketFields(new Set());
+    setNames(""); setResourceGroupArmId(""); setSubnetArmId(""); setLocation("");
+    setVmSize(""); setAdminUsername(""); setSshPublicKey(""); setRationale("");
+    setOsPublisher("Canonical"); setOsOffer("0001-com-ubuntu-server-jammy"); setOsSku("22_04-lts-gen2"); setOsVersion("latest");
+    setEnvironment("development");
+    setSearchParams({}, { replace: true });
+  };
+
+
   const requested = useMemo(() => names.split(/[\s,]+/).map((name) => name.trim()).filter(Boolean), [names]);
   // A name that already exists in Azure is the likeliest way a batch fails
   // half-way through apply, so surface it before the package is even created.
