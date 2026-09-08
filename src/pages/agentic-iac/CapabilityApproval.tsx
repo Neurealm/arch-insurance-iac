@@ -54,6 +54,72 @@ function promotionReadiness(gap: CapabilityGap, viewerId: string | null) {
   return { tone: "ready" as const, label: "Ready for promotion", detail: "Fresh CI, an independent GitHub review and a verified merge are all present for this exact commit." };
 }
 
+type StepState = "done" | "active" | "failed" | "pending";
+
+/**
+ * Display-only progress strip. Every state is derived from the gap record and
+ * its recorded events; this screen never infers progress the server did not
+ * write.
+ */
+function agentSteps(gap: CapabilityGap, events: GapEvent[]) {
+  const seen = new Set(events.map((event) => event.eventType));
+  const drafted = !!gap.linkedCapabilityId || seen.has("pr_opened");
+  const draftFailed = !drafted && (seen.has("draft_validation_failed") || seen.has("drafting_failed") || seen.has("draft_capability_insert_failed"));
+  const prOpened = !!gap.draftPrNumber;
+  const prFailed = !prOpened && seen.has("pr_open_failed");
+  const promoted = gap.status === "capability_approved";
+  const evidence = gap.ciEvidence as Record<string, unknown>;
+  const review = (evidence.review ?? {}) as Record<string, unknown>;
+  const reviewed = evidence.merged === true && review.state === "APPROVED";
+
+  const step = (label: string, detail: string, state: StepState) => ({ label, detail, state });
+  return [
+    step("Request accepted", "A capability gap was opened from the intake request.", "done"),
+    step("Module drafted", draftFailed ? "The generated module was rejected by the policy check." : drafted ? "Terraform files were generated and passed the policy check." : "Waiting for the drafting agent.",
+      draftFailed ? "failed" : drafted ? "done" : gap.status === "drafting" ? "active" : "pending"),
+    step("Pull request opened", prFailed ? "The pull request could not be opened." : prOpened ? `Draft pull request #${gap.draftPrNumber} is open for review.` : "No pull request yet.",
+      prFailed ? "failed" : prOpened ? "done" : drafted ? "active" : "pending"),
+    step("Automated checks", gap.ciStatus === "passed" ? "Formatting, validation and policy checks passed on the reviewed commit." : gap.ciStatus === "failed" ? "The automated checks failed on the reviewed commit." : gap.ciStatus === "running" ? "Checks are running." : "Not observed yet.",
+      gap.ciStatus === "passed" ? "done" : gap.ciStatus === "failed" ? "failed" : gap.ciStatus === "running" ? "active" : prOpened ? "active" : "pending"),
+    step("Reviewed and merged", reviewed ? "An independent reviewer approved this commit and it was merged." : "Awaiting an independent approval and merge of this exact commit.",
+      reviewed ? "done" : gap.ciStatus === "passed" ? "active" : "pending"),
+    step("Promoted for use", promoted ? "The reviewed commit is pinned and the capability can be used in change packages." : "The capability stays unusable until it is promoted.",
+      promoted ? "done" : reviewed ? "active" : "pending"),
+  ];
+}
+
+const stepTone: Record<StepState, { dot: string; text: string; bar: string }> = {
+  done: { dot: "border-emerald-300 bg-emerald-500 text-white", text: "text-slate-800", bar: "bg-emerald-300" },
+  active: { dot: "border-[#1B4F91] bg-white text-[#1B4F91] animate-pulse", text: "text-[#1B4F91]", bar: "bg-slate-200" },
+  failed: { dot: "border-red-300 bg-red-500 text-white", text: "text-red-700", bar: "bg-slate-200" },
+  pending: { dot: "border-slate-200 bg-white text-slate-400", text: "text-slate-400", bar: "bg-slate-200" },
+};
+
+function AgentProgress({ gap, events }: { gap: CapabilityGap; events: GapEvent[] }) {
+  const steps = agentSteps(gap, events);
+  return <Panel title="Drafting agent progress" className="mb-3">
+    <ol className="flex flex-col gap-3 md:flex-row md:gap-0">
+      {steps.map((item, index) => {
+        const tone = stepTone[item.state];
+        return <li key={item.label} className="relative flex min-w-0 flex-1 gap-2.5 md:flex-col md:gap-2">
+          <div className="flex flex-col items-center md:w-full md:flex-row">
+            <span className={cn("z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10.5px] font-semibold", tone.dot)} aria-hidden="true">
+              {item.state === "done" ? <CheckCircle2 className="h-3.5 w-3.5" /> : item.state === "failed" ? <AlertTriangle className="h-3.5 w-3.5" /> : index + 1}
+            </span>
+            {index < steps.length - 1 && <span className={cn("hidden h-0.5 w-full md:block", tone.bar)} />}
+            {index < steps.length - 1 && <span className={cn("w-0.5 flex-1 md:hidden", tone.bar)} />}
+          </div>
+          <div className="min-w-0 pb-1 md:pr-3">
+            <p className={cn("text-[12px] font-semibold", tone.text)}>{item.label}</p>
+            <p className="mt-0.5 text-[11px] leading-snug text-slate-600">{item.detail}</p>
+          </div>
+        </li>;
+      })}
+    </ol>
+    <p className="mt-2 text-[11px] text-slate-500">Each step reflects what the server recorded. The agent only drafts and opens a pull request; it never plans or applies anything in Azure.</p>
+  </Panel>;
+}
+
 export default function CapabilityApproval() {
   const { gapId } = useParams<{ gapId: string }>();
   const { isAdmin } = useAuth();
@@ -187,6 +253,8 @@ function GapDetail({ gapId }: { gapId: string }) {
     </div>
     {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}
     {notice && <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{notice}</div>}
+
+    <AgentProgress gap={gap} events={events} />
 
     <div className="grid gap-3 lg:grid-cols-2">
       <Panel title="Engineering gap" right={<GapBadge status={gap.status} />}>
