@@ -67,13 +67,7 @@ const App = () => (
               <Route element={<RequireAuth />}>
                 <Route element={<IacLayout />}>
                   <Route path="/connections" element={<AzureConnections />} />
-                  <Route path="/resources" element={<AzureResources />} />
-                  <Route path="/demo-change-request" element={<DemoChangeRequest />} />
                   <Route path="/servicenow-intake" element={<ServiceNowIntake />} />
-                  <Route path="/resources/virtual-machines/:vmName" element={<AssetDigitalTwin />} />
-                  <Route path="/remediation" element={<RemediationIntelligence />} />
-                  <Route path="/remediation/virtual-machines/:vmName" element={<RemediationIntelligence />} />
-                  <Route path="/remediation/:assetId" element={<Navigate to="/remediation" replace />} />
                   <Route path="/changes" element={<ChangeEngineering />} />
                   <Route path="/changes/provision-vms" element={<ProvisionVms />} />
                   <Route path="/changes/virtual-machines/:vmName" element={<ChangeEngineering />} />
@@ -84,14 +78,8 @@ const App = () => (
                   <Route path="/execution/:packageId" element={<ExecutionCenter />} />
                   <Route path="/validation" element={<ValidationEvidence />} />
                   <Route path="/validation/:packageId" element={<ValidationEvidence />} />
-                  <Route path="/platform/deployment-architecture" element={<DeploymentArchitecture />} />
-                  <Route path="/platform/integrations" element={<IntegrationsConnectivity />} />
-                  <Route path="/platform/access-security" element={<AccessGovernance />} />
-                  <Route path="/platform/policies-governance" element={<PoliciesGovernance />} />
                   <Route path="/platform/capabilities" element={<CapabilityApproval />} />
                   <Route path="/platform/capabilities/:gapId" element={<CapabilityApproval />} />
-                  <Route path="/platform/audit-compliance" element={<PlatformAdminPlaceholder />} />
-                  <Route path="/platform/system-settings" element={<SystemSettingsPage />} />
                 </Route>
               </Route>
 
