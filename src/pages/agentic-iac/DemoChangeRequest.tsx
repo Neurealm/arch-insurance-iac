@@ -101,7 +101,9 @@ export default function DemoChangeRequest() {
     const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
     const notesSuffix = additionalNotes.trim() ? `\n\nAdditional notes (${stamp} UTC): ${additionalNotes.trim()}` : "";
     try {
-      const result = await submitDemoServiceNowTicket({ number, sys_id: `demo-${crypto.randomUUID()}`, requester: requester.trim(), application: application.trim(), environment, description: `${targetPrefix}${description.trim()}${notesSuffix}`, maintenance_window: maintenanceWindow.trim(), business_impact: businessImpact.trim(), application_owner: applicationOwner.trim(), rollback_plan: rollbackPlan.trim() });
+      const answers = additionalNotes.trim() ? [...priorAnswers, `${stamp} UTC: ${additionalNotes.trim()}`] : priorAnswers;
+      const result = await submitDemoServiceNowTicket({ number, sys_id: `demo-${crypto.randomUUID()}`, requester: requester.trim(), application: application.trim(), environment, description: `${targetPrefix}${description.trim()}${notesSuffix}`, maintenance_window: maintenanceWindow.trim(), business_impact: businessImpact.trim(), application_owner: applicationOwner.trim(), rollback_plan: rollbackPlan.trim(), prior_questions: priorQuestions, clarification_answers: answers });
+
       navigate(`/servicenow-intake?requestId=${encodeURIComponent(result.requestId)}`);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to submit the demo change request."); }
     finally { setSubmitting(false); }
