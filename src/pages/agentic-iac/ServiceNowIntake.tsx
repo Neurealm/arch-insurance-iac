@@ -101,6 +101,13 @@ export default function ServiceNowIntake() {
   const azureVms = Array.isArray(azure.vms) ? azure.vms : [];
   const questions = valueList(validation.questions);
   const canAddNotes = Boolean(selected) && selected?.requestedByUserId === user?.id;
+  // Sends the reviewer to the form that matches the action, carrying the ticket
+  // so the fields arrive prefilled instead of being retyped.
+  const handoff = changeHandoffPath(
+    selected?.id ?? "",
+    typeof analysis.action === "string" ? analysis.action : null,
+    typeof analysis.targetVmName === "string" ? analysis.targetVmName : null,
+  );
 
   // Answering in place: the note is appended to the original ticket text and
   // resubmitted under the same ticket number, so it lands as a new revision the
