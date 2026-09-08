@@ -1,38 +1,48 @@
-# What the Change Engineering screen should contain
+# Change Engineering becomes ticket-driven
 
-Change Engineering is step 2 of the workflow: an intake ticket has been agreed, and here a person turns it into a precise, approval-controlled change package. Nothing on this screen touches Azure.
+Yes — understood. Instead of starting from a machine list, Change Engineering should start from the accepted ServiceNow request: the package is already drafted from the ticket, and the engineer's job is to review it and submit it for approval.
 
-## The screen should have, in order
+## What already exists
 
-1. **Where this came from**
-   A ticket selector at the top. Either the screen was opened from a ServiceNow ticket (show the ticket number, requester and agreed summary, fields already filled and locked), or the person picks a ready ticket from a short list. Building a package with no ticket stays possible but is marked as unlinked.
+When a ServiceNow request is analysed and judged actionable, the intake service already builds a draft change package from the ticket (targets, action, parameters, reason) and links it to the ticket. That draft exists in the system today; Change Engineering simply does not show it — it shows a machine picker instead.
 
-2. **What is being changed**
-   Two routes, clearly separated:
-   - Existing machines: the live Azure list with search and filters (region, resource group, power state, environment) to pick one target.
-   - New machines: the "provision new virtual machines" entry, for names that do not exist yet.
+There are currently no intake requests or packages in the database (they were cleared earlier), so this will be exercised with a new ticket.
 
-3. **Which change**
-   Only actions the platform can actually perform today: start, stop, restart, resize, and create machines. Actions with no approved capability behind them (disk growth, backup, monitoring, patch assessment) are not offered as if they work; they appear only as "request this capability", which routes to the capability path.
+## New Change Engineering screen
 
-4. **The details that decide approval**
-   The inputs for the chosen action (new size, machine count, names, resource group, region, size, network) validated on the spot: name already in use, size not permitted in the approved scope, region or resource group outside scope, target machine not found.
+**Main view: work queue of drafted packages**
 
-5. **Why and when**
-   Business reason carried from the ticket, plus intended window and any rollback note. This is what reviewers read.
+A list, newest first, of packages drafted from tickets, each row showing:
+- Ticket number and requester
+- What is being done (create / start / stop / restart / resize) and the target machines
+- Resource group, region, environment
+- Status: Draft awaiting review, Submitted for approval, Changes requested, Approved
+- Any blocking note (name already taken, size outside approved scope, machine not found)
 
-6. **A preview of the package before it is created**
-   A plain summary: targets, action, parameters, scope checks passed or failed, and a clear statement that the next step is authorization by someone else. One button to create the package, one to save as draft.
+Rows are grouped: "Needs your review" first, then submitted/approved for reference.
 
-7. **Existing packages for this target**
-   A short list of packages already raised for the same machines, with status, so nobody duplicates a request or claims a machine that another draft already holds.
+**Detail view: review and submit**
 
-## What should not be here
+Opening a row shows the drafted package as a read-through, in the same shape every time:
+1. Source ticket — number, requester, description, agreed clarifications
+2. What will change — target machines, action, parameters, with each value marked as taken from the ticket
+3. Scope checks — resource group, region, size, network and name availability, each passed or failed with the reason
+4. Reason and window — carried from the ticket, editable
+5. Actions — Submit for approval (only when checks pass), Edit values, or Return to intake for clarification
 
-Azure execution, approval, plan output, and evidence. Those belong to Change Review & Approval, Execution Center, and Validation & Evidence.
+Edits are allowed and recorded; every change re-runs the checks. Nothing is applied to Azure here.
 
-## Current gaps versus the above
+**Secondary, not primary**
 
-The screen today shows the live inventory, the provisioning entry, and the eight-action list, and builds a package. Ticket linkage exists on the provisioning path. The items above that are not yet fully in place: ticket linkage for changes to existing machines, hiding actions with no approved capability, scope validation shown before submission, the pre-create summary, and the existing-packages-for-this-target list.
+The live machine list and the "provision new machines" form stay reachable for the occasional request raised without a ticket, behind a "Start a package without a ticket" link — no longer the first thing on the screen.
 
-Approving this plan means I build those missing pieces; approve only if that is what you want, otherwise treat this as the written definition.
+## Behaviour when a ticket has no draft yet
+
+If a ticket is accepted but no package was drafted (missing capability or unresolved clarification), the row shows the reason and links back to ServiceNow Intake or Capability Promotion, instead of silently disappearing.
+
+## Technical notes
+
+- Rewrite `src/pages/agentic-iac/ChangeEngineering.tsx`: default view becomes the package queue, sourced from `listVmChangePackages` joined with `listServiceNowIntakeRequests` on `change_package_id`; the existing `VmChangeTargetSelection` moves behind the "without a ticket" route.
+- New detail route `/changes/package/:packageNumber` rendering the drafted package with `iac_change_package_targets`, reusing `PackageContentsDrawer` content and the scope checks already used by the provisioning form.
+- Submit action sets package status to `submitted`, which is what Change Review & Approval already reads; no schema change and no edge-function change is expected.
+- Existing routes `/changes/:vmName` and `/changes/provision-vms` keep working, including the `fromTicket` prefill.
