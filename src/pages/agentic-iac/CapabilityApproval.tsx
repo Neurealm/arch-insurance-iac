@@ -155,7 +155,7 @@ function GapQueue() {
 
   return <div className="min-w-0 p-4">
     <div className="mb-3 flex flex-wrap items-center gap-2">
-      <nav className="text-[12px] text-slate-500"><Link to="/resources" className="hover:text-[#1B4F91]">Azure Resources</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">Capability Promotion</span></nav>
+      <nav className="text-[12px] text-slate-500"><Link to="/servicenow-intake" className="hover:text-[#1B4F91]">ServiceNow Intake</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">Capability Promotion</span></nav>
       <button type="button" onClick={() => void sync()} disabled={syncing} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"><RefreshCw className={cn("h-3.5 w-3.5", syncing && "animate-spin")} />{syncing ? "Observing GitHub…" : "Synchronize CI"}</button>
       <button type="button" onClick={() => void load()} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50"><RefreshCw className="h-3.5 w-3.5" />Refresh</button>
     </div>
