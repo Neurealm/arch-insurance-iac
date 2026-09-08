@@ -40,7 +40,7 @@ function LegacyIacRedirect() {
     .replace(/^\/change-engineering/, "/changes")
     .replace(/^\/change-review/, "/approvals")
     .replace(/^\/execution-center/, "/execution");
-  const target = rest && rest !== "/" ? rest : "/resources";
+  const target = rest && rest !== "/" ? rest : "/servicenow-intake";
   return <Navigate to={`${target}${search}${hash}`} replace />;
 }
 
@@ -89,8 +89,8 @@ const App = () => (
               <Route path="/intelligent-iac/*" element={<LegacyIacRedirect />} />
 
               {/* Entry point and everything else */}
-              <Route path="/" element={<Navigate to="/resources" replace />} />
-              <Route path="*" element={<Navigate to="/resources" replace />} />
+              <Route path="/" element={<Navigate to="/servicenow-intake" replace />} />
+              <Route path="*" element={<Navigate to="/servicenow-intake" replace />} />
             </Routes>
           </LazyRouteBoundary>
         </AuthProvider>
