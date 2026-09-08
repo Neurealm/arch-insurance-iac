@@ -229,8 +229,13 @@ async function apply(request: Request, db: ReturnType<typeof admin>, actor: stri
     obj(obj(remote.attributes).actions)["is-confirmable"] !== true || obj(remote.attributes)["auto-apply"] !== false)
     throw new Error("The exact HCP saved plan is no longer available for manual apply.");
   const rawPlan = obj(await hcp(`/plans/${encodeURIComponent(saved.hcp_plan_id)}/json-output`, applyToken));
-  if (await digest(stableStringify(rawPlan)) !== saved.plan_sha256 || !assessPlan(rawPlan, resolved.targets, resolved.inputs, resolved.capability).matched)
+  const applyGuard = assessPlan(rawPlan, resolved.targets, resolved.inputs, resolved.capability, { allowDestroy: true });
+  if (await digest(stableStringify(rawPlan)) !== saved.plan_sha256 || !applyGuard.matched)
     throw new Error("The remote saved-plan digest or policy evidence changed.");
+  // Destroying plans may be reviewed but never executed by this endpoint.
+  if (applyGuard.destroy || applyGuard.replace)
+    throw new Error("This saved plan deletes or replaces existing resources. Applying a destructive plan is not permitted; adjust the module or use a dedicated workspace.");
+
   const { data, error } = await db.rpc("claim_iac_terraform_apply", { p_package_id: packageId, p_actor: actor, p_run_id: saved.id, p_plan_sha256: saved.plan_sha256 });
   if (error || !data) throw error ?? new Error("Unable to atomically claim the reviewed plan.");
   try {
