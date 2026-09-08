@@ -99,6 +99,33 @@ export default function ServiceNowIntake() {
   const target = validation.target && typeof validation.target === "object" ? validation.target as Record<string, unknown> : {};
   const azure = selected?.azureObservation ?? {};
   const azureVms = Array.isArray(azure.vms) ? azure.vms : [];
+  const questions = valueList(validation.questions);
+  const canAddNotes = Boolean(selected) && selected?.requestedByUserId === user?.id;
+
+  // Answering in place: the note is appended to the original ticket text and
+  // resubmitted under the same ticket number, so it lands as a new revision the
+  // agent re-analyses instead of a separate request.
+  const submitNotes = async () => {
+    if (!selected || notes.trim().length < 5) { setError("Add at least a short note before submitting."); return; }
+    setSubmittingNotes(true); setError(null); setNotice(null);
+    try {
+      const payload = selected.ticketPayload ?? {};
+      const previous = typeof payload.description === "string" ? payload.description : "";
+      const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+      const result = await submitDemoServiceNowTicket({
+        ...payload,
+        number: selected.ticketNumber,
+        sys_id: `demo-${crypto.randomUUID()}`,
+        description: `${previous}\n\nAdditional notes (${stamp} UTC): ${notes.trim()}`.trim(),
+      });
+      setNotes("");
+      setNotice("Your notes were added to the ticket and the agent re-analyzed it.");
+      await load();
+      setSelectedId(result.requestId);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to submit your notes."); }
+    finally { setSubmittingNotes(false); }
+  };
+
 
   return <main className="mx-auto max-w-[1500px] space-y-4 px-3 py-5 md:px-5">
     <header className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs text-slate-500">Infrastructure as Code <span className="mx-1">/</span> ServiceNow Intake</p><div className="mt-1 flex items-center gap-3"><h1 className="text-2xl font-semibold text-slate-900">ServiceNow Intake &amp; Agent Analysis</h1><span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700">LLM triage queue</span></div><p className="mt-2 max-w-3xl text-sm text-slate-600">Review submitted change requests after the platform agent has analyzed them. Open a ticket to see intent, confidence, live Azure evidence, missing information, and the next governed step.</p></div><div className="flex flex-wrap gap-2"><Link to="/demo-change-request" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white"><FileInput className="h-4 w-4" />Create demo request</Link><button onClick={() => void load()} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50"><RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />Refresh queue</button><button onClick={() => void resume()} disabled={resuming} className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50" title="Re-analyze every ticket whose capability has since been approved"><RefreshCw className={cn("h-4 w-4", resuming && "animate-spin")} />Resume waiting tickets</button></div></header>
