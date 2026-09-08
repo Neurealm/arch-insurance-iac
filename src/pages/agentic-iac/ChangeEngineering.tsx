@@ -6,6 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, type AzureVirtualMachine, type AzureVmOperations } from "./azureControlPlane";
 import { listVmChangePackages, saveVmChangePackage, type VmChangePackage } from "./changePackages";
 import { createTerraformPlan, diagnoseTerraformSource, type TerraformSourceDiagnostics } from "./automationCatalog";
+import { loadTicketPrefill, prefillRationale, type TicketPrefill } from "./change/ticketPrefill";
+import PrefilledFromTicket from "./change/PrefilledFromTicket";
 
 type ActionId = "start_vm" | "stop_vm" | "restart_vm" | "resize_vm" | "increase_os_disk" | "configure_backup" | "enable_monitoring" | "assess_patches";
 type ActionDefinition = { id: ActionId; label: string; description: string; category: string; requiresValue?: "vmSize" | "diskSize" };
@@ -156,7 +158,7 @@ function FilterSelect({ value, onChange, label, values }: { value: string; onCha
   return <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} className="h-9 w-full rounded-md border border-[#CBD5E1] bg-white px-2.5 text-[12px] text-slate-700 outline-none focus:border-[#1B4F91] focus:ring-1 focus:ring-[#CFE0F3]"><option value="all">{label}</option>{values.map((item) => <option key={item} value={item}>{item}</option>)}</select>;
 }
 
-function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmResourceId: string | null }) {
+function VmChangePackageBuilder({ vmName, vmResourceId, fromTicket }: { vmName: string; vmResourceId: string | null; fromTicket?: string | null }) {
   const { user } = useAuth();
   const [vms, setVms] = useState<AzureVirtualMachine[]>([]);
   const [operations, setOperations] = useState<AzureVmOperations | null>(null);
