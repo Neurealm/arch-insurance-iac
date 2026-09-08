@@ -183,9 +183,18 @@ Supported action values: start_vm, stop_vm, restart_vm, resize_vm, increase_os_d
 
 Ticket data:
 ${JSON.stringify(ticket, null, 2)}
+${ticket.priorQuestions.length || ticket.clarificationAnswers.length ? `
+This ticket has already been through clarification. Questions previously asked of the requester:
+${ticket.priorQuestions.map((question) => `- ${question}`).join("\n") || "- (none recorded)"}
 
+The requester's answers, which are part of the ticket text above and are authoritative:
+${ticket.clarificationAnswers.map((answer) => `- ${answer}`).join("\n") || "- (see the description)"}
+
+Read the description and these answers together before deciding anything is missing. Do NOT repeat a question that the answers above already resolve, even if the value appears only in prose rather than in a structured field: extract it and report it as present. Only re-ask a previous question when its answer is genuinely absent, contradictory, or unusable, and say briefly why.
+` : ""}
 Live Azure VM inventory (authoritative for target matching):
 ${JSON.stringify(azure, null, 2)}
+
 
 Return ONLY JSON with this exact shape:
 {
