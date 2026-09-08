@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, type AzureVirtualMachine, type AzureVmOperations } from "./azureControlPlane";
 import { authorizeProvisioningTargets, getProvisioningAuthorization, getVmChangePackage, listChangePackageTargets, listVmChangePackageReviews, listVmChangePackages, reviewVmChangePackage, type ChangePackageStatus, type ChangePackageTarget, type ChangeReviewDecision, type ProvisioningAuthorization, type VmChangePackage, type VmChangePackageReview } from "./changePackages";
-import { listTerraformRuns, syncTerraformRuns, type TerraformRun } from "./automationCatalog";
+import { createTerraformPlan, listTerraformRuns, syncTerraformRuns, type TerraformRun } from "./automationCatalog";
 
 function Panel({ title, right, children, className }: { title: string; right?: ReactNode; children: ReactNode; className?: string }) {
   return <section className={cn("rounded-md border border-[#E2E8F0] bg-white", className)}><header className="flex items-center gap-2 border-b border-[#E2E8F0] px-3 py-2"><h2 className="text-[12px] font-semibold uppercase tracking-wide text-slate-700">{title}</h2>{right && <div className="ml-auto">{right}</div>}</header><div className="p-3">{children}</div></section>;
@@ -115,8 +115,14 @@ function ProvisioningAuthorizationPanel({ pkg, canAuthorize, onChange }: { pkg: 
 
   const authorize = async () => {
     setBusy(true); setError(null);
-    try { await authorizeProvisioningTargets(pkg.id, targets.map((target) => target.targetResourceId), comment); setComment(""); await load(); onChange(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Authorization was refused."); }
+    try {
+      await authorizeProvisioningTargets(pkg.id, targets.map((target) => target.targetResourceId), comment);
+      await createTerraformPlan(pkg.id);
+      setComment("");
+      await load();
+      onChange();
+    }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Authorization or Terraform planning was refused."); }
     finally { setBusy(false); }
   };
 
