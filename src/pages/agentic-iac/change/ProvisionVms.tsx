@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { listApprovedVmCapabilities, createTerraformPlan, type AutomationCapability } from "../automationCatalog";
 import { deriveVmTargetIds, saveVmChangePackage, type ChangePackageTarget } from "../changePackages";
 import { listAzureVirtualMachines, AzureControlPlaneError, type AzureVirtualMachine } from "../azureControlPlane";
+import { listServiceNowIntakeRequests } from "../servicenowIntakeRequests";
 import { loadTicketPrefill, prefillRationale, type TicketPrefill } from "./ticketPrefill";
 import PrefilledFromTicket, { FromTicketTag } from "./PrefilledFromTicket";
 
