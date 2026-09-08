@@ -347,16 +347,30 @@ function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: 
   // context the canonical labels cannot.
   const missing = analysis.action === "create_vm" ? [] : [...analysis.missingFields];
   const conflicts = [...analysis.conflicts];
+  // A requester who answers a clarification question types the answer into the
+  // ticket text, not into the structured ServiceNow field it belongs to. Asking
+  // again because the field is still blank is how the loop used to repeat
+  // forever, so an answer the model extracted from the prose counts as supplied.
+  const supplied = (structured: string, ...keys: string[]) =>
+    structured.trim() || keys.map((key) => text(analysis.extractedFields[key])).find(Boolean) || "";
+  const application = supplied(ticket.application, "application", "businessService", "business_service", "service");
+  const environment = supplied(ticket.environment, "environment");
+  const maintenanceWindow = supplied(ticket.maintenanceWindow, "maintenanceWindow", "maintenance_window", "changeWindow");
+  const businessImpact = supplied(ticket.businessImpact, "businessImpact", "business_impact", "impact");
+  const applicationOwner = supplied(ticket.applicationOwner, "applicationOwner", "application_owner", "owner", "serviceOwner");
+  const rollbackPlan = supplied(ticket.rollbackPlan, "rollbackPlan", "rollback_plan", "backoutPlan", "backout_plan");
+
   if (!ticket.ticketNumber) missing.push("ServiceNow ticket number");
-  if (!ticket.requester) missing.push("Requester");
-  if (!ticket.application) missing.push("Application or business service");
-  if (!ticket.environment) missing.push("Environment");
+  if (!supplied(ticket.requester, "requester", "requestedBy", "requested_by")) missing.push("Requester");
+  if (!application) missing.push("Application or business service");
+  if (!environment) missing.push("Environment");
   if (ticket.description.length < 10) missing.push("Request description");
-  if (!ticket.maintenanceWindow) missing.push("Maintenance window with timezone");
-  if (!ticket.businessImpact) missing.push("Expected business impact");
-  if (!ticket.applicationOwner) missing.push("Application owner");
-  if (ticket.rollbackPlan.length < 10) missing.push("Rollback plan");
+  if (!maintenanceWindow) missing.push("Maintenance window with timezone");
+  if (!businessImpact) missing.push("Expected business impact");
+  if (!applicationOwner) missing.push("Application owner");
+  if (rollbackPlan.length < 10) missing.push("Rollback plan");
   if (analysis.action === "unknown" || analysis.confidence < 60) missing.push("A supported, unambiguous Azure VM action");
+
 
   // The ticket carries an environment in a structured field AND in prose, and
   // they can disagree -- a request whose dropdown says Production while the
