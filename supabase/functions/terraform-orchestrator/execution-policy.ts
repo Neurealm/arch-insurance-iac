@@ -204,5 +204,5 @@ export function assessPlan(plan: Json, targets: string[], inputs: Json, capabili
     && !(createdNics.has(id) && targetGroups.has(armIdentity(id).resourceGroupId)));
   const missingFromPlan = [...expected].filter(id => !seen.has(id));
   if (plan.errored === true || plan.complete === false || arr(plan.deferred_changes).length) violations.push("Plan is incomplete, deferred or errored.");
-  return { destroy, replace, affected, actions, unexpected, missingFromPlan, violations, matched: !destroy && !replace && !unexpected.length && !missingFromPlan.length && !violations.length };
+  return { destroy, replace, affected, actions, unexpected, missingFromPlan, violations, matched: (allowDestroy || (!destroy && !replace)) && !unexpected.length && !missingFromPlan.length && !violations.length };
 }
