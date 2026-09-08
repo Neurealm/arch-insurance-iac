@@ -57,11 +57,27 @@ export async function listTerraformRuns(packageId: string) {
   return (data ?? []).map(mapRun);
 }
 
+/**
+ * A policy refusal comes back as a structured JSON body on a non-2xx response.
+ * supabase.functions.invoke leaves that body unread, so the operator only sees
+ * "Edge Function returned a non-2xx status code" and cannot tell a refusal from
+ * an outage. Read the body first and surface the real reason.
+ */
+async function readFunctionError(error: unknown): Promise<Error> {
+  const response = (error as { context?: Response }).context;
+  if (response && typeof response.json === "function") {
+    const parsed = await response.json().catch(() => null) as { error?: unknown } | null;
+    if (parsed && typeof parsed.error === "string" && parsed.error) return new Error(parsed.error);
+  }
+  return error instanceof Error ? error : new Error("The Terraform orchestrator refused the request.");
+}
+
 async function invoke(operation: "resolve" | "plan" | "apply" | "sync", packageId: string) {
   const { data, error } = await supabase.functions.invoke("terraform-orchestrator", { body: { operation, packageId } });
-  if (error) throw error;
+  if (error) throw await readFunctionError(error);
   return data as Record<string, unknown>;
 }
+
 
 export type TerraformSourceDiagnostics = {
   repository: string; tokenConfigured: boolean; ref: string;
@@ -71,7 +87,7 @@ export type TerraformSourceDiagnostics = {
 
 export async function diagnoseTerraformSource() {
   const { data, error } = await supabase.functions.invoke("terraform-orchestrator", { body: { operation: "diagnose" } });
-  if (error) throw error;
+  if (error) throw await readFunctionError(error);
   return data as TerraformSourceDiagnostics;
 }
 
