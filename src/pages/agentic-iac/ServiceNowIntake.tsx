@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { AlertTriangle, ArrowRight, CheckCircle2, Clock, FileInput, PenLine, RefreshCw, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
-import { listServiceNowIntakeRequests, resumeServiceNowIntake, type ServiceNowIntakeRequest } from "./servicenowIntakeRequests";
+import { listServiceNowIntakeRequests, resumeServiceNowIntake, submitDemoServiceNowTicket, type ServiceNowIntakeRequest } from "./servicenowIntakeRequests";
 
 function Panel({ title, children, action, className }: { title: string; children: ReactNode; action?: ReactNode; className?: string }) {
   return <section className={cn("rounded-xl border border-slate-200 bg-white", className)}><header className="flex min-h-11 items-center justify-between border-b border-slate-200 px-4"><h2 className="text-[12px] font-semibold uppercase tracking-wide text-slate-800">{title}</h2>{action}</header><div className="p-4">{children}</div></section>;
