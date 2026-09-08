@@ -87,7 +87,7 @@ export type TerraformSourceDiagnostics = {
 
 export async function diagnoseTerraformSource() {
   const { data, error } = await supabase.functions.invoke("terraform-orchestrator", { body: { operation: "diagnose" } });
-  if (error) throw error;
+  if (error) throw await readFunctionError(error);
   return data as TerraformSourceDiagnostics;
 }
 
