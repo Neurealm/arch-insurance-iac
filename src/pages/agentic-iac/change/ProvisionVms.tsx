@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { AlertTriangle, CheckCircle2, RefreshCw, Server, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileInput, RefreshCw, Server, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { listApprovedVmCapabilities, createTerraformPlan, type AutomationCapability } from "../automationCatalog";
 import { deriveVmTargetIds, saveVmChangePackage, type ChangePackageTarget } from "../changePackages";
 import { listAzureVirtualMachines, AzureControlPlaneError, type AzureVirtualMachine } from "../azureControlPlane";
+import { listServiceNowIntakeRequests } from "../servicenowIntakeRequests";
 import { loadTicketPrefill, prefillRationale, type TicketPrefill } from "./ticketPrefill";
 import PrefilledFromTicket, { FromTicketTag } from "./PrefilledFromTicket";
 
@@ -61,6 +62,23 @@ export default function ProvisionVms() {
   // sits next to a value nobody has reviewed by hand.
   const [fromTicketFields, setFromTicketFields] = useState<Set<string>>(new Set());
   const touched = (key: string) => setFromTicketFields((keys) => { if (!keys.has(key)) return keys; const next = new Set(keys); next.delete(key); return next; });
+  // Reaching this page from the menu is just as common as arriving from a
+  // ticket, so the create-VM tickets are offered here rather than forcing a
+  // detour back to the intake queue.
+  const [ticketOptions, setTicketOptions] = useState<{ id: string; label: string }[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const rows = await listServiceNowIntakeRequests();
+        if (cancelled) return;
+        setTicketOptions(rows
+          .filter((row) => asText(row.llmAnalysis.action) === "create_vm")
+          .map((row) => ({ id: row.id, label: `${row.ticketNumber} · ${asText(row.llmAnalysis.summary).slice(0, 60) || "create virtual machines"}` })));
+      } catch { /* the picker is a convenience; a blank form still works */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
 
 
@@ -208,6 +226,21 @@ export default function ProvisionVms() {
     </header>
 
     {prefill && <PrefilledFromTicket prefill={prefill} onClear={clearPrefill} />}
+    {!prefill && ticketOptions.length > 0 && (
+      <div className="mb-3 flex flex-wrap items-center gap-2 rounded-md border border-[#CFE0F3] bg-[#EFF4FB] px-3 py-2 text-[12px] text-[#1B4F91]">
+        <FileInput className="h-3.5 w-3.5 shrink-0" />
+        <span>Fill this form from a submitted ticket instead of typing it again.</span>
+        <select
+          aria-label="Prefill from ticket"
+          value=""
+          onChange={(event) => { if (event.target.value) setSearchParams({ fromTicket: event.target.value }, { replace: true }); }}
+          className="ml-auto h-7 rounded-md border border-[#CFE0F3] bg-white px-2 text-[12px] text-slate-800"
+        >
+          <option value="">Choose a ticket…</option>
+          {ticketOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+        </select>
+      </div>
+    )}
     {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}
     {message && <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{message}</div>}
     {!loading && !capability && <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-800"><AlertTriangle className="mr-1 inline h-3.5 w-3.5" />No approved <code>create_vm</code> capability exists yet. Submit a request as a ticket instead — the platform will open an engineering gap, draft a module and route it for approval.</div>}
