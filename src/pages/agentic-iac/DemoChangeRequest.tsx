@@ -74,9 +74,13 @@ export default function DemoChangeRequest() {
         setApplicationOwner(text(payload.application_owner));
         setRollbackPlan(text(payload.rollback_plan));
         setRevisingTicket(original.ticketNumber);
+        const strings = (value: unknown) => Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
         const validation = original.llmAnalysis.validation as Record<string, unknown> | undefined;
-        const questions = Array.isArray(validation?.questions) ? validation.questions : [];
-        setOutstanding(questions.filter((item): item is string => typeof item === "string"));
+        const questions = strings(validation?.questions);
+        setOutstanding(questions);
+        setPriorQuestions([...new Set([...strings(payload.prior_questions), ...questions])]);
+        setPriorAnswers(strings(payload.clarification_answers));
+
       } catch { /* a failed prefill still leaves a usable blank form */ }
     })();
     return () => { cancelled = true; };
