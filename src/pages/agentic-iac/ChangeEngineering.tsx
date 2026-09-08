@@ -6,6 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { AzureControlPlaneError, getAzureVmOperations, listAzureVirtualMachines, type AzureVirtualMachine, type AzureVmOperations } from "./azureControlPlane";
 import { listVmChangePackages, saveVmChangePackage, type VmChangePackage } from "./changePackages";
 import { createTerraformPlan, diagnoseTerraformSource, type TerraformSourceDiagnostics } from "./automationCatalog";
+import { loadTicketPrefill, prefillRationale, type TicketPrefill } from "./change/ticketPrefill";
+import PrefilledFromTicket from "./change/PrefilledFromTicket";
 
 type ActionId = "start_vm" | "stop_vm" | "restart_vm" | "resize_vm" | "increase_os_disk" | "configure_backup" | "enable_monitoring" | "assess_patches";
 type ActionDefinition = { id: ActionId; label: string; description: string; category: string; requiresValue?: "vmSize" | "diskSize" };
@@ -33,9 +35,10 @@ export default function ChangeEngineering() {
   const { vmName } = useParams<{ vmName: string }>();
   const [searchParams] = useSearchParams();
   return vmName
-    ? <VmChangePackageBuilder vmName={vmName} vmResourceId={searchParams.get("resourceId")} />
+    ? <VmChangePackageBuilder vmName={vmName} vmResourceId={searchParams.get("resourceId")} fromTicket={searchParams.get("fromTicket")} />
     : <VmChangeTargetSelection />;
 }
+
 
 function isRunning(powerState: string) { return /running/i.test(powerState); }
 
@@ -155,7 +158,7 @@ function FilterSelect({ value, onChange, label, values }: { value: string; onCha
   return <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} className="h-9 w-full rounded-md border border-[#CBD5E1] bg-white px-2.5 text-[12px] text-slate-700 outline-none focus:border-[#1B4F91] focus:ring-1 focus:ring-[#CFE0F3]"><option value="all">{label}</option>{values.map((item) => <option key={item} value={item}>{item}</option>)}</select>;
 }
 
-function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmResourceId: string | null }) {
+function VmChangePackageBuilder({ vmName, vmResourceId, fromTicket }: { vmName: string; vmResourceId: string | null; fromTicket?: string | null }) {
   const { user } = useAuth();
   const [vms, setVms] = useState<AzureVirtualMachine[]>([]);
   const [operations, setOperations] = useState<AzureVmOperations | null>(null);
@@ -169,6 +172,32 @@ function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmRe
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [prefill, setPrefill] = useState<TicketPrefill | null>(null);
+
+  // Seeded once per ticket, and only into fields the person still confirms by
+  // hand before saving. Eligibility, policy scoring and approval are unchanged.
+  useEffect(() => {
+    if (!fromTicket || prefill?.intakeRequestId === fromTicket) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const ticket = await loadTicketPrefill(fromTicket);
+        if (!ticket || cancelled) return;
+        const match = ACTIONS.find((action) => action.id === ticket.action);
+        if (match) setActionId(match.id);
+        const size = typeof ticket.extractedFields.requestedVmSize === "string" ? ticket.extractedFields.requestedVmSize
+          : typeof ticket.extractedFields.vmSize === "string" ? ticket.extractedFields.vmSize : "";
+        if (match?.requiresValue === "vmSize" && size) setVmSize(size.trim());
+        const disk = ticket.extractedFields.requestedOsDiskSizeGB ?? ticket.extractedFields.diskSizeGB;
+        if (match?.requiresValue === "diskSize" && (typeof disk === "number" || typeof disk === "string")) setDiskSize(String(disk).replace(/\D/g, ""));
+        setRationale(prefillRationale(ticket));
+        setPrefill(ticket);
+      } catch { /* a failed prefill still leaves a usable blank form */ }
+    })();
+    return () => { cancelled = true; };
+  }, [fromTicket, prefill?.intakeRequestId]);
+
+
 
   const selectedVm = useMemo(() => vmResourceId
     ? vms.find((vm) => vm.id.toLowerCase() === vmResourceId.toLowerCase()) ?? null
@@ -279,11 +308,12 @@ function VmChangePackageBuilder({ vmName, vmResourceId }: { vmName: string; vmRe
   };
 
   if (loading && !selectedVm) return <div className="p-4 text-[13px] text-slate-600">Loading Azure VM change builder…</div>;
-  if (!selectedVm) return <div className="p-4"><Panel title="VM change engineering"><p className="text-[13px] text-slate-600">This virtual machine is not available in the current connected Azure scope.</p><Link to="/changes" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Select another Azure VM</Link></Panel></div>;
+  if (!selectedVm) return <div className="p-4"><Panel title="VM change engineering"><p className="text-[13px] text-slate-600">{fromTicket ? `The ticket named "${vmName}", but no machine with that name is available in the current connected Azure scope.` : "This virtual machine is not available in the current connected Azure scope."}</p><Link to="/changes" className="mt-3 inline-block text-[12px] font-medium text-[#1B4F91] underline">Select another Azure VM</Link></Panel></div>;
 
   return <div className="min-w-0 p-4">
     <div className="mb-3 flex flex-wrap items-center gap-2"><nav className="text-[12px] text-slate-500"><Link to="/resources" className="hover:text-[#1B4F91]">Azure Resources</Link><span className="mx-1.5">/</span><Link to={`/resources/virtual-machines/${encodeURIComponent(selectedVm.name)}`} className="hover:text-[#1B4F91]">{selectedVm.name}</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">Change Engineering</span></nav><button type="button" onClick={() => void load()} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50"><RefreshCw className="h-3.5 w-3.5" />Refresh Azure state</button></div>
     <header className="mb-3 flex flex-wrap items-start gap-3"><div><h1 className="text-[20px] font-semibold text-slate-900">VM Change Package Builder</h1><p className="mt-1 text-[12px] text-slate-600">Choose a real Azure VM and the change you want to request. Saving creates a durable package; it does not modify Azure.</p></div><div className="ml-auto rounded-md border border-[#CFE0F3] bg-[#EFF4FB] px-3 py-2 text-[11.5px] text-[#1B4F91]"><ShieldCheck className="mr-1 inline h-3.5 w-3.5" />Human approval required for every VM change</div></header>
+    {prefill && <PrefilledFromTicket prefill={prefill} onClear={() => { setPrefill(null); setRationale(""); setVmSize(""); setDiskSize(""); setActionId(null); }} />}
     {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}{message && <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{message}</div>}
 
     <div className="grid gap-3 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
