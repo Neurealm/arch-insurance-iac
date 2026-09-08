@@ -24,6 +24,8 @@ const ServiceNowIntake = lazy(() => import("./pages/agentic-iac/ServiceNowIntake
 const DemoChangeRequest = lazy(() => import("./pages/agentic-iac/DemoChangeRequest.tsx"));
 const ChangeEngineering = lazy(() => import("./pages/agentic-iac/ChangeEngineering.tsx"));
 const ProvisionVms = lazy(() => import("./pages/agentic-iac/change/ProvisionVms.tsx"));
+const TicketPackageQueue = lazy(() => import("./pages/agentic-iac/change/TicketPackageQueue.tsx"));
+const PackageReview = lazy(() => import("./pages/agentic-iac/change/PackageReview.tsx"));
 const ChangeReviewApproval = lazy(() => import("./pages/agentic-iac/ChangeReviewApproval.tsx"));
 const ExecutionCenter = lazy(() => import("./pages/agentic-iac/ExecutionCenter.tsx"));
 const ValidationEvidence = lazy(() => import("./pages/agentic-iac/ValidationEvidence.tsx"));
