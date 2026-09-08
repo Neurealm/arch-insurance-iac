@@ -36,6 +36,11 @@ export default function DemoChangeRequest() {
   const [outstanding, setOutstanding] = useState<string[]>([]);
   const [revisingTicket, setRevisingTicket] = useState<string | null>(null);
   const [additionalNotes, setAdditionalNotes] = useState("");
+  // Everything this ticket has already been asked, and already answered. Both
+  // are resubmitted so the agent analyses the conversation, not just the form.
+  const [priorQuestions, setPriorQuestions] = useState<string[]>([]);
+  const [priorAnswers, setPriorAnswers] = useState<string[]>([]);
+
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
@@ -69,9 +74,13 @@ export default function DemoChangeRequest() {
         setApplicationOwner(text(payload.application_owner));
         setRollbackPlan(text(payload.rollback_plan));
         setRevisingTicket(original.ticketNumber);
+        const strings = (value: unknown) => Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
         const validation = original.llmAnalysis.validation as Record<string, unknown> | undefined;
-        const questions = Array.isArray(validation?.questions) ? validation.questions : [];
-        setOutstanding(questions.filter((item): item is string => typeof item === "string"));
+        const questions = strings(validation?.questions);
+        setOutstanding(questions);
+        setPriorQuestions([...new Set([...strings(payload.prior_questions), ...questions])]);
+        setPriorAnswers(strings(payload.clarification_answers));
+
       } catch { /* a failed prefill still leaves a usable blank form */ }
     })();
     return () => { cancelled = true; };
@@ -92,7 +101,9 @@ export default function DemoChangeRequest() {
     const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
     const notesSuffix = additionalNotes.trim() ? `\n\nAdditional notes (${stamp} UTC): ${additionalNotes.trim()}` : "";
     try {
-      const result = await submitDemoServiceNowTicket({ number, sys_id: `demo-${crypto.randomUUID()}`, requester: requester.trim(), application: application.trim(), environment, description: `${targetPrefix}${description.trim()}${notesSuffix}`, maintenance_window: maintenanceWindow.trim(), business_impact: businessImpact.trim(), application_owner: applicationOwner.trim(), rollback_plan: rollbackPlan.trim() });
+      const answers = additionalNotes.trim() ? [...priorAnswers, `${stamp} UTC: ${additionalNotes.trim()}`] : priorAnswers;
+      const result = await submitDemoServiceNowTicket({ number, sys_id: `demo-${crypto.randomUUID()}`, requester: requester.trim(), application: application.trim(), environment, description: `${targetPrefix}${description.trim()}${notesSuffix}`, maintenance_window: maintenanceWindow.trim(), business_impact: businessImpact.trim(), application_owner: applicationOwner.trim(), rollback_plan: rollbackPlan.trim(), prior_questions: priorQuestions, clarification_answers: answers });
+
       navigate(`/servicenow-intake?requestId=${encodeURIComponent(result.requestId)}`);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to submit the demo change request."); }
     finally { setSubmitting(false); }

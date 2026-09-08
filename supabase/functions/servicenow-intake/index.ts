@@ -20,7 +20,12 @@ type NormalizedTicket = {
   applicationOwner: string;
   rollbackPlan: string;
   sourceUpdatedAt: string | null;
+  /** Questions a previous analysis of this same ticket asked the requester. */
+  priorQuestions: string[];
+  /** The requester's answers to those questions, newest last. */
+  clarificationAnswers: string[];
 };
+
 type AzureVm = {
   id: string;
   name: string;
@@ -95,7 +100,13 @@ function normalizeTicket(body: RecordValue): NormalizedTicket {
     applicationOwner: first(fields, ["application_owner", "service_owner", "u_application_owner"]),
     rollbackPlan: first(fields, ["rollback_plan", "backout_plan", "u_rollback_plan"]),
     sourceUpdatedAt: timestamp(first(fields, ["sys_updated_on", "updated_at", "source_updated_at"])),
+    // Carried by a resubmission of a ticket the agent already questioned.
+    // Without these the next analysis starts from scratch and re-asks
+    // everything the requester has already answered.
+    priorQuestions: unique(array(fields.prior_questions ?? fields.priorQuestions).filter((item): item is string => typeof item === "string").map((item) => item.trim()).slice(0, 40)),
+    clarificationAnswers: unique(array(fields.clarification_answers ?? fields.clarificationAnswers).filter((item): item is string => typeof item === "string").map((item) => item.trim()).slice(0, 40)),
   };
+
 }
 
 async function sha256(value: unknown) {
@@ -172,9 +183,18 @@ Supported action values: start_vm, stop_vm, restart_vm, resize_vm, increase_os_d
 
 Ticket data:
 ${JSON.stringify(ticket, null, 2)}
+${ticket.priorQuestions.length || ticket.clarificationAnswers.length ? `
+This ticket has already been through clarification. Questions previously asked of the requester:
+${ticket.priorQuestions.map((question) => `- ${question}`).join("\n") || "- (none recorded)"}
 
+The requester's answers, which are part of the ticket text above and are authoritative:
+${ticket.clarificationAnswers.map((answer) => `- ${answer}`).join("\n") || "- (see the description)"}
+
+Read the description and these answers together before deciding anything is missing. Do NOT repeat a question that the answers above already resolve, even if the value appears only in prose rather than in a structured field: extract it and report it as present. Only re-ask a previous question when its answer is genuinely absent, contradictory, or unusable, and say briefly why.
+` : ""}
 Live Azure VM inventory (authoritative for target matching):
 ${JSON.stringify(azure, null, 2)}
+
 
 Return ONLY JSON with this exact shape:
 {
@@ -327,16 +347,30 @@ function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: 
   // context the canonical labels cannot.
   const missing = analysis.action === "create_vm" ? [] : [...analysis.missingFields];
   const conflicts = [...analysis.conflicts];
+  // A requester who answers a clarification question types the answer into the
+  // ticket text, not into the structured ServiceNow field it belongs to. Asking
+  // again because the field is still blank is how the loop used to repeat
+  // forever, so an answer the model extracted from the prose counts as supplied.
+  const supplied = (structured: string, ...keys: string[]) =>
+    structured.trim() || keys.map((key) => text(analysis.extractedFields[key])).find(Boolean) || "";
+  const application = supplied(ticket.application, "application", "businessService", "business_service", "service");
+  const environment = supplied(ticket.environment, "environment");
+  const maintenanceWindow = supplied(ticket.maintenanceWindow, "maintenanceWindow", "maintenance_window", "changeWindow");
+  const businessImpact = supplied(ticket.businessImpact, "businessImpact", "business_impact", "impact");
+  const applicationOwner = supplied(ticket.applicationOwner, "applicationOwner", "application_owner", "owner", "serviceOwner");
+  const rollbackPlan = supplied(ticket.rollbackPlan, "rollbackPlan", "rollback_plan", "backoutPlan", "backout_plan");
+
   if (!ticket.ticketNumber) missing.push("ServiceNow ticket number");
-  if (!ticket.requester) missing.push("Requester");
-  if (!ticket.application) missing.push("Application or business service");
-  if (!ticket.environment) missing.push("Environment");
+  if (!supplied(ticket.requester, "requester", "requestedBy", "requested_by")) missing.push("Requester");
+  if (!application) missing.push("Application or business service");
+  if (!environment) missing.push("Environment");
   if (ticket.description.length < 10) missing.push("Request description");
-  if (!ticket.maintenanceWindow) missing.push("Maintenance window with timezone");
-  if (!ticket.businessImpact) missing.push("Expected business impact");
-  if (!ticket.applicationOwner) missing.push("Application owner");
-  if (ticket.rollbackPlan.length < 10) missing.push("Rollback plan");
+  if (!maintenanceWindow) missing.push("Maintenance window with timezone");
+  if (!businessImpact) missing.push("Expected business impact");
+  if (!applicationOwner) missing.push("Application owner");
+  if (rollbackPlan.length < 10) missing.push("Rollback plan");
   if (analysis.action === "unknown" || analysis.confidence < 60) missing.push("A supported, unambiguous Azure VM action");
+
 
   // The ticket carries an environment in a structured field AND in prose, and
   // they can disagree -- a request whose dropdown says Production while the

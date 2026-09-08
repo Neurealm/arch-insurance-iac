@@ -112,12 +112,21 @@ export default function ServiceNowIntake() {
       const payload = selected.ticketPayload ?? {};
       const previous = typeof payload.description === "string" ? payload.description : "";
       const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+      // The questions this ticket has already been asked, and every answer given
+      // so far, travel with the resubmission. Without them the next analysis has
+      // no memory of the exchange and asks for the same things again.
+      const strings = (value: unknown) => Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+      const validation = (selected.llmAnalysis?.validation ?? {}) as Record<string, unknown>;
+      const askedNow = strings(validation.questions);
       const result = await submitDemoServiceNowTicket({
         ...payload,
         number: selected.ticketNumber,
         sys_id: `demo-${crypto.randomUUID()}`,
         description: `${previous}\n\nAdditional notes (${stamp} UTC): ${notes.trim()}`.trim(),
+        prior_questions: [...new Set([...strings(payload.prior_questions), ...askedNow])],
+        clarification_answers: [...strings(payload.clarification_answers), `${stamp} UTC: ${notes.trim()}`],
       });
+
       setNotes("");
       setNotice("Your notes were added to the ticket and the agent re-analyzed it.");
       await load();
