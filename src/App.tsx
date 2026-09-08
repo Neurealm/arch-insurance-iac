@@ -70,6 +70,7 @@ const App = () => (
                 <Route element={<IacLayout />}>
                   <Route path="/connections" element={<AzureConnections />} />
                   <Route path="/servicenow-intake" element={<ServiceNowIntake />} />
+                  <Route path="/demo-change-request" element={<DemoChangeRequest />} />
                   <Route path="/changes" element={<ChangeEngineering />} />
                   <Route path="/changes/provision-vms" element={<ProvisionVms />} />
                   <Route path="/changes/virtual-machines/:vmName" element={<ChangeEngineering />} />
