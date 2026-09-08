@@ -161,7 +161,7 @@ async function sync(db: ReturnType<typeof admin>, run: Json) {
     const { data: capability, error } = await db.from("iac_automation_capabilities").select("*").eq("id", run.capability_id).single();
     if (error) throw error;
     const plan = obj(await hcp(`/plans/${encodeURIComponent(planId)}/json-output`, token("plan")));
-    const targets = await packageTargets(db, str(run.package_id)), guard = assessPlan(plan, targets, obj(run.resolved_inputs), capability);
+    const targets = await packageTargets(db, str(run.package_id)), guard = assessPlan(plan, targets, obj(run.resolved_inputs), capability, { allowDestroy: true });
     Object.assign(update, { status: guard.matched ? "succeeded" : "blocked", completed_at: iso(), artifact_uri: runUrl(str(run.hcp_workspace_name), str(run.hcp_run_id)),
       plan_sha256: await digest(stableStringify(plan)), plan_summary: { actions: guard.actions, hcpStatus, sourceRevision: run.source_revision },
       reconciliation: { matched: guard.matched, expectedTargets: targets.map(target => target.toLowerCase()), affectedResourceIds: guard.affected, unexpected: guard.unexpected, missingFromPlan: guard.missingFromPlan, violations: guard.violations },
