@@ -172,6 +172,32 @@ function VmChangePackageBuilder({ vmName, vmResourceId, fromTicket }: { vmName: 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [prefill, setPrefill] = useState<TicketPrefill | null>(null);
+
+  // Seeded once per ticket, and only into fields the person still confirms by
+  // hand before saving. Eligibility, policy scoring and approval are unchanged.
+  useEffect(() => {
+    if (!fromTicket || prefill?.intakeRequestId === fromTicket) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const ticket = await loadTicketPrefill(fromTicket);
+        if (!ticket || cancelled) return;
+        const match = ACTIONS.find((action) => action.id === ticket.action);
+        if (match) setActionId(match.id);
+        const size = typeof ticket.extractedFields.requestedVmSize === "string" ? ticket.extractedFields.requestedVmSize
+          : typeof ticket.extractedFields.vmSize === "string" ? ticket.extractedFields.vmSize : "";
+        if (match?.requiresValue === "vmSize" && size) setVmSize(size.trim());
+        const disk = ticket.extractedFields.requestedOsDiskSizeGB ?? ticket.extractedFields.diskSizeGB;
+        if (match?.requiresValue === "diskSize" && (typeof disk === "number" || typeof disk === "string")) setDiskSize(String(disk).replace(/\D/g, ""));
+        setRationale(prefillRationale(ticket));
+        setPrefill(ticket);
+      } catch { /* a failed prefill still leaves a usable blank form */ }
+    })();
+    return () => { cancelled = true; };
+  }, [fromTicket, prefill?.intakeRequestId]);
+
+
 
   const selectedVm = useMemo(() => vmResourceId
     ? vms.find((vm) => vm.id.toLowerCase() === vmResourceId.toLowerCase()) ?? null
