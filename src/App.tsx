@@ -19,23 +19,13 @@ import { AuthProvider } from "./context/AuthContext.tsx";
 
 const IacLayout = lazy(() => import("./pages/agentic-iac/IacLayout.tsx"));
 const AzureConnections = lazy(() => import("./pages/agentic-iac/AzureConnections.tsx"));
-const AzureResources = lazy(() => import("./pages/agentic-iac/AzureResources.tsx"));
-const DemoChangeRequest = lazy(() => import("./pages/agentic-iac/DemoChangeRequest.tsx"));
 const ServiceNowIntake = lazy(() => import("./pages/agentic-iac/ServiceNowIntake.tsx"));
-const AssetDigitalTwin = lazy(() => import("./pages/agentic-iac/AssetDigitalTwin.tsx"));
-const RemediationIntelligence = lazy(() => import("./pages/agentic-iac/RemediationIntelligence.tsx"));
 const ChangeEngineering = lazy(() => import("./pages/agentic-iac/ChangeEngineering.tsx"));
 const ProvisionVms = lazy(() => import("./pages/agentic-iac/change/ProvisionVms.tsx"));
 const ChangeReviewApproval = lazy(() => import("./pages/agentic-iac/ChangeReviewApproval.tsx"));
 const ExecutionCenter = lazy(() => import("./pages/agentic-iac/ExecutionCenter.tsx"));
 const ValidationEvidence = lazy(() => import("./pages/agentic-iac/ValidationEvidence.tsx"));
-const DeploymentArchitecture = lazy(() => import("./pages/agentic-iac/DeploymentArchitecture.tsx"));
-const PlatformAdminPlaceholder = lazy(() => import("./pages/agentic-iac/PlatformAdminPlaceholder.tsx"));
 const CapabilityApproval = lazy(() => import("./pages/agentic-iac/CapabilityApproval.tsx"));
-const IntegrationsConnectivity = lazy(() => import("./pages/agentic-iac/IntegrationsConnectivity.tsx"));
-const AccessGovernance = lazy(() => import("./pages/agentic-iac/AccessGovernance.tsx"));
-const PoliciesGovernance = lazy(() => import("./pages/agentic-iac/PoliciesGovernance.tsx"));
-const SystemSettingsPage = lazy(() => import("./pages/agentic-iac/SystemSettings.tsx"));
 
 const queryClient = new QueryClient();
 
