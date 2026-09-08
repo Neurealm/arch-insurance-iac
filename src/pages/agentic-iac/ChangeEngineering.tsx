@@ -33,9 +33,10 @@ export default function ChangeEngineering() {
   const { vmName } = useParams<{ vmName: string }>();
   const [searchParams] = useSearchParams();
   return vmName
-    ? <VmChangePackageBuilder vmName={vmName} vmResourceId={searchParams.get("resourceId")} />
+    ? <VmChangePackageBuilder vmName={vmName} vmResourceId={searchParams.get("resourceId")} fromTicket={searchParams.get("fromTicket")} />
     : <VmChangeTargetSelection />;
 }
+
 
 function isRunning(powerState: string) { return /running/i.test(powerState); }
 
