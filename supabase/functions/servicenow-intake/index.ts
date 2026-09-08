@@ -100,7 +100,13 @@ function normalizeTicket(body: RecordValue): NormalizedTicket {
     applicationOwner: first(fields, ["application_owner", "service_owner", "u_application_owner"]),
     rollbackPlan: first(fields, ["rollback_plan", "backout_plan", "u_rollback_plan"]),
     sourceUpdatedAt: timestamp(first(fields, ["sys_updated_on", "updated_at", "source_updated_at"])),
+    // Carried by a resubmission of a ticket the agent already questioned.
+    // Without these the next analysis starts from scratch and re-asks
+    // everything the requester has already answered.
+    priorQuestions: unique(array(fields.prior_questions ?? fields.priorQuestions).filter((item): item is string => typeof item === "string").map((item) => item.trim()).slice(0, 40)),
+    clarificationAnswers: unique(array(fields.clarification_answers ?? fields.clarificationAnswers).filter((item): item is string => typeof item === "string").map((item) => item.trim()).slice(0, 40)),
   };
+
 }
 
 async function sha256(value: unknown) {
