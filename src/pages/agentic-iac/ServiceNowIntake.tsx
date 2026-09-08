@@ -42,6 +42,8 @@ export default function ServiceNowIntake() {
   const [error, setError] = useState<string | null>(null);
   const [resuming, setResuming] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [notes, setNotes] = useState("");
+  const [submittingNotes, setSubmittingNotes] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
