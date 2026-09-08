@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AlertTriangle, CheckCircle2, FileInput, RefreshCw, Server, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { listApprovedVmCapabilities, createTerraformPlan, type AutomationCapability } from "../automationCatalog";
+import { listApprovedVmCapabilities, type AutomationCapability } from "../automationCatalog";
 import { deriveVmTargetIds, saveVmChangePackage, type ChangePackageTarget } from "../changePackages";
 import { listAzureVirtualMachines, AzureControlPlaneError, type AzureVirtualMachine } from "../azureControlPlane";
 import { listServiceNowIntakeRequests } from "../servicenowIntakeRequests";
@@ -201,14 +201,6 @@ export default function ProvisionVms() {
         riskScore: 60, riskLevel: "Medium", approvalRequired: true,
       }, targets);
       setMessage(`${saved.packageNumber} submitted with ${targets.length} declared target(s). A platform administrator must authorize the exact machines before it can be planned.`);
-      try {
-        await createTerraformPlan(saved.id);
-        setMessage(`${saved.packageNumber} submitted and its governed Terraform plan was queued.`);
-      } catch (planCause) {
-        // Expected until the targets are authorized; say so plainly rather than
-        // presenting a governance gate as a failure.
-        setError(planCause instanceof Error ? planCause.message : "Terraform planning was not queued.");
-      }
       setTimeout(() => navigate(`/approvals/${saved.id}`), 1200);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to create the provisioning request.");
