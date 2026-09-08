@@ -20,6 +20,8 @@ import { AuthProvider } from "./context/AuthContext.tsx";
 const IacLayout = lazy(() => import("./pages/agentic-iac/IacLayout.tsx"));
 const AzureConnections = lazy(() => import("./pages/agentic-iac/AzureConnections.tsx"));
 const ServiceNowIntake = lazy(() => import("./pages/agentic-iac/ServiceNowIntake.tsx"));
+// Kept reachable but hidden from navigation: tickets are raised from the intake screen.
+const DemoChangeRequest = lazy(() => import("./pages/agentic-iac/DemoChangeRequest.tsx"));
 const ChangeEngineering = lazy(() => import("./pages/agentic-iac/ChangeEngineering.tsx"));
 const ProvisionVms = lazy(() => import("./pages/agentic-iac/change/ProvisionVms.tsx"));
 const ChangeReviewApproval = lazy(() => import("./pages/agentic-iac/ChangeReviewApproval.tsx"));
