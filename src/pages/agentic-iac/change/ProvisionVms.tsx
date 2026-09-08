@@ -61,6 +61,23 @@ export default function ProvisionVms() {
   // sits next to a value nobody has reviewed by hand.
   const [fromTicketFields, setFromTicketFields] = useState<Set<string>>(new Set());
   const touched = (key: string) => setFromTicketFields((keys) => { if (!keys.has(key)) return keys; const next = new Set(keys); next.delete(key); return next; });
+  // Reaching this page from the menu is just as common as arriving from a
+  // ticket, so the create-VM tickets are offered here rather than forcing a
+  // detour back to the intake queue.
+  const [ticketOptions, setTicketOptions] = useState<{ id: string; label: string }[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const rows = await listServiceNowIntakeRequests();
+        if (cancelled) return;
+        setTicketOptions(rows
+          .filter((row) => asText(row.llmAnalysis.action) === "create_vm")
+          .map((row) => ({ id: row.id, label: `${row.ticketNumber} · ${asText(row.llmAnalysis.summary).slice(0, 60) || "create virtual machines"}` })));
+      } catch { /* the picker is a convenience; a blank form still works */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
 
 
