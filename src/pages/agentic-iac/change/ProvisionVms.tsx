@@ -207,6 +207,7 @@ export default function ProvisionVms() {
       <div className="ml-auto rounded-md border border-[#CFE0F3] bg-[#EFF4FB] px-3 py-2 text-[11.5px] text-[#1B4F91]"><ShieldCheck className="mr-1 inline h-3.5 w-3.5" />Creating nothing until reviewed</div>
     </header>
 
+    {prefill && <PrefilledFromTicket prefill={prefill} onClear={clearPrefill} />}
     {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}
     {message && <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{message}</div>}
     {!loading && !capability && <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-800"><AlertTriangle className="mr-1 inline h-3.5 w-3.5" />No approved <code>create_vm</code> capability exists yet. Submit a request as a ticket instead — the platform will open an engineering gap, draft a module and route it for approval.</div>}
@@ -214,40 +215,41 @@ export default function ProvisionVms() {
     <div className="grid gap-3 lg:grid-cols-2">
       <Panel title="Machines" right={<span className="text-[11px] text-slate-500">{requested.length} of max {maxTargets}</span>}>
         <div className="space-y-3">
-          <Field label="Machine names" hint="One per line, or comma separated. Letters, numbers and hyphens only.">
-            <textarea value={names} onChange={(event) => setNames(event.target.value)} rows={5} placeholder={"claims-vm-01\nclaims-vm-02"} className={cn(input, "resize-y")} />
+          <Field label="Machine names" hint="One per line, or comma separated. Letters, numbers and hyphens only." tag={<FromTicketTag shown={fromTicketFields.has("names")} />}>
+            <textarea value={names} onChange={(event) => { touched("names"); setNames(event.target.value); }} rows={5} placeholder={"claims-vm-01\nclaims-vm-02"} className={cn(input, "resize-y")} />
           </Field>
           {collisions.length > 0 && <div className="rounded-md border border-red-200 bg-red-50 px-2.5 py-2 text-[11.5px] text-red-800"><AlertTriangle className="mr-1 inline h-3.5 w-3.5" />Already present in Azure: {collisions.join(", ")}</div>}
           {requested.length > 0 && !collisions.length && <div className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[11.5px] text-emerald-800"><CheckCircle2 className="mr-1 inline h-3.5 w-3.5" />{requested.length} name(s) not currently in Azure.</div>}
-          <Field label="VM size" hint="Must be on the authorized SKU list for the target scope."><input value={vmSize} onChange={(event) => setVmSize(event.target.value)} placeholder="Standard_B2s" className={input} /></Field>
-          <Field label="Environment"><select value={environment} onChange={(event) => setEnvironment(event.target.value)} className={cn(input, "font-sans")}><option value="development">development</option><option value="pre-production">pre-production</option><option value="production">production</option></select></Field>
+          <Field label="VM size" hint="Must be on the authorized SKU list for the target scope." tag={<FromTicketTag shown={fromTicketFields.has("vmSize")} />}><input value={vmSize} onChange={(event) => { touched("vmSize"); setVmSize(event.target.value); }} placeholder="Standard_B2s" className={input} /></Field>
+          <Field label="Environment" tag={<FromTicketTag shown={fromTicketFields.has("environment")} />}><select value={environment} onChange={(event) => { touched("environment"); setEnvironment(event.target.value); }} className={cn(input, "font-sans")}><option value="development">development</option><option value="pre-production">pre-production</option><option value="production">production</option></select></Field>
         </div>
       </Panel>
 
       <Panel title="Placement">
         <div className="space-y-3">
-          <Field label="Destination resource group ARM ID"><input value={resourceGroupArmId} onChange={(event) => setResourceGroupArmId(event.target.value)} placeholder="/subscriptions/.../resourceGroups/..." className={input} /></Field>
-          <Field label="Subnet ARM ID" hint="Enforced against the authorized subnet list before planning."><input value={subnetArmId} onChange={(event) => setSubnetArmId(event.target.value)} placeholder="/subscriptions/.../subnets/..." className={input} /></Field>
-          <Field label="Azure region"><input value={location} onChange={(event) => setLocation(event.target.value)} placeholder="eastus" className={input} /></Field>
+          <Field label="Destination resource group ARM ID" tag={<FromTicketTag shown={fromTicketFields.has("resourceGroupArmId")} />}><input value={resourceGroupArmId} onChange={(event) => { touched("resourceGroupArmId"); setResourceGroupArmId(event.target.value); }} placeholder="/subscriptions/.../resourceGroups/..." className={input} /></Field>
+          <Field label="Subnet ARM ID" hint="Enforced against the authorized subnet list before planning." tag={<FromTicketTag shown={fromTicketFields.has("subnetArmId")} />}><input value={subnetArmId} onChange={(event) => { touched("subnetArmId"); setSubnetArmId(event.target.value); }} placeholder="/subscriptions/.../subnets/..." className={input} /></Field>
+          <Field label="Azure region" tag={<FromTicketTag shown={fromTicketFields.has("location")} />}><input value={location} onChange={(event) => { touched("location"); setLocation(event.target.value); }} placeholder="eastus" className={input} /></Field>
         </div>
       </Panel>
 
       <Panel title="Operating system and access">
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Image publisher"><input value={osPublisher} onChange={(event) => setOsPublisher(event.target.value)} className={input} /></Field>
-            <Field label="Image offer"><input value={osOffer} onChange={(event) => setOsOffer(event.target.value)} className={input} /></Field>
-            <Field label="Image SKU"><input value={osSku} onChange={(event) => setOsSku(event.target.value)} className={input} /></Field>
-            <Field label="Image version"><input value={osVersion} onChange={(event) => setOsVersion(event.target.value)} className={input} /></Field>
+            <Field label="Image publisher" tag={<FromTicketTag shown={fromTicketFields.has("osPublisher")} />}><input value={osPublisher} onChange={(event) => { touched("osPublisher"); setOsPublisher(event.target.value); }} className={input} /></Field>
+            <Field label="Image offer" tag={<FromTicketTag shown={fromTicketFields.has("osOffer")} />}><input value={osOffer} onChange={(event) => { touched("osOffer"); setOsOffer(event.target.value); }} className={input} /></Field>
+            <Field label="Image SKU" tag={<FromTicketTag shown={fromTicketFields.has("osSku")} />}><input value={osSku} onChange={(event) => { touched("osSku"); setOsSku(event.target.value); }} className={input} /></Field>
+            <Field label="Image version" tag={<FromTicketTag shown={fromTicketFields.has("osVersion")} />}><input value={osVersion} onChange={(event) => { touched("osVersion"); setOsVersion(event.target.value); }} className={input} /></Field>
           </div>
-          <Field label="Administrator username"><input value={adminUsername} onChange={(event) => setAdminUsername(event.target.value)} placeholder="azureuser" className={input} /></Field>
-          <Field label="SSH public key" hint="Password authentication is disabled on every machine this creates."><textarea value={sshPublicKey} onChange={(event) => setSshPublicKey(event.target.value)} rows={3} placeholder="ssh-ed25519 AAAA..." className={cn(input, "resize-y")} /></Field>
+          <Field label="Administrator username" tag={<FromTicketTag shown={fromTicketFields.has("adminUsername")} />}><input value={adminUsername} onChange={(event) => { touched("adminUsername"); setAdminUsername(event.target.value); }} placeholder="azureuser" className={input} /></Field>
+          <Field label="SSH public key" hint="Password authentication is disabled on every machine this creates." tag={<FromTicketTag shown={fromTicketFields.has("sshPublicKey")} />}><textarea value={sshPublicKey} onChange={(event) => { touched("sshPublicKey"); setSshPublicKey(event.target.value); }} rows={3} placeholder="ssh-ed25519 AAAA..." className={cn(input, "resize-y")} /></Field>
         </div>
       </Panel>
 
       <Panel title="Submit">
-        <Field label="Reason for this request" hint="Stored on the package and shown to reviewers.">
-          <textarea value={rationale} onChange={(event) => setRationale(event.target.value)} rows={4} className={cn(input, "font-sans resize-y")} />
+        <Field label="Reason for this request" hint="Stored on the package and shown to reviewers." tag={<FromTicketTag shown={fromTicketFields.has("rationale")} />}>
+          <textarea value={rationale} onChange={(event) => { touched("rationale"); setRationale(event.target.value); }} rows={4} className={cn(input, "font-sans resize-y")} />
+
         </Field>
         <div className={cn("mt-3 flex items-start gap-2 rounded-md border px-2.5 py-2 text-[11.5px]", problem ? "border-amber-200 bg-amber-50 text-amber-800" : "border-emerald-200 bg-emerald-50 text-emerald-800")}>
           {problem ? <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> : <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />}
