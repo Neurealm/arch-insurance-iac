@@ -23,6 +23,10 @@ function firstText(value: unknown, paths: string[]): string | null { for (const 
 type ReviewReadiness = { tone: "ready" | "attention" | "blocked"; label: string; detail: string };
 
 function reviewReadiness(pkg: VmChangePackage, vm: AzureVirtualMachine | null): ReviewReadiness {
+  if (pkg.actionType === "create_vm") {
+    if (vm) return { tone: "blocked", label: "Name already in use", detail: `Azure already reports a machine at ${pkg.targetName}. A create request cannot be approved against an existing resource.` };
+    return { tone: "ready", label: "Ready for human review", detail: "The requested machines do not yet exist in Azure, which is expected for a create request. Review the requested parameters and authorized machines before approving." };
+  }
   if (!vm) return { tone: "blocked", label: "Target is unavailable", detail: "The package target is not visible in the current Azure discovery scope." };
   if (pkg.actionType !== "start_vm") return { tone: "blocked", label: "Not executable in this pilot", detail: "Only Start virtual machine packages have an Azure execution path configured for this pilot." };
   if (/running/i.test(vm.powerState)) return { tone: "blocked", label: "No start required", detail: "Azure already reports this VM as running. Do not approve a redundant start request." };
