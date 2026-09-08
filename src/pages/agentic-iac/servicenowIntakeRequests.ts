@@ -6,6 +6,8 @@ export type ServiceNowIntakeRequest = {
   status: string;
   requestedByUserId: string | null;
   normalizedRequest: Record<string, unknown>;
+  /** The original submission, replayed into the form when a ticket is revised. */
+  ticketPayload: Record<string, unknown>;
   llmAnalysis: Record<string, unknown>;
   azureObservation: Record<string, unknown>;
   clarificationNote: string | null;
@@ -25,6 +27,7 @@ function map(row: Record<string, any>): ServiceNowIntakeRequest {
     status: row.status,
     requestedByUserId: row.requested_by_user_id ?? null,
     normalizedRequest: row.normalized_request ?? {},
+    ticketPayload: row.ticket_payload ?? {},
     llmAnalysis: row.llm_analysis ?? {},
     azureObservation: row.azure_observation ?? {},
     clarificationNote: row.clarification_note ?? null,
@@ -37,7 +40,7 @@ function map(row: Record<string, any>): ServiceNowIntakeRequest {
 }
 
 export async function listServiceNowIntakeRequests() {
-  const { data, error } = await table().from("servicenow_intake_requests").select("id, ticket_number, status, requested_by_user_id, normalized_request, llm_analysis, azure_observation, clarification_note, change_package_id, error_message, received_at, analyzed_at, updated_at").order("updated_at", { ascending: false }).limit(25);
+  const { data, error } = await table().from("servicenow_intake_requests").select("id, ticket_number, status, requested_by_user_id, normalized_request, ticket_payload, llm_analysis, azure_observation, clarification_note, change_package_id, error_message, received_at, analyzed_at, updated_at").order("updated_at", { ascending: false }).limit(25);
   if (error) throw error;
   return (data ?? []).map(map);
 }
