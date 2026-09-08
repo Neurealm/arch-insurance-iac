@@ -89,7 +89,7 @@ resource "azapi_resource" "virtual_machine" {
       }
     }
     tags = var.tags
-  })
+  }
 
   lifecycle {
     precondition {
