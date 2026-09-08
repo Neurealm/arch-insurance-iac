@@ -20,7 +20,12 @@ type NormalizedTicket = {
   applicationOwner: string;
   rollbackPlan: string;
   sourceUpdatedAt: string | null;
+  /** Questions a previous analysis of this same ticket asked the requester. */
+  priorQuestions: string[];
+  /** The requester's answers to those questions, newest last. */
+  clarificationAnswers: string[];
 };
+
 type AzureVm = {
   id: string;
   name: string;
