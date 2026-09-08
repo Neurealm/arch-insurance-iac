@@ -36,6 +36,11 @@ export default function DemoChangeRequest() {
   const [outstanding, setOutstanding] = useState<string[]>([]);
   const [revisingTicket, setRevisingTicket] = useState<string | null>(null);
   const [additionalNotes, setAdditionalNotes] = useState("");
+  // Everything this ticket has already been asked, and already answered. Both
+  // are resubmitted so the agent analyses the conversation, not just the form.
+  const [priorQuestions, setPriorQuestions] = useState<string[]>([]);
+  const [priorAnswers, setPriorAnswers] = useState<string[]>([]);
+
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
