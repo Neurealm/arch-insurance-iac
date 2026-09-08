@@ -55,6 +55,14 @@ export default function ProvisionVms() {
   const [osVersion, setOsVersion] = useState("latest");
   const [environment, setEnvironment] = useState("development");
   const [rationale, setRationale] = useState("");
+  const [prefill, setPrefill] = useState<TicketPrefill | null>(null);
+  // Keys still holding an untouched ticket value. A key leaves the set the
+  // first time a person edits that field, so the "from ticket" marker only ever
+  // sits next to a value nobody has reviewed by hand.
+  const [fromTicketFields, setFromTicketFields] = useState<Set<string>>(new Set());
+  const touched = (key: string) => setFromTicketFields((keys) => { if (!keys.has(key)) return keys; const next = new Set(keys); next.delete(key); return next; });
+
+
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
