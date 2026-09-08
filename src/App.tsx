@@ -24,6 +24,8 @@ const ServiceNowIntake = lazy(() => import("./pages/agentic-iac/ServiceNowIntake
 const DemoChangeRequest = lazy(() => import("./pages/agentic-iac/DemoChangeRequest.tsx"));
 const ChangeEngineering = lazy(() => import("./pages/agentic-iac/ChangeEngineering.tsx"));
 const ProvisionVms = lazy(() => import("./pages/agentic-iac/change/ProvisionVms.tsx"));
+const TicketPackageQueue = lazy(() => import("./pages/agentic-iac/change/TicketPackageQueue.tsx"));
+const PackageReview = lazy(() => import("./pages/agentic-iac/change/PackageReview.tsx"));
 const ChangeReviewApproval = lazy(() => import("./pages/agentic-iac/ChangeReviewApproval.tsx"));
 const ExecutionCenter = lazy(() => import("./pages/agentic-iac/ExecutionCenter.tsx"));
 const ValidationEvidence = lazy(() => import("./pages/agentic-iac/ValidationEvidence.tsx"));
@@ -71,7 +73,9 @@ const App = () => (
                   <Route path="/connections" element={<AzureConnections />} />
                   <Route path="/servicenow-intake" element={<ServiceNowIntake />} />
                   <Route path="/demo-change-request" element={<DemoChangeRequest />} />
-                  <Route path="/changes" element={<ChangeEngineering />} />
+                  <Route path="/changes" element={<TicketPackageQueue />} />
+                  <Route path="/changes/without-ticket" element={<ChangeEngineering />} />
+                  <Route path="/changes/package/:packageNumber" element={<PackageReview />} />
                   <Route path="/changes/provision-vms" element={<ProvisionVms />} />
                   <Route path="/changes/virtual-machines/:vmName" element={<ChangeEngineering />} />
                   <Route path="/changes/:assetId" element={<Navigate to="/changes" replace />} />
