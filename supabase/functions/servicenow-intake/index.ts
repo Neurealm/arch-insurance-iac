@@ -387,10 +387,18 @@ function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: 
     }
   }
 
-  // Lowercase only the first character so acronyms survive: "ARM ID" stayed
-  // readable, whereas toLowerCase() on the whole label produced "arm id".
-  const asRequest = (field: string) => `Please provide the ${field.charAt(0).toLowerCase()}${field.slice(1)}.`;
-  const questions = unique([...analysis.clarificationQuestions, ...unique(missing).map(asRequest), ...unique(conflicts).map((conflict) => `Please resolve: ${conflict}`)]);
+  // Lowercasing the first character alone broke labels that START with an
+  // acronym -- "VM size" became "vM size", "SSH public key" became "sSH".
+  // Leave the label alone when its first two characters are both uppercase.
+  const asRequest = (field: string) => {
+    const acronym = field.length > 1 && field[0] === field[0].toUpperCase() && field[1] === field[1].toUpperCase();
+    return `Please provide the ${acronym ? field : field.charAt(0).toLowerCase() + field.slice(1)}.`;
+  };
+  // For creation the canonical labels are complete and stable, so they are the
+  // only source. Merging the model's clarificationQuestions as well asked for
+  // the same nine things eighteen times, in two different voices.
+  const modelQuestions = analysis.action === "create_vm" ? [] : analysis.clarificationQuestions;
+  const questions = unique([...modelQuestions, ...unique(missing).map(asRequest), ...unique(conflicts).map((conflict) => `Please resolve: ${conflict}`)]);
   // Whether a request can proceed depends on whether an approved capability
   // exists for its action -- not on the action's name. create_vm used to be
   // hardcoded as permanently gap-only, so a ticket would have kept opening
