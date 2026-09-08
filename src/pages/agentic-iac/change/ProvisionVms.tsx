@@ -1,21 +1,25 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AlertTriangle, CheckCircle2, RefreshCw, Server, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { listApprovedVmCapabilities, createTerraformPlan, type AutomationCapability } from "../automationCatalog";
 import { deriveVmTargetIds, saveVmChangePackage, type ChangePackageTarget } from "../changePackages";
 import { listAzureVirtualMachines, AzureControlPlaneError, type AzureVirtualMachine } from "../azureControlPlane";
+import { loadTicketPrefill, prefillRationale, type TicketPrefill } from "./ticketPrefill";
+import PrefilledFromTicket, { FromTicketTag } from "./PrefilledFromTicket";
 
 function Panel({ title, right, children }: { title: string; right?: ReactNode; children: ReactNode }) {
   return <section className="rounded-md border border-[#E2E8F0] bg-white"><header className="flex items-center gap-2 border-b border-[#E2E8F0] px-3 py-2"><h2 className="text-[12px] font-semibold uppercase tracking-wide text-slate-700">{title}</h2>{right && <div className="ml-auto">{right}</div>}</header><div className="p-3">{children}</div></section>;
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
-  return <label className="block"><span className="block text-[11.5px] font-medium text-slate-700">{label}</span>{hint && <span className="mt-0.5 block text-[10.5px] text-slate-500">{hint}</span>}<div className="mt-1">{children}</div></label>;
+function Field({ label, hint, tag, children }: { label: string; hint?: string; tag?: ReactNode; children: ReactNode }) {
+  return <label className="block"><span className="block text-[11.5px] font-medium text-slate-700">{label}{tag}</span>{hint && <span className="mt-0.5 block text-[10.5px] text-slate-500">{hint}</span>}<div className="mt-1">{children}</div></label>;
 }
 
 const input = "w-full rounded-md border border-[#E2E8F0] px-2.5 py-1.5 text-[12px] text-slate-800 font-mono";
 const newPackageNumber = () => `VM-CHG-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
+const asText = (value: unknown) => (typeof value === "string" ? value.trim() : "");
+
 
 /**
  * Requesting brand-new machines.
