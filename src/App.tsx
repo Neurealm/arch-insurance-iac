@@ -73,7 +73,9 @@ const App = () => (
                   <Route path="/connections" element={<AzureConnections />} />
                   <Route path="/servicenow-intake" element={<ServiceNowIntake />} />
                   <Route path="/demo-change-request" element={<DemoChangeRequest />} />
-                  <Route path="/changes" element={<ChangeEngineering />} />
+                  <Route path="/changes" element={<TicketPackageQueue />} />
+                  <Route path="/changes/without-ticket" element={<ChangeEngineering />} />
+                  <Route path="/changes/package/:packageNumber" element={<PackageReview />} />
                   <Route path="/changes/provision-vms" element={<ProvisionVms />} />
                   <Route path="/changes/virtual-machines/:vmName" element={<ChangeEngineering />} />
                   <Route path="/changes/:assetId" element={<Navigate to="/changes" replace />} />
