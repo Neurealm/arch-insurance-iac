@@ -126,6 +126,14 @@ function ProvisioningAuthorizationPanel({ pkg, canAuthorize, onChange }: { pkg: 
     finally { setBusy(false); }
   };
 
+  const retryPlan = async () => {
+    setBusy(true); setError(null);
+    try { await createTerraformPlan(pkg.id); await load(); onChange(); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Terraform planning was refused."); }
+    finally { setBusy(false); }
+  };
+
+
   return <Panel title="Authorized machines" right={<span className="text-[10.5px] text-slate-500">{loading ? "Loading…" : `${targets.length} declared`}</span>}>
     {error && <div className="mb-2 rounded-md border border-red-200 bg-red-50 px-2.5 py-2 text-[11.5px] text-red-800">{error}</div>}
     <div className="max-h-48 overflow-y-auto rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-2">
