@@ -87,8 +87,12 @@ export default function DemoChangeRequest() {
     setSubmitting(true); setError(null);
     const number = ticketNumber.trim() || `DEMO-CHG-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
     const targetPrefix = selectedVm ? `Target Azure VM: ${selectedVm.name} (${selectedVm.id}). ` : "";
+    // Answers to the agent are appended to the ticket text with a timestamp so
+    // the original submission stays readable and the new detail is attributable.
+    const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+    const notesSuffix = additionalNotes.trim() ? `\n\nAdditional notes (${stamp} UTC): ${additionalNotes.trim()}` : "";
     try {
-      const result = await submitDemoServiceNowTicket({ number, sys_id: `demo-${crypto.randomUUID()}`, requester: requester.trim(), application: application.trim(), environment, description: `${targetPrefix}${description.trim()}`, maintenance_window: maintenanceWindow.trim(), business_impact: businessImpact.trim(), application_owner: applicationOwner.trim(), rollback_plan: rollbackPlan.trim() });
+      const result = await submitDemoServiceNowTicket({ number, sys_id: `demo-${crypto.randomUUID()}`, requester: requester.trim(), application: application.trim(), environment, description: `${targetPrefix}${description.trim()}${notesSuffix}`, maintenance_window: maintenanceWindow.trim(), business_impact: businessImpact.trim(), application_owner: applicationOwner.trim(), rollback_plan: rollbackPlan.trim() });
       navigate(`/servicenow-intake?requestId=${encodeURIComponent(result.requestId)}`);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to submit the demo change request."); }
     finally { setSubmitting(false); }
