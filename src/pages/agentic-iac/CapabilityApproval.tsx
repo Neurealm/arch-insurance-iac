@@ -254,6 +254,8 @@ function GapDetail({ gapId }: { gapId: string }) {
     {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}
     {notice && <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{notice}</div>}
 
+    <AgentProgress gap={gap} events={events} />
+
     <div className="grid gap-3 lg:grid-cols-2">
       <Panel title="Engineering gap" right={<GapBadge status={gap.status} />}>
         <Row label="Requested action" value={title(gap.actionType)} />
