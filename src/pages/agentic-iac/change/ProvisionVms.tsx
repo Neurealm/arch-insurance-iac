@@ -32,6 +32,9 @@ const asText = (value: unknown) => (typeof value === "string" ? value.trim() : "
  */
 export default function ProvisionVms() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const fromTicket = searchParams.get("fromTicket");
+
   const [capability, setCapability] = useState<AutomationCapability | null>(null);
   const [existingVms, setExistingVms] = useState<AzureVirtualMachine[]>([]);
   const [loading, setLoading] = useState(true);
