@@ -160,7 +160,11 @@ export default function ProvisionVms() {
           sshPublicKey: sshPublicKey.trim(), osPublisher: osPublisher.trim(), osOffer: osOffer.trim(),
           osSku: osSku.trim(), osVersion: osVersion.trim(), tags: {},
           // Compared against the server-authorized scope binding at plan time.
-          environment: environment.toLowerCase(), source: "console",
+          environment: environment.toLowerCase(),
+          // A package opened from a ticket stays traceable back to it, matching
+          // what servicenow-intake writes on the drafts it creates itself.
+          source: prefill ? "servicenow_ticket" : "console",
+          ...(prefill ? { serviceNowTicket: prefill.ticketNumber, serviceNowSysId: prefill.sysId } : {}),
         },
         rationale: rationale.trim(),
         currentState: {},
@@ -168,6 +172,8 @@ export default function ProvisionVms() {
           { check: "Capability provenance", result: `Approved commit ${capability?.moduleVersion ?? "unknown"} · ${capability?.moduleSource ?? ""}` },
           { check: "Name collision", result: `${requested.length} requested name(s) absent from live Azure inventory` },
           { check: "Blast radius", result: `${requested.length} of at most ${maxTargets} machines per run` },
+          ...(prefill ? [{ check: "Request provenance", result: `Prefilled from ticket ${prefill.ticketNumber} · values confirmed by submitter` }] : []),
+
         ],
         validationPlan: [
           "Confirm every requested machine exists in Azure after apply",
