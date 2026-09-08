@@ -174,7 +174,7 @@ export default function PackageReview() {
             <button type="button" onClick={() => void submit()} disabled={!canSubmit || saving} className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-md bg-[#1B4F91] px-3 text-[12.5px] font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"><Send className="h-3.5 w-3.5" />{saving ? "Submitting…" : "Submit for approval"}</button>
             {!canSubmit && <p className="mt-2 flex items-start gap-1.5 text-[11.5px] text-amber-800"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />Every scope check must pass before this can be submitted.</p>}
             <Link to="/servicenow-intake" className="mt-2 block text-center text-[11.5px] font-medium text-[#1B4F91] underline">Return to intake for clarification</Link>
-          </> : <p className="text-[12px] text-slate-600">This package has moved on to review. Follow it in <Link to="/change-review" className="font-medium text-[#1B4F91] underline">Change Review &amp; Approval</Link>.</p>}
+          </> : <p className="text-[12px] text-slate-600">This package has moved on to review. Follow it in <Link to="/approvals" className="font-medium text-[#1B4F91] underline">Change Review &amp; Approval</Link>.</p>}
           <p className="mt-3 text-[11px] text-slate-500">Approval and execution happen on later screens, and every deletion stays blocked at apply.</p>
         </Panel>
 

@@ -61,7 +61,7 @@ export function changeHandoffPath(
   const query = `?fromTicket=${encodeURIComponent(intakeRequestId)}`;
   if (action === "create_vm") return { path: `/changes/provision-vms${query}`, label: "Open provisioning request" };
   if (action && action !== "unknown" && targetVmName) {
-    return { path: `/changes/${encodeURIComponent(targetVmName)}${query}`, label: "Open change request" };
+    return { path: `/changes/virtual-machines/${encodeURIComponent(targetVmName)}${query}`, label: "Open change request" };
   }
   return { path: "/changes", label: "Open Change Engineering" };
 }
