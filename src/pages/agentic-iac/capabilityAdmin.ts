@@ -41,7 +41,7 @@ export type GapEvent = { id: string; eventType: string; detail: Record<string, u
 
 /** Server-observed CI evidence. Only the server may produce this shape. */
 export type CiEvidence = {
-  status?: CiStatus; headSha?: string; merged?: boolean; mergeSha?: string;
+  status?: CiStatus; reason?: string; headSha?: string; merged?: boolean; mergeSha?: string;
   promotionReady?: boolean; observedAt?: string; prNumber?: string; branch?: string;
   workflows?: Array<Record<string, unknown>>; review?: Record<string, unknown>;
 };

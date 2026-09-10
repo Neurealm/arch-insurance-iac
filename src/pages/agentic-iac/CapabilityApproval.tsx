@@ -102,6 +102,13 @@ const stepTone: Record<StepState, { dot: string; text: string; bar: string }> = 
 
 function eventDetail(event: GapEvent) {
   const detail = event.detail;
+  if (event.eventType === "ci_observed") {
+    const evidence = detail.evidence && typeof detail.evidence === "object" && !Array.isArray(detail.evidence)
+      ? detail.evidence as Record<string, unknown> : {};
+    const status = typeof evidence.status === "string" ? title(evidence.status) : "Unknown";
+    const reason = typeof evidence.reason === "string" ? evidence.reason.trim() : "";
+    return reason ? `CI ${status}: ${reason}` : `CI ${status}.`;
+  }
   if (typeof detail.message === "string" && detail.message) return detail.message;
   if (typeof detail.prUrl === "string" && detail.prUrl) return detail.prUrl;
   if (Array.isArray(detail.problems) && detail.problems.length) return detail.problems.map(String).join(" ");
@@ -273,7 +280,10 @@ function GapDetail({ gapId }: { gapId: string }) {
         return false;
       }
       if (observation.evidence.status !== "failed") {
-        setNotice("CI has not reached a pass/fail result. The watcher will check GitHub again in 10 seconds.");
+        const reason = typeof observation.evidence.reason === "string" ? observation.evidence.reason.trim() : "";
+        setNotice(reason
+          ? `CI is not yet actionable: ${reason} The watcher will check GitHub again in 10 seconds.`
+          : "CI has not reached a pass/fail result. The watcher will check GitHub again in 10 seconds.");
         return true;
       }
       const failedHead = observation.evidence.headSha;
@@ -412,6 +422,7 @@ function GapDetail({ gapId }: { gapId: string }) {
         <Row label="Head commit" value={<span className="font-mono text-[10.5px]">{shortSha(gap.ciHeadSha)}</span>} />
         <Row label="Observed at" value={dateTime(gap.ciObservedAt)} />
         <Row label="Evidence version" value={String(gap.ciVersion)} />
+        <Row label="CI observation" value={typeof evidence.reason === "string" && evidence.reason.trim() ? evidence.reason : "No server reason was recorded."} />
         <Row label="Merged" value={evidence.merged === true ? `Yes · ${String(evidence.mergeSha ?? "").slice(0, 12)}` : "No"} />
         <Row label="GitHub review" value={review.state === "APPROVED" ? `Approved · ${String(review.commitId ?? "").slice(0, 12)}` : "Not approved"} />
         <Row label="Server promotion flag" value={evidence.promotionReady === true ? "Promotion-ready" : "Withheld"} />
