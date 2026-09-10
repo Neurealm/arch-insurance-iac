@@ -325,17 +325,21 @@ variable "change_request_id" {
 }`;
 
 async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
+  await addEvent(db, str(gap.id), "draft_generation_started", { action: "increase_os_disk" });
   const draft = await draftPromptWithGemini(buildOsDiskPrompt(gap));
   draft.moduleName = "vm-os-disk-expand";
   draft.displayName = "Increase Azure VM OS disk capacity";
+  await addEvent(db, str(gap.id), "draft_generation_completed", { moduleName: draft.moduleName });
   draft.moduleMainTf = sanitizeHcl(draft.moduleMainTf);
   draft.moduleVariablesTf = sanitizeHcl(draft.moduleVariablesTf);
   draft.moduleOutputsTf = sanitizeHcl(draft.moduleOutputsTf);
+  await addEvent(db, str(gap.id), "draft_policy_validation_started", { moduleName: draft.moduleName });
   const problems = validateOsDiskDraft(draft);
   if (problems.length) {
     await addEvent(db, str(gap.id), "draft_validation_failed", { problems });
     return { outcome: "validation_failed", problems };
   }
+  await addEvent(db, str(gap.id), "draft_policy_validation_passed", { moduleName: draft.moduleName });
 
   const token = draftToken();
   const root = templateRootFiles(draft.moduleName, OS_DISK_VARIABLES);
@@ -360,6 +364,7 @@ async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Js
     await addEvent(db, str(gap.id), "draft_capability_insert_failed", { message: capabilityError.message });
     return { outcome: "capability_insert_failed", message: capabilityError.message };
   }
+  await addEvent(db, str(gap.id), "draft_capability_registered", { capabilityId: capability.id, moduleName: draft.moduleName });
 
   const branch = `ai-draft/${draft.moduleName}-${str(gap.id).slice(0, 8)}`;
   const prBody = [
@@ -372,6 +377,7 @@ async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Js
     `Draft capability id: \`${capability.id}\``,
   ].join("\n");
   try {
+    await addEvent(db, str(gap.id), "pull_request_opening", { branch, moduleName: draft.moduleName });
     const pr = await openPullRequest(token, branch, "main", files, `AI-draft: ${draft.displayName}`, `AI-draft: ${draft.displayName} (${draft.moduleName})`, prBody);
     await db.from("iac_engineering_gaps").update({ status: "pr_opened", linked_capability_id: capability.id, draft_branch: branch, draft_pr_number: pr.number, draft_pr_url: pr.url }).eq("id", gap.id);
     await addEvent(db, str(gap.id), "pr_opened", { prNumber: pr.number, prUrl: pr.url, branch, capabilityId: capability.id, moduleName: draft.moduleName });
@@ -390,15 +396,19 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
   }
   if (str(gap.action_type) === "increase_os_disk") return draftOsDiskForGap(db, gap);
   if (str(gap.action_type) !== "create_vm") return { outcome: "unsupported", message: "Draft generation does not have a policy for this VM action yet." };
+  await addEvent(db, str(gap.id), "draft_generation_started", { action: "create_vm" });
   const draft = await draftWithGemini(gap, EXEMPLAR);
+  await addEvent(db, str(gap.id), "draft_generation_completed", { moduleName: draft.moduleName });
   draft.moduleMainTf = sanitizeHcl(draft.moduleMainTf);
   draft.moduleVariablesTf = sanitizeHcl(draft.moduleVariablesTf);
   draft.moduleOutputsTf = sanitizeHcl(draft.moduleOutputsTf);
+  await addEvent(db, str(gap.id), "draft_policy_validation_started", { moduleName: draft.moduleName });
   const problems = validateDraft(draft);
   if (problems.length) {
     await addEvent(db, str(gap.id), "draft_validation_failed", { problems });
     return { outcome: "validation_failed", problems };
   }
+  await addEvent(db, str(gap.id), "draft_policy_validation_passed", { moduleName: draft.moduleName });
 
   const token = draftToken();
   // Root HCL is built only from the server-owned interface, never LLM types,
@@ -426,6 +436,7 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
     allowed_environments: ["development"], requires_managed_resource: false, max_targets_per_run: 20,
   }).select("id").single();
   if (capabilityError) { await addEvent(db, str(gap.id), "draft_capability_insert_failed", { message: capabilityError.message }); return { outcome: "capability_insert_failed", message: capabilityError.message }; }
+  await addEvent(db, str(gap.id), "draft_capability_registered", { capabilityId: capability.id, moduleName: draft.moduleName });
   const branch = `ai-draft/${draft.moduleName}-${str(gap.id).slice(0, 8)}`;
   const prBody = [
     `AI-drafted Terraform module for **${str(gap.action_type)}** (${str(gap.resource_type)}), generated from engineering gap \`${gap.id}\`.`,
@@ -438,6 +449,7 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
   ].join("\n");
 
   try {
+    await addEvent(db, str(gap.id), "pull_request_opening", { branch, moduleName: draft.moduleName });
     const pr = await openPullRequest(token, branch, "main", files, `AI-draft: ${draft.displayName}`, `AI-draft: ${draft.displayName} (${draft.moduleName})`, prBody);
     await db.from("iac_engineering_gaps").update({ status: "pr_opened", linked_capability_id: capability.id, draft_branch: branch, draft_pr_number: pr.number, draft_pr_url: pr.url }).eq("id", gap.id);
     await addEvent(db, str(gap.id), "pr_opened", { prNumber: pr.number, prUrl: pr.url, branch, capabilityId: capability.id, moduleName: draft.moduleName });

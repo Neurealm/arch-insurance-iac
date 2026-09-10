@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AlertTriangle, CheckCircle2, ExternalLink, GitPullRequest, Play, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock3, ExternalLink, GitPullRequest, Play, Radio, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { resumeServiceNowIntake } from "./servicenowIntakeRequests";
@@ -95,9 +95,42 @@ const stepTone: Record<StepState, { dot: string; text: string; bar: string }> = 
   pending: { dot: "border-slate-200 bg-white text-slate-400", text: "text-slate-400", bar: "bg-slate-200" },
 };
 
+function eventDetail(event: GapEvent) {
+  const detail = event.detail;
+  if (typeof detail.message === "string" && detail.message) return detail.message;
+  if (typeof detail.prUrl === "string" && detail.prUrl) return detail.prUrl;
+  if (Array.isArray(detail.problems) && detail.problems.length) return detail.problems.map(String).join(" ");
+  const parts = [
+    typeof detail.moduleName === "string" ? `Module: ${detail.moduleName}` : "",
+    typeof detail.branch === "string" ? `Branch: ${detail.branch}` : "",
+    detail.prNumber ? `PR #${String(detail.prNumber)}` : "",
+  ].filter(Boolean);
+  return parts.join(" · ") || "Recorded by the platform.";
+}
+
+function eventLabel(eventType: string) {
+  return ({
+    drafting_queued: "Draft request queued",
+    draft_generation_started: "Generating Terraform",
+    draft_generation_completed: "Terraform draft generated",
+    draft_policy_validation_started: "Checking draft policy",
+    draft_policy_validation_passed: "Draft policy passed",
+    draft_validation_failed: "Draft policy rejected",
+    draft_capability_registered: "Draft capability registered",
+    draft_capability_insert_failed: "Capability registration failed",
+    pull_request_opening: "Opening pull request",
+    pr_opened: "Pull request opened",
+    pr_open_failed: "Pull request failed",
+    drafting_failed: "Drafting failed",
+    ci_observed: "CI status observed",
+    capability_approved: "Capability promoted",
+  } as Record<string, string>)[eventType] ?? title(eventType);
+}
+
 function AgentProgress({ gap, events }: { gap: CapabilityGap; events: GapEvent[] }) {
   const steps = agentSteps(gap, events);
-  return <Panel title="Drafting agent progress" className="mb-3">
+  const active = gap.status === "drafting";
+  return <Panel title="Live drafting activity" className="mb-3" right={<span className={cn("inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10.5px] font-semibold", active ? "border-blue-200 bg-blue-50 text-blue-700" : "border-slate-200 bg-slate-50 text-slate-600")}><Radio className={cn("h-3 w-3", active && "animate-pulse")} />{active ? "Live" : "Server recorded"}</span>}>
     <ol className="flex flex-col gap-3 md:flex-row md:gap-0">
       {steps.map((item, index) => {
         const tone = stepTone[item.state];
@@ -116,7 +149,11 @@ function AgentProgress({ gap, events }: { gap: CapabilityGap; events: GapEvent[]
         </li>;
       })}
     </ol>
-    <p className="mt-2 text-[11px] text-slate-500">Each step reflects what the server recorded. The agent only drafts and opens a pull request; it never plans or applies anything in Azure.</p>
+    <div className="mt-3 border-t border-slate-100 pt-3">
+      <div className="mb-2 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-slate-500"><Clock3 className="h-3.5 w-3.5" />Activity log</div>
+      {events.length ? <ol className="space-y-2">{events.slice(0, 8).map((event) => <li key={event.id} className="rounded border border-slate-100 bg-slate-50 px-2.5 py-2"><div className="flex items-start justify-between gap-3"><span className="font-medium text-slate-800">{eventLabel(event.eventType)}</span><time className="shrink-0 text-[10.5px] text-slate-500">{dateTime(event.createdAt)}</time></div><p className="mt-0.5 break-words text-[11px] text-slate-600">{eventDetail(event)}</p></li>)}</ol> : <p className="text-[11.5px] text-slate-600">No server activity has been recorded. Start the drafting agent to create a live run.</p>}
+    </div>
+    <p className="mt-3 text-[11px] text-slate-500">Updates automatically every 4 seconds. The agent only drafts and opens a pull request; it never plans or applies Azure.</p>
   </Panel>;
 }
 
@@ -196,14 +233,19 @@ function GapDetail({ gapId }: { gapId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [draftConfirmationOpen, setDraftConfirmationOpen] = useState(false);
+  const [lastLiveUpdate, setLastLiveUpdate] = useState<number | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true); setError(null);
+  const load = useCallback(async (background = false) => {
+    if (!background) { setLoading(true); setError(null); }
     try { const [record, history] = await Promise.all([getCapabilityGap(gapId), listGapEvents(gapId)]); setGap(record); setEvents(history); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to load this engineering gap."); }
-    finally { setLoading(false); }
+    catch (cause) { if (!background) setError(cause instanceof Error ? cause.message : "Unable to load this engineering gap."); }
+    finally { if (!background) setLoading(false); setLastLiveUpdate(Date.now()); }
   }, [gapId]);
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+    const poll = window.setInterval(() => { void load(true); }, 4_000);
+    return () => window.clearInterval(poll);
+  }, [load]);
 
   const sync = async () => {
     setBusy("sync"); setError(null); setNotice(null);
@@ -266,6 +308,7 @@ function GapDetail({ gapId }: { gapId: string }) {
     {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}
     {notice && <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{notice}</div>}
 
+    <div className="mb-1 text-right text-[10.5px] text-slate-500">Live view {lastLiveUpdate ? `updated ${new Date(lastLiveUpdate).toLocaleTimeString()}` : "connecting…"}</div>
     <AgentProgress gap={gap} events={events} />
 
     <div className="grid gap-3 lg:grid-cols-2">
