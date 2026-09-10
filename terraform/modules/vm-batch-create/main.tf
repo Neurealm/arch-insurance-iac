@@ -77,8 +77,7 @@ resource "azapi_resource" "virtual_machine" {
       networkProfile = {
         networkInterfaces = [
           {
-            id      = azapi_resource.network_interface[each.key].id
-            primary = true
+            id = azapi_resource.network_interface[each.key].id
           }
         ]
       }
