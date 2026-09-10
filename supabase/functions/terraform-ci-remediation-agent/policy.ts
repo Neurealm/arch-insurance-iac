@@ -1,5 +1,5 @@
-import { CREATE_VM_INPUT_SCHEMA, CREATE_VM_VARIABLES, validateDraft, type DraftResult } from "../_shared/terraform-draft-policy.ts";
-import { OS_DISK_INPUT_SCHEMA, OS_DISK_VARIABLES, validateOsDiskDraft } from "../_shared/os-disk-draft-policy.ts";
+import { CREATE_VM_INPUT_SCHEMA, CREATE_VM_VARIABLES, validateDraft, validateGeneratedDraftFiles, type DraftResult } from "../_shared/terraform-draft-policy.ts";
+import { OS_DISK_INPUT_SCHEMA, OS_DISK_VARIABLES, validateOsDiskDraft, validateOsDiskGeneratedFiles } from "../_shared/os-disk-draft-policy.ts";
 
 export type Json = Record<string, unknown>;
 export type RepairFiles = { mainTf: string; variablesTf: string; outputsTf: string };
@@ -101,10 +101,9 @@ export function parseRepairResponse(payload: unknown): RepairProposal {
   return proposal;
 }
 
-export function validateRepairProposal(gap: RepairGap, proposal: RepairProposal): string[] {
+function repairDraft(gap: RepairGap, proposal: RepairProposal): DraftResult {
   const { moduleName } = governedModule(gap);
-  if (!SHA.test(gap.ci_head_sha)) return ["The failed source revision is invalid."];
-  const draft: DraftResult = {
+  return {
     moduleName,
     displayName: moduleName,
     rationale: proposal.summary,
@@ -114,5 +113,16 @@ export function validateRepairProposal(gap: RepairGap, proposal: RepairProposal)
     moduleVariablesTf: proposal.variablesTf,
     moduleOutputsTf: proposal.outputsTf,
   };
+}
+
+export function validateRepairProposal(gap: RepairGap, proposal: RepairProposal): string[] {
+  if (!SHA.test(gap.ci_head_sha)) return ["The failed source revision is invalid."];
+  const draft = repairDraft(gap, proposal);
   return gap.action_type === "increase_os_disk" ? validateOsDiskDraft(draft) : validateDraft(draft);
+}
+
+export function validateRepairArchive(gap: RepairGap, proposal: RepairProposal, files: Array<{ path: string; content: string }>): string[] {
+  if (!SHA.test(gap.ci_head_sha)) return ["The failed source revision is invalid."];
+  const draft = repairDraft(gap, proposal);
+  return gap.action_type === "increase_os_disk" ? validateOsDiskGeneratedFiles(draft, files) : validateGeneratedDraftFiles(draft, files);
 }

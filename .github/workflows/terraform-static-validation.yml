@@ -8,7 +8,7 @@ on:
       - "supabase/functions/terraform-orchestrator/**"
       - "supabase/functions/terraform-drafting-agent/**"
       - "supabase/functions/terraform-ci-remediation-agent/**"
-      - "supabase/functions/_shared/terraform-draft-policy*"
+      - "supabase/functions/_shared/*draft*"
       - "scripts/validate-terraform-drafts.ts"
       - "supabase/migrations/*terraform*"
       - "supabase/migrations/*remediation*"
@@ -20,7 +20,7 @@ on:
       - "terraform/**"
       - "supabase/functions/terraform-drafting-agent/**"
       - "supabase/functions/terraform-ci-remediation-agent/**"
-      - "supabase/functions/_shared/terraform-draft-policy*"
+      - "supabase/functions/_shared/*draft*"
       - "scripts/validate-terraform-drafts.ts"
       - "supabase/migrations/*remediation*"
       - ".github/workflows/terraform-static-validation.yml"
@@ -43,7 +43,7 @@ jobs:
       - name: Test draft HCL security policy
         # GopherJS's Go runtime enumerates process.env during initialization.
         # No cloud credentials are supplied; no network/run/read is granted.
-        run: deno test --allow-env --no-config --no-lock --node-modules-dir=none supabase/functions/_shared/terraform-draft-policy.test.ts supabase/functions/terraform-ci-remediation-agent/policy.test.ts
+        run: deno test --allow-env --no-config --no-lock --node-modules-dir=none supabase/functions/_shared/terraform-draft-policy.test.ts supabase/functions/_shared/terraform-draft-template.test.ts supabase/functions/terraform-ci-remediation-agent/policy.test.ts
       - name: Type-check Terraform agents
         run: deno check --no-config --no-lock --node-modules-dir=none supabase/functions/terraform-drafting-agent/index.ts supabase/functions/terraform-ci-remediation-agent/index.ts
       - name: Validate generated draft archives
@@ -51,16 +51,9 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.16.1"
-      # An AI-drafted PR (terraform-drafting-agent) produces semantically
-      # correct HCL but does not reliably reproduce terraform fmt's exact
-      # alignment. Normalize formatting in the runner only -- no commit, no
-      # push -- so a purely cosmetic diff never blocks these branches, while
-      # `terraform validate` below (the real correctness gate) still applies
-      # in full. Every human-authored branch is untouched and remains gated
-      # by the strict fmt check exactly as before.
-      - name: Normalize formatting for AI drafts
-        if: startsWith(github.head_ref, 'ai-draft/')
-        run: terraform fmt -recursive terraform
+      # Formatting must be present in the committed source. The remediation
+      # agent can push a bounded correction to an AI draft; CI never rewrites
+      # files transiently and then reports a misleading pass.
       - name: Formatting
         run: terraform fmt -check -recursive terraform
       - name: Validate pilot backend configuration

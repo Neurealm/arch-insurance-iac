@@ -1,9 +1,12 @@
 import { createClient } from "npm:@supabase/supabase-js@2.112.4";
 import { decodeBase64, githubGet, obj, str } from "../_shared/github.ts";
+import { CREATE_VM_VARIABLES } from "../_shared/terraform-draft-policy.ts";
+import { OS_DISK_VARIABLES } from "../_shared/os-disk-draft-policy.ts";
+import { formatGeneratedHclAssignments, moduleVersionsTf, templateRootFiles } from "../_shared/terraform-draft-template.ts";
 import { createRemediationHandler, type Claim, type CompleteInput, type GapRecord } from "./handler.ts";
 import {
   REPAIR_OUTPUT_SCHEMA, buildRepairInput, buildRepairInstructions, failedJobIds,
-  governedModule, parseRepairResponse, redactCiLog, validateRepairProposal,
+  governedModule, parseRepairResponse, redactCiLog, validateRepairArchive,
   type Json, type RepairFiles, type RepairGap,
 } from "./policy.ts";
 
@@ -109,25 +112,35 @@ async function askCodingModel(gap: RepairGap, current: RepairFiles, logs: string
   return { model, proposal: parseRepairResponse(await response.json()) };
 }
 
-async function updateBranch(token: string, gap: RepairGap, current: RepairFiles, proposal: RepairFiles, message: string) {
-  if (current.mainTf === proposal.mainTf && current.variablesTf === proposal.variablesTf && current.outputsTf === proposal.outputsTf) throw new Error("The proposed repair did not change the module.");
+function repairArchive(gap: RepairGap, proposal: RepairFiles) {
+  const { moduleName } = governedModule(gap);
+  const variables = gap.action_type === "increase_os_disk" ? OS_DISK_VARIABLES : CREATE_VM_VARIABLES;
+  const root = templateRootFiles(moduleName, variables);
+  return [
+    { path: `${gap.module_source}/main.tf`, content: proposal.mainTf },
+    { path: `${gap.module_source}/variables.tf`, content: proposal.variablesTf },
+    { path: `${gap.module_source}/outputs.tf`, content: proposal.outputsTf },
+    { path: `${gap.module_source}/versions.tf`, content: moduleVersionsTf() },
+    { path: `terraform/environments/pilot/${moduleName}/main.tf`, content: root.main },
+    { path: `terraform/environments/pilot/${moduleName}/variables.tf`, content: root.variablesTf },
+    { path: `terraform/environments/pilot/${moduleName}/versions.tf`, content: root.versions },
+  ].map((file) => ({ ...file, content: formatGeneratedHclAssignments(file.content) }));
+}
+
+async function updateBranch(token: string, gap: RepairGap, replacements: Array<{ path: string; content: string }>, message: string) {
   const ref = await ghJson(`${PREFIX}/git/ref/heads/${gap.draft_branch}`, token);
   const head = str(obj(ref.object).sha);
   if (head !== gap.ci_head_sha || !SHA.test(head)) throw new Error("The draft branch moved before the repair commit.");
   const commit = await ghJson(`${PREFIX}/git/commits/${head}`, token);
   const baseTree = str(obj(commit.tree).sha);
   if (!SHA.test(baseTree)) throw new Error("GitHub returned an invalid base tree.");
-  const replacements = [
-    { path: `${gap.module_source}/main.tf`, content: proposal.mainTf },
-    { path: `${gap.module_source}/variables.tf`, content: proposal.variablesTf },
-    { path: `${gap.module_source}/outputs.tf`, content: proposal.outputsTf },
-  ];
   const blobs = await Promise.all(replacements.map(async (replacement) => {
     const blob = await ghJson(`${PREFIX}/git/blobs`, token, { method: "POST", body: JSON.stringify({ content: replacement.content, encoding: "utf-8" }) });
     if (!SHA.test(str(blob.sha))) throw new Error("GitHub did not create an immutable source blob.");
     return { path: replacement.path, mode: "100644", type: "blob", sha: str(blob.sha) };
   }));
   const tree = await ghJson(`${PREFIX}/git/trees`, token, { method: "POST", body: JSON.stringify({ base_tree: baseTree, tree: blobs }) });
+  if (!SHA.test(str(tree.sha)) || str(tree.sha) === baseTree) throw new Error("The proposed repair did not change the governed archive.");
   const repaired = await ghJson(`${PREFIX}/git/commits`, token, { method: "POST", body: JSON.stringify({ message, tree: str(tree.sha), parents: [head] }) });
   const newHead = str(repaired.sha);
   if (!SHA.test(newHead) || newHead === head) throw new Error("GitHub did not create a new repair commit.");
@@ -153,9 +166,10 @@ async function repairGap(value: GapRecord, attempt: number, expectedHeadSha: str
   const logs = redactCiLog(logParts.join("\n\n"));
   const current = await moduleFiles(gap, readToken);
   const { model, proposal } = await askCodingModel(gap, current, logs);
-  const problems = validateRepairProposal(gap, proposal);
+  const archive = repairArchive(gap, proposal);
+  const problems = validateRepairArchive(gap, proposal, archive);
   if (problems.length) return { outcome: "rejected" as const, model, summary: `Model repair was rejected by policy: ${problems.slice(0, 6).join(" ")}`.slice(0, 1000) };
-  const newHeadSha = await updateBranch(writeToken, gap, current, proposal, `AI-repair: CI remediation attempt ${attempt}`);
+  const newHeadSha = await updateBranch(writeToken, gap, archive, `AI-repair: CI remediation attempt ${attempt}`);
   return { outcome: "committed" as const, model, summary: redactCiLog(proposal.summary, 1000), newHeadSha };
 }
 

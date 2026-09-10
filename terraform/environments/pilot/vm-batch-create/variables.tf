@@ -61,7 +61,7 @@ variable "tags" {
 
 variable "tfc_azure_dynamic_credentials" {
   description = "HCP Terraform-generated OIDC file locations for the default Azure provider."
-  type        = object({
+  type = object({
     default = object({
       client_id_file_path  = string
       oidc_token_file_path = string

@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.112.4";
 import { CREATE_VM_INPUT_SCHEMA, CREATE_VM_VARIABLES, validateDraft, validateGeneratedDraftFiles, type DraftResult, type DraftVariable } from "../_shared/terraform-draft-policy.ts";
 import { OS_DISK_INPUT_SCHEMA, OS_DISK_VARIABLES, validateOsDiskDraft, validateOsDiskGeneratedFiles } from "../_shared/os-disk-draft-policy.ts";
+import { formatGeneratedHclAssignments } from "../_shared/terraform-draft-template.ts";
 
 // This agent is the one place in the whole platform that is allowed to
 // WRITE to GitHub (open a branch, commit files, open a PR) -- it uses its
@@ -196,37 +197,11 @@ function sanitizeHcl(content: string): string {
  * assignments within a block aren't column-aligned to their widest sibling
  * -- a purely mechanical rule, but our own templated root files (and the
  * LLM's module files) don't reliably produce it. Replicates just that one
- * rule: within each contiguous run of same-indent, single-line assignment
- * lines, pad every key to the widest key in the run.
+ * rule for the restricted generated grammar. Multiline values form a group
+ * boundary and are not aligned with preceding scalar assignments.
  */
 function alignEquals(content: string): string {
-  const lines = content.split("\n");
-  const assignment = /^(\s*)([A-Za-z_][A-Za-z0-9_-]*)\s*=\s*(.+)$/;
-  const out: string[] = [];
-  let i = 0;
-  while (i < lines.length) {
-    const match = lines[i].match(assignment);
-    if (!match) { out.push(lines[i]); i += 1; continue; }
-    const indent = match[1];
-    const group: Array<{ key: string; value: string }> = [];
-    let j = i;
-    // A key whose value opens a nested block (`key = {`) still aligns with
-    // its simple sibling assignments (e.g. `createOption = "..."` next to
-    // `managedDisk  = {`) -- include such a line in the group, then stop,
-    // since everything after it is that block's (more-indented) body until
-    // its closing brace, never a continuation of this same-indent run.
-    while (j < lines.length) {
-      const current = lines[j].match(assignment);
-      if (!current || current[1] !== indent) break;
-      group.push({ key: current[2], value: current[3] });
-      j += 1;
-      if (current[3].trimEnd().endsWith("{")) break;
-    }
-    const width = Math.max(...group.map((item) => item.key.length));
-    for (const item of group) out.push(`${indent}${item.key.padEnd(width)} = ${item.value}`);
-    i = j;
-  }
-  return out.join("\n");
+  return formatGeneratedHclAssignments(content);
 }
 
 function templateRootFiles(moduleName: string, variables: DraftVariable[]) {

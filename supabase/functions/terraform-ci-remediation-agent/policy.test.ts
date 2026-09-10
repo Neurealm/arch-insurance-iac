@@ -1,4 +1,6 @@
-import { failedJobIds, governedModule, parseRepairResponse, redactCiLog, validateRepairProposal, type RepairGap, type RepairProposal } from "./policy.ts";
+import { OS_DISK_VARIABLES } from "../_shared/os-disk-draft-policy.ts";
+import { formatGeneratedHclAssignments, moduleVersionsTf, templateRootFiles } from "../_shared/terraform-draft-template.ts";
+import { failedJobIds, governedModule, parseRepairResponse, redactCiLog, validateRepairArchive, validateRepairProposal, type RepairGap, type RepairProposal } from "./policy.ts";
 
 function assert(ok: unknown, message: string) { if (!ok) throw new Error(message); }
 const gap: RepairGap = {
@@ -56,6 +58,21 @@ variable "change_request_id" {
 
 Deno.test("accepts a bounded OS-disk repair proposal", () => {
   assert(validateRepairProposal(gap, proposal).length === 0, JSON.stringify(validateRepairProposal(gap, proposal)));
+});
+
+Deno.test("accepts the complete seven-file repair archive with trusted companion files", () => {
+  const root = templateRootFiles("vm-os-disk-expand", OS_DISK_VARIABLES);
+  const files = [
+    { path: `${gap.module_source}/main.tf`, content: proposal.mainTf },
+    { path: `${gap.module_source}/variables.tf`, content: proposal.variablesTf },
+    { path: `${gap.module_source}/outputs.tf`, content: proposal.outputsTf },
+    { path: `${gap.module_source}/versions.tf`, content: moduleVersionsTf() },
+    { path: "terraform/environments/pilot/vm-os-disk-expand/main.tf", content: root.main },
+    { path: "terraform/environments/pilot/vm-os-disk-expand/variables.tf", content: root.variablesTf },
+    { path: "terraform/environments/pilot/vm-os-disk-expand/versions.tf", content: root.versions },
+  ].map((file) => ({ ...file, content: formatGeneratedHclAssignments(file.content) }));
+  const problems = validateRepairArchive(gap, proposal, files);
+  assert(problems.length === 0, JSON.stringify(problems));
 });
 
 Deno.test("rejects repairs that add another Azure mutation", () => {
