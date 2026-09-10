@@ -33,7 +33,13 @@ function repo(value: unknown) { return str(obj(value).full_name).toLowerCase() =
 async function ghJson(path: string, token: string, init: RequestInit = {}) {
   const response = await fetch(`https://api.github.com${path}`, {
     ...init,
-    headers: { accept: "application/vnd.github+json", authorization: `Bearer ${token}`, "x-github-api-version": "2022-11-28", ...(init.headers ?? {}) },
+    headers: {
+      accept: "application/vnd.github+json",
+      authorization: `Bearer ${token}`,
+      "x-github-api-version": "2022-11-28",
+      ...(init.body ? { "content-type": "application/json" } : {}),
+      ...(init.headers ?? {}),
+    },
   });
   if (!response.ok) throw new Error(`GitHub request failed (${response.status}).`);
   return obj(await response.json());
@@ -74,15 +80,31 @@ async function jobLog(jobId: number, token: string) {
   return readTail(log, 50_000);
 }
 
+async function terraformFile(path: string, ref: string, token: string): Promise<string> {
+  const result = await ghJson(`${PREFIX}/contents/${path}?ref=${ref}`, token);
+  if (result.type !== "file" || result.encoding !== "base64") throw new Error("GitHub returned an invalid Terraform source file.");
+  const decoded = new TextDecoder().decode(decodeBase64(str(result.content)));
+  if (!decoded || decoded.length > 20_000) throw new Error("Terraform source file is empty or oversized.");
+  return decoded;
+}
+
+async function optionalTerraformFile(path: string, ref: string, token: string): Promise<string | null> {
+  try {
+    return await terraformFile(path, ref, token);
+  } catch (cause) {
+    // A missing trusted template file is a deterministic repair case, not an
+    // upstream error. Permission and transport failures still stop the agent.
+    if (cause instanceof Error && cause.message.includes("(404)")) return null;
+    throw cause;
+  }
+}
+
 async function moduleFiles(gap: RepairGap, token: string): Promise<RepairFiles> {
-  const file = async (name: string) => {
-    const result = obj(await githubGet(`${PREFIX}/contents/${gap.module_source}/${name}?ref=${gap.ci_head_sha}`, token, "Unable to read failed Terraform source"));
-    if (result.type !== "file" || result.encoding !== "base64") throw new Error("GitHub returned an invalid Terraform source file.");
-    const decoded = new TextDecoder().decode(decodeBase64(str(result.content)));
-    if (!decoded || decoded.length > 20_000) throw new Error("Terraform source file is empty or oversized.");
-    return decoded;
-  };
-  const [mainTf, variablesTf, outputsTf] = await Promise.all([file("main.tf"), file("variables.tf"), file("outputs.tf")]);
+  const [mainTf, variablesTf, outputsTf] = await Promise.all([
+    terraformFile(`${gap.module_source}/main.tf`, gap.ci_head_sha, token),
+    terraformFile(`${gap.module_source}/variables.tf`, gap.ci_head_sha, token),
+    terraformFile(`${gap.module_source}/outputs.tf`, gap.ci_head_sha, token),
+  ]);
   return { mainTf, variablesTf, outputsTf };
 }
 
@@ -91,6 +113,44 @@ function assertOpenPullRequest(pr: Json, gap: RepairGap) {
     || str(obj(pr.base).ref) !== "main" || str(obj(pr.head).ref) !== gap.draft_branch || str(obj(pr.head).sha) !== gap.ci_head_sha) {
     throw new Error("The pull request no longer matches the failed draft head.");
   }
+}
+
+function assertRefreshedPullRequest(pr: Json, gap: RepairGap, previousHead: string) {
+  if (pr.number !== gap.draft_pr_number || pr.state !== "open" || pr.merged === true || !repo(obj(pr.head).repo) || !repo(obj(pr.base).repo)
+    || str(obj(pr.base).ref) !== "main" || str(obj(pr.head).ref) !== gap.draft_branch) {
+    throw new Error("The pull request changed while trusted main was being synchronized.");
+  }
+  const head = str(obj(pr.head).sha);
+  if (!SHA.test(head) || head === previousHead) throw new Error("GitHub did not finish synchronizing the draft branch with trusted main.");
+  return head;
+}
+
+const wait = (milliseconds: number) => new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
+
+/**
+ * A draft that was generated against an old base may fail a newer validation
+ * policy even when its module is correct. GitHub's update-branch endpoint
+ * merges only the trusted `main` base into the already-open draft branch; it
+ * never merges the draft PR, changes a workflow, or force-pushes history.
+ */
+async function refreshFromTrustedMain(gap: RepairGap, pr: Json, readToken: string, writeToken: string): Promise<string | null> {
+  const baseHead = str(obj(pr.base).sha);
+  const mainRef = obj(await ghJson(`${PREFIX}/git/ref/heads/main`, readToken));
+  const trustedMain = str(obj(mainRef.object).sha);
+  if (!SHA.test(baseHead) || !SHA.test(trustedMain)) throw new Error("GitHub did not provide immutable base revisions.");
+  if (baseHead === trustedMain) return null;
+
+  await ghJson(`${PREFIX}/pulls/${gap.draft_pr_number}/update-branch`, writeToken, {
+    method: "PUT",
+    body: JSON.stringify({ expected_head_sha: gap.ci_head_sha }),
+  });
+  for (let poll = 0; poll < 12; poll += 1) {
+    await wait(1_000);
+    const updated = obj(await githubGet(`${PREFIX}/pulls/${gap.draft_pr_number}`, readToken, "Unable to verify trusted-main synchronization"));
+    const head = str(obj(updated.head).sha);
+    if (head !== gap.ci_head_sha) return assertRefreshedPullRequest(updated, gap, gap.ci_head_sha);
+  }
+  throw new Error("GitHub accepted the trusted-main synchronization but did not create a new draft head in time.");
 }
 
 async function askCodingModel(gap: RepairGap, current: RepairFiles, logs: string) {
@@ -127,6 +187,11 @@ function repairArchive(gap: RepairGap, proposal: RepairFiles) {
   ].map((file) => ({ ...file, content: formatGeneratedHclAssignments(file.content) }));
 }
 
+async function archiveMatchesDraft(gap: RepairGap, archive: Array<{ path: string; content: string }>, token: string) {
+  const existing = await Promise.all(archive.map((file) => optionalTerraformFile(file.path, gap.ci_head_sha, token)));
+  return archive.every((file, index) => file.content === existing[index]);
+}
+
 async function updateBranch(token: string, gap: RepairGap, replacements: Array<{ path: string; content: string }>, message: string) {
   const ref = await ghJson(`${PREFIX}/git/ref/heads/${gap.draft_branch}`, token);
   const head = str(obj(ref.object).sha);
@@ -157,6 +222,35 @@ async function repairGap(value: GapRecord, attempt: number, expectedHeadSha: str
   const pr = obj(await githubGet(`${PREFIX}/pulls/${gap.draft_pr_number}`, readToken, "Unable to verify draft pull request"));
   assertOpenPullRequest(pr, gap);
 
+  const refreshedHeadSha = await refreshFromTrustedMain(gap, pr, readToken, writeToken);
+  if (refreshedHeadSha) {
+    return {
+      outcome: "committed" as const,
+      model: "trusted-main-refresh",
+      summary: "Merged the latest trusted main branch into the existing draft branch so CI can validate the draft against current policy.",
+      newHeadSha: refreshedHeadSha,
+    };
+  }
+
+  // The model is not needed for missing trusted companion files or committed
+  // HCL formatting. Regenerate only the governed seven-file archive first.
+  const current = await moduleFiles(gap, readToken);
+  const deterministicProposal = {
+    summary: "Regenerated the governed Terraform archive with trusted companion files and committed formatting.",
+    ...current,
+  };
+  const deterministicArchive = repairArchive(gap, deterministicProposal);
+  const deterministicProblems = validateRepairArchive(gap, deterministicProposal, deterministicArchive);
+  if (!deterministicProblems.length && !(await archiveMatchesDraft(gap, deterministicArchive, readToken))) {
+    const newHeadSha = await updateBranch(writeToken, gap, deterministicArchive, `AI-repair: normalize governed Terraform archive (attempt ${attempt})`);
+    return {
+      outcome: "committed" as const,
+      model: "deterministic-terraform-normalizer",
+      summary: "Regenerated trusted companion Terraform files and committed Terraform formatting before requesting a model repair.",
+      newHeadSha,
+    };
+  }
+
   const ids = failedJobIds(gap.ci_evidence);
   const logParts: string[] = [`Recorded CI evidence:\n${JSON.stringify(gap.ci_evidence).slice(0, 25_000)}`];
   for (const id of ids) {
@@ -164,11 +258,13 @@ async function repairGap(value: GapRecord, attempt: number, expectedHeadSha: str
     catch { logParts.push(`GitHub Actions job ${id}: detailed log was unavailable; use the recorded evidence.`); }
   }
   const logs = redactCiLog(logParts.join("\n\n"));
-  const current = await moduleFiles(gap, readToken);
   const { model, proposal } = await askCodingModel(gap, current, logs);
   const archive = repairArchive(gap, proposal);
   const problems = validateRepairArchive(gap, proposal, archive);
   if (problems.length) return { outcome: "rejected" as const, model, summary: `Model repair was rejected by policy: ${problems.slice(0, 6).join(" ")}`.slice(0, 1000) };
+  if (await archiveMatchesDraft(gap, archive, readToken)) {
+    return { outcome: "rejected" as const, model, summary: "The model proposed no governed Terraform change. A human must inspect the CI failure." };
+  }
   const newHeadSha = await updateBranch(writeToken, gap, archive, `AI-repair: CI remediation attempt ${attempt}`);
   return { outcome: "committed" as const, model, summary: redactCiLog(proposal.summary, 1000), newHeadSha };
 }
