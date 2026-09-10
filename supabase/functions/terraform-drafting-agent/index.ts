@@ -1,6 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.112.4";
 import { CREATE_VM_INPUT_SCHEMA, CREATE_VM_VARIABLES, validateDraft, validateGeneratedDraftFiles, type DraftResult, type DraftVariable } from "../_shared/terraform-draft-policy.ts";
-import { OS_DISK_INPUT_SCHEMA, OS_DISK_VARIABLES, validateOsDiskDraft } from "../_shared/os-disk-draft-policy.ts";
+import { OS_DISK_INPUT_SCHEMA, OS_DISK_VARIABLES, validateOsDiskDraft, validateOsDiskGeneratedFiles } from "../_shared/os-disk-draft-policy.ts";
 
 // This agent is the one place in the whole platform that is allowed to
 // WRITE to GitHub (open a branch, commit files, open a PR) -- it uses its
@@ -352,6 +352,11 @@ async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Js
     { path: `terraform/environments/pilot/${draft.moduleName}/variables.tf`, content: root.variablesTf },
     { path: `terraform/environments/pilot/${draft.moduleName}/versions.tf`, content: root.versions },
   ].map((file) => ({ ...file, content: alignEquals(file.content) }));
+  const fileProblems = validateOsDiskGeneratedFiles(draft, files);
+  if (fileProblems.length) {
+    await addEvent(db, str(gap.id), "draft_validation_failed", { problems: fileProblems });
+    return { outcome: "validation_failed", problems: fileProblems };
+  }
 
   const { data: capability, error: capabilityError } = await db.from("iac_automation_capabilities").insert({
     provider: "azure", resource_type: "Microsoft.Compute/virtualMachines", action_type: "increase_os_disk",

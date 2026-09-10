@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, CheckCircle2, Clock3, ExternalLink, GitPullRequest, Play, Radio, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { resumeServiceNowIntake } from "./servicenowIntakeRequests";
 import {
-  approveCapability, getCapabilityGap, listCapabilityGaps, listGapEvents, startCapabilityDraft, syncCapabilityCi,
+  approveCapability, getCapabilityGap, listCapabilityGaps, listGapEvents, repairCapabilityCi, startCapabilityDraft, syncCapabilityCi,
   type CapabilityGap, type CiStatus, type GapEvent, type GapStatus,
 } from "./capabilityAdmin";
 
@@ -71,6 +71,9 @@ function agentSteps(gap: CapabilityGap, events: GapEvent[]) {
   const evidence = gap.ciEvidence as Record<string, unknown>;
   const review = (evidence.review ?? {}) as Record<string, unknown>;
   const reviewed = evidence.merged === true && review.state === "APPROVED";
+  const repairStarted = gap.remediationAttempts > 0;
+  const repairFailed = gap.remediationStatus === "exhausted";
+  const repairActive = ["running", "waiting_ci", "failed"].includes(gap.remediationStatus) && !repairFailed;
 
   const step = (label: string, detail: string, state: StepState) => ({ label, detail, state });
   return [
@@ -81,6 +84,8 @@ function agentSteps(gap: CapabilityGap, events: GapEvent[]) {
       prFailed ? "failed" : prOpened ? "done" : drafted ? "active" : "pending"),
     step("Automated checks", gap.ciStatus === "passed" ? "Formatting, validation and policy checks passed on the reviewed commit." : gap.ciStatus === "failed" ? "The automated checks failed on the reviewed commit." : gap.ciStatus === "running" ? "Checks are running." : "Not observed yet.",
       gap.ciStatus === "passed" ? "done" : gap.ciStatus === "failed" ? "failed" : gap.ciStatus === "running" ? "active" : prOpened ? "active" : "pending"),
+    step("Automated repair", gap.remediationStatus === "succeeded" ? `CI passed after ${gap.remediationAttempts} repair attempt(s).` : repairFailed ? "The three-attempt repair limit was reached; a human must inspect the PR." : gap.remediationStatus === "running" ? `Attempt ${gap.remediationAttempts} is reading the failure and validating a correction.` : gap.remediationStatus === "waiting_ci" ? `Attempt ${gap.remediationAttempts} pushed a correction; waiting for CI.` : repairStarted ? `Attempt ${gap.remediationAttempts} did not produce a passing correction; another bounded attempt may run.` : "Starts only if synchronized CI reports a failure.",
+      gap.remediationStatus === "succeeded" ? "done" : repairFailed ? "failed" : repairActive ? "active" : gap.ciStatus === "passed" ? "done" : "pending"),
     step("Reviewed and merged", reviewed ? "An independent reviewer approved this commit and it was merged." : "Awaiting an independent approval and merge of this exact commit.",
       reviewed ? "done" : gap.ciStatus === "passed" ? "active" : "pending"),
     step("Promoted for use", promoted ? "The reviewed commit is pinned and the capability can be used in change packages." : "The capability stays unusable until it is promoted.",
@@ -104,6 +109,8 @@ function eventDetail(event: GapEvent) {
     typeof detail.moduleName === "string" ? `Module: ${detail.moduleName}` : "",
     typeof detail.branch === "string" ? `Branch: ${detail.branch}` : "",
     detail.prNumber ? `PR #${String(detail.prNumber)}` : "",
+    detail.attempt ? `Attempt ${String(detail.attempt)} of 3` : "",
+    typeof detail.newHeadSha === "string" ? `Commit ${detail.newHeadSha.slice(0, 12)}` : "",
   ].filter(Boolean);
   return parts.join(" · ") || "Recorded by the platform.";
 }
@@ -123,13 +130,18 @@ function eventLabel(eventType: string) {
     pr_open_failed: "Pull request failed",
     drafting_failed: "Drafting failed",
     ci_observed: "CI status observed",
+    ci_remediation_started: "Repair attempt started",
+    ci_remediation_committed: "Repair commit pushed",
+    ci_remediation_validation_failed: "Repair rejected by policy",
+    ci_remediation_failed: "Repair attempt failed",
+    ci_remediation_exhausted: "Repair limit reached",
     capability_approved: "Capability promoted",
   } as Record<string, string>)[eventType] ?? title(eventType);
 }
 
 function AgentProgress({ gap, events }: { gap: CapabilityGap; events: GapEvent[] }) {
   const steps = agentSteps(gap, events);
-  const active = gap.status === "drafting";
+  const active = gap.status === "drafting" || gap.remediationStatus === "running" || gap.remediationStatus === "waiting_ci";
   return <Panel title="Live drafting activity" className="mb-3" right={<span className={cn("inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10.5px] font-semibold", active ? "border-blue-200 bg-blue-50 text-blue-700" : "border-slate-200 bg-slate-50 text-slate-600")}><Radio className={cn("h-3 w-3", active && "animate-pulse")} />{active ? "Live" : "Server recorded"}</span>}>
     <ol className="flex flex-col gap-3 md:flex-row md:gap-0">
       {steps.map((item, index) => {
@@ -153,7 +165,7 @@ function AgentProgress({ gap, events }: { gap: CapabilityGap; events: GapEvent[]
       <div className="mb-2 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-slate-500"><Clock3 className="h-3.5 w-3.5" />Activity log</div>
       {events.length ? <ol className="space-y-2">{events.slice(0, 8).map((event) => <li key={event.id} className="rounded border border-slate-100 bg-slate-50 px-2.5 py-2"><div className="flex items-start justify-between gap-3"><span className="font-medium text-slate-800">{eventLabel(event.eventType)}</span><time className="shrink-0 text-[10.5px] text-slate-500">{dateTime(event.createdAt)}</time></div><p className="mt-0.5 break-words text-[11px] text-slate-600">{eventDetail(event)}</p></li>)}</ol> : <p className="text-[11.5px] text-slate-600">No server activity has been recorded. Start the drafting agent to create a live run.</p>}
     </div>
-    <p className="mt-3 text-[11px] text-slate-500">Updates automatically every 4 seconds. The agent only drafts and opens a pull request; it never plans or applies Azure.</p>
+    <p className="mt-3 text-[11px] text-slate-500">Activity refreshes every 4 seconds. While CI watch is active, GitHub is synchronized every 10 seconds. The agents may only update the draft PR; they never merge, promote, plan, apply, or change Azure.</p>
   </Panel>;
 }
 
@@ -228,12 +240,15 @@ function GapDetail({ gapId }: { gapId: string }) {
   const [gap, setGap] = useState<CapabilityGap | null>(null);
   const [events, setEvents] = useState<GapEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<"draft" | "sync" | "approve" | "resume" | null>(null);
+  const [busy, setBusy] = useState<"draft" | "sync" | "repair" | "approve" | "resume" | null>(null);
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [draftConfirmationOpen, setDraftConfirmationOpen] = useState(false);
   const [lastLiveUpdate, setLastLiveUpdate] = useState<number | null>(null);
+  const [watchingCi, setWatchingCi] = useState(false);
+  const [nextCiCheckAt, setNextCiCheckAt] = useState<number | null>(null);
+  const watchGeneration = useRef(0);
 
   const load = useCallback(async (background = false) => {
     if (!background) { setLoading(true); setError(null); }
@@ -247,12 +262,70 @@ function GapDetail({ gapId }: { gapId: string }) {
     return () => window.clearInterval(poll);
   }, [load]);
 
-  const sync = async () => {
+  const runCiCycle = useCallback(async () => {
     setBusy("sync"); setError(null); setNotice(null);
-    try { await syncCapabilityCi(gapId); setNotice("GitHub was re-observed and the evidence was recorded. No capability was promoted."); await load(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to synchronize CI evidence."); }
-    finally { setBusy(null); }
+    try {
+      const [observation] = await syncCapabilityCi(gapId);
+      if (!observation) throw new Error("The server did not return CI evidence for this gap.");
+      await load(true);
+      if (observation.evidence.status === "passed") {
+        setNotice("CI passed for the current draft head. Automatic repair stopped; no capability was promoted.");
+        return false;
+      }
+      if (observation.evidence.status !== "failed") {
+        setNotice("CI has not reached a pass/fail result. The watcher will check GitHub again in 10 seconds.");
+        return true;
+      }
+      const failedHead = observation.evidence.headSha;
+      if (!failedHead) throw new Error("Failed CI did not identify an exact commit to repair.");
+      setBusy("repair");
+      const repaired = await repairCapabilityCi({ gapId, expectedHeadSha: failedHead, expectedCiVersion: observation.ciVersion });
+      await load(true);
+      if (repaired.outcome === "committed") {
+        setNotice(`Repair attempt ${repaired.attempt} pushed commit ${repaired.newHeadSha?.slice(0, 12)}. Waiting 10 seconds for CI.`);
+        return true;
+      }
+      if (repaired.remediationStatus === "exhausted" || repaired.outcome === "exhausted") {
+        setNotice("The repair agent reached its three-attempt limit. Automatic watching stopped for human review.");
+        return false;
+      }
+      setNotice(`Repair attempt ${repaired.attempt} was not accepted: ${repaired.summary} The watcher will try again, within the three-attempt limit.`);
+      return true;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to synchronize or repair CI.");
+      return false;
+    } finally { setBusy(null); }
+  }, [gapId, load]);
+
+  const startCiWatch = async () => {
+    const generation = ++watchGeneration.current;
+    setWatchingCi(false); setNextCiCheckAt(null);
+    const keepWatching = await runCiCycle();
+    if (generation === watchGeneration.current && keepWatching) setWatchingCi(true);
   };
+  const stopCiWatch = () => {
+    watchGeneration.current += 1;
+    setWatchingCi(false); setNextCiCheckAt(null);
+    setNotice("Automatic CI watching stopped. No merge, promotion, plan, or apply was performed.");
+  };
+  useEffect(() => {
+    if (!watchingCi) return;
+    const generation = watchGeneration.current;
+    let timer = 0;
+    let cancelled = false;
+    const schedule = () => {
+      const next = Date.now() + 10_000;
+      setNextCiCheckAt(next);
+      timer = window.setTimeout(async () => {
+        if (cancelled || generation !== watchGeneration.current) return;
+        const keepWatching = await runCiCycle();
+        if (!cancelled && generation === watchGeneration.current && keepWatching) schedule();
+        else if (!cancelled) { setWatchingCi(false); setNextCiCheckAt(null); }
+      }, 10_000);
+    };
+    schedule();
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [watchingCi, runCiCycle]);
 
   const resumeTickets = async () => {
     setBusy("resume"); setError(null); setNotice(null);
@@ -302,13 +375,14 @@ function GapDetail({ gapId }: { gapId: string }) {
   return <div className="min-w-0 p-4">
     <div className="mb-3 flex flex-wrap items-center gap-2">
       <nav className="text-[12px] text-slate-500"><Link to="/platform/capabilities" className="hover:text-[#1B4F91]">Capability Promotion</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">{title(gap.actionType)}</span></nav>
-      <button type="button" onClick={() => void sync()} disabled={busy !== null} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"><RefreshCw className={cn("h-3.5 w-3.5", busy === "sync" && "animate-spin")} />{busy === "sync" ? "Observing GitHub…" : "Synchronize CI"}</button>
+      <button type="button" onClick={() => void startCiWatch()} disabled={busy !== null || watchingCi} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"><RefreshCw className={cn("h-3.5 w-3.5", (busy === "sync" || busy === "repair" || watchingCi) && "animate-spin")} />{busy === "repair" ? "Repairing CI…" : busy === "sync" ? "Observing GitHub…" : watchingCi ? "Watching CI…" : "Synchronize CI"}</button>
+      {watchingCi && <button type="button" onClick={stopCiWatch} className="inline-flex h-8 items-center rounded-md border border-red-200 bg-white px-2.5 text-[12px] font-medium text-red-700 hover:bg-red-50">Stop CI watch</button>}
       <button type="button" onClick={() => void resumeTickets()} disabled={busy !== null} title="Re-analyze tickets that were waiting on this capability" className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"><RefreshCw className={cn("h-3.5 w-3.5", busy === "resume" && "animate-spin")} />Resume linked tickets</button>
     </div>
     {error && <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">{error}</div>}
     {notice && <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-800">{notice}</div>}
 
-    <div className="mb-1 text-right text-[10.5px] text-slate-500">Live view {lastLiveUpdate ? `updated ${new Date(lastLiveUpdate).toLocaleTimeString()}` : "connecting…"}</div>
+    <div className="mb-1 text-right text-[10.5px] text-slate-500">Live view {lastLiveUpdate ? `updated ${new Date(lastLiveUpdate).toLocaleTimeString()}` : "connecting…"}{watchingCi && nextCiCheckAt ? ` · next CI check ${new Date(nextCiCheckAt).toLocaleTimeString()}` : ""}</div>
     <AgentProgress gap={gap} events={events} />
 
     <div className="grid gap-3 lg:grid-cols-2">
@@ -341,6 +415,10 @@ function GapDetail({ gapId }: { gapId: string }) {
         <Row label="Merged" value={evidence.merged === true ? `Yes · ${String(evidence.mergeSha ?? "").slice(0, 12)}` : "No"} />
         <Row label="GitHub review" value={review.state === "APPROVED" ? `Approved · ${String(review.commitId ?? "").slice(0, 12)}` : "Not approved"} />
         <Row label="Server promotion flag" value={evidence.promotionReady === true ? "Promotion-ready" : "Withheld"} />
+        <Row label="Repair agent" value={title(gap.remediationStatus)} />
+        <Row label="Repair attempts" value={`${gap.remediationAttempts} / 3`} />
+        <Row label="Repair head" value={<span className="font-mono text-[10.5px]">{shortSha(gap.remediationHeadSha)}</span>} />
+        <Row label="Repair updated" value={dateTime(gap.remediationUpdatedAt)} />
       </Panel>
 
       <Panel title="Promotion decision">

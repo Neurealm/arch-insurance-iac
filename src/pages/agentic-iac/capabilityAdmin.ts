@@ -17,6 +17,7 @@ export type GapStatus =
   | "open" | "searching_existing" | "drafting" | "pr_opened" | "ci_running"
   | "ci_passed" | "ci_failed" | "ready_for_review" | "capability_approved" | "abandoned";
 export type CiStatus = "unknown" | "running" | "passed" | "failed";
+export type RemediationStatus = "idle" | "running" | "waiting_ci" | "succeeded" | "failed" | "exhausted";
 
 export type CapabilityGap = {
   id: string; provider: string; resourceType: string; actionType: string;
@@ -25,6 +26,8 @@ export type CapabilityGap = {
   linkedCapabilityId: string | null;
   ciStatus: CiStatus; ciHeadSha: string | null; ciObservedAt: string | null;
   ciVersion: number; ciEvidence: Record<string, unknown>;
+  remediationStatus: RemediationStatus; remediationAttempts: number;
+  remediationHeadSha: string | null; remediationUpdatedAt: string | null;
   createdAt: string; updatedAt: string;
   capability: {
     id: string; displayName: string; actionType: string; moduleSource: string;
@@ -62,6 +65,10 @@ function mapGap(row: Record<string, any>): CapabilityGap {
     ciStatus: row.ci_status ?? "unknown", ciHeadSha: row.ci_head_sha ?? null,
     ciObservedAt: row.ci_observed_at ?? null, ciVersion: Number(row.ci_version ?? 0),
     ciEvidence: record(row.ci_evidence), createdAt: row.created_at, updatedAt: row.updated_at,
+    remediationStatus: row.remediation_status ?? "idle",
+    remediationAttempts: Number(row.remediation_attempts ?? 0),
+    remediationHeadSha: row.remediation_head_sha ?? null,
+    remediationUpdatedAt: row.remediation_updated_at ?? null,
     capability: capability
       ? {
         id: capability.id, displayName: capability.display_name, actionType: capability.action_type,
@@ -130,6 +137,17 @@ async function invokeDraftingAgent(body: Record<string, unknown>): Promise<Recor
   throw error;
 }
 
+async function invokeRemediationAgent(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const { data, error } = await supabase.functions.invoke("terraform-ci-remediation-agent", { body });
+  if (!error) return record(data);
+  const response = (error as { context?: Response }).context;
+  if (response && typeof response.json === "function") {
+    const parsed = record(await response.json().catch(() => ({})));
+    if (typeof parsed.error === "string" && parsed.error) throw new Error(parsed.error);
+  }
+  throw error;
+}
+
 export type DraftStartResult = {
   outcome: string;
   message: string;
@@ -159,6 +177,25 @@ export async function syncCapabilityCi(gapId?: string): Promise<CiSyncResult[]> 
     const item = record(row);
     return { gapId: String(item.gapId ?? ""), ciVersion: Number(item.ciVersion ?? 0), evidence: record(item.evidence) as CiEvidence };
   });
+}
+
+export type CiRemediationResult = {
+  outcome: "committed" | "rejected" | "exhausted" | "failed";
+  attempt: number; remediationStatus: RemediationStatus;
+  model: string | null; summary: string; newHeadSha: string | null;
+};
+
+/** Run one claimed repair attempt for the exact failed CI observation. */
+export async function repairCapabilityCi(input: { gapId: string; expectedHeadSha: string; expectedCiVersion: number }): Promise<CiRemediationResult> {
+  const result = await invokeRemediationAgent(input);
+  return {
+    outcome: String(result.outcome ?? "failed") as CiRemediationResult["outcome"],
+    attempt: Number(result.attempt ?? 0),
+    remediationStatus: String(result.remediationStatus ?? "failed") as RemediationStatus,
+    model: typeof result.model === "string" ? result.model : null,
+    summary: String(result.summary ?? result.message ?? "The repair agent did not report a summary."),
+    newHeadSha: typeof result.newHeadSha === "string" ? result.newHeadSha : null,
+  };
 }
 
 /**
