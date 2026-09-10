@@ -119,6 +119,36 @@ async function invokeCiSync(body: Record<string, unknown>): Promise<Record<strin
   throw error;
 }
 
+async function invokeDraftingAgent(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const { data, error } = await supabase.functions.invoke("terraform-drafting-agent", { body });
+  if (!error) return record(data);
+  const response = (error as { context?: Response }).context;
+  if (response && typeof response.json === "function") {
+    const parsed = record(await response.json().catch(() => ({})));
+    if (typeof parsed.error === "string" && parsed.error) throw new Error(parsed.error);
+  }
+  throw error;
+}
+
+export type DraftStartResult = {
+  outcome: string;
+  message: string;
+  prUrl: string | null;
+};
+
+export async function startCapabilityDraft(gapId: string): Promise<DraftStartResult> {
+  const { data, error } = await supabase.functions.invoke("capability-resolver", { body: { gapId } });
+  if (error) throw error;
+  const resolver = record(data);
+  const result = await invokeDraftingAgent({ gapId });
+  const row = record(Array.isArray(result.results) ? result.results[0] : result);
+  return {
+    outcome: String(row.outcome ?? resolver.outcome ?? "unknown"),
+    message: String(row.message ?? "Drafting request submitted."),
+    prUrl: typeof row.prUrl === "string" ? row.prUrl : null,
+  };
+}
+
 export type CiSyncResult = { gapId: string; ciVersion: number; evidence: CiEvidence };
 
 /** Re-observe GitHub. Records evidence; never approves anything. */

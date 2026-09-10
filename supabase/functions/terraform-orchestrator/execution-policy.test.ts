@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { hclLiteral, resolveExecutionScope } from "./execution-policy.ts";
+import { assessPlan, hclLiteral, resolveExecutionScope, typedInputs } from "./execution-policy.ts";
 
 test("HCP run inputs preserve literal Terraform interpolation text", () => {
   assert.equal(hclLiteral("${1 + 1}"), '"$${1 + 1}"');
@@ -64,6 +64,23 @@ const startPkg = { region: "eastus", action_type: "start_vm", parameters: {} };
 const createPkg = {
   region: "eastus", action_type: "create_vm",
   parameters: { environment: "development", vmSize: "Standard_B2s", subnetArmId: SUBNET },
+};
+const diskCapability = {
+  module_source: "terraform/modules/vm-os-disk-expand", execution_mode: "azapi_update", action_type: "increase_os_disk",
+  allowed_environments: ["development"], max_targets_per_run: 1, requires_managed_resource: true,
+  input_schema: { fields: [
+    { key: "target_resource_id", type: "string", source: "target", required: true },
+    { key: "requested_os_disk_size_gb", type: "integer", source: "parameters.requestedOsDiskSizeGB", required: true, minimum: 64, maximum: 4095 },
+    { key: "change_request_id", type: "string", source: "package_number_or_ticket", required: true, minLength: 6 },
+  ] },
+};
+const diskPkg = { package_number: "VM-CHG-123456", region: "eastus", action_type: "increase_os_disk", parameters: { requestedOsDiskSizeGB: 128 } };
+const diskBinding = {
+  moduleSource: "terraform/modules/vm-os-disk-expand", environment: "development", stateAttested: true,
+  workspaceId: "ws-mYVgBMRzGSATtRnc", workspaceName: "arch-vm-ops-development", sourceRevision: REVISION,
+  resourceGroupId: RG, targetResourceIds: [VM01], managedResourceIds: [VM01],
+  allowedRegions: ["eastus"], allowedVmSizes: [], allowedSubnetIds: [], maxOsDiskSizeGb: 256,
+  applyEnabled: true, provisioningEnabled: false,
 };
 
 test("an existing mutate capability resolves exactly as before", () => {
@@ -141,4 +158,35 @@ test("a target outside the authorized resource group is refused even when author
   const outside = `/subscriptions/${SUB}/resourceGroups/other-rg/providers/Microsoft.Compute/virtualMachines/claims-vm-01`;
   assert.throws(() => resolveExecutionScope(bindings(createBinding), createPkg, createCapability, [outside], [outside]),
     /leave the authorized resource group/);
+});
+
+test("OS disk expansion requires a managed target and an explicitly authorized maximum", () => {
+  const scope = resolveExecutionScope(bindings(diskBinding), diskPkg, diskCapability, [VM01]);
+  assert.equal(scope.maxOsDiskSizeGb, 256);
+  assert.throws(() => resolveExecutionScope(bindings({ ...diskBinding, maxOsDiskSizeGb: 127 }), diskPkg, diskCapability, [VM01]), /capacity has not been authorized/);
+  assert.throws(() => resolveExecutionScope(bindings({ ...diskBinding, managedResourceIds: [] }), diskPkg, diskCapability, [VM01]), /ownership\/adoption is required/);
+  assert.throws(() => typedInputs({ ...diskPkg, parameters: { requestedOsDiskSizeGB: 32 } }, diskCapability, VM01), /outside the approved range/);
+});
+
+test("OS disk plan must modify exactly diskSizeGB on the declared VM", () => {
+  const inputs = typedInputs(diskPkg, diskCapability, VM01);
+  const plan = { resource_changes: [{
+    mode: "managed", provider_name: "registry.terraform.io/azure/azapi", type: "azapi_update_resource",
+    change: { actions: ["update"], after: { resource_id: VM01, type: "Microsoft.Compute/virtualMachines@2024-07-01", body: { properties: { storageProfile: { osDisk: { diskSizeGB: 128 } } } }, sensitive_body: {} }, after_unknown: {} },
+  }] };
+  assert.equal(assessPlan(plan, [VM01], inputs, diskCapability).matched, true);
+  const unsafe = {
+    ...plan,
+    resource_changes: [{
+      ...plan.resource_changes[0],
+      change: {
+        ...plan.resource_changes[0].change,
+        after: {
+          ...plan.resource_changes[0].change.after,
+          body: { properties: { storageProfile: { osDisk: { diskSizeGB: 128 } }, hardwareProfile: { vmSize: "Standard_D4s_v5" } } },
+        },
+      },
+    }],
+  };
+  assert.equal(assessPlan(unsafe, [VM01], inputs, diskCapability).matched, false);
 });

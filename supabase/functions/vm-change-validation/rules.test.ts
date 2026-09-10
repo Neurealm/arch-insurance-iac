@@ -55,6 +55,11 @@ describe("Authoritative action-specific Azure validation", () => {
     assert.equal(passes(check("resize_vm", {}, { resolved_inputs: { requested_vm_size: "Standard_D4s_v5" } })), false);
     assert.equal(passes(check("resize_vm")), false);
   });
+  it("compares OS disk capacity against the approved immutable plan input", () => {
+    assert.equal(passes(check("increase_os_disk", { configuration: { vmSize: "Standard_D2s_v5", osType: "Linux", osDisk: { sizeGB: 128 } } }, { resolved_inputs: { requested_os_disk_size_gb: 128 } })), true);
+    assert.equal(passes(check("increase_os_disk", { configuration: { vmSize: "Standard_D2s_v5", osType: "Linux", osDisk: { sizeGB: 64 } } }, { resolved_inputs: { requested_os_disk_size_gb: 128 } })), false);
+    assert.equal(passes(check("increase_os_disk")), false);
+  });
   it("never claims a running VM proves restart", () => assert.equal(passes(check("restart_vm")), false));
   for (const [name, patch] of [
     ["missing timestamp", { observedAt: null }],

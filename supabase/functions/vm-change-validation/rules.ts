@@ -72,6 +72,11 @@ export function buildValidationChecks(pkg: Json, apply: Json, plan: Json, target
         const expected = text(record(plan.resolved_inputs).requested_vm_size);
         check("SIZE", "Approved VM size", expected || "Missing approved SKU", configuration.vmSize ?? "Not reported", !!expected && configuration.vmSize === expected); break;
       }
+      case "increase_os_disk": {
+        const expected = record(plan.resolved_inputs).requested_os_disk_size_gb;
+        const observed = record(configuration.osDisk).sizeGB;
+        check("OS-DISK", "Approved OS disk capacity (GB)", expected ?? "Missing approved capacity", observed ?? "Not reported", Number.isSafeInteger(expected) && observed === expected); break;
+      }
       case "restart_vm":
         check("RUNNING", "VM power state", "running", power || "Not reported", power === "running");
         // Merely being running does not prove a restart occurred. Do not manufacture

@@ -9,11 +9,6 @@ BEGIN
   IF approved_count <> 4 THEN RAISE EXCEPTION 'expected four approved VM capabilities, found %', approved_count; END IF;
 
   IF EXISTS (
-    SELECT 1 FROM public.iac_automation_capabilities
-    WHERE action_type = 'increase_os_disk' AND lifecycle_status = 'approved'
-  ) THEN RAISE EXCEPTION 'OS disk expansion must remain gated in testing'; END IF;
-
-  IF EXISTS (
     SELECT action_type FROM public.iac_automation_capabilities
     WHERE lifecycle_status = 'approved'
     GROUP BY provider, resource_type, action_type HAVING count(*) > 1

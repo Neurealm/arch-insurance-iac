@@ -73,11 +73,10 @@ function shortId(value?: string | null) {
 type Readiness = { state: "ready" | "attention" | "blocked"; title: string; detail: string };
 
 function executionReadiness(pkg: VmChangePackage, vm?: AzureVirtualMachine): Readiness {
-  if (!vm) return { state: "blocked", title: "Target unavailable", detail: "The VM is not present in the latest Azure discovery." };
-  if (pkg.actionType !== "start_vm") return { state: "blocked", title: "Execution unavailable", detail: "This action has no Azure execution workflow configured." };
-  if (/running/i.test(vm.powerState ?? "")) return { state: "attention", title: "No start required", detail: "Azure reports this VM is already running." };
-  if (!/(deallocated|stopped)/i.test(vm.powerState ?? "")) return { state: "attention", title: "State requires review", detail: `Azure currently reports ${vm.powerState || "an unknown power state"}.` };
-  return { state: "ready", title: "Ready for controlled start", detail: "The approved start request matches Azure's current stopped/deallocated state." };
+  if (pkg.actionType === "create_vm" && !vm) return { state: "ready", title: "Ready for manual execution", detail: "The requested machine does not yet exist in Azure, as expected for a creation package." };
+  if (!vm) return { state: "attention", title: "Target not currently discovered", detail: "The package may still be manually executed because the approved saved plan is authoritative; review the latest available evidence first." };
+  if (pkg.actionType === "start_vm" && /running/i.test(vm.powerState ?? "")) return { state: "attention", title: "No start currently required", detail: "Azure reports this VM is already running. Confirm the request remains necessary before manual execution." };
+  return { state: "ready", title: "Ready for manual execution", detail: `Azure currently reports ${vm.powerState || "an unknown power state"}. Manual execution applies only the exact reviewed HCP Terraform saved plan.` };
 }
 
 function ReadinessBadge({ readiness }: { readiness: Readiness }) {
@@ -122,12 +121,15 @@ function VmExecutionQueue() {
   }, []);
   useEffect(() => { void load(); }, [load]);
   const vmById = useMemo(() => new Map(vms.map((vm) => [vm.id.toLowerCase(), vm])), [vms]);
-  const readyCount = packages.filter((pkg) => pkg.status === "approved" && executionReadiness(pkg, vmById.get(pkg.targetResourceId.toLowerCase())).state === "ready").length;
+  // Approval is issued only for a clean, exact saved plan. Azure discovery is
+  // displayed as current evidence, but does not hide an approved package from
+  // the manual HCP Terraform execution queue.
+  const readyCount = packages.filter((pkg) => pkg.status === "approved").length;
   const legacyNotice = new URLSearchParams(location.search).get("reference") === "legacy-sample";
 
   return <main className="mx-auto max-w-[1500px] space-y-4 px-3 py-5 md:px-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
-      <div><p className="text-xs text-slate-500">Azure Resources <ChevronRight className="inline h-3 w-3" /> Execution Center</p><h1 className="mt-1 text-2xl font-semibold text-slate-900">VM Execution Center</h1><p className="mt-1 text-sm text-slate-600">Execute only approved Azure VM packages through the controlled Azure action endpoint.</p></div>
+      <div><p className="text-xs text-slate-500">Azure Resources <ChevronRight className="inline h-3 w-3" /> Execution Center</p><h1 className="mt-1 text-2xl font-semibold text-slate-900">VM Execution Center</h1><p className="mt-1 text-sm text-slate-600">Manually apply only approved Azure VM packages through HCP Terraform.</p></div>
       <button onClick={() => void load()} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 disabled:opacity-50"><RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />Refresh Azure state</button>
     </div>
     {legacyNotice && <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"><b>Legacy sample package not loaded.</b> The former SQL/AWS demo package is not an Azure VM change package. Select a real approved VM package below.</div>}
@@ -185,8 +187,8 @@ function VmExecutionDetail({ packageReference }: { packageReference: string }) {
   const preflightSteps = [
     {
       title: "Confirm the target VM",
-      detail: vm ? `${vm.name} was found in the latest Azure discovery for ${vm.resourceGroup}.` : "The target VM was not returned by the latest Azure discovery.",
-      state: vm ? "complete" : "blocked",
+      detail: vm ? `${vm.name} was found in the latest Azure discovery for ${vm.resourceGroup}.` : pkg?.actionType === "create_vm" ? "The requested VM does not exist yet, as expected for this creation package." : "The target VM was not returned by the latest Azure discovery. Review the available package evidence before manual execution.",
+      state: vm || pkg?.actionType === "create_vm" ? "complete" : "attention",
     },
     {
       title: "Validate the approved package",

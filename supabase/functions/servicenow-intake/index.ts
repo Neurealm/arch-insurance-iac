@@ -63,6 +63,17 @@ function timestamp(value: string) {
 function first(source: RecordValue, keys: string[]) { for (const key of keys) { const value = text(source[key]); if (value) return value; } return ""; }
 function array(value: unknown) { return Array.isArray(value) ? value : []; }
 function unique(values: string[]) { return [...new Set(values.filter(Boolean))]; }
+function requestedOsDiskSizeGb(fields: RecordValue): number | null {
+  for (const key of ["requestedOsDiskSizeGB", "diskSizeGB", "osDiskSizeGB"]) {
+    const value = fields[key];
+    if (Number.isSafeInteger(value)) return value as number;
+    if (typeof value === "string") {
+      const match = value.trim().match(/^(\d{1,4})(?:\s*(gb|tb))?$/i);
+      if (match) return Number(match[1]) * (match[2]?.toLowerCase() === "tb" ? 1024 : 1);
+    }
+  }
+  return null;
+}
 function corsHeaders(request?: Request) {
   const configuredOrigin = Deno.env.get("APP_ORIGIN")?.trim();
   const requestOrigin = request?.headers.get("origin")?.trim();
@@ -395,6 +406,7 @@ function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: 
   const textBlob = `${ticket.description} ${JSON.stringify(analysis.extractedFields)}`.toLowerCase();
   if (analysis.action === "resize_vm" && !(/standard_[a-z0-9_]+/i.test(textBlob) || /\b\d+\s*(v?cpu|core|cores)\b/i.test(textBlob))) missing.push("Requested VM size or SKU");
   if (analysis.action === "increase_os_disk" && !/\b\d+\s*(gb|tb)\b/i.test(textBlob)) missing.push("Requested disk capacity");
+  if (analysis.action === "increase_os_disk" && (!Number.isSafeInteger(requestedOsDiskSizeGb(analysis.extractedFields)) || (requestedOsDiskSizeGb(analysis.extractedFields) ?? 0) < 64 || (requestedOsDiskSizeGb(analysis.extractedFields) ?? 0) > 4095)) missing.push("Requested OS disk capacity from 64 through 4095 GB");
   if (analysis.action === "configure_backup" && !/\b(rpo|rto|hour|daily|weekly|retention|policy)\b/i.test(textBlob)) missing.push("Recovery objective or backup policy");
   // Creation needs twelve specific inputs, so say which one is absent rather
   // than asking for "VM count and size/SKU" and leaving the requester to guess.
@@ -528,7 +540,7 @@ async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket:
       package_number: packageNumber, target_resource_id: target.id, target_name: target.name,
       subscription_id: target.subscriptionId, resource_group: target.resourceGroup, region: target.location,
       action_type: analysis.action, action_label: actionLabel(analysis.action),
-      parameters: { source: "servicenow_webhook", serviceNowTicket: ticket.ticketNumber, serviceNowSysId: ticket.sysId, confidence: analysis.confidence, extractedFields: analysis.extractedFields },
+      parameters: { source: "servicenow_webhook", serviceNowTicket: ticket.ticketNumber, serviceNowSysId: ticket.sysId, confidence: analysis.confidence, extractedFields: analysis.extractedFields, ...(analysis.action === "increase_os_disk" ? { requestedOsDiskSizeGB: requestedOsDiskSizeGb(analysis.extractedFields) } : {}) },
       rationale: `ServiceNow ${ticket.ticketNumber} requested by ${ticket.requester}: ${ticket.description}`,
       current_state: target,
       policy_evidence: [{ check: "LLM classification", result: `${analysis.action} · ${analysis.confidence}% confidence` }, { check: "Azure target", result: `${target.name} matched live inventory` }],

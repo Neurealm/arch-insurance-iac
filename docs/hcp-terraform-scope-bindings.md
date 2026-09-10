@@ -28,8 +28,9 @@ a second binding, not editing the first.
 | `targetResourceIds` | the only VM any change package has ever declared (`iac_change_package_targets`) |
 | `resourceGroupId`, `allowedRegions` | that package's own resource group and region |
 | `allowedVmSizes` | **not derivable — see below** |
+| `maxOsDiskSizeGb` | **not derivable — see below** |
 
-## Two decisions that are yours, not mine
+## Three decisions that are yours, not mine
 
 **1. `stateAttested`.** Setting this to `true` asserts that a human has
 reviewed which Terraform state owns this workspace and confirmed the module and
@@ -43,6 +44,10 @@ evidence of which SKUs are sanctioned. I have left it empty rather than invent
 an allow-list, because it is a cost and blast-radius control. Resize will
 correctly refuse with *"Requested VM SKU has not been authorized for this
 scope"* until you fill it. Start/stop/restart are unaffected.
+
+**3. `maxOsDiskSizeGb`.** OS-disk expansion refuses to plan unless the exact
+scope declares an integer maximum from 64 through 4095. This is a cost and
+blast-radius control; it is not inferred from a ticket or from AI output.
 
 `applyEnabled` is `true` to preserve the pilot's existing behaviour; set it to
 `false` if you want plan-only while you verify the new guardrails.
@@ -101,6 +106,37 @@ this flag or of promoting the `create_vm` capability.
 `requires_managed_resource = true`: every target must be listed there or the
 plan is refused. This asserts Terraform genuinely owns/has adopted that VM —
 review it before you accept it.
+
+## Adding the promoted OS-disk capability
+
+After the drafting PR is merged and the exact commit is promoted, add one
+binding like this. Replace the placeholders with the promoted module commit
+and your approved capacity limit. The target must remain a Terraform-owned or
+explicitly adopted VM.
+
+```json
+{
+  "moduleSource": "terraform/modules/vm-os-disk-expand",
+  "environment": "development",
+  "stateAttested": true,
+  "workspaceId": "ws-mYVgBMRzGSATtRnc",
+  "workspaceName": "arch-vm-ops-development",
+  "sourceRevision": "<40-character promoted commit SHA>",
+  "resourceGroupId": "/subscriptions/7dc9a7e7-2294-487c-af02-7cee2806017f/resourceGroups/iac-pilot-dev",
+  "targetResourceIds": [
+    "/subscriptions/7dc9a7e7-2294-487c-af02-7cee2806017f/resourceGroups/iac-pilot-dev/providers/Microsoft.Compute/virtualMachines/iac-pilot-vm01"
+  ],
+  "managedResourceIds": [
+    "/subscriptions/7dc9a7e7-2294-487c-af02-7cee2806017f/resourceGroups/iac-pilot-dev/providers/Microsoft.Compute/virtualMachines/iac-pilot-vm01"
+  ],
+  "allowedRegions": ["eastus"],
+  "allowedVmSizes": [],
+  "allowedSubnetIds": [],
+  "maxOsDiskSizeGb": 256,
+  "applyEnabled": true,
+  "provisioningEnabled": false
+}
+```
 
 ## Setting it
 

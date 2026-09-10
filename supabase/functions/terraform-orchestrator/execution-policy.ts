@@ -25,7 +25,7 @@ export type ExecutionScope = {
   environment: string; workspaceId: string; workspaceName: string; moduleSource: string;
   sourceRevision: string; targetResourceIds: string[]; managedResourceIds: string[];
   resourceGroupId: string; allowedRegions: string[]; allowedVmSizes: string[];
-  allowedSubnetIds: string[]; applyEnabled: boolean; provisioningEnabled: boolean;
+  allowedSubnetIds: string[]; maxOsDiskSizeGb: number | null; applyEnabled: boolean; provisioningEnabled: boolean;
 };
 
 /**
@@ -74,6 +74,9 @@ export function resolveExecutionScope(raw: string | undefined, pkg: Json, capabi
   if (!allowedRegions.length || !allowedRegions.includes(str(pkg.region).toLowerCase())) throw new Error("Requested region is outside the authorized scope.");
   const sizes = arr(scope.allowedVmSizes).map(str);
   if (pkg.action_type === "resize_vm" && !sizes.includes(str(obj(pkg.parameters).requestedVmSize))) throw new Error("Requested VM SKU has not been authorized for this scope.");
+  const maxOsDiskSizeGb = Number(scope.maxOsDiskSizeGb);
+  const requestedOsDiskSizeGb = obj(pkg.parameters).requestedOsDiskSizeGB;
+  if (pkg.action_type === "increase_os_disk" && (!Number.isSafeInteger(requestedOsDiskSizeGb) || !Number.isSafeInteger(maxOsDiskSizeGb) || maxOsDiskSizeGb < 64 || maxOsDiskSizeGb > 4095 || requestedOsDiskSizeGb > maxOsDiskSizeGb)) throw new Error("Requested OS disk capacity has not been authorized for this scope.");
   const subnets = arr(scope.allowedSubnetIds).map(value => str(value).toLowerCase());
   if (provisioning) {
     if (!capability.approved_source_revision || !capability.approval_gap_id || scope.provisioningEnabled !== true) throw new Error("Provisioning requires a promoted capability and an explicitly verified creation scope.");
@@ -90,7 +93,7 @@ export function resolveExecutionScope(raw: string | undefined, pkg: Json, capabi
   }
   return { environment, workspaceId: str(scope.workspaceId), workspaceName: str(scope.workspaceName), moduleSource: str(scope.moduleSource), sourceRevision,
     targetResourceIds: exactTargets, managedResourceIds: managed, resourceGroupId: group, allowedRegions, allowedVmSizes: sizes,
-    allowedSubnetIds: subnets, applyEnabled: scope.applyEnabled === true, provisioningEnabled: scope.provisioningEnabled === true };
+    allowedSubnetIds: subnets, maxOsDiskSizeGb: Number.isSafeInteger(maxOsDiskSizeGb) ? maxOsDiskSizeGb : null, applyEnabled: scope.applyEnabled === true, provisioningEnabled: scope.provisioningEnabled === true };
 }
 
 export function typedInputs(pkg: Json, capability: Json, target: string): Json {
@@ -114,6 +117,7 @@ export function typedInputs(pkg: Json, capability: Json, target: string): Json {
       if (value.length > 16000 || (typeof field.minLength === "number" && value.length < field.minLength)) throw new Error(`Terraform input ${key} has an invalid length.`);
       if (typeof field.pattern === "string" && (field.pattern.length > 500 || !new RegExp(field.pattern).test(value))) throw new Error(`Terraform input ${key} failed validation.`);
     }
+    if (typeof value === "number" && (type === "number" || type === "integer") && ((typeof field.minimum === "number" && value < field.minimum) || (typeof field.maximum === "number" && value > field.maximum))) throw new Error(`Terraform input ${key} is outside the approved range.`);
     inputs[key] = value;
   }
   return inputs;
@@ -160,8 +164,14 @@ export function assessPlan(plan: Json, targets: string[], inputs: Json, capabili
           if (operations.includes("no-op")) throw new Error("No-op action plan cannot prove that a new requested VM action will execute.");
         } else {
           if (capability.execution_mode !== "azapi_update" || hasUnknown(unknown.body) || hasUnknown(unknown.sensitive_body) || !emptyObject(after.sensitive_body)) throw new Error("Unexpected or unknown VM update.");
-          const body = obj(after.body), properties = obj(body.properties), profile = obj(properties.hardwareProfile);
-          if (Object.keys(body).join() !== "properties" || Object.keys(properties).join() !== "hardwareProfile" || Object.keys(profile).join() !== "vmSize" || profile.vmSize !== inputs.requested_vm_size) throw new Error("VM update changes fields outside the requested size.");
+          const body = obj(after.body), properties = obj(body.properties);
+          if (capability.action_type === "resize_vm") {
+            const profile = obj(properties.hardwareProfile);
+            if (Object.keys(body).join() !== "properties" || Object.keys(properties).join() !== "hardwareProfile" || Object.keys(profile).join() !== "vmSize" || profile.vmSize !== inputs.requested_vm_size) throw new Error("VM update changes fields outside the requested size.");
+          } else if (capability.action_type === "increase_os_disk") {
+            const storage = obj(properties.storageProfile), disk = obj(storage.osDisk);
+            if (Object.keys(body).join() !== "properties" || Object.keys(properties).join() !== "storageProfile" || Object.keys(storage).join() !== "osDisk" || Object.keys(disk).join() !== "diskSizeGB" || !Number.isSafeInteger(disk.diskSizeGB) || disk.diskSizeGB !== inputs.requested_os_disk_size_gb) throw new Error("VM update changes fields outside the requested OS disk capacity.");
+          } else throw new Error("VM update action is not approved.");
         }
       } else if (resource.type === "azapi_resource" && capability.execution_mode === "azapi_resource") {
         if (["type", "parent_id", "name"].some(key => unknown[key])) throw new Error("Create target identity is unknown.");

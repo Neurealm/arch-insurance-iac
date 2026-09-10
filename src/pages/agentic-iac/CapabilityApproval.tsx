@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AlertTriangle, CheckCircle2, ExternalLink, GitPullRequest, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ExternalLink, GitPullRequest, Play, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { resumeServiceNowIntake } from "./servicenowIntakeRequests";
 import {
-  approveCapability, getCapabilityGap, listCapabilityGaps, listGapEvents, syncCapabilityCi,
+  approveCapability, getCapabilityGap, listCapabilityGaps, listGapEvents, startCapabilityDraft, syncCapabilityCi,
   type CapabilityGap, type CiStatus, type GapEvent, type GapStatus,
 } from "./capabilityAdmin";
 
@@ -191,10 +191,11 @@ function GapDetail({ gapId }: { gapId: string }) {
   const [gap, setGap] = useState<CapabilityGap | null>(null);
   const [events, setEvents] = useState<GapEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<"sync" | "approve" | "resume" | null>(null);
+  const [busy, setBusy] = useState<"draft" | "sync" | "approve" | "resume" | null>(null);
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [draftConfirmationOpen, setDraftConfirmationOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
@@ -224,6 +225,16 @@ function GapDetail({ gapId }: { gapId: string }) {
     finally { setBusy(null); }
   };
 
+  const startDraft = async () => {
+    setDraftConfirmationOpen(false); setBusy("draft"); setError(null); setNotice(null);
+    try {
+      const result = await startCapabilityDraft(gapId);
+      setNotice(result.prUrl ? `Draft pull request created: ${result.prUrl}` : result.message);
+      await load();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "The drafting agent could not start."); await load(); }
+    finally { setBusy(null); }
+  };
+
   const promote = async () => {
     if (!gap?.ciHeadSha) return;
     setBusy("approve"); setError(null); setNotice(null);
@@ -244,6 +255,7 @@ function GapDetail({ gapId }: { gapId: string }) {
   const review = (evidence.review ?? {}) as Record<string, unknown>;
   const context = gap.context;
   const canPromote = readiness.tone === "ready" && comment.trim().length >= 10 && busy === null;
+  const canStartDraft = !gap.capability && ["open", "drafting"].includes(gap.status) && busy === null;
 
   return <div className="min-w-0 p-4">
     <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -274,7 +286,7 @@ function GapDetail({ gapId }: { gapId: string }) {
           <Row label="Allowed environments" value={gap.capability.allowedEnvironments.join(", ") || "None"} />
           <Row label="Max targets per run" value={String(gap.capability.maxTargetsPerRun)} />
           <Row label="Pinned approved commit" value={<span className="font-mono text-[10.5px]">{shortSha(gap.capability.approvedSourceRevision)}</span>} />
-        </> : <p className="py-6 text-center text-[12px] text-slate-600">No draft capability is linked to this gap yet.</p>}
+        </> : <div className="py-4 text-center"><p className="text-[12px] text-slate-600">No draft capability is linked to this gap yet.</p><button type="button" onClick={() => setDraftConfirmationOpen(true)} disabled={!canStartDraft} className="mt-3 inline-flex h-8 items-center gap-1.5 rounded-md bg-[#1B4F91] px-3 text-[12px] font-semibold text-white hover:bg-[#16406f] disabled:cursor-not-allowed disabled:bg-slate-300"><Play className="h-3.5 w-3.5" />Start drafting agent</button><p className="mt-2 text-[10.5px] text-slate-500">Creates a governed Terraform draft pull request only. It cannot plan, apply, or change Azure.</p></div>}
       </Panel>
 
       <Panel title="Server-observed CI evidence" right={<CiBadge status={gap.ciStatus} />}>
@@ -301,6 +313,8 @@ function GapDetail({ gapId }: { gapId: string }) {
         <p className="mt-2 text-[11px] text-slate-500">Promotion pins this exact commit as the capability's approved source. Any ticket waiting on this capability is queued for re-analysis; promotion itself never starts a Terraform plan or apply. Rejecting a draft is done by closing its pull request in GitHub; there is no server-side reject action yet.</p>
       </Panel>
     </div>
+
+    {draftConfirmationOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4" role="dialog" aria-modal="true" aria-labelledby="draft-confirmation-title"><div className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl"><h2 id="draft-confirmation-title" className="text-base font-semibold text-slate-900">Start the drafting agent?</h2><p className="mt-2 text-[12px] leading-relaxed text-slate-600">The agent will generate the restricted OS-disk Terraform module and may open a GitHub pull request. It will not create an HCP Terraform plan, apply infrastructure, or change Azure.</p><div className="mt-4 flex justify-end gap-2"><button type="button" onClick={() => setDraftConfirmationOpen(false)} className="h-8 rounded-md border border-slate-200 px-3 text-[12px] font-medium text-slate-700 hover:bg-slate-50">Cancel</button><button type="button" onClick={() => void startDraft()} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-[#1B4F91] px-3 text-[12px] font-semibold text-white hover:bg-[#16406f]"><Play className="h-3.5 w-3.5" />Create draft PR</button></div></div></div>}
 
     <Panel title="Gap history" className="mt-3" right={<span className="text-[11px] text-slate-500">{events.length} event(s)</span>}>
       {events.length ? <div className="overflow-x-auto"><table className="w-full min-w-[600px] text-left text-[12px]"><thead className="border-b border-[#E2E8F0] text-[10.5px] uppercase tracking-wide text-slate-500"><tr><th className="pb-2 font-medium">Event</th><th className="pb-2 font-medium">Recorded</th></tr></thead><tbody>{events.map((event) => <tr key={event.id} className="border-b border-[#EEF2F6]"><td className="py-2 font-medium text-slate-800">{title(event.eventType)}</td><td className="py-2 text-[10.5px] text-slate-500">{dateTime(event.createdAt)}</td></tr>)}</tbody></table></div> : <p className="py-6 text-center text-[12px] text-slate-600">No events have been recorded for this gap.</p>}
