@@ -4666,6 +4666,10 @@ export type Database = {
           linked_capability_id: string | null
           notes: string | null
           provider: string
+          remediation_attempts: number
+          remediation_head_sha: string | null
+          remediation_status: string
+          remediation_updated_at: string | null
           requested_by: string | null
           resource_type: string
           source_intake_request_id: string | null
@@ -4690,6 +4694,10 @@ export type Database = {
           linked_capability_id?: string | null
           notes?: string | null
           provider?: string
+          remediation_attempts?: number
+          remediation_head_sha?: string | null
+          remediation_status?: string
+          remediation_updated_at?: string | null
           requested_by?: string | null
           resource_type: string
           source_intake_request_id?: string | null
@@ -4714,6 +4722,10 @@ export type Database = {
           linked_capability_id?: string | null
           notes?: string | null
           provider?: string
+          remediation_attempts?: number
+          remediation_head_sha?: string | null
+          remediation_status?: string
+          remediation_updated_at?: string | null
           requested_by?: string | null
           resource_type?: string
           source_intake_request_id?: string | null
@@ -11129,6 +11141,15 @@ export type Database = {
         Args: { _invitation_id: string }
         Returns: undefined
       }
+      claim_iac_ci_remediation: {
+        Args: {
+          p_expected_head_sha: string
+          p_expected_version: number
+          p_gap_id: string
+          p_max_attempts?: number
+        }
+        Returns: Json
+      }
       claim_iac_intake_resumptions: {
         Args: { p_limit?: number }
         Returns: {
@@ -11594,6 +11615,18 @@ export type Database = {
         Args: { _scenario_id: string }
         Returns: Json
       }
+      complete_iac_ci_remediation: {
+        Args: {
+          p_attempt: number
+          p_expected_head_sha: string
+          p_gap_id: string
+          p_model: string
+          p_new_head_sha: string
+          p_outcome: string
+          p_summary: string
+        }
+        Returns: Json
+      }
       complete_iac_vm_execution: {
         Args: { p_message: string; p_package_id: string; p_success: boolean }
         Returns: {
@@ -12040,6 +12073,10 @@ export type Database = {
           linked_capability_id: string | null
           notes: string | null
           provider: string
+          remediation_attempts: number
+          remediation_head_sha: string | null
+          remediation_status: string
+          remediation_updated_at: string | null
           requested_by: string | null
           resource_type: string
           source_intake_request_id: string | null
