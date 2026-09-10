@@ -12,7 +12,7 @@ import {
 
 const REPOSITORY = "Neurealm/arch-insurance-iac";
 const PREFIX = `/repos/${REPOSITORY}`;
-const DEFAULT_MODEL = "gpt-6-astra";
+const DEFAULT_MODEL = "gpt-5.6-terra";
 const SHA = /^[0-9a-f]{40}$/;
 
 function admin() {

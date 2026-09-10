@@ -24,6 +24,6 @@ CI logs are treated as untrusted input. Raw logs are not stored in the engineeri
 - `GITHUB_TERRAFORM_SOURCE_TOKEN`: repository Contents, Pull requests, and Actions read access.
 - `GITHUB_TERRAFORM_DRAFT_TOKEN`: Contents write access limited to the Terraform repository.
 - `OPENAI_API_KEY`: server-side OpenAI API key.
-- `OPENAI_REMEDIATION_MODEL`: optional model override; defaults to `gpt-6-astra`.
+- `OPENAI_REMEDIATION_MODEL`: optional model override; defaults to `gpt-5.6-terra`.
 
 If any required secret is missing, the endpoint returns a configuration error before claiming an attempt.
