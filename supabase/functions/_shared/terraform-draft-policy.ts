@@ -179,7 +179,12 @@ export function validateDraft(draft: DraftResult): string[] {
 /** Parse and check the entire seven-file archive, including trusted root
  * wiring. This is also invoked by CI against files actually checked out.
  */
-export function validateGeneratedDraftFiles(draft: DraftResult, files: Array<{ path: string; content: string }>): string[] {
+export function validateGeneratedDraftArchive(
+  draft: DraftResult,
+  files: Array<{ path: string; content: string }>,
+  interfaceVariables: DraftVariable[],
+  validateModule: (candidate: DraftResult) => string[],
+): string[] {
   const problems: string[] = [];
   const modulePath = `terraform/modules/${draft.moduleName}`;
   const rootPath = `terraform/environments/pilot/${draft.moduleName}`;
@@ -191,7 +196,7 @@ export function validateGeneratedDraftFiles(draft: DraftResult, files: Array<{ p
   }
   if (expected.some((path) => !actual.has(path))) problems.push("Generated archive is incomplete.");
   if (problems.length) return problems;
-  problems.push(...validateDraft({ ...draft, moduleMainTf: actual.get(`${modulePath}/main.tf`)!, moduleVariablesTf: actual.get(`${modulePath}/variables.tf`)!, moduleOutputsTf: actual.get(`${modulePath}/outputs.tf`)! }));
+  problems.push(...validateModule({ ...draft, moduleMainTf: actual.get(`${modulePath}/main.tf`)!, moduleVariablesTf: actual.get(`${modulePath}/variables.tf`)!, moduleOutputsTf: actual.get(`${modulePath}/outputs.tf`)! }));
   const parse = (path: string) => parseDraftHcl(actual.get(path)!, path);
   try {
     for (const path of [`${modulePath}/versions.tf`, `${rootPath}/versions.tf`]) {
@@ -221,14 +226,14 @@ export function validateGeneratedDraftFiles(draft: DraftResult, files: Array<{ p
     keysOnly(modules, [moduleName], "root.module", problems);
     if (array(modules[moduleName]).length !== 1) problems.push("root.module: exactly one local module is required.");
     const module = obj(array(modules[moduleName])[0]);
-    keysOnly(module, ["source", ...CREATE_VM_VARIABLES.map((v) => v.name)], "root.module", problems);
+    keysOnly(module, ["source", ...interfaceVariables.map((v) => v.name)], "root.module", problems);
     if (module.source !== `../../../modules/${draft.moduleName}`) problems.push("Root module source must be its matching local module, never a remote source.");
-    for (const v of CREATE_VM_VARIABLES) if (module[v.name] !== `\${var.${v.name}}`) problems.push(`Root input ${v.name} must wire directly to its matching variable.`);
+    for (const v of interfaceVariables) if (module[v.name] !== `\${var.${v.name}}`) problems.push(`Root input ${v.name} must wire directly to its matching variable.`);
     const rootVars = parse(`${rootPath}/variables.tf`);
     keysOnly(rootVars, ["variable"], "root.variables", problems);
     const variables = obj(rootVars.variable);
-    keysOnly(variables, [...CREATE_VM_VARIABLES.map((v) => v.name), "tfc_azure_dynamic_credentials"], "root.variables", problems);
-    for (const v of CREATE_VM_VARIABLES) {
+    keysOnly(variables, [...interfaceVariables.map((v) => v.name), "tfc_azure_dynamic_credentials"], "root.variables", problems);
+    for (const v of interfaceVariables) {
       const blocks = array(variables[v.name]);
       const variable = obj(blocks[0]);
       if (blocks.length !== 1 || literalExpression(variable.type) !== `\${${v.type}}`) problems.push(`Root variable ${v.name}: unexpected type/declaration.`);
@@ -243,4 +248,8 @@ export function validateGeneratedDraftFiles(draft: DraftResult, files: Array<{ p
     if (dynamic.length !== 1 || literalExpression(credential.type) !== credentialType || /\$\{|%\{/.test(text(credential.description))) problems.push("Unexpected HCP dynamic credential variable declaration.");
   } catch (error) { problems.push(error instanceof Error ? error.message : "Generated HCL parse failed."); }
   return [...new Set(problems)];
+}
+
+export function validateGeneratedDraftFiles(draft: DraftResult, files: Array<{ path: string; content: string }>): string[] {
+  return validateGeneratedDraftArchive(draft, files, CREATE_VM_VARIABLES, validateDraft);
 }

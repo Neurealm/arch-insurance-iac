@@ -19,6 +19,13 @@ verify_jwt = false
 [functions.terraform-ci-status-sync]
 verify_jwt = false
 
+# Requires a real platform-admin user session, then atomically claims one of
+# three bounded repair attempts. The function reads redacted GitHub Actions
+# logs, validates the coding model's three-file Terraform proposal, and may
+# push only to the existing ai-draft branch. It cannot merge or promote.
+[functions.terraform-ci-remediation-agent]
+verify_jwt = false
+
 # Resolves the caller with Auth.getUser() and checks package ownership or
 # administrator access before reading HCP/Azure evidence. Evidence is persisted
 # only through the service-only record_iac_vm_validation RPC.

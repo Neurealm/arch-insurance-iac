@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.112.4";
 import { CREATE_VM_INPUT_SCHEMA, CREATE_VM_VARIABLES, validateDraft, validateGeneratedDraftFiles, type DraftResult, type DraftVariable } from "../_shared/terraform-draft-policy.ts";
-import { OS_DISK_INPUT_SCHEMA, OS_DISK_VARIABLES, validateOsDiskDraft } from "../_shared/os-disk-draft-policy.ts";
+import { OS_DISK_INPUT_SCHEMA, OS_DISK_VARIABLES, validateOsDiskDraft, validateOsDiskGeneratedFiles } from "../_shared/os-disk-draft-policy.ts";
+import { formatGeneratedHclAssignments } from "../_shared/terraform-draft-template.ts";
 
 // This agent is the one place in the whole platform that is allowed to
 // WRITE to GitHub (open a branch, commit files, open a PR) -- it uses its
@@ -196,37 +197,11 @@ function sanitizeHcl(content: string): string {
  * assignments within a block aren't column-aligned to their widest sibling
  * -- a purely mechanical rule, but our own templated root files (and the
  * LLM's module files) don't reliably produce it. Replicates just that one
- * rule: within each contiguous run of same-indent, single-line assignment
- * lines, pad every key to the widest key in the run.
+ * rule for the restricted generated grammar. Multiline values form a group
+ * boundary and are not aligned with preceding scalar assignments.
  */
 function alignEquals(content: string): string {
-  const lines = content.split("\n");
-  const assignment = /^(\s*)([A-Za-z_][A-Za-z0-9_-]*)\s*=\s*(.+)$/;
-  const out: string[] = [];
-  let i = 0;
-  while (i < lines.length) {
-    const match = lines[i].match(assignment);
-    if (!match) { out.push(lines[i]); i += 1; continue; }
-    const indent = match[1];
-    const group: Array<{ key: string; value: string }> = [];
-    let j = i;
-    // A key whose value opens a nested block (`key = {`) still aligns with
-    // its simple sibling assignments (e.g. `createOption = "..."` next to
-    // `managedDisk  = {`) -- include such a line in the group, then stop,
-    // since everything after it is that block's (more-indented) body until
-    // its closing brace, never a continuation of this same-indent run.
-    while (j < lines.length) {
-      const current = lines[j].match(assignment);
-      if (!current || current[1] !== indent) break;
-      group.push({ key: current[2], value: current[3] });
-      j += 1;
-      if (current[3].trimEnd().endsWith("{")) break;
-    }
-    const width = Math.max(...group.map((item) => item.key.length));
-    for (const item of group) out.push(`${indent}${item.key.padEnd(width)} = ${item.value}`);
-    i = j;
-  }
-  return out.join("\n");
+  return formatGeneratedHclAssignments(content);
 }
 
 function templateRootFiles(moduleName: string, variables: DraftVariable[]) {
@@ -325,17 +300,21 @@ variable "change_request_id" {
 }`;
 
 async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
+  await addEvent(db, str(gap.id), "draft_generation_started", { action: "increase_os_disk" });
   const draft = await draftPromptWithGemini(buildOsDiskPrompt(gap));
   draft.moduleName = "vm-os-disk-expand";
   draft.displayName = "Increase Azure VM OS disk capacity";
+  await addEvent(db, str(gap.id), "draft_generation_completed", { moduleName: draft.moduleName });
   draft.moduleMainTf = sanitizeHcl(draft.moduleMainTf);
   draft.moduleVariablesTf = sanitizeHcl(draft.moduleVariablesTf);
   draft.moduleOutputsTf = sanitizeHcl(draft.moduleOutputsTf);
+  await addEvent(db, str(gap.id), "draft_policy_validation_started", { moduleName: draft.moduleName });
   const problems = validateOsDiskDraft(draft);
   if (problems.length) {
     await addEvent(db, str(gap.id), "draft_validation_failed", { problems });
     return { outcome: "validation_failed", problems };
   }
+  await addEvent(db, str(gap.id), "draft_policy_validation_passed", { moduleName: draft.moduleName });
 
   const token = draftToken();
   const root = templateRootFiles(draft.moduleName, OS_DISK_VARIABLES);
@@ -348,6 +327,11 @@ async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Js
     { path: `terraform/environments/pilot/${draft.moduleName}/variables.tf`, content: root.variablesTf },
     { path: `terraform/environments/pilot/${draft.moduleName}/versions.tf`, content: root.versions },
   ].map((file) => ({ ...file, content: alignEquals(file.content) }));
+  const fileProblems = validateOsDiskGeneratedFiles(draft, files);
+  if (fileProblems.length) {
+    await addEvent(db, str(gap.id), "draft_validation_failed", { problems: fileProblems });
+    return { outcome: "validation_failed", problems: fileProblems };
+  }
 
   const { data: capability, error: capabilityError } = await db.from("iac_automation_capabilities").insert({
     provider: "azure", resource_type: "Microsoft.Compute/virtualMachines", action_type: "increase_os_disk",
@@ -360,6 +344,7 @@ async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Js
     await addEvent(db, str(gap.id), "draft_capability_insert_failed", { message: capabilityError.message });
     return { outcome: "capability_insert_failed", message: capabilityError.message };
   }
+  await addEvent(db, str(gap.id), "draft_capability_registered", { capabilityId: capability.id, moduleName: draft.moduleName });
 
   const branch = `ai-draft/${draft.moduleName}-${str(gap.id).slice(0, 8)}`;
   const prBody = [
@@ -372,6 +357,7 @@ async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Js
     `Draft capability id: \`${capability.id}\``,
   ].join("\n");
   try {
+    await addEvent(db, str(gap.id), "pull_request_opening", { branch, moduleName: draft.moduleName });
     const pr = await openPullRequest(token, branch, "main", files, `AI-draft: ${draft.displayName}`, `AI-draft: ${draft.displayName} (${draft.moduleName})`, prBody);
     await db.from("iac_engineering_gaps").update({ status: "pr_opened", linked_capability_id: capability.id, draft_branch: branch, draft_pr_number: pr.number, draft_pr_url: pr.url }).eq("id", gap.id);
     await addEvent(db, str(gap.id), "pr_opened", { prNumber: pr.number, prUrl: pr.url, branch, capabilityId: capability.id, moduleName: draft.moduleName });
@@ -390,15 +376,19 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
   }
   if (str(gap.action_type) === "increase_os_disk") return draftOsDiskForGap(db, gap);
   if (str(gap.action_type) !== "create_vm") return { outcome: "unsupported", message: "Draft generation does not have a policy for this VM action yet." };
+  await addEvent(db, str(gap.id), "draft_generation_started", { action: "create_vm" });
   const draft = await draftWithGemini(gap, EXEMPLAR);
+  await addEvent(db, str(gap.id), "draft_generation_completed", { moduleName: draft.moduleName });
   draft.moduleMainTf = sanitizeHcl(draft.moduleMainTf);
   draft.moduleVariablesTf = sanitizeHcl(draft.moduleVariablesTf);
   draft.moduleOutputsTf = sanitizeHcl(draft.moduleOutputsTf);
+  await addEvent(db, str(gap.id), "draft_policy_validation_started", { moduleName: draft.moduleName });
   const problems = validateDraft(draft);
   if (problems.length) {
     await addEvent(db, str(gap.id), "draft_validation_failed", { problems });
     return { outcome: "validation_failed", problems };
   }
+  await addEvent(db, str(gap.id), "draft_policy_validation_passed", { moduleName: draft.moduleName });
 
   const token = draftToken();
   // Root HCL is built only from the server-owned interface, never LLM types,
@@ -426,6 +416,7 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
     allowed_environments: ["development"], requires_managed_resource: false, max_targets_per_run: 20,
   }).select("id").single();
   if (capabilityError) { await addEvent(db, str(gap.id), "draft_capability_insert_failed", { message: capabilityError.message }); return { outcome: "capability_insert_failed", message: capabilityError.message }; }
+  await addEvent(db, str(gap.id), "draft_capability_registered", { capabilityId: capability.id, moduleName: draft.moduleName });
   const branch = `ai-draft/${draft.moduleName}-${str(gap.id).slice(0, 8)}`;
   const prBody = [
     `AI-drafted Terraform module for **${str(gap.action_type)}** (${str(gap.resource_type)}), generated from engineering gap \`${gap.id}\`.`,
@@ -438,6 +429,7 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
   ].join("\n");
 
   try {
+    await addEvent(db, str(gap.id), "pull_request_opening", { branch, moduleName: draft.moduleName });
     const pr = await openPullRequest(token, branch, "main", files, `AI-draft: ${draft.displayName}`, `AI-draft: ${draft.displayName} (${draft.moduleName})`, prBody);
     await db.from("iac_engineering_gaps").update({ status: "pr_opened", linked_capability_id: capability.id, draft_branch: branch, draft_pr_number: pr.number, draft_pr_url: pr.url }).eq("id", gap.id);
     await addEvent(db, str(gap.id), "pr_opened", { prNumber: pr.number, prUrl: pr.url, branch, capabilityId: capability.id, moduleName: draft.moduleName });

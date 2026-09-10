@@ -10,7 +10,7 @@ resource "azapi_resource" "network_interface" {
     properties = {
       ipConfigurations = [
         {
-          name       = "ipconfig1"
+          name = "ipconfig1"
           properties = {
             primary                   = true
             privateIPAllocationMethod = "Dynamic"
@@ -46,11 +46,11 @@ resource "azapi_resource" "virtual_machine" {
         vmSize = var.vm_size
       }
       osProfile = {
-        computerName       = each.key
-        adminUsername      = var.admin_username
+        computerName  = each.key
+        adminUsername = var.admin_username
         linuxConfiguration = {
           disablePasswordAuthentication = true
-          ssh                           = {
+          ssh = {
             publicKeys = [
               {
                 path    = "/home/${var.admin_username}/.ssh/authorized_keys"
@@ -69,7 +69,7 @@ resource "azapi_resource" "virtual_machine" {
         }
         osDisk = {
           createOption = "FromImage"
-          managedDisk  = {
+          managedDisk = {
             storageAccountType = "Standard_LRS"
           }
         }
@@ -77,8 +77,7 @@ resource "azapi_resource" "virtual_machine" {
       networkProfile = {
         networkInterfaces = [
           {
-            id      = azapi_resource.network_interface[each.key].id
-            primary = true
+            id = azapi_resource.network_interface[each.key].id
           }
         ]
       }

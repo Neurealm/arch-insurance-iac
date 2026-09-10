@@ -1,4 +1,4 @@
-import type { DraftResult, DraftVariable } from "./terraform-draft-policy.ts";
+import { parseDraftHcl, validateGeneratedDraftArchive, type DraftResult, type DraftVariable } from "./terraform-draft-policy.ts";
 
 type Json = Record<string, unknown>;
 
@@ -22,6 +22,11 @@ export const OS_DISK_INPUT_SCHEMA: Json = {
 
 const same = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
 const forbidden = /\b(?:data|module|provider|terraform|provisioner|dynamic)\b|(?:local-exec|remote-exec|customData|userData|adminPassword|extensions|applicationProfile|ignore_changes|replace_triggered_by)\b|<<-?\s*[A-Za-z_]/i;
+const object = (value: unknown): Json => value && typeof value === "object" && !Array.isArray(value) ? value as Json : {};
+const array = (value: unknown): unknown[] => Array.isArray(value) ? value : [];
+function onlyKeys(value: Json, allowed: string[], label: string, problems: string[]) {
+  for (const key of Object.keys(value)) if (!allowed.includes(key)) problems.push(`${label}: unsupported key/block ${key}.`);
+}
 
 export function validateOsDiskDraft(draft: DraftResult): string[] {
   const problems: string[] = [];
@@ -30,6 +35,22 @@ export function validateOsDiskDraft(draft: DraftResult): string[] {
   const metadata = new Map(draft.variables.map((variable) => [variable.name, variable.type]));
   if (metadata.size !== OS_DISK_VARIABLES.length || OS_DISK_VARIABLES.some((variable) => metadata.get(variable.name) !== variable.type)) problems.push("Variable metadata must match the governed OS-disk interface.");
   if (!same(draft.inputSchema, OS_DISK_INPUT_SCHEMA)) problems.push("inputSchema must match the governed OS-disk interface.");
+
+  const parsed: Record<string, Json> = {};
+  for (const [label, content] of Object.entries({ main: draft.moduleMainTf, variables: draft.moduleVariablesTf, outputs: draft.moduleOutputsTf })) {
+    try { parsed[label] = parseDraftHcl(content, label); }
+    catch (error) { problems.push(error instanceof Error ? error.message : "HCL parse failed."); }
+  }
+  if (Object.keys(parsed).length === 3) {
+    onlyKeys(parsed.main, ["resource"], "main.tf", problems);
+    onlyKeys(parsed.variables, ["variable"], "variables.tf", problems);
+    onlyKeys(parsed.outputs, ["output"], "outputs.tf", problems);
+    const resourceTypes = object(parsed.main.resource);
+    onlyKeys(resourceTypes, ["azapi_update_resource"], "main.tf.resource", problems);
+    const resources = object(resourceTypes.azapi_update_resource);
+    if (Object.keys(resources).length !== 1 || array(resources[Object.keys(resources)[0]]).length !== 1) problems.push("Exactly one named azapi_update_resource block is required.");
+    if (!Object.keys(object(parsed.outputs.output)).length) problems.push("outputs.tf must expose the updated VM identifier or disk size.");
+  }
 
   const variables = draft.moduleVariablesTf;
   for (const variable of OS_DISK_VARIABLES) {
@@ -50,4 +71,8 @@ export function validateOsDiskDraft(draft: DraftResult): string[] {
   if (/\b(?:hardwareProfile|networkProfile|securityProfile|identity|diagnosticsProfile)\b/.test(main)) problems.push("The OS-disk draft may not update other VM properties.");
   if (!/lifecycle\s*\{[\s\S]*?precondition\s*\{[\s\S]*?length\s*\(\s*trimspace\s*\(\s*var\.change_request_id\s*\)\s*\)\s*>=\s*6/.test(main)) problems.push("The exact change-request precondition is required.");
   return [...new Set(problems)];
+}
+
+export function validateOsDiskGeneratedFiles(draft: DraftResult, files: Array<{ path: string; content: string }>): string[] {
+  return validateGeneratedDraftArchive(draft, files, OS_DISK_VARIABLES, validateOsDiskDraft);
 }

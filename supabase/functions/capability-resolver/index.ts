@@ -102,7 +102,7 @@ async function resolveGap(db: ReturnType<typeof admin>["client"], gap: Json) {
   }
 
   await db.from("iac_engineering_gaps").update({ status: "drafting" }).eq("id", gap.id);
-  await addEvent(db, str(gap.id), "no_reusable_module_found", {});
+  await addEvent(db, str(gap.id), "drafting_queued", { action: actionType });
   return "drafting";
 }
 
