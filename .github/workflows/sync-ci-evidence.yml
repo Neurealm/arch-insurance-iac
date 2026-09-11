@@ -1,0 +1,50 @@
+name: Sync Terraform CI evidence
+
+# Scheduled backstop for engineering-gap CI evidence. The primary sync path
+# is push-based: supabase/functions/github-ci-webhook receives a GitHub
+# webhook the instant a workflow run on an AI-draft branch completes, and
+# triggers terraform-ci-status-sync for that specific gap. This workflow
+# exists because the webhook can be missed (delivery failure, misconfigured
+# or not-yet-registered webhook), so it independently calls the same sync
+# endpoint in batch mode every 15 minutes -- catching anything the webhook
+# missed. Both paths call the exact same, unmodified evidence logic
+# (ci-evidence.ts's inspectCi); this workflow adds no evidence logic of its
+# own.
+#
+# Requires a repository secret SUPABASE_SERVICE_ROLE_KEY (the project's
+# service_role key) -- the same authorization convention every other
+# unattended trigger in this platform uses.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Batch-sync pending engineering gaps
+        env:
+          SUPABASE_URL: "https://esfpbiishpkvhlejnxzq.supabase.co"
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY}" ]; then
+            echo "::error::The SUPABASE_SERVICE_ROLE_KEY repository secret is not configured; cannot sync."
+            exit 1
+          fi
+          status=$(curl -sS -o response.json -w "%{http_code}" \
+            -X POST "${SUPABASE_URL}/functions/v1/terraform-ci-status-sync" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{"operation":"sync"}')
+          echo "terraform-ci-status-sync responded ${status}:"
+          cat response.json
+          echo
+          if [ "${status}" -ge 300 ]; then
+            echo "::error::terraform-ci-status-sync returned HTTP ${status}"
+            exit 1
+          fi

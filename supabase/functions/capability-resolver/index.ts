@@ -1,47 +1,23 @@
-import { createClient } from "npm:@supabase/supabase-js@2.112.4";
 import { directNamesUnder, fetchTree, resolveRevision } from "../_shared/github.ts";
+import { addGapEvent, adminClient, corsHeaders, isPlatformAuthorized, jsonReply, obj, resolvePrincipal, str, type Json } from "../_shared/platform-function.ts";
 
-type Json = Record<string, unknown>;
 const REPOSITORY = "Neurealm/arch-insurance-iac";
 const MODULE_ROOT = "terraform/modules";
 
-const obj = (value: unknown): Json => value && typeof value === "object" && !Array.isArray(value) ? value as Json : {};
-const str = (value: unknown) => typeof value === "string" ? value.trim() : "";
-
-function admin() {
-  const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => { try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default; } catch { return undefined; } })();
-  if (!url || !key) throw new Error("Supabase server credentials are not configured.");
-  return { client: createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } }), key };
-}
-function cors(request: Request) {
-  const origin = request.headers.get("origin");
-  const origins = (Deno.env.get("APP_ORIGINS") ?? Deno.env.get("APP_ORIGIN") ?? "").split(",").map((item) => item.trim()).filter(Boolean);
-  return { "access-control-allow-origin": origin && origins.includes(origin) ? origin : origins[0] ?? "null", "access-control-allow-headers": "authorization, x-client-info, apikey, content-type", "access-control-allow-methods": "POST, OPTIONS", vary: "Origin" };
-}
-function reply(request: Request, body: unknown, status = 200) { return new Response(JSON.stringify(body), { status, headers: { ...cors(request), "content-type": "application/json", "cache-control": "no-store" } }); }
+const admin = adminClient;
+const reply = jsonReply;
+const addEvent = addGapEvent;
 
 /**
- * This function runs unattended (pg_cron -> pg_net -> this endpoint, no
- * end user in the loop), so it authenticates the caller as either the
- * service role itself (the standard pg_cron pattern: the scheduled job
- * sends `Authorization: Bearer <service_role_key>`) or an interactively
- * authenticated platform admin (for a manual "resolve now" trigger from a
- * future admin UI) -- never an ordinary user.
+ * This function runs unattended (a scheduled GitHub Actions workflow or
+ * pg_net trigger calling in, no end user in the loop), so it authenticates
+ * the caller as either the service role itself (`Authorization: Bearer
+ * <service_role_key>`) or an interactively authenticated platform admin (for
+ * a manual "resolve now" trigger from the admin UI) -- never an ordinary
+ * user.
  */
 async function authorized(request: Request, db: ReturnType<typeof admin>) {
-  const auth = request.headers.get("authorization") ?? "";
-  if (!auth.startsWith("Bearer ")) return false;
-  const token = auth.slice(7);
-  if (token === db.key) return true;
-  const { data, error } = await db.client.auth.getUser(token);
-  if (error || !data.user) return false;
-  const { data: role } = await db.client.from("user_roles").select("user_id").eq("user_id", data.user.id).eq("role", "platform_admin").maybeSingle();
-  return !!role;
-}
-
-async function addEvent(db: ReturnType<typeof admin>["client"], gapId: string, type: string, detail: Json = {}) {
-  await db.from("iac_engineering_gap_events").insert({ gap_id: gapId, event_type: type, detail });
+  return isPlatformAuthorized(await resolvePrincipal(request, db));
 }
 
 /**
@@ -107,7 +83,7 @@ async function resolveGap(db: ReturnType<typeof admin>["client"], gap: Json) {
 }
 
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS") return new Response("ok", { headers: cors(request) });
+  if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(request) });
   if (request.method !== "POST") return reply(request, { error: "method not allowed" }, 405);
   const db = admin();
   if (!await authorized(request, db)) return reply(request, { error: "unauthorized" }, 401);

@@ -1,4 +1,7 @@
-import { parseDraftHcl, validateGeneratedDraftArchive, type DraftResult, type DraftVariable } from "./terraform-draft-policy.ts";
+import {
+  array, inspectExpressions, keysOnly, literalExpression, obj, parseDraftHcl, text,
+  validateGeneratedDraftArchive, type DraftResult, type DraftVariable,
+} from "./terraform-draft-policy.ts";
 
 type Json = Record<string, unknown>;
 
@@ -21,55 +24,107 @@ export const OS_DISK_INPUT_SCHEMA: Json = {
 };
 
 const same = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
-const forbidden = /\b(?:data|module|provider|terraform|provisioner|dynamic)\b|(?:local-exec|remote-exec|customData|userData|adminPassword|extensions|applicationProfile|ignore_changes|replace_triggered_by)\b|<<-?\s*[A-Za-z_]/i;
-const object = (value: unknown): Json => value && typeof value === "object" && !Array.isArray(value) ? value as Json : {};
-const array = (value: unknown): unknown[] => Array.isArray(value) ? value : [];
-function onlyKeys(value: Json, allowed: string[], label: string, problems: string[]) {
-  for (const key of Object.keys(value)) if (!allowed.includes(key)) problems.push(`${label}: unsupported key/block ${key}.`);
-}
+const IDENTIFIER = /^[a-z][a-z0-9_]*$/;
+const RESOURCE_TYPE = "Microsoft.Compute/virtualMachines@2024-07-01";
 
+/**
+ * Structural, parsed-HCL validation for the OS-disk expansion draft -- the
+ * same category of rigor terraform-draft-policy.ts's validateDraft uses for
+ * create_vm (parse, then walk the tree), rather than the previous approach
+ * of a regex blocklist plus matching against raw, unparsed source text.
+ * That text-matching approach could in principle be fooled by a match
+ * appearing inside a comment or unrelated string, and its forbidden-content
+ * checks (a hand-maintained regex) could drift out of sync with the
+ * create-VM path's tested function allowlist. This reuses inspectExpressions
+ * (the same credential/function/variable-reference walk create_vm uses,
+ * parameterized here with OS_DISK_VARIABLES) for that part, and adds
+ * structural checks for this module's specific shape.
+ */
 export function validateOsDiskDraft(draft: DraftResult): string[] {
   const problems: string[] = [];
   if (draft.moduleName !== "vm-os-disk-expand") problems.push("moduleName must be vm-os-disk-expand.");
-  if (forbidden.test(`${draft.moduleMainTf}\n${draft.moduleVariablesTf}\n${draft.moduleOutputsTf}`)) problems.push("Draft contains a forbidden Terraform construct.");
-  const metadata = new Map(draft.variables.map((variable) => [variable.name, variable.type]));
-  if (metadata.size !== OS_DISK_VARIABLES.length || OS_DISK_VARIABLES.some((variable) => metadata.get(variable.name) !== variable.type)) problems.push("Variable metadata must match the governed OS-disk interface.");
+  const names = new Set<string>();
+  for (const variable of draft.variables) {
+    const expected = OS_DISK_VARIABLES.find((v) => v.name === variable.name);
+    if (!IDENTIFIER.test(variable.name) || !expected || variable.type !== expected.type || names.has(variable.name)) problems.push(`Unsafe, duplicate or unexpected variable metadata: ${variable.name}.`);
+    if (/\$\{|%\{/.test(variable.description)) problems.push(`Variable ${variable.name}: interpolated descriptions are forbidden.`);
+    names.add(variable.name);
+  }
+  if (names.size !== OS_DISK_VARIABLES.length || OS_DISK_VARIABLES.some((v) => !names.has(v.name))) problems.push("Variable metadata must match the complete OS-disk interface.");
   if (!same(draft.inputSchema, OS_DISK_INPUT_SCHEMA)) problems.push("inputSchema must match the governed OS-disk interface.");
 
   const parsed: Record<string, Json> = {};
   for (const [label, content] of Object.entries({ main: draft.moduleMainTf, variables: draft.moduleVariablesTf, outputs: draft.moduleOutputsTf })) {
-    try { parsed[label] = parseDraftHcl(content, label); }
+    try { parsed[label] = parseDraftHcl(content, label); inspectExpressions(parsed[label], label, problems, OS_DISK_VARIABLES); }
     catch (error) { problems.push(error instanceof Error ? error.message : "HCL parse failed."); }
   }
-  if (Object.keys(parsed).length === 3) {
-    onlyKeys(parsed.main, ["resource"], "main.tf", problems);
-    onlyKeys(parsed.variables, ["variable"], "variables.tf", problems);
-    onlyKeys(parsed.outputs, ["output"], "outputs.tf", problems);
-    const resourceTypes = object(parsed.main.resource);
-    onlyKeys(resourceTypes, ["azapi_update_resource"], "main.tf.resource", problems);
-    const resources = object(resourceTypes.azapi_update_resource);
-    if (Object.keys(resources).length !== 1 || array(resources[Object.keys(resources)[0]]).length !== 1) problems.push("Exactly one named azapi_update_resource block is required.");
-    if (!Object.keys(object(parsed.outputs.output)).length) problems.push("outputs.tf must expose the updated VM identifier or disk size.");
+  if (Object.keys(parsed).length !== 3) return [...new Set(problems)];
+
+  keysOnly(parsed.main, ["resource"], "main.tf", problems);
+  keysOnly(parsed.variables, ["variable"], "variables.tf", problems);
+  keysOnly(parsed.outputs, ["output"], "outputs.tf", problems);
+
+  const declared = obj(parsed.variables.variable);
+  if (Object.keys(declared).length !== OS_DISK_VARIABLES.length) problems.push("variables.tf must declare precisely the canonical inputs.");
+  for (const expected of OS_DISK_VARIABLES) {
+    const blocks = array(declared[expected.name]);
+    const variable = obj(blocks[0]);
+    if (blocks.length !== 1 || literalExpression(variable.type) !== `\${${expected.type}}`) problems.push(`variables.tf: ${expected.name} has a missing/duplicate declaration or incorrect type.`);
+    keysOnly(variable, ["type", "description", "validation", "sensitive", "nullable"], `variable.${expected.name}`, problems);
+    if ("default" in variable) problems.push(`variable.${expected.name}: defaults are forbidden.`);
+    const validations = array(variable.validation).map(obj);
+    if (!validations.length) { problems.push(`variable.${expected.name}: validation is required.`); continue; }
+    for (const validation of validations) keysOnly(validation, ["condition", "error_message"], `variable.${expected.name}.validation`, problems);
+    const conditions = validations.map((v) => literalExpression(v.condition));
+    if (expected.name === "change_request_id" && !conditions.includes("${length(trimspace(var.change_request_id))>=6}")) {
+      problems.push("variable.change_request_id: missing exact length validation.");
+    }
+    if (expected.name === "requested_os_disk_size_gb" && !conditions.some((c) => c.includes("var.requested_os_disk_size_gb>=64") && c.includes("var.requested_os_disk_size_gb<=4095"))) {
+      problems.push("variable.requested_os_disk_size_gb: must validate the 64-4095 GB bound against this variable.");
+    }
+    if (expected.name === "target_resource_id" && !conditions.some((c) => c.includes("regex(") && c.includes("var.target_resource_id"))) {
+      problems.push("variable.target_resource_id: an exact VM ARM ID regex validation is required.");
+    }
   }
 
-  const variables = draft.moduleVariablesTf;
-  for (const variable of OS_DISK_VARIABLES) {
-    const exact = new RegExp(`variable\\s+"${variable.name}"\\s*\\{[\\s\\S]*?type\\s*=\\s*${variable.type.replace(/[()]/g, "\\\\$&")}[\\s\\S]*?\\}`, "m");
-    if (!exact.test(variables)) problems.push(`Missing or invalid variable declaration: ${variable.name}.`);
+  const types = obj(parsed.main.resource);
+  keysOnly(types, ["azapi_update_resource"], "resource", problems);
+  const resources = obj(types.azapi_update_resource);
+  if (Object.keys(resources).length !== 1) problems.push("Exactly one azapi_update_resource block is required.");
+  for (const [name, blocks] of Object.entries(resources)) {
+    const resource = obj(array(blocks)[0]);
+    if (!IDENTIFIER.test(name) || array(blocks).length !== 1) problems.push(`resource.${name}: invalid or duplicate resource label.`);
+    keysOnly(resource, ["type", "resource_id", "body", "lifecycle"], `resource.${name}`, problems);
+    if (text(resource.type) !== RESOURCE_TYPE) problems.push(`resource.${name}: unsupported or missing Azure resource type.`);
+    if (literalExpression(resource.resource_id) !== "${var.target_resource_id}") problems.push(`resource.${name}: resource_id must be the declared approved VM target.`);
+    if (!("body" in resource)) { problems.push(`resource.${name}: Azure body is required.`); continue; }
+    const body = obj(resource.body);
+    keysOnly(body, ["properties"], `resource.${name}.body`, problems);
+    const properties = obj(body.properties);
+    keysOnly(properties, ["storageProfile"], `resource.${name}.body.properties`, problems);
+    const storageProfile = obj(properties.storageProfile);
+    keysOnly(storageProfile, ["osDisk"], `resource.${name}.body.properties.storageProfile`, problems);
+    const osDisk = obj(storageProfile.osDisk);
+    keysOnly(osDisk, ["diskSizeGB"], `resource.${name}.body.properties.storageProfile.osDisk`, problems);
+    if (literalExpression(osDisk.diskSizeGB) !== "${var.requested_os_disk_size_gb}") problems.push(`resource.${name}: diskSizeGB must be set exactly to var.requested_os_disk_size_gb.`);
+    // Lifecycle execution hooks, ignore_changes and replacement triggers are
+    // not draftable; only the correlation precondition is.
+    const lifecycles = array(resource.lifecycle);
+    if (lifecycles.length !== 1) problems.push(`resource.${name}: a correlation lifecycle precondition is required.`);
+    for (const lifecycle of lifecycles) {
+      keysOnly(obj(lifecycle), ["precondition"], `resource.${name}.lifecycle`, problems);
+      const conditions = array(obj(lifecycle).precondition).map(obj);
+      if (!conditions.some((p) => literalExpression(p.condition) === "${length(trimspace(var.change_request_id))>=6}")) problems.push(`resource.${name}: missing exact change_request_id precondition.`);
+      for (const p of conditions) keysOnly(p, ["condition", "error_message"], `resource.${name}.precondition`, problems);
+    }
   }
-  const declared = [...variables.matchAll(/variable\s+"([^"]+)"/g)].map((match) => match[1]);
-  if (declared.length !== OS_DISK_VARIABLES.length || declared.some((name) => !metadata.has(name))) problems.push("variables.tf declares unexpected inputs.");
-  if (!/requested_os_disk_size_gb[\s\S]*?(?:>=\s*64|>\s*63)[\s\S]*?(?:<=\s*4095|<\s*4096)/.test(variables)) problems.push("Disk size must be constrained to 64–4095 GB.");
-  if (!/change_request_id[\s\S]*?length\s*\(\s*trimspace\s*\(\s*var\.change_request_id\s*\)\s*\)\s*>=\s*6/.test(variables)) problems.push("change_request_id validation is required.");
 
-  const main = draft.moduleMainTf;
-  if ((main.match(/resource\s+"azapi_update_resource"/g) ?? []).length !== 1) problems.push("Exactly one azapi_update_resource is required.");
-  if (/\bresource\s+"(?!azapi_update_resource")/.test(main)) problems.push("Only azapi_update_resource is allowed.");
-  if (!/type\s*=\s*"Microsoft\.Compute\/virtualMachines@2024-07-01"/.test(main)) problems.push("The module must update one Azure VM using the approved API version.");
-  if (!/resource_id\s*=\s*var\.target_resource_id/.test(main)) problems.push("The exact approved VM target is required.");
-  if (!/storageProfile\s*=\s*\{[\s\S]*?osDisk\s*=\s*\{[\s\S]*?diskSizeGB\s*=\s*var\.requested_os_disk_size_gb/.test(main)) problems.push("The update must set only the requested OS disk size.");
-  if (/\b(?:hardwareProfile|networkProfile|securityProfile|identity|diagnosticsProfile)\b/.test(main)) problems.push("The OS-disk draft may not update other VM properties.");
-  if (!/lifecycle\s*\{[\s\S]*?precondition\s*\{[\s\S]*?length\s*\(\s*trimspace\s*\(\s*var\.change_request_id\s*\)\s*\)\s*>=\s*6/.test(main)) problems.push("The exact change-request precondition is required.");
+  const outputs = obj(parsed.outputs.output);
+  if (!Object.keys(outputs).length) problems.push("outputs.tf must expose the updated VM identifier or disk size.");
+  for (const [name, blocks] of Object.entries(outputs)) {
+    if (!IDENTIFIER.test(name) || array(blocks).length !== 1) problems.push(`output.${name}: invalid/duplicate output.`);
+    keysOnly(obj(array(blocks)[0]), ["value", "description", "sensitive"], `output.${name}`, problems);
+  }
   return [...new Set(problems)];
 }
 

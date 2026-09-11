@@ -8,19 +8,32 @@ on:
       - "supabase/functions/terraform-orchestrator/**"
       - "supabase/functions/terraform-drafting-agent/**"
       - "supabase/functions/terraform-ci-remediation-agent/**"
+      - "supabase/functions/terraform-ci-status-sync/**"
+      - "supabase/functions/capability-resolver/**"
+      - "supabase/functions/github-ci-webhook/**"
       - "supabase/functions/_shared/*draft*"
+      - "supabase/functions/_shared/platform-function.ts"
+      - "supabase/functions/_shared/github-write.ts"
+      - "supabase/functions/_shared/webhook-auth.ts"
       - "scripts/validate-terraform-drafts.ts"
       - "supabase/migrations/*terraform*"
       - "supabase/migrations/*remediation*"
       - ".github/workflows/terraform-static-validation.yml"
       - ".github/workflows/hcp-terraform-authentication-test.yml"
+      - ".github/workflows/sync-ci-evidence.yml"
   push:
     branches: [main]
     paths:
       - "terraform/**"
       - "supabase/functions/terraform-drafting-agent/**"
       - "supabase/functions/terraform-ci-remediation-agent/**"
+      - "supabase/functions/terraform-ci-status-sync/**"
+      - "supabase/functions/capability-resolver/**"
+      - "supabase/functions/github-ci-webhook/**"
       - "supabase/functions/_shared/*draft*"
+      - "supabase/functions/_shared/platform-function.ts"
+      - "supabase/functions/_shared/github-write.ts"
+      - "supabase/functions/_shared/webhook-auth.ts"
       - "scripts/validate-terraform-drafts.ts"
       - "supabase/migrations/*remediation*"
       - ".github/workflows/terraform-static-validation.yml"
@@ -43,9 +56,9 @@ jobs:
       - name: Test draft HCL security policy
         # GopherJS's Go runtime enumerates process.env during initialization.
         # No cloud credentials are supplied; no network/run/read is granted.
-        run: deno test --allow-env --no-config --no-lock --node-modules-dir=none supabase/functions/_shared/terraform-draft-policy.test.ts supabase/functions/_shared/terraform-draft-template.test.ts supabase/functions/terraform-ci-remediation-agent/policy.test.ts
+        run: deno test --allow-env --no-config --no-lock --node-modules-dir=none supabase/functions/_shared/terraform-draft-policy.test.ts supabase/functions/_shared/os-disk-draft-policy.test.ts supabase/functions/_shared/terraform-draft-template.test.ts supabase/functions/_shared/webhook-auth.test.ts supabase/functions/terraform-ci-remediation-agent/policy.test.ts supabase/functions/terraform-ci-remediation-agent/handler.test.ts supabase/functions/terraform-ci-remediation-agent/fetch-with-retry.test.ts
       - name: Type-check Terraform agents
-        run: deno check --no-config --no-lock --node-modules-dir=none supabase/functions/terraform-drafting-agent/index.ts supabase/functions/terraform-ci-remediation-agent/index.ts
+        run: deno check --no-config --no-lock --node-modules-dir=none supabase/functions/terraform-drafting-agent/index.ts supabase/functions/terraform-ci-remediation-agent/index.ts supabase/functions/terraform-ci-status-sync/index.ts supabase/functions/capability-resolver/index.ts supabase/functions/github-ci-webhook/index.ts
       - name: Validate generated draft archives
         run: deno run --allow-env --no-config --no-lock --node-modules-dir=none --allow-read=terraform scripts/validate-terraform-drafts.ts
       - uses: hashicorp/setup-terraform@v3

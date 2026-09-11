@@ -4,6 +4,7 @@ import {
   ARM_GROUP, ARM_SUBNET, VM_NAME, VM_SIZE, ADMIN_USERNAME, ADMIN_USERNAME_RESERVED, SSH_KEY, IMAGE_PART, LOCATION,
   type CandidateFact,
 } from "../_shared/servicenow-change-agent.ts";
+import { timingSafeEqual, hmacSha256Hex } from "../_shared/webhook-auth.ts";
 
 const MODEL = "google/gemini-2.5-flash";
 const SERVICE_NOW_MARKER = "[NeuGAIN Infrastructure Intake]";
@@ -854,27 +855,6 @@ async function resumeQueued(admin: ReturnType<typeof supabaseAdmin>, request: Re
     }
   }
   return json({ processed: results.length, results }, 200, request);
-}
-
-/**
- * Constant-time string comparison -- a plain `!==` on the shared secret leaks
- * timing information about how many leading characters matched. The strings
- * here are short (a header value vs. an env var), so the risk is minor, but
- * it costs nothing to close.
- */
-function timingSafeEqual(a: string, b: string): boolean {
-  const left = new TextEncoder().encode(a);
-  const right = new TextEncoder().encode(b);
-  if (left.length !== right.length) return false;
-  let diff = 0;
-  for (let i = 0; i < left.length; i++) diff |= left[i] ^ right[i];
-  return diff === 0;
-}
-
-async function hmacSha256Hex(secret: string, message: string): Promise<string> {
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
-  return [...new Uint8Array(signature)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 /**

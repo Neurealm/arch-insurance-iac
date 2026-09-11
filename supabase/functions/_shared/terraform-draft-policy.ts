@@ -11,9 +11,9 @@ export type DraftResult = {
   variables: DraftVariable[]; moduleMainTf: string;
   moduleVariablesTf: string; moduleOutputsTf: string; inputSchema: Json;
 };
-const obj = (v: unknown): Json => v && typeof v === "object" && !Array.isArray(v) ? v as Json : {};
-const array = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
-const text = (v: unknown): string => typeof v === "string" ? v : "";
+export const obj = (v: unknown): Json => v && typeof v === "object" && !Array.isArray(v) ? v as Json : {};
+export const array = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
+export const text = (v: unknown): string => typeof v === "string" ? v : "";
 const IDENTIFIER = /^[a-z][a-z0-9_]*$/;
 const RESOURCE_TYPES = new Set([
   "Microsoft.Compute/virtualMachines@2024-07-01",
@@ -52,20 +52,27 @@ const FUNCTIONS = new Set([
   "upper", "values", "zipmap",
 ]);
 
-function keysOnly(value: Json, allowed: string[], label: string, problems: string[]) {
+export function keysOnly(value: Json, allowed: string[], label: string, problems: string[]) {
   for (const key of Object.keys(value)) if (!allowed.includes(key)) problems.push(`${label}: unsupported key/block ${key}.`);
 }
 
-/** Traverse the parsed tree, including expressions preserved by HCL2JSON.
+/**
+ * Traverse the parsed tree, including expressions preserved by HCL2JSON.
  * Deliberately scan literal strings as well: false positives need a human
  * rewrite, never an unsafe expression bypass hidden in interpolation/heredoc.
+ *
+ * Parameterized by `variables` (defaults to the create-VM interface) so
+ * every draft policy shares one credential/function/variable-reference
+ * walk instead of each maintaining its own -- e.g. the OS-disk policy
+ * previously used a regex blocklist over raw text that could miss what
+ * this structural walk catches.
  */
-function inspectExpressions(value: unknown, label: string, problems: string[]) {
-  if (Array.isArray(value)) { value.forEach((v, i) => inspectExpressions(v, `${label}[${i}]`, problems)); return; }
+export function inspectExpressions(value: unknown, label: string, problems: string[], variables: DraftVariable[] = CREATE_VM_VARIABLES) {
+  if (Array.isArray(value)) { value.forEach((v, i) => inspectExpressions(v, `${label}[${i}]`, problems, variables)); return; }
   if (value && typeof value === "object") {
     for (const [key, v] of Object.entries(value)) {
       if (/^(customData|userData|adminPassword|extensions|applicationProfile)$/i.test(key)) problems.push(`${label}.${key}: guest execution/credential payload is forbidden.`);
-      inspectExpressions(v, `${label}.${key}`, problems);
+      inspectExpressions(v, `${label}.${key}`, problems, variables);
     }
     return;
   }
@@ -81,7 +88,7 @@ function inspectExpressions(value: unknown, label: string, problems: string[]) {
     if (!FUNCTIONS.has(match[1])) problems.push(`${label}: function ${match[1]} is not allowed.`);
   }
   for (const match of value.matchAll(/\bvar\.([A-Za-z_][A-Za-z0-9_]*)/g)) {
-    if (!CREATE_VM_VARIABLES.some((v) => v.name === match[1])) problems.push(`${label}: undeclared or reserved variable ${match[1]}.`);
+    if (!variables.some((v) => v.name === match[1])) problems.push(`${label}: undeclared or reserved variable ${match[1]}.`);
   }
 }
 
@@ -98,7 +105,7 @@ export function parseDraftHcl(content: string, label: string): Json {
   return obj(parsed[0]);
 }
 
-function literalExpression(value: unknown): string { return text(value).replace(/\s+/g, ""); }
+export function literalExpression(value: unknown): string { return text(value).replace(/\s+/g, ""); }
 
 export function validateDraft(draft: DraftResult): string[] {
   const problems: string[] = [];

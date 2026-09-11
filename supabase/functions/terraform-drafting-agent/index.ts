@@ -1,78 +1,27 @@
-import { createClient } from "npm:@supabase/supabase-js@2.112.4";
 import { CREATE_VM_INPUT_SCHEMA, CREATE_VM_VARIABLES, validateDraft, validateGeneratedDraftFiles, type DraftResult, type DraftVariable } from "../_shared/terraform-draft-policy.ts";
 import { OS_DISK_INPUT_SCHEMA, OS_DISK_VARIABLES, validateOsDiskDraft, validateOsDiskGeneratedFiles } from "../_shared/os-disk-draft-policy.ts";
-import { formatGeneratedHclAssignments } from "../_shared/terraform-draft-template.ts";
+import { formatGeneratedHclAssignments, moduleVersionsTf, templateRootFiles } from "../_shared/terraform-draft-template.ts";
+import { addGapEvent, adminClient, corsHeaders, isPlatformAuthorized, jsonReply, obj, resolvePrincipal, str, arr, type Json } from "../_shared/platform-function.ts";
+import { draftGitHubToken, openPullRequest } from "../_shared/github-write.ts";
 
 // This agent is the one place in the whole platform that is allowed to
 // WRITE to GitHub (open a branch, commit files, open a PR) -- it uses its
-// own token (GITHUB_TERRAFORM_DRAFT_TOKEN) and its own minimal Git Data API
-// helpers below, deliberately never importing ../_shared/github.ts (that
+// own token (GITHUB_TERRAFORM_DRAFT_TOKEN) via ../_shared/github-write.ts
+// (the shared write-capable client), never ../_shared/github.ts (that
 // module is read-only by contract; see its header comment).
 
-type Json = Record<string, unknown>;
 const REPOSITORY = "Neurealm/arch-insurance-iac";
 const MODEL = "google/gemini-2.5-flash";
 
-const obj = (value: unknown): Json => value && typeof value === "object" && !Array.isArray(value) ? value as Json : {};
-const str = (value: unknown) => typeof value === "string" ? value.trim() : "";
-const arr = (value: unknown) => Array.isArray(value) ? value : [];
-
-function admin() {
-  const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => { try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default; } catch { return undefined; } })();
-  if (!url || !key) throw new Error("Supabase server credentials are not configured.");
-  return { client: createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } }), key };
-}
-function cors(request: Request) {
-  const origin = request.headers.get("origin");
-  const origins = (Deno.env.get("APP_ORIGINS") ?? Deno.env.get("APP_ORIGIN") ?? "").split(",").map((item) => item.trim()).filter(Boolean);
-  return { "access-control-allow-origin": origin && origins.includes(origin) ? origin : origins[0] ?? "null", "access-control-allow-headers": "authorization, x-client-info, apikey, content-type", "access-control-allow-methods": "POST, OPTIONS", vary: "Origin" };
-}
-function reply(request: Request, body: unknown, status = 200) { return new Response(JSON.stringify(body), { status, headers: { ...cors(request), "content-type": "application/json", "cache-control": "no-store" } }); }
+const admin = adminClient;
+const reply = jsonReply;
+const addEvent = addGapEvent;
 
 async function authorized(request: Request, db: ReturnType<typeof admin>) {
-  const auth = request.headers.get("authorization") ?? "";
-  if (!auth.startsWith("Bearer ")) return false;
-  const token = auth.slice(7);
-  if (token === db.key) return true;
-  const { data, error } = await db.client.auth.getUser(token);
-  if (error || !data.user) return false;
-  const { data: role } = await db.client.from("user_roles").select("user_id").eq("user_id", data.user.id).eq("role", "platform_admin").maybeSingle();
-  return !!role;
+  return isPlatformAuthorized(await resolvePrincipal(request, db));
 }
 
-async function addEvent(db: ReturnType<typeof admin>["client"], gapId: string, type: string, detail: Json = {}) {
-  await db.from("iac_engineering_gap_events").insert({ gap_id: gapId, event_type: type, detail });
-}
-
-// --- Write-scoped GitHub helpers (this function's own token only) ---------
-function draftToken() {
-  const token = str(Deno.env.get("GITHUB_TERRAFORM_DRAFT_TOKEN"));
-  if (!token) throw new Error("GITHUB_TERRAFORM_DRAFT_TOKEN is not configured.");
-  return token;
-}
-async function gh(path: string, token: string, init: RequestInit = {}) {
-  const response = await fetch(`https://api.github.com${path}`, { ...init, headers: { accept: "application/vnd.github+json", authorization: `Bearer ${token}`, "x-github-api-version": "2022-11-28", ...(init.headers ?? {}) } });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(`GitHub ${path} returned ${response.status}: ${str(obj(body).message) || "request failed"}`);
-  return body;
-}
-async function openPullRequest(token: string, branch: string, baseBranch: string, files: Array<{ path: string; content: string }>, commitMessage: string, prTitle: string, prBody: string) {
-  const baseRef = obj(await gh(`/repos/${REPOSITORY}/git/ref/heads/${baseBranch}`, token));
-  const baseCommitSha = str(obj(baseRef.object).sha);
-  const baseCommit = obj(await gh(`/repos/${REPOSITORY}/git/commits/${baseCommitSha}`, token));
-  const baseTreeSha = str(obj(baseCommit.tree).sha);
-
-  const blobs = await Promise.all(files.map(async (file) => {
-    const blob = obj(await gh(`/repos/${REPOSITORY}/git/blobs`, token, { method: "POST", body: JSON.stringify({ content: file.content, encoding: "utf-8" }) }));
-    return { path: file.path, mode: "100644", type: "blob", sha: str(blob.sha) };
-  }));
-  const tree = obj(await gh(`/repos/${REPOSITORY}/git/trees`, token, { method: "POST", body: JSON.stringify({ base_tree: baseTreeSha, tree: blobs }) }));
-  const commit = obj(await gh(`/repos/${REPOSITORY}/git/commits`, token, { method: "POST", body: JSON.stringify({ message: commitMessage, tree: str(tree.sha), parents: [baseCommitSha] }) }));
-  await gh(`/repos/${REPOSITORY}/git/refs`, token, { method: "POST", body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: str(commit.sha) }) });
-  const pr = obj(await gh(`/repos/${REPOSITORY}/pulls`, token, { method: "POST", body: JSON.stringify({ title: prTitle, head: branch, base: baseBranch, body: prBody }) }));
-  return { number: Number(pr.number), url: str(pr.html_url) };
-}
+const draftToken = draftGitHubToken;
 
 // --- Drafting ---------------------------------------------------------------
 
@@ -204,67 +153,6 @@ function alignEquals(content: string): string {
   return formatGeneratedHclAssignments(content);
 }
 
-function templateRootFiles(moduleName: string, variables: DraftVariable[]) {
-  const moduleSnake = moduleName.replace(/-/g, "_");
-  const wiring = variables.map((variable) => `  ${variable.name} = var.${variable.name}`).join("\n");
-  const varDecls = variables.map((variable) => `variable "${variable.name}" {\n  type        = ${variable.type}\n  description = ${JSON.stringify(variable.description || variable.name)}\n${variable.name === "tags" ? "  default     = {}\n" : ""}}`).join("\n\n");
-  const main = `provider "azapi" {
-  # HCP Terraform supplies these short-lived files through its Azure dynamic
-  # credentials integration. Do not replace this with a client secret.
-  use_cli              = false
-  use_oidc             = true
-  client_id_file_path  = var.tfc_azure_dynamic_credentials.default.client_id_file_path
-  oidc_token_file_path = var.tfc_azure_dynamic_credentials.default.oidc_token_file_path
-}
-
-module "${moduleSnake}" {
-  source = "../../../modules/${moduleName}"
-
-${wiring}
-}
-`;
-  const variablesTf = `${varDecls}
-
-variable "tfc_azure_dynamic_credentials" {
-  description = "HCP Terraform-generated OIDC file locations for the default Azure provider."
-  type = object({
-    default = object({
-      client_id_file_path  = string
-      oidc_token_file_path = string
-    })
-    aliases = map(object({
-      client_id_file_path  = string
-      oidc_token_file_path = string
-    }))
-  })
-}
-`;
-  const versions = `terraform {
-  required_version = ">= 1.9.0, < 2.0.0"
-
-  required_providers {
-    azapi = {
-      source  = "Azure/azapi"
-      version = "~> 2.0"
-    }
-  }
-}
-`;
-  return { main, variablesTf, versions };
-}
-function moduleVersionsTf() {
-  return `terraform {
-  required_version = ">= 1.9.0, < 2.0.0"
-  required_providers {
-    azapi = {
-      source  = "Azure/azapi"
-      version = "~> 2.0"
-    }
-  }
-}
-`;
-}
-
 const EXEMPLAR = `// terraform/modules/vm-action/main.tf
 resource "azapi_resource_action" "vm" {
   type        = "Microsoft.Compute/virtualMachines@2024-07-01"
@@ -358,7 +246,7 @@ async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Js
   ].join("\n");
   try {
     await addEvent(db, str(gap.id), "pull_request_opening", { branch, moduleName: draft.moduleName });
-    const pr = await openPullRequest(token, branch, "main", files, `AI-draft: ${draft.displayName}`, `AI-draft: ${draft.displayName} (${draft.moduleName})`, prBody);
+    const pr = await openPullRequest(token, REPOSITORY, branch, "main", files, `AI-draft: ${draft.displayName}`, `AI-draft: ${draft.displayName} (${draft.moduleName})`, prBody);
     await db.from("iac_engineering_gaps").update({ status: "pr_opened", linked_capability_id: capability.id, draft_branch: branch, draft_pr_number: pr.number, draft_pr_url: pr.url }).eq("id", gap.id);
     await addEvent(db, str(gap.id), "pr_opened", { prNumber: pr.number, prUrl: pr.url, branch, capabilityId: capability.id, moduleName: draft.moduleName });
     return { outcome: "pr_opened", prUrl: pr.url, capabilityId: capability.id };
@@ -430,7 +318,7 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
 
   try {
     await addEvent(db, str(gap.id), "pull_request_opening", { branch, moduleName: draft.moduleName });
-    const pr = await openPullRequest(token, branch, "main", files, `AI-draft: ${draft.displayName}`, `AI-draft: ${draft.displayName} (${draft.moduleName})`, prBody);
+    const pr = await openPullRequest(token, REPOSITORY, branch, "main", files, `AI-draft: ${draft.displayName}`, `AI-draft: ${draft.displayName} (${draft.moduleName})`, prBody);
     await db.from("iac_engineering_gaps").update({ status: "pr_opened", linked_capability_id: capability.id, draft_branch: branch, draft_pr_number: pr.number, draft_pr_url: pr.url }).eq("id", gap.id);
     await addEvent(db, str(gap.id), "pr_opened", { prNumber: pr.number, prUrl: pr.url, branch, capabilityId: capability.id, moduleName: draft.moduleName });
     return { outcome: "pr_opened", prUrl: pr.url, capabilityId: capability.id };
@@ -445,7 +333,7 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
 }
 
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS") return new Response("ok", { headers: cors(request) });
+  if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(request) });
   if (request.method !== "POST") return reply(request, { error: "method not allowed" }, 405);
   const db = admin();
   if (!await authorized(request, db)) return reply(request, { error: "unauthorized" }, 401);

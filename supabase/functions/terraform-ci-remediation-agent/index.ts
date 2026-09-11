@@ -1,9 +1,11 @@
-import { createClient } from "npm:@supabase/supabase-js@2.112.4";
 import { decodeBase64, githubGet, obj, str } from "../_shared/github.ts";
+import { githubWriteRequest } from "../_shared/github-write.ts";
+import { adminClient, corsHeaders, resolvePrincipal } from "../_shared/platform-function.ts";
 import { CREATE_VM_VARIABLES } from "../_shared/terraform-draft-policy.ts";
 import { OS_DISK_VARIABLES } from "../_shared/os-disk-draft-policy.ts";
 import { formatGeneratedHclAssignments, moduleVersionsTf, templateRootFiles } from "../_shared/terraform-draft-template.ts";
 import { createRemediationHandler, type Claim, type CompleteInput, type GapRecord } from "./handler.ts";
+import { fetchWithRetry } from "./fetch-with-retry.ts";
 import {
   REPAIR_OUTPUT_SCHEMA, buildRepairInput, buildRepairInstructions, failedJobIds,
   governedModule, parseRepairResponse, redactCiLog, validateRepairArchive,
@@ -15,35 +17,16 @@ const PREFIX = `/repos/${REPOSITORY}`;
 const DEFAULT_MODEL = "gpt-5.6-terra";
 const SHA = /^[0-9a-f]{40}$/;
 
-function admin() {
-  const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => { try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default; } catch { return undefined; } })();
-  if (!url || !key) throw new Error("Supabase server credentials are not configured.");
-  return { client: createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } }), key };
-}
-function cors(request: Request) {
-  const origin = request.headers.get("origin");
-  const origins = (Deno.env.get("APP_ORIGINS") ?? Deno.env.get("APP_ORIGIN") ?? "").split(",").map((item) => item.trim()).filter(Boolean);
-  return { "access-control-allow-origin": origin && origins.includes(origin) ? origin : origins[0] ?? "null", "access-control-allow-headers": "authorization, x-client-info, apikey, content-type", "access-control-allow-methods": "POST, OPTIONS", vary: "Origin" };
-}
+const admin = adminClient;
+const cors = corsHeaders;
 function env(name: string) { return str(Deno.env.get(name)); }
 function modelName() { return env("OPENAI_REMEDIATION_MODEL") || DEFAULT_MODEL; }
 function repo(value: unknown) { return str(obj(value).full_name).toLowerCase() === REPOSITORY.toLowerCase(); }
 
-async function ghJson(path: string, token: string, init: RequestInit = {}) {
-  const response = await fetch(`https://api.github.com${path}`, {
-    ...init,
-    headers: {
-      accept: "application/vnd.github+json",
-      authorization: `Bearer ${token}`,
-      "x-github-api-version": "2022-11-28",
-      ...(init.body ? { "content-type": "application/json" } : {}),
-      ...(init.headers ?? {}),
-    },
-  });
-  if (!response.ok) throw new Error(`GitHub request failed (${response.status}).`);
-  return obj(await response.json());
-}
+// Surfaces GitHub's own error message on failure (previously this agent's
+// local copy discarded it, reporting only a bare status code -- unified with
+// terraform-drafting-agent's client, which never had that gap).
+const ghJson = (path: string, token: string, init: RequestInit = {}) => githubWriteRequest(path, token, init);
 
 async function readTail(response: Response, limit: number) {
   if (!response.body) return "";
@@ -155,7 +138,7 @@ async function refreshFromTrustedMain(gap: RepairGap, pr: Json, readToken: strin
 
 async function askCodingModel(gap: RepairGap, current: RepairFiles, logs: string) {
   const model = modelName();
-  const response = await fetch("https://api.openai.com/v1/responses", {
+  const body = await fetchWithRetry("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: { authorization: `Bearer ${env("OPENAI_API_KEY")}`, "content-type": "application/json" },
     body: JSON.stringify({
@@ -168,8 +151,7 @@ async function askCodingModel(gap: RepairGap, current: RepairFiles, logs: string
       text: { format: { type: "json_schema", name: "terraform_ci_repair", strict: true, schema: REPAIR_OUTPUT_SCHEMA } },
     }),
   });
-  if (!response.ok) throw new Error(`Coding model request failed (${response.status}).`);
-  return { model, proposal: parseRepairResponse(await response.json()) };
+  return { model, proposal: parseRepairResponse(body) };
 }
 
 function repairArchive(gap: RepairGap, proposal: RepairFiles) {
@@ -286,16 +268,12 @@ Deno.serve(async (request) => {
   try { db = admin(); } catch { return new Response(JSON.stringify({ error: "Server configuration unavailable." }), { status: 503, headers: { ...cors(request), "content-type": "application/json", "cache-control": "no-store" } }); }
   return createRemediationHandler({
     headers: cors,
+    // CI remediation always requires an interactive human admin, never the
+    // service role -- an AI-assisted code repair attempt is deliberately not
+    // something an unattended trigger can set off on its own.
     authenticate: async (req) => {
-      const auth = req.headers.get("authorization") ?? "";
-      if (!auth.startsWith("Bearer ")) return null;
-      const token = auth.slice(7);
-      if (token === db.key) return null;
-      const { data, error } = await db.client.auth.getUser(token);
-      if (error || !data.user) return null;
-      const role = await db.client.from("user_roles").select("user_id").eq("user_id", data.user.id).eq("role", "platform_admin").maybeSingle();
-      if (role.error) throw role.error;
-      return { id: data.user.id, isAdmin: !!role.data };
+      const principal = await resolvePrincipal(req, db);
+      return principal?.kind === "human" ? { id: principal.id, isAdmin: principal.isAdmin } : null;
     },
     ready: () => {
       const model = modelName();

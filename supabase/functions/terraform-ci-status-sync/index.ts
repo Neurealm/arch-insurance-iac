@@ -1,19 +1,10 @@
-import { createClient } from "npm:@supabase/supabase-js@2.112.4";
 import { githubGet, obj, str } from "../_shared/github.ts";
+import { adminClient, corsHeaders, resolvePrincipal } from "../_shared/platform-function.ts";
 import { createCiHandler } from "./handler.ts";
 import type { GapRecord } from "./handler.ts";
 
-function admin() {
-  const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => { try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default; } catch { return undefined; } })();
-  if (!url || !key) throw new Error("Supabase server credentials are not configured.");
-  return { client: createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } }), key };
-}
-function cors(request: Request) {
-  const origin = request.headers.get("origin");
-  const origins = (Deno.env.get("APP_ORIGINS") ?? Deno.env.get("APP_ORIGIN") ?? "").split(",").map((item) => item.trim()).filter(Boolean);
-  return { "access-control-allow-origin": origin && origins.includes(origin) ? origin : origins[0] ?? "null", "access-control-allow-headers": "authorization, x-client-info, apikey, content-type", "access-control-allow-methods": "POST, OPTIONS", vary: "Origin" };
-}
+const admin = adminClient;
+const cors = corsHeaders;
 const COLUMNS = "id,status,requested_by,ci_version,ci_head_sha,ci_capability_snapshot,draft_pr_number,draft_branch,linked_capability_id,iac_automation_capabilities!linked_capability_id(*)";
 function gapRecord(value: unknown): GapRecord {
   const row = obj(value);
@@ -29,17 +20,7 @@ Deno.serve(async (request) => {
   try { db = admin(); } catch { return new Response(JSON.stringify({ error: "Server configuration unavailable." }), { status: 503, headers: { ...cors(request), "content-type": "application/json", "cache-control": "no-store" } }); }
   return createCiHandler({
     headers: cors,
-    authenticate: async (req) => {
-      const auth = req.headers.get("authorization") ?? "";
-      if (!auth.startsWith("Bearer ")) return null;
-      const token = auth.slice(7);
-      if (token === db.key) return { kind: "service" };
-      const { data, error } = await db.client.auth.getUser(token);
-      if (error || !data.user) return null;
-      const role = await db.client.from("user_roles").select("user_id").eq("user_id", data.user.id).eq("role", "platform_admin").maybeSingle();
-      if (role.error) throw role.error;
-      return { kind: "human", id: data.user.id, isAdmin: !!role.data };
-    },
+    authenticate: (req) => resolvePrincipal(req, db),
     getGap: async (id) => {
       const { data, error } = await db.client.from("iac_engineering_gaps").select(COLUMNS).eq("id", id).maybeSingle();
       if (error) throw error;
