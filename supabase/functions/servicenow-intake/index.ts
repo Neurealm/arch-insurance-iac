@@ -1,4 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import {
+  mergeTicketHistory, redactSensitiveData, unwrapTicketPayload, reconcileFacts, createVmFieldStates,
+  ARM_GROUP, ARM_SUBNET, VM_NAME, VM_SIZE, ADMIN_USERNAME, ADMIN_USERNAME_RESERVED, SSH_KEY, IMAGE_PART, LOCATION,
+  type CandidateFact,
+} from "../_shared/servicenow-change-agent.ts";
 
 const MODEL = "google/gemini-2.5-flash";
 const SERVICE_NOW_MARKER = "[NeuGAIN Infrastructure Intake]";
@@ -19,6 +24,8 @@ type NormalizedTicket = {
   businessImpact: string;
   applicationOwner: string;
   rollbackPlan: string;
+  /** Stable ServiceNow identity mismatches are conflicts, never corrections. */
+  identityConflicts: string[];
   sourceUpdatedAt: string | null;
   /** Questions a previous analysis of this same ticket asked the requester. */
   priorQuestions: string[];
@@ -94,30 +101,29 @@ function json(body: unknown, status = 200, request?: Request) {
   });
 }
 
-function normalizeTicket(body: RecordValue): NormalizedTicket {
-  const source = record(body.ticket ?? body.change_request ?? body.request);
-  const fields = { ...body, ...source };
-  const requestedBy = record(fields.requested_by);
-  const requestedFor = record(fields.requested_for);
+function normalizeTicket(body: RecordValue, history: unknown[] = [body]): NormalizedTicket {
+  // Incoming webhooks are partial snapshots. Rebuild the permanent ticket
+  // conversation before every analysis; an empty newer field must never erase
+  // an older supplied value. `unwrapTicketPayload` also repairs already
+  // double-nested demo revisions created by the former console flow.
+  const merged = mergeTicketHistory(history);
+  const fields = unwrapTicketPayload(body);
   return {
-    ticketNumber: first(fields, ["number", "ticket_number", "ticketNumber", "change_number", "id"]),
-    sysId: first(fields, ["sys_id", "sysId"]) || null,
-    requester: first(fields, ["requester", "requested_by_email", "requested_by_name"]) || first(requestedBy, ["email", "name", "user_name"]) || first(requestedFor, ["email", "name", "user_name"]),
-    application: first(fields, ["application", "business_service", "service", "cmdb_ci_name"]),
-    environment: first(fields, ["environment", "u_environment"]) || "",
-    description: first(fields, ["description", "short_description", "details", "justification"]),
-    maintenanceWindow: first(fields, ["maintenance_window", "planned_start", "planned_end", "u_maintenance_window"]),
-    businessImpact: first(fields, ["business_impact", "impact", "u_business_impact"]),
-    applicationOwner: first(fields, ["application_owner", "service_owner", "u_application_owner"]),
-    rollbackPlan: first(fields, ["rollback_plan", "backout_plan", "u_rollback_plan"]),
+    ticketNumber: merged.ticketNumber,
+    sysId: merged.sysId,
+    requester: merged.requester,
+    application: merged.application,
+    environment: merged.environment,
+    description: merged.description,
+    maintenanceWindow: merged.maintenanceWindow,
+    businessImpact: merged.businessImpact,
+    applicationOwner: merged.applicationOwner,
+    rollbackPlan: merged.rollbackPlan,
+    identityConflicts: merged.identityConflicts,
     sourceUpdatedAt: timestamp(first(fields, ["sys_updated_on", "updated_at", "source_updated_at"])),
-    // Carried by a resubmission of a ticket the agent already questioned.
-    // Without these the next analysis starts from scratch and re-asks
-    // everything the requester has already answered.
-    priorQuestions: unique(array(fields.prior_questions ?? fields.priorQuestions).filter((item): item is string => typeof item === "string").map((item) => item.trim()).slice(0, 40)),
-    clarificationAnswers: unique(array(fields.clarification_answers ?? fields.clarificationAnswers).filter((item): item is string => typeof item === "string").map((item) => item.trim()).slice(0, 40)),
+    priorQuestions: merged.priorQuestions.slice(0, 40),
+    clarificationAnswers: merged.clarificationAnswers.slice(0, 40),
   };
-
 }
 
 async function sha256(value: unknown) {
@@ -156,6 +162,83 @@ async function authenticatedCaller(request: Request) {
 
 async function addEvent(admin: ReturnType<typeof supabaseAdmin>, requestId: string, eventType: string, detail: RecordValue = {}) {
   await admin.from("servicenow_intake_events").insert({ request_id: requestId, event_type: eventType, detail });
+}
+
+async function ticketPayloadHistory(admin: ReturnType<typeof supabaseAdmin>, ticketNumber: string): Promise<unknown[]> {
+  // Old intake rows are a compatibility source until the canonical snapshot
+  // reader is cut over. Page through the entire ticket rather than imposing a
+  // silent history cap that could hide the original request or an answer.
+  const history: unknown[] = [];
+  const escaped = ticketNumber.replace(/[\\%_]/g, "\\$&");
+  const pageSize = 1_000;
+  for (let from = 0;; from += pageSize) {
+    const { data, error } = await admin.from("servicenow_intake_requests")
+      .select("ticket_number, ticket_payload")
+      .ilike("ticket_number", escaped)
+      .order("received_at", { ascending: true })
+      .range(from, from + pageSize - 1);
+    if (error) throw new Error(`Unable to load complete ticket history: ${error.message}`);
+    const rows = data ?? [];
+    history.push(...rows
+      .filter((row) => text(record(row).ticket_number).toLowerCase() === ticketNumber.toLowerCase())
+      .map((row) => redactSensitiveData(record(row).ticket_payload)));
+    if (rows.length < pageSize) break;
+  }
+  return history;
+}
+
+function upstreamEventKey(body: RecordValue, ticket: NormalizedTicket, observedSysId: string | null, payloadHash: string, demoMode: boolean) {
+  const fields = unwrapTicketPayload(body);
+  const eventId = first(fields, ["event_id", "eventId", "journal_entry_id", "sys_journal_field_id", "webhook_event_id"]);
+  if (eventId) return `servicenow-event:${eventId}`;
+  if (!demoMode && observedSysId && ticket.sourceUpdatedAt) return `servicenow-ticket:${observedSysId}:${ticket.sourceUpdatedAt}`;
+  return `payload:${payloadHash}`;
+}
+
+type CanonicalSnapshot = {
+  ticketId: string;
+  snapshotId: string | null;
+  inserted: boolean;
+  workflowVersion: number;
+  identityConflict: boolean;
+};
+
+async function recordCanonicalSnapshot(
+  admin: ReturnType<typeof supabaseAdmin>,
+  body: RecordValue,
+  ticket: NormalizedTicket,
+  observedTicketNumber: string,
+  observedSysId: string | null,
+  callerId: string | null,
+  payloadHash: string,
+  demoMode: boolean,
+): Promise<CanonicalSnapshot> {
+  const safePayload = redactSensitiveData(body);
+  const safeFields = redactSensitiveData(unwrapTicketPayload(body));
+  const { data, error } = await admin.rpc("ingest_servicenow_ticket_snapshot", {
+    p_ticket_number: observedTicketNumber,
+    // Preserve the current webhook's immutable ServiceNow identity separately
+    // from the conversation's first accepted identity. The canonical RPC must
+    // see a mismatch so it can quarantine it instead of silently accepting
+    // the historical value we merged above.
+    p_service_now_sys_id: observedSysId,
+    p_requested_by_user_id: callerId,
+    p_upstream_event_key: upstreamEventKey(body, ticket, observedSysId, payloadHash, demoMode),
+    p_source_updated_at: ticket.sourceUpdatedAt,
+    p_redacted_payload: safePayload,
+    p_canonical_structured_fields: safeFields,
+    p_content_sha256: payloadHash,
+  });
+  if (error) throw new Error(`Unable to record canonical ServiceNow history: ${error.message}`);
+  const result = record(array(data)[0] ?? data);
+  const ticketId = text(result.ticket_id ?? result.ticketId);
+  const snapshotId = text(result.snapshot_id ?? result.snapshotId);
+  const workflowVersion = Number(result.workflow_version ?? result.workflowVersion);
+  const identityConflict = result.identity_conflict === true || result.identityConflict === true;
+  if (!ticketId || (!identityConflict && !snapshotId) || !Number.isSafeInteger(workflowVersion)) {
+    throw new Error("Canonical ServiceNow history returned an invalid snapshot record.");
+  }
+  return { ticketId, snapshotId: snapshotId || null, inserted: result.inserted === true, workflowVersion, identityConflict };
 }
 
 function normalizeVm(value: unknown): AzureVm | null {
@@ -258,11 +341,6 @@ const PROVISIONING_FIELDS: Array<{ key: string; label: string }> = [
   { key: "osVersion", label: "OS image version, for example latest" },
 ];
 
-const ARM_GROUP = /^\/subscriptions\/[0-9a-fA-F-]{36}\/resourceGroups\/[A-Za-z0-9_.()-]+$/;
-const ARM_SUBNET = /^\/subscriptions\/[0-9a-fA-F-]{36}\/resourceGroups\/[A-Za-z0-9_.()-]+\/providers\/Microsoft\.Network\/virtualNetworks\/[A-Za-z0-9_.-]+\/subnets\/[A-Za-z0-9_.-]+$/;
-const VM_NAME = /^[A-Za-z0-9][A-Za-z0-9-]{0,62}$/;
-const IMAGE_PART = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
-
 /**
  * The trust boundary for ticket-supplied infrastructure values.
  *
@@ -284,16 +362,16 @@ function sanitizeProvisioning(value: unknown): RecordValue {
   const subnet = text(raw.subnetArmId);
   if (ARM_SUBNET.test(subnet)) out.subnetArmId = subnet;
   const location = text(raw.location).toLowerCase().replace(/\s+/g, "");
-  if (/^[a-z][a-z0-9]{2,30}$/.test(location)) out.location = location;
+  if (LOCATION.test(location)) out.location = location;
   const names = array(raw.vmNames).filter((item): item is string => typeof item === "string").map((item) => item.trim());
   const distinct = unique(names.map((name) => name.toLowerCase()));
   if (names.length >= 1 && names.length <= 20 && names.every((name) => VM_NAME.test(name)) && distinct.length === names.length) out.vmNames = names;
   const size = text(raw.vmSize);
-  if (/^Standard_[A-Za-z0-9_]+$/.test(size)) out.vmSize = size;
+  if (VM_SIZE.test(size)) out.vmSize = size;
   const admin = text(raw.adminUsername);
-  if (/^[a-z_][a-z0-9_-]{0,31}$/.test(admin) && !["root", "admin", "administrator"].includes(admin)) out.adminUsername = admin;
+  if (ADMIN_USERNAME.test(admin) && !ADMIN_USERNAME_RESERVED.includes(admin)) out.adminUsername = admin;
   const key = text(raw.sshPublicKey);
-  if (/^(ssh-rsa|ssh-ed25519|ecdsa-sha2-nistp(256|384|521)) [A-Za-z0-9+/=]+/.test(key)) out.sshPublicKey = key;
+  if (SSH_KEY.test(key)) out.sshPublicKey = key;
   for (const field of ["osPublisher", "osOffer", "osSku", "osVersion"]) {
     const part = text(raw[field]);
     if (IMAGE_PART.test(part)) out[field] = part;
@@ -348,6 +426,48 @@ function actionLabel(action: string) {
   return ({ start_vm: "Start Azure VM", stop_vm: "Stop Azure VM", restart_vm: "Restart Azure VM", resize_vm: "Change VM size", increase_os_disk: "Increase OS disk capacity", configure_backup: "Configure Azure Backup", enable_monitoring: "Enable Azure Monitor / VM Insights", assess_patches: "Run patch assessment", create_vm: "Create Azure VM", unknown: "Unable to classify request" } as Record<string, string>)[action] ?? action;
 }
 
+const COMMON_FACT_FIELDS: Array<{ field: string; ticketKey: "requester" | "application" | "environment" | "maintenanceWindow" | "businessImpact" | "applicationOwner" | "rollbackPlan"; extractedKeys: string[] }> = [
+  { field: "requester", ticketKey: "requester", extractedKeys: ["requester", "requestedBy", "requested_by"] },
+  { field: "application", ticketKey: "application", extractedKeys: ["application", "businessService", "business_service", "service"] },
+  { field: "environment", ticketKey: "environment", extractedKeys: ["environment"] },
+  { field: "maintenanceWindow", ticketKey: "maintenanceWindow", extractedKeys: ["maintenanceWindow", "maintenance_window", "changeWindow"] },
+  { field: "businessImpact", ticketKey: "businessImpact", extractedKeys: ["businessImpact", "business_impact", "impact"] },
+  { field: "applicationOwner", ticketKey: "applicationOwner", extractedKeys: ["applicationOwner", "application_owner", "owner", "serviceOwner"] },
+  { field: "rollbackPlan", ticketKey: "rollbackPlan", extractedKeys: ["rollbackPlan", "rollback_plan", "backoutPlan", "backout_plan"] },
+];
+
+const FACT_FIELD_LABELS: Record<string, string> = {
+  requester: "requester", application: "application or business service", environment: "environment",
+  maintenanceWindow: "maintenance window", businessImpact: "business impact",
+  applicationOwner: "application owner", rollbackPlan: "rollback plan",
+};
+
+/**
+ * One candidate fact per common field per source (structured ServiceNow field
+ * vs. a mention extracted from ticket prose). reconcileFacts lets a structured
+ * value win over a prose mention without asking, for every field except
+ * environment: that one is deliberately given the SAME source-weight tier on
+ * both sides so a genuine disagreement between the dropdown and the
+ * description always surfaces as a conflict instead of one silently winning --
+ * see the comment above validate() for why that field specifically cannot be
+ * guessed.
+ */
+function buildCommonFacts(ticket: NormalizedTicket, analysis: Analysis): CandidateFact[] {
+  const at = ticket.sourceUpdatedAt ?? new Date(0).toISOString();
+  const facts: CandidateFact[] = [];
+  for (const { field, ticketKey, extractedKeys } of COMMON_FACT_FIELDS) {
+    const structuredValue = text(ticket[ticketKey]);
+    const proseValue = first(analysis.extractedFields, extractedKeys);
+    if (structuredValue) {
+      facts.push({ field, value: structuredValue, dataType: "string", source: "structured_ticket", sourceRecordId: `${ticket.ticketNumber}:structured:${field}`, sourceAuthor: null, sourceAt: at, supportingText: structuredValue, confidence: 100 });
+    }
+    if (proseValue) {
+      facts.push({ field, value: proseValue, dataType: "string", source: field === "environment" ? "structured_ticket" : "requester_prose", sourceRecordId: `${ticket.ticketNumber}:prose:${field}`, sourceAuthor: null, sourceAt: at, supportingText: proseValue, confidence: analysis.confidence });
+    }
+  }
+  return facts;
+}
+
 function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: string; vms: AzureVm[] }, hasApprovedCapability = false) {
   // For creation the required inputs are a known, finite list computed below,
   // so the model's own missingFields are dropped rather than merged. Merging
@@ -357,43 +477,49 @@ function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: 
   // model's clarificationQuestions are kept: they are well phrased and add
   // context the canonical labels cannot.
   const missing = analysis.action === "create_vm" ? [] : [...analysis.missingFields];
-  const conflicts = [...analysis.conflicts];
-  // A requester who answers a clarification question types the answer into the
-  // ticket text, not into the structured ServiceNow field it belongs to. Asking
-  // again because the field is still blank is how the loop used to repeat
-  // forever, so an answer the model extracted from the prose counts as supplied.
-  const supplied = (structured: string, ...keys: string[]) =>
-    structured.trim() || keys.map((key) => text(analysis.extractedFields[key])).find(Boolean) || "";
-  const application = supplied(ticket.application, "application", "businessService", "business_service", "service");
-  const environment = supplied(ticket.environment, "environment");
-  const maintenanceWindow = supplied(ticket.maintenanceWindow, "maintenanceWindow", "maintenance_window", "changeWindow");
-  const businessImpact = supplied(ticket.businessImpact, "businessImpact", "business_impact", "impact");
-  const applicationOwner = supplied(ticket.applicationOwner, "applicationOwner", "application_owner", "owner", "serviceOwner");
-  const rollbackPlan = supplied(ticket.rollbackPlan, "rollbackPlan", "rollback_plan", "backoutPlan", "backout_plan");
+  const conflicts = [...analysis.conflicts, ...ticket.identityConflicts];
+
+  // Provenance-aware reconciliation of the seven common request fields (see
+  // buildCommonFacts). This is also how an answer typed into ticket prose
+  // rather than into its structured field counts as supplied -- without it,
+  // the field would read as still-missing and the clarification loop would
+  // repeat forever.
+  const { facts: reconciledFacts, conflicts: factConflicts } = reconcileFacts(buildCommonFacts(ticket, analysis));
+  const resolved = Object.fromEntries(reconciledFacts.map((fact) => [fact.field, text(fact.value)]));
+  // A field in genuine conflict has no reconciled value (reconcileFacts
+  // deliberately withholds one rather than guessing) -- it must not also be
+  // reported as "missing" on top of the conflict message asking the requester
+  // to resolve it; that would ask the same question twice in different words.
+  const conflictedFields = new Set(factConflicts.map((conflict) => conflict.field));
+  const application = resolved.application ?? "";
+  const environment = resolved.environment ?? "";
+  const maintenanceWindow = resolved.maintenanceWindow ?? "";
+  const businessImpact = resolved.businessImpact ?? "";
+  const applicationOwner = resolved.applicationOwner ?? "";
+  const rollbackPlan = resolved.rollbackPlan ?? "";
 
   if (!ticket.ticketNumber) missing.push("ServiceNow ticket number");
-  if (!supplied(ticket.requester, "requester", "requestedBy", "requested_by")) missing.push("Requester");
-  if (!application) missing.push("Application or business service");
-  if (!environment) missing.push("Environment");
+  if (!(resolved.requester ?? "") && !conflictedFields.has("requester")) missing.push("Requester");
+  if (!application && !conflictedFields.has("application")) missing.push("Application or business service");
+  if (!environment && !conflictedFields.has("environment")) missing.push("Environment");
   if (ticket.description.length < 10) missing.push("Request description");
-  if (!maintenanceWindow) missing.push("Maintenance window with timezone");
-  if (!businessImpact) missing.push("Expected business impact");
-  if (!applicationOwner) missing.push("Application owner");
-  if (rollbackPlan.length < 10) missing.push("Rollback plan");
+  if (!maintenanceWindow && !conflictedFields.has("maintenanceWindow")) missing.push("Maintenance window with timezone");
+  if (!businessImpact && !conflictedFields.has("businessImpact")) missing.push("Expected business impact");
+  if (!applicationOwner && !conflictedFields.has("applicationOwner")) missing.push("Application owner");
+  if (rollbackPlan.length < 10 && !conflictedFields.has("rollbackPlan")) missing.push("Rollback plan");
   if (analysis.action === "unknown" || analysis.confidence < 60) missing.push("A supported, unambiguous Azure VM action");
 
-
-  // The ticket carries an environment in a structured field AND in prose, and
-  // they can disagree -- a request whose dropdown says Production while the
-  // description says development is the obvious case. Neither is safe to
-  // silently prefer: parameters.environment is compared against the
-  // server-authorized scope binding, so picking wrong either refuses a valid
-  // request or points a real one at the wrong environment. Make the requester
-  // resolve it.
-  const statedEnvironment = ticket.environment.trim().toLowerCase().replace("pre-production", "preproduction");
-  const inferredEnvironment = text(analysis.extractedFields.environment).toLowerCase().replace("pre-production", "preproduction");
-  if (statedEnvironment && inferredEnvironment && statedEnvironment !== inferredEnvironment) {
-    conflicts.push(`The ticket's environment field says ${ticket.environment} but the description asks for ${text(analysis.extractedFields.environment)}. Confirm which environment these machines belong in.`);
+  // environment is the one common field deliberately given equal source
+  // weight on both sides in buildCommonFacts, so a genuine disagreement
+  // between the ticket's structured environment field and its description
+  // always lands here rather than one silently winning: parameters.environment
+  // is compared against the server-authorized scope binding, so guessing wrong
+  // either refuses a valid request or points a real one at the wrong
+  // environment. The mechanism generalizes to any other field a future change
+  // wants the same treatment for.
+  for (const conflict of factConflicts) {
+    const values = unique(conflict.values.map((candidate) => text(candidate.value)));
+    conflicts.push(`The ticket gives conflicting values for ${FACT_FIELD_LABELS[conflict.field] ?? conflict.field}: ${values.join(" vs. ")}. Confirm which is correct.`);
   }
 
   const target = azure.vms.find((vm) => vm.name.toLowerCase() === (analysis.targetVmName ?? "").toLowerCase() || vm.id.toLowerCase() === (analysis.targetVmName ?? "").toLowerCase()) ?? null;
@@ -414,10 +540,13 @@ function validate(ticket: NormalizedTicket, analysis: Analysis, azure: { state: 
   // key here means either "not supplied" or "supplied unusably" -- both of
   // which the requester answers the same way.
   if (analysis.action === "create_vm") {
+    // sanitizeProvisioning already dropped anything malformed before this
+    // point, so re-checking with the shared field-state validator (the same
+    // regexes sanitizeProvisioning itself enforces) tells us "missing" from
+    // one source of truth instead of a separate bespoke presence check.
+    const provisioningStates = createVmFieldStates(analysis.provisioning);
     for (const field of PROVISIONING_FIELDS) {
-      const value = analysis.provisioning[field.key];
-      const present = Array.isArray(value) ? value.length > 0 : text(value).length > 0;
-      if (!present) missing.push(field.label);
+      if (provisioningStates[field.key] !== "VALID") missing.push(field.label);
     }
     const names = array(analysis.provisioning.vmNames).filter((item): item is string => typeof item === "string");
     // Catching a name collision here means the requester is told in the ticket,
@@ -642,11 +771,11 @@ async function resumeQueued(admin: ReturnType<typeof supabaseAdmin>, request: Re
       if (resumptionId) await admin.rpc("finish_iac_intake_resumption", { p_id: resumptionId, p_status: status, p_error: error ?? null });
     };
     try {
-      const { data: intake } = await admin.from("servicenow_intake_requests").select("id, ticket_payload, clarification_note, change_package_id, requested_by_user_id").eq("id", intakeRequestId).maybeSingle();
+      const { data: intake } = await admin.from("servicenow_intake_requests").select("id, ticket_number, ticket_payload, clarification_note, change_package_id, requested_by_user_id").eq("id", intakeRequestId).maybeSingle();
       if (!intake) { await finish("skipped", "intake request no longer exists"); results.push({ intakeRequestId, outcome: "skipped" }); continue; }
       if (intake.change_package_id) { await finish("skipped", "a change package already exists"); results.push({ intakeRequestId, outcome: "already_resumed" }); continue; }
 
-      const ticket = normalizeTicket(record(intake.ticket_payload));
+      const ticket = normalizeTicket(record(intake.ticket_payload), await ticketPayloadHistory(admin, text(intake.ticket_number)));
       const azure = await loadAzureInventory();
       const analysis = await analyzeWithGemini(ticket, azure);
       const { data: approvedCapability } = await admin.from("iac_automation_capabilities")
@@ -681,12 +810,68 @@ async function resumeQueued(admin: ReturnType<typeof supabaseAdmin>, request: Re
   return json({ processed: results.length, results }, 200, request);
 }
 
+/**
+ * Constant-time string comparison -- a plain `!==` on the shared secret leaks
+ * timing information about how many leading characters matched. The strings
+ * here are short (a header value vs. an env var), so the risk is minor, but
+ * it costs nothing to close.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  const left = new TextEncoder().encode(a);
+  const right = new TextEncoder().encode(b);
+  if (left.length !== right.length) return false;
+  let diff = 0;
+  for (let i = 0; i < left.length; i++) diff |= left[i] ^ right[i];
+  return diff === 0;
+}
+
+async function hmacSha256Hex(secret: string, message: string): Promise<string> {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
+  return [...new Uint8Array(signature)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * The shared-secret header (SERVICENOW_WEBHOOK_SECRET / x-servicenow-webhook-secret)
+ * stays the primary, required check -- it's what the current ServiceNow
+ * integration actually sends today. HMAC verification is additive and
+ * opt-in: it only activates once SERVICENOW_WEBHOOK_HMAC_SECRET is
+ * configured. The header name and format assumed here
+ * (`x-servicenow-signature: sha256=<hex>` computed over the raw request
+ * body) is a common Outbound REST / Business Rule convention, not a
+ * ServiceNow standard -- confirm it against the actual instance's outbound
+ * webhook configuration before enabling this secret in production, and
+ * adjust the header/format here if it signs differently.
+ */
+async function verifyServiceNowWebhook(request: Request, rawBody: string): Promise<{ status: number; message: string } | null> {
+  const expectedSecret = Deno.env.get("SERVICENOW_WEBHOOK_SECRET");
+  if (!expectedSecret) return { status: 503, message: "webhook is not configured" };
+  const receivedSecret = request.headers.get("x-servicenow-webhook-secret") ?? "";
+  if (!receivedSecret || !timingSafeEqual(receivedSecret, expectedSecret)) return { status: 401, message: "unauthorized" };
+
+  const hmacSecret = Deno.env.get("SERVICENOW_WEBHOOK_HMAC_SECRET");
+  if (hmacSecret) {
+    const header = request.headers.get("x-servicenow-signature") ?? "";
+    const signature = (header.startsWith("sha256=") ? header.slice(7) : header).toLowerCase();
+    const expectedSignature = await hmacSha256Hex(hmacSecret, rawBody);
+    if (!signature || !timingSafeEqual(signature, expectedSignature)) return { status: 401, message: "unauthorized" };
+  }
+  return null;
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(request) });
   if (request.method !== "POST") return json({ error: "method not allowed" }, 405, request);
 
+  // Captured once, before parsing: HMAC verification (below) must run over
+  // the exact bytes ServiceNow signed, not a re-serialization of the parsed body.
+  const rawBody = await request.text();
   let body: RecordValue;
-  try { body = record(await request.json()); } catch { return json({ error: "invalid json" }, 400, request); }
+  try { body = record(JSON.parse(rawBody)); } catch { return json({ error: "invalid json" }, 400, request); }
+  // Ticket material is untrusted input. The legacy table stays only as a
+  // compatibility read during migration, so write and analyze the redacted
+  // representation from this point forward.
+  body = record(redactSensitiveData(body));
   const mode = text(body.mode).toLowerCase();
 
   // Resuming tickets whose capability has since been approved. Either the
@@ -711,16 +896,14 @@ Deno.serve(async (request) => {
   if (demoMode) {
     if (!callerId) return json({ error: "authenticated demo submission required" }, 401, request);
   } else {
-    const expectedSecret = Deno.env.get("SERVICENOW_WEBHOOK_SECRET");
-    const receivedSecret = request.headers.get("x-servicenow-webhook-secret");
-    if (!expectedSecret) return json({ error: "webhook is not configured" }, 503, request);
-    if (!receivedSecret || receivedSecret !== expectedSecret) return json({ error: "unauthorized" }, 401, request);
+    const authError = await verifyServiceNowWebhook(request, rawBody);
+    if (authError) return json({ error: authError.message }, authError.status, request);
   }
-  const ticket = normalizeTicket(body);
-  if (!ticket.ticketNumber) return json({ error: "ticket number is required" }, 400, request);
+  const incomingTicket = normalizeTicket(body);
+  if (!incomingTicket.ticketNumber) return json({ error: "ticket number is required" }, 400, request);
   const admin = supabaseAdmin();
   const payloadHash = await sha256(body);
-  const existing = await admin.from("servicenow_intake_requests").select("id, status, change_package_id").eq("ticket_number", ticket.ticketNumber).eq("payload_hash", payloadHash).maybeSingle();
+  const existing = await admin.from("servicenow_intake_requests").select("id, status, change_package_id").eq("ticket_number", incomingTicket.ticketNumber).eq("payload_hash", payloadHash).maybeSingle();
   if (existing.data?.status === "comment_posted") return json({ duplicate: true, requestId: existing.data.id, status: existing.data.status, changePackageId: existing.data.change_package_id }, 200, request);
 
   let requestId = existing.data?.id as string | undefined;
@@ -728,12 +911,38 @@ Deno.serve(async (request) => {
     const { error: resetError } = await admin.from("servicenow_intake_requests").update({ status: "analyzing", error_message: null }).eq("id", requestId);
     if (resetError) return json({ error: resetError.message }, 500, request);
   } else {
-    const { data: intake, error: insertError } = await admin.from("servicenow_intake_requests").insert({ ticket_number: ticket.ticketNumber, service_now_sys_id: ticket.sysId, ticket_updated_at: ticket.sourceUpdatedAt, payload_hash: payloadHash, status: "analyzing", requested_by_user_id: callerId, ticket_payload: body, normalized_request: ticket }).select("id").single();
+    const { data: intake, error: insertError } = await admin.from("servicenow_intake_requests").insert({ ticket_number: incomingTicket.ticketNumber, service_now_sys_id: incomingTicket.sysId, ticket_updated_at: incomingTicket.sourceUpdatedAt, payload_hash: payloadHash, status: "analyzing", requested_by_user_id: callerId, ticket_payload: body, normalized_request: incomingTicket }).select("id").single();
     if (insertError || !intake) return json({ error: insertError?.message ?? "unable to persist intake request" }, 500, request);
     requestId = intake.id as string;
   }
   if (!requestId) return json({ error: "unable to resolve intake request id" }, 500, request);
-  await addEvent(admin, requestId, "ticket_received", { ticketNumber: ticket.ticketNumber });
+  const history = await ticketPayloadHistory(admin, incomingTicket.ticketNumber);
+  const ticket = normalizeTicket(body, history);
+  // Canonical ingestion is intentionally before every external/legacy action.
+  // If this audit write fails, the request stops rather than creating an
+  // untraceable package or engineering gap through the legacy pilot path.
+  try {
+    const canonical = await recordCanonicalSnapshot(
+      admin, body, ticket, incomingTicket.ticketNumber, incomingTicket.sysId,
+      demoMode ? callerId : null, payloadHash, demoMode,
+    );
+    const { error: canonicalLinkError } = await admin.from("servicenow_intake_requests").update({ normalized_request: ticket, ticket_id: canonical.ticketId }).eq("id", requestId);
+    if (canonicalLinkError) throw new Error(`Unable to link intake revision to canonical ticket: ${canonicalLinkError.message}`);
+    await addEvent(admin, requestId, "ticket_received", { ticketNumber: ticket.ticketNumber, historySnapshots: history.length, canonicalTicketId: canonical.ticketId, canonicalSnapshotId: canonical.snapshotId, canonicalSnapshotInserted: canonical.inserted, identityConflict: canonical.identityConflict });
+    if (canonical.identityConflict) {
+      const message = "The incoming ServiceNow ticket number and sys_id do not match the permanent conversation identity. A human must reconcile the source record before analysis can continue.";
+      const { error: conflictUpdateError } = await admin.from("servicenow_intake_requests")
+        .update({ status: "identity_conflict", error_message: message }).eq("id", requestId);
+      if (conflictUpdateError) throw new Error(`Unable to mark ServiceNow identity conflict: ${conflictUpdateError.message}`);
+      await addEvent(admin, requestId, "identity_conflict_quarantined", { canonicalTicketId: canonical.ticketId });
+      return json({ requestId, status: "identity_conflict", error: message }, 409, request);
+    }
+  } catch (cause) {
+    const message = cause instanceof Error ? cause.message : "Unable to record canonical ServiceNow history.";
+    await admin.from("servicenow_intake_requests").update({ status: "comment_failed", error_message: message }).eq("id", requestId);
+    await addEvent(admin, requestId, "canonical_history_failed", { message });
+    return json({ requestId, error: message }, 502, request);
+  }
 
   try {
     const azure = await loadAzureInventory(request.headers.get("authorization") ?? undefined);

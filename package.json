@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:deno": "deno test --allow-read --allow-env supabase/functions/_shared/servicenow-change-agent.test.ts",
     "sync-nova-kb": "bun run scripts/sync-nova-kb.ts"
   },
   "dependencies": {

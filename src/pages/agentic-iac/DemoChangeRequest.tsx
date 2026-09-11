@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AlertTriangle, ArrowRight, FileInput, RefreshCw, Send, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AzureControlPlaneError, listAzureVirtualMachines, type AzureVirtualMachine } from "./azureControlPlane";
-import { listServiceNowIntakeRequests, submitDemoServiceNowTicket } from "./servicenowIntakeRequests";
+import { listServiceNowIntakeRequests, listServiceNowIntakeTicketHistory, mergeTicketPayloadHistory, submitDemoServiceNowTicket } from "./servicenowIntakeRequests";
 
 function Field({ label, value, onChange, placeholder, required = false }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; required?: boolean }) {
   return <label className="text-sm font-medium text-slate-700">{label}{required && <span className="ml-1 text-red-600">*</span>}<input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="mt-1 h-10 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" /></label>;
@@ -22,6 +22,7 @@ export default function DemoChangeRequest() {
   const [vms, setVms] = useState<AzureVirtualMachine[]>([]);
   const [vmId, setVmId] = useState("");
   const [ticketNumber, setTicketNumber] = useState("");
+  const [sysId, setSysId] = useState("");
   const [requester, setRequester] = useState("");
   const [application, setApplication] = useState("");
   const [environment, setEnvironment] = useState("Production");
@@ -63,8 +64,10 @@ export default function DemoChangeRequest() {
         const requests = await listServiceNowIntakeRequests();
         const original = requests.find((item) => item.id === reviseFrom);
         if (!original || cancelled) return;
-        const payload = original.ticketPayload;
+        const history = await listServiceNowIntakeTicketHistory(original.ticketNumber);
+        const payload = mergeTicketPayloadHistory(history.map((entry) => entry.ticketPayload));
         setTicketNumber(text(payload.number) || original.ticketNumber);
+        setSysId(text(payload.sys_id) || text(payload.sysId) || original.serviceNowSysId || "");
         setRequester(text(payload.requester));
         setApplication(text(payload.application));
         if (text(payload.environment)) setEnvironment(text(payload.environment));
@@ -102,7 +105,7 @@ export default function DemoChangeRequest() {
     const notesSuffix = additionalNotes.trim() ? `\n\nAdditional notes (${stamp} UTC): ${additionalNotes.trim()}` : "";
     try {
       const answers = additionalNotes.trim() ? [...priorAnswers, `${stamp} UTC: ${additionalNotes.trim()}`] : priorAnswers;
-      const result = await submitDemoServiceNowTicket({ number, sys_id: `demo-${crypto.randomUUID()}`, requester: requester.trim(), application: application.trim(), environment, description: `${targetPrefix}${description.trim()}${notesSuffix}`, maintenance_window: maintenanceWindow.trim(), business_impact: businessImpact.trim(), application_owner: applicationOwner.trim(), rollback_plan: rollbackPlan.trim(), prior_questions: priorQuestions, clarification_answers: answers });
+      const result = await submitDemoServiceNowTicket({ number, sys_id: sysId.trim() || `demo-${crypto.randomUUID()}`, requester: requester.trim(), application: application.trim(), environment, description: `${targetPrefix}${description.trim()}${notesSuffix}`, maintenance_window: maintenanceWindow.trim(), business_impact: businessImpact.trim(), application_owner: applicationOwner.trim(), rollback_plan: rollbackPlan.trim(), prior_questions: priorQuestions, clarification_answers: answers });
 
       navigate(`/servicenow-intake?requestId=${encodeURIComponent(result.requestId)}`);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to submit the demo change request."); }

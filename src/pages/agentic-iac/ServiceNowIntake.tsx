@@ -87,15 +87,23 @@ export default function ServiceNowIntake() {
     setSubmittingNotes(true); setError(null); setNotice(null);
     try {
       const payload = selected.ticketPayload ?? {};
-      const previous = typeof payload.description === "string" ? payload.description : "";
       const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
-      const existingSysId = typeof payload.sys_id === "string" && payload.sys_id.trim() ? payload.sys_id : `demo-${selected.ticketNumber}`;
+      const payloadSysId = typeof payload.sys_id === "string" && payload.sys_id.trim()
+        ? payload.sys_id
+        : typeof payload.sysId === "string" && payload.sysId.trim() ? payload.sysId : "";
+      const existingSysId = payloadSysId
+        ? payloadSysId
+        : selected.serviceNowSysId ?? `demo-${selected.ticketNumber}`;
       const askedNow = valueList((selected.llmAnalysis?.validation as Record<string, unknown> | undefined)?.questions);
+      // Send only the new requester event. The server reconstructs the ticket
+      // from its immutable history; a browser must never replay or own the
+      // canonical ticket snapshot.
       const result = await submitDemoServiceNowTicket({
-        ...payload, number: selected.ticketNumber, sys_id: existingSysId,
-        description: `${previous}\n\nAdditional notes (${stamp} UTC): ${notes.trim()}`.trim(),
-        prior_questions: [...new Set([...valueList(payload.prior_questions), ...askedNow])],
-        clarification_answers: [...valueList(payload.clarification_answers), `${stamp} UTC: ${notes.trim()}`],
+        number: selected.ticketNumber,
+        sys_id: existingSysId,
+        description: `Requester follow-up (${stamp} UTC): ${notes.trim()}`,
+        prior_questions: askedNow,
+        clarification_answers: [`${stamp} UTC: ${notes.trim()}`],
       });
       setNotes(""); setNotice("Your note was added to this ticket and the agent re-analyzed it.");
       await load(); setSelectedId(result.requestId);
