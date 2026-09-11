@@ -12525,6 +12525,10 @@ export type Database = {
         Args: { _invitation_id: string }
         Returns: undefined
       }
+      canonical_servicenow_terraform_manifest: {
+        Args: { p_manifest: Json }
+        Returns: Json
+      }
       claim_iac_ci_remediation: {
         Args: {
           p_expected_head_sha: string
@@ -13064,6 +13068,17 @@ export type Database = {
         Args: { _exclude_membership?: string; _tenant_id: string }
         Returns: number
       }
+      create_servicenow_ticket_engineering_gap: {
+        Args: {
+          p_actor: string
+          p_expected_version: number
+          p_gap: Json
+          p_idempotency_key: string
+          p_source_event_id?: string
+          p_ticket_id: string
+        }
+        Returns: Json
+      }
       create_tenant_role: {
         Args: {
           _code: string
@@ -13361,8 +13376,16 @@ export type Database = {
         }
         Returns: Json
       }
+      is_allowed_servicenow_static_validation_command: {
+        Args: { p_command: string }
+        Returns: boolean
+      }
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       is_user_approved: { Args: { _user_id: string }; Returns: boolean }
+      is_valid_servicenow_terraform_manifest: {
+        Args: { p_manifest: Json }
+        Returns: boolean
+      }
       is_valid_timezone: { Args: { _tz: string }; Returns: boolean }
       list_audit_events: {
         Args: {
@@ -13515,6 +13538,27 @@ export type Database = {
         }
         Returns: Json
       }
+      record_servicenow_ticket_static_validation: {
+        Args: {
+          p_actor: string
+          p_expected_version: number
+          p_idempotency_key: string
+          p_ticket_id: string
+          p_validation: Json
+        }
+        Returns: Json
+      }
+      record_servicenow_ticket_terraform_package: {
+        Args: {
+          p_actor: string
+          p_expected_version: number
+          p_idempotency_key: string
+          p_package: Json
+          p_source_event_id?: string
+          p_ticket_id: string
+        }
+        Returns: Json
+      }
       record_user_login_event: {
         Args: {
           _action?: string
@@ -13558,6 +13602,17 @@ export type Database = {
           p_workspace_id: string
         }
         Returns: string
+      }
+      retry_servicenow_ticket_terraform_package: {
+        Args: {
+          p_actor: string
+          p_expected_version: number
+          p_idempotency_key: string
+          p_reason_code: string
+          p_source_event_id?: string
+          p_ticket_id: string
+        }
+        Returns: number
       }
       review_iac_change_package: {
         Args: { p_comment?: string; p_decision: string; p_package_id: string }
@@ -13796,6 +13851,15 @@ export type Database = {
       seed_user_defaults: {
         Args: { _email: string; _user_id: string }
         Returns: undefined
+      }
+      servicenow_agent_json_sha256: { Args: { p_value: Json }; Returns: string }
+      servicenow_terraform_manifest_sha256: {
+        Args: { p_manifest: Json }
+        Returns: string
+      }
+      servicenow_validation_requirement_command: {
+        Args: { p_requirement: Json }
+        Returns: string
       }
       set_membership_status: {
         Args: {
