@@ -4893,6 +4893,36 @@ export type Database = {
           },
         ]
       }
+      iac_policy_rules: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          request_type: string | null
+          rule: Json
+          rule_code: string
+          version: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          request_type?: string | null
+          rule: Json
+          rule_code: string
+          version?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          request_type?: string | null
+          rule?: Json
+          rule_code?: string
+          version?: number
+        }
+        Relationships: []
+      }
       iac_provisioning_authorizations: {
         Row: {
           authorized_at: string
@@ -4924,6 +4954,104 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      iac_request_schemas: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          request_type: string
+          schema: Json
+          version: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          request_type: string
+          schema: Json
+          version: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          request_type?: string
+          schema?: Json
+          version?: number
+        }
+        Relationships: []
+      }
+      iac_servicenow_tool_audit_events: {
+        Row: {
+          created_at: string
+          id: string
+          idempotency_key: string
+          operation: string
+          outcome: string
+          redacted_detail: Json
+          ticket_id: string | null
+          tool_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          operation: string
+          outcome: string
+          redacted_detail?: Json
+          ticket_id?: string | null
+          tool_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          operation?: string
+          outcome?: string
+          redacted_detail?: Json
+          ticket_id?: string | null
+          tool_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_servicenow_tool_audit_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_terraform_agent_repository_allowlist: {
+        Row: {
+          active: boolean
+          allowed_module_roots: Json
+          created_at: string
+          id: string
+          repository: string
+          repository_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          allowed_module_roots?: Json
+          created_at?: string
+          id?: string
+          repository: string
+          repository_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          allowed_module_roots?: Json
+          created_at?: string
+          id?: string
+          repository?: string
+          repository_key?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       iac_terraform_plan_claims: {
         Row: {
@@ -5162,6 +5290,404 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: []
+      }
+      iac_ticket_draft_pull_requests: {
+        Row: {
+          actor: string
+          attempt_number: number
+          created_at: string
+          github_observation_id: string
+          head_sha: string
+          id: string
+          idempotency_key: string
+          is_draft: boolean
+          package_id: string
+          package_sha256: string
+          pull_number: number
+          pull_url: string
+          repository: string
+          request_sha256: string
+          ticket_id: string
+          tree_sha: string
+        }
+        Insert: {
+          actor: string
+          attempt_number: number
+          created_at?: string
+          github_observation_id: string
+          head_sha: string
+          id?: string
+          idempotency_key: string
+          is_draft?: boolean
+          package_id: string
+          package_sha256: string
+          pull_number: number
+          pull_url: string
+          repository: string
+          request_sha256: string
+          ticket_id: string
+          tree_sha: string
+        }
+        Update: {
+          actor?: string
+          attempt_number?: number
+          created_at?: string
+          github_observation_id?: string
+          head_sha?: string
+          id?: string
+          idempotency_key?: string
+          is_draft?: boolean
+          package_id?: string
+          package_sha256?: string
+          pull_number?: number
+          pull_url?: string
+          repository?: string
+          request_sha256?: string
+          ticket_id?: string
+          tree_sha?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_ticket_draft_pull_requests_github_observation_id_fkey"
+            columns: ["github_observation_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_github_commit_observations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_draft_pull_requests_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_terraform_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_draft_pull_requests_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_pr_github_observation_same_ticket_fkey"
+            columns: ["ticket_id", "github_observation_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_github_commit_observations"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_pr_package_same_ticket_fkey"
+            columns: ["ticket_id", "package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_terraform_packages"
+            referencedColumns: ["ticket_id", "id"]
+          },
+        ]
+      }
+      iac_ticket_engineering_gaps: {
+        Row: {
+          acceptance_criteria: Json
+          created_at: string
+          id: string
+          normalized_requirements: Json
+          reusable_capability_gap_id: string | null
+          risk_level: string
+          rollback_guidance: string
+          security_considerations: Json
+          status: string
+          ticket_id: string
+          updated_at: string
+          validation_requirements: Json
+        }
+        Insert: {
+          acceptance_criteria?: Json
+          created_at?: string
+          id?: string
+          normalized_requirements?: Json
+          reusable_capability_gap_id?: string | null
+          risk_level?: string
+          rollback_guidance?: string
+          security_considerations?: Json
+          status?: string
+          ticket_id: string
+          updated_at?: string
+          validation_requirements?: Json
+        }
+        Update: {
+          acceptance_criteria?: Json
+          created_at?: string
+          id?: string
+          normalized_requirements?: Json
+          reusable_capability_gap_id?: string | null
+          risk_level?: string
+          rollback_guidance?: string
+          security_considerations?: Json
+          status?: string
+          ticket_id?: string
+          updated_at?: string
+          validation_requirements?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_ticket_engineering_gaps_reusable_capability_gap_id_fkey"
+            columns: ["reusable_capability_gap_id"]
+            isOneToOne: false
+            referencedRelation: "iac_engineering_gaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_engineering_gaps_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: true
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iac_ticket_github_commit_observations: {
+        Row: {
+          actor: string
+          created_at: string
+          expected_package_sha256: string
+          head_ref: string
+          head_sha: string
+          id: string
+          idempotency_key: string
+          observed_manifest: Json
+          observed_manifest_sha256: string | null
+          package_id: string
+          pull_number: number
+          pull_url: string
+          redacted_evidence: Json
+          repository: string
+          request_sha256: string
+          ticket_id: string
+          tree_sha: string
+          verification_status: string
+        }
+        Insert: {
+          actor: string
+          created_at?: string
+          expected_package_sha256: string
+          head_ref: string
+          head_sha: string
+          id?: string
+          idempotency_key: string
+          observed_manifest?: Json
+          observed_manifest_sha256?: string | null
+          package_id: string
+          pull_number: number
+          pull_url: string
+          redacted_evidence?: Json
+          repository: string
+          request_sha256: string
+          ticket_id: string
+          tree_sha: string
+          verification_status: string
+        }
+        Update: {
+          actor?: string
+          created_at?: string
+          expected_package_sha256?: string
+          head_ref?: string
+          head_sha?: string
+          id?: string
+          idempotency_key?: string
+          observed_manifest?: Json
+          observed_manifest_sha256?: string | null
+          package_id?: string
+          pull_number?: number
+          pull_url?: string
+          redacted_evidence?: Json
+          repository?: string
+          request_sha256?: string
+          ticket_id?: string
+          tree_sha?: string
+          verification_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_ticket_github_commit_observations_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_terraform_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_github_commit_observations_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_github_observation_package_same_ticket_fkey"
+            columns: ["ticket_id", "package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_terraform_packages"
+            referencedColumns: ["ticket_id", "id"]
+          },
+        ]
+      }
+      iac_ticket_static_validation_runs: {
+        Row: {
+          actor: string
+          command_name: string
+          created_at: string
+          id: string
+          idempotency_key: string
+          outcome: string
+          package_id: string
+          package_sha256: string
+          redacted_summary: string
+          request_sha256: string
+          ticket_id: string
+          validator: string
+        }
+        Insert: {
+          actor: string
+          command_name: string
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          outcome: string
+          package_id: string
+          package_sha256: string
+          redacted_summary?: string
+          request_sha256: string
+          ticket_id: string
+          validator: string
+        }
+        Update: {
+          actor?: string
+          command_name?: string
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          outcome?: string
+          package_id?: string
+          package_sha256?: string
+          redacted_summary?: string
+          request_sha256?: string
+          ticket_id?: string
+          validator?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_ticket_static_validation_runs_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_terraform_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_static_validation_runs_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_validation_package_same_ticket_fkey"
+            columns: ["ticket_id", "package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_terraform_packages"
+            referencedColumns: ["ticket_id", "id"]
+          },
+        ]
+      }
+      iac_ticket_terraform_packages: {
+        Row: {
+          branch_name: string
+          created_at: string
+          engineering_gap_id: string
+          generation_idempotency_key: string
+          generation_request_sha256: string
+          id: string
+          module_source: string
+          package_manifest: Json
+          package_revision: number
+          package_sha256: string
+          parent_package_id: string | null
+          repository: string
+          requirement_traceability: Json
+          status: string
+          ticket_id: string
+          updated_at: string
+        }
+        Insert: {
+          branch_name: string
+          created_at?: string
+          engineering_gap_id: string
+          generation_idempotency_key: string
+          generation_request_sha256: string
+          id?: string
+          module_source: string
+          package_manifest?: Json
+          package_revision: number
+          package_sha256: string
+          parent_package_id?: string | null
+          repository: string
+          requirement_traceability?: Json
+          status?: string
+          ticket_id: string
+          updated_at?: string
+        }
+        Update: {
+          branch_name?: string
+          created_at?: string
+          engineering_gap_id?: string
+          generation_idempotency_key?: string
+          generation_request_sha256?: string
+          id?: string
+          module_source?: string
+          package_manifest?: Json
+          package_revision?: number
+          package_sha256?: string
+          parent_package_id?: string | null
+          repository?: string
+          requirement_traceability?: Json
+          status?: string
+          ticket_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_ticket_package_gap_same_ticket_fkey"
+            columns: ["ticket_id", "engineering_gap_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_engineering_gaps"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_package_parent_same_ticket_fkey"
+            columns: ["ticket_id", "parent_package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_terraform_packages"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_terraform_packages_engineering_gap_id_fkey"
+            columns: ["engineering_gap_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_engineering_gaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_terraform_packages_parent_package_id_fkey"
+            columns: ["parent_package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_terraform_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_ticket_terraform_packages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       iac_validation_results: {
         Row: {
@@ -9789,6 +10315,73 @@ export type Database = {
           },
         ]
       }
+      servicenow_intake_attachments: {
+        Row: {
+          byte_size: number | null
+          content_sha256: string | null
+          content_type: string | null
+          created_at: string
+          event_id: string
+          extraction_status: string
+          filename: string
+          id: string
+          redacted_text: string | null
+          redaction_version: string
+          source_attachment_id: string
+          ticket_id: string
+        }
+        Insert: {
+          byte_size?: number | null
+          content_sha256?: string | null
+          content_type?: string | null
+          created_at?: string
+          event_id: string
+          extraction_status?: string
+          filename: string
+          id?: string
+          redacted_text?: string | null
+          redaction_version?: string
+          source_attachment_id: string
+          ticket_id: string
+        }
+        Update: {
+          byte_size?: number | null
+          content_sha256?: string | null
+          content_type?: string | null
+          created_at?: string
+          event_id?: string
+          extraction_status?: string
+          filename?: string
+          id?: string
+          redacted_text?: string | null
+          redaction_version?: string
+          source_attachment_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_attachment_event_same_ticket_fkey"
+            columns: ["ticket_id", "event_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_events"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_attachments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_attachments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       servicenow_intake_events: {
         Row: {
           created_at: string
@@ -9818,6 +10411,362 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "servicenow_intake_requests"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicenow_intake_fact_conflict_members: {
+        Row: {
+          conflict_id: string
+          created_at: string
+          fact_id: string
+          ticket_id: string
+        }
+        Insert: {
+          conflict_id: string
+          created_at?: string
+          fact_id: string
+          ticket_id: string
+        }
+        Update: {
+          conflict_id?: string
+          created_at?: string
+          fact_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_conflict_member_conflict_same_ticket_fkey"
+            columns: ["ticket_id", "conflict_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_fact_conflicts"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "servicenow_conflict_member_fact_same_ticket_fkey"
+            columns: ["ticket_id", "fact_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_facts"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_fact_conflict_members_conflict_id_fkey"
+            columns: ["conflict_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_fact_conflicts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_fact_conflict_members_fact_id_fkey"
+            columns: ["fact_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_facts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_fact_conflict_members_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicenow_intake_fact_conflicts: {
+        Row: {
+          canonical_field: string
+          created_at: string
+          id: string
+          resolution: string
+          resolution_detail: string
+          ticket_id: string
+        }
+        Insert: {
+          canonical_field: string
+          created_at?: string
+          id?: string
+          resolution?: string
+          resolution_detail?: string
+          ticket_id: string
+        }
+        Update: {
+          canonical_field?: string
+          created_at?: string
+          id?: string
+          resolution?: string
+          resolution_detail?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_fact_conflicts_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicenow_intake_facts: {
+        Row: {
+          canonical_field: string
+          confidence: number
+          created_at: string
+          id: string
+          precedence_rank: number
+          source_author: string | null
+          source_event_id: string
+          source_occurred_at: string | null
+          source_record_id: string | null
+          source_snapshot_id: string | null
+          source_type: string
+          supporting_text: string
+          ticket_id: string
+          validation_code: string | null
+          validation_status: string
+          value_jsonb: Json
+          value_sha256: string
+          value_type: string
+        }
+        Insert: {
+          canonical_field: string
+          confidence: number
+          created_at?: string
+          id?: string
+          precedence_rank: number
+          source_author?: string | null
+          source_event_id: string
+          source_occurred_at?: string | null
+          source_record_id?: string | null
+          source_snapshot_id?: string | null
+          source_type: string
+          supporting_text?: string
+          ticket_id: string
+          validation_code?: string | null
+          validation_status: string
+          value_jsonb: Json
+          value_sha256: string
+          value_type: string
+        }
+        Update: {
+          canonical_field?: string
+          confidence?: number
+          created_at?: string
+          id?: string
+          precedence_rank?: number
+          source_author?: string | null
+          source_event_id?: string
+          source_occurred_at?: string | null
+          source_record_id?: string | null
+          source_snapshot_id?: string | null
+          source_type?: string
+          supporting_text?: string
+          ticket_id?: string
+          validation_code?: string | null
+          validation_status?: string
+          value_jsonb?: Json
+          value_sha256?: string
+          value_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_fact_event_same_ticket_fkey"
+            columns: ["ticket_id", "source_event_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_events"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "servicenow_fact_snapshot_same_ticket_fkey"
+            columns: ["ticket_id", "source_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_snapshots"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_facts_source_event_id_fkey"
+            columns: ["source_event_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_facts_source_snapshot_id_fkey"
+            columns: ["source_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_snapshots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_facts_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicenow_intake_idempotency_keys: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          idempotency_key: string
+          operation: string
+          result: Json
+          status: string
+          ticket_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          idempotency_key: string
+          operation: string
+          result?: Json
+          status: string
+          ticket_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          idempotency_key?: string
+          operation?: string
+          result?: Json
+          status?: string
+          ticket_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_idempotency_keys_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicenow_intake_question_events: {
+        Row: {
+          created_at: string
+          detail: Json
+          event_type: string
+          fact_id: string | null
+          id: string
+          idempotency_key: string
+          question_id: string
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          event_type: string
+          fact_id?: string | null
+          id?: string
+          idempotency_key: string
+          question_id: string
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          event_type?: string
+          fact_id?: string | null
+          id?: string
+          idempotency_key?: string
+          question_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_question_events_fact_id_fkey"
+            columns: ["fact_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_facts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_question_events_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_question_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_question_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_question_event_fact_same_ticket_fkey"
+            columns: ["ticket_id", "fact_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_facts"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "servicenow_question_event_question_same_ticket_fkey"
+            columns: ["ticket_id", "question_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_question_registry"
+            referencedColumns: ["ticket_id", "id"]
+          },
+        ]
+      }
+      servicenow_intake_question_registry: {
+        Row: {
+          canonical_field: string
+          id: string
+          initial_question: string
+          latest_answer_fact_id: string | null
+          opened_at: string
+          resolved_at: string | null
+          semantic_fingerprint: string
+          status: string
+          ticket_id: string
+        }
+        Insert: {
+          canonical_field: string
+          id?: string
+          initial_question: string
+          latest_answer_fact_id?: string | null
+          opened_at?: string
+          resolved_at?: string | null
+          semantic_fingerprint: string
+          status?: string
+          ticket_id: string
+        }
+        Update: {
+          canonical_field?: string
+          id?: string
+          initial_question?: string
+          latest_answer_fact_id?: string | null
+          opened_at?: string
+          resolved_at?: string | null
+          semantic_fingerprint?: string
+          status?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_question_registry_latest_answer_fact_id_fkey"
+            columns: ["latest_answer_fact_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_facts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_question_registry_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_question_answer_same_ticket_fkey"
+            columns: ["ticket_id", "latest_answer_fact_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_facts"
+            referencedColumns: ["ticket_id", "id"]
           },
         ]
       }
@@ -9889,6 +10838,414 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "iac_change_packages"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicenow_intake_requirement_revisions: {
+        Row: {
+          canonical_field: string
+          created_at: string
+          explanation: string
+          field_state: string
+          id: string
+          policy_rule_code: string | null
+          revision_number: number
+          selected_fact_id: string | null
+          ticket_id: string
+        }
+        Insert: {
+          canonical_field: string
+          created_at?: string
+          explanation?: string
+          field_state: string
+          id?: string
+          policy_rule_code?: string | null
+          revision_number: number
+          selected_fact_id?: string | null
+          ticket_id: string
+        }
+        Update: {
+          canonical_field?: string
+          created_at?: string
+          explanation?: string
+          field_state?: string
+          id?: string
+          policy_rule_code?: string | null
+          revision_number?: number
+          selected_fact_id?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_requirement_revisions_selected_fact_id_fkey"
+            columns: ["selected_fact_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_facts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_requirement_revisions_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_requirement_fact_same_ticket_fkey"
+            columns: ["ticket_id", "selected_fact_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_facts"
+            referencedColumns: ["ticket_id", "id"]
+          },
+        ]
+      }
+      servicenow_intake_ticket_approvals: {
+        Row: {
+          approval_type: string
+          approver: string | null
+          created_at: string
+          evidence: Json
+          id: string
+          idempotency_key: string
+          source_event_id: string | null
+          status: string
+          ticket_id: string
+        }
+        Insert: {
+          approval_type: string
+          approver?: string | null
+          created_at?: string
+          evidence?: Json
+          id?: string
+          idempotency_key: string
+          source_event_id?: string | null
+          status: string
+          ticket_id: string
+        }
+        Update: {
+          approval_type?: string
+          approver?: string | null
+          created_at?: string
+          evidence?: Json
+          id?: string
+          idempotency_key?: string
+          source_event_id?: string | null
+          status?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_ticket_approvals_source_event_id_fkey"
+            columns: ["source_event_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_ticket_approvals_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_ticket_approval_event_same_ticket_fkey"
+            columns: ["ticket_id", "source_event_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_events"
+            referencedColumns: ["ticket_id", "id"]
+          },
+        ]
+      }
+      servicenow_intake_ticket_events: {
+        Row: {
+          content_sha256: string
+          created_at: string
+          event_type: string
+          id: string
+          idempotency_key: string
+          redacted_payload: Json
+          snapshot_id: string | null
+          source_author: string | null
+          source_occurred_at: string | null
+          source_record_id: string | null
+          source_type: string
+          supporting_text: string | null
+          ticket_id: string
+        }
+        Insert: {
+          content_sha256: string
+          created_at?: string
+          event_type: string
+          id?: string
+          idempotency_key: string
+          redacted_payload?: Json
+          snapshot_id?: string | null
+          source_author?: string | null
+          source_occurred_at?: string | null
+          source_record_id?: string | null
+          source_type: string
+          supporting_text?: string | null
+          ticket_id: string
+        }
+        Update: {
+          content_sha256?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          idempotency_key?: string
+          redacted_payload?: Json
+          snapshot_id?: string | null
+          source_author?: string | null
+          source_occurred_at?: string | null
+          source_record_id?: string | null
+          source_type?: string
+          supporting_text?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_event_snapshot_same_ticket_fkey"
+            columns: ["ticket_id", "snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_snapshots"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_ticket_events_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_snapshots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_ticket_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicenow_intake_ticket_snapshots: {
+        Row: {
+          canonical_structured_fields: Json
+          content_sha256: string
+          id: string
+          received_at: string
+          redacted_payload: Json
+          sequence_id: number
+          source_updated_at: string | null
+          ticket_id: string
+          upstream_event_key: string
+        }
+        Insert: {
+          canonical_structured_fields?: Json
+          content_sha256: string
+          id?: string
+          received_at?: string
+          redacted_payload?: Json
+          sequence_id?: never
+          source_updated_at?: string | null
+          ticket_id: string
+          upstream_event_key: string
+        }
+        Update: {
+          canonical_structured_fields?: Json
+          content_sha256?: string
+          id?: string
+          received_at?: string
+          redacted_payload?: Json
+          sequence_id?: never
+          source_updated_at?: string | null
+          ticket_id?: string
+          upstream_event_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_ticket_snapshots_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servicenow_intake_tickets: {
+        Row: {
+          active_terraform_package_id: string | null
+          change_package_id: string | null
+          created_at: string
+          current_snapshot_id: string | null
+          id: string
+          request_schema_id: string | null
+          request_type: string | null
+          requested_by_user_id: string | null
+          reusable_capability_gap_id: string | null
+          service_now_sys_id: string | null
+          service_now_sys_id_key: string | null
+          ticket_key: string | null
+          ticket_number: string
+          updated_at: string
+          workflow_state: string
+          workflow_version: number
+        }
+        Insert: {
+          active_terraform_package_id?: string | null
+          change_package_id?: string | null
+          created_at?: string
+          current_snapshot_id?: string | null
+          id?: string
+          request_schema_id?: string | null
+          request_type?: string | null
+          requested_by_user_id?: string | null
+          reusable_capability_gap_id?: string | null
+          service_now_sys_id?: string | null
+          service_now_sys_id_key?: string | null
+          ticket_key?: string | null
+          ticket_number: string
+          updated_at?: string
+          workflow_state?: string
+          workflow_version?: number
+        }
+        Update: {
+          active_terraform_package_id?: string | null
+          change_package_id?: string | null
+          created_at?: string
+          current_snapshot_id?: string | null
+          id?: string
+          request_schema_id?: string | null
+          request_type?: string | null
+          requested_by_user_id?: string | null
+          reusable_capability_gap_id?: string | null
+          service_now_sys_id?: string | null
+          service_now_sys_id_key?: string | null
+          ticket_key?: string | null
+          ticket_number?: string
+          updated_at?: string
+          workflow_state?: string
+          workflow_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_tickets_active_terraform_package_id_fkey"
+            columns: ["active_terraform_package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_terraform_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_tickets_change_package_id_fkey"
+            columns: ["change_package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_change_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_tickets_current_snapshot_id_fkey"
+            columns: ["current_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_snapshots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_tickets_request_schema_id_fkey"
+            columns: ["request_schema_id"]
+            isOneToOne: false
+            referencedRelation: "iac_request_schemas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_tickets_reusable_capability_gap_id_fkey"
+            columns: ["reusable_capability_gap_id"]
+            isOneToOne: false
+            referencedRelation: "iac_engineering_gaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_ticket_active_package_same_ticket_fkey"
+            columns: ["id", "active_terraform_package_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_terraform_packages"
+            referencedColumns: ["ticket_id", "id"]
+          },
+        ]
+      }
+      servicenow_intake_workflow_transitions: {
+        Row: {
+          actor: string
+          created_at: string
+          expected_version: number
+          from_state: string | null
+          github_observation_id: string | null
+          id: string
+          idempotency_key: string
+          reason_code: string
+          source_event_id: string | null
+          ticket_id: string
+          to_state: string
+        }
+        Insert: {
+          actor: string
+          created_at?: string
+          expected_version: number
+          from_state?: string | null
+          github_observation_id?: string | null
+          id?: string
+          idempotency_key: string
+          reason_code: string
+          source_event_id?: string | null
+          ticket_id: string
+          to_state: string
+        }
+        Update: {
+          actor?: string
+          created_at?: string
+          expected_version?: number
+          from_state?: string | null
+          github_observation_id?: string | null
+          id?: string
+          idempotency_key?: string
+          reason_code?: string
+          source_event_id?: string | null
+          ticket_id?: string
+          to_state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicenow_intake_workflow_transitio_github_observation_id_fkey"
+            columns: ["github_observation_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_github_commit_observations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_workflow_transitions_source_event_id_fkey"
+            columns: ["source_event_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_workflow_transitions_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_transition_event_same_ticket_fkey"
+            columns: ["ticket_id", "source_event_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_ticket_events"
+            referencedColumns: ["ticket_id", "id"]
+          },
+          {
+            foreignKeyName: "servicenow_transition_github_observation_same_ticket_fkey"
+            columns: ["ticket_id", "github_observation_id"]
+            isOneToOne: false
+            referencedRelation: "iac_ticket_github_commit_observations"
+            referencedColumns: ["ticket_id", "id"]
           },
         ]
       }
