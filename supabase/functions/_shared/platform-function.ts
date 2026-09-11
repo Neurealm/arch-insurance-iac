@@ -11,13 +11,37 @@ export const obj = (value: unknown): Json => value && typeof value === "object" 
 export const str = (value: unknown) => typeof value === "string" ? value.trim() : "";
 export const arr = (value: unknown) => Array.isArray(value) ? value : [];
 
+/**
+ * Supabase is mid-migration from the legacy SUPABASE_SERVICE_ROLE_KEY env
+ * var to a JSON dictionary, SUPABASE_SECRET_KEYS (of which `.default` is the
+ * equivalent full-access credential), issued through the newer JWT Signing
+ * Keys system. The platform still auto-populates the legacy var for every
+ * project even after a project has adopted the new system, so checking it
+ * first and stopping there -- which every one of these functions used to do
+ * -- silently authenticates against a DIFFERENT, older credential than
+ * whatever a project's dashboard now shows as "the" service-role/secret
+ * key. Returning every candidate (rather than picking one) means an
+ * external caller (a GitHub Actions secret, a webhook adapter) is accepted
+ * whichever one it was actually given, instead of this needing to guess
+ * which key system a given project has migrated to.
+ */
+export function serviceRoleKeyCandidates(): string[] {
+  const candidates: string[] = [];
+  const legacy = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (legacy) candidates.push(legacy);
+  try {
+    const parsed = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}");
+    if (typeof parsed?.default === "string" && parsed.default) candidates.push(parsed.default);
+  } catch { /* SUPABASE_SECRET_KEYS is absent or malformed; legacy candidate (if any) still applies */ }
+  return [...new Set(candidates)];
+}
+
 export function adminClient() {
   const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => {
-    try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default; } catch { return undefined; }
-  })();
+  const keyCandidates = serviceRoleKeyCandidates();
+  const key = keyCandidates[0];
   if (!url || !key) throw new Error("Supabase server credentials are not configured.");
-  return { client: createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } }), key };
+  return { client: createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } }), key, keyCandidates };
 }
 
 export function corsHeaders(request: Request) {
@@ -44,7 +68,7 @@ export async function resolvePrincipal(request: Request, db: ReturnType<typeof a
   const auth = request.headers.get("authorization") ?? "";
   if (!auth.startsWith("Bearer ")) return null;
   const token = auth.slice(7);
-  if (token === db.key) return { kind: "service" };
+  if (db.keyCandidates.includes(token)) return { kind: "service" };
   const { data, error } = await db.client.auth.getUser(token);
   if (error || !data.user) return null;
   const { data: role, error: roleError } = await db.client.from("user_roles").select("user_id").eq("user_id", data.user.id).eq("role", "platform_admin").maybeSingle();

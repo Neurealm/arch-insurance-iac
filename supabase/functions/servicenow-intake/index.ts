@@ -5,6 +5,7 @@ import {
   type CandidateFact,
 } from "../_shared/servicenow-change-agent.ts";
 import { timingSafeEqual, hmacSha256Hex } from "../_shared/webhook-auth.ts";
+import { serviceRoleKeyCandidates } from "../_shared/platform-function.ts";
 
 const MODEL = "google/gemini-2.5-flash";
 const SERVICE_NOW_MARKER = "[NeuGAIN Infrastructure Intake]";
@@ -135,9 +136,7 @@ async function sha256(value: unknown) {
 
 function supabaseAdmin() {
   const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => {
-    try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default; } catch { return undefined; }
-  })();
+  const key = serviceRoleKeyCandidates()[0];
   if (!url || !key) throw new Error("Supabase server credentials are not configured.");
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 }
@@ -146,9 +145,7 @@ async function authenticatedCaller(request: Request) {
   const authorization = request.headers.get("authorization") ?? "";
   if (!authorization.startsWith("Bearer ")) return null;
   const url = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => {
-    try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default; } catch { return undefined; }
-  })();
+  const serviceRoleKey = serviceRoleKeyCandidates()[0];
   if (!url || !serviceRoleKey) throw new Error("Supabase server credentials are not configured.");
 
   // Validate the caller with the service-role client. This avoids relying on
@@ -762,11 +759,6 @@ async function maybeCreateGap(admin: ReturnType<typeof supabaseAdmin>, ticket: N
   return { id: created.id as string, reused: false };
 }
 
-function serviceRoleKey() {
-  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? (() => {
-    try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}").default as string | undefined; } catch { return undefined; }
-  })();
-}
 
 async function isPlatformAdmin(admin: ReturnType<typeof supabaseAdmin>, userId: string) {
   const { data } = await admin.from("user_roles").select("user_id").eq("user_id", userId).eq("role", "platform_admin").maybeSingle();
@@ -908,7 +900,7 @@ Deno.serve(async (request) => {
     const admin = supabaseAdmin();
     const authorization = request.headers.get("authorization") ?? "";
     const bearer = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
-    let permitted = bearer !== "" && bearer === serviceRoleKey();
+    let permitted = bearer !== "" && serviceRoleKeyCandidates().includes(bearer);
     if (!permitted) {
       const actor = await authenticatedCaller(request);
       permitted = !!actor && await isPlatformAdmin(admin, actor);

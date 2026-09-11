@@ -11,9 +11,12 @@ name: Sync Terraform CI evidence
 # (ci-evidence.ts's inspectCi); this workflow adds no evidence logic of its
 # own.
 #
-# Requires a repository secret SUPABASE_SERVICE_ROLE_KEY (the project's
-# service_role key) -- the same authorization convention every other
-# unattended trigger in this platform uses.
+# Requires a repository secret SUPABASE_SERVICE_ROLE_KEY holding the
+# project's full-access server key -- the same authorization convention
+# every other unattended trigger in this platform uses. The platform
+# accepts either the legacy service_role key or the newer secret key from
+# SUPABASE_SECRET_KEYS (Project Settings -> API); use whichever one your
+# project's dashboard shows.
 
 on:
   schedule:
@@ -36,8 +39,6 @@ jobs:
             echo "::error::The SUPABASE_SERVICE_ROLE_KEY repository secret is not configured; cannot sync."
             exit 1
           fi
-          echo "DEBUG secret length: $(printf '%s' "${SUPABASE_SERVICE_ROLE_KEY}" | wc -c)"
-          echo "DEBUG secret sha256: $(printf '%s' "${SUPABASE_SERVICE_ROLE_KEY}" | sha256sum | cut -d' ' -f1)"
           status=$(curl -sS -o response.json -w "%{http_code}" \
             -X POST "${SUPABASE_URL}/functions/v1/terraform-ci-status-sync" \
             -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
