@@ -29,6 +29,18 @@ jobs:
     permissions:
       contents: read
     steps:
+      # TEMPORARY diagnostic step: calls a throwaway debug-key-check function
+      # that returns only sha256 hashes + byte lengths of the server-side
+      # candidate keys and of this secret -- never raw values -- so a 401
+      # can be root-caused without anyone pasting a real secret anywhere.
+      # Remove this step and the debug-key-check function once resolved.
+      - name: Diagnose credential mismatch
+        env:
+          SUPABASE_URL: "https://esfpbiishpkvhlejnxzq.supabase.co"
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          curl -sS -X POST "${SUPABASE_URL}/functions/v1/debug-key-check" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" | tee debug.json
       - name: Batch-sync pending engineering gaps
         env:
           SUPABASE_URL: "https://esfpbiishpkvhlejnxzq.supabase.co"
