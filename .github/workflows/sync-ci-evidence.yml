@@ -36,6 +36,8 @@ jobs:
             echo "::error::The SUPABASE_SERVICE_ROLE_KEY repository secret is not configured; cannot sync."
             exit 1
           fi
+          echo "DEBUG secret length: $(printf '%s' "${SUPABASE_SERVICE_ROLE_KEY}" | wc -c)"
+          echo "DEBUG secret sha256: $(printf '%s' "${SUPABASE_SERVICE_ROLE_KEY}" | sha256sum | cut -d' ' -f1)"
           status=$(curl -sS -o response.json -w "%{http_code}" \
             -X POST "${SUPABASE_URL}/functions/v1/terraform-ci-status-sync" \
             -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
