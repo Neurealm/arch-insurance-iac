@@ -10786,6 +10786,7 @@ export type Database = {
           requested_by_user_id: string | null
           service_now_sys_id: string | null
           status: string
+          ticket_id: string | null
           ticket_number: string
           ticket_payload: Json
           ticket_updated_at: string | null
@@ -10806,6 +10807,7 @@ export type Database = {
           requested_by_user_id?: string | null
           service_now_sys_id?: string | null
           status?: string
+          ticket_id?: string | null
           ticket_number: string
           ticket_payload?: Json
           ticket_updated_at?: string | null
@@ -10826,6 +10828,7 @@ export type Database = {
           requested_by_user_id?: string | null
           service_now_sys_id?: string | null
           status?: string
+          ticket_id?: string | null
           ticket_number?: string
           ticket_payload?: Json
           ticket_updated_at?: string | null
@@ -10837,6 +10840,13 @@ export type Database = {
             columns: ["change_package_id"]
             isOneToOne: false
             referencedRelation: "iac_change_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicenow_intake_requests_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_tickets"
             referencedColumns: ["id"]
           },
         ]
@@ -12291,6 +12301,7 @@ export type Database = {
         }
       }
       archive_tenant_role: { Args: { _role_id: string }; Returns: undefined }
+      assert_servicenow_agent_service_role: { Args: never; Returns: undefined }
       assign_membership_role: {
         Args: { _membership_id: string; _role_id: string }
         Returns: string
@@ -13470,6 +13481,10 @@ export type Database = {
           _user_id: string
         }
         Returns: string
+      }
+      redact_servicenow_agent_jsonb: {
+        Args: { p_depth?: number; p_value: Json }
+        Returns: Json
       }
       release_iac_terraform_claim: {
         Args: { p_claim_id: string }
