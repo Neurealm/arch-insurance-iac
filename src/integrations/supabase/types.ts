@@ -12237,6 +12237,22 @@ export type Database = {
         Returns: undefined
       }
       accept_invitation: { Args: { _token: string }; Returns: Json }
+      activate_servicenow_policy_rule: {
+        Args: {
+          p_actor: string
+          p_idempotency_key: string
+          p_policy_rule_id: string
+        }
+        Returns: Json
+      }
+      activate_servicenow_request_schema: {
+        Args: {
+          p_actor: string
+          p_idempotency_key: string
+          p_schema_id: string
+        }
+        Returns: Json
+      }
       admin_get_user_login_history: {
         Args: { _email?: string; _limit?: number; _user_id: string }
         Returns: {
@@ -13033,6 +13049,17 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      complete_servicenow_ticket_request: {
+        Args: {
+          p_actor: string
+          p_expected_version: number
+          p_idempotency_key: string
+          p_request_schema_id: string
+          p_source_event_id?: string
+          p_ticket_id: string
+        }
+        Returns: number
+      }
       count_active_tenant_admins: {
         Args: { _exclude_membership?: string; _tenant_id: string }
         Returns: number
@@ -13305,6 +13332,25 @@ export type Database = {
       iac_vm_target_ids: {
         Args: { p_resource_group_arm_id: string; p_vm_names: string[] }
         Returns: string[]
+      }
+      ingest_servicenow_ticket_snapshot: {
+        Args: {
+          p_canonical_structured_fields: Json
+          p_content_sha256: string
+          p_redacted_payload: Json
+          p_requested_by_user_id: string
+          p_service_now_sys_id: string
+          p_source_updated_at: string
+          p_ticket_number: string
+          p_upstream_event_key: string
+        }
+        Returns: {
+          identity_conflict: boolean
+          inserted: boolean
+          snapshot_id: string
+          ticket_id: string
+          workflow_version: number
+        }[]
       }
       invite_member: {
         Args: {
@@ -13802,6 +13848,18 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      transition_servicenow_intake_ticket: {
+        Args: {
+          p_actor: string
+          p_expected_version: number
+          p_idempotency_key: string
+          p_reason_code: string
+          p_source_event_id?: string
+          p_ticket_id: string
+          p_to_state: string
+        }
+        Returns: number
       }
       update_tenant: {
         Args: {
