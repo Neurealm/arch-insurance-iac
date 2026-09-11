@@ -13053,6 +13053,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      complete_servicenow_ticket_handoff: {
+        Args: {
+          p_actor: string
+          p_expected_version: number
+          p_idempotency_key: string
+          p_ticket_id: string
+        }
+        Returns: number
+      }
       complete_servicenow_ticket_request: {
         Args: {
           p_actor: string
@@ -13535,6 +13544,25 @@ export type Database = {
           p_close?: boolean
           p_observations: Json
           p_package_id: string
+        }
+        Returns: Json
+      }
+      record_servicenow_ticket_draft_pr: {
+        Args: {
+          p_actor: string
+          p_expected_version: number
+          p_idempotency_key: string
+          p_pr: Json
+          p_ticket_id: string
+        }
+        Returns: Json
+      }
+      record_servicenow_ticket_github_observation: {
+        Args: {
+          p_actor: string
+          p_idempotency_key: string
+          p_observation: Json
+          p_ticket_id: string
         }
         Returns: Json
       }
