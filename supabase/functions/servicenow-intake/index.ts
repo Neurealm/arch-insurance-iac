@@ -594,6 +594,23 @@ function clarificationNote(ticket: NormalizedTicket, analysis: Analysis, result:
   return [`${SERVICE_NOW_MARKER} Clarification required`, "", "The infrastructure team cannot process this change yet. Please update the ticket with:", ...result.questions.map((question) => `- ${question}`), "", `Detected request type: ${actionLabel(analysis.action)} (${analysis.confidence}% confidence).`, "No Azure action was performed by this analysis."].join("\n");
 }
 
+/**
+ * The requester didn't do anything wrong here -- another governed change is
+ * already open against the same resource, so this one has to wait its turn
+ * rather than being drafted concurrently. Phrased as a wait-and-retry
+ * instruction, not an error, since from the requester's side it isn't one.
+ */
+function inFlightConflictNote(analysis: Analysis, detail: string) {
+  return [
+    `${SERVICE_NOW_MARKER} Clarification required`, "",
+    "The infrastructure team cannot open a new governed change for this resource yet:",
+    `- ${detail}`, "",
+    "Please wait until that change is approved or rejected, then resubmit this request (or ask the platform team to resume this ticket).",
+    "", `Detected request type: ${actionLabel(analysis.action)} (${analysis.confidence}% confidence).`,
+    "No Azure action was performed by this analysis.",
+  ].join("\n");
+}
+
 async function postCustomerComment(ticket: NormalizedTicket, note: string) {
   const baseUrl = (Deno.env.get("SERVICENOW_BASE_URL") ?? "").replace(/\/$/, "");
   const clientId = Deno.env.get("SERVICENOW_CLIENT_ID");
@@ -608,6 +625,16 @@ async function postCustomerComment(ticket: NormalizedTicket, note: string) {
   const update = await fetch(`${baseUrl}/api/now/table/${encodeURIComponent(table)}/${encodeURIComponent(ticket.sysId)}`, { method: "PATCH", headers: { authorization: `Bearer ${token}`, "content-type": "application/json", accept: "application/json" }, body: JSON.stringify({ comments: note }) });
   if (!update.ok) throw new Error(`ServiceNow comment update returned ${update.status}.`);
 }
+
+const IN_FLIGHT_CONFLICT_MARKER = "another_in_flight_change_package_already_targets_one_of_these_resources";
+
+/**
+ * A real, anticipated business rule (save_iac_change_package refuses to open
+ * a second in-flight package against a resource that already has one) --
+ * not a system failure. Thrown instead of a plain Error so callers can turn
+ * it into a clarification note back to the requester instead of a raw 502.
+ */
+class InFlightChangeConflict extends Error {}
 
 async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket: NormalizedTicket, analysis: Analysis, target: AzureVm | null, creatorOverride?: string | null) {
   const creator = creatorOverride || Deno.env.get("IAC_AUTOMATION_USER_ID");
@@ -654,7 +681,12 @@ async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket:
       })),
       p_submit: false, p_package_id: null, p_created_by: creator,
     });
-    if (createError) throw new Error(`Unable to create governed draft: ${createError.message}`);
+    if (createError) {
+      if (createError.message.includes(IN_FLIGHT_CONFLICT_MARKER)) {
+        throw new InFlightChangeConflict(`Another governed change is already in progress for one of the requested machines (${names.join(", ")}).`);
+      }
+      throw new Error(`Unable to create governed draft: ${createError.message}`);
+    }
     const saved = record(created);
     return { id: text(saved.id), package_number: text(saved.package_number) };
   }
@@ -684,7 +716,12 @@ async function maybeCreateDraft(admin: ReturnType<typeof supabaseAdmin>, ticket:
     p_package_id: null,
     p_created_by: creator,
   });
-  if (error) throw new Error(`Unable to create governed draft: ${error.message}`);
+  if (error) {
+    if (error.message.includes(IN_FLIGHT_CONFLICT_MARKER)) {
+      throw new InFlightChangeConflict(`Another governed change is already in progress for ${target.name}.`);
+    }
+    throw new Error(`Unable to create governed draft: ${error.message}`);
+  }
   const saved = record(data);
   return { id: text(saved.id), package_number: text(saved.package_number) };
 }
@@ -782,15 +819,24 @@ async function resumeQueued(admin: ReturnType<typeof supabaseAdmin>, request: Re
         .select("id").eq("provider", "azure").eq("resource_type", VM_RESOURCE_TYPE)
         .eq("action_type", analysis.action).eq("lifecycle_status", "approved").maybeSingle();
       const validation = validate(ticket, analysis, azure, !!approvedCapability);
-      const draft = validation.ready ? await maybeCreateDraft(admin, ticket, analysis, validation.target, text(intake.requested_by_user_id) || null) : null;
-      const note = clarificationNote(ticket, analysis, validation, null);
+      let draft: { id: string; package_number: string } | null = null;
+      let inFlightConflict: string | null = null;
+      if (validation.ready) {
+        try {
+          draft = await maybeCreateDraft(admin, ticket, analysis, validation.target, text(intake.requested_by_user_id) || null);
+        } catch (cause) {
+          if (cause instanceof InFlightChangeConflict) inFlightConflict = cause.message;
+          else throw cause;
+        }
+      }
+      const note = inFlightConflict ? inFlightConflictNote(analysis, inFlightConflict) : clarificationNote(ticket, analysis, validation, null);
       const finalNote = draft ? `${note}\n\nGoverned draft package created: ${draft.package_number}. Approval is still required.` : note;
-      const status = validation.ready ? "ready_for_engineering" : "needs_clarification";
+      const status = validation.ready && !inFlightConflict ? "ready_for_engineering" : "needs_clarification";
       await admin.from("servicenow_intake_requests").update({
         status, llm_analysis: { ...analysis, validation }, clarification_note: finalNote,
         change_package_id: draft?.id ?? null, analyzed_at: new Date().toISOString(), error_message: null,
       }).eq("id", intakeRequestId);
-      await addEvent(admin, intakeRequestId, "intake_resumed", { action: analysis.action, ready: validation.ready, changePackageId: draft?.id ?? null });
+      await addEvent(admin, intakeRequestId, "intake_resumed", { action: analysis.action, ready: validation.ready && !inFlightConflict, changePackageId: draft?.id ?? null, inFlightConflict });
 
       // Only speak up if the answer changed. A resume that reaches the same
       // conclusion must not post the requester an identical comment again.
@@ -798,7 +844,7 @@ async function resumeQueued(admin: ReturnType<typeof supabaseAdmin>, request: Re
         try { await postCustomerComment(ticket, finalNote); await addEvent(admin, intakeRequestId, "servicenow_customer_comment_posted", { field: "comments", resumed: true }); }
         catch { /* the analysis stands even when ServiceNow is unreachable */ }
       }
-      await finish(draft ? "succeeded" : "failed", draft ? undefined : "resumed but still not ready for engineering");
+      await finish(draft ? "succeeded" : "failed", draft ? undefined : (inFlightConflict ?? "resumed but still not ready for engineering"));
       results.push({ intakeRequestId, outcome: draft ? "package_created" : "still_blocked", changePackageNumber: draft?.package_number ?? null, action: analysis.action });
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : "resume failed";
@@ -955,22 +1001,37 @@ Deno.serve(async (request) => {
       .select("id").eq("provider", "azure").eq("resource_type", VM_RESOURCE_TYPE)
       .eq("action_type", analysis.action).eq("lifecycle_status", "approved").maybeSingle();
     const validation = validate(ticket, analysis, azure, !!approvedCapability);
-    const draft = validation.ready ? await maybeCreateDraft(admin, ticket, analysis, validation.target, demoMode ? callerId : null) : null;
+    // A resource with another change already in flight is a real, anticipated
+    // business rule -- not a processing failure. Catch it here specifically so
+    // it becomes a clarification note asking the requester to wait, rather
+    // than falling through to the generic error handler below and surfacing
+    // as a raw non-2xx response.
+    let draft: { id: string; package_number: string } | null = null;
+    let inFlightConflict: string | null = null;
+    if (validation.ready) {
+      try {
+        draft = await maybeCreateDraft(admin, ticket, analysis, validation.target, demoMode ? callerId : null);
+      } catch (cause) {
+        if (cause instanceof InFlightChangeConflict) inFlightConflict = cause.message;
+        else throw cause;
+      }
+    }
     const gap = validation.readyForGap ? await maybeCreateGap(admin, ticket, analysis, requestId, demoMode ? callerId : null) : null;
-    const note = clarificationNote(ticket, analysis, validation, gap);
-    const status = validation.ready ? "ready_for_engineering" : gap ? "engineering_gap_opened" : "needs_clarification";
+    const ready = validation.ready && !inFlightConflict;
+    const note = inFlightConflict ? inFlightConflictNote(analysis, inFlightConflict) : clarificationNote(ticket, analysis, validation, gap);
+    const status = ready ? "ready_for_engineering" : gap ? "engineering_gap_opened" : "needs_clarification";
     await admin.from("servicenow_intake_requests").update({ status, llm_analysis: { ...analysis, validation }, clarification_note: note, change_package_id: draft?.id ?? null, analyzed_at: new Date().toISOString(), error_message: null }).eq("id", requestId);
-    await addEvent(admin, requestId, "llm_analysis_completed", { action: analysis.action, confidence: analysis.confidence, ready: validation.ready, gapId: gap?.id ?? null, missingCount: validation.missing.length, conflictCount: validation.conflicts.length });
+    await addEvent(admin, requestId, "llm_analysis_completed", { action: analysis.action, confidence: analysis.confidence, ready, gapId: gap?.id ?? null, missingCount: validation.missing.length, conflictCount: validation.conflicts.length, inFlightConflict });
     const finalNote = draft ? `${note}\n\nGoverned draft package created: ${draft.package_number}. Approval is still required.` : note;
     if (demoMode) {
       await admin.from("servicenow_intake_requests").update({ status: "demo_comment_generated", clarification_note: finalNote }).eq("id", requestId);
       await addEvent(admin, requestId, "demo_customer_comment_generated", { field: "comments", simulated: true });
-      return json({ requestId, status: "demo_comment_generated", action: analysis.action, confidence: analysis.confidence, readyForEngineering: validation.ready, changePackageNumber: draft?.package_number ?? null, comment: finalNote }, 200, request);
+      return json({ requestId, status: "demo_comment_generated", action: analysis.action, confidence: analysis.confidence, readyForEngineering: ready, changePackageNumber: draft?.package_number ?? null, comment: finalNote }, 200, request);
     }
     await postCustomerComment(ticket, finalNote);
     await admin.from("servicenow_intake_requests").update({ status: "comment_posted", clarification_note: finalNote }).eq("id", requestId);
     await addEvent(admin, requestId, "servicenow_customer_comment_posted", { field: "comments" });
-    return json({ requestId, status: "comment_posted", action: analysis.action, confidence: analysis.confidence, readyForEngineering: validation.ready, changePackageNumber: draft?.package_number ?? null }, 200, request);
+    return json({ requestId, status: "comment_posted", action: analysis.action, confidence: analysis.confidence, readyForEngineering: ready, changePackageNumber: draft?.package_number ?? null }, 200, request);
   } catch (error) {
     const message = error instanceof Error ? error.message : "ServiceNow intake processing failed.";
     await admin.from("servicenow_intake_requests").update({ status: "comment_failed", error_message: message }).eq("id", requestId);
