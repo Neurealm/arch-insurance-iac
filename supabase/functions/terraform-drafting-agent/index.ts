@@ -23,6 +23,24 @@ async function authorized(request: Request, db: ReturnType<typeof admin>) {
 
 const draftToken = draftGitHubToken;
 
+/**
+ * `iac_automation_capabilities` has UNIQUE (provider, resource_type,
+ * action_type, module_version), and every drafting path used to hardcode
+ * module_version to "v1.0.0". A capability that never got approved (its PR
+ * was closed, or a later attempt superseded it) still occupies that row --
+ * lifecycle_status has no partial-unique carve-out for anything but
+ * 'approved' -- so any later retry for the same action permanently failed
+ * to insert with "duplicate key value violates unique constraint...".
+ * Deriving the next patch version from whatever already exists (including
+ * retired/abandoned rows) makes every retry succeed instead of colliding.
+ */
+async function nextModuleVersion(db: ReturnType<typeof admin>["client"], provider: string, resourceType: string, actionType: string): Promise<string> {
+  const { data, error } = await db.from("iac_automation_capabilities").select("module_version").eq("provider", provider).eq("resource_type", resourceType).eq("action_type", actionType).order("created_at", { ascending: false }).limit(1).maybeSingle();
+  if (error) throw error;
+  const match = /^v(\d+)\.(\d+)\.(\d+)$/.exec(str(data?.module_version));
+  return match ? `v${match[1]}.${match[2]}.${Number(match[3]) + 1}` : "v1.0.0";
+}
+
 // --- Drafting ---------------------------------------------------------------
 
 function buildPrompt(gap: Json, exemplar: string) {
@@ -299,7 +317,7 @@ async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Js
   const { data: capability, error: capabilityError } = await db.from("iac_automation_capabilities").insert({
     provider: "azure", resource_type: "Microsoft.Compute/virtualMachines", action_type: "increase_os_disk",
     display_name: draft.displayName || "Increase Azure VM OS disk capacity",
-    module_source: `terraform/modules/${draft.moduleName}`, module_version: "v1.0.0",
+    module_source: `terraform/modules/${draft.moduleName}`, module_version: await nextModuleVersion(db, "azure", "Microsoft.Compute/virtualMachines", "increase_os_disk"),
     execution_mode: "azapi_update", lifecycle_status: "draft", input_schema: OS_DISK_INPUT_SCHEMA,
     allowed_environments: ["development"], requires_managed_resource: true, max_targets_per_run: 1,
   }).select("id").single();
@@ -374,7 +392,7 @@ async function draftForGap(db: ReturnType<typeof admin>["client"], gap: Json) {
   }
   const { data: capability, error: capabilityError } = await db.from("iac_automation_capabilities").insert({
     provider: str(gap.provider), resource_type: str(gap.resource_type), action_type: str(gap.action_type),
-    display_name: draft.displayName, module_source: `terraform/modules/${draft.moduleName}`, module_version: "v1.0.0",
+    display_name: draft.displayName, module_source: `terraform/modules/${draft.moduleName}`, module_version: await nextModuleVersion(db, str(gap.provider), str(gap.resource_type), str(gap.action_type)),
     execution_mode: "azapi_resource", lifecycle_status: "draft", input_schema: CREATE_VM_INPUT_SCHEMA,
     allowed_environments: ["development"], requires_managed_resource: false, max_targets_per_run: 20,
   }).select("id").single();
