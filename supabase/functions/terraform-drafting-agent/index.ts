@@ -259,6 +259,14 @@ async function draftOsDiskForGap(db: ReturnType<typeof admin>["client"], gap: Js
   const draft = await draftPromptWithGemini(buildOsDiskPrompt(gap));
   draft.moduleName = "vm-os-disk-expand";
   draft.displayName = "Increase Azure VM OS disk capacity";
+  // variables/inputSchema are a fixed, server-owned interface (the prompt
+  // already dictates them verbatim) -- forcing them here, the same way
+  // moduleName/displayName are forced above, removes an entire class of
+  // spurious rejections from the model re-serializing JSON it was only ever
+  // supposed to copy (key reordering, dropped fields), while leaving the
+  // model responsible for exactly what needs its judgment: the HCL bodies.
+  draft.variables = OS_DISK_VARIABLES;
+  draft.inputSchema = OS_DISK_INPUT_SCHEMA;
   await addEvent(db, str(gap.id), "draft_generation_completed", { moduleName: draft.moduleName });
   draft.moduleMainTf = sanitizeHcl(draft.moduleMainTf);
   draft.moduleVariablesTf = sanitizeHcl(draft.moduleVariablesTf);
