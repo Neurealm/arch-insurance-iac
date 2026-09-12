@@ -144,14 +144,40 @@ export function assessPlan(plan: Json, targets: string[], inputs: Json, capabili
     const change = obj(resource.change), after = obj(change.after), unknown = obj(change.after_unknown);
     const operations = arr(change.actions).map(str);
     for (const op of operations) actions[op] = Number(actions[op] ?? 0) + 1;
-    if (operations.includes("delete")) destroy = true;
-    if (operations.includes("delete") && operations.includes("create")) replace = true;
+
+    // The vm-action module's retrigger helper (see its main.tf): a bare
+    // terraform_data resource holding only the current change_request_id, so
+    // that the azapi_resource_action below has something that changes on
+    // every distinct ticket and can be force-replaced instead of planning as
+    // an unprovable no-op. It calls no API and owns no Azure identity, so it
+    // is validated here and excluded entirely from the ARM-identity/destroy/
+    // replace bookkeeping below -- it can never stand in for, or mask, a
+    // change to an actual Azure resource.
+    if (resource.type === "terraform_data") {
+      if (resource.mode !== "managed" || !str(resource.provider_name).toLowerCase().endsWith("builtin/terraform") || operations.includes("delete") || str(after.input) !== str(inputs.change_request_id)) {
+        violations.push("Unexpected action-retrigger resource evidence.");
+      }
+      continue;
+    }
+
+    // A replace (delete+create) of exactly the action-invoking resource is
+    // the one safe exception to the destroy ban below: azapi_resource_action
+    // corresponds to no persistent Azure state, so removing Terraform's
+    // bookkeeping for a past action call and recreating it has zero Azure
+    // effect on its own -- it is what makes the retrigger above actually
+    // cause the action to be re-invoked at apply, instead of silently
+    // skipping a genuine repeat start/stop/restart request.
+    const isActionReplace = resource.type === "azapi_resource_action" && operations.length === 2 && operations.includes("delete") && operations.includes("create");
+    if (!isActionReplace) {
+      if (operations.includes("delete")) destroy = true;
+      if (operations.includes("delete") && operations.includes("create")) replace = true;
+    }
     if (resource.mode !== "managed" || str(resource.provider_name).toLowerCase() !== "registry.terraform.io/azure/azapi") { violations.push("Unexpected resource mode or provider."); continue; }
     // A pure delete has no `after` body to validate against the request. When
     // deletions are permitted it is recorded and skipped; the destroy flag above
     // still carries it into every downstream decision.
     if (allowDestroy && operations.length === 1 && operations[0] === "delete") continue;
-    if (!operations.length || operations.some(op => !["create", "update", "no-op"].includes(op))) violations.push("Destroy, replace or unsupported resource operation is prohibited.");
+    if (!operations.length || (operations.some(op => !["create", "update", "no-op"].includes(op)) && !isActionReplace)) violations.push("Destroy, replace or unsupported resource operation is prohibited.");
 
     let id: string;
     try {

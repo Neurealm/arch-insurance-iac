@@ -54,6 +54,11 @@ const bindings = (...items: unknown[]) => JSON.stringify(items);
 const actionCapability = {
   module_source: "terraform/modules/vm-action", execution_mode: "azapi_action",
   allowed_environments: ["development"], max_targets_per_run: 1, requires_managed_resource: false,
+  // Matches the real seeded shape (20260906050000_add_typed_input_schema.sql).
+  input_schema: { action: "start", fields: [
+    { key: "target_resource_id", source: "target", type: "string", required: true, pattern: "^/subscriptions/" },
+    { key: "change_request_id", source: "package_number_or_ticket", type: "string", required: true, minLength: 6 },
+  ] },
 };
 const createCapability = {
   module_source: "terraform/modules/vm-batch-create", execution_mode: "azapi_resource",
@@ -166,6 +171,86 @@ test("OS disk expansion requires a managed target and an explicitly authorized m
   assert.throws(() => resolveExecutionScope(bindings({ ...diskBinding, maxOsDiskSizeGb: 127 }), diskPkg, diskCapability, [VM01]), /capacity has not been authorized/);
   assert.throws(() => resolveExecutionScope(bindings({ ...diskBinding, managedResourceIds: [] }), diskPkg, diskCapability, [VM01]), /ownership\/adoption is required/);
   assert.throws(() => typedInputs({ ...diskPkg, parameters: { requestedOsDiskSizeGB: 32 } }, diskCapability, VM01), /outside the approved range/);
+});
+
+// ---------------------------------------------------------------------------
+// vm-action retrigger: azapi_resource_action has no way to prove a repeat
+// start/stop/restart will re-execute, since Terraform only diffs
+// type/resource_id/action/method -- identical across two distinct change
+// requests. The module now pairs it with a terraform_data resource holding
+// change_request_id and a `replace_triggered_by` on the action, so a repeat
+// request forces a replace (delete+create) instead of an unprovable no-op.
+// These tests cover assessPlan's narrow, explicit exception for exactly that
+// pattern -- and confirm it is not a general loosening of the destroy ban.
+// ---------------------------------------------------------------------------
+
+function actionResourceChange(actions: string[], overrides: Record<string, unknown> = {}) {
+  return {
+    mode: "managed", provider_name: "registry.terraform.io/azure/azapi", type: "azapi_resource_action",
+    change: {
+      actions,
+      after: {
+        resource_id: VM01, type: "Microsoft.Compute/virtualMachines@2024-07-01", action: "start", method: "POST",
+        when: "apply", body: {}, sensitive_body: {}, query_parameters: {}, headers: {}, ...overrides,
+      },
+      after_unknown: {},
+    },
+  };
+}
+function triggerResourceChange(actions: string[], input: string) {
+  return {
+    mode: "managed", provider_name: "terraform.io/builtin/terraform", type: "terraform_data",
+    change: { actions, after: { input, output: input, triggers_replace: null }, after_unknown: {} },
+  };
+}
+
+test("a first-ever start_vm plan creates both the trigger and the action", () => {
+  const inputs = typedInputs({ ...startPkg, package_number: "VM-CHG-000111" }, actionCapability, VM01);
+  const plan = { resource_changes: [triggerResourceChange(["create"], "VM-CHG-000111"), actionResourceChange(["create"])] };
+  assert.equal(assessPlan(plan, [VM01], inputs, actionCapability).matched, true);
+});
+
+test("a repeat start_vm request forces a replace and is still approvable", () => {
+  const inputs = typedInputs({ ...startPkg, package_number: "VM-CHG-000222" }, actionCapability, VM01);
+  const plan = { resource_changes: [triggerResourceChange(["update"], "VM-CHG-000222"), actionResourceChange(["delete", "create"])] };
+  assert.equal(assessPlan(plan, [VM01], inputs, actionCapability).matched, true);
+});
+
+test("a trigger whose input does not match this ticket's change_request_id is rejected", () => {
+  const inputs = typedInputs({ ...startPkg, package_number: "VM-CHG-000333" }, actionCapability, VM01);
+  const plan = { resource_changes: [triggerResourceChange(["update"], "someone-elses-ticket"), actionResourceChange(["delete", "create"])] };
+  assert.equal(assessPlan(plan, [VM01], inputs, actionCapability).matched, false);
+});
+
+test("a trigger the plan tries to delete outright is rejected", () => {
+  const inputs = typedInputs({ ...startPkg, package_number: "VM-CHG-000444" }, actionCapability, VM01);
+  const plan = { resource_changes: [triggerResourceChange(["delete"], "VM-CHG-000444"), actionResourceChange(["delete", "create"])] };
+  assert.equal(assessPlan(plan, [VM01], inputs, actionCapability).matched, false);
+});
+
+test("the action resource deleted alone, without a paired create, is still prohibited", () => {
+  const inputs = typedInputs({ ...startPkg, package_number: "VM-CHG-000555" }, actionCapability, VM01);
+  const plan = { resource_changes: [triggerResourceChange(["update"], "VM-CHG-000555"), actionResourceChange(["delete"])] };
+  const result = assessPlan(plan, [VM01], inputs, actionCapability);
+  assert.equal(result.matched, false);
+  assert.equal(result.destroy, true);
+});
+
+test("a genuine no-op (the trigger did not change) is still refused, not silently trusted", () => {
+  const inputs = typedInputs({ ...startPkg, package_number: "VM-CHG-000666" }, actionCapability, VM01);
+  const plan = { resource_changes: [triggerResourceChange(["no-op"], "VM-CHG-000666"), actionResourceChange(["no-op"])] };
+  assert.equal(assessPlan(plan, [VM01], inputs, actionCapability).matched, false);
+});
+
+test("the replace exception is scoped to azapi_resource_action only, never azapi_update_resource", () => {
+  const inputs = typedInputs(diskPkg, diskCapability, VM01);
+  const plan = { resource_changes: [{
+    mode: "managed", provider_name: "registry.terraform.io/azure/azapi", type: "azapi_update_resource",
+    change: { actions: ["delete", "create"], after: { resource_id: VM01, type: "Microsoft.Compute/virtualMachines@2024-07-01", body: { properties: { storageProfile: { osDisk: { diskSizeGB: 128 } } } }, sensitive_body: {} }, after_unknown: {} },
+  }] };
+  const result = assessPlan(plan, [VM01], inputs, diskCapability);
+  assert.equal(result.matched, false);
+  assert.equal(result.replace, true);
 });
 
 test("OS disk plan must modify exactly diskSizeGB on the declared VM", () => {
