@@ -50,16 +50,30 @@ async function list(get: Get, path: string, field?: string): Promise<Json[]> {
 }
 function matchesRun(run: Json, workflowId: number, path: string, gap: Gap, head: string) {
   return run.workflow_id === workflowId && str(run.path) === path && str(run.event) === "pull_request" &&
-    str(run.head_sha) === head && str(run.head_branch) === gap.draft_branch && repository(run.repository) && repository(run.head_repository) &&
-    arr(run.pull_requests).some((value) => {
-      const pull = obj(value);
-      return pull.number === gap.draft_pr_number && str(obj(pull.head).sha) === head;
-    });
+    str(run.head_sha) === head && str(run.head_branch) === gap.draft_branch && repository(run.repository) && repository(run.head_repository);
 }
 function runVersion(run: Json) { return `${run.id}:${run.run_attempt}:${run.status}:${run.conclusion}:${run.head_sha}`; }
 
-async function workflowEvidence(get: Get, required: typeof REQUIRED_WORKFLOWS[number], gap: Gap, pr: Json) {
+/**
+ * GitHub's workflow-run API only lists a run's associated `pull_requests`
+ * while that PR is still open -- once merged (observed directly: a run's
+ * `pull_requests` field goes from populated to `[]` the moment its PR
+ * merges, even though the run itself and its head_sha are unchanged), that
+ * field can no longer be used to confirm which PR a run belongs to. Since
+ * promotion is only ever evaluated *after* merge, relying on it there would
+ * make every promotion permanently stuck at "no matching pull-request run
+ * for the current head" despite CI having genuinely passed pre-merge.
+ * `GET /commits/{sha}/pulls` remains accurate regardless of merge state, so
+ * it replaces the run's own `pull_requests` field as the source of truth.
+ */
+async function confirmCommitBelongsToPr(get: Get, gap: Gap, head: string): Promise<boolean> {
+  const associated = await list(get, `${PREFIX}/commits/${head}/pulls`);
+  return associated.some((pull) => pull.number === gap.draft_pr_number && str(obj(pull.head).sha) === head);
+}
+
+async function workflowEvidence(get: Get, required: typeof REQUIRED_WORKFLOWS[number], gap: Gap, pr: Json, prConfirmed: boolean) {
   const head = sha(obj(pr.head).sha), base = sha(obj(pr.base).sha);
+  if (!prConfirmed) return { status: "unknown" as const, evidence: { path: required.path, reason: "GitHub no longer associates this commit with the expected pull request." } };
   const workflow = obj(await get(`${PREFIX}/actions/workflows/${required.path.split("/").pop()}`));
   const workflowId = integer(workflow.id);
   if (workflow.path !== required.path || workflow.state !== "active") throw new Error("Required validation workflow is not active at its trusted path.");
@@ -134,9 +148,10 @@ export async function inspectCi(get: Get, gap: Gap, now = () => new Date()): Pro
     result.headSha = sha(obj(pr.head).sha); result.prState = str(pr.state); result.merged = pr.merged === true;
     if (pr.state === "closed" && pr.merged !== true) { result.status = "failed"; result.reason = "Pull request was closed without merging."; return result; }
     if (!["open", "closed"].includes(str(pr.state))) throw new Error("Pull request state is unknown.");
+    const prConfirmed = await confirmCommitBelongsToPr(get, gap, result.headSha);
     const statuses: Evidence["status"][] = [];
     for (const required of REQUIRED_WORKFLOWS) {
-      const observation = await workflowEvidence(get, required, gap, pr);
+      const observation = await workflowEvidence(get, required, gap, pr, prConfirmed);
       result.workflows.push(observation.evidence); statuses.push(observation.status);
     }
     result.status = statuses.includes("failed") ? "failed" : statuses.includes("unknown") ? "unknown" : statuses.includes("running") ? "running" : "passed";

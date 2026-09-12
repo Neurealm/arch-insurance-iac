@@ -23,6 +23,7 @@ export function fixture(merged = false, transform?: (path: string, value: unknow
     else if (path.includes("/compare/")) value = { status: "ahead" };
     else if (path.includes("/git/trees/")) value = { truncated: false, tree: ["terraform/modules/vm-create/main.tf", "terraform/environments/pilot/vm-create/main.tf"].map((name) => ({ path: name, sha: BLOB, mode: "100644", type: "blob" })) };
     else if (path.includes("/pulls/13/reviews")) value = [{ id: 200, state: "APPROVED", commit_id: HEAD, user: { login: "reviewer", type: "User" } }];
+    else if (path.includes(`/commits/${HEAD}/pulls`)) value = [{ number: 13, head: { sha: HEAD } }];
     else {
       for (const [index, required] of REQUIRED_WORKFLOWS.entries()) {
         if (path.endsWith(`/actions/workflows/${required.path.split("/").pop()}`)) value = { id: 10 + index, state: "active", path: required.path };

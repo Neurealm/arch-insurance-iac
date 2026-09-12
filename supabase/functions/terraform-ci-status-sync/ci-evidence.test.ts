@@ -37,13 +37,27 @@ test("a workflow changed inside the draft cannot validate itself", async () => {
   const result = await inspectCi(fixture(false, (path, raw) => path.includes("/contents/") && path.endsWith(HEAD) ? { ...object(raw), sha: "f".repeat(40) } : raw).get, GAP);
   assert.equal(result.status, "unknown"); assert.match(result.reason, /trusted validation workflow/);
 });
-for (const key of ["head_sha", "event", "workflow_id", "path", "repository", "head_repository", "pull_requests", "head_branch"]) test(`does not trust a green run with wrong ${key}`, async () => {
+for (const key of ["head_sha", "event", "workflow_id", "path", "repository", "head_repository", "head_branch"]) test(`does not trust a green run with wrong ${key}`, async () => {
   const result = await inspectCi(fixture(false, (path, raw) => {
     if (!path.includes("/runs?")) return raw;
     const response = object(raw), run = object((response.workflow_runs as unknown[])[0]);
-    run[key] = key === "workflow_id" ? 999 : key === "pull_requests" ? [] : key.includes("repository") ? { full_name: "attacker/fork" } : "wrong";
+    run[key] = key === "workflow_id" ? 999 : key.includes("repository") ? { full_name: "attacker/fork" } : "wrong";
     return response;
   }).get, GAP); assert.equal(result.status, "unknown");
+});
+// GitHub's own `pull_requests` field on a workflow run is only populated
+// while that PR is open (confirmed empirically: it flips to `[]` the
+// instant the PR merges, on the same unchanged run) -- so PR association
+// is verified independently via `/commits/{sha}/pulls`, which stays
+// accurate post-merge. This is what promotion depends on, since promotion
+// is only ever evaluated after merge.
+test("does not trust CI once GitHub stops associating the commit with the expected PR", async () => {
+  const result = await inspectCi(fixture(false, (path, raw) => path.includes(`/commits/${HEAD}/pulls`) ? [] : raw).get, GAP);
+  assert.equal(result.status, "unknown");
+});
+test("does not trust a forged PR association pointing at the wrong commit", async () => {
+  const result = await inspectCi(fixture(false, (path, raw) => path.includes(`/commits/${HEAD}/pulls`) ? [{ number: 13, head: { sha: "f".repeat(40) } }] : raw).get, GAP);
+  assert.equal(result.status, "unknown");
 });
 for (const conclusion of ["failure", "cancelled", "skipped", "neutral", "timed_out", "action_required", "stale"]) test(`run ${conclusion} cannot be passing evidence`, async () => {
   const result = await inspectCi(fixture(false, (path, raw) => path.endsWith("/actions/runs/100") ? { ...object(raw), conclusion } : raw).get, GAP);
