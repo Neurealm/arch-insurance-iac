@@ -5,6 +5,13 @@ project_id = "esfpbiishpkvhlejnxzq"
 [functions.servicenow-intake]
 verify_jwt = false
 
+# Agentic rebuild of servicenow-intake (see docs/servicenow-intake-agent.md).
+# Runs alongside the function above, not in place of it -- ServiceNow is not
+# pointed at this endpoint yet. Same auth story: shared-secret webhook
+# verification, or Auth.getUser() + platform_admin for demo/resume calls.
+[functions.servicenow-intake-agent]
+verify_jwt = false
+
 # User JWTs are verified inside the function with Auth.getUser(). Every
 # package operation also checks ownership/administrator access before privileged
 # workflow operations. This endpoint does not accept legacy runner callbacks.
