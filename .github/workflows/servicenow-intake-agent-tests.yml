@@ -1,0 +1,47 @@
+name: ServiceNow intake agent tests
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/servicenow-intake-agent/**"
+      - "supabase/functions/_shared/servicenow-intake-agent-core.ts"
+      - "supabase/functions/_shared/servicenow-change-agent.ts"
+      - "supabase/functions/_shared/platform-function.ts"
+      - "supabase/functions/_shared/webhook-auth.ts"
+      - ".github/workflows/servicenow-intake-agent-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/servicenow-intake-agent/**"
+      - "supabase/functions/_shared/servicenow-intake-agent-core.ts"
+      - "supabase/functions/_shared/servicenow-change-agent.ts"
+      - "supabase/functions/_shared/platform-function.ts"
+      - "supabase/functions/_shared/webhook-auth.ts"
+      - ".github/workflows/servicenow-intake-agent-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: "2.9.6"
+      # handler.test.ts imports only TYPES from the shared core/tools/agent-loop
+      # modules (erased at compile time -- no runtime Deno.env or npm: specifier
+      # reachable from it), so it needs no cloud credentials at all.
+      # tools.test.ts's fakes stand in for the real admin/Azure/GitHub/model
+      # calls, so nothing under test actually reads Deno.env either -- Deno is
+      # required here only to resolve core.ts's npm:@supabase/supabase-js
+      # import, not because any credential is used.
+      - name: Run agent unit tests
+        run: deno test --allow-env --no-config --no-lock --node-modules-dir=none supabase/functions/servicenow-intake-agent/handler.test.ts supabase/functions/servicenow-intake-agent/tools.test.ts
+      - name: Type-check the agent
+        run: deno check --no-config --no-lock --node-modules-dir=none supabase/functions/servicenow-intake-agent/index.ts supabase/functions/servicenow-intake-agent/handler.ts supabase/functions/servicenow-intake-agent/resume.ts supabase/functions/servicenow-intake-agent/tools.ts supabase/functions/servicenow-intake-agent/agent-loop.ts

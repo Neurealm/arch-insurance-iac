@@ -60,7 +60,17 @@ has zero effect on whether the tool call succeeds. Concretely:
 4. **Watch turn count and cost.** Multiple LLM calls per ticket is a real cost multiplier over the original's one call; `MAX_TURNS` in `agent-loop.ts` is a starting guess, not a tuned value.
 5. **Only after 1-3 hold up** should ServiceNow's webhook be repointed at this function instead of the original -- and only then should the two be consolidated onto one shared core (right now `_shared/servicenow-intake-agent-core.ts` duplicates most of the original's logic rather than the original importing it, specifically so this rebuild carries zero risk to the live webhook while it's unproven).
 
+## File layout
+
+- `handler.ts` -- all HTTP control flow (mode dispatch, dedupe, canonical-snapshot gate, agent invocation, response shaping) as a pure function of an injected `Dependencies` object. Same pattern as `terraform-ci-remediation-agent/handler.ts`.
+- `resume.ts` -- the resume-queue batch job, built on the real dependencies (not injected at this granularity; see below).
+- `index.ts` -- thin wiring only: builds the real `Dependencies` (actual Supabase/ServiceNow calls) and hands them to `Deno.serve(createIntakeAgentHandler(deps))`.
+- `tools.ts` / `agent-loop.ts` -- unchanged from the initial version (the tool schema, dispatch, and multi-turn loop).
+- `handler.test.ts` -- exercises every branch in `handler.ts` (mode dispatch and auth gating, dedupe short-circuit, reset-vs-create, identity conflict, canonical-recording failure, demo vs. webhook comment posting, comment-post failure) against fakes -- no network, no LLM, no Supabase.
+- `tools.test.ts` -- exercises the tool-dispatch guardrails (covered since the first version).
+- `.github/workflows/servicenow-intake-agent-tests.yml` -- runs both test files plus a `deno check` of the whole function on every PR/push touching this function or its `_shared` dependencies. Confirmed locally: `deno check` clean, 23/23 tests passing.
+
 ## Known gaps vs. the original, left for a follow-up
 
-- `resumeQueued` in this version does not currently write `azure_observation` back to the row (the main webhook/demo path does). Low-value, cheap to add later.
+- `resume.ts` is tested only at the boundary (`handler.test.ts` checks that `deps.resume` is called when authorized and not otherwise) -- its own internals (claim/finish lifecycle, re-post-only-if-note-changed) have no dedicated test yet. Lower priority than the main path since it is a background batch job, not the request path a person is waiting on.
 - No test coverage yet for the full agent loop (`agent-loop.ts`) itself -- `tools.test.ts` covers the tool-dispatch guardrails, which is the part that actually matters for safety, but a mocked-gateway test of multi-turn looping (including the turn-cap and text-only-nudge fallbacks) would be worth adding before cutover.
