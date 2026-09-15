@@ -13077,6 +13077,25 @@ export type Database = {
         Args: { _exclude_membership?: string; _tenant_id: string }
         Returns: number
       }
+      create_servicenow_policy_rule_version: {
+        Args: {
+          p_actor: string
+          p_idempotency_key: string
+          p_request_type: string
+          p_rule: Json
+          p_rule_code: string
+        }
+        Returns: Json
+      }
+      create_servicenow_request_schema_version: {
+        Args: {
+          p_actor: string
+          p_idempotency_key: string
+          p_request_type: string
+          p_schema: Json
+        }
+        Returns: Json
+      }
       create_servicenow_ticket_engineering_gap: {
         Args: {
           p_actor: string
@@ -13547,12 +13566,35 @@ export type Database = {
         }
         Returns: Json
       }
+      record_servicenow_requirement_revisions: {
+        Args: { p_actor: string; p_revisions: Json; p_ticket_id: string }
+        Returns: Json
+      }
+      record_servicenow_ticket_analysis_event: {
+        Args: {
+          p_actor: string
+          p_content_sha256: string
+          p_idempotency_key: string
+          p_redacted_summary: Json
+          p_ticket_id: string
+        }
+        Returns: string
+      }
       record_servicenow_ticket_draft_pr: {
         Args: {
           p_actor: string
           p_expected_version: number
           p_idempotency_key: string
           p_pr: Json
+          p_ticket_id: string
+        }
+        Returns: Json
+      }
+      record_servicenow_ticket_facts: {
+        Args: {
+          p_actor: string
+          p_facts: Json
+          p_source_event_id: string
           p_ticket_id: string
         }
         Returns: Json
@@ -13895,6 +13937,10 @@ export type Database = {
           _reason?: string
           _status: Database["public"]["Enums"]["membership_status"]
         }
+        Returns: Json
+      }
+      sync_servicenow_question_registry: {
+        Args: { p_actor: string; p_questions: Json; p_ticket_id: string }
         Returns: Json
       }
       synchronize_iac_terraform_run: {
