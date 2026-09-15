@@ -75,7 +75,7 @@ export function resolveExecutionScope(raw: string | undefined, pkg: Json, capabi
   const sizes = arr(scope.allowedVmSizes).map(str);
   if (pkg.action_type === "resize_vm" && !sizes.includes(str(obj(pkg.parameters).requestedVmSize))) throw new Error("Requested VM SKU has not been authorized for this scope.");
   const maxOsDiskSizeGb = Number(scope.maxOsDiskSizeGb);
-  const requestedOsDiskSizeGb = obj(pkg.parameters).requestedOsDiskSizeGB;
+  const requestedOsDiskSizeGb = Number(obj(pkg.parameters).requestedOsDiskSizeGB);
   if (pkg.action_type === "increase_os_disk" && (!Number.isSafeInteger(requestedOsDiskSizeGb) || !Number.isSafeInteger(maxOsDiskSizeGb) || maxOsDiskSizeGb < 64 || maxOsDiskSizeGb > 4095 || requestedOsDiskSizeGb > maxOsDiskSizeGb)) throw new Error("Requested OS disk capacity has not been authorized for this scope.");
   const subnets = arr(scope.allowedSubnetIds).map(value => str(value).toLowerCase());
   if (provisioning) {

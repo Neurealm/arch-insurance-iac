@@ -168,6 +168,27 @@ async function sync(db: ReturnType<typeof admin>, run: Json) {
       has_destroy: guard.destroy, has_replace: guard.replace,
       hcp_plan_json: { formatVersion: str(plan.format_version), terraformVersion: str(plan.terraform_version), resourceChanges: arr(plan.resource_changes).length, guardrails: guard },
       error_message: guard.matched ? null : "Saved plan failed the exact target/action policy. Review the guardrail evidence." });
+    // A plan HCP is willing to confirm, but that our own policy refuses, must
+    // not sit forever as a live, appliable run someone could still confirm by
+    // hand in the HCP UI -- and must not permanently hold this workspace's one
+    // claim hostage, since the claim only releases once HCP reports a genuine
+    // terminal status. Tell HCP to stand down and record the real resulting
+    // status, so the existing terminal-status release logic in
+    // synchronize_iac_terraform_run picks it up automatically, the same way it
+    // already does for an apply or an HCP-side error. A failed discard is not
+    // fatal -- the run is still recorded as blocked exactly as before this
+    // change, just without the automatic self-heal.
+    if (!guard.matched) {
+      try {
+        await hcp(`/runs/${encodeURIComponent(str(run.hcp_run_id))}/actions/discard`, token("plan"), {
+          method: "POST", headers: { "content-type": "application/vnd.api+json" },
+          body: JSON.stringify({ comment: "Discarded automatically: saved plan failed the exact target/action policy." }),
+        });
+        update.hcp_run_status = "discarded";
+      } catch (cause) {
+        await addEvent(db, str(run.id), "hcp_discard_failed", { message: cause instanceof Error ? cause.message : "Unable to discard the blocked HCP run." });
+      }
+    }
   } else if (run.run_type === "plan" && hcpStatus === "planned_and_finished") {
     Object.assign(update, { status: "blocked", completed_at: iso(), error_message: "This is a no-change or plan-only run, not an executable saved plan." });
   } else if (run.run_type === "apply" && hcpStatus === "applied") {
