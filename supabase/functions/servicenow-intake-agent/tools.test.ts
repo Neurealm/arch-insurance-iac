@@ -43,7 +43,7 @@ function fakeAdmin(opts: { capabilityApproved?: boolean } = {}) {
 function harness(opts: { capabilityApproved?: boolean } = {}) {
   const admin = fakeAdmin(opts);
   // deno-lint-ignore no-explicit-any
-  const ctx = createAgentContext({ admin: admin as any, ticket: TICKET, requestId: "req-1", demoMode: true, callerId: "user-1" });
+  const ctx = createAgentContext({ admin: admin as any, ticket: TICKET, requestId: "req-1", canonicalTicketId: "ticket-1", demoMode: true, callerId: "user-1" });
   return { admin, ctx };
 }
 

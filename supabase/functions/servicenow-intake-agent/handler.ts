@@ -32,7 +32,7 @@ export type Dependencies = {
   linkCanonical: (requestId: string, ticket: NormalizedTicket, canonicalTicketId: string) => Promise<void>;
   markIdentityConflict: (requestId: string, message: string) => Promise<void>;
   markCanonicalFailure: (requestId: string, message: string) => Promise<void>;
-  runAgent: (opts: { ticket: NormalizedTicket; requestId: string; demoMode: boolean; callerId: string | null; userAuthorization?: string }) => Promise<AgentRunResult>;
+  runAgent: (opts: { ticket: NormalizedTicket; requestId: string; canonicalTicketId: string; demoMode: boolean; callerId: string | null; userAuthorization?: string }) => Promise<AgentRunResult>;
   persistOutcome: (requestId: string, outcome: AgentOutcome, run: AgentRunResult) => Promise<void>;
   markDemoGenerated: (requestId: string, note: string) => Promise<void>;
   postComment: (ticket: NormalizedTicket, note: string) => Promise<void>;
@@ -109,8 +109,9 @@ export function createIntakeAgentHandler(deps: Dependencies) {
     const history = await deps.loadTicketHistory(incomingTicket.ticketNumber);
     const ticket = deps.normalizeTicket(body, history);
 
+    let canonical: CanonicalResult;
     try {
-      const canonical = await deps.recordCanonical(body, ticket, incomingTicket.ticketNumber, incomingTicket.sysId, demoMode ? callerId : null, payloadHash, demoMode);
+      canonical = await deps.recordCanonical(body, ticket, incomingTicket.ticketNumber, incomingTicket.sysId, demoMode ? callerId : null, payloadHash, demoMode);
       await deps.linkCanonical(requestId, ticket, canonical.ticketId);
       await deps.logEvent(requestId, "ticket_received", { ticketNumber: ticket.ticketNumber, historySnapshots: history.length, canonicalTicketId: canonical.ticketId, canonicalSnapshotId: canonical.snapshotId, canonicalSnapshotInserted: canonical.inserted, identityConflict: canonical.identityConflict, engine: "agent" });
       if (canonical.identityConflict) {
@@ -127,7 +128,7 @@ export function createIntakeAgentHandler(deps: Dependencies) {
     }
 
     try {
-      const run = await deps.runAgent({ ticket, requestId, demoMode, callerId, userAuthorization: request.headers.get("authorization") ?? undefined });
+      const run = await deps.runAgent({ ticket, requestId, canonicalTicketId: canonical.ticketId, demoMode, callerId, userAuthorization: request.headers.get("authorization") ?? undefined });
       const { outcome } = run;
       await deps.persistOutcome(requestId, outcome, run);
       await deps.logEvent(requestId, "agent_analysis_completed", { outcome: outcome.kind, turnsUsed: run.turnsUsed, action: outcome.analysis?.action ?? "unknown", confidence: outcome.analysis?.confidence ?? null, gapId: outcome.gap?.id ?? null, changePackageId: outcome.draft?.id ?? null });
@@ -135,12 +136,12 @@ export function createIntakeAgentHandler(deps: Dependencies) {
       if (demoMode) {
         await deps.markDemoGenerated(requestId, outcome.note);
         await deps.logEvent(requestId, "demo_customer_comment_generated", { field: "comments", simulated: true });
-        return reply({ requestId, status: "demo_comment_generated", outcome: outcome.kind, action: outcome.analysis?.action ?? "unknown", confidence: outcome.analysis?.confidence ?? null, turnsUsed: run.turnsUsed, changePackageNumber: outcome.draft?.package_number ?? null, comment: outcome.note }, 200);
+        return reply({ requestId, status: "demo_comment_generated", outcome: outcome.kind, action: outcome.analysis?.action ?? "unknown", confidence: outcome.analysis?.confidence ?? null, turnsUsed: run.turnsUsed, changePackageNumber: outcome.draft?.package_number ?? null, comment: outcome.note, readiness: run.readiness }, 200);
       }
       await deps.postComment(ticket, outcome.note);
       await deps.markCommentPosted(requestId, outcome.note);
       await deps.logEvent(requestId, "servicenow_customer_comment_posted", { field: "comments" });
-      return reply({ requestId, status: "comment_posted", outcome: outcome.kind, action: outcome.analysis?.action ?? "unknown", confidence: outcome.analysis?.confidence ?? null, turnsUsed: run.turnsUsed, changePackageNumber: outcome.draft?.package_number ?? null }, 200);
+      return reply({ requestId, status: "comment_posted", outcome: outcome.kind, action: outcome.analysis?.action ?? "unknown", confidence: outcome.analysis?.confidence ?? null, turnsUsed: run.turnsUsed, changePackageNumber: outcome.draft?.package_number ?? null, readiness: run.readiness }, 200);
     } catch (error) {
       const message = error instanceof Error ? error.message : "ServiceNow intake agent processing failed.";
       await deps.markCommentFailed(requestId, message);

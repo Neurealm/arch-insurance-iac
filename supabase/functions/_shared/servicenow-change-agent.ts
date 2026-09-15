@@ -61,7 +61,10 @@ export type TicketConversation = {
 const ENVELOPES = ["ticket", "change_request", "request"];
 const TICKET_NUMBER_KEYS = ["number", "ticket_number", "ticketNumber", "change_number", "id"];
 const SYS_ID_KEYS = ["sys_id", "sysId"];
-const SOURCE_WEIGHT: Record<FactSource, number> = {
+// Exported so the change-readiness persistence layer can record the exact
+// weight that won reconciliation as the fact's durable precedence_rank,
+// instead of a second, driftable copy of these numbers.
+export const SOURCE_WEIGHT: Record<FactSource, number> = {
   requester_correction: 6,
   requester_reply: 5,
   structured_ticket: 4,

@@ -5278,7 +5278,11 @@
         "npm:xlsx@~0.18.5",
         "npm:zod@^3.25.76",
         "npm:zustand@^5.0.14"
-      ]
+      ],
+      "overrides": {
+        "lodash": "^4.17.21",
+        "d3-color": "^3.1.0"
+      }
     }
   }
 }

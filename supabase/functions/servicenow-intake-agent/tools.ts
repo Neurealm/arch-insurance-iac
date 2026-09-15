@@ -30,6 +30,8 @@ export type AgentContext = {
   admin: ReturnType<typeof supabaseAdmin>;
   ticket: NormalizedTicket;
   requestId: string;
+  /** The durable ticket-ledger row (servicenow_intake_tickets.id) this run's facts, requirement revisions, questions, and workflow transitions attach to -- distinct from requestId, which identifies the legacy servicenow_intake_requests row. */
+  canonicalTicketId: string;
   demoMode: boolean;
   /** Only set in demo mode -- the human testing the agent from the console. Never the ticket requester. */
   callerId: string | null;
@@ -45,6 +47,7 @@ export function createAgentContext(opts: {
   admin: ReturnType<typeof supabaseAdmin>;
   ticket: NormalizedTicket;
   requestId: string;
+  canonicalTicketId: string;
   demoMode: boolean;
   callerId: string | null;
   userAuthorization?: string;

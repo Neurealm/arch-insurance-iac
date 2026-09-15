@@ -30,13 +30,15 @@ export async function resumeQueued(admin: ReturnType<typeof supabaseAdmin>, requ
       if (resumptionId) await admin.rpc("finish_iac_intake_resumption", { p_id: resumptionId, p_status: status, p_error: error ?? null });
     };
     try {
-      const { data: intake } = await admin.from("servicenow_intake_requests").select("id, ticket_number, ticket_payload, clarification_note, change_package_id, requested_by_user_id").eq("id", intakeRequestId).maybeSingle();
+      const { data: intake } = await admin.from("servicenow_intake_requests").select("id, ticket_number, ticket_payload, ticket_id, clarification_note, change_package_id, requested_by_user_id").eq("id", intakeRequestId).maybeSingle();
       if (!intake) { await finish("skipped", "intake request no longer exists"); results.push({ intakeRequestId, outcome: "skipped" }); continue; }
       if (intake.change_package_id) { await finish("skipped", "a change package already exists"); results.push({ intakeRequestId, outcome: "already_resumed" }); continue; }
+      const canonicalTicketId = text(intake.ticket_id);
+      if (!canonicalTicketId) { await finish("skipped", "request has no canonical ledger ticket to resume against"); results.push({ intakeRequestId, outcome: "skipped" }); continue; }
 
       const ticket = normalizeTicket(record(intake.ticket_payload), await ticketPayloadHistory(admin, text(intake.ticket_number)));
       const requestedBy = text(intake.requested_by_user_id) || null;
-      const run = await analyzeTicketWithAgent({ admin, ticket, requestId: intakeRequestId, demoMode: false, callerId: requestedBy });
+      const run = await analyzeTicketWithAgent({ admin, ticket, requestId: intakeRequestId, canonicalTicketId, demoMode: false, callerId: requestedBy });
       const { outcome } = run;
       const status = statusForOutcome(outcome.kind);
       await admin.from("servicenow_intake_requests").update({

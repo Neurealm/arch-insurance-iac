@@ -372,13 +372,23 @@ const COMMON_FACT_FIELDS: Array<{ field: string; ticketKey: "requester" | "appli
   { field: "rollbackPlan", ticketKey: "rollbackPlan", extractedKeys: ["rollbackPlan", "rollback_plan", "backoutPlan", "backout_plan"] },
 ];
 
-const FACT_FIELD_LABELS: Record<string, string> = {
+// Exported for the same reason as buildCommonFacts: the change-readiness
+// persistence layer needs human-readable labels for this identical field
+// vocabulary for explanations and clarifying questions on durable
+// requirement revisions, without a second, driftable copy of these strings.
+export const FACT_FIELD_LABELS: Record<string, string> = {
   requester: "requester", application: "application or business service", environment: "environment",
   maintenanceWindow: "maintenance window", businessImpact: "business impact",
   applicationOwner: "application owner", rollbackPlan: "rollback plan",
 };
 
-function buildCommonFacts(ticket: NormalizedTicket, analysis: Analysis): CandidateFact[] {
+// Exported so the change-readiness persistence layer
+// (_shared/servicenow-change-readiness-core.ts) can recompute the exact same
+// per-field ReconciledFact[]/FactConflict[] validate() uses internally, for
+// durable storage -- without duplicating this function or changing what
+// "ready" means. Calling it twice on the same (ticket, analysis) is cheap
+// and deterministic; it never talks to a database.
+export function buildCommonFacts(ticket: NormalizedTicket, analysis: Analysis): CandidateFact[] {
   const at = ticket.sourceUpdatedAt ?? new Date(0).toISOString();
   const facts: CandidateFact[] = [];
   for (const { field, ticketKey, extractedKeys } of COMMON_FACT_FIELDS) {

@@ -132,3 +132,14 @@ It is deliberately not a claim that the entire production lifecycle is live:
 are subsequent phases. Until those are tested end-to-end, the legacy pilot
 continues to own its existing package/capability behavior, and no new automated
 PR path is enabled.
+
+**Update:** the "persistent fact extraction and question-resolution
+transactions" gap above is now closed for `servicenow-intake-agent` (not for
+`servicenow-intake`) -- see
+[servicenow-change-readiness-agent.md](servicenow-change-readiness-agent.md).
+That work deliberately reuses the *existing* `iac_engineering_gaps`/
+`iac_change_packages` pipeline instead of this document's ticket-scoped gap/
+package/validation-run/draft-PR tables, which remain unimplemented and are
+not on that agent's roadmap. "Isolated Terraform generation" and
+"ticket-specific GitHub draft-PR creation" above are still not live for any
+function.

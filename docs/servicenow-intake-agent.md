@@ -7,6 +7,12 @@ ServiceNow webhook depends on this file existing. Treat this as a parallel
 implementation to validate in demo/resume mode before ever pointing real
 ServiceNow traffic at it.
 
+This document describes the agent loop and tool-calling mechanics. For the
+durable per-ticket ledger this function now also writes to -- full field
+provenance, the versioned requirement catalog, the workflow state machine,
+and the structured `ChangeReadinessOutput` contract -- see
+[servicenow-change-readiness-agent.md](servicenow-change-readiness-agent.md).
+
 ## Why this is a real agent and the original wasn't
 
 The original function calls Gemini exactly once per ticket, in a fixed

@@ -4,6 +4,7 @@ import { createIntakeAgentHandler, statusForOutcome, type Dependencies } from ".
 import type { NormalizedTicket } from "../_shared/servicenow-intake-agent-core.ts";
 import type { AgentOutcome } from "./tools.ts";
 import type { AgentRunResult } from "./agent-loop.ts";
+import type { ChangeReadinessOutput } from "../_shared/servicenow-change-readiness-core.ts";
 
 const TICKET_NUMBER = "CHG0000999";
 
@@ -21,8 +22,20 @@ function outcome(overrides: Partial<AgentOutcome> = {}): AgentOutcome {
   return { kind: "needs_clarification", note: "please clarify", draft: null, gap: null, analysis: null, validation: null, ...overrides };
 }
 
+function readiness(overrides: Partial<ChangeReadinessOutput> = {}): ChangeReadinessOutput {
+  return {
+    ticketId: "ticket-1", ticketVersion: 1, detectedChangeTypes: ["restart_vm"], classificationConfidence: 90,
+    extractedFields: {}, fieldProvenance: {}, missingFields: [], invalidFields: [], conflicts: [],
+    validationResults: [], clarifyingQuestions: [], assumptions: [], riskFlags: [],
+    readinessStatus: "NEEDS_CLARIFICATION", readinessReason: "test default", recommendedAssignmentGroup: "Cloud Platform Engineering",
+    handoffPackage: null, terraformEligibility: { eligible: false, reason: "test default" },
+    auditMetadata: { requestId: "req-1", analyzedAt: new Date(0).toISOString(), turnsUsed: 2 },
+    ...overrides,
+  };
+}
+
 function runResult(overrides: Partial<AgentRunResult> = {}): AgentRunResult {
-  return { outcome: outcome(), turnsUsed: 2, transcript: [], azureObservation: null, ...overrides };
+  return { outcome: outcome(), turnsUsed: 2, transcript: [], azureObservation: null, readiness: readiness(), ...overrides };
 }
 
 /**
