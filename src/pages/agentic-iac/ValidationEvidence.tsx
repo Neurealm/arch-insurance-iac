@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, CheckCircle2, ClipboardCheck, Clock3, Download, FileText, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import { listVmChangePackages, type VmChangePackage } from "./changePackages";
@@ -17,6 +17,42 @@ function formatDate(value?: string | null) { return value ? new Date(value).toLo
 
 export default function ValidationEvidence() {
   const { packageId } = useParams();
+  return packageId ? <VmValidationDetail packageId={packageId} /> : <VmValidationQueue />;
+}
+
+function VmValidationQueue() {
+  const [packages, setPackages] = useState<VmChangePackage[]>([]);
+  const [runs, setRuns] = useState<Record<string, ValidationRun | null>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try {
+      const all = await listVmChangePackages();
+      const eligible = all.filter((item) => ["executed", "execution_failed"].includes(item.status));
+      setPackages(eligible);
+      const entries = await Promise.all(eligible.map(async (pkg) => [pkg.id, await getValidationRun(pkg.id)] as const));
+      setRuns(Object.fromEntries(entries));
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to load VM change packages."); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { void load(); }, [load]);
+
+  return <div className="min-w-0 px-4 py-4">
+    <header className="flex flex-wrap items-start gap-3">
+      <div><h1 className="text-[20px] font-semibold text-slate-900">Validation &amp; Evidence</h1><p className="mt-1 text-[12px] text-slate-600">Post-execution verification for executed Azure VM change packages.</p></div>
+      <button onClick={() => void load()} className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50"><RefreshCw className="h-3.5 w-3.5" />Refresh queue</button>
+    </header>
+    {error && <div className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-[12px] text-rose-800">{error}</div>}
+    <section className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
+      <div className="flex items-center justify-between gap-2"><h2 className="text-[12.5px] font-semibold text-slate-800">Executed change packages</h2><span className="text-[11px] text-slate-500">{loading ? "Loading…" : `${packages.length} eligible for validation`}</span></div>
+      {loading ? <p className="py-8 text-center text-[12px] text-slate-500">Loading executed VM packages…</p> : packages.length ? <div className="mt-3 overflow-x-auto"><table className="w-full min-w-[860px] text-left text-[11.5px]"><thead className="border-b border-slate-200 text-[10px] uppercase tracking-wide text-slate-500"><tr><th className="pb-2">Package</th><th className="pb-2">Target VM</th><th className="pb-2">Action</th><th className="pb-2">Execution</th><th className="pb-2">Completed</th><th className="pb-2">Validation status</th><th className="pb-2" /></tr></thead><tbody>{packages.map((pkg) => { const run = runs[pkg.id] ?? null; const validationStatus = run ? (run.authority !== "server-v1" ? "legacy evidence" : run.status) : "not started"; return <tr key={pkg.id} className="border-b border-slate-100"><td className="py-2.5 font-mono font-semibold text-slate-800">{pkg.packageNumber}</td><td className="py-2.5"><div className="font-medium text-slate-800">{pkg.targetName}</div><div className="mt-0.5 text-[10.5px] text-slate-500">{pkg.resourceGroup} · {pkg.region}</div></td><td className="py-2.5 text-slate-700">{pkg.actionLabel}</td><td className="py-2.5"><Status value={pkg.status} /></td><td className="py-2.5 text-slate-600">{formatDate(pkg.executionCompletedAt)}</td><td className="py-2.5"><Status value={validationStatus} /></td><td className="py-2.5 text-right"><Link to={`/validation/${pkg.id}`} className="text-[11.5px] font-medium text-[#1B4F91] hover:underline">Review evidence</Link></td></tr>; })}</tbody></table></div> : <div className="py-8 text-center"><ClipboardCheck className="mx-auto h-8 w-8 text-slate-400" /><p className="mt-3 text-[12px] text-slate-600">No executed VM change packages are waiting on validation.</p><Link to="/changes" className="mt-2 inline-block text-[12px] font-medium text-blue-700 underline">Create a VM change package</Link></div>}
+    </section>
+  </div>;
+}
+
+function VmValidationDetail({ packageId }: { packageId: string }) {
   const navigate = useNavigate();
   const [packages, setPackages] = useState<VmChangePackage[]>([]);
   const [selected, setSelected] = useState<VmChangePackage | null>(null);
@@ -33,7 +69,7 @@ export default function ValidationEvidence() {
       const all = await listVmChangePackages();
       const eligible = all.filter((item) => ["executed", "execution_failed"].includes(item.status));
       setPackages(eligible);
-      const chosen = packageId ? all.find((item) => item.id === packageId || item.packageNumber === packageId) ?? null : eligible[0] ?? null;
+      const chosen = all.find((item) => item.id === packageId || item.packageNumber === packageId) ?? null;
       setSelected(chosen);
       if (!chosen) { setRun(null); setResults([]); setEvidence([]); return; }
       const existing = await getValidationRun(chosen.id);
@@ -67,7 +103,7 @@ export default function ValidationEvidence() {
   };
 
   if (loading) return <div className="p-5 text-[13px] text-slate-600">Loading executed VM packages and Azure evidence…</div>;
-  if (!selected) return <div className="p-5"><div className="rounded-lg border border-slate-200 bg-white p-8 text-center"><ClipboardCheck className="mx-auto h-8 w-8 text-slate-400" /><h1 className="mt-3 text-lg font-semibold text-slate-900">Validation &amp; Evidence</h1><p className="mt-2 text-sm text-slate-600">A completed Azure VM execution is required before final validation can begin.</p><Link to="/changes" className="mt-4 inline-block text-sm font-medium text-blue-700 underline">Create a VM change package</Link></div></div>;
+  if (!selected) return <div className="p-5"><div className="rounded-lg border border-slate-200 bg-white p-8 text-center"><ClipboardCheck className="mx-auto h-8 w-8 text-slate-400" /><h1 className="mt-3 text-lg font-semibold text-slate-900">Validation &amp; Evidence</h1><p className="mt-2 text-sm text-slate-600">This is not a live VM package available in your current Azure pilot scope, or it has not completed execution yet.</p><Link to="/validation" className="mt-4 inline-block text-sm font-medium text-blue-700 underline">Open validation queue</Link></div></div>;
 
   const observations = Array.isArray(run?.afterState.observations) ? run.afterState.observations as Record<string, unknown>[] : [];
   const observed = observations.find(item => String(item.resourceId).toLowerCase() === selected.targetResourceId.toLowerCase());
@@ -77,6 +113,7 @@ export default function ValidationEvidence() {
   const status = run && run.authority !== "server-v1" ? "legacy evidence" : run?.status ?? "pending";
 
   return <div className="min-w-0 px-4 py-4">
+    <nav className="mb-2 text-[12px] text-slate-500"><Link to="/validation" className="hover:text-[#1B4F91]">Validation &amp; Evidence</Link><span className="mx-1.5">/</span><span className="font-medium text-slate-800">{selected.packageNumber}</span></nav>
     <header className="flex flex-wrap items-start gap-3"><div><div className="flex items-center gap-2"><h1 className="text-[20px] font-semibold text-slate-900">Validation &amp; Evidence</h1><Status value={status} /></div><p className="mt-1 text-[12px] text-slate-600">Post-execution verification for the selected Azure VM change package.</p></div><div className="ml-auto flex flex-wrap gap-2"><select value={selected.id} onChange={(event) => { const next = packages.find((item) => item.id === event.target.value); if (next) navigate(`/validation/${next.id}`); }} className="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11.5px]"><option value={selected.id}>{selected.packageNumber} · {selected.targetName}</option>{packages.filter((item) => item.id !== selected.id).map((item) => <option key={item.id} value={item.id}>{item.packageNumber} · {item.targetName}</option>)}</select><button onClick={() => void load()} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-[12px] font-medium"><RefreshCw className="h-3.5 w-3.5" />Reload evidence</button><button onClick={() => window.print()} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-[12px] font-medium"><Download className="h-3.5 w-3.5" />Export report</button>{run?.status === "verified" && run.authority === "server-v1" && <button disabled={running} onClick={() => void close()} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-emerald-700 px-3 text-[12px] font-semibold text-white"><ShieldCheck className="h-3.5 w-3.5" />Verify &amp; close</button>}</div></header>
     {error && <div className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-[12px] text-rose-800">{error}</div>}
     <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border border-slate-200 bg-white px-4 py-3 md:grid-cols-6"><Value label="Package" value={<span className="font-mono">{selected.packageNumber}</span>} /><Value label="Target VM" value={selected.targetName} /><Value label="Action" value={selected.actionLabel} /><Value label="Execution" value={<Status value={selected.status} />} /><Value label="Completed" value={formatDate(selected.executionCompletedAt)} /><Value label="Mandatory checks passed" value={run?.confidence != null ? `${run.confidence}%` : "Not calculated"} /></div>
