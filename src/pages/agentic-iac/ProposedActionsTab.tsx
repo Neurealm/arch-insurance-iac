@@ -220,7 +220,7 @@ export function ProposedActionsTab() {
       await load();
       // Navigate to the engineering gap detail after a short delay so the user
       // sees the success message before the tab change.
-      setTimeout(() => navigate(`/agentic-iac?tab=capabilities&gapId=${gapId}`), 1500);
+      setTimeout(() => navigate(`/platform/capabilities/${gapId}`), 1500);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Approval failed");
       setActionState("idle");
