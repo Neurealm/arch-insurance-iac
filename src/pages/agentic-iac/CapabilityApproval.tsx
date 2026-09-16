@@ -4,6 +4,7 @@ import { AlertTriangle, CheckCircle2, Clock3, ExternalLink, GitPullRequest, Play
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { resumeServiceNowIntake } from "./servicenowIntakeRequests";
+import { ProposedActionsTab } from "./ProposedActionsTab";
 import {
   approveCapability, getCapabilityGap, listCapabilityGaps, listGapEvents, repairCapabilityCi, startCapabilityDraft, syncCapabilityCi,
   type CapabilityGap, type CiStatus, type GapEvent, type GapStatus,
@@ -238,6 +239,7 @@ function GapQueue() {
           </tr>)}</tbody></table></div>
           : <p className="py-8 text-center text-[12px] text-slate-600">No engineering gaps exist. One is opened automatically when an intake request needs a capability that is not yet approved.</p>}
     </Panel>
+    <div className="mt-4"><ProposedActionsTab /></div>
   </div>;
 }
 
