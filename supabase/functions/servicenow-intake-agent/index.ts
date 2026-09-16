@@ -21,6 +21,14 @@ const deps: Dependencies = {
   verifyServiceNowWebhook,
   authenticateDemoCaller: authenticatedCaller,
 
+  authenticateAdmin: async (request) => {
+    const admin = supabaseAdmin();
+    const actor = await authenticatedCaller(request);
+    if (!actor) return null;
+    const isAdmin = await isPlatformAdmin(admin, actor);
+    return isAdmin ? actor : null;
+  },
+
   authorizeResume: async (request) => {
     const admin = supabaseAdmin();
     const authorization = request.headers.get("authorization") ?? "";
@@ -30,6 +38,80 @@ const deps: Dependencies = {
     return !!actor && await isPlatformAdmin(admin, actor);
   },
   resume: (request, onlyIntakeRequestId) => resumeQueued(supabaseAdmin(), request, onlyIntakeRequestId),
+
+  rejectProposal: async (request, proposalId, reason, _adminId) => {
+    const admin = supabaseAdmin();
+    const headers = { ...corsHeaders(request), "content-type": "application/json", "cache-control": "no-store" };
+    const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers });
+
+    // Load proposal + intake request in one join
+    const { data: proposal, error: fetchErr } = await admin
+      .from("iac_proposed_actions")
+      .select("*, servicenow_intake_requests(ticket_number, ticket_payload)")
+      .eq("id", proposalId)
+      .maybeSingle();
+
+    if (fetchErr) return reply({ error: fetchErr.message }, 500);
+    if (!proposal) return reply({ error: "proposal not found" }, 404);
+    if (text(proposal.status) !== "pending") return reply({ error: `proposal already reviewed (status: ${proposal.status})` }, 409);
+
+    // Mark rejected in DB
+    const { error: updateErr } = await admin
+      .from("iac_proposed_actions")
+      .update({ status: "rejected", rejection_reason: reason, reviewed_at: new Date().toISOString() })
+      .eq("id", proposalId)
+      .eq("status", "pending"); // optimistic lock: bail if another admin just reviewed it
+
+    if (updateErr) return reply({ error: updateErr.message }, 500);
+
+    // Update the originating intake request status so the ticket is fully settled
+    if (proposal.intake_request_id) {
+      await admin.from("servicenow_intake_requests")
+        .update({ status: "comment_failed", error_message: null, clarification_note: null })
+        .eq("id", proposal.intake_request_id)
+        // Only reset if still in action_proposed / comment states; don't overwrite a
+        // request that has since been re-submitted and reached a different terminal state.
+        .in("status", ["action_proposed", "comment_posted"]);
+    }
+
+    // Post rejection comment to ServiceNow
+    const intakeRow = record(proposal.servicenow_intake_requests);
+    const ticketNumber = text(intakeRow.ticket_number) || text(proposal.ticket_number);
+    const ticketPayload = record(intakeRow.ticket_payload);
+    const ticket = normalizeTicket(ticketPayload);
+    if (!ticket.ticketNumber && ticketNumber) ticket.ticketNumber = ticketNumber;
+
+    const rejectionNote = [
+      "[NeuGAIN Infrastructure Intake] Request reviewed – action type not approved",
+      "",
+      `Thank you for your ServiceNow ticket ${ticketNumber}.`,
+      "",
+      `After reviewing your request for a new infrastructure action type (${text(proposal.display_name)}), the Cloud Platform Engineering team has determined it cannot be added to the platform at this time.`,
+      "",
+      `Reason: ${reason}`,
+      "",
+      "If you believe this decision should be reconsidered, or if you have a different request we can assist with, please open a new ticket or contact the Cloud Platform Engineering team directly.",
+    ].join("\n");
+
+    let commentPosted = false;
+    try {
+      await postCustomerComment(ticket, rejectionNote);
+      commentPosted = true;
+      if (proposal.intake_request_id) {
+        await admin.from("servicenow_intake_requests")
+          .update({ status: "comment_posted", clarification_note: rejectionNote })
+          .eq("id", proposal.intake_request_id);
+      }
+      await addEvent(admin, proposal.intake_request_id ?? proposalId, "proposal_rejection_comment_posted", { proposalId, ticketNumber });
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : "ServiceNow comment failed";
+      await addEvent(admin, proposal.intake_request_id ?? proposalId, "proposal_rejection_comment_failed", { proposalId, ticketNumber, message });
+      // The rejection is still recorded; just the ServiceNow comment failed.
+      return reply({ rejected: true, proposalId, commentPosted: false, commentError: message }, 200);
+    }
+
+    return reply({ rejected: true, proposalId, commentPosted }, 200);
+  },
 
   normalizeTicket,
   sha256,

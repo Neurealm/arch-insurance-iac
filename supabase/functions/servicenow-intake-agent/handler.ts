@@ -20,8 +20,12 @@ export type Dependencies = {
   redact: (body: RecordValue) => RecordValue;
   verifyServiceNowWebhook: (request: Request, rawBody: string) => Promise<{ status: number; message: string } | null>;
   authenticateDemoCaller: (request: Request) => Promise<string | null>;
+  /** Returns the authenticated user ID if they are a platform admin; null otherwise. Used for privileged write modes (resume, reject_proposal). */
+  authenticateAdmin: (request: Request) => Promise<string | null>;
   authorizeResume: (request: Request) => Promise<boolean>;
   resume: (request: Request, onlyIntakeRequestId: string | null) => Promise<Response>;
+  /** Reject a pending proposed action: records reason in DB and posts ServiceNow comment. */
+  rejectProposal: (request: Request, proposalId: string, reason: string, adminId: string) => Promise<Response>;
   normalizeTicket: (body: RecordValue, history?: unknown[]) => NormalizedTicket;
   sha256: (value: unknown) => Promise<string>;
   findExisting: (ticketNumber: string, payloadHash: string) => Promise<ExistingRequest | null>;
@@ -48,10 +52,12 @@ function text(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function statusForOutcome(kind: AgentOutcome["kind"]): string {
+export function statusForOutcome(kind: AgentOutcome["kind"]): string {
   if (kind === "ready") return "ready_for_engineering";
   if (kind === "gap_opened") return "engineering_gap_opened";
-  return "needs_clarification"; // covers "needs_clarification" and "blocked" -- both are "a human needs to look at this", same as the one-shot function's status vocabulary.
+  if (kind === "action_proposed") return "action_proposed";
+  // "needs_clarification" and "blocked" both mean "a human needs to look at this"
+  return "needs_clarification";
 }
 
 export function createIntakeAgentHandler(deps: Dependencies) {
@@ -72,6 +78,18 @@ export function createIntakeAgentHandler(deps: Dependencies) {
       const permitted = await deps.authorizeResume(request);
       if (!permitted) return reply({ error: "a platform administrator or the platform service may resume tickets" }, 403);
       return await deps.resume(request, text(body.intakeRequestId) || null);
+    }
+
+    // reject_proposal: admin supplies a rejection reason; this mode updates the
+    // DB record and posts a ServiceNow comment explaining the rejection to the requester.
+    if (mode === "reject_proposal") {
+      const adminId = await deps.authenticateAdmin(request);
+      if (!adminId) return reply({ error: "a platform administrator is required to reject proposals" }, 403);
+      const proposalId = text(body.proposalId);
+      const reason = text(body.reason);
+      if (!proposalId) return reply({ error: "proposalId is required" }, 400);
+      if (!reason) return reply({ error: "reason is required -- explain to the requester why this action type will not be supported" }, 400);
+      return await deps.rejectProposal(request, proposalId, reason, adminId);
     }
 
     const demoMode = mode === "demo";
@@ -151,4 +169,4 @@ export function createIntakeAgentHandler(deps: Dependencies) {
   };
 }
 
-export { statusForOutcome };
+export { statusForOutcome as default };

@@ -15,7 +15,7 @@ import {
   inFlightConflictNote, addEvent, supabaseAdmin, SUPPORTED_ACTIONS, VM_RESOURCE_TYPE,
 } from "../_shared/servicenow-intake-agent-core.ts";
 
-export type AgentOutcomeKind = "ready" | "gap_opened" | "needs_clarification" | "blocked";
+export type AgentOutcomeKind = "ready" | "gap_opened" | "needs_clarification" | "blocked" | "action_proposed";
 
 export type AgentOutcome = {
   kind: AgentOutcomeKind;
@@ -165,6 +165,36 @@ export const TOOL_SCHEMAS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "propose_new_action",
+      description:
+        "Terminal action. Use ONLY when the ticket clearly describes a type of infrastructure work that is genuinely not covered by any supported action type, and cannot be handled by asking clarifying questions (i.e. no amount of clarification would make it map to a known action). " +
+        "This records a proposal for platform admin review and posts an immediate ServiceNow comment telling the requester their request has been logged but is not yet supported. " +
+        "Do NOT use this when the ticket is simply vague or missing information about a known action -- use ask_clarifying_question instead. " +
+        "Requires that you have already called submit_analysis and the action was classified as 'unknown'.",
+      parameters: {
+        type: "object",
+        properties: {
+          proposed_name: {
+            type: "string",
+            description: "A concise, snake_case identifier for the proposed action type, e.g. 'rotate_ssh_key', 'patch_os', 'attach_data_disk'. Must not duplicate an existing supported action name. Keep it short and consistent with the existing naming style.",
+          },
+          display_name: {
+            type: "string",
+            description: "Human-readable label for admin display, e.g. 'SSH Key Rotation', 'OS Patch Application', 'Data Disk Attachment'.",
+          },
+          rationale: {
+            type: "string",
+            description: "Two to three sentences: why this ticket cannot be handled by any existing action type, and what the proposed new action type would represent.",
+          },
+        },
+        required: ["proposed_name", "display_name", "rationale"],
+        additionalProperties: false,
+      },
+    },
+  },
 ] as const;
 
 export type ToolResult = { content: RecordValue; terminal: boolean };
@@ -283,6 +313,69 @@ export async function callTool(name: string, rawArgs: unknown, ctx: AgentContext
     ctx.outcome = { kind: "gap_opened", note, draft: null, gap, analysis, validation };
     await addEvent(ctx.admin, ctx.requestId, "agent_terminal_create_engineering_gap", { rationale, gapId: gap.id, reused: gap.reused });
     return { content: { accepted: true, gapId: gap.id, reused: gap.reused, note }, terminal: true };
+  }
+
+  if (name === "propose_new_action") {
+    const proposedName = text(args.proposed_name).toLowerCase().replace(/[^a-z0-9_]/g, "_");
+    const displayName = text(args.display_name);
+    const rationale = text(args.rationale);
+
+    if (!proposedName || !displayName || !rationale) {
+      return { content: { error: "proposed_name, display_name, and rationale are all required." }, terminal: false };
+    }
+    // Guard: must not duplicate an existing supported action.
+    if (SUPPORTED_ACTIONS.has(proposedName)) {
+      return {
+        content: { error: `'${proposedName}' is already a supported action. Call submit_analysis with action='${proposedName}', then use create_change_package or create_engineering_gap.` },
+        terminal: false,
+      };
+    }
+    // Guard: submit_analysis must have been called first and classified the action as unknown.
+    const found = requireAnalysis(ctx);
+    if ("error" in found) return { content: { error: found.error }, terminal: false };
+    const { analysis, validation } = found;
+    if (analysis.action !== "unknown") {
+      return {
+        content: { error: `Your last submit_analysis classified this as '${analysis.action}', which is a supported action. Use ask_clarifying_question, create_change_package, or create_engineering_gap instead.` },
+        terminal: false,
+      };
+    }
+
+    // Record the proposal. The unique index on (proposed_name) WHERE status='pending'
+    // makes a duplicate for the same action name a no-op; we detect that via the
+    // conflict and report it back to the audit log without failing the terminal action.
+    const { error: insertError } = await ctx.admin.from("iac_proposed_actions").insert({
+      proposed_name: proposedName,
+      display_name: displayName,
+      intake_request_id: ctx.requestId,
+      ticket_number: ctx.ticket.ticketNumber,
+      agent_reasoning: rationale,
+    });
+    const isDuplicate = insertError?.code === "23505"; // unique_violation: already a pending proposal
+    if (insertError && !isDuplicate) {
+      return { content: { error: `Unable to record proposal: ${insertError.message}` }, terminal: false };
+    }
+
+    // Customer-facing ServiceNow comment: tells the requester the platform
+    // doesn't support this yet, but it's been logged for admin review.
+    const note = [
+      "[NeuGAIN Infrastructure Intake] Request received – new capability required",
+      "",
+      `Thank you for your ServiceNow ticket ${ctx.ticket.ticketNumber}.`,
+      "",
+      `Your request involves an infrastructure action (${displayName}) that is not yet supported by the NeuGAIN automated platform.`,
+      "Your request has been logged and will be reviewed by the Cloud Platform Engineering team.",
+      "",
+      "If the platform team approves this new capability, your ticket will automatically be re-evaluated at that time and you will receive a follow-up comment. No infrastructure changes have been made.",
+      "",
+      "If this request is time-sensitive, please contact the Cloud Platform Engineering team directly and reference this ticket number.",
+    ].join("\n");
+
+    ctx.outcome = { kind: "action_proposed", note, draft: null, gap: null, analysis, validation };
+    await addEvent(ctx.admin, ctx.requestId, "agent_terminal_propose_new_action", {
+      proposedName, displayName, rationale, duplicate: isDuplicate,
+    });
+    return { content: { accepted: true, proposedName, displayName, note, duplicate: isDuplicate }, terminal: true };
   }
 
   return { content: { error: `Unknown tool: ${name}` }, terminal: false };
