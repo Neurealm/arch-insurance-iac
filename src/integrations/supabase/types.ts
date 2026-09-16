@@ -4923,6 +4923,66 @@ export type Database = {
         }
         Relationships: []
       }
+      iac_proposed_actions: {
+        Row: {
+          agent_reasoning: string
+          created_at: string
+          display_name: string
+          gap_id: string | null
+          id: string
+          intake_request_id: string | null
+          proposed_name: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          ticket_number: string
+        }
+        Insert: {
+          agent_reasoning: string
+          created_at?: string
+          display_name: string
+          gap_id?: string | null
+          id?: string
+          intake_request_id?: string | null
+          proposed_name: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          ticket_number: string
+        }
+        Update: {
+          agent_reasoning?: string
+          created_at?: string
+          display_name?: string
+          gap_id?: string | null
+          id?: string
+          intake_request_id?: string | null
+          proposed_name?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          ticket_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iac_proposed_actions_gap_id_fkey"
+            columns: ["gap_id"]
+            isOneToOne: false
+            referencedRelation: "iac_engineering_gaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iac_proposed_actions_intake_request_id_fkey"
+            columns: ["intake_request_id"]
+            isOneToOne: false
+            referencedRelation: "servicenow_intake_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       iac_provisioning_authorizations: {
         Row: {
           authorized_at: string
@@ -12315,6 +12375,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      approve_proposed_action: {
+        Args: { p_proposal_id: string }
+        Returns: Json
       }
       archive_tenant_role: { Args: { _role_id: string }; Returns: undefined }
       assert_servicenow_agent_service_role: { Args: never; Returns: undefined }
